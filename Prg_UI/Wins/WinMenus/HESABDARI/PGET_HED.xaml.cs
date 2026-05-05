@@ -728,6 +728,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                new SearchableProperty { DisplayName = "شماره خزانه", PropertyPath = "ID", PropertyType = typeof(double) },
                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE", PropertyType = typeof(long) },
                new SearchableProperty { DisplayName = "شماره برگه", PropertyPath = "IDK", PropertyType = typeof(double) },
+               new SearchableProperty { DisplayName = "شماره سند", PropertyPath = "N_S", PropertyType = typeof(double) },
                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
                // Add other searchable properties
@@ -1762,11 +1763,21 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     db.Open();
                     using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                     {
-                        var _id = CL_HESABDARI.GetNewIDD("ID", "PGET_HED", "MOLAH");
+                        // TABLOCK+UPDLOCK acquires a table-level update lock at the very start,
+                        // serializing all concurrent saves. The second session blocks here until the
+                        // first commits — so both MAX(ID) and MAX(IDK) are read after the previous
+                        // insert is visible, preventing duplicate IDs, duplicate IDKs, and deadlocks.
+                        // GetNewIDD is intentionally not used: it commits its own transaction and
+                        // releases its lock before our INSERT, leaving a race window.
+                        var _maxId = db.Query<long?>(
+                            "SELECT MAX(ID) FROM dbo.PGET_HED WITH (TABLOCK, UPDLOCK)",
+                            null, transaction).FirstOrDefault();
+                        var _id = (_maxId ?? 0) + 1;
                         ID.Text = _id.ToString();
-                        IDK.Text = _id.ToString();
 
-                        var RST_M = db.Query<string>($"SELECT MAX(IDK) AS MaxOfidK FROM dbo.PGET_HED WHERE (KIND = {KIND.SelectedValue})", null, transaction).ToList();
+                        var RST_M = db.Query<string>(
+                            $"SELECT MAX(IDK) AS MaxOfidK FROM dbo.PGET_HED WHERE (KIND = {KIND.SelectedValue})",
+                            null, transaction).ToList();
                         if (RST_M.Count == 0 || string.IsNullOrEmpty(RST_M.FirstOrDefault()))
                         {
                             IDK.Text = "1";
@@ -1775,15 +1786,23 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         {
                             IDK.Text = Convert.ToString(Convert.ToInt64(RST_M.FirstOrDefault()) + 1);
                         }
+
+                        // N_S must be set before INSERT because PGET_HED has a UNIQUE constraint on N_S
+                        // and SQL Server allows only one NULL per unique index — a second NULL causes error 2627.
+                        var _dateRaw = DATE.Text.ToRawTarikh();
+                        var _sharhd = "خزانه داري شماره " + _id + " مورخ " + Strings.Format(Convert.ToInt64(_dateRaw), "####/##/##");
+                        var _ns = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.Createsanad(Convert.ToInt64(_dateRaw), _sharhd, 0, 5, 1, USER_NAME.Text);
+                        N_S.Text = _ns.ToString();
+
                         try
                         {
                             const string insertSql = @"
-                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID)
-                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID)";
+                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID, N_S)
+                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID, @N_S)";
                             var insertParameters = new
                             {
                                 ID = _id,
-                                DATE = DATE.Text.ToRawTarikh(),
+                                DATE = _dateRaw,
                                 MOLAH = MOLAH.Text.Trim(),
                                 DEPATMAN = DEPATMAN.SelectedValue,
                                 SHIFT = SHIFT.SelectedValue,
@@ -1791,7 +1810,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                 KIND = KIND.SelectedValue,
                                 OKF = Convert.ToByte(OKF.IsChecked),
                                 IDK = IDK.Text,
-                                UID = Baseknow.USERCOD
+                                UID = Baseknow.USERCOD,
+                                N_S = _ns
                             };
                             db.Execute(insertSql, insertParameters, transaction);
 
@@ -1805,7 +1825,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         }
                         catch (SqlException ex)
                         {
-                            if (ex.Number == 2627)
+                            if (ex.Message.Contains("duplicate key value is (<NULL>)", StringComparison.OrdinalIgnoreCase))
+                            {
+                                new Msgwin(false, "در جدول خزانه یک رکورد با شماره سند خالی (NULL) مانده بود. سیستم برای رکورد جدید شماره موقت داد؛ دوباره ذخیره را انجام دهید.").ShowDialog();
+                            }
+                            else if (ex.Number == 2627)
                             {
                                 new Msgwin(false, "خزانه با این تاریخ (تاریخ تکراری) قبلا ثبت شده , تاریخ را اصلاح کنید").ShowDialog();
                             }
@@ -1818,7 +1842,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         {
                             if (!SuccessSave)
                             {
-                                transaction?.Commit();
+                                transaction?.Rollback();
                                 db?.Close();
                             }
                         }
