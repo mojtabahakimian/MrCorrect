@@ -1775,15 +1775,23 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         {
                             IDK.Text = Convert.ToString(Convert.ToInt64(RST_M.FirstOrDefault()) + 1);
                         }
+
+                        // N_S must be set before INSERT because PGET_HED has a UNIQUE constraint on N_S
+                        // and SQL Server allows only one NULL per unique index — a second NULL causes error 2627.
+                        var _dateRaw = DATE.Text.ToRawTarikh();
+                        var _sharhd = "خزانه داري شماره " + _id + " مورخ " + Strings.Format(Convert.ToInt64(_dateRaw), "####/##/##");
+                        var _ns = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.Createsanad(Convert.ToInt64(_dateRaw), _sharhd, 0, 5, 1, USER_NAME.Text);
+                        N_S.Text = _ns.ToString();
+
                         try
                         {
                             const string insertSql = @"
-                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID)
-                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID)";
+                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID, N_S)
+                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID, @N_S)";
                             var insertParameters = new
                             {
                                 ID = _id,
-                                DATE = DATE.Text.ToRawTarikh(),
+                                DATE = _dateRaw,
                                 MOLAH = MOLAH.Text.Trim(),
                                 DEPATMAN = DEPATMAN.SelectedValue,
                                 SHIFT = SHIFT.SelectedValue,
@@ -1791,7 +1799,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                 KIND = KIND.SelectedValue,
                                 OKF = Convert.ToByte(OKF.IsChecked),
                                 IDK = IDK.Text,
-                                UID = Baseknow.USERCOD
+                                UID = Baseknow.USERCOD,
+                                N_S = _ns
                             };
                             db.Execute(insertSql, insertParameters, transaction);
 
