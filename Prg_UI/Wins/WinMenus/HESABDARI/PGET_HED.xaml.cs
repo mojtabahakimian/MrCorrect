@@ -1766,7 +1766,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         ID.Text = _id.ToString();
                         IDK.Text = _id.ToString();
 
-                        var RST_M = db.Query<string>($"SELECT MAX(IDK) AS MaxOfidK FROM dbo.PGET_HED WHERE (KIND = {KIND.SelectedValue})", null, transaction).ToList();
+                        // UPDLOCK prevents the S→X upgrade deadlock when two sessions run this concurrently:
+                        // both would hold range-S and then block each other trying to INSERT (which needs X).
+                        // An update lock (U) is incompatible with another U, so the second session waits.
+                        var RST_M = db.Query<string>($"SELECT MAX(IDK) AS MaxOfidK FROM dbo.PGET_HED WITH (UPDLOCK) WHERE (KIND = {KIND.SelectedValue})", null, transaction).ToList();
                         if (RST_M.Count == 0 || string.IsNullOrEmpty(RST_M.FirstOrDefault()))
                         {
                             IDK.Text = "1";
