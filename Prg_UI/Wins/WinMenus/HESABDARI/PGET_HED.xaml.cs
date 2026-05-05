@@ -1778,8 +1778,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         try
                         {
                             const string insertSql = @"
-                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID)
-                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID)";
+                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID, N_S)
+                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID, @N_S)";
                             var insertParameters = new
                             {
                                 ID = _id,
@@ -1791,7 +1791,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                 KIND = KIND.SelectedValue,
                                 OKF = Convert.ToByte(OKF.IsChecked),
                                 IDK = IDK.Text,
-                                UID = Baseknow.USERCOD
+                                UID = Baseknow.USERCOD,
+                                N_S = -1 * _id
                             };
                             db.Execute(insertSql, insertParameters, transaction);
 
@@ -1805,9 +1806,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         }
                         catch (SqlException ex)
                         {
-                            if (ex.Number == 2627)
+                            if (ex.Number == 2627 || ex.Number == 2601)
                             {
-                                new Msgwin(false, "خزانه با این تاریخ (تاریخ تکراری) قبلا ثبت شده , تاریخ را اصلاح کنید").ShowDialog();
+                                if (ex.Message.Contains("duplicate key value is (<NULL>)", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    new Msgwin(false, "در جدول خزانه یک رکورد با شماره سند خالی (NULL) مانده بود. سیستم برای رکورد جدید شماره موقت داد؛ دوباره ذخیره را انجام دهید.").ShowDialog();
+                                }
+                                else
+                                {
+                                    new Msgwin(false, "خزانه با این تاریخ (تاریخ تکراری) قبلا ثبت شده , تاریخ را اصلاح کنید").ShowDialog();
+                                }
                             }
                             else
                             {
@@ -1818,7 +1826,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         {
                             if (!SuccessSave)
                             {
-                                transaction?.Commit();
+                                transaction?.Rollback();
                                 db?.Close();
                             }
                         }
