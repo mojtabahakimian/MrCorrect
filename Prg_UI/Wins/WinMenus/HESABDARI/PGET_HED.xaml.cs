@@ -1762,14 +1762,21 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     db.Open();
                     using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                     {
-                        var _id = CL_HESABDARI.GetNewIDD("ID", "PGET_HED", "MOLAH");
+                        // TABLOCK+UPDLOCK acquires a table-level update lock at the very start,
+                        // serializing all concurrent saves. The second session blocks here until the
+                        // first commits — so both MAX(ID) and MAX(IDK) are read after the previous
+                        // insert is visible, preventing duplicate IDs, duplicate IDKs, and deadlocks.
+                        // GetNewIDD is intentionally not used: it commits its own transaction and
+                        // releases its lock before our INSERT, leaving a race window.
+                        var _maxId = db.Query<long?>(
+                            "SELECT MAX(ID) FROM dbo.PGET_HED WITH (TABLOCK, UPDLOCK)",
+                            null, transaction).FirstOrDefault();
+                        var _id = (_maxId ?? 0) + 1;
                         ID.Text = _id.ToString();
-                        IDK.Text = _id.ToString();
 
-                        // UPDLOCK prevents the S→X upgrade deadlock when two sessions run this concurrently:
-                        // both would hold range-S and then block each other trying to INSERT (which needs X).
-                        // An update lock (U) is incompatible with another U, so the second session waits.
-                        var RST_M = db.Query<string>($"SELECT MAX(IDK) AS MaxOfidK FROM dbo.PGET_HED WITH (UPDLOCK) WHERE (KIND = {KIND.SelectedValue})", null, transaction).ToList();
+                        var RST_M = db.Query<string>(
+                            $"SELECT MAX(IDK) AS MaxOfidK FROM dbo.PGET_HED WHERE (KIND = {KIND.SelectedValue})",
+                            null, transaction).ToList();
                         if (RST_M.Count == 0 || string.IsNullOrEmpty(RST_M.FirstOrDefault()))
                         {
                             IDK.Text = "1";
