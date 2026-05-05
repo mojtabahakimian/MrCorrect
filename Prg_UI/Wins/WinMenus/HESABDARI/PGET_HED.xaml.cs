@@ -1815,7 +1815,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             };
                             db.Execute(insertSql, insertParameters, transaction);
 
-
                             SANAD(transaction); //برای اینکه در زمان صدور خزانه جدید برای اینکه همزمان دوتا شماره سند خالی نخوره برای خزانه جدید , سریع میگیم سند بزنه توی خزانه جدید که تداخل ایجاد نشه
 
                             transaction.Commit(); db?.Close();
