@@ -775,6 +775,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (isNumeric)
                 return $" {agg}({TryCastNumeric(field)}) AS {field}";
 
+            // اگر فیلد متنی است و کاربر به اشتباه SUM یا AVG را انتخاب کرده است
+            if (agg.Equals("SUM", StringComparison.OrdinalIgnoreCase) || agg.Equals("AVG", StringComparison.OrdinalIgnoreCase))
+                return $" MAX({field}) AS {field}";
+
             // بقیه‌ی موارد متنی
             return $" {agg}({field}) AS {field}";
         }

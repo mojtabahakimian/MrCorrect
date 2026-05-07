@@ -1101,7 +1101,7 @@ namespace Prg_UI.Wins.WinMenus.SALARY
 
         private void LoadItemTemplatesForCombo()
         {
-            if (ItemTemplates == null || !ItemTemplates.Any())
+            //if (ItemTemplates == null || !ItemTemplates.Any())
             {
                 string sql = "SELECT TMPL_ID, TMPL_NAME FROM PAY2_ITEM_TEMPLATE WHERE IS_ACTIVE = 1";
                 var data = dbms.DoGetDataSQL<Pay2ItemTemplateModel>(sql);
@@ -1467,6 +1467,7 @@ namespace Prg_UI.Wins.WinMenus.SALARY
         }
         private void ShowItemDefModal_Click(object sender, RoutedEventArgs e)
         {
+            //مدیریت آیتم‌های حقوقی (PAY2_ITEM_DEF)
             ResetItemDefForm();
             LoadItemDefs();
             ModalItemDefManage.Visibility = Visibility.Visible;
@@ -1715,6 +1716,7 @@ namespace Prg_UI.Wins.WinMenus.SALARY
 
         private void ShowTemplateModal_Click(object sender, RoutedEventArgs e)
         {
+            //مدیریت قالب‌های حکم (PAY2_ITEM_TEMPLATE)
             LoadWorkshopsForLookup();
             ResetTemplateForm();
             LoadTemplates();
@@ -1776,6 +1778,7 @@ namespace Prg_UI.Wins.WinMenus.SALARY
 
                 ResetTemplateForm();
                 LoadTemplates();
+                LoadItemTemplatesForCombo(); // ← sync نگه داشتن cache
             }
             catch (Exception ex)
             {
@@ -2840,10 +2843,10 @@ namespace Prg_UI.Wins.WinMenus.SALARY
             public string NATIONAL_CODE { get; set; }
             public string GENDER { get; set; } = "1";
             public string MARITAL { get; set; } = "2";
-            public long HIRE_DATE { get; set; }
+            public long HIRE_DATE { get; set; } = Convert.ToInt64(Tarikh.FullCurrentDate);
             public int? JOB_ID { get; set; }
             public string INS_CODE { get; set; }
-            public int? ACC_T { get; set; }
+            public string? ACC_T { get; set; }
             public bool IS_ACTIVE { get; set; } = true;
 
             // ─── مشخصات فردی تکمیلی ───────────────────────────────────────
@@ -3077,11 +3080,12 @@ namespace Prg_UI.Wins.WinMenus.SALARY
             public long TOTAL_DED { get; set; }
             public long NET_PAY { get; set; }
 
-            public string GROSS_PAY_STR => GROSS_PAY.ToString("N0");
-            public string INS_WORKER_STR => INS_WORKER.ToString("N0");
-            public string TAX_AMOUNT_STR => TAX_AMOUNT.ToString("N0");
-            public string ADVANCE_DED_STR => ADVANCE_DED.ToString("N0");
-            public string NET_PAY_STR => NET_PAY.ToString("N0");
+            // ▼▼▼ این ۵ خط باید تغییر کنند ▼▼▼
+            public string GROSS_PAY_STR => GROSS_PAY.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            public string INS_WORKER_STR => INS_WORKER.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            public string TAX_AMOUNT_STR => TAX_AMOUNT.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            public string ADVANCE_DED_STR => ADVANCE_DED.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            public string NET_PAY_STR => NET_PAY.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
 
             public event PropertyChangedEventHandler PropertyChanged;
         }
@@ -3091,7 +3095,7 @@ namespace Prg_UI.Wins.WinMenus.SALARY
         {
             public string ItemName { get; set; }
             public long Amount { get; set; }
-            public string AmountStr => Amount.ToString("N0");
+            public string AmountStr => Amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
         }
 
         public class RunDetailTempModel
@@ -3112,9 +3116,10 @@ namespace Prg_UI.Wins.WinMenus.SALARY
             public long TotalDeductions { get; set; }
             public long NetPay { get; set; }
 
-            public string TotalEarningsStr => TotalEarnings.ToString("N0");
-            public string TotalDeductionsStr => TotalDeductions.ToString("N0");
-            public string NetPayStr => NetPay.ToString("N0");
+            public string TotalEarningsStr => TotalEarnings.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            public string TotalDeductionsStr => TotalDeductions.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+            public string NetPayStr => NetPay.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
+
             public string WorkDaysStr => WorkDays.ToString("0.##");
 
             public ObservableCollection<PayslipItemModel> Earnings { get; set; } = new ObservableCollection<PayslipItemModel>();

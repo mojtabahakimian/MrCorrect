@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.SALARY"
         mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         FontFamily="{StaticResource IRANYEKAN}"
-        Title="مستر کارکت - سیستم حقوق و دستمزد PAY2" Height="850" Width="1400" d:Height="2000" d:Width="1400"
+        Title="مستر کارکت - سیستم حقوق و دستمزد PAY2" Height="850" Width="1400" d:Height="2000" d:Width="2000"
         WindowStartupLocation="CenterScreen"
         FlowDirection="RightToLeft"
         Background="#f8fafc"
@@ -203,101 +204,106 @@
         </Style>
 
         <Style x:Key="ComboStyle" TargetType="ComboBox">
-            <Setter Property="IsEditable"             Value="True"/>
-            <Setter Property="IsTextSearchEnabled"    Value="True"/>
+            <Setter Property="IsEditable" Value="True"/>
+            <Setter Property="IsTextSearchEnabled" Value="True"/>
             <Setter Property="IsTextSearchCaseSensitive" Value="False"/>
-            <Setter Property="StaysOpenOnEdit"        Value="False"/>
-            <Setter Property="Padding"                Value="12,0,0,0"/>
-            <Setter Property="Background"             Value="{StaticResource BgMain}"/>
-            <Setter Property="BorderBrush"            Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness"        Value="1"/>
-            <Setter Property="Foreground"             Value="{StaticResource TextMain}"/>
-            <Setter Property="Height"                 Value="42"/>
+            <Setter Property="StaysOpenOnEdit" Value="False"/>
+            <Setter Property="Padding" Value="12,0,0,0"/>
+            <Setter Property="Background" Value="{StaticResource BgMain}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="MaxDropDownHeight" Value="300"/>
+            <!-- ✅ CRITICAL -->
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+            <!-- ✅ Virtualization settings -->
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+            <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+
             <Setter Property="ItemsPanel">
                 <Setter.Value>
                     <ItemsPanelTemplate>
-                        <VirtualizingStackPanel IsItemsHost="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                        <VirtualizingStackPanel/>
                     </ItemsPanelTemplate>
                 </Setter.Value>
             </Setter>
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="36"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!--
-                                    PART_EditableTextBox — نام این کنترل دقیقاً باید همین باشد.
-                                    WPF از این TextBox برای IsEditable=True استفاده می‌کند.
-                                -->
                                 <TextBox x:Name="PART_EditableTextBox"
-                                         Grid.Column="0"
-                                         Background="Transparent"
-                                         BorderThickness="0" 
-                                         materialDesign:TextFieldAssist.UnderlineBrush="{x:Null}"
-                                         Foreground="{TemplateBinding Foreground}"
-                                         IsReadOnly="{TemplateBinding IsReadOnly}"
-                                         VerticalAlignment="Center"
-                                         Padding="{TemplateBinding Padding}"
-                                         CaretBrush="{TemplateBinding Foreground}"
-                                         FocusVisualStyle="{x:Null}"/>
+                                 Grid.Column="0"
+                                 Background="Transparent"
+                                 BorderThickness="0" 
+                                 materialDesign:TextFieldAssist.UnderlineBrush="{x:Null}"
+                                 Foreground="{TemplateBinding Foreground}"
+                                 IsReadOnly="{TemplateBinding IsReadOnly}"
+                                 VerticalAlignment="Center"
+                                 Padding="{TemplateBinding Padding}"
+                                 CaretBrush="{TemplateBinding Foreground}"
+                                 FocusVisualStyle="{x:Null}"/>
 
-                                <!--
-                                    ToggleButton فقط برای آیکون فلش و toggle dropdown.
-                                    کل ناحیه کلیک با PART_EditableTextBox پوشش می‌شود.
-                                    با کلیک روی TextBox، WPF خود dropdown را باز می‌کند (StaysOpenOnEdit=False).
-                                -->
                                 <ToggleButton x:Name="toggleBtn"
-                                              Grid.Column="1"
-                                              IsChecked="{Binding IsDropDownOpen,
-                                                          RelativeSource={RelativeSource TemplatedParent},
-                                                          Mode=TwoWay}"
-                                              Focusable="False"
-                                              Cursor="Hand">
+                                      Grid.Column="1"
+                                      IsChecked="{Binding IsDropDownOpen,
+                                                  RelativeSource={RelativeSource TemplatedParent},
+                                                  Mode=TwoWay}"
+                                      Focusable="False"
+                                      Cursor="Hand">
                                     <ToggleButton.Template>
                                         <ControlTemplate TargetType="ToggleButton">
                                             <Border Background="Transparent">
                                                 <Path Data="M0,0 L5,5 L10,0"
-                                                      Stroke="#64748b"
-                                                      StrokeThickness="1.5"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"
-                                                      StrokeLineJoin="Round"/>
+                                              Stroke="#64748b"
+                                              StrokeThickness="1.5"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              StrokeLineJoin="Round"/>
                                             </Border>
                                         </ControlTemplate>
                                     </ToggleButton.Template>
                                 </ToggleButton>
 
-                                <!-- Popup لیست گزینه‌ها -->
                                 <Popup x:Name="PART_Popup"
-                                       Grid.ColumnSpan="2"
-                                       Placement="Bottom"
-                                       IsOpen="{TemplateBinding IsDropDownOpen}"
-                                       AllowsTransparency="True"
-                                       Focusable="False"
-                                       PopupAnimation="Slide">
+                               Grid.ColumnSpan="2"
+                               Placement="Bottom"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               PopupAnimation="Slide">
                                     <Grid SnapsToDevicePixels="True"
-                                          MinWidth="{TemplateBinding ActualWidth}"
-                                          MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                         <Border Background="White"
-                                                BorderThickness="1"
-                                                BorderBrush="{StaticResource BorderColor}"
-                                                CornerRadius="10"
-                                                Margin="0,4,0,0">
+                                        BorderThickness="1"
+                                        BorderBrush="{StaticResource BorderColor}"
+                                        CornerRadius="10"
+                                        Margin="0,4,0,0">
                                             <Border.Effect>
                                                 <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="12" ShadowDepth="3"/>
                                             </Border.Effect>
-                                            <ScrollViewer Margin="4,6" SnapsToDevicePixels="True">
-                                                <StackPanel IsItemsHost="True"/>
+
+                                            <!-- ✅ FIXED: Use ItemsPresenter to preserve virtualization -->
+                                            <ScrollViewer Margin="4,6" 
+                                                  SnapsToDevicePixels="True"
+                                                  CanContentScroll="True"
+                                                  HorizontalScrollBarVisibility="Disabled"
+                                                  VerticalScrollBarVisibility="Auto">
+                                                <ItemsPresenter/>
                                             </ScrollViewer>
                                         </Border>
                                     </Grid>
@@ -311,11 +317,11 @@
                             </Trigger>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#93c5fd"/>
-                                <Setter TargetName="border" Property="Background"  Value="White"/>
+                                <Setter TargetName="border" Property="Background" Value="White"/>
                             </Trigger>
                             <Trigger Property="IsDropDownOpen" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#93c5fd"/>
-                                <Setter TargetName="border" Property="Background"  Value="White"/>
+                                <Setter TargetName="border" Property="Background" Value="White"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Opacity" Value="0.5"/>
@@ -324,18 +330,19 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+
             <Style.Resources>
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="Padding" Value="12,8"/>
-                    <Setter Property="Cursor"  Value="Hand"/>
+                    <Setter Property="Cursor" Value="Hand"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ComboBoxItem">
                                 <Border x:Name="itemBorder"
-                                        Background="Transparent"
-                                        CornerRadius="6"
-                                        Margin="4,2"
-                                        Padding="{TemplateBinding Padding}">
+                                Background="Transparent"
+                                CornerRadius="6"
+                                Margin="4,2"
+                                Padding="{TemplateBinding Padding}">
                                     <ContentPresenter VerticalAlignment="Center"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
@@ -356,6 +363,37 @@
             </Style.Resources>
         </Style>
 
+        <!-- Nav Action Button — برای دکمه‌های modal که تب نیستند -->
+        <Style x:Key="NavActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="12"
+                        Padding="{TemplateBinding Padding}" Name="border">
+                            <ContentPresenter HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource BgMain}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryLight}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Primary}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
     </Window.Resources>
 
@@ -422,6 +460,12 @@
                         <RadioButton Style="{StaticResource NavButtonStyle}" Content="محاسبه حقوق" Checked="Tab_Checked" Tag="payroll"/>
                         <RadioButton Style="{StaticResource NavButtonStyle}" Content="تنظیمات سیستم" Checked="Tab_Checked" Tag="settings"/>
                         <RadioButton Style="{StaticResource NavButtonStyle}" Content="آیتم‌های حقوقی" Checked="Tab_Checked" Tag="itemdefs"/>
+
+                        <!-- جداکننده بصری -->
+                        <Separator Margin="4,10,4,4" Background="{StaticResource BorderLight}"/>
+                        <!--<TextBlock Text="تعاریف پایه سیستم" Foreground="{StaticResource TextLight}" FontSize="11" Margin="16,2,16,4"/>-->
+                        <Button Style="{StaticResource NavActionButtonStyle}" Content="آیتم‌های حقوقی" Click="ShowItemDefModal_Click" FlowDirection="LeftToRight"/>
+                        <Button Style="{StaticResource NavActionButtonStyle}" Content="قالب‌های حکم" Click="ShowTemplateModal_Click" FlowDirection="LeftToRight"/>
                     </StackPanel>
                 </ScrollViewer>
 
@@ -571,7 +615,7 @@
                     </Grid>
 
                     <!-- Workshops -->
-                    <Grid x:Name="TabWorkshops" Style="{StaticResource FadeInGrid}" Visibility="Collapsed" d:Visibility="Visible">
+                    <Grid x:Name="TabWorkshops" Style="{StaticResource FadeInGrid}" Visibility="Collapsed" d:Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -664,7 +708,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Margin="0,0,8,16">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="کد یکتای کارگاه (WS_CODE) *"/>
-                                                    <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentWorkshop.WS_CODE, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentWorkshop.WS_CODE, UpdateSourceTrigger=PropertyChanged}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Margin="8,0,0,16">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="نام کارگاه *"/>
@@ -679,7 +723,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Margin="0,0,8,16">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="کد کارگاه (بیمه تامین اجتماعی)"/>
-                                                    <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentWorkshop.SOCIAL_INS_CODE, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentWorkshop.SOCIAL_INS_CODE, UpdateSourceTrigger=PropertyChanged}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Margin="8,0,0,16">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="شناسه مالیاتی (دارایی)"/>
@@ -694,7 +738,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Margin="0,0,8,16">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="شناسه ملی"/>
-                                                    <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentWorkshop.NATIONAL_ID, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentWorkshop.NATIONAL_ID, UpdateSourceTrigger=PropertyChanged}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Margin="8,0,0,16">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="شماره تلفن"/>
@@ -731,7 +775,7 @@
                                                 <!-- INS_MODE ComboBox -->
                                                 <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                                     <TextBlock Style="{StaticResource InputLabel}" Text="نوع بیمه کارگاه"/>
-                                                    <ComboBox x:Name="CmbInsMode"
+                                                    <ComboBox x:Name="CmbInsMode" Style="{StaticResource ComboStyle}" IsEditable="True"
                                                               SelectedValue="{Binding CurrentWorkshop.INS_MODE}"
                                                               SelectedValuePath="Tag"
                                                               Background="{StaticResource BgMain}" Padding="10">
@@ -760,12 +804,12 @@
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel Margin="0,0,8,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="کد کل مساعده (ADV_HES_K)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}"
                                                                      Text="{Binding CurrentWorkshopAcc.ADV_HES_K, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="کد معین مساعده (ADV_HES_M)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}"
                                                                      Text="{Binding CurrentWorkshopAcc.ADV_HES_M, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -780,12 +824,12 @@
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel Margin="0,0,8,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="هزینه حقوق (SALARY_EXP)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"
                                                                      Text="{Binding CurrentWorkshopAcc.SALARY_EXP, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="پرداختنی حقوق (SALARY_PAYABLE)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"
                                                                      Text="{Binding CurrentWorkshopAcc.SALARY_PAYABLE, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -801,17 +845,17 @@
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel Margin="0,0,8,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="هزینه بیمه کارفرما (INS_EXP)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"
                                                                      Text="{Binding CurrentWorkshopAcc.INS_EXP, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1" Margin="8,0,8,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="پرداختنی بیمه (INS_PAYABLE)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"
                                                                      Text="{Binding CurrentWorkshopAcc.INS_PAYABLE, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2" Margin="8,0,0,0">
                                                             <TextBlock Style="{StaticResource InputLabel}" Text="پرداختنی مالیات (TAX_PAYABLE)"/>
-                                                            <TextBox Style="{StaticResource InputStyle}"
+                                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"
                                                                      Text="{Binding CurrentWorkshopAcc.TAX_PAYABLE, UpdateSourceTrigger=PropertyChanged}"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -1147,7 +1191,7 @@
                     </Grid>
 
                     <!-- Payroll -->
-                    <Grid x:Name="TabPayroll" Style="{StaticResource FadeInGrid}" Visibility="Collapsed">
+                    <Grid x:Name="TabPayroll" Style="{StaticResource FadeInGrid}" Visibility="Collapsed" d:Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -1272,7 +1316,7 @@
                         </Border>
 
                         <!-- Empty State: دوره باز نشده است -->
-                        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Visibility="{Binding IsPeriodNotOpened, Converter={StaticResource BoolToVis}}">
+                        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Visibility="{Binding IsPeriodNotOpened, Converter={StaticResource BoolToVis}}" d:Visibility="Hidden">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40">
                                 <Path Data="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
                                       Stroke="{StaticResource BorderColor}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeLineJoin="Round" Width="64" Height="64" Stretch="Uniform" Margin="0,0,0,16"/>
@@ -1284,7 +1328,7 @@
                     </Grid>
 
                     <!-- Settings -->
-                    <Border x:Name="TabSettings" Visibility="Collapsed" Background="White" CornerRadius="12" Padding="20" d:Visibility="Collapsed">
+                    <Border x:Name="TabSettings" Visibility="Collapsed" Background="White" CornerRadius="12" Padding="20" d:Visibility="Visible">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -1326,11 +1370,11 @@
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="ضریب اضافه‌کار تعطیل" ToolTip="OT_HOLIDAY_MULT"/>
-                                            <TextBox x:Name="OT_HOLIDAY_MULT" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox TextBoxStyle="{StaticResource InputStyle}" DoesAcceptDouble="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged" TextAlignment="Left"  x:Name="OT_HOLIDAY_MULT"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="ساعت کاری روزانه" ToolTip="OT_HOUR_BASE (مثال: 7.33)"/>
-                                            <TextBox x:Name="OT_HOUR_BASE" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" x:Name="OT_HOUR_BASE" />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="روش محاسبه حق شیفت" ToolTip="SHIFT_MODE"/>
@@ -1358,15 +1402,15 @@
                                     <WrapPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="نرخ بیمه سهم کارگر (%)" ToolTip="INS_WORKER_RATE"/>
-                                            <TextBox x:Name="INS_WORKER_RATE" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox TextBoxStyle="{StaticResource InputStyle}" DoesAcceptDouble="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged" TextAlignment="Left"  x:Name="INS_WORKER_RATE" />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="نرخ بیمه کارفرما (%)" ToolTip="INS_EMPLOYER_RATE"/>
-                                            <TextBox x:Name="INS_EMPLOYER_RATE" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox TextBoxStyle="{StaticResource InputStyle}" DoesAcceptDouble="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged" TextAlignment="Left"  x:Name="INS_EMPLOYER_RATE"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="نرخ بیمه بیکاری (%)" ToolTip="INS_UNEMP_RATE"/>
-                                            <TextBox x:Name="INS_UNEMP_RATE" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox TextBoxStyle="{StaticResource InputStyle}" DoesAcceptDouble="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged" TextAlignment="Left"  x:Name="INS_UNEMP_RATE"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="اعمال سقف دستمزد بیمه" ToolTip="INS_CEILING_APPLY"/>
@@ -1378,7 +1422,7 @@
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="سقف ماهیانه مشمول بیمه" ToolTip="INS_CEILING_MONTHLY"/>
-                                            <TextBox x:Name="INS_CEILING_MONTHLY" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"   x:Name="INS_CEILING_MONTHLY" />
                                         </StackPanel>
 
                                         <!-- ═══ v6: سه فیلد جدید بیمه تبصره‌ای و جانباز ═══ -->
@@ -1386,13 +1430,13 @@
                                             <TextBlock Style="{StaticResource InputLabel}" 
                                                        Text="تعداد کارگران معاف (تبصره ماده ۷)" 
                                                        ToolTip="INS_EXEMPT_COUNT — کارگاه با ≤ این تعداد از ۲۰٪ کارفرما معاف است"/>
-                                            <TextBox x:Name="INS_EXEMPT_COUNT" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}"  x:Name="INS_EXEMPT_COUNT"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" 
                                                        Text="نرخ بیمه کارفرما برای جانباز (درصد)" 
                                                        ToolTip="INS_JANBAZ_RATE — پیش‌فرض: 0.18"/>
-                                            <TextBox x:Name="INS_JANBAZ_RATE" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox TextBoxStyle="{StaticResource InputStyle}" DoesAcceptDouble="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged" TextAlignment="Left"  x:Name="INS_JANBAZ_RATE" />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" 
@@ -1416,7 +1460,7 @@
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="معافیت ماهیانه مالیات" ToolTip="TAX_EXEMPT_MONTHLY"/>
-                                            <TextBox x:Name="TAX_EXEMPT_MONTHLY" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"   x:Name="TAX_EXEMPT_MONTHLY"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="کسر بیمه قبل از مالیات" ToolTip="TAX_DEDUCT_INS"/>
@@ -1491,7 +1535,7 @@
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="ارزش هر روز (دقیقه)" ToolTip="LEAVE_MINS_PER_DAY (440 در نسخه v6)"/>
-                                            <TextBox x:Name="LEAVE_MINS_PER_DAY" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}"  x:Name="LEAVE_MINS_PER_DAY" />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="سقف انتقال مرخصی (روز)" ToolTip="LEAVE_CARRYOVER_MAX"/>
@@ -1519,23 +1563,23 @@
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="روز عیدی در حالت سفارشی" ToolTip="BONUS_CUSTOM_DAYS"/>
-                                            <TextBox x:Name="BONUS_CUSTOM_DAYS" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" x:Name="BONUS_CUSTOM_DAYS"  />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="حداقل دستمزد روزانه (ریال)" ToolTip="MIN_WAGE_DAILY"/>
-                                            <TextBox x:Name="MIN_WAGE_DAILY" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"   x:Name="MIN_WAGE_DAILY"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="حداقل دستمزد ماهیانه (ریال)" ToolTip="MIN_WAGE_MONTHLY"/>
-                                            <TextBox x:Name="MIN_WAGE_MONTHLY" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"   x:Name="MIN_WAGE_MONTHLY"/>
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="حداقل روز مشمول عیدی" ToolTip="EIDI_MIN_DAYS"/>
-                                            <TextBox x:Name="EIDI_MIN_DAYS" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}"  x:Name="EIDI_MIN_DAYS" />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="حداکثر روز مشمول عیدی" ToolTip="EIDI_MAX_DAYS"/>
-                                            <TextBox x:Name="EIDI_MAX_DAYS" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}"  x:Name="EIDI_MAX_DAYS" />
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="مبنای محاسبه سنوات" ToolTip="SENIORITY_MODE"/>
@@ -1548,7 +1592,7 @@
                                         </StackPanel>
                                         <StackPanel Margin="10" Width="200">
                                             <TextBlock Style="{StaticResource InputLabel}" Text="مبلغ ثابت سنوات per سال" ToolTip="SENIORITY_FIXED_AMT"/>
-                                            <TextBox x:Name="SENIORITY_FIXED_AMT" Style="{StaticResource InputStyle}"/>
+                                            <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" MaxLength="16" TextBoxStyle="{StaticResource InputStyle}" TextAlignment="Left"   x:Name="SENIORITY_FIXED_AMT" />
                                         </StackPanel>
                                     </WrapPanel>
 
@@ -1574,14 +1618,7 @@
                                             </ComboBox>
                                         </StackPanel>
                                     </WrapPanel>
-
-                                    <Separator Margin="0,20" Background="{StaticResource BorderLight}"/>
-
-                                    <TextBlock Text="۸. تعاریف پایه سیستم" FontWeight="Bold" FontSize="16" Foreground="{StaticResource Primary}" Margin="0,10,0,15"/>
-                                    <WrapPanel>
-                                        <Button Style="{StaticResource BtnOutline}" Content="مدیریت آیتم‌های حقوقی (PAY2_ITEM_DEF)" Margin="10,0,0,0" Click="ShowItemDefModal_Click" HorizontalAlignment="Left"/>
-                                        <Button Style="{StaticResource BtnOutline}" Content="مدیریت قالب‌های حکم (PAY2_ITEM_TEMPLATE)" Margin="10,0,0,0" Click="ShowTemplateModal_Click" HorizontalAlignment="Left"/>
-                                    </WrapPanel>
+                                   
                                 </StackPanel>
                             </ScrollViewer>
 
@@ -1593,7 +1630,7 @@
                     </Border>
 
                     <!-- F-08 — TabItemDef — تعریف آیتم‌های حقوقی (PAY2_ITEM_DEF) -->
-                    <Grid x:Name="TabItemDefs" Style="{StaticResource FadeInGrid}" Visibility="Collapsed">
+                    <Grid x:Name="TabItemDefs" Style="{StaticResource FadeInGrid}" Visibility="Collapsed"  d:Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
@@ -1611,14 +1648,19 @@
                         </Grid>
 
                         <!-- محتوا: گرید سمت راست + فرم سمت چپ -->
+                        <!-- محتوا: گرید سمت راست + فرم سمت چپ -->
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="1.2*"/>
+                                <!-- پنل راست (جدول) -->
+                                <ColumnDefinition Width="6*"/>
+                                <!-- پنل اسپلیتر -->
+                                <ColumnDefinition Width="Auto"/>
+                                <!-- پنل چپ (فرم) -->
+                                <ColumnDefinition Width="4*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- ──────── گرید آیتم‌ها ──────── -->
-                            <Border Style="{StaticResource CardStyle}" Padding="0" Margin="0,0,12,0">
+                            <!-- ──────── گرید آیتم‌ها (ستون ۰) ──────── -->
+                            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="0" Margin="0,0,6,0">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -1631,17 +1673,20 @@
                                FontWeight="Bold" Foreground="{StaticResource TextMain}"/>
                                     </Border>
 
-                                    <DataGrid x:Name="GridItemDefs" Grid.Row="1"
-                          ItemsSource="{Binding ItemDefs}"
-                          SelectionChanged="GridItemDefs_SelectionChanged"
-                          AutoGenerateColumns="False" IsReadOnly="True"
-                          Background="White" RowBackground="White"
-                          AlternatingRowBackground="#f8fafc"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="#e2e8f0"
-                          BorderThickness="0">
+                                    <DataGrid x:Name="GridItemDefs" Grid.Row="1" d:ItemsSource="{d:SampleData}"
+                                              ItemsSource="{Binding ItemDefs}"
+                                              SelectionChanged="GridItemDefs_SelectionChanged"
+                                              AutoGenerateColumns="False" IsReadOnly="True"
+                                              Background="White" RowBackground="White"
+                                              AlternatingRowBackground="#f8fafc"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              HorizontalGridLinesBrush="#e2e8f0"
+                                              BorderThickness="0"
+                                              ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+                                              ScrollViewer.VerticalScrollBarVisibility="Auto">
                                         <DataGrid.Columns>
+                                            <!-- عرض‌های ثابت به جای Auto برای جلوگیری از فشرده شدن -->
                                             <DataGridTextColumn Header="کد آیتم" Binding="{Binding ITEM_CODE}" Width="120">
                                                 <DataGridTextColumn.ElementStyle>
                                                     <Style TargetType="TextBlock">
@@ -1653,10 +1698,12 @@
                                                 </DataGridTextColumn.ElementStyle>
                                             </DataGridTextColumn>
 
-                                            <DataGridTextColumn Header="نام فارسی" Binding="{Binding ITEM_NAME}" Width="*">
+                                            <!-- ستون متغیر که بقیه فضا را می‌گیرد -->
+                                            <DataGridTextColumn Header="نام فارسی" Binding="{Binding ITEM_NAME}" Width="Auto" MinWidth="100">
                                                 <DataGridTextColumn.ElementStyle>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="FontWeight" Value="SemiBold"/>
+                                                        <Setter Property="Margin" Value="4,0"/>
                                                         <Setter Property="VerticalAlignment" Value="Center"/>
                                                     </Style>
                                                 </DataGridTextColumn.ElementStyle>
@@ -1671,7 +1718,7 @@
                                                 </DataGridTextColumn.ElementStyle>
                                             </DataGridTextColumn>
 
-                                            <DataGridTextColumn Header="مبنا" Binding="{Binding CalcBasisText}" Width="80">
+                                            <DataGridTextColumn Header="مبنا" Binding="{Binding CalcBasisText}" Width="75">
                                                 <DataGridTextColumn.ElementStyle>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -1680,68 +1727,52 @@
                                                 </DataGridTextColumn.ElementStyle>
                                             </DataGridTextColumn>
 
-                                            <DataGridTemplateColumn Header="بیمه" Width="60">
+                                            <DataGridTemplateColumn Header="بیمه" Width="80">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="{Binding InsBgColor}" CornerRadius="8"
-                                            Padding="6,2" HorizontalAlignment="Center" Margin="4">
-                                                            <TextBlock Text="{Binding InsText}" FontSize="11"
-                                                   Foreground="{Binding InsTextColor}" FontWeight="SemiBold"/>
+                                                        <Border Background="{Binding InsBgColor}" CornerRadius="8" Padding="8,4" HorizontalAlignment="Center" Margin="4">
+                                                            <TextBlock Text="{Binding InsText}" FontSize="11" Foreground="{Binding InsTextColor}" FontWeight="SemiBold"/>
                                                         </Border>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="مالیات" Width="60">
+                                            <DataGridTemplateColumn Header="مالیات" Width="80">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="{Binding TaxBgColor}" CornerRadius="8"
-                                            Padding="6,2" HorizontalAlignment="Center" Margin="4">
-                                                            <TextBlock Text="{Binding TaxText}" FontSize="11"
-                                                   Foreground="{Binding TaxTextColor}" FontWeight="SemiBold"/>
+                                                        <Border Background="{Binding TaxBgColor}" CornerRadius="8" Padding="8,4" HorizontalAlignment="Center" Margin="4">
+                                                            <TextBlock Text="{Binding TaxText}" FontSize="11" Foreground="{Binding TaxTextColor}" FontWeight="SemiBold"/>
                                                         </Border>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="وضعیت" Width="75">
+                                            <DataGridTemplateColumn Header="وضعیت" Width="80">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="{Binding ActiveBgColor}" CornerRadius="8"
-                                            Padding="6,2" HorizontalAlignment="Center" Margin="4">
-                                                            <TextBlock Text="{Binding ActiveText}" FontSize="11"
-                                                   Foreground="{Binding ActiveTextColor}" FontWeight="SemiBold"/>
+                                                        <Border Background="{Binding ActiveBgColor}" CornerRadius="8" Padding="8,4" HorizontalAlignment="Center" Margin="4">
+                                                            <TextBlock Text="{Binding ActiveText}" FontSize="11" Foreground="{Binding ActiveTextColor}" FontWeight="SemiBold"/>
                                                         </Border>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="سیستمی" Width="65">
+                                            <DataGridTemplateColumn Header="سیستمی" Width="90">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="{Binding SystemBgColor}" CornerRadius="8"
-                                            Padding="6,2" HorizontalAlignment="Center" Margin="4">
-                                                            <TextBlock Text="{Binding SystemText}" FontSize="11"
-                                                   Foreground="{Binding SystemTextColor}" FontWeight="SemiBold"/>
+                                                        <Border Background="{Binding SystemBgColor}" CornerRadius="8" Padding="8,4" HorizontalAlignment="Center" Margin="4">
+                                                            <TextBlock Text="{Binding SystemText}" FontSize="11" Foreground="{Binding SystemTextColor}" FontWeight="SemiBold"/>
                                                         </Border>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="عملیات" Width="130">
+                                            <DataGridTemplateColumn Header="عملیات" Width="140">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                            <Button Style="{StaticResource BtnGhost}" Content="ویرایش"
-                                                Foreground="{StaticResource Primary}"
-                                                Click="EditItemDef_Click"
-                                                CommandParameter="{Binding}"
-                                                Margin="0,0,4,0"/>
-                                                            <Button Style="{StaticResource BtnGhost}" Content="حذف"
-                                                Foreground="{StaticResource ErrorText}"
-                                                Click="DeleteItemDef_Click"
-                                                CommandParameter="{Binding}"
-                                                IsEnabled="{Binding CanDelete}"/>
+                                                            <Button Style="{StaticResource BtnGhost}" Content="ویرایش" Foreground="{StaticResource Primary}" Click="EditItemDef_Click" CommandParameter="{Binding}" Margin="0,0,4,0"/>
+                                                            <Button Style="{StaticResource BtnGhost}" Content="حذف" Foreground="{StaticResource ErrorText}" Click="DeleteItemDef_Click" CommandParameter="{Binding}" IsEnabled="{Binding CanDelete}"/>
                                                         </StackPanel>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
@@ -1751,8 +1782,13 @@
                                 </Grid>
                             </Border>
 
-                            <!-- ──────── فرم ورود/ویرایش ──────── -->
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="1" Padding="24">
+                            <!-- ──────── اسپلیتر (ستون ۱) ──────── -->
+                            <GridSplitter Grid.Column="1" Width="8" 
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch" 
+                      Background="Transparent" Cursor="SizeWE" />
+
+                            <!-- ──────── فرم ورود/ویرایش (ستون ۲) ──────── -->
+                            <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="24" Margin="6,0,0,0">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
                                         <TextBlock Text="{Binding ItemDefFormTitle}" 
@@ -1831,7 +1867,7 @@
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- چک‌باکس‌های مشمولیت -->
+                                        <!-- چک‌باکس‌های مشمولیت (اصلاح‌شده به صورت WrapPanel) -->
                                         <Border Background="{StaticResource BgMain}" CornerRadius="10" 
                             Padding="14" BorderThickness="1" 
                             BorderBrush="{StaticResource BorderColor}" Margin="0,0,0,14">
@@ -1839,25 +1875,24 @@
                                                 <TextBlock Text="تنظیمات مشمولیت" FontWeight="SemiBold" 
                                        Foreground="{StaticResource TextMuted}" 
                                        FontSize="12" Margin="0,0,0,10"/>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
+
+                                                <WrapPanel Orientation="Horizontal">
                                                     <CheckBox IsChecked="{Binding CurrentItemDef.INS_SUBJECT}"
                                           Content="مشمول بیمه" VerticalAlignment="Center"
-                                          Margin="0,0,0,8"/>
-                                                    <CheckBox Grid.Column="1"
-                                          IsChecked="{Binding CurrentItemDef.TAX_SUBJECT}"
+                                          Margin="0,0,16,10"/>
+
+                                                    <CheckBox IsChecked="{Binding CurrentItemDef.TAX_SUBJECT}"
                                           Content="مشمول مالیات" VerticalAlignment="Center"
-                                          Margin="0,0,0,8"/>
-                                                    <CheckBox Grid.Row="1"
-                                          IsChecked="{Binding CurrentItemDef.SHOW_IN_SLIP}"
-                                          Content="نمایش در فیش" VerticalAlignment="Center"/>
-                                                    <CheckBox Grid.Row="1" Grid.Column="1"
-                                          IsChecked="{Binding CurrentItemDef.IS_ACTIVE}"
-                                          Content="آیتم فعال است" VerticalAlignment="Center"/>
-                                                </Grid>
+                                          Margin="0,0,16,10"/>
+
+                                                    <CheckBox IsChecked="{Binding CurrentItemDef.SHOW_IN_SLIP}"
+                                          Content="نمایش در فیش" VerticalAlignment="Center"
+                                          Margin="0,0,16,10"/>
+
+                                                    <CheckBox IsChecked="{Binding CurrentItemDef.IS_ACTIVE}"
+                                          Content="آیتم فعال است" VerticalAlignment="Center"
+                                          Margin="0,0,16,10"/>
+                                                </WrapPanel>
                                             </StackPanel>
                                         </Border>
 
@@ -1898,7 +1933,7 @@
         </Grid>
 
         <!-- Modals -->
-        <Grid x:Name="ModalNewEmp" Grid.ColumnSpan="2" Background="#660f172a" Panel.ZIndex="100" Visibility="Collapsed">
+        <Grid x:Name="ModalNewEmp" Grid.ColumnSpan="2" Background="#660f172a" Panel.ZIndex="100" Visibility="Collapsed" d:Visibility="Collapsed">
             <Border Background="White" CornerRadius="24" Width="800" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" Style="{StaticResource CardStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -1915,10 +1950,10 @@
                     </Border>
 
                     <Border Grid.Row="1" Padding="24">
-                        <ScrollViewer MaxHeight="550" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer MaxHeight="550" VerticalScrollBarVisibility="Auto" d:MaxHeight="2000">
                             <StackPanel>
                                 <TextBlock Text="۱. مشخصات فردی" FontWeight="Bold" FontSize="15" Foreground="{StaticResource Primary}" Margin="0,0,0,16"/>
-                                <Grid Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,16" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
@@ -1927,7 +1962,7 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="کد پرسنلی (EMP_CODE) *"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.EMP_CODE, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.EMP_CODE, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Margin="8,0,8,0">
@@ -1950,12 +1985,12 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="کد ملی"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.NATIONAL_CODE, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" MaxLength="10" Text="{Binding CurrentEmployee.NATIONAL_CODE, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Margin="8,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="جنسیت *"/>
-                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.GENDER}" Background="{StaticResource BgMain}" Padding="10">
+                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.GENDER}" Style="{StaticResource ComboStyle}" IsEditable="True" Background="{StaticResource BgMain}" Padding="10">
                                             <ComboBoxItem Content="مذکر" Tag="1"/>
                                             <ComboBoxItem Content="مونث" Tag="2"/>
                                         </ComboBox>
@@ -1963,7 +1998,7 @@
 
                                     <StackPanel Grid.Column="2" Margin="8,0,0,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="وضعیت تأهل *"/>
-                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.MARITAL}" Background="{StaticResource BgMain}" Padding="10">
+                                        <ComboBox SelectedValuePath="Tag" Style="{StaticResource ComboStyle}" IsEditable="True" SelectedValue="{Binding CurrentEmployee.MARITAL}" Background="{StaticResource BgMain}" Padding="10">
                                             <ComboBoxItem Content="متأهل" Tag="1"/>
                                             <ComboBoxItem Content="مجرد" Tag="2"/>
                                         </ComboBox>
@@ -1986,7 +2021,7 @@
 
                                     <StackPanel Grid.Column="1" Margin="8,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="شماره شناسنامه"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.ID_NUMBER, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.ID_NUMBER, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Margin="8,0,8,0">
@@ -1996,7 +2031,7 @@
 
                                     <StackPanel Grid.Column="3" Margin="8,0,0,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="تاریخ تولد (شمسی)" ToolTip="فرمت: YYYYMMDD مثال: 13600101"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.BIRTH_DATE, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox IsPersianDateMode="True" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.BIRTH_DATE, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -2010,7 +2045,7 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="ملیت *"/>
-                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.NATIONALITY}" Background="{StaticResource BgMain}" Padding="10">
+                                        <ComboBox SelectedValuePath="Tag" Style="{StaticResource ComboStyle}" IsEditable="True" SelectedValue="{Binding CurrentEmployee.NATIONALITY}" Background="{StaticResource BgMain}" Padding="10">
                                             <ComboBoxItem Content="ایرانی" Tag="1"/>
                                             <ComboBoxItem Content="خارجی" Tag="2"/>
                                         </ComboBox>
@@ -2037,17 +2072,23 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="کارگاه محل خدمت *"/>
-                                        <ComboBox ItemsSource="{Binding Workshops}" DisplayMemberPath="WS_NAME" SelectedValuePath="WS_ID" SelectedValue="{Binding CurrentEmployee.WS_ID}" Background="{StaticResource BgMain}" Padding="10"/>
+                                        <ComboBox  Style="{StaticResource ComboStyle}" IsEditable="True" ItemsSource="{Binding Workshops}" DisplayMemberPath="WS_NAME" SelectedValuePath="WS_ID" SelectedValue="{Binding CurrentEmployee.WS_ID}" Background="{StaticResource BgMain}" Padding="10"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Margin="8,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="شغل (PAY2_JOB)"/>
-                                        <ComboBox ItemsSource="{Binding Jobs}" DisplayMemberPath="JOB_NAME" SelectedValuePath="JOB_ID" SelectedValue="{Binding CurrentEmployee.JOB_ID}" Background="{StaticResource BgMain}" Padding="10"/>
+                                        
+                                        <ComboBox Style="{StaticResource ComboStyle}" IsEditable="True"
+                                                  ItemsSource="{Binding Jobs}" 
+                                                  DisplayMemberPath="JOB_NAME" 
+                                                  SelectedValuePath="JOB_ID" 
+                                                  SelectedValue="{Binding CurrentEmployee.JOB_ID}"/>
+
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Margin="8,0,0,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="تاریخ شروع به کار (شمسی) *"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.HIRE_DATE, UpdateSourceTrigger=PropertyChanged}" ToolTip="مثال: 14030101"/>
+                                        <CNC:NumericTextBox IsPersianDateMode="True" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.HIRE_DATE, UpdateSourceTrigger=PropertyChanged}" ToolTip="مثال: 14030101" FlowDirection="LeftToRight"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -2061,7 +2102,7 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="واحد سازمانی"/>
-                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.UNIT}" Background="{StaticResource BgMain}" Padding="10">
+                                        <ComboBox Style="{StaticResource ComboStyle}" IsEditable="True"  SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.UNIT}" Background="{StaticResource BgMain}" Padding="10">
                                             <ComboBoxItem Content="— انتخاب کنید —" Tag="{x:Null}"/>
                                             <ComboBoxItem Content="تولید" Tag="1"/>
                                             <ComboBoxItem Content="فروش" Tag="2"/>
@@ -2072,7 +2113,7 @@
 
                                     <StackPanel Grid.Column="1" Margin="8,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="مدرک تحصیلی"/>
-                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.EDU_LEVEL}" Background="{StaticResource BgMain}" Padding="10">
+                                        <ComboBox Style="{StaticResource ComboStyle}" IsEditable="True" SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.EDU_LEVEL}" Background="{StaticResource BgMain}" Padding="10">
                                             <ComboBoxItem Content="— انتخاب کنید —" Tag="{x:Null}"/>
                                             <ComboBoxItem Content="زیر دیپلم" Tag="1"/>
                                             <ComboBoxItem Content="دیپلم" Tag="2"/>
@@ -2085,7 +2126,7 @@
 
                                     <StackPanel Grid.Column="2" Margin="8,0,0,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="تاریخ ترک کار (شمسی)" ToolTip="فقط در صورت پایان همکاری — فرمت: YYYYMMDD"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.FIRE_DATE, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox IsPersianDateMode="True" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.FIRE_DATE, UpdateSourceTrigger=PropertyChanged}" FlowDirection="LeftToRight"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -2101,13 +2142,17 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="شماره بیمه (INS_CODE)"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.INS_CODE, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.INS_CODE, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
 
                                     <Border Grid.Column="1" Grid.ColumnSpan="2" Background="{StaticResource PrimaryLight}" CornerRadius="12" Padding="16" BorderThickness="1" BorderBrush="#bfdbfe" Margin="8,0,0,0">
                                         <StackPanel>
                                             <TextBlock Text="کد تفصیلی حسابداری (برای مساعده هوشمند)" Foreground="{StaticResource Primary}" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                            <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.ACC_T, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBox Style="{StaticResource InputStyle}" 
+                                                     Text="{Binding CurrentEmployee.ACC_T, UpdateSourceTrigger=PropertyChanged}" 
+                                                     FlowDirection="LeftToRight" 
+                                                     FontFamily="Consolas" 
+                                                     MaxLength="50"/>
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -2122,7 +2167,7 @@
 
                                     <StackPanel Margin="0,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="نوع بیمه *"/>
-                                        <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.INS_TYPE}" Background="{StaticResource BgMain}" Padding="10">
+                                        <ComboBox Style="{StaticResource ComboStyle}" IsEditable="True"  SelectedValuePath="Tag" SelectedValue="{Binding CurrentEmployee.INS_TYPE}" Background="{StaticResource BgMain}" Padding="10">
                                             <ComboBoxItem Content="معمولی" Tag="1"/>
                                             <ComboBoxItem Content="تبصره‌ای (ماده ۵۶)" Tag="2"/>
                                             <ComboBoxItem Content="معاف از بیمه" Tag="3"/>
@@ -2131,7 +2176,7 @@
 
                                     <StackPanel Grid.Column="1" Margin="8,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="معافیت منطقه محروم (%)" ToolTip="0=بدون معافیت — 50=پنجاه درصد معافیت"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.REGION_DEPRIVATION, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox TextBoxStyle="{StaticResource InputStyle}" DoesAcceptDouble="False" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged" TextAlignment="Left" Text="{Binding CurrentEmployee.REGION_DEPRIVATION, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Bottom">
@@ -2164,7 +2209,7 @@
 
                                     <StackPanel Grid.Column="2" Margin="8,0,8,0">
                                         <TextBlock Style="{StaticResource InputLabel}" Text="شماره حساب بانکی"/>
-                                        <TextBox Style="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.BANK_ACC, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <CNC:NumericTextBox DoesAcceptDouble="False" TextAlignment="Left" RestoreLastValidValue="False" LastValueShouldZero="False" TextBoxStyle="{StaticResource InputStyle}" Text="{Binding CurrentEmployee.BANK_ACC, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="3" Margin="8,0,0,0">
@@ -2567,7 +2612,7 @@
         </Grid>
 
         <!-- Job Manage Modal -->
-        <Grid x:Name="ModalJobManage" Grid.ColumnSpan="2" Background="#660f172a" Panel.ZIndex="100" Visibility="Collapsed">
+        <Grid x:Name="ModalJobManage" Grid.ColumnSpan="2" Background="#660f172a" Panel.ZIndex="100" Visibility="Collapsed" d:Visibility="Collapsed">
             <Border Background="White" CornerRadius="24" Width="750" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0" Style="{StaticResource CardStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -2586,9 +2631,9 @@
                     <Border Grid.Row="1" Padding="24">
                         <StackPanel>
                             <TextBlock Text="مشاغل جدید را اضافه کنید یا مقادیر موجود را ویرایش نمایید. اگر شغلی به پرسنل تخصیص داده شده باشد، سیستم به جای حذف فیزیکی، آن را غیرفعال (IS_ACTIVE = 0) خواهد کرد." Foreground="{StaticResource TextMuted}" Margin="0,0,0,16" FontSize="12" TextWrapping="Wrap"/>
-                            <DataGrid ItemsSource="{Binding Jobs}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Background="White" RowBackground="White" AlternatingRowBackground="#f8fafc" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="1" BorderBrush="#e2e8f0" MinHeight="250" MaxHeight="400">
+                            <DataGrid ItemsSource="{Binding Jobs}" materialDesign:DataGridAssist.EnableEditBoxAssist="False" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Background="White" RowBackground="White" AlternatingRowBackground="#f8fafc" HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="1" BorderBrush="#e2e8f0" MinHeight="250" MaxHeight="400">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="کد شغل (JOB_CODE)" Binding="{Binding JOB_CODE}" Width="150">
+                                    <DataGridTextColumn Header="کد شغل (JOB_CODE)" Binding="{Binding JOB_CODE,UpdateSourceTrigger=LostFocus}" Width="150">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="FontFamily" Value="Consolas"/>
@@ -2596,9 +2641,9 @@
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="عنوان شغل" Binding="{Binding JOB_NAME}" Width="*"/>
-                                    <DataGridTextColumn Header="گروه شغلی" Binding="{Binding JOB_GROUP}" Width="150"/>
-                                    <DataGridCheckBoxColumn Header="فعال؟" Binding="{Binding IS_ACTIVE}"/>
+                                    <DataGridTextColumn Header="عنوان شغل" Binding="{Binding JOB_NAME,UpdateSourceTrigger=LostFocus}" Width="*"/>
+                                    <DataGridTextColumn Header="گروه شغلی" Binding="{Binding JOB_GROUP,UpdateSourceTrigger=LostFocus}" Width="150"/>
+                                    <DataGridCheckBoxColumn Header="فعال؟" Binding="{Binding IS_ACTIVE,UpdateSourceTrigger=LostFocus}"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
@@ -3169,7 +3214,18 @@
 
                                 <StackPanel Margin="0,0,8,0">
                                     <TextBlock Style="{StaticResource InputLabel}" Text="مدرک تحصیلی در این حکم"/>
-                                    <TextBox Style="{StaticResource InputStyle}" Background="White" Text="{Binding CurrentDecree.EDU_LEVEL, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <ComboBox SelectedValuePath="Tag"
+                                              SelectedValue="{Binding CurrentDecree.EDU_LEVEL}"
+                                              Background="White" Padding="10"
+                                              BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+                                        <ComboBoxItem Content="— انتخاب کنید —" Tag="{x:Null}"/>
+                                        <ComboBoxItem Content="زیر دیپلم"    Tag="1"/>
+                                        <ComboBoxItem Content="دیپلم"         Tag="2"/>
+                                        <ComboBoxItem Content="فوق دیپلم"     Tag="3"/>
+                                        <ComboBoxItem Content="لیسانس"        Tag="4"/>
+                                        <ComboBoxItem Content="فوق لیسانس"   Tag="5"/>
+                                        <ComboBoxItem Content="دکترا"         Tag="6"/>
+                                    </ComboBox>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Margin="8,0,8,0">

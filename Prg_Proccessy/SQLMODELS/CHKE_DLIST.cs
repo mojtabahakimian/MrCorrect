@@ -73,6 +73,9 @@ namespace Prg_Proccessy.SQLMODELS
         public int? KIND { get => _kind; set { if (_kind == value) return; _kind = value; OnPropertyChanged("KIND"); } }
         private int? _listno;
         public int? LISTNO { get => _listno; set { if (_listno == value) return; _listno = value; OnPropertyChanged("LISTNO"); } }
+        private long? _date_vagozari;
+        public long? DATE_VAGOZARI { get => _date_vagozari; set { if (_date_vagozari == value) return; _date_vagozari = value; OnPropertyChanged("DATE_VAGOZARI"); } }
+
         private string? _hes1;
         public string? HES1 { get => _hes1; set { if (_hes1 == value) return; _hes1 = value; OnPropertyChanged("HES1"); } }
         private string? _hes2;

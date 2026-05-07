@@ -666,6 +666,11 @@
                 <syncfusion:GridTextColumn MappingName="N_TAF3" HeaderText="وصول به حساب تفضیلی" MinimumWidth="180" IsReadOnly="True"  />
 
                 <syncfusion:GridTextColumn MappingName="LISTNO" HeaderText="شماره لیست" MinimumWidth="180" IsReadOnly="True"  />
+                <syncfusion:GridTextColumn HeaderText="تاریخ واگذاری" MappingName="DATE_VAGOZARI" IsReadOnly="True" >
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="DATE_VAGOZARI" StringFormat="####/##/##" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
                 <syncfusion:GridComboBoxColumn HeaderText="نوع" MappingName="KIND" IsReadOnly="True"  >
                     <syncfusion:GridComboBoxColumn.ItemsSource>
                         <x:Array Type="{x:Type sys:String}">

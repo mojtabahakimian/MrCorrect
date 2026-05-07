@@ -60,7 +60,19 @@
                     <DataGridTextColumn Header="روز کارکرد کل" Binding="{Binding WORK_DAYS, StringFormat={}{0:N2}}" Width="100"/>
                     <DataGridTextColumn Header="روز تولید" Binding="{Binding DAYS_TOLID, StringFormat={}{0:N2}}" Width="80"/>
                     <DataGridTextColumn Header="روز اداری" Binding="{Binding DAYS_EDARI, StringFormat={}{0:N2}}" Width="80"/>
+                    <!-- بعد از روز اداری -->
+                    <DataGridTextColumn Header="روز خدمات"       Binding="{Binding DAYS_KHADAMAT, StringFormat={}{0:N2}}" Width="90"/>
+                    <DataGridTextColumn Header="روز فروش"        Binding="{Binding DAYS_FOROSH,   StringFormat={}{0:N2}}" Width="80"/>
 
+                    <!-- بعد از اضافه‌کار تعطیل -->
+                    <DataGridTextColumn Header="اضافه‌کار اداری" Binding="{Binding OT_ADMIN_H,    StringFormat={}{0:N2}}" Width="120"/>
+
+                    <!-- بعد از روز غیبت -->
+                    <DataGridTextColumn Header="روز مأموریت"     Binding="{Binding MISSION_DAYS,  StringFormat={}{0:N2}}" Width="100"/>
+                    <DataGridTextColumn Header="تعطیلات رسمی"    Binding="{Binding TDAYS,         StringFormat={}{0:N2}}" Width="100"/>
+
+                    <!-- بعد از پاداش/راندمان -->
+                    <DataGridTextColumn Header="حق ایاب‌وذهاب (ریال)" Binding="{Binding TRANSP_AMOUNT}" Width="140"/>
                     <DataGridTextColumn Header="اضافه کار عادی (ساعت)" Binding="{Binding OT_NORMAL_H, StringFormat={}{0:N2}}" Width="140"/>
                     <DataGridTextColumn Header="اضافه کار تعطیل" Binding="{Binding OT_HOLIDAY_H, StringFormat={}{0:N2}}" Width="110"/>
 
