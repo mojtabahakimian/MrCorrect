@@ -188,74 +188,75 @@ namespace Prg_UI.Wins.WinMenus.BARNAME_RIZI
         // این تابع کمکی مانند یک فلزیاب در ساختار بصری WPF جستجو می‌کند
         private FrameworkElement chartPlotArea;
 
-        private void salesChart_MouseMove(object sender, MouseEventArgs e)
-        {
-            try
-            {
-                // --- مرحله ۱: استفاده از شاه‌کلید (Reflection) برای دسترسی به پنل داخلی ---
-                if (this.chartPlotArea == null)
-                {
-                    if (salesChart.Series.Count > 0 && salesChart.Series[0] is Syncfusion.UI.Xaml.Charts.ColumnSeries columnSeries)
-                    {
-                        // با Reflection، پراپرتی غیرعمومی SeriesRootPanel را پیدا می‌کنیم
-                        PropertyInfo seriesRootPanelProperty = typeof(Syncfusion.UI.Xaml.Charts.ColumnSeries)
-                            .GetProperty("SeriesRootPanel", BindingFlags.Instance | BindingFlags.NonPublic);
+        //شیوه قدیمی نمایش مقدار ستون ها با حرکت موس 
+        //private void salesChart_MouseMove(object sender, MouseEventArgs e)
+        //{
+        //    try
+        //    {
+        //        // --- مرحله ۱: استفاده از شاه‌کلید (Reflection) برای دسترسی به پنل داخلی ---
+        //        if (this.chartPlotArea == null)
+        //        {
+        //            if (salesChart.Series.Count > 0 && salesChart.Series[0] is Syncfusion.UI.Xaml.Charts.ColumnSeries columnSeries)
+        //            {
+        //                // با Reflection، پراپرتی غیرعمومی SeriesRootPanel را پیدا می‌کنیم
+        //                PropertyInfo seriesRootPanelProperty = typeof(Syncfusion.UI.Xaml.Charts.ColumnSeries)
+        //                    .GetProperty("SeriesRootPanel", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                        // اگر پراپرتی پیدا شد، مقدار آن را می‌خوانیم
-                        if (seriesRootPanelProperty != null)
-                        {
-                            this.chartPlotArea = seriesRootPanelProperty.GetValue(columnSeries) as FrameworkElement;
-                        }
-                    }
-                }
+        //                // اگر پراپرتی پیدا شد، مقدار آن را می‌خوانیم
+        //                if (seriesRootPanelProperty != null)
+        //                {
+        //                    this.chartPlotArea = seriesRootPanelProperty.GetValue(columnSeries) as FrameworkElement;
+        //                }
+        //            }
+        //        }
 
-                // اگر پنل پیدا نشد یا داده‌ای وجود نداشت، خارج می‌شویم
-                if (this.chartPlotArea == null || salesChart.DataContext == null)
-                {
-                    CustomTooltipPopup.IsOpen = false;
-                    return;
-                }
+        //        // اگر پنل پیدا نشد یا داده‌ای وجود نداشت، خارج می‌شویم
+        //        if (this.chartPlotArea == null || salesChart.DataContext == null)
+        //        {
+        //            CustomTooltipPopup.IsOpen = false;
+        //            return;
+        //        }
 
-                // --- مراحل ۲ و ۳ (محاسبات) بدون هیچ تغییری باقی می‌مانند ---
-                Point mousePosition = e.GetPosition(this.chartPlotArea);
-                Rect plotAreaBounds = new Rect(0, 0, this.chartPlotArea.ActualWidth, this.chartPlotArea.ActualHeight);
+        //        // --- مراحل ۲ و ۳ (محاسبات) بدون هیچ تغییری باقی می‌مانند ---
+        //        Point mousePosition = e.GetPosition(this.chartPlotArea);
+        //        Rect plotAreaBounds = new Rect(0, 0, this.chartPlotArea.ActualWidth, this.chartPlotArea.ActualHeight);
 
-                if (!plotAreaBounds.Contains(mousePosition))
-                {
-                    CustomTooltipPopup.IsOpen = false;
-                    return;
-                }
+        //        if (!plotAreaBounds.Contains(mousePosition))
+        //        {
+        //            CustomTooltipPopup.IsOpen = false;
+        //            return;
+        //        }
 
-                var dataSource = salesChart.DataContext as System.Collections.IList;
-                var yAxis = salesChart.SecondaryAxis;
-                if (dataSource == null || yAxis == null) return;
+        //        var dataSource = salesChart.DataContext as System.Collections.IList;
+        //        var yAxis = salesChart.SecondaryAxis;
+        //        if (dataSource == null || yAxis == null) return;
 
-                double horizontalRatio = mousePosition.X / plotAreaBounds.Width;
-                int categoryIndex = (int)(horizontalRatio * dataSource.Count);
+        //        double horizontalRatio = mousePosition.X / plotAreaBounds.Width;
+        //        int categoryIndex = (int)(horizontalRatio * dataSource.Count);
 
-                double yMin = yAxis.VisibleRange.Start;
-                double yMax = yAxis.VisibleRange.End;
-                double verticalRatio = mousePosition.Y / plotAreaBounds.Height;
-                double yValue = yMax - (verticalRatio * (yMax - yMin));
+        //        double yMin = yAxis.VisibleRange.Start;
+        //        double yMax = yAxis.VisibleRange.End;
+        //        double verticalRatio = mousePosition.Y / plotAreaBounds.Height;
+        //        double yValue = yMax - (verticalRatio * (yMax - yMin));
 
-                if (categoryIndex >= 0 && categoryIndex < dataSource.Count)
-                {
-                    var dataItem = dataSource[categoryIndex] as SalesReportByMonth;
-                    if (dataItem != null && yValue >= 0 && yValue <= dataItem.MABL_K)
-                    {
-                        CustomTooltipPopup.DataContext = dataItem;
-                        CustomTooltipPopup.IsOpen = true;
-                        return;
-                    }
-                }
+        //        if (categoryIndex >= 0 && categoryIndex < dataSource.Count)
+        //        {
+        //            var dataItem = dataSource[categoryIndex] as SalesReportByMonth;
+        //            if (dataItem != null && yValue >= 0 && yValue <= dataItem.MABL_K)
+        //            {
+        //                CustomTooltipPopup.DataContext = dataItem;
+        //                CustomTooltipPopup.IsOpen = true;
+        //                return;
+        //            }
+        //        }
 
-                CustomTooltipPopup.IsOpen = false;
-            }
-            catch (Exception)
-            {
-                CustomTooltipPopup.IsOpen = false;
-            }
-        }
+        //        CustomTooltipPopup.IsOpen = false;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        CustomTooltipPopup.IsOpen = false;
+        //    }
+        //}
 
         // <<<<<<< 3. فقط به این یک نسخه از تابع کمکی نیاز داریم >>>>>>>
         public static T FindChild<T>(DependencyObject parent) where T : DependencyObject
