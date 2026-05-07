@@ -196,6 +196,7 @@
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
 		<None Remove="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
+		<None Remove="Scriptses\joby.rar" />
 		<None Remove="UiDrive\EXEFILES\Preloader.exe" />
 		<None Remove="UiDrive\FNT\IRANYekanFN.TTF" />
 		<None Remove="UiDrive\IMGS\budget.jpg" />

@@ -7,6 +7,8 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -3285,7 +3287,7 @@ FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
                 #region SALARY
-                if (false) //isCustomCall
+                if (isCustomCall) //
                 {
                     string tablescript = @"
 -- ================================================================
@@ -5678,6 +5680,524 @@ GO
                     GO
                     """;
                     ExecuteBatches(db, procScript);
+
+                    string modify1 = @"
+-- 1. تغییر نوع فیلد در جدول پرسنل
+ALTER TABLE PAY2_EMPLOYEE ALTER COLUMN ACC_T NVARCHAR(50) NULL;
+GO
+
+-- 2. اصلاح پروسیجر محاسبه مساعده (SP_PAY2_GET_ADVANCES)
+-- تغییر مقایسه از حالت عددی به حالت رشته‌ای (پشتیبانی از HES و HES_T)
+ALTER PROCEDURE [dbo].[SP_PAY2_GET_ADVANCES]
+    @PERIOD_DATE  BIGINT,
+    @PAYROLL_N_S  FLOAT,
+    @WS_ID        INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @HES_K INT = (SELECT CAST(ACC_CODE AS INT) FROM PAY2_WORKSHOP_ACC WHERE WS_ID = @WS_ID AND ACC_KEY = 'ADV_HES_K');
+    DECLARE @HES_M INT = (SELECT CAST(ACC_CODE AS INT) FROM PAY2_WORKSHOP_ACC WHERE WS_ID = @WS_ID AND ACC_KEY = 'ADV_HES_M');
+    DECLARE @USE_T BIT = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY = 'ADV_USE_HES_T_FILTER') AS BIT);
+    DECLARE @MIN_POS BIT = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY = 'ADV_MIN_POSITIVE') AS BIT);
+    DECLARE @ADV_SCOPE NVARCHAR(20) = ISNULL((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY = 'ADV_SCOPE'), 'CURRENT_MONTH');
+    DECLARE @PERIOD_MONTH INT = @PERIOD_DATE / 100;
+
+    IF @HES_K IS NULL OR @HES_M IS NULL RETURN;
+
+    SELECT
+        E.EMP_ID,
+        E.ACC_T AS PCODE, -- اکنون این فیلد متنی است
+        E.LAST_NAME + N' ' + E.FIRST_NAME AS FULL_NAME,
+
+        ISNULL((SELECT CAST(SUM(D.BED - D.BES) AS BIGINT)
+                FROM DEED_HED H INNER JOIN DEED_DTL D ON H.N_S = D.N_S
+                WHERE D.HES_K = @HES_K AND D.HES_M = @HES_M
+                  -- تغییر کلیدی: مقایسه رشته‌ای با کد ترکیبی حسابداری یا تفصیلی
+                  AND (@USE_T = 0 OR D.HES = E.ACC_T OR CAST(D.HES_T AS NVARCHAR(50)) = E.ACC_T)
+                  AND H.N_S < @PAYROLL_N_S
+                  AND (@ADV_SCOPE = 'OPEN_BALANCE' OR [dbo].[FN_PAY2_MONTH](H.DATE_S) = @PERIOD_MONTH)
+                  AND H.OKF = 1), 0) AS RAW_BALANCE,
+
+        ISNULL((SELECT SUM(EXCL_AMOUNT) FROM PAY2_ADVANCE_EXCL
+                WHERE EMP_ID = E.EMP_ID AND PERIOD_DATE / 100 = @PERIOD_MONTH), 0) AS MANUAL_EXCL,
+
+        CASE 
+            WHEN @MIN_POS = 1 AND 
+                 ISNULL((SELECT CAST(SUM(D.BED - D.BES) AS BIGINT)
+                         FROM DEED_HED H INNER JOIN DEED_DTL D ON H.N_S = D.N_S
+                         WHERE D.HES_K = @HES_K AND D.HES_M = @HES_M
+                           AND (@USE_T = 0 OR D.HES = E.ACC_T OR CAST(D.HES_T AS NVARCHAR(50)) = E.ACC_T)
+                           AND H.N_S < @PAYROLL_N_S
+                           AND [dbo].[FN_PAY2_MONTH](H.DATE_S) = @PERIOD_MONTH
+                           AND H.OKF = 1), 0)
+                 - ISNULL((SELECT SUM(EXCL_AMOUNT) FROM PAY2_ADVANCE_EXCL WHERE EMP_ID = E.EMP_ID AND PERIOD_DATE/100 = @PERIOD_MONTH), 0) <= 0 
+            THEN 0
+            ELSE 
+                 ISNULL((SELECT CAST(SUM(D.BED - D.BES) AS BIGINT)
+                         FROM DEED_HED H INNER JOIN DEED_DTL D ON H.N_S = D.N_S
+                         WHERE D.HES_K = @HES_K AND D.HES_M = @HES_M
+                           AND (@USE_T = 0 OR D.HES = E.ACC_T OR CAST(D.HES_T AS NVARCHAR(50)) = E.ACC_T)
+                           AND H.N_S < @PAYROLL_N_S
+                           AND [dbo].[FN_PAY2_MONTH](H.DATE_S) = @PERIOD_MONTH
+                           AND H.OKF = 1), 0)
+                 - ISNULL((SELECT SUM(EXCL_AMOUNT) FROM PAY2_ADVANCE_EXCL WHERE EMP_ID = E.EMP_ID AND PERIOD_DATE/100 = @PERIOD_MONTH), 0)
+        END AS ADVANCE_DEDUCTION
+    FROM PAY2_EMPLOYEE E
+    INNER JOIN PAY2_PERIOD P ON P.WS_ID = E.WS_ID AND P.PERIOD_DATE/100 = @PERIOD_MONTH
+    WHERE E.WS_ID = @WS_ID AND E.IS_ACTIVE = 1 AND E.ACC_T IS NOT NULL AND E.ACC_T <> N'';
+END;
+GO
+
+ALTER PROCEDURE [dbo].[SP_PAY2_CALC_RUN]
+    @WS_ID       INT,
+    @PER_ID      INT,
+    @PAYROLL_N_S FLOAT,
+    @CALC_BY     INT          = NULL,
+    @IS_RERUN    BIT          = 0,
+    @NEW_RUN_ID  INT          OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    -- خاموش کردن هشدارهای مزاحم SUM (جلوگیری از نمایش Warning در C#)
+    SET ANSI_WARNINGS OFF;
+
+    -- ────────────────────────────────────────────────────────────
+    -- گام ۱ — بارگذاری تنظیمات از PAY2_CONFIG
+    -- ────────────────────────────────────────────────────────────
+    DECLARE
+        @MONTH_DAYS_MODE   NVARCHAR(10),
+        @MONTH_DAYS        TINYINT,
+        @OT_NORMAL_MULT    DECIMAL(6,4),
+        @OT_HOLIDAY_MULT   DECIMAL(6,4),
+        @OT_HOUR_BASE      DECIMAL(6,4),
+        @SHIFT_MODE        NVARCHAR(10),
+        @ROUND_MODE        INT,
+        @INS_WORKER_RATE   DECIMAL(6,4),
+        @INS_EMPLOYER_RATE DECIMAL(6,4),
+        @INS_UNEMP_RATE    DECIMAL(6,4),
+        @INS_CEILING_APPLY BIT,
+        @INS_CEILING       BIGINT,
+        @TAX_YEAR          SMALLINT,
+        @TAX_EXEMPT        BIGINT,
+        @TAX_DEDUCT_INS    BIT,
+        @TAX_DEP_APPLY     BIT,
+        @ADV_ENABLED       BIT,
+        @PERIOD_DATE       BIGINT,
+        @PERIOD_MONTH      INT;
+
+    -- استفاده از ISNULL برای جلوگیری از NULL شدن مقادیر تنظیمات
+    SELECT
+        @MONTH_DAYS_MODE   = ISNULL(MAX(CASE WHEN CFG_KEY='MONTH_DAYS_MODE'    THEN CFG_VALUE END), '30'),
+        @OT_NORMAL_MULT    = ISNULL(MAX(CASE WHEN CFG_KEY='OT_NORMAL_MULT'     THEN CAST(CFG_VALUE AS DECIMAL(6,4)) END), 1.40),
+        @OT_HOLIDAY_MULT   = ISNULL(MAX(CASE WHEN CFG_KEY='OT_HOLIDAY_MULT'    THEN CAST(CFG_VALUE AS DECIMAL(6,4)) END), 1.40),
+        @OT_HOUR_BASE      = ISNULL(MAX(CASE WHEN CFG_KEY='OT_HOUR_BASE'       THEN CAST(CFG_VALUE AS DECIMAL(6,4)) END), 7.33),
+        @SHIFT_MODE        = ISNULL(MAX(CASE WHEN CFG_KEY='SHIFT_MODE'         THEN CFG_VALUE END), 'PCT'),
+        @ROUND_MODE        = ISNULL(MAX(CASE WHEN CFG_KEY='ROUND_MODE'         THEN CAST(CFG_VALUE AS INT) END), 1),
+        @INS_WORKER_RATE   = ISNULL(MAX(CASE WHEN CFG_KEY='INS_WORKER_RATE'    THEN CAST(CFG_VALUE AS DECIMAL(6,4)) END) / 100.0, 0.07),
+        @INS_EMPLOYER_RATE = ISNULL(MAX(CASE WHEN CFG_KEY='INS_EMPLOYER_RATE'  THEN CAST(CFG_VALUE AS DECIMAL(6,4)) END) / 100.0, 0.20),
+        @INS_UNEMP_RATE    = ISNULL(MAX(CASE WHEN CFG_KEY='INS_UNEMP_RATE'     THEN CAST(CFG_VALUE AS DECIMAL(6,4)) END) / 100.0, 0.03),
+        @INS_CEILING       = ISNULL(MAX(CASE WHEN CFG_KEY='INS_CEILING_MONTHLY' THEN CAST(CFG_VALUE AS BIGINT) END), 999999999),
+        @TAX_YEAR          = ISNULL(MAX(CASE WHEN CFG_KEY='TAX_YEAR'           THEN CAST(CFG_VALUE AS SMALLINT) END), 1403),
+        @TAX_EXEMPT        = ISNULL(MAX(CASE WHEN CFG_KEY='TAX_EXEMPT_MONTHLY' THEN CAST(CFG_VALUE AS BIGINT) END), 0),
+        @INS_CEILING_APPLY = ISNULL(CAST(MAX(CASE WHEN CFG_KEY='INS_CEILING_APPLY'  THEN CAST(CFG_VALUE AS INT) END) AS BIT), 1),
+        @TAX_DEDUCT_INS    = ISNULL(CAST(MAX(CASE WHEN CFG_KEY='TAX_DEDUCT_INS'     THEN CAST(CFG_VALUE AS INT) END) AS BIT), 1),
+        @TAX_DEP_APPLY     = ISNULL(CAST(MAX(CASE WHEN CFG_KEY='TAX_DEPRIVATION_APPLY' THEN CAST(CFG_VALUE AS INT) END) AS BIT), 0),
+        @ADV_ENABLED       = ISNULL(CAST(MAX(CASE WHEN CFG_KEY='ADV_ENABLED'        THEN CAST(CFG_VALUE AS INT) END) AS BIT), 0)
+    FROM PAY2_CONFIG
+    WHERE CFG_KEY IN (
+        'MONTH_DAYS_MODE','OT_NORMAL_MULT','OT_HOLIDAY_MULT','OT_HOUR_BASE',
+        'SHIFT_MODE','ROUND_MODE','INS_WORKER_RATE','INS_EMPLOYER_RATE',
+        'INS_UNEMP_RATE','INS_CEILING_APPLY','INS_CEILING_MONTHLY',
+        'TAX_YEAR','TAX_EXEMPT_MONTHLY','TAX_DEDUCT_INS',
+        'TAX_DEPRIVATION_APPLY','ADV_ENABLED'
+    );
+
+    SELECT @PERIOD_DATE = PERIOD_DATE FROM PAY2_PERIOD WHERE PER_ID = @PER_ID;
+    IF @PERIOD_DATE IS NULL
+    BEGIN
+        RAISERROR(N'دوره %d یافت نشد.', 16, 1, @PER_ID);
+        RETURN;
+    END;
+
+    SET @MONTH_DAYS = CASE WHEN @MONTH_DAYS_MODE = '30' THEN 30 ELSE 30 END;
+    SET @PERIOD_MONTH = @PERIOD_DATE / 100;  
+
+    -- ────────────────────────────────────────────────────────────
+    -- گام ۲ — ایجاد هدر PAY2_RUN
+    -- ────────────────────────────────────────────────────────────
+    DECLARE @PREV_RUN_ID INT = NULL;
+    DECLARE @NEXT_RUN_NO SMALLINT = 1;
+
+    IF @IS_RERUN = 1
+    BEGIN
+        SELECT TOP 1
+            @PREV_RUN_ID = RUN_ID,
+            @NEXT_RUN_NO = RUN_NO + 1
+        FROM PAY2_RUN
+        WHERE PER_ID = @PER_ID AND IS_LATEST = 1
+        ORDER BY RUN_NO DESC;
+
+        UPDATE PAY2_RUN SET IS_LATEST = 0 WHERE PER_ID = @PER_ID;
+    END;
+
+    INSERT INTO PAY2_RUN (PER_ID, RUN_NO, IS_LATEST, CALC_AT, CALC_BY, STATUS, PREV_RUN_ID)
+    VALUES (@PER_ID, @NEXT_RUN_NO, 1, GETDATE(), @CALC_BY, 1, @PREV_RUN_ID);
+
+    SET @NEW_RUN_ID = SCOPE_IDENTITY();
+
+    -- ────────────────────────────────────────────────────────────
+    -- جدول موقت نتایج مساعده (از SP_PAY2_GET_ADVANCES)
+    -- ────────────────────────────────────────────────────────────
+    CREATE TABLE #AdvResult (
+        EMP_ID             INT,
+        PCODE              NVARCHAR(50), 
+        FULL_NAME          NVARCHAR(150),
+        RAW_BALANCE        BIGINT,
+        MANUAL_EXCL        BIGINT,
+        ADVANCE_DEDUCTION  BIGINT
+    );
+
+    IF @ADV_ENABLED = 1
+    BEGIN
+        INSERT INTO #AdvResult (EMP_ID, PCODE, FULL_NAME, RAW_BALANCE, MANUAL_EXCL, ADVANCE_DEDUCTION)
+        EXEC SP_PAY2_GET_ADVANCES
+            @PERIOD_DATE = @PERIOD_DATE,
+            @PAYROLL_N_S = @PAYROLL_N_S,
+            @WS_ID       = @WS_ID;
+    END;
+
+    -- ────────────────────────────────────────────────────────────
+    -- گام ۳ — حلقه روی پرسنل فعال کارگاه
+    -- ────────────────────────────────────────────────────────────
+    DECLARE
+        @EMP_ID            INT,
+        @IS_MANAGER        BIT,
+        @INS_TYPE          TINYINT,
+        @TAX_EXEMPT_FLAG   BIT,
+        @REGION_DEP        TINYINT,
+        @ACC_T             NVARCHAR(50); 
+
+    DECLARE cur_emp CURSOR LOCAL FAST_FORWARD FOR
+        SELECT E.EMP_ID, E.IS_MANAGER, E.INS_TYPE, E.TAX_EXEMPT, E.REGION_DEPRIVATION, E.ACC_T
+        FROM PAY2_EMPLOYEE E
+        WHERE E.WS_ID = @WS_ID AND E.IS_ACTIVE = 1
+          AND EXISTS (SELECT 1 FROM PAY2_ATTENDANCE A
+                      WHERE A.PER_ID = @PER_ID AND A.EMP_ID = E.EMP_ID);
+
+    OPEN cur_emp;
+    FETCH NEXT FROM cur_emp INTO @EMP_ID, @IS_MANAGER, @INS_TYPE, @TAX_EXEMPT_FLAG, @REGION_DEP, @ACC_T;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        DECLARE
+            @WORK_DAYS    DECIMAL(5,2) = 0,
+            @DAYS         DECIMAL(5,2) = 0,
+            @DAYSB        DECIMAL(5,2) = 0,
+            @FRID_COUNT   TINYINT = 0,
+            @TDAYS        DECIMAL(5,2) = 0,
+            @OT_NORMAL_H  DECIMAL(6,2) = 0,
+            @OT_HOLIDAY_H DECIMAL(6,2) = 0,
+            @OT_ADMIN_H   DECIMAL(6,2) = 0,
+            @LEAVE_DAYS   DECIMAL(5,2) = 0,
+            @PERF_AMOUNT  BIGINT = 0,
+            @TRANSP_AMOUNT BIGINT = 0,
+            @KASR_OTHER   BIGINT = 0;
+
+        SELECT
+            @WORK_DAYS     = ISNULL(WORK_DAYS,0),
+            @DAYS          = ISNULL(DAYS,0),
+            @DAYSB         = ISNULL(DAYSB,0),
+            @FRID_COUNT    = ISNULL(FRID_COUNT,0),
+            @TDAYS         = ISNULL(TDAYS,0),
+            @OT_NORMAL_H   = ISNULL(OT_NORMAL_H,0),
+            @OT_HOLIDAY_H  = ISNULL(OT_HOLIDAY_H,0),
+            @OT_ADMIN_H    = ISNULL(OT_ADMIN_H,0),
+            @LEAVE_DAYS    = ISNULL(LEAVE_DAYS,0),
+            @PERF_AMOUNT   = ISNULL(PERF_AMOUNT,0),
+            @TRANSP_AMOUNT = ISNULL(TRANSP_AMOUNT,0),
+            @KASR_OTHER    = ISNULL(KASR_OTHER,0)
+        FROM PAY2_ATTENDANCE
+        WHERE PER_ID = @PER_ID AND EMP_ID = @EMP_ID;
+
+        CREATE TABLE #ItemCalc (
+            ITEM_ID     INT,
+            ITEM_CODE   NVARCHAR(30),
+            ITEM_TYPE   TINYINT,
+            AMOUNT      BIGINT,
+            INS_SUBJECT BIT,
+            TAX_SUBJECT BIT
+        );
+
+        -- ── گام ۴ — یافتن حکم معتبر ─────────────────────────────
+        DECLARE @DEC_ID   INT;
+        DECLARE @DEC_FROM BIGINT;
+        DECLARE @DEC_TO   BIGINT;
+
+        DECLARE cur_dec CURSOR LOCAL FAST_FORWARD FOR
+            SELECT DEC_ID, EFF_FROM, ISNULL(EFF_TO, 99991231)
+            FROM PAY2_DECREE
+            WHERE EMP_ID = @EMP_ID
+              AND IS_CONFIRMED = 1
+              AND EFF_FROM <= @PERIOD_DATE + 30   
+              AND (EFF_TO IS NULL OR EFF_TO >= @PERIOD_DATE)
+            ORDER BY EFF_FROM;
+
+        OPEN cur_dec;
+        FETCH NEXT FROM cur_dec INTO @DEC_ID, @DEC_FROM, @DEC_TO;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            -- ── گام ۵ — محاسبه هر آیتم حکم ──────────────────────
+            DECLARE
+                @ITEM_ID      INT,
+                @ITEM_CODE    NVARCHAR(30),
+                @ITEM_TYPE    TINYINT,
+                @ITEM_AMOUNT  BIGINT,
+                @ITEM_BASIS   TINYINT,  
+                @ITEM_INS     BIT,
+                @ITEM_TAX     BIT,
+                @ITEM_PBD     TINYINT,  
+                @OV_INS       BIT,
+                @OV_TAX       BIT,
+                @OV_BASIS     TINYINT,
+                @CALC_AMOUNT  BIGINT = 0;
+
+            DECLARE cur_line CURSOR LOCAL FAST_FORWARD FOR
+                SELECT
+                    DL.ITEM_ID,
+                    ID.ITEM_CODE,
+                    ID.ITEM_TYPE,
+                    ISNULL(DL.AMOUNT, 0),
+                    ISNULL(DL.BASIS_OV, ID.CALC_BASIS),
+                    ISNULL(DL.INS_OV,   ID.INS_SUBJECT),
+                    ISNULL(DL.TAX_OV,   ID.TAX_SUBJECT),
+                    ID.PAY_BASE_DAYS
+                FROM PAY2_DECREE_LINE DL
+                INNER JOIN PAY2_ITEM_DEF ID ON DL.ITEM_ID = ID.ITEM_ID
+                WHERE DL.DEC_ID = @DEC_ID
+                  AND ID.IS_ACTIVE = 1
+                  AND ID.ITEM_CODE NOT IN ('INS_DED','TAX_DED','LOAN_DED','ADVANCE_DED')
+                ORDER BY ID.SORT_ORDER;
+
+            OPEN cur_line;
+            FETCH NEXT FROM cur_line INTO
+                @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT,
+                @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
+
+            WHILE @@FETCH_STATUS = 0
+            BEGIN
+                SELECT TOP 1
+                    @OV_INS   = INS_OV,
+                    @OV_TAX   = TAX_OV,
+                    @OV_BASIS = BASIS_OV
+                FROM PAY2_OVERRIDE
+                WHERE EMP_ID = @EMP_ID AND ITEM_ID = @ITEM_ID
+                  AND VALID_FROM <= @PERIOD_DATE
+                  AND (VALID_TO IS NULL OR VALID_TO >= @PERIOD_DATE);
+
+                IF @OV_INS   IS NOT NULL SET @ITEM_INS   = @OV_INS;
+                IF @OV_TAX   IS NOT NULL SET @ITEM_TAX   = @OV_TAX;
+                IF @OV_BASIS IS NOT NULL SET @ITEM_BASIS  = @OV_BASIS;
+
+                IF @ITEM_BASIS = 1 
+                BEGIN
+                    DECLARE @PAY_DAYS DECIMAL(5,2) = CASE @ITEM_PBD WHEN 1 THEN @DAYS ELSE @DAYSB END;
+
+                    IF @ITEM_CODE IN ('HOME','CHILDREN','GROCERY')
+                        SET @CALC_AMOUNT = CASE WHEN @PAY_DAYS >= 28 THEN @ITEM_AMOUNT ELSE CAST(@ITEM_AMOUNT * @PAY_DAYS / 30.0 AS BIGINT) END;
+                    ELSE IF @ITEM_CODE = 'NAHAR'
+                    BEGIN
+                        DECLARE @NAHAR_DAYS DECIMAL(5,2) = @DAYSB - @FRID_COUNT - @LEAVE_DAYS + @TDAYS;
+                        SET @CALC_AMOUNT = CASE WHEN @NAHAR_DAYS > 0 THEN CAST(@ITEM_AMOUNT * @NAHAR_DAYS AS BIGINT) ELSE CAST(@ITEM_AMOUNT * @DAYSB AS BIGINT) END;
+                    END;
+                    ELSE IF @ITEM_CODE = 'SHIFT'
+                    BEGIN
+                        DECLARE @BASE_SAL_B BIGINT = ISNULL((SELECT TOP 1 AMOUNT FROM #ItemCalc WHERE ITEM_CODE = 'BASE_SAL_B'), 0);
+                        SET @CALC_AMOUNT = CAST(@BASE_SAL_B * @DAYSB / @MONTH_DAYS * @ITEM_AMOUNT / 100.0 AS BIGINT);
+                    END;
+                    ELSE
+                        SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * @PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2)) AS BIGINT);
+                END;
+                ELSE 
+                    SET @CALC_AMOUNT = ISNULL(@ITEM_AMOUNT, 0);
+
+                INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+                VALUES (@ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @CALC_AMOUNT, @ITEM_INS, @ITEM_TAX);
+
+                FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
+            END;
+            CLOSE cur_line; DEALLOCATE cur_line;
+
+            FETCH NEXT FROM cur_dec INTO @DEC_ID, @DEC_FROM, @DEC_TO;
+        END;
+        CLOSE cur_dec; DEALLOCATE cur_dec;
+
+        -- ── گام ۶ — افزودن آیتم‌های متغیر ──────────────────────
+        DECLARE @BASE_SAL_DAILY BIGINT = ISNULL((SELECT TOP 1 AMOUNT FROM #ItemCalc WHERE ITEM_CODE = 'BASE_SAL' OR ITEM_CODE = 'BASE_SAL_B'), 0);
+
+        IF @OT_NORMAL_H > 0
+        BEGIN
+            DECLARE @OT_NORMAL_AMT BIGINT = ISNULL(CAST(@BASE_SAL_DAILY / (@MONTH_DAYS * @OT_HOUR_BASE) * @OT_NORMAL_H * @OT_NORMAL_MULT AS BIGINT), 0);
+            INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'OT_NORMAL', 2, @OT_NORMAL_AMT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_NORMAL';
+        END;
+
+        IF @OT_HOLIDAY_H > 0
+        BEGIN
+            DECLARE @OT_HOLIDAY_AMT BIGINT = ISNULL(CAST(@BASE_SAL_DAILY / (@MONTH_DAYS * @OT_HOUR_BASE) * @OT_HOLIDAY_H * @OT_HOLIDAY_MULT AS BIGINT), 0);
+            INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'OT_HOLIDAY', 2, @OT_HOLIDAY_AMT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_HOLIDAY';
+        END;
+
+        IF @OT_ADMIN_H > 0
+        BEGIN
+            DECLARE @OT_ADMIN_AMT BIGINT = ISNULL(CAST(@BASE_SAL_DAILY / (@MONTH_DAYS * @OT_HOUR_BASE) * @OT_ADMIN_H * @OT_NORMAL_MULT AS BIGINT), 0);
+            INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'OT_ADMIN', 2, @OT_ADMIN_AMT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_ADMIN';
+        END;
+
+        IF @PERF_AMOUNT > 0
+            INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'PERF_BONUS', 2, @PERF_AMOUNT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'PERF_BONUS';
+
+        IF @TRANSP_AMOUNT > 0
+            INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'TRANSP', 2, @TRANSP_AMOUNT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'TRANSP';
+
+        INSERT INTO #ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+        SELECT AV.ITEM_ID, ID.ITEM_CODE, ID.ITEM_TYPE, AV.VALUE, ID.INS_SUBJECT, ID.TAX_SUBJECT
+        FROM PAY2_ATT_VALUE AV INNER JOIN PAY2_ITEM_DEF ID ON AV.ITEM_ID = ID.ITEM_ID
+        WHERE AV.PER_ID = @PER_ID AND AV.EMP_ID = @EMP_ID AND AV.VALUE <> 0
+          AND NOT EXISTS (SELECT 1 FROM #ItemCalc X WHERE X.ITEM_ID = AV.ITEM_ID);
+
+        -- ── گام ۷ — محاسبه بیمه ─────────────────────────────────
+        -- مقداردهی اولیه صفر برای جلوگیری قطعی از NULL شدن
+        DECLARE
+            @GROSS_PAY    BIGINT = 0,
+            @INS_BASE     BIGINT = 0,
+            @INS_WORKER   BIGINT = 0,
+            @INS_EMPLOYER BIGINT = 0;
+
+        SELECT @GROSS_PAY = ISNULL(SUM(AMOUNT), 0) FROM #ItemCalc WHERE ITEM_TYPE IN (1, 2);
+        SELECT @INS_BASE = ISNULL(SUM(AMOUNT), 0) FROM #ItemCalc WHERE INS_SUBJECT = 1 AND ITEM_TYPE IN (1, 2);
+
+        IF @INS_CEILING_APPLY = 1 AND @INS_TYPE <> 3
+            SET @INS_BASE = CASE WHEN @INS_BASE > @INS_CEILING THEN @INS_CEILING ELSE @INS_BASE END;
+
+        IF @INS_TYPE = 3 
+        BEGIN
+            SET @INS_BASE = 0; SET @INS_WORKER = 0; SET @INS_EMPLOYER = 0;
+        END;
+        ELSE
+        BEGIN
+            SET @INS_WORKER = ISNULL(CAST(@INS_BASE * @INS_WORKER_RATE AS BIGINT), 0);
+            
+            DECLARE @EMP_IS_JANBAZ BIT = ISNULL((SELECT IS_JANBAZ FROM PAY2_EMPLOYEE WHERE EMP_ID = @EMP_ID), 0);
+            DECLARE @JANBAZ_RATE   DECIMAL(6,4) = ISNULL(CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='INS_JANBAZ_RATE') AS DECIMAL(6,4)), 0.18);
+
+            IF @EMP_IS_JANBAZ = 1
+                SET @INS_EMPLOYER = ISNULL(CAST(@INS_BASE * @JANBAZ_RATE AS BIGINT), 0); 
+            ELSE
+                SET @INS_EMPLOYER = ISNULL(CAST(@INS_BASE * (@INS_EMPLOYER_RATE + CASE WHEN ISNULL(@IS_MANAGER,0)=0 THEN @INS_UNEMP_RATE ELSE 0 END) AS BIGINT), 0);
+        END;
+
+        -- ── گام ۸ — محاسبه مالیات ───────────────────────────────
+        DECLARE
+            @TAX_BASE   BIGINT = 0,
+            @TAX_AMOUNT BIGINT = 0;
+
+        IF @TAX_EXEMPT_FLAG = 1
+        BEGIN
+            SET @TAX_BASE   = 0; SET @TAX_AMOUNT = 0;
+        END;
+        ELSE
+        BEGIN
+            SELECT @TAX_BASE = ISNULL(SUM(AMOUNT), 0) FROM #ItemCalc WHERE TAX_SUBJECT = 1 AND ITEM_TYPE IN (1, 2);
+            IF @TAX_DEDUCT_INS = 1 SET @TAX_BASE = @TAX_BASE - @INS_WORKER;
+            SET @TAX_BASE = CASE WHEN @TAX_BASE > @TAX_EXEMPT THEN @TAX_BASE - @TAX_EXEMPT ELSE 0 END;
+            IF @TAX_DEP_APPLY = 1 AND @REGION_DEP > 0 SET @TAX_BASE = CAST(@TAX_BASE * (1.0 - @REGION_DEP / 100.0) AS BIGINT);
+            SET @TAX_AMOUNT = ISNULL([dbo].[FN_PAY2_CALC_TAX](@TAX_BASE * 12, @TAX_YEAR) / 12, 0);
+            IF @TAX_AMOUNT < 0 SET @TAX_AMOUNT = 0;
+        END;
+
+        -- ── گام ۹ — مساعده هوشمند ───────────────────────────────
+        DECLARE @ADVANCE_DED BIGINT = 0;
+        IF @ADV_ENABLED = 1
+            SELECT @ADVANCE_DED = ISNULL(ADVANCE_DEDUCTION, 0) FROM #AdvResult WHERE EMP_ID = @EMP_ID;
+
+        -- ── گام ۱۰ — کسر وام خودکار ─────────────────────────────
+        DECLARE @LOAN_DED BIGINT = 0;
+        SELECT @LOAN_DED = ISNULL(SUM(LS.AMOUNT), 0) FROM PAY2_LOAN_SCHED LS INNER JOIN PAY2_LOAN L ON LS.LOAN_ID = L.LOAN_ID
+        WHERE L.EMP_ID = @EMP_ID AND L.IS_ACTIVE = 1 AND LS.DUE_PERIOD = @PERIOD_DATE AND LS.RUN_ID IS NULL;
+
+        DECLARE @OTHER_DED BIGINT = ISNULL(@KASR_OTHER, 0);
+
+        -- ── گام ۱۱ — محاسبه خالص ────────────────────────────────
+        DECLARE @TOTAL_DED BIGINT = @INS_WORKER + @TAX_AMOUNT + @LOAN_DED + @ADVANCE_DED + @OTHER_DED;
+        DECLARE @NET_PAY BIGINT = @GROSS_PAY - @TOTAL_DED;
+
+        IF @ROUND_MODE > 1
+            SET @NET_PAY = ISNULL(ROUND(@NET_PAY / CAST(@ROUND_MODE AS FLOAT), 0) * @ROUND_MODE, 0);
+
+        -- ── گام ۱۲ — ذخیره نتایج ─────────────────────────────────
+        DECLARE @LEAVE_BAL_DAYS DECIMAL(5,2) = NULL;
+        SELECT @LEAVE_BAL_DAYS = CAST(BALANCE_MIN AS DECIMAL(10,2)) / 440.0 FROM PAY2_LEAVE_BAL WHERE EMP_ID = @EMP_ID AND YEAR = @PERIOD_DATE / 10000;
+
+        DECLARE @LOAN_BAL BIGINT = NULL;
+        SELECT @LOAN_BAL = ISNULL(SUM(BALANCE), 0) FROM V_PAY2_LOAN_BALANCE WHERE EMP_ID = @EMP_ID;
+
+        INSERT INTO PAY2_RUN_LINE (
+            RUN_ID, EMP_ID, WORK_DAYS, GROSS_PAY, INS_BASE, INS_WORKER, INS_EMPLOYER, TAX_BASE, TAX_AMOUNT,
+            LOAN_DED, ADVANCE_DED, OTHER_DED, TOTAL_DED, NET_PAY, LEAVE_BAL_DAYS, LOAN_BALANCE, ADVANCE_BALANCE_SNAP
+        ) VALUES (
+            @NEW_RUN_ID, @EMP_ID, @DAYSB, @GROSS_PAY, @INS_BASE, @INS_WORKER, @INS_EMPLOYER, @TAX_BASE, @TAX_AMOUNT,
+            @LOAN_DED, @ADVANCE_DED, @OTHER_DED, @TOTAL_DED, @NET_PAY, @LEAVE_BAL_DAYS, @LOAN_BAL, @ADVANCE_DED
+        );
+
+        INSERT INTO PAY2_RUN_DETAIL (RUN_ID, EMP_ID, ITEM_ID, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+        SELECT @NEW_RUN_ID, @EMP_ID, ITEM_ID, ISNULL(AMOUNT,0), ISNULL(INS_SUBJECT,0), ISNULL(TAX_SUBJECT,0) FROM #ItemCalc;
+
+        DECLARE @INS_DED_ID  INT = (SELECT ITEM_ID FROM PAY2_ITEM_DEF WHERE ITEM_CODE='INS_DED');
+        DECLARE @TAX_DED_ID  INT = (SELECT ITEM_ID FROM PAY2_ITEM_DEF WHERE ITEM_CODE='TAX_DED');
+        DECLARE @LOAN_DED_ID INT = (SELECT ITEM_ID FROM PAY2_ITEM_DEF WHERE ITEM_CODE='LOAN_DED');
+        DECLARE @ADV_DED_ID  INT = (SELECT ITEM_ID FROM PAY2_ITEM_DEF WHERE ITEM_CODE='ADVANCE_DED');
+
+        IF @INS_WORKER  > 0 INSERT INTO PAY2_RUN_DETAIL VALUES (@NEW_RUN_ID,@EMP_ID,@INS_DED_ID, @INS_WORKER, 0,0);
+        IF @TAX_AMOUNT  > 0 INSERT INTO PAY2_RUN_DETAIL VALUES (@NEW_RUN_ID,@EMP_ID,@TAX_DED_ID, @TAX_AMOUNT, 0,0);
+        IF @LOAN_DED    > 0 INSERT INTO PAY2_RUN_DETAIL VALUES (@NEW_RUN_ID,@EMP_ID,@LOAN_DED_ID,@LOAN_DED,   0,0);
+        IF @ADVANCE_DED > 0 INSERT INTO PAY2_RUN_DETAIL VALUES (@NEW_RUN_ID,@EMP_ID,@ADV_DED_ID, @ADVANCE_DED,0,0);
+
+        UPDATE PAY2_LOAN_SCHED SET RUN_ID = @NEW_RUN_ID, PAID_AT = GETDATE()
+        WHERE DUE_PERIOD = @PERIOD_DATE AND RUN_ID IS NULL AND LOAN_ID IN (SELECT LOAN_ID FROM PAY2_LOAN WHERE EMP_ID=@EMP_ID AND IS_ACTIVE=1);
+
+        UPDATE PAY2_LOAN SET PAID_INST = PAID_INST + (SELECT COUNT(*) FROM PAY2_LOAN_SCHED WHERE LOAN_ID=PAY2_LOAN.LOAN_ID AND DUE_PERIOD=@PERIOD_DATE AND RUN_ID=@NEW_RUN_ID)
+        WHERE EMP_ID=@EMP_ID AND IS_ACTIVE=1;
+
+        DECLARE @LEAVE_MIN_USED INT = CAST(@LEAVE_DAYS * 440 AS INT);
+        IF @LEAVE_MIN_USED > 0
+        BEGIN
+            UPDATE PAY2_LEAVE_BAL SET USED_MIN = USED_MIN + @LEAVE_MIN_USED, UPDATED_AT = GETDATE()
+            WHERE EMP_ID = @EMP_ID AND YEAR = @PERIOD_DATE / 10000;
+        END;
+
+        DROP TABLE #ItemCalc;
+
+        FETCH NEXT FROM cur_emp INTO @EMP_ID, @IS_MANAGER, @INS_TYPE, @TAX_EXEMPT_FLAG, @REGION_DEP, @ACC_T;
+    END;
+
+    CLOSE cur_emp; DEALLOCATE cur_emp;
+    DROP TABLE #AdvResult;
+
+    UPDATE PAY2_PERIOD SET STATUS = 3 WHERE PER_ID = @PER_ID;
+
+END;
+GO";
+                    ExecuteBatches(db, modify1);
+
+                    LoadJobData(db);   // <-- این خط اضافه شود
                 }
                 #endregion
 
@@ -5706,7 +6226,99 @@ GO
                 }
             }
         }
+        private static void LoadJobData(SqlConnection db)
+        {
+            const string JobFilePath = @"C:\CORRECT\joby.sql";
 
+            if (!File.Exists(JobFilePath))
+            {
+                Console.WriteLine($"[LoadJobData] فایل پیدا نشد: {JobFilePath}");
+                return;
+            }
+
+            // ── بررسی وجود داده قبلی ─────────────────────────────
+            var existingCount = db.ExecuteScalar<int>("SELECT COUNT(*) FROM [dbo].[PAY2_JOB]");
+            if (existingCount > 0)
+            {
+                Console.WriteLine($"[LoadJobData] PAY2_JOB از قبل {existingCount} رکورد دارد — رد شد.");
+                return;
+            }
+
+            Console.WriteLine("[LoadJobData] در حال خواندن joby.sql ...");
+
+            // فایل UTF-16LE است
+            string[] lines = File.ReadAllLines(JobFilePath, System.Text.Encoding.Unicode);
+
+            // ── Parse سطرهای INSERT با Regex ─────────────────────
+            // نمونه: INSERT [dbo].[PAY2_JOB] ([JOB_ID],...) VALUES (1, N'1', N'2', N'3', 1)
+            var insertRx = new Regex(
+                @"VALUES\s*\(\s*(\d+)\s*,\s*N'((?:[^']|'')*)'\s*,\s*N'((?:[^']|'')*)'\s*,\s*(?:N'((?:[^']|'')*)'|NULL)\s*,\s*(\d+)\s*\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+            var table = new DataTable();
+            table.Columns.Add("JOB_ID", typeof(int));
+            table.Columns.Add("JOB_CODE", typeof(string));
+            table.Columns.Add("JOB_NAME", typeof(string));
+            table.Columns.Add("JOB_GROUP", typeof(string));
+            table.Columns.Add("IS_ACTIVE", typeof(bool));
+
+            int parsed = 0;
+            foreach (string line in lines)
+            {
+                var m = insertRx.Match(line);
+                if (!m.Success) continue;
+
+                table.Rows.Add(
+                    int.Parse(m.Groups[1].Value),           // JOB_ID
+                    m.Groups[2].Value.Replace("''", "'"),   // JOB_CODE
+                    m.Groups[3].Value.Replace("''", "'"),   // JOB_NAME
+                    m.Groups[4].Success && m.Groups[4].Value.Length > 0
+                        ? (object)m.Groups[4].Value.Replace("''", "'")
+                        : DBNull.Value,                     // JOB_GROUP (nullable)
+                    m.Groups[5].Value == "1"                // IS_ACTIVE
+                );
+                parsed++;
+            }
+
+            if (parsed == 0)
+            {
+                Console.WriteLine("[LoadJobData] هیچ سطر INSERT ای parse نشد.");
+                return;
+            }
+
+            Console.WriteLine($"[LoadJobData] {parsed} رکورد parse شد — در حال BulkCopy ...");
+
+            // ── SqlBulkCopy با IDENTITY_INSERT ON ────────────────
+            using (var cmd = new SqlCommand("SET IDENTITY_INSERT [dbo].[PAY2_JOB] ON", db))
+                cmd.ExecuteNonQuery();
+
+            try
+            {
+                using var bulk = new SqlBulkCopy(db, SqlBulkCopyOptions.KeepIdentity, null)
+                {
+                    DestinationTableName = "[dbo].[PAY2_JOB]",
+                    BatchSize = 1000,
+                    BulkCopyTimeout = 600
+                };
+                bulk.ColumnMappings.Add("JOB_ID", "JOB_ID");
+                bulk.ColumnMappings.Add("JOB_CODE", "JOB_CODE");
+                bulk.ColumnMappings.Add("JOB_NAME", "JOB_NAME");
+                bulk.ColumnMappings.Add("JOB_GROUP", "JOB_GROUP");
+                bulk.ColumnMappings.Add("IS_ACTIVE", "IS_ACTIVE");
+
+                bulk.WriteToServer(table);
+                Console.WriteLine($"[LoadJobData] {parsed} رکورد با موفقیت در PAY2_JOB درج شد.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LoadJobData] خطا در BulkCopy: {ex.Message}");
+            }
+            finally
+            {
+                using var cmd = new SqlCommand("SET IDENTITY_INSERT [dbo].[PAY2_JOB] OFF", db);
+                cmd.ExecuteNonQuery();
+            }
+        }
         private static void BlazorDbScriptUpdate(SqlConnection db)
         {
             //ذخیره اطلاعات پیش فرض کاربران سمت سرور
