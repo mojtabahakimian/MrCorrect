@@ -142,46 +142,103 @@
         <!--Start.......................................................................................-->
 
 
-        <syncfusion:SfChart x:Name="salesChart" Margin="30,48,30,30" MouseMove="salesChart_MouseMove">
+        <Border Background="#F8FAFC" 
+        BorderBrush="#E2E8F0" 
+        BorderThickness="1" 
+        CornerRadius="16" 
+        Margin="30,65,30,30" 
+        Padding="20,20,20,10">
 
-            <syncfusion:SfChart.PrimaryAxis>
-                <syncfusion:CategoryAxis Header="ماه" FontFamily="{StaticResource IRANYEKAN}" FontSize="14" />
-            </syncfusion:SfChart.PrimaryAxis>
-            <syncfusion:SfChart.SecondaryAxis>
-                <syncfusion:NumericalAxis Header="مقدار فروش" FontFamily="{StaticResource IRANYEKAN}" FontSize="13" LabelFormat="#,##0" />
-            </syncfusion:SfChart.SecondaryAxis>
+            <syncfusion:SfChart x:Name="salesChart" Background="Transparent">
 
-            <syncfusion:ColumnSeries ItemsSource="{Binding}"
-                             XBindingPath="MN"
-                             YBindingPath="MABL_K"
-                             Palette="Custom"
-                             Label="مبلغ فروش (ریال)"
-                             EnableAnimation="True"
-                             AnimationDuration="0:0:1.5">
+                <syncfusion:SfChart.PrimaryAxis>
+                    <syncfusion:CategoryAxis Header="ماه" 
+                                     FontFamily="{StaticResource IRANYEKAN}" 
+                                     FontSize="14"
+                                     ShowGridLines="False"
+                                     TickLineSize="0">
+                        <syncfusion:CategoryAxis.AxisLineStyle>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="Transparent"/>
+                            </Style>
+                        </syncfusion:CategoryAxis.AxisLineStyle>
+                    </syncfusion:CategoryAxis>
+                </syncfusion:SfChart.PrimaryAxis>
 
-                <syncfusion:ColumnSeries.ColorModel>
-                    <syncfusion:ChartColorModel>
-                        <syncfusion:ChartColorModel.CustomBrushes>
-                            <SolidColorBrush Color="#FFD6A5"/>
-                            <SolidColorBrush Color="#A7C7E7"/>
-                            <SolidColorBrush Color="#B7E5B4"/>
-                            <SolidColorBrush Color="#FFB5E8"/>
-                            <SolidColorBrush Color="#C6E2FF"/>
-                            <SolidColorBrush Color="#D1CFE2"/>
-                            <SolidColorBrush Color="#E2F0CB"/>
-                            <SolidColorBrush Color="#FFB4A2"/>
-                        </syncfusion:ChartColorModel.CustomBrushes>
-                    </syncfusion:ChartColorModel>
-                </syncfusion:ColumnSeries.ColorModel>
+                <syncfusion:SfChart.SecondaryAxis>
+                    <syncfusion:NumericalAxis Header="مقدار فروش" 
+                                      FontFamily="{StaticResource IRANYEKAN}" 
+                                      FontSize="13" 
+                                      LabelFormat="#,##0"
+                                      TickLineSize="0">
+                        <syncfusion:NumericalAxis.MajorGridLineStyle>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="#E2E8F0" />
+                                <Setter Property="StrokeThickness" Value="1" />
+                            </Style>
+                        </syncfusion:NumericalAxis.MajorGridLineStyle>
+                        <syncfusion:NumericalAxis.AxisLineStyle>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="Transparent"/>
+                            </Style>
+                        </syncfusion:NumericalAxis.AxisLineStyle>
+                    </syncfusion:NumericalAxis>
+                </syncfusion:SfChart.SecondaryAxis>
 
-                <syncfusion:ColumnSeries.AdornmentsInfo>
-                    <syncfusion:ChartAdornmentInfo ShowLabel="True"
-                                           LabelPosition="Outer"
-                                           FontSize="16"
-                                           LabelTemplate="{StaticResource CurrencyLabelTemplate}" />
-                </syncfusion:ColumnSeries.AdornmentsInfo>
+                <syncfusion:SfChart.Behaviors>
+                    <syncfusion:ChartTooltipBehavior Position="Pointer" />
+                </syncfusion:SfChart.Behaviors>
 
-            </syncfusion:ColumnSeries>
-        </syncfusion:SfChart>
+                <syncfusion:ColumnSeries ItemsSource="{Binding}"
+                                 XBindingPath="MN"
+                                 YBindingPath="MABL_K"
+                                 Palette="Custom"
+                                 Label="مبلغ فروش (ریال)"
+                                 EnableAnimation="True"
+                                 AnimationDuration="0:0:1.5"
+                                 SegmentSpacing="0.4" 
+                                 ShowTooltip="True"
+                                 TooltipTemplate="{StaticResource CustomTooltipTemplate}">
+
+                    <syncfusion:ColumnSeries.CustomTemplate>
+                        <DataTemplate>
+                            <Canvas>
+                                <Border CornerRadius="6,6,0,0" 
+                                Background="{Binding Interior}" 
+                                Width="{Binding Width}"
+                                Height="{Binding Height}"
+                                Canvas.Left="{Binding RectX}"
+                                Canvas.Top="{Binding RectY}" />
+                            </Canvas>
+                        </DataTemplate>
+                    </syncfusion:ColumnSeries.CustomTemplate>
+
+                    <syncfusion:ColumnSeries.ColorModel>
+                        <syncfusion:ChartColorModel>
+                            <syncfusion:ChartColorModel.CustomBrushes>
+                                <SolidColorBrush Color="#3B82F6"/>
+                                <SolidColorBrush Color="#8B5CF6"/>
+                                <SolidColorBrush Color="#10B981"/>
+                                <SolidColorBrush Color="#F59E0B"/>
+                                <SolidColorBrush Color="#EF4444"/>
+                                <SolidColorBrush Color="#06B6D4"/>
+                                <SolidColorBrush Color="#F97316"/>
+                                <SolidColorBrush Color="#64748B"/>
+                                <SolidColorBrush Color="#14B8A6"/>
+                                <SolidColorBrush Color="#6366F1"/>
+                            </syncfusion:ChartColorModel.CustomBrushes>
+                        </syncfusion:ChartColorModel>
+                    </syncfusion:ColumnSeries.ColorModel>
+
+                    <syncfusion:ColumnSeries.AdornmentsInfo>
+                        <syncfusion:ChartAdornmentInfo ShowLabel="True"
+                                               LabelPosition="Outer"
+                                               FontSize="14"
+                                               LabelTemplate="{StaticResource CurrencyLabelTemplate}" />
+                    </syncfusion:ColumnSeries.AdornmentsInfo>
+
+                </syncfusion:ColumnSeries>
+            </syncfusion:SfChart>
+        </Border>
     </Grid>
 </Window>

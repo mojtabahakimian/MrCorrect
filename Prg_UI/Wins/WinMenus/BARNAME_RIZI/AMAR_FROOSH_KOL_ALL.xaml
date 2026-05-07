@@ -18,14 +18,13 @@
         WindowStartupLocation="CenterScreen"
         Title="AMAR_FROOSH_KOL" Height="587" Width="962" Loaded="Window_Loaded">
 
-
     <Window.Resources>
         <local:ThousandsSeparatorConverter x:Key="ThousandsSeparatorConverter"/>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
-        <!-- Style for SfDataGrid -->
+
         <Style x:Key="KDG"  TargetType="syncfusion:SfDataGrid" BasedOn="{StaticResource SfDataGridStyle}">
             <Setter Property="CurrentCellBorderBrush" Value="{StaticResource GENERAL_Grlicom}" />
             <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
@@ -38,7 +37,6 @@
             <Setter Property="GridLinesVisibility" Value="Both" />
         </Style>
 
-        <!-- Modified Column Header Style -->
         <Style x:Key="KDGHeader" TargetType="syncfusion:GridHeaderCellControl" BasedOn="{StaticResource GridHeaderCellControlStyle}">
             <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
             <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
@@ -51,22 +49,22 @@
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
         </Style>
 
-
+        <DataTemplate x:Key="CustomTooltipTemplate">
+            <Border CornerRadius="5" Background="#2C3E50" Padding="10" BorderBrush="#34495E" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="{Binding Item.MN}" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                    <TextBlock Foreground="White" Margin="0,5,0,0" FontSize="12">
+                        <Run Text="مبلغ فروش: "/>
+                        <Run Text="{Binding Item.MABL_K, StringFormat='#,##0 ریال'}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
 
         <DataTemplate x:Key="CurrencyLabelTemplate">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock
-            Text="ریال "
-            Foreground="Black"
-            FontWeight="Bold"
-            Background="Transparent"
-            VerticalAlignment="Center"/>
-                <TextBlock
-            Text="{Binding Converter={StaticResource ThousandsSeparatorConverter}}"
-            Foreground="Black"
-            FontWeight="Bold"
-            Background="Transparent"
-            VerticalAlignment="Center"/>
+                <TextBlock Text="ریال " Foreground="Black" FontWeight="Bold" Background="Transparent" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Converter={StaticResource ThousandsSeparatorConverter}}" Foreground="Black" FontWeight="Bold" Background="Transparent" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
 
@@ -94,81 +92,113 @@
                 </Grid>
             </Border>
         </Border>
+
         <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
             <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
                 <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
                     <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
-                                                   Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                             Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
                 </Border>
             </StackPanel>
         </Popup>
 
-        <Popup x:Name="CustomTooltipPopup"
-           Placement="MousePoint"
-           AllowsTransparency="True">
-            <Border CornerRadius="5" Background="#2C3E50" Padding="10" BorderBrush="#34495E" BorderThickness="1">
-                <StackPanel>
-                    <TextBlock Text="{Binding MN}" FontWeight="Bold" Foreground="White" FontSize="14"/>
-                    <TextBlock Foreground="White" Margin="0,5,0,0" FontSize="12">
-                    <Run Text="مبلغ فروش: "/>
-                    <Run Text="{Binding MABL_K, StringFormat='#,##0 ریال'}" FontWeight="SemiBold"/>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
-        </Popup>
-        <!--Start.......................................................................................-->
+        <Border Background="#F8FAFC" 
+                BorderBrush="#E2E8F0" 
+                BorderThickness="1" 
+                CornerRadius="16" 
+                Margin="30,48,30,30" 
+                Padding="20,20,20,10">
 
+            <syncfusion:SfChart x:Name="salesChart" Background="Transparent">
 
-        <syncfusion:SfChart x:Name="salesChart" Margin="30,48,30,30" MouseMove="salesChart_MouseMove">
-            <!-- محور X -->
-            <syncfusion:SfChart.PrimaryAxis>
-                <syncfusion:CategoryAxis Header="ماه" 
-                                         FontFamily="{StaticResource IRANYEKAN}"
-                                         FontSize="14"
-                                         />
-            </syncfusion:SfChart.PrimaryAxis>
-            <!-- محور Y -->
-            <syncfusion:SfChart.SecondaryAxis>
-                <syncfusion:NumericalAxis Header="مقدار فروش"
-                                          FontFamily="{StaticResource IRANYEKAN}"
-                                          FontSize="13"
-                                          LabelFormat="#,##0"
-                                          />
-            </syncfusion:SfChart.SecondaryAxis>
-            <!-- سری ستونی -->
-            <syncfusion:ColumnSeries
-                ItemsSource="{Binding}"
-                XBindingPath="MN"
-                YBindingPath="MABL_K"
-                Palette="Custom"
-                EnableAnimation="True"
-                AnimationDuration="0:0:1.5"
-                
-                Label="مبلغ فروش (ریال)">
-                <syncfusion:ColumnSeries.ColorModel>
-                    <syncfusion:ChartColorModel>
-                        <syncfusion:ChartColorModel.CustomBrushes>
-                            <SolidColorBrush Color="#FFD6A5"/>
-                            <SolidColorBrush Color="#A7C7E7"/>
-                            <SolidColorBrush Color="#B7E5B4"/>
-                            <SolidColorBrush Color="#FFB5E8"/>
-                            <SolidColorBrush Color="#C6E2FF"/>
-                            <SolidColorBrush Color="#D1CFE2"/>
-                            <SolidColorBrush Color="#E2F0CB"/>
-                            <SolidColorBrush Color="#FFB4A2"/>
-                        </syncfusion:ChartColorModel.CustomBrushes>
-                    </syncfusion:ChartColorModel>
-                </syncfusion:ColumnSeries.ColorModel>
+                <syncfusion:SfChart.Behaviors>
+                    <syncfusion:ChartTooltipBehavior Position="Pointer" />
+                </syncfusion:SfChart.Behaviors>
 
-                <syncfusion:ColumnSeries.AdornmentsInfo>
-                    <syncfusion:ChartAdornmentInfo
-                        ShowLabel="True"
-                        LabelPosition="Outer"
-                        FontSize="16"
-                        LabelTemplate="{StaticResource CurrencyLabelTemplate}" />
-                </syncfusion:ColumnSeries.AdornmentsInfo>
+                <syncfusion:SfChart.PrimaryAxis>
+                    <syncfusion:CategoryAxis Header="ماه" 
+                                             FontFamily="{StaticResource IRANYEKAN}"
+                                             FontSize="14"
+                                             ShowGridLines="False"
+                                             TickLineSize="0">
+                        <syncfusion:CategoryAxis.AxisLineStyle>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="Transparent"/>
+                            </Style>
+                        </syncfusion:CategoryAxis.AxisLineStyle>
+                    </syncfusion:CategoryAxis>
+                </syncfusion:SfChart.PrimaryAxis>
 
-            </syncfusion:ColumnSeries>
-        </syncfusion:SfChart>
+                <syncfusion:SfChart.SecondaryAxis>
+                    <syncfusion:NumericalAxis Header="مقدار فروش"
+                                              FontFamily="{StaticResource IRANYEKAN}"
+                                              FontSize="13"
+                                              LabelFormat="#,##0"
+                                              TickLineSize="0">
+                        <syncfusion:NumericalAxis.MajorGridLineStyle>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="#E2E8F0" />
+                                <Setter Property="StrokeThickness" Value="1" />
+                            </Style>
+                        </syncfusion:NumericalAxis.MajorGridLineStyle>
+                        <syncfusion:NumericalAxis.AxisLineStyle>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="Transparent"/>
+                            </Style>
+                        </syncfusion:NumericalAxis.AxisLineStyle>
+                    </syncfusion:NumericalAxis>
+                </syncfusion:SfChart.SecondaryAxis>
+
+                <syncfusion:ColumnSeries ItemsSource="{Binding}"
+                                         XBindingPath="MN"
+                                         YBindingPath="MABL_K"
+                                         Palette="Custom"
+                                         EnableAnimation="True"
+                                         AnimationDuration="0:0:1.5"
+                                         SegmentSpacing="0.4"
+                                         ShowTooltip="True"
+                                         TooltipTemplate="{StaticResource CustomTooltipTemplate}"
+                                         Label="مبلغ فروش (ریال)">
+
+                    <syncfusion:ColumnSeries.CustomTemplate>
+                        <DataTemplate>
+                            <Canvas>
+                                <Border CornerRadius="6,6,0,0" 
+                                        Background="{Binding Interior}" 
+                                        Width="{Binding Width}"
+                                        Height="{Binding Height}"
+                                        Canvas.Left="{Binding RectX}"
+                                        Canvas.Top="{Binding RectY}" />
+                            </Canvas>
+                        </DataTemplate>
+                    </syncfusion:ColumnSeries.CustomTemplate>
+
+                    <syncfusion:ColumnSeries.ColorModel>
+                        <syncfusion:ChartColorModel>
+                            <syncfusion:ChartColorModel.CustomBrushes>
+                                <SolidColorBrush Color="#3B82F6"/>
+                                <SolidColorBrush Color="#8B5CF6"/>
+                                <SolidColorBrush Color="#10B981"/>
+                                <SolidColorBrush Color="#F59E0B"/>
+                                <SolidColorBrush Color="#EF4444"/>
+                                <SolidColorBrush Color="#06B6D4"/>
+                                <SolidColorBrush Color="#F97316"/>
+                                <SolidColorBrush Color="#64748B"/>
+                                <SolidColorBrush Color="#14B8A6"/>
+                                <SolidColorBrush Color="#6366F1"/>
+                            </syncfusion:ChartColorModel.CustomBrushes>
+                        </syncfusion:ChartColorModel>
+                    </syncfusion:ColumnSeries.ColorModel>
+
+                    <syncfusion:ColumnSeries.AdornmentsInfo>
+                        <syncfusion:ChartAdornmentInfo ShowLabel="True"
+                                                       LabelPosition="Outer"
+                                                       FontSize="16"
+                                                       LabelTemplate="{StaticResource CurrencyLabelTemplate}" />
+                    </syncfusion:ColumnSeries.AdornmentsInfo>
+
+                </syncfusion:ColumnSeries>
+            </syncfusion:SfChart>
+        </Border>
     </Grid>
 </Window>
