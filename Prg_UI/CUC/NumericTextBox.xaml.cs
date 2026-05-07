@@ -1,8 +1,8 @@
 ﻿using Functions;
 using Prg_UI.Functions;
 using System;
+using System.ComponentModel;
 using System.Globalization;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -10,70 +10,34 @@ using System.Windows.Input;
 
 namespace Prg_UI.CUC
 {
-    public enum NumericInputMask
-    {
-        None,
-        DateYYYYMMDD
-    }
     public partial class NumericTextBox : UserControl
     {
+
+        // Declare lastValidValue at the class level
+        /// <summary>
+        /// The last correct value accepted is used when we want to replace the incorrect value with it
+        /// </summary>
+
+        //private double LastValidValue = 0;
         private double? LastValidValue = null;
-
-        // فقط رقم‌های واقعی تاریخ، بدون اسلش: 14050215
-        private string _rawDateDigits = string.Empty;
-
-        // برای جلوگیری از برگشت‌های ناخواسته بین Binding و TextChanged
-        private bool _isInternalTextChange = false;
-
-        private const int PersianDateDigitLength = 8;
 
         public NumericTextBox()
         {
             InitializeComponent();
 
+            var defaultStyle = (Style)FindResource("FuzzyOut");
             if (TextBoxStyle == null)
             {
-                Style? defaultStyle = null;
-
-                //defaultStyle = Application.Current.TryFindResource("InputStyle") as Style;
-                var fuzzyStyle = (Style)FindResource("FuzzyOut");
-                if (fuzzyStyle != null)
-                {
-                    TextBoxStyle = fuzzyStyle;
-                }
-                else
-                {
-                    // تلاش برای گرفتن استایل دیفالت TextBox که توسط متریال دیزاین ست شده است
-                    TextBoxStyle = (Style)Application.Current.TryFindResource(typeof(TextBox));
-                }
-
-                if (TXB0.Style == fuzzyStyle) //FuzzyOut
-                {
-                    TXB0.Padding = new Thickness(left: 3, top: 3, right: 3, bottom: 3);
-                }
-
+                TextBoxStyle = defaultStyle;
             }
 
-            TXB0.TextAlignment = TextAlignment;
-            RefreshDisplayFromTextValue(moveCaret: false);
+            //this.IsKeyboardFocusWithinChanged += NumericTextBox_IsKeyboardFocusWithinChanged;
+
+            TXB0.TextAlignment = TextAlignment; // Set default alignment
         }
 
         // Dependency Properties
 
-        // Property جدیدی که خواستی:
-        // وقتی True شود، کنترل فقط 8 رقم مثبت می‌گیرد و ظاهر آن را 0000/00/00 نشان می‌دهد.
-        public static readonly DependencyProperty IsPersianDateModeProperty =
-            DependencyProperty.Register(nameof(IsPersianDateMode), typeof(bool), typeof(NumericTextBox),
-                new PropertyMetadata(false, OnIsPersianDateModeChanged));
-
-        // این Property را نگه داشتم تا اگر قبلاً از InputMask استفاده کرده باشی، کدت نشکند.
-        public static readonly DependencyProperty InputMaskProperty =
-            DependencyProperty.Register(nameof(InputMask), typeof(NumericInputMask), typeof(NumericTextBox),
-                new PropertyMetadata(NumericInputMask.None, OnInputMaskChanged));
-
-        public static readonly DependencyProperty DisplayTextProperty =
-            DependencyProperty.Register(nameof(DisplayText), typeof(string), typeof(NumericTextBox),
-                new FrameworkPropertyMetadata("0", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnDisplayTextChanged));
 
         public static readonly DependencyProperty LastValueShouldZeroProperty =
            DependencyProperty.Register(nameof(LastValueShouldZero), typeof(bool?), typeof(NumericTextBox), new PropertyMetadata(false));
@@ -118,72 +82,56 @@ namespace Prg_UI.CUC
         public static readonly DependencyProperty IsPercentageModeProperty =
             DependencyProperty.Register(nameof(IsPercentageMode), typeof(bool), typeof(NumericTextBox), new PropertyMetadata(false, OnIsPercentageModeChanged));
 
-        public static readonly DependencyProperty TextAlignmentProperty =
-            DependencyProperty.Register(nameof(TextAlignment), typeof(TextAlignment), typeof(NumericTextBox),
+        public static readonly DependencyProperty TextAlignmentProperty = DependencyProperty.Register(nameof(TextAlignment), typeof(TextAlignment), typeof(NumericTextBox),
                 new PropertyMetadata(TextAlignment.Right, OnTextAlignmentChanged));
 
+
+        // Routed Events
         public static readonly RoutedEvent NumericLostFocusEvent = EventManager.RegisterRoutedEvent(
             nameof(NumericLostFocus), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(NumericTextBox));
 
         public static readonly DependencyProperty AllowEnterNegativeProperty =
             DependencyProperty.Register(nameof(AllowEnterNegative), typeof(bool), typeof(NumericTextBox), new PropertyMetadata(false));
 
-        // Properties
-
-        public bool IsPersianDateMode
-        {
-            get => (bool)GetValue(IsPersianDateModeProperty);
-            set => SetValue(IsPersianDateModeProperty, value);
-        }
-
-        public NumericInputMask InputMask
-        {
-            get => (NumericInputMask)GetValue(InputMaskProperty);
-            set => SetValue(InputMaskProperty, value);
-        }
-
-        private bool IsDateMode => IsPersianDateMode || InputMask == NumericInputMask.DateYYYYMMDD;
-
-        public string DisplayText
-        {
-            get => (string)GetValue(DisplayTextProperty);
-            set => SetValue(DisplayTextProperty, value);
-        }
-
+        // Event Wrapper
         public event RoutedEventHandler NumericLostFocus
         {
             add { AddHandler(NumericLostFocusEvent, value); }
             remove { RemoveHandler(NumericLostFocusEvent, value); }
         }
 
+        // Properties
         public TextAlignment TextAlignment
         {
             get => (TextAlignment)GetValue(TextAlignmentProperty);
             set => SetValue(TextAlignmentProperty, value);
         }
-
+        private static void OnTextAlignmentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is NumericTextBox control)
+            {
+                control.TXB0.TextAlignment = (TextAlignment)e.NewValue;
+            }
+        }
         public bool AllowEnterNegative
         {
             get => (bool)GetValue(AllowEnterNegativeProperty);
             set => SetValue(AllowEnterNegativeProperty, value);
         }
-
         public bool IsPercentageMode
         {
             get => (bool)GetValue(IsPercentageModeProperty);
             set => SetValue(IsPercentageModeProperty, value);
         }
-
         public bool RestoreLastValidValue
         {
             get => (bool)GetValue(RestoreLastValidValueProperty);
             set => SetValue(RestoreLastValidValueProperty, value);
         }
-
         public int MaxDecimalPlaces
         {
-            get => (int)GetValue(MaxDecimalPlacesProperty);
-            set => SetValue(MaxDecimalPlacesProperty, value);
+            get { return (int)GetValue(MaxDecimalPlacesProperty); }
+            set { SetValue(MaxDecimalPlacesProperty, value); }
         }
 
         public bool? LastValueShouldZero
@@ -210,31 +158,59 @@ namespace Prg_UI.CUC
             set => SetValue(CustomUpdateSourceTriggerProperty, value);
         }
 
-        // در حالت تاریخ:
-        // مقدار Text خام و عددی است: 14050215
-        // چیزی که کاربر می‌بیند DisplayText است: 1405/02/15
         public string Text
         {
-            get
-            {
-                if (IsDateMode)
-                {
-                    return NormalizeDateDigits((string)GetValue(TextProperty));
-                }
+            get => UnformatText((string)GetValue(TextProperty));
 
-                return UnformatText((string)GetValue(TextProperty));
-            }
+            //get ////this is for avoid Input string was not in a correct format on leave
+            //{
+            //    string unformattedText = UnformatText((string)GetValue(TextProperty));
+
+            //    if (string.IsNullOrWhiteSpace(unformattedText))
+            //    {
+            //        if (LastValueShouldZero ?? false)
+            //        {
+            //            return "0";
+            //        }
+            //        else if (LastValueShouldZero == false && LastValidValue.HasValue)
+            //        {
+            //            return LastValidValue.Value.ToString(CultureInfo.InvariantCulture);
+            //        }
+            //        else
+            //        {
+            //            return "0"; // Default safe value
+            //        }
+            //    }
+            //    return unformattedText;
+            //}
             set
             {
-                if (IsDateMode)
+                if (!string.IsNullOrEmpty(value))
                 {
-                    SetRawDateDigits(value, moveCaret: false);
-                    return;
+                    if (!double.TryParse(value, out double parsedValue))
+                    {
+                        value = LastValidValue?.ToString(CultureInfo.InvariantCulture);
+                    }
+                    else if (double.IsNaN(parsedValue) || double.IsInfinity(parsedValue))
+                    {
+                        value = LastValidValue?.ToString(CultureInfo.InvariantCulture);
+                    }
                 }
 
-                SetNumericTextValue(value);
+                // Check if the new value exceeds MaxLength
+                if (value != null && MaxLength > 0 && value.Length > MaxLength)
+                {
+                    //throw new InvalidOperationException($"Text length cannot exceed MaxLength of {MaxLength}.");
+                    value = value.Length > MaxLength ? value.Substring(0, MaxLength) : value;
+                }
+
+                SetValue(TextProperty, value);
+
+                //OnPropertyChanged("Text");
             }
         }
+
+
 
         public bool DoesAcceptDouble
         {
@@ -272,29 +248,7 @@ namespace Prg_UI.CUC
             set => SetValue(ThreeTwoZeroProperty, value);
         }
 
-        // Dependency Property Callbacks
-
-        private static void OnIsPersianDateModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is NumericTextBox control)
-            {
-                control.RefreshDisplayFromTextValue(moveCaret: false);
-            }
-        }
-
-        private static void OnInputMaskChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is NumericTextBox control)
-            {
-                control.RefreshDisplayFromTextValue(moveCaret: false);
-            }
-        }
-
-        private static void OnDisplayTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            // TextBox.Text به این Property وصل است. منطق اصلی در TXB0_TextChanged انجام می‌شود.
-        }
-
+        // Event Handlers
         private static void OnIsPercentageModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is NumericTextBox control)
@@ -302,15 +256,18 @@ namespace Prg_UI.CUC
                 control.UpdatePercentageMode();
             }
         }
-
         private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not NumericTextBox control || control._isInternalTextChange)
-            {
-                return;
-            }
-
-            control.RefreshDisplayFromTextValue(moveCaret: false);
+            //if (d is NumericTextBox control)
+            //{
+            //    if (!control.DoesAcceptDouble && e.NewValue is string newText) //Integery
+            //    {
+            //        if (newText.Contains(".") || newText.Contains(","))
+            //        {
+            //            control.Text = newText.Split(new[] { '.', ',' })[0];
+            //        }
+            //    }
+            //}
         }
 
         private static void OnInnerTabStopPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -337,260 +294,21 @@ namespace Prg_UI.CUC
             }
         }
 
-        private static void OnTextAlignmentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private void NumericTextBox_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (d is NumericTextBox control)
-            {
-                control.TXB0.TextAlignment = (TextAlignment)e.NewValue;
-            }
+            //if ((bool)e.OldValue && !(bool)e.NewValue) // If focus was within and now is not
+            //{
+            //    RaiseEvent(new RoutedEventArgs(NumericLostFocusEvent, this));
+            //}
         }
 
-        // Persian Date Helpers
-
-        private static string NormalizeDigits(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder(input.Length);
-
-            foreach (char ch in input)
-            {
-                if (ch >= '0' && ch <= '9')
-                {
-                    sb.Append(ch);
-                }
-                else if (ch >= '۰' && ch <= '۹')
-                {
-                    sb.Append((char)('0' + (ch - '۰')));
-                }
-                else if (ch >= '٠' && ch <= '٩')
-                {
-                    sb.Append((char)('0' + (ch - '٠')));
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        private static string NormalizeDateDigits(string input)
-        {
-            string digits = NormalizeDigits(input);
-            return digits.Length > PersianDateDigitLength
-                ? digits.Substring(0, PersianDateDigitLength)
-                : digits;
-        }
-
-        private const string PersianDatePlaceholder = "    /  /  ";
-        private static string FormatPersianDateDisplay(string rawDigits)
-        {
-            string normalized = NormalizeDateDigits(rawDigits);
-            if (string.IsNullOrEmpty(normalized))
-            {
-                return PersianDatePlaceholder;
-            }
-
-            string digits = normalized.PadRight(PersianDateDigitLength, ' ');
-
-            string year = digits.Substring(0, 4);
-            string month = digits.Substring(4, 2);
-            string day = digits.Substring(6, 2);
-
-            return $"{year}/{month}/{day}";
-        }
-
-        private static int GetDateCaretIndex(int rawLength)
-        {
-            rawLength = Math.Max(0, Math.Min(PersianDateDigitLength, rawLength));
-
-            if (rawLength <= 4)
-            {
-                return rawLength;
-            }
-
-            if (rawLength <= 6)
-            {
-                return rawLength + 1; // یک اسلش بعد از سال
-            }
-
-            return rawLength + 2; // دو اسلش بعد از سال و ماه
-        }
-
-        private void SetRawDateDigits(string value, bool moveCaret)
-        {
-            _rawDateDigits = NormalizeDateDigits(value);
-
-            _isInternalTextChange = true;
-            try
-            {
-                SetCurrentValue(TextProperty, _rawDateDigits);
-            }
-            finally
-            {
-                _isInternalTextChange = false;
-            }
-
-            UpdateDateDisplay(moveCaret);
-        }
-
-        private void UpdateDateDisplay(bool moveCaret)
-        {
-            string formatted = FormatPersianDateDisplay(_rawDateDigits);
-
-            _isInternalTextChange = true;
-            try
-            {
-                SetCurrentValue(DisplayTextProperty, formatted);
-
-                if (TXB0.Text != formatted)
-                {
-                    TXB0.Text = formatted;
-                }
-            }
-            finally
-            {
-                _isInternalTextChange = false;
-            }
-
-            if (moveCaret)
-            {
-                TXB0.CaretIndex = GetDateCaretIndex(_rawDateDigits.Length);
-            }
-        }
-
-        private void AppendDateDigits(string input)
-        {
-            string digits = NormalizeDateDigits(input);
-            if (string.IsNullOrEmpty(digits))
-            {
-                return;
-            }
-
-            string newRaw;
-
-            // ساده و قابل پیش‌بینی: اگر بخشی انتخاب شده باشد، کل تاریخ از نو جایگزین می‌شود.
-            if (TXB0.SelectionLength > 0)
-            {
-                newRaw = digits;
-            }
-            else
-            {
-                newRaw = _rawDateDigits + digits;
-            }
-
-            SetRawDateDigits(newRaw, moveCaret: true);
-        }
-
-        private void RemoveLastDateDigit()
-        {
-            if (TXB0.SelectionLength > 0)
-            {
-                SetRawDateDigits(string.Empty, moveCaret: true);
-                return;
-            }
-
-            if (_rawDateDigits.Length == 0)
-            {
-                UpdateDateDisplay(moveCaret: true);
-                return;
-            }
-
-            SetRawDateDigits(_rawDateDigits.Substring(0, _rawDateDigits.Length - 1), moveCaret: true);
-        }
-
-        private void RefreshDisplayFromTextValue(bool moveCaret)
-        {
-            if (IsDateMode)
-            {
-                _rawDateDigits = NormalizeDateDigits((string)GetValue(TextProperty));
-
-                // مقدار پیش‌فرض NumericTextBox در حالت عددی "0" است.
-                // در حالت تاریخ، "0" را به عنوان مقدار خالی در نظر می‌گیریم تا نمایش اولیه 0000/00/00 باشد.
-                if (_rawDateDigits == "0")
-                {
-                    _rawDateDigits = string.Empty;
-                }
-
-                UpdateDateDisplay(moveCaret);
-                return;
-            }
-
-            string value = (string)GetValue(TextProperty) ?? string.Empty;
-            SetDisplayTextCore(value);
-        }
-
-        private void SetDisplayTextCore(string value)
-        {
-            value ??= string.Empty;
-
-            if (DisplayText == value && TXB0.Text == value)
-            {
-                return;
-            }
-
-            _isInternalTextChange = true;
-            try
-            {
-                SetCurrentValue(DisplayTextProperty, value);
-
-                if (TXB0.Text != value)
-                {
-                    TXB0.Text = value;
-                }
-            }
-            finally
-            {
-                _isInternalTextChange = false;
-            }
-        }
-
-        // Numeric Helpers
-
-        private void SetNumericTextValue(string value)
-        {
-            if (!string.IsNullOrEmpty(value))
-            {
-                if (!double.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out double parsedValue) &&
-                    !double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedValue))
-                {
-                    value = LastValidValue?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
-                }
-                else if (double.IsNaN(parsedValue) || double.IsInfinity(parsedValue))
-                {
-                    value = LastValidValue?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
-                }
-            }
-
-            if (value != null && MaxLength > 0 && value.Length > MaxLength)
-            {
-                value = value.Substring(0, MaxLength);
-            }
-
-            _isInternalTextChange = true;
-            try
-            {
-                SetCurrentValue(TextProperty, value);
-            }
-            finally
-            {
-                _isInternalTextChange = false;
-            }
-
-            SetDisplayTextCore(value ?? string.Empty);
-        }
-
+        //Methods & Event Control
         private bool IsValidInput(string input)
         {
-            if (IsDateMode)
-            {
-                string digits = NormalizeDateDigits(input);
-                return digits.Length > 0 && (_rawDateDigits.Length + digits.Length) <= PersianDateDigitLength;
-            }
-
+            // Check if the input is a decimal separator and if it's allowed
             if (IsDecimalSeparator(input))
             {
+                // Allow decimal separator only if DoesAcceptDouble is true
                 return DoesAcceptDouble;
             }
 
@@ -602,129 +320,143 @@ namespace Prg_UI.CUC
 
             if (DoesAcceptDouble)
             {
+                // Check if adding this input would exceed MaxLength
                 if (MaxLength > 0 && TXB0.Text.Length + input.Length > MaxLength)
                 {
                     return false;
                 }
-
+                //return double.TryParse(TXB0.Text + input, NumberStyles.Any, CultureInfo.CurrentCulture, out _);
                 return double.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out _);
             }
-
-            return long.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out _);
+            else
+            {
+                // Check if adding this input would exceed MaxLength
+                //if (MaxLength > 0 && TXB0.Text.Length + input.Length > MaxLength)
+                //{
+                //    return false;
+                //}
+                return long.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out _);
+            }
         }
-
         private void UpdatePercentageMode()
         {
+            if (IsPercentageMode)
+            {
+                //DoesAcceptDouble = true;
+                //MaxDecimalPlaces = 2;
+            }
             FormatNumericValue();
         }
-
         public (bool IsValid, string ErrorMessage) IsValidPercentage(string input, bool allowNegative = false, bool allowOver100 = false, int decimalPlaces = 2)
         {
-            if (MaxDecimalPlaces > 0)
+            if (MaxDecimalPlaces != null && MaxDecimalPlaces > 0)
             {
                 decimalPlaces = MaxDecimalPlaces;
             }
-
+            // Trim the input to remove any leading/trailing whitespace
             input = input.Trim();
 
+            // Check if the input is empty
             if (string.IsNullOrEmpty(input))
             {
                 return (false, "درصد نمی تواند خالی باشد!");
             }
 
+            // Remove percentage symbol if present
             if (input.EndsWith("%"))
             {
                 input = input.TrimEnd('%');
             }
 
-            if (!decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal percentage))
+            // Try parsing the input as a decimal
+            if (!decimal.TryParse(input, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal percentage))
             {
                 return (false, "عدد وارد شده صحیح نیست!.");
             }
 
+            // Check if negative percentages are allowed
             if (!allowNegative && percentage < 0)
             {
                 return (false, "عدد منفی قابل قبول نیست.");
             }
 
+            // Check if percentages over 100 are allowed
             if (!allowOver100 && percentage > 100)
             {
                 return (false, "درصد بیش از عدد 100 مجاز نیست.");
             }
 
+            // Check for the correct number of decimal places
             string[] parts = input.Split('.');
             if (parts.Length > 1 && parts[1].Length > decimalPlaces)
             {
                 return (false, $"Maximum {decimalPlaces} decimal places allowed.");
             }
 
+            // If we've made it this far, the percentage is valid
             return (true, "Valid percentage.");
         }
-
         private string UnformatText(string formattedText)
         {
-            if (IsDateMode)
-            {
-                return _rawDateDigits;
-            }
-
             return formattedText?
                 .Replace(",", "")
                 .Replace("%", "")
-                .Replace("ریال", "") ?? string.Empty;
+                .Replace("ریال", "") ?? "";
         }
-
         public void SetFocusToTextBox()
         {
             TXB0.Focus();
             TXB0.SelectAll();
             Keyboard.Focus(TXB0);
         }
-
         private bool IsDecimalSeparator(string input)
         {
+            // Check if the input equals the current culture's decimal separator
             return input.Equals(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
         }
-
         private void FormatNumericValue()
         {
-            if (IsDateMode)
-            {
-                UpdateDateDisplay(moveCaret: false);
-                return;
-            }
-
-            if (double.TryParse(TXB0.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out double numericValue))
+            if (double.TryParse(TXB0.Text, out double numericValue))
             {
                 TXB0.TextChanged -= TXB0_TextChanged;
 
                 var text = TXB0;
-                if (text.Text.Length == 0)
-                {
-                    TXB0.TextChanged += TXB0_TextChanged;
-                    return;
-                }
-
-                if (!double.TryParse(text.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out _))
+                if (text.Text.Length == 0) { TXB0.TextChanged += TXB0_TextChanged; return; }
+                double range;
+                if (!Double.TryParse(text.Text, out range))
                 {
                     text.Text = text.Text.Replace(text.Text.Substring(text.Text.Length - 1, 1), "");
                 }
-
                 if (text.Text != string.Empty)
                 {
-                    if (text.Text.Substring(text.Text.Length - 1, 1) == ".")
-                    {
-                        TXB0.TextChanged += TXB0_TextChanged;
-                        return;
-                    }
+                    if (text.Text.Substring(text.Text.Length - 1, 1) == ".") { TXB0.TextChanged += TXB0_TextChanged; return; }
 
+                    //if (IsPercentageMode)
+                    //{
+                    //    text.Text = numericValue.ToString("0.##'%'", CultureInfo.CurrentCulture);
+                    //}
+                    // Format with or without digit grouping based on DoesAcceptDouble
                     if (DoesAcceptDouble)
                     {
+                        ////text.Text = string.Format("{0:#,##0.##}", double.Parse(text.Text.Trim()));
+                        ////text.Text = numericValue.ToString("R", CultureInfo.CurrentCulture);
+
+                        //string decimalFormat = new string('#', 17);
+                        //if (MaxDecimalPlaces <= 17)
+                        //{
+                        //    decimalFormat = new string('#', MaxDecimalPlaces);
+                        //}
+                        //text.Text = numericValue.ToString("0." + decimalFormat, CultureInfo.CurrentCulture);
+
+                        //text.Text = numericValue.ToString("N", CultureInfo.CurrentCulture); // Use "N" format for currency-like formatting with digit grouping
+
                         if (IsDigitGroupActive)
                         {
                             string decimalFormat = new string('#', Math.Min(MaxDecimalPlaces, 17));
                             text.Text = numericValue.ToString("#,##0." + decimalFormat, CultureInfo.CurrentCulture);
+
                         }
+
                     }
                     else
                     {
@@ -732,6 +464,7 @@ namespace Prg_UI.CUC
                         {
                             text.Text = ((long)numericValue).ToString("N0", CultureInfo.CurrentCulture);
                         }
+                        //text.Text = string.Format("{0:#,##0}", long.Parse(text.Text.Trim()));
                     }
 
                     if (text.Text.Length != 0)
@@ -740,69 +473,32 @@ namespace Prg_UI.CUC
                     }
                 }
 
-                SetCurrentValue(DisplayTextProperty, text.Text);
-                SetCurrentValue(TextProperty, text.Text);
-
                 TXB0.TextChanged += TXB0_TextChanged;
             }
         }
-
         private void UpdateLastValidValue()
         {
-            if (IsDateMode)
-            {
-                if (!string.IsNullOrEmpty(_rawDateDigits) && double.TryParse(_rawDateDigits, out double dateValue))
-                {
-                    LastValidValue = dateValue;
-                }
-                return;
-            }
-
             if (!string.IsNullOrEmpty(Text))
             {
-                if (double.TryParse(Text, NumberStyles.Any, CultureInfo.CurrentCulture, out double newValue))
+                if (double.TryParse(Text, out double newValue))
                 {
                     if (IsValidInput(Text))
                     {
-                        LastValidValue = newValue;
+                        LastValidValue = newValue; // newValue is already parsed
                     }
                 }
             }
         }
 
-        // Event Handlers
-
         private void TXB0_Loaded(object sender, RoutedEventArgs e)
         {
-            TXB0.IsReadOnly = IsReadOnly;
-            TXB0.IsTabStop = InnerTabStop;
-            TXB0.TextAlignment = TextAlignment;
-
-            RefreshDisplayFromTextValue(moveCaret: false);
-
-            if (LastValueShouldZero is not null)
+            if (LastValueShouldZero is not null) //at lesat it hav a value
             {
                 UpdateLastValidValue();
             }
         }
-
         private void TXB0_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (IsDateMode)
-            {
-                string digits = NormalizeDateDigits(e.Text);
-
-                if (string.IsNullOrEmpty(digits))
-                {
-                    e.Handled = true;
-                    return;
-                }
-
-                e.Handled = true;
-                AppendDateDigits(digits);
-                return;
-            }
-
             if (AllowEnterNegative && e.Text == "-")
             {
                 if (TXB0.Text.Contains("-") || TXB0.CaretIndex != 0)
@@ -817,42 +513,22 @@ namespace Prg_UI.CUC
                 e.Handled = true;
             }
         }
-
         private void TXB0_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_isInternalTextChange)
+            if (CustomUpdateSourceTrigger == UpdateSourceTrigger.PropertyChanged)
             {
-                return;
+                Text = TXB0.Text;
             }
-
-            if (IsDateMode)
-            {
-                SetRawDateDigits(TXB0.Text, moveCaret: true);
-                return;
-            }
-
-            SetCurrentValue(TextProperty, TXB0.Text);
-
             if (DigitGroupOnEnter is true && IsDigitGroupActive is true)
             {
                 FormatNumericValue();
             }
 
-            UpdateLastValidValue();
-        }
+            UpdateLastValidValue(); //Suspected that is ok to be here ?!
 
+        }
         private void TXB0_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (IsDateMode)
-            {
-                // عمدی: اینجا اعتبارسنجی تقویم شمسی انجام نمی‌دهیم.
-                // فقط ظاهر را ثابت می‌کنیم: 0000/00/00 یا 1405/02/15
-                UpdateDateDisplay(moveCaret: false);
-                UpdateLastValidValue();
-                RaiseEvent(new RoutedEventArgs(NumericLostFocusEvent, this));
-                return;
-            }
-
             UpdateLastValidValue();
 
             if (RestoreLastValidValue)
@@ -862,102 +538,86 @@ namespace Prg_UI.CUC
                     var (isValid, _) = IsValidPercentage(Text);
                     if (!isValid)
                     {
-                        Text = LastValidValue?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+                        //TXB0.Text = LastValidValue.ToString();
+                        Text = LastValidValue.ToString();
                     }
                 }
                 else if (!CL_LMethods.IsNumeric(Text))
                 {
-                    if (LastValueShouldZero ?? false)
+                    if (LastValueShouldZero ?? false) // = 0
                     {
                         Text = "0";
                     }
-                    else if (!(LastValueShouldZero ?? false))
+                    else if (!LastValueShouldZero ?? false) // = Number
                     {
                         if (LastValidValue != null)
                         {
-                            Text = LastValidValue.Value.ToString(CultureInfo.InvariantCulture);
+                            Text = LastValidValue.ToString();
                         }
                     }
-                    else if (LastValueShouldZero is null)
+                    else if (LastValueShouldZero is null) // = Null
                     {
                         Text = string.Empty;
                     }
                 }
+
             }
 
             FormatNumericValue();
+
+            // 3. Raise the custom routed event.
             RaiseEvent(new RoutedEventArgs(NumericLostFocusEvent, this));
         }
-
         private void TXB0_Pasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (!e.DataObject.GetDataPresent(typeof(string)))
+            #region MyRegion
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                e.CancelCommand();
-                return;
-            }
-
-            try
-            {
-                string pastedText = (string)e.DataObject.GetData(typeof(string));
-
-                if (IsDateMode)
+                try
                 {
-                    string digits = NormalizeDateDigits(pastedText);
-                    if (string.IsNullOrEmpty(digits))
+                    string pastedText = (string)e.DataObject.GetData(typeof(string));
+
+                    // Extract numbers from the pasted text
+                    var extractedNumbers = NumberExtractor.ExtractNumbersLine(pastedText);
+
+                    // Join the extracted numbers back into a single string
+                    string validInput = string.Join("", extractedNumbers);
+
+                    // Calculate the new text including the valid input
+                    string newText = TXB0.Text.Substring(0, TXB0.SelectionStart) + validInput + TXB0.Text.Substring(TXB0.SelectionStart + TXB0.SelectionLength);
+
+                    if (!IsValidInput(validInput) || (MaxLength > 0 && newText.Length > MaxLength))
                     {
                         e.CancelCommand();
-                        return;
                     }
-
-                    e.CancelCommand();
-                    AppendDateDigits(digits);
-                    return;
+                    else
+                    {
+                        // Replace the original pasted text with only the valid numbers
+                        Clipboard.SetText(validInput);
+                        e.Handled = true; // This prevents the original paste operation
+                    }
                 }
-
-                var extractedNumbers = NumberExtractor.ExtractNumbersLine(pastedText);
-                string validInput = string.Join("", extractedNumbers);
-
-                string newText = TXB0.Text.Substring(0, TXB0.SelectionStart) +
-                                 validInput +
-                                 TXB0.Text.Substring(TXB0.SelectionStart + TXB0.SelectionLength);
-
-                if (!IsValidInput(validInput) || (MaxLength > 0 && newText.Length > MaxLength))
-                {
-                    e.CancelCommand();
-                }
-                else
-                {
-                    Clipboard.SetText(validInput);
-                    e.Handled = true;
-                }
+                catch { e.CancelCommand(); }
             }
-            catch
-            {
-                e.CancelCommand();
-            }
+            #endregion
+
+            //if (e.DataObject.GetDataPresent(typeof(string)))
+            //{
+            //    string pastedText = (string)e.DataObject.GetData(typeof(string));
+            //    string newText = TXB0.Text.Substring(0, TXB0.SelectionStart) + pastedText + TXB0.Text.Substring(TXB0.SelectionStart + TXB0.SelectionLength);
+
+            //    if (!IsValidInput(pastedText) || (MaxLength > 0 && newText.Length > MaxLength))
+            //    {
+            //        e.CancelCommand();
+            //    }
+            //}
+            //else
+            //{
+            //    e.CancelCommand();
+            //}
         }
-
         private void TXB0_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (IsDateMode)
-            {
-                if (e.Key == Key.Space || e.Key == Key.Decimal || e.Key == Key.OemPeriod || e.Key == Key.OemMinus || e.Key == Key.Subtract)
-                {
-                    e.Handled = true;
-                    return;
-                }
-
-                if (e.Key == Key.Back || e.Key == Key.Delete)
-                {
-                    e.Handled = true;
-                    RemoveLastDateDigit();
-                    return;
-                }
-
-                return;
-            }
-
             if (e.Key == Key.Space)
             {
                 e.Handled = true;
@@ -992,7 +652,6 @@ namespace Prg_UI.CUC
                 }
             }
         }
-
         private void TXB0_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (TXB0.IsEnabled && TXB0.IsReadOnly == false)
@@ -1000,24 +659,20 @@ namespace Prg_UI.CUC
                 TXB0.SelectAll();
             }
         }
-
         private void TextBoxControl_PreviewQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
         {
             e.Action = DragAction.Cancel;
             e.Handled = true;
+            //if (e.KeyStates.HasFlag(DragDropKeyStates.LeftMouseButton))
+            //{
+            //}
         }
 
         public void CleanToZero()
         {
-            if (IsDateMode)
-            {
-                SetRawDateDigits(string.Empty, moveCaret: false);
-                LastValidValue = null;
-                return;
-            }
-
             LastValidValue = 0;
-            Text = "0";
+            TXB0.Text = "0";
         }
+
     }
 }

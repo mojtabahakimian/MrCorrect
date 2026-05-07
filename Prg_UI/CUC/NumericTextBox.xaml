@@ -4,12 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Prg_UI.CUC"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
              Focusable="False"
              IsTabStop="False"
              d:DesignHeight="450" d:DesignWidth="800">
-
     <TextBox x:Name="TXB0" 
              HorizontalAlignment="Stretch" 
              VerticalAlignment="Center"
@@ -22,10 +20,11 @@
              PreviewQueryContinueDrag="TextBoxControl_PreviewQueryContinueDrag"
              Style="{Binding TextBoxStyle, RelativeSource={RelativeSource AncestorType=UserControl}}"
              TextAlignment="{Binding TextAlignment, RelativeSource={RelativeSource AncestorType=UserControl}}"
-             Text="{Binding DisplayText, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
              TabIndex="{Binding TabIndex, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
-             materialDesign:HintAssist.Hint="{Binding Path=(materialDesign:HintAssist.Hint), RelativeSource={RelativeSource AncestorType=UserControl}}"
+             
              AllowDrop="False" 
              VerticalContentAlignment="Center"
+             Padding="3"
              Loaded="TXB0_Loaded"/>
 </UserControl>
