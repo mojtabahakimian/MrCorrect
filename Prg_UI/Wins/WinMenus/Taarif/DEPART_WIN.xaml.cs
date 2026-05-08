@@ -470,6 +470,66 @@ namespace Wins.WinMenus.Taarif
         }
         private void DEPART_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.OemQuotes)
+            {
+                try
+                {
+                    if (DEPART_SUB.CurrentCell != null)
+                    {
+                        // Get the current cell
+                        DataGridCellInfo currentCell = DEPART_SUB.CurrentCell;
+                        if (currentCell != null)
+                        {
+                            // Get the row index and column index of the current cell
+                            int rowIndex = DEPART_SUB.Items.IndexOf(currentCell.Item);
+                            int columnIndex = DEPART_SUB.Columns.IndexOf(currentCell.Column);
+
+                            // Check if it's not the first row
+                            if (rowIndex > 0)
+                            {
+                                // Get the value from the cell above
+                                object valueAbove = DEPART_SUB.Items[rowIndex - 1];
+
+                                // Ensure that the column index is within bounds
+                                if (columnIndex >= 0 && columnIndex < DEPART_SUB.Columns.Count)
+                                {
+                                    // Get the column information
+                                    var column = DEPART_SUB.Columns[columnIndex];
+
+                                    // Ensure that the column has a valid SortMemberPath
+                                    if (!string.IsNullOrEmpty(column.SortMemberPath))
+                                    {
+                                        // Use reflection to get and set the property values
+                                        var propertyInfo = valueAbove.GetType().GetProperty(column.SortMemberPath);
+
+                                        // Ensure that the property exists and is not null
+                                        if (propertyInfo != null)
+                                        {
+                                            // Get the value from the above cell
+                                            object valueAboveCellValue = propertyInfo.GetValue(valueAbove);
+
+                                            // Cast currentCell.Item to the actual data type
+                                            var currentItem = currentCell.Item;
+
+                                            // Use reflection to set the value on the current item
+                                            if (currentItem.GetType().GetProperty(column.SortMemberPath) is PropertyInfo currentCellProperty)
+                                            {
+                                                // Set the value on the current cell's item
+                                                currentCellProperty.SetValue(currentItem, valueAboveCellValue);
+
+                                                DEPART_SUB.BeginEdit();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        e.Handled = true;
+                    }
+                }
+                catch { }
+            }
+
             if (e.Key is Key.Delete)
             {
                 if (DEPART_SUB.Items.Count > 0 && DEPART_SUB.SelectedItem != null)
