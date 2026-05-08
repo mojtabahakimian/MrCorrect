@@ -323,6 +323,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     {
                         ConnectedToSQLDB = false;
                     }
+                    LogSqlQuery(sql, ex);
                     throw; // Rethrow if not deadlock or max retries reached
                 }
                 catch (Exception er)
