@@ -40,7 +40,6 @@ namespace Prg_UI
     {
         private static bool _isHandlingSqlConnectionFailure;
 
-
         #region NEW_ADDED_FOR_FIX
         //static App()
         //{
@@ -130,6 +129,10 @@ namespace Prg_UI
                             userMessage = "وضعیت پایگاه داده تغییر یافته , احتمالا سرویس پایگاه داده متوقف یا اتصال به شبکه قطع شده است !.";
                             break;
 
+                        case 18452: // Integrated authentication from untrusted domain
+                            userMessage = "احراز هویت ویندوزی پایگاه داده به دلیل نامعتبر بودن دامنه انجام نشد. لطفاً اتصال را با کاربر SQL تنظیم کنید یا ورود کاربر به دامنه (Domain) معتبر را بررسی کنید.";
+                            break;
+
                         case 18456: // Login failed
                             userMessage = "احراز هویت پایگاه داده به دلیل خطا انجام نشده , بنا بر این نمیتوان به سرور متصل شد!";
                             break;
@@ -137,11 +140,26 @@ namespace Prg_UI
                         case -2: // Timeout
                         case 53: // Network error
                         case 26: // Instance error
+                        case 121:
+                        case 258:
                             userMessage = "اتصال به سرور پایگاه داده ممکن نیست. لطفاً اتصال شبکه و در دسترس بودن سرور خود را بررسی کنید , همچنین سرویس رو هم بررسی کنید که فعال باشد..";
                             break;
 
                         case 208: // Invalid object name
                             userMessage = "بعضی از موجودیت های پایگاه داده وجود ندارد , با پشتیبانی در ارتباط باشید";
+                            break;
+
+                        case 40:
+                        case 11001:
+                            userMessage = "سرور پایگاه داده یافت نشد یا در دسترس نیست. لطفاً نام سرور را بررسی کنید و مطمئن شوید سرور در شبکه فعال است.";
+                            break;
+
+                        case 10054:
+                        case 64:
+                            userMessage = "ارتباط با سرور قطع شد. وضعیت پایگاه داده یا اتصال شبکه را بررسی کنید.";
+                            break;
+                        case 1205:
+                            userMessage = "تداخل در تراکنش‌های دیتابیس رخ داده است. لطفاً چند لحظه صبر کنید و دوباره تلاش کنید.";
                             break;
 
 

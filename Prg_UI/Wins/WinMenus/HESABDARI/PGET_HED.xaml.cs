@@ -1753,10 +1753,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
         private bool DoCmdSaveHeader()
         {
             bool SuccessSave = false;
+
+            bool isNewRecordAtStart = NewRecord;
+            string originalId = ID.Text;
+            string originalIdk = IDK.Text;
+            string originalNs = N_S.Text;
+
             //Form_BeforeUpdate
             OKF.IsChecked = true;
 
-            if (NewRecord)
+            if (isNewRecordAtStart)
             {
                 using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                 {
@@ -1841,7 +1847,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         {
                             if (!SuccessSave)
                             {
-                                transaction?.Rollback();
+                                try { transaction?.Rollback(); }
+                                catch
+                                {
+                                    // The transaction may already be completed/invalid after a SQL error.
+                                }
+                                // Restore Reset
+                                ID.Text = originalId;
+                                IDK.Text = originalIdk;
+                                N_S.Text = originalNs;
+
                                 db?.Close();
                             }
                         }
