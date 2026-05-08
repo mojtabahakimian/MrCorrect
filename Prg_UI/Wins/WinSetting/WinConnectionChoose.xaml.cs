@@ -153,6 +153,7 @@ namespace Prg_UI.Wins.WinSetting
             CL_LMethods.GoExitTheApplication(); //#NABILOO#
             return;
         }
+
         internal (bool Success, string ErrorMessage) GoTestConnectionOK()
         {
             string _cnn = null;
@@ -214,11 +215,22 @@ namespace Prg_UI.Wins.WinSetting
                 return (false, $"خطا در برقراری اتصال:\n{ex.Message}");
             }
         }
-
         private static string BuildSqlErrorMessage(SqlException ex, string serverName, string databaseName, bool isWindowsAuth)
         {
             if (ex == null)
                 return "خطا در اتصال به دیتابیس رخ داد.\nراهنما: اطلاعات اتصال را بررسی کرده و مجدد تلاش کنید.";
+
+            // قبل از switch اصلی، در ابتدای متد
+            if (ex.Message.Contains("Cannot generate SSPI context", StringComparison.OrdinalIgnoreCase))
+                return "خطای Kerberos: SSPI Context تولید نشد.\n\nراه‌حل پیشنهادی:\n• ساعت سیستم را با Domain هماهنگ کنید.\n• از SQL Authentication استفاده کنید.\n• اگر VPN فعال است قطع/وصل کنید.";
+
+            // قبل از switch، بعد از null check
+            if (ex.Message.Contains("certificate chain", StringComparison.OrdinalIgnoreCase) ||
+                ex.Message.Contains("SSL Provider", StringComparison.OrdinalIgnoreCase) ||
+                ex.Message.Contains("pre-login handshake", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"خطای رمزنگاری/TLS با سرور «{serverName}».\n\nراه‌حل پیشنهادی:\n• مطمئن شوید TrustServerCertificate=True در رشته اتصال هست.\n• نسخه TLS سرور را با کلاینت هماهنگ کنید (TLS 1.2 به بعد).\n• اگر سرور قدیمی است، Encrypt=False امتحان کنید.\n• گواهی SQL Server را به Trusted Root اضافه کنید.";
+            }
 
             // بررسی خطاهای Win32 (سطح شبکه / سیستم‌عامل)
             if (ex.InnerException is System.ComponentModel.Win32Exception win32)
@@ -233,6 +245,14 @@ namespace Prg_UI.Wins.WinSetting
                     10053 => $"اتصال به سرور «{serverName}» توسط شبکه قطع شد.\n\nراه‌حل پیشنهادی:\n• پایداری شبکه را بررسی کنید.\n• VPN یا Proxy را بررسی کنید.",
                     1722 => $"سرویس RPC روی سرور «{serverName}» در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید سرویس SQL Server در حال اجرا است.\n• Named Pipes را در SQL Server Configuration Manager فعال کنید.",
                     5 => $"دسترسی به سرور «{serverName}» رد شد.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید حساب کاربری جاری مجاز به اتصال است.\n• تنظیمات فایروال سرور را بررسی کنید.",
+
+                    // داخل switch مربوط به win32.NativeErrorCode و قبل از _ => اضافه کن
+                    10013 => $"اتصال به سرور «{serverName}» توسط سیستم یا فایروال رد شد.\n\nراه‌حل پیشنهادی:\n• فایروال ویندوز و آنتی‌ویروس را بررسی کنید.\n• مطمئن شوید برنامه اجازه اتصال خروجی به پورت SQL Server را دارد.",
+                    10049 => $"آدرس سرور «{serverName}» برای این سیستم معتبر نیست.\n\nراه‌حل پیشنهادی:\n• IP یا نام سرور را بررسی کنید.\n• اگر IP دستی وارد شده، مطمئن شوید اشتباه تایپی ندارد.",
+                    10051 => $"شبکه مقصد برای اتصال به سرور «{serverName}» در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• اتصال شبکه، Gateway و VPN را بررسی کنید.\n• مطمئن شوید کلاینت و سرور در یک مسیر شبکه قابل دسترسی هستند.",
+                    10065 => $"مسیر شبکه‌ای برای رسیدن به سرور «{serverName}» وجود ندارد.\n\nراه‌حل پیشنهادی:\n• Routing، VPN و Gateway را بررسی کنید.\n• اگر از IP بیرونی استفاده می‌کنید، Port Forwarding را بررسی کنید.",
+                    11001 => $"نام سرور «{serverName}» در DNS پیدا نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را بررسی کنید.\n• با IP سرور تست کنید.\n• تنظیمات DNS سیستم را بررسی کنید.",
+
                     _ => $"خطای شبکه (کد: {win32.NativeErrorCode}):\n{win32.Message}\n\nراه حل : با مدیر شبکه تماس بگیرید (اگر هیچ کاربری نمیتواند متصل شود , ممکن است سرویس اصلی مربوط به SQL Server متوقف شده باشد).",
                 };
             }
@@ -274,9 +294,26 @@ namespace Prg_UI.Wins.WinSetting
 
                 // ─── خطاهای ورود / احراز هویت ───
                 case 18456:
-                    if (isWindowsAuth)
-                        return "ورود ناموفق بود (Windows Authentication).\n\nراه‌حل پیشنهادی:\n• حساب ویندوز فعلی باید روی SQL Server دسترسی داشته باشد.\n• در صورت نیاز از SQL Authentication استفاده کنید.";
-                    return "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری SQL را بررسی کنید.\n• رمز عبور را مجدداً وارد کنید.\n• مطمئن شوید کاربر در SQL Server تعریف شده است.";
+                    return ex.State switch
+                    {
+                        2 or 5 => "کاربر در SQL Server تعریف نشده است.\n\nراه‌حل پیشنهادی:\n• نام کاربری را بررسی کنید.\n• از مدیر دیتابیس بخواهید Login جدید ایجاد کند.",
+                        6 => "از حساب کاربری Windows برای SQL Authentication استفاده شده است.\n\nراه‌حل پیشنهادی:\n• گزینه Windows Authentication را انتخاب کنید.",
+                        7 => "حساب کاربری غیرفعال است و رمز عبور نیز اشتباه است.",
+                        8 or 9 => "رمز عبور اشتباه است.\n\nراه‌حل پیشنهادی:\n• رمز عبور را با دقت وارد کنید (به Caps Lock و زبان کیبورد دقت کنید).",
+                        11 or 12 => "اعتبارسنجی موفق بود اما کاربر اجازه دسترسی به سرور را ندارد.\n\nراه‌حل پیشنهادی:\n• از مدیر دیتابیس بخواهید کاربر را به Server Roles اضافه کند.",
+                        18 => "رمز عبور حساب کاربری باید تغییر کند.\n\nراه‌حل پیشنهادی:\n• یک بار از طریق SSMS وارد شوید و رمز جدید تعیین کنید.",
+                        38 => $"دیتابیس «{databaseName}» وجود ندارد یا کاربر دسترسی ندارد.\n\nراه‌حل پیشنهادی:\n• نام دیتابیس را بررسی کنید.\n• از مدیر دیتابیس درخواست دسترسی کنید.",
+                        58 => "سرور فقط Windows Authentication را قبول می‌کند.\n\nراه‌حل پیشنهادی:\n• گزینه Windows Authentication را انتخاب کنید.\n• یا از مدیر دیتابیس بخواهید Mixed Mode را فعال کند.",
+                        102 or 104 => "آدرس IP کلاینت در فایروال SQL Server مجاز نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس برای اضافه کردن IP به Whitelist هماهنگ کنید.",
+                        _ => isWindowsAuth
+                            ? "ورود ناموفق بود (Windows Authentication).\n\nراه‌حل پیشنهادی:\n• حساب ویندوز فعلی باید روی SQL Server دسترسی داشته باشد."
+                            : "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری و رمز عبور را بررسی کنید."
+                    };
+
+                case 17806:  // SSPI handshake failed
+                case 17807:  // Could not find an entry for SQL Server in service principal name
+                case 17808:  // SSPI authentication error
+                    return "خطای SSPI/Kerberos در احراز هویت Windows.\n\nراه‌حل پیشنهادی:\n• ساعت سیستم کلاینت را با Domain Controller هماهنگ کنید.\n• SPN در Active Directory را بررسی کنید.\n• به جای Windows Authentication از SQL Authentication استفاده کنید.\n• اگر سرور با IP وصل می‌شود، با نام DNS تست کنید.";
 
                 case 18452:
                     return "ورود با Windows Authentication ناموفق بود چون کلاینت در Domain مورد اعتماد SQL Server نیست.\n\nراه‌حل پیشنهادی:\n• اگر سرور با IP یا از شبکه/Domain دیگر وصل می‌شود، SQL Authentication را انتخاب کنید.\n• در صورت نیاز از مدیر شبکه بخواهید Trust بین Domainها را تنظیم کند.\n• اگر باید Windows Auth استفاده شود، برنامه را با کاربر دامنه مجاز اجرا کنید.";
@@ -295,6 +332,35 @@ namespace Prg_UI.Wins.WinSetting
 
                 case 1326:
                     return "اعتبارسنجی کاربر در شبکه/دامنه ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری و رمز عبور ویندوز/دامنه را بررسی کنید.\n• از دسترسی شبکه و Domain Controller مطمئن شوید.";
+
+                case 701:   // Out of memory
+                case 802:   // Insufficient memory
+                case 8645:  // Timeout waiting for memory resources
+                case 8651:  // Low memory condition
+                    return "حافظه سرور SQL Server کافی نیست.\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کرده و دوباره تست کنید.\n• با مدیر سرور برای افزایش RAM یا تنظیم max server memory هماهنگ کنید.";
+
+                case 1105:  // Could not allocate space (filegroup full)
+                case 1101:  // Could not allocate new page
+                    return $"فضای فایل/Filegroup دیتابیس «{databaseName}» پر شده است.\n\nراه‌حل پیشنهادی:\n• فضای دیسک سرور را بررسی کنید.\n• Auto-Growth فایل دیتابیس را فعال یا افزایش دهید.\n• با مدیر دیتابیس تماس بگیرید.";
+
+                case 9001:  // Log not available
+                case 9004:  // Error while processing the log
+                    return $"لاگ تراکنش دیتابیس «{databaseName}» دچار مشکل شده است.\n\nراه‌حل پیشنهادی:\n• فوراً با مدیر دیتابیس تماس بگیرید.\n• ممکن است نیاز به Restore یا Repair باشد.";
+
+                case 109:   // Insufficient system memory in resource pool
+                    return "منابع Resource Pool روی سرور کافی نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس برای تنظیم Resource Governor هماهنگ کنید.";
+
+                case 6:     // Specified SQL server not found (legacy DBNETLIB)
+                    return $"سرور «{serverName}» پیدا نشد (DBNETLIB).\n\nراه‌حل پیشنهادی:\n• نام سرور یا Instance را دوباره بررسی کنید.";
+
+                case 4063:  // Cannot open user default database (variant of 4064)
+                    return $"دیتابیس پیش‌فرض کاربر در دسترس نیست یا حذف شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس برای تغییر Default Database کاربر تماس بگیرید.";
+
+                case 7202:  // Could not find server in sys.servers (Linked Server)
+                    return "Linked Server مورد نیاز در سرور پیدا نشد.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس برای پیکربندی Linked Server هماهنگ کنید.";
+
+                case 18406: // Login failed (DBNETLIB legacy)
+                    return "ورود به SQL Server ناموفق بود (DBNETLIB).\n\nراه‌حل پیشنهادی:\n• از یک Driver جدیدتر استفاده کنید یا نام کاربری/رمز را بررسی کنید.";
 
                 // ─── دسترسی به اشیای دیتابیس ───
                 case 229:
@@ -322,11 +388,92 @@ namespace Prg_UI.Wins.WinSetting
                 case 9002:
                     return $"فضای لاگ تراکنش دیتابیس «{databaseName}» پر شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا فضای لاگ را آزاد کنند.\n• پشتیبان‌گیری از لاگ یا تغییر Recovery Model می‌تواند کمک کند.";
 
+                case 945: // Database cannot be opened
+                    return $"دیتابیس «{databaseName}» قابل باز شدن نیست (ممکن است در حال Restore یا Suspect باشد).";
+
+                case 5120: // File access error
+                    return "خطا در دسترسی به فایل‌های دیتابیس (مجوز فایل).";
+
+                case 18450:
+                    return "ورود با Windows Authentication ناموفق بود (RANDOm). حساب کاربری در Domain یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام کاربری و دامنه را بررسی کنید.\n• از SQL Authentication استفاده کنید.";
+
+                case 18451:
+                    return "ورود با Windows Authentication ناموفق بود. حساب کاربری غیرفعال یا قفل شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر Active Directory یا SQL Server تماس بگیرید.";
+
+                case 18463:
+                    return "ورود ناموفق بود. حساب کاربری منقضی شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر Active Directory تماس بگیرید تا حساب را فعال کنند.";
+
+                case 18464:
+                    return "ورود ناموفق بود. رمز عبور حساب کاربری منقضی شده است.\n\nراه‌حل پیشنهادی:\n• رمز عبور را از طریق IT Helpdesk یا SSMS تغییر دهید.";
+
+                case 18465:
+                    return "ورود ناموفق بود. حساب کاربری در بازه زمانی مجاز برای ورود نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر سیستم تماس بگیرید.";
+
+                // ─── خطاهای Azure SQL / Cloud (Transient Faults) ───
+                case 40143:
+                    return "سرویس SQL Server/Cloud موقتاً در دسترس نیست (Transient Fault).\n\nراه‌حل پیشنهادی:\n• چند ثانیه صبر کرده و دوباره تلاش کنید.\n• اگر مشکل ادامه داشت با پشتیبانی Azure تماس بگیرید.";
+
+                // ─── خطاهای شبکه و ارتباطی عمومی ───
+                case 11:
+                    return $"خطای عمومی شبکه در ارتباط با سرور «{serverName}» رخ داد.\n\nراه‌حل پیشنهادی:\n• پایداری شبکه و تنظیمات کارت شبکه را بررسی کنید.";
+
+                case 20:
+                    return $"خطای رمزنگاری (Encryption) در ارتباط با سرور «{serverName}» رخ داد.\n\nراه‌حل پیشنهادی:\n• کلاینت از رمزنگاری پشتیبانی نمی‌کند یا تنظیمات SSL/TLS سرور نیاز به بازبینی دارد.";
+
+                // ─── محدودیت‌های سرور ───
+                case 10928:
+                case 10929:
+                    return $"سرور «{serverName}» به حداکثر ظرفیت اتصالات خود رسیده است.\n\nراه‌حل پیشنهادی:\n• چند دقیقه صبر کنید تا اتصالات قبلی آزاد شوند.\n• با مدیر دیتابیس برای افزایش سقف اتصالات (Resource Limits) هماهنگ کنید.";
+
+                // ─── دیتابیس در دسترس نیست (وضعیت‌های خاص) ───
+                case 922:
+                    return $"دیتابیس «{databaseName}» در حال بازیابی (Recovery) است و فعلاً در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• چند دقیقه صبر کنید تا فرآیند Recovery سرور تکمیل شود و دوباره تلاش کنید.";
+
+                case 942:
+                    return $"دیتابیس «{databaseName}» در وضعیت Offline قرار دارد.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا دیتابیس را Online کند.";
+
+                case 952:
+                    return $"دیتابیس «{databaseName}» در حال انتقال وضعیت (Transition) است.\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کنید و دوباره تلاش کنید.";
+                
+                case 18486:
+                    return "حساب کاربری SQL قفل شده است (تلاش‌های ناموفق متعدد).\n\nراه‌حل پیشنهادی:\n• از طریق SSMS حساب کاربری را Unlock کنید.\n• با مدیر SQL Server تماس بگیرید.";
+
+                case 4062:
+                    return $"دیتابیس «{databaseName}» در حال حاضر در دسترس نیست (آفلاین یا در حال Restore).\n\nراه‌حل پیشنهادی:\n• وضعیت دیتابیس را در SSMS بررسی کنید.\n• منتظر بمانید تا عملیات Restore/Recovery تمام شود.";
+
+                case 17:
+                    return $"سرور SQL Server «{serverName}» وجود ندارد یا دسترسی به آن امکان‌پذیر نیست.\n\nراه‌حل پیشنهادی:\n• نام سرور را بررسی کنید.\n• اگر از Instance استفاده می‌کنید، نام آن را دقیق وارد کنید.\n• TCP/IP و SQL Server Browser را بررسی کنید.";
+
+                case 10013:
+                    return $"اتصال به سرور «{serverName}» توسط فایروال یا تنظیمات امنیتی سیستم رد شد.\n\nراه‌حل پیشنهادی:\n• فایروال ویندوز، آنتی‌ویروس یا Policy شبکه را بررسی کنید.\n• مطمئن شوید پورت SQL Server باز است.";
+
+                case 10049:
+                    return $"آدرس سرور «{serverName}» معتبر نیست.\n\nراه‌حل پیشنهادی:\n• IP یا نام سرور را بررسی کنید.\n• اگر از IP استفاده می‌کنید، مطمئن شوید فرمت آن درست است.";
+
+                case 10051:
+                    return $"شبکه مقصد برای اتصال به سرور «{serverName}» در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• اتصال شبکه، Gateway و VPN را بررسی کنید.\n• مطمئن شوید مسیر شبکه بین کلاینت و سرور برقرار است.";
+
+                case 10065:
+                    return $"هیچ مسیر شبکه‌ای برای رسیدن به سرور «{serverName}» وجود ندارد.\n\nراه‌حل پیشنهادی:\n• Routing، VPN، Gateway و Port Forwarding را بررسی کنید.";
+
+                case 927:
+                    return $"دیتابیس «{databaseName}» در حال Recovery است و فعلاً قابل استفاده نیست.\n\nراه‌حل پیشنهادی:\n• چند دقیقه صبر کنید و دوباره تست کنید.\n• اگر وضعیت Recovery طولانی شد، با مدیر دیتابیس تماس بگیرید.";
+
+                case 926:
+                    return $"دیتابیس «{databaseName}» در وضعیت Suspect قرار دارد.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید.\n• احتمال خرابی فایل، قطع برق، مشکل دیسک یا پر شدن لاگ وجود دارد.";
+
+                case 823:
+                case 824:
+                case 825:
+                    return $"خطای جدی I/O یا خرابی احتمالی در فایل‌های دیتابیس «{databaseName}» رخ داده است.\n\nراه‌حل پیشنهادی:\n• سریعاً با مدیر دیتابیس تماس بگیرید.\n• وضعیت دیسک، Storage و Backup بررسی شود.";
+
+                case 0:
+                    return $"خطای عمومی اتصال به SQL Server رخ داد.\n\nجزئیات:\n{ex.Message}\n\nراه‌حل پیشنهادی:\n• نام سرور «{serverName}» را بررسی کنید.\n• TCP/IP و SQL Server Browser را بررسی کنید.\n• فایروال، پورت و تنظیمات Instance را بررسی کنید.";
+
                 default:
                     return $"خطای SQL Server (کد: {ex.Number}):\n{ex.Message}\n\nراه‌حل: تنظیمات سرور/شبکه/دسترسی را بررسی کنید یا با مدیر سیستم تماس بگیرید.";
             }
         }
-
         private async void Btn_TestConnection_Click(object sender, RoutedEventArgs e)
         {
             lblconnecting.Visibility = Visibility.Visible;

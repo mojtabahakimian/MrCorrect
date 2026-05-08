@@ -137,6 +137,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             233,    // No process on the other end of the pipe
             4060,   // Cannot open database requested by the login
             17142,  // The server is paused
+            18452,  // The login is from an untrusted domain and cannot be used with Integrated authentication
             18456   // Login failed for user
         };
         private static readonly int[] NonRetriableAuthenticationErrorNumbers =
@@ -323,6 +324,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     {
                         ConnectedToSQLDB = false;
                     }
+                    LogSqlQuery(sql, ex);
                     throw; // Rethrow if not deadlock or max retries reached
                 }
                 catch (Exception er)
