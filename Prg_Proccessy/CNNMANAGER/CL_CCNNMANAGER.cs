@@ -165,6 +165,9 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             return false;
         }
+        private static bool IsExpectedBusinessError(SqlException? exception) =>
+            exception is not null && (exception.Number is 547 or 2627 or 2601);
+
         public static bool IsConnectionRelated(SqlException? exception)
         {
             if (exception is null)
@@ -267,7 +270,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
 
-                    LogSqlQuery(sql, sqlEx);
+                    // FK violation (547) and duplicate key (2627, 2601) are expected business errors
+                    // handled by callers — don't pollute the log with them
+                    if (!IsExpectedBusinessError(sqlEx))
+                    {
+                        LogSqlQuery(sql, sqlEx);
+                    }
 
                     throw;
                 }
