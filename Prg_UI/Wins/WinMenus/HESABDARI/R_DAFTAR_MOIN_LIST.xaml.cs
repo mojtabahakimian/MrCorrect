@@ -157,8 +157,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             try
             {
-                dbms.DoExecuteSQL("INSERT INTO AMALIAT (USERID,USERNAME,ADATE,AMALID) VALUES (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.TruncateString(Baseknow.UUSER, 49) + "',GETDATE(),'" + CL_HESABDARI.TruncateString(OPEN_ARG.ToStringNullSafe(), 49) + "')");
-                dbms.DoExecuteSQL("INSERT INTO AMALIAT (USERID,USERNAME,ADATE,AMALID) VALUES (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.TruncateString(FULLHESAB_NAME, 49) + "',GETDATE(),'" + CL_HESABDARI.TruncateString(OPEN_ARG.ToStringNullSafe(), 49) + "')");
+                const string insertAmaliatSql = "INSERT INTO AMALIAT (USERID,USERNAME,ADATE,AMALID) VALUES (@UserId,@UserName,GETDATE(),@AmalId)";
+                dbms.DoExecuteSQL(insertAmaliatSql, new
+                {
+                    UserId = Baseknow.USERCOD,
+                    UserName = CL_HESABDARI.TruncateString(Baseknow.UUSER, 49),
+                    AmalId = CL_HESABDARI.TruncateString(OPEN_ARG.ToStringNullSafe(), 49)
+                });
+                dbms.DoExecuteSQL(insertAmaliatSql, new
+                {
+                    UserId = Baseknow.USERCOD,
+                    UserName = CL_HESABDARI.TruncateString(FULLHESAB_NAME, 49),
+                    AmalId = CL_HESABDARI.TruncateString(OPEN_ARG.ToStringNullSafe(), 49)
+                });
             }
             catch { }
 
