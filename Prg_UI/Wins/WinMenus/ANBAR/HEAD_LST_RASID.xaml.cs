@@ -148,7 +148,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         public string NameOfCurrentColumn { get; set; }
         public object ENTERED_VALUE_ROW { get; set; }
         public DataGridCell CURRENT_CELL_ROW { get; set; }
-        public INVO_LST_FACTOR22 CURRENT_ITMES_ROW { get; set; }
+        public INVO_LST_FACTOR22? CURRENT_ITMES_ROW { get; set; }
         public Visual I_AM_RASID_KHAREED { get; set; }
 
         List<COMBOPERSONEL> rst_personel = null;
@@ -163,6 +163,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 AllowAdditionEdits(_ican);
             }
         }
+
+        public bool IsOnRequestNumber { get; set; } = false;
 
         #region SPECIAL_F7
         object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
@@ -282,7 +284,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
 
-            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5") //فقط بر اسا شماره درخواست باشه
+            IsOnRequestNumber = Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5";
+            if (IsOnRequestNumber) //فقط بر اسا شماره درخواست باشه
             {
                 NUMBER1.Visibility = Visibility.Visible;
                 LBL_DARKHAST.Visibility = Visibility.Visible;
@@ -307,6 +310,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 );
 
             GetDefaultFocus();
+        }
+        public class CMB_NUMBER1
+        {
+            public int NUMBER { get; set; }
         }
 
         private void GetDefaultFocus()
@@ -396,7 +403,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 //شماره درخواست
                 NUMBER1.Text = HEADER_FAC.NUMBER1.ToString();
-                NUMBER1.Tag = NUMBER1.Text;
+                if (double.TryParse(NUMBER1.Text, out double parsedValue))
+                {
+                    NUMBER1_TAG = parsedValue;
+                }
 
                 SADER.SelectedValue = HEADER_FAC.SADER; SADER.Items.Refresh();
                 TAH.Text = HEADER_FAC.TAH.ToStringNullSafe();
@@ -497,15 +507,22 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ نمی تواند خالی باشد" });
             }
 
+            if (IsOnRequestNumber)
+            {
+                if (_navigationManager.IsNewRecord || INVO_DATA_RASID_KHARID.Any())
+                {
+                    if (NUMBER1.Text == "0" || NUMBER1.SelectedValue == null)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "شماره درخواست نمیتواند خالی باشد" });
+                    }
+                }
+            }
+
             if (CUST_NO.SelectedValue is null) //حساب مشتری
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام مشتری نمیتواند خالی باشد." });
             }
 
-            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5" && IsNull(this.NUMBER1.Text))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = " شماره درخواست وارد نشده است ....!" });
-            }
 
             if (IsNull(this.CUST_NO.SelectedValue) || this.CUST_NO.SelectedIndex < 0)
             {
@@ -1645,8 +1662,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             };
             SADER.SelectedValue = 0; SADER.Items.Refresh();
 
-
-
             //واحد ها
             var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
             foreach (var item in RST)
@@ -1660,6 +1675,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             DEPATMAN.SelectedIndex = 0;
             DEPATMAN.SelectedItem = 0;
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
+
+
+            IsOnRequestNumber = Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5";
+            if (IsOnRequestNumber) // فقط وقتی OPTIONSS[17] == "5"
+            {
+                NUMBER1.ItemsSource = dbms.DoGetDataSQL<CMB_NUMBER1>(
+                    "SELECT NUMBER FROM HEAD_LST WHERE TAG = 23 GROUP BY NUMBER ORDER BY NUMBER"
+                ).ToList();
+                NUMBER1.DisplayMemberPath = "NUMBER";
+                NUMBER1.SelectedValuePath = "NUMBER";
+            }
         }
         private void ReGetdata()
         {
@@ -1734,36 +1760,47 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
             {
-                var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 23 and NUMBER = " + this.NUMBER1.Text).ToList();
-                var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 1 and NUMBER = " + this.NUMBER.Text).ToList();
-                if (RST2.Count == 0)
+                if (TryGetLongFromText(this.NUMBER1.Text, out var requestNumber) && TryGetLongFromText(this.NUMBER.Text, out var receiptNumber))
                 {
-                    //while (!rst.EOF)
-                    for (int i = 0; i < rst.Count; i++)
+                    var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 23 AND NUMBER = @RequestNumber", new { RequestNumber = requestNumber }).ToList();
+                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 1 AND NUMBER = @ReceiptNumber", new { ReceiptNumber = receiptNumber }).ToList();
+                    if (RST2.Count == 0)
                     {
-                        //RST2.AddNew();
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.INVO_LST
-                                                        (
-                                                            NUMBER,
-                                                            TAG,
-                                                            ANBAR,
-                                                            CODE,
-                                                            RADAH,
-                                                            VAHED_K
-                                                        )
-                                                        VALUES
-                                                        (   {NUMBER.Text},
-                                                            1,
-                                                            {rst[i].ANBAR},
-                                                            N'{rst[i].CODE}',
-                                                            {rst[i].id},
-                                                            {rst[i].VAHED_K}
-                                                            )");
+                        //while (!rst.EOF)
+                        for (int i = 0; i < rst.Count; i++)
+                        {
+                            //RST2.AddNew();
+                            dbms.DoExecuteSQL(@"INSERT INTO dbo.INVO_LST
+                                                            (
+                                                                NUMBER,
+                                                                TAG,
+                                                                ANBAR,
+                                                                CODE,
+                                                                RADAH,
+                                                                VAHED_K
+                                                            )
+                                                            VALUES
+                                                            (   @ReceiptNumber,
+                                                                1,
+                                                                @Anbar,
+                                                                @Code,
+                                                                @Radah,
+                                                                @VahedK
+                                                                )",
+                                new
+                                {
+                                    ReceiptNumber = receiptNumber,
+                                    Anbar = rst[i].ANBAR,
+                                    Code = rst[i].CODE,
+                                    Radah = rst[i].id,
+                                    VahedK = rst[i].VAHED_K
+                                });
 
-                        //RST2.update();
-                        //rst.MoveNext();
+                            //RST2.update();
+                            //rst.MoveNext();
+                        }
+                        //this.INVO_LST_RASID_SUB.Requery();
                     }
-                    //this.INVO_LST_RASID_SUB.Requery();
                 }
             }
             ;
@@ -1795,32 +1832,43 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             long num = 0;
 
-            // بخش کدهای مربوط به شماره درخواست (بدون تغییر)
+            // بخش کدهای مربوط به شماره درخواست
             if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
             {
-                var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 23 and NUMBER = " + this.NUMBER1.Text).ToList();
-                var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 1 and NUMBER = " + this.NUMBER.Text).ToList();
-                if (RST2.Count == 0)
+                if (TryGetLongFromText(this.NUMBER1.Text, out var requestNumber) && TryGetLongFromText(this.NUMBER.Text, out var receiptNumber))
                 {
-                    for (int i = 0; i < rst.Count; i++)
+                    var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 23 AND NUMBER = @RequestNumber", new { RequestNumber = requestNumber }).ToList();
+                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 1 AND NUMBER = @ReceiptNumber", new { ReceiptNumber = receiptNumber }).ToList();
+                    if (RST2.Count == 0)
                     {
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.INVO_LST
-                                                        (
-                                                            NUMBER,
-                                                            TAG,
-                                                            ANBAR,
-                                                            CODE,
-                                                            RADAH,
-                                                            VAHED_K
-                                                        )
-                                                        VALUES
-                                                        (   {NUMBER.Text},
-                                                            1,
-                                                            {rst[i].ANBAR},
-                                                            N'{rst[i].CODE}',
-                                                            {rst[i].id},
-                                                            {rst[i].VAHED_K}
-                                                            )");
+                        for (int i = 0; i < rst.Count; i++)
+                        {
+                            dbms.DoExecuteSQL(@"INSERT INTO dbo.INVO_LST
+                                                            (
+                                                                NUMBER,
+                                                                TAG,
+                                                                ANBAR,
+                                                                CODE,
+                                                                RADAH,
+                                                                VAHED_K
+                                                            )
+                                                            VALUES
+                                                            (   @ReceiptNumber,
+                                                                1,
+                                                                @Anbar,
+                                                                @Code,
+                                                                @Radah,
+                                                                @VahedK
+                                                                )",
+                                new
+                                {
+                                    ReceiptNumber = receiptNumber,
+                                    Anbar = rst[i].ANBAR,
+                                    Code = rst[i].CODE,
+                                    Radah = rst[i].id,
+                                    VahedK = rst[i].VAHED_K
+                                });
+                        }
                     }
                 }
             }
@@ -1910,44 +1958,283 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 INVO_LST_RASID_SUB.CellEditEnding += INVO_LST_RASID_SUB_CellEditEnding;
             });
         }
+
+        public double? NUMBER1_TAG { get; private set; } = null;
         private void NUMBER1_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (NUMBER1.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
-            //NUMBER1_BeforeUpdate
-            if (Convert.ToDouble(NUMBER.Text ?? "0") > 0)
-            {
-                if (!string.IsNullOrEmpty(NUMBER1.Text) && NUMBER1.SelectedValue == null)
-                {
-                    universControl.PopNotifyShowUp("چنین شماره درخواستی وجود ندارد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
-                    NUMBER1.Text = NUMBER1.Tag.ToString();
-                    return;
-                }
-                else
-                {
-                    NUMBER1.Text = NUMBER1.Tag.ToString();
-                }
+            bool isOK = true;
+            string title = "شماره درخواست";
 
-                var rst = dbms.DoGetDataSQL<int?>("SELECT COUNT(NUMBER) AS FNUM FROM INVO_LST WHERE TAG = 1 and NUMBER = " + NUMBER.Text).FirstOrDefault();
-                if (rst > 0)
+            // Handle empty value
+            if (string.IsNullOrWhiteSpace(NUMBER1.Text?.Trim()))
+            {
+                isOK = false;
+            }
+
+            if (_navigationManager.IsNewRecord)
+            {
+                string selected = NUMBER1.Text?.Trim() ?? "";
+
+                if (!string.IsNullOrWhiteSpace(selected))
                 {
-                    if (NUMBER1.Text != "0" && NUMBER1.Text != NUMBER1.Tag?.ToString())
+                    // Check if this NUMBER1 is already used in another record
+                    var existingRecordNumber = dbms.DoGetDataSQL<double?>("SELECT NUMBER FROM HEAD_LST WHERE TAG = @TAG AND NUMBER1 = @NUMBER1", new { TAG = 1, NUMBER1 = selected }).FirstOrDefault();
+
+                    if (existingRecordNumber != null)
                     {
-                        NUMBER1.Text = NUMBER1.Tag.ToString();
-                        Msgwin msgwin = new Msgwin(false, "اين برگه داراي اطلاعات  مي باشد .ابتدا اطلاعات سطرهاي زير را حذف كنيد سپس شماره درخواست جديد را وارد نماييد.");
-                        msgwin.ShowDialog();
+                        new Msgwin(false, $"این {title} قبلاً برای رسید انبار شماره {existingRecordNumber} استفاده شده است. ").ShowDialog();
+                        isOK = false;
+
+                        // Check if the conflicting warehouse receipt has detail rows
+                        var detailCount = dbms.DoGetDataSQL<int>("SELECT COUNT(NUMBER) AS fnum FROM INVO_LST WHERE TAG = @TAG AND NUMBER = @NUMBER", new { TAG = 1, NUMBER = existingRecordNumber }).FirstOrDefault();
+
+                        if (detailCount > 0)
+                        {
+                            universControl.PopNotifyShow("این برگه دارای اطلاعات می‌باشد. ابتدا اطلاعات سطرهای زیر را حذف کنید سپس شماره درخواست جدید را وارد نمایید.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                        }
+
+                        var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER == existingRecordNumber);
+                        if (itemfound == null)
+                        {
+                            new Msgwin(false, $"رسید انبار شماره {existingRecordNumber} در لیست فعلی شما یافت نشد، ممکن است به آن دسترسی نداشته باشید.").ShowDialog();
+                        }
+
+                        // Revert to original value
+                        NUMBER1.SelectedValue = NUMBER1_TAG;
+                        NUMBER1.Text = NUMBER1_TAG?.ToString();
+                        NUMBER1.Items.Refresh();
+                        e.Handled = true;
+                        return;
                     }
-                    else if (!string.IsNullOrEmpty(NUMBER1.Text)) //Success:
-                    {
-                        NUMBER1.Tag = NUMBER1.Text;
-                    }
-                }
-                if (string.IsNullOrEmpty(FNUMCO.Text))
-                {
-                    FNUMCO.Text = "0";
                 }
             }
+            else // Edit existing record
+            {
+                if (!double.TryParse(NUMBER1.Text, out double enteredNumber1) || enteredNumber1 != NUMBER1_TAG)
+                {
+                    // Check if current record has detail rows before allowing NUMBER1 change
+                    var detailCount = dbms.DoGetDataSQL<int>("SELECT COUNT(NUMBER) AS fnum FROM INVO_LST WHERE TAG = @TAG AND NUMBER = @NUMBER", new { TAG = 1, NUMBER = NUMBER.Text }).FirstOrDefault();  // NUMBER is the current warehouse receipt number
+
+                    if (detailCount > 0)
+                    {
+                        new Msgwin(false, "این برگه دارای اطلاعات می‌باشد. ابتدا اطلاعات سطرهای زیر را حذف کنید سپس شماره درخواست جدید را وارد نمایید.").ShowDialog();
+
+                        NUMBER1.SelectedValue = NUMBER1_TAG;
+                        NUMBER1.Text = NUMBER1_TAG?.ToString();
+                        NUMBER1.Items.Refresh();
+                        isOK = false;
+                        e.Handled = true;
+                        return;
+                    }
+                }
+            }
+
+            // Confirmation for changing NUMBER1 on existing record
+            if (NUMBER1_TAG > 0)
+            {
+                if (double.TryParse(NUMBER1.Text, out double newNumber1) && newNumber1 != NUMBER1_TAG && newNumber1 != 0)
+                {
+                    Msgwin msgwin = new Msgwin(true, "آیا از تغییر شماره درخواست مطمئن هستید؟");
+                    msgwin.ShowDialog();
+
+                    if (msgwin.DialogResult == false) // User chose NO
+                    {
+                        NUMBER1.SelectedValue = NUMBER1_TAG;
+                        NUMBER1.Text = NUMBER1_TAG?.ToString();
+                        NUMBER1.Items.Refresh();
+                        e.Handled = true;
+                        return;
+                    }
+                }
+            }
+
+            // Final success path
+            if (!string.IsNullOrWhiteSpace(NUMBER1.Text))
+            {
+                NUMBER1_TAG = Convert.ToDouble(NUMBER1.Text);
+            }
+
+            if (isOK)
+            {
+                // InsertRowsByRequestNumber1();   // Uncomment when needed
+            }
         }
+        private void InsertRowsByRequestNumber1(bool isNumberSelectedNow = true)
+        {
+            if (isNumberSelectedNow)
+                return;
+
+            if (string.IsNullOrWhiteSpace(NUMBER1.Text) || NUMBER1.Text == "0")
+                return;
+
+            if (!double.TryParse(NUMBER1.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double requestNumber))
+                return;
+
+            const int requestTag = 23;
+            const int receiptTag = 1;
+            string title = "شماره درخواست";
+
+            if (CL_HESABDARI.Signed(12, Convert.ToInt64(NUMBER.Text)))
+            {
+                new Msgwin(false, "براي اين رسید فاکتور صادر شده و به امضاء رسيده است .اگر ميخواهيد آنرا اصلاح کنيد بايد امضاء دوم و سوم فاکتور  برداشته شود . به کارتابل ارسال کنيد و براي مدير مالي جهت برداشتن امضا ارسال کنيد").ShowDialog();
+                return;
+            }
+
+            // === New Record Handling ===
+            if (_navigationManager.IsNewRecord)
+            {
+                var selected = NUMBER1.Text.Trim();
+
+                var existingRecordNumber = dbms.DoGetDataSQL<double?>(
+                    "SELECT NUMBER FROM HEAD_LST WHERE TAG = @TAG AND NUMBER1 = @NUMBER1",
+                    new { TAG = 1, NUMBER1 = selected }
+                ).FirstOrDefault();
+
+                if (existingRecordNumber != null)
+                {
+                    new Msgwin(false, $"این {title} قبلاً برای رسید انبار شماره {existingRecordNumber} استفاده شده است. در حال بارگذاری آن برگه...").ShowDialog();
+
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER == existingRecordNumber);
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx >= 0)
+                        {
+                            _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        }
+                    }
+                    else
+                    {
+                        new Msgwin(false, $"رسید انبار شماره {existingRecordNumber} در لیست فعلی شما یافت نشد، ممکن است به آن دسترسی نداشته باشید.").ShowDialog();
+                    }
+
+                    NUMBER1.SelectedValue = NUMBER1_TAG;
+                    NUMBER1.Text = NUMBER1_TAG?.ToString();
+                    NUMBER1.Items.Refresh();
+                    return;
+                }
+            }
+            else // Edit existing record
+            {
+                if (Convert.ToDouble(NUMBER1.Text) != NUMBER1_TAG)
+                {
+                    var detailCount = dbms.DoGetDataSQL<int>(
+                        "SELECT COUNT(NUMBER) AS fnum FROM INVO_LST WHERE TAG = @TAG AND NUMBER = @NUMBER",
+                        new { TAG = 1, NUMBER = NUMBER.Text }
+                    ).FirstOrDefault();
+
+                    if (detailCount > 0)
+                    {
+                        new Msgwin(false, "این برگه دارای اطلاعات می‌باشد. ابتدا اطلاعات سطرهای زیر را حذف کنید سپس شماره درخواست جدید را وارد نمایید.").ShowDialog();
+                        NUMBER1.SelectedValue = NUMBER1_TAG;
+                        NUMBER1.Text = NUMBER1_TAG?.ToString();
+                        NUMBER1.Items.Refresh();
+                        return;
+                    }
+                }
+            }
+
+            // === Validate Request Exists ===
+            var header = dbms.DoGetDataSQL<HEAD_LST>(@"SELECT TOP 1 * FROM HEAD_LST WHERE NUMBER=@Number AND TAG=@Tag", new { Number = requestNumber, Tag = requestTag }
+            ).FirstOrDefault();
+
+            if (header == null)
+            {
+                new Msgwin(false, "چنین شماره درخواستی وجود ندارد").Show();
+                return;
+            }
+
+            // === Get Request Lines ===
+            var requestLines = dbms.DoGetDataSQL<INVO_LST_FACTOR22>(@"SELECT * FROM INVO_LST WHERE NUMBER=@Number AND TAG=@Tag ORDER BY RADIF", new { Number = requestNumber, Tag = requestTag }).ToList();
+
+            if (!requestLines.Any())
+                return;
+
+            double receiptNumber = Convert.ToDouble(NUMBER.Text);
+
+            // === Get existing items in current receipt (CODE + ANBAR) ===
+            var existingItems = dbms.DoGetDataSQL<(string Code, int? Anbar)>(
+                @"SELECT CODE, ANBAR 
+          FROM INVO_LST 
+          WHERE NUMBER = @Number AND TAG = @Tag 
+            AND CODE IS NOT NULL",
+                new { Number = receiptNumber, Tag = receiptTag }
+            ).ToHashSet();
+
+            // === Filter only new items that do not exist yet ===
+            var linesToAdd = requestLines
+                .Where(line => !string.IsNullOrWhiteSpace(line.CODE) &&
+                               !existingItems.Contains((line.CODE, line.ANBAR)))
+                .ToList();
+
+            if (!linesToAdd.Any())
+            {
+                // All items already exist
+                return;
+            }
+
+            // === Get next RADIF ===
+            int nextRadif = dbms.DoGetDataSQL<int>(
+                @"SELECT ISNULL(MAX(RADIF), 0) 
+          FROM INVO_LST 
+          WHERE NUMBER=@Number AND TAG=@Tag",
+                new { Number = receiptNumber, Tag = receiptTag }
+            ).FirstOrDefault();
+
+            // === Insert missing lines ===
+            foreach (var line in linesToAdd)
+            {
+                nextRadif++;
+
+                string mandahText = $"{line.MEGHk}|{line.MANDAH}".Trim();
+                if (mandahText.Length > 50)
+                    mandahText = mandahText.Substring(0, 50);
+
+                dbms.DoExecuteSQL(
+                    @"INSERT INTO INVO_LST
+            (NUMBER, TAG, ANBAR, RADIF, CODE,
+             MEGH, MEGHk, MEGH_MAR, MANDAH,
+             MABL, MABL_K, FROM_A, N_RASID,
+             MEGH_R, VAHED_K, N_KOL, N_MOIN,
+             N_TAF, AVRAGE, CRT)
+            VALUES
+            (@NUMBER, @TAG, @ANBAR, @RADIF, @CODE,
+             @MEGH, @MEGHk, @MEGH_MAR, @MANDAH,
+             @MABL, @MABL_K, @FROM_A, @N_RASID,
+             @MEGH_R, @VAHED_K, @N_KOL, @N_MOIN,
+             @N_TAF, @AVRAGE, GETDATE())",
+                    new
+                    {
+                        NUMBER = receiptNumber,
+                        TAG = receiptTag,
+                        ANBAR = line.ANBAR,
+                        RADIF = nextRadif,
+                        CODE = line.CODE,
+                        MEGH = 0,
+                        MEGHk = 0,
+                        MEGH_MAR = 0,
+                        MANDAH = mandahText,
+                        MABL = 0,
+                        MABL_K = 0,
+                        FROM_A = line.FROM_A,
+                        N_RASID = line.N_RASID,
+                        MEGH_R = line.MEGH_R,
+                        VAHED_K = line.VAHED_K,
+                        N_KOL = 0,
+                        N_MOIN = 0,
+                        N_TAF = 0,
+                        AVRAGE = 0
+                    });
+            }
+
+            ReGetdata();
+        }
+
+
+
         private void NUMBER1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -1966,6 +2253,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
         }
+        private bool TryGetLongFromText(string text, out long value)
+        {
+            return long.TryParse(text?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+        }
+
         private bool IsNull(object hTAF2)
         {
             if (hTAF2 is null)
@@ -2240,7 +2532,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     }
                     else if (CL_HESABDARI.Signed(12, Convert.ToInt64(NUMBER.Text)))
                     {
-                        new Msgwin(false, "براي اين حواله فاکتور صادر شده و به امضاء رسيده است .اگر ميخواهيد آنرا اصلاح کنيد بايد امضاء دوم و سوم فاکتور  برداشته شود . به کارتابل ارسال کنيد و براي مدير مالي جهت برداشتن امضا ارسال کنيد").ShowDialog();
+                        new Msgwin(false, "براي اين رسید فاکتور صادر شده و به امضاء رسيده است .اگر ميخواهيد آنرا اصلاح کنيد بايد امضاء دوم و سوم فاکتور  برداشته شود . به کارتابل ارسال کنيد و براي مدير مالي جهت برداشتن امضا ارسال کنيد").ShowDialog();
                         return;
                     }
                     else
@@ -2840,29 +3132,46 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void MEGH_BeforeUpdate_Sub()
         {
             double MEGHCH;
-            if (!NewRecord && Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
+            if (!_navigationManager.IsNewRecord && Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
             {
-                var rst = dbms.DoGetDataSQL<QRE_KH_0>("SELECT     NUMBER,ID, TAG, ANBAR, CODE, VAHED_K, MEGH, MEGHk FROM dbo.INVO_LST WHERE (TAG = 23) And   (NUMBER = " + NUMBER1.Text.ToStringNullSafe() + ") AND  (ID = " + CURRENT_ITMES_ROW.RADAH + ")").ToList();
-                if (rst.Count == 0)
+                if (CURRENT_ITMES_ROW == null)
                 {
-                    new Msgwin(false, "مغايرت در درخواست خريد و رسيد!!!.").ShowDialog();
-                }
-                else
-                {
-                    var RST2 = dbms.DoGetDataSQL<double?>("SELECT SUM(dbo.INVO_LST.MEGH) AS MEGHS, SUM(dbo.INVO_LST.MEGHk) AS MEGHkS FROM  dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE  (dbo.INVO_LST.TAG = 1) And   (dbo.HEAD_LST.NUMBER1 = " + NUMBER1.Text + ") AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + " ) AND  (dbo.INVO_LST.RADAH = " + CURRENT_ITMES_ROW.RADAH + ") ").ToList();
-                    if (RST2.Count == 0 || IsNull(RST2.FirstOrDefault()))
+                    // Try to recover from DataGrid current item
+                    if (INVO_LST_RASID_SUB.SelectedItem is INVO_LST_FACTOR22 selectedRow)
                     {
-                        MEGHCH = (double)rst.FirstOrDefault().MEGH;
+                        CURRENT_ITMES_ROW = selectedRow;
                     }
                     else
                     {
-                        MEGHCH = ((double)(rst.FirstOrDefault().MEGH - RST2.FirstOrDefault()));
-                    }
-                    if (CURRENT_ITMES_ROW.MEGH > MEGHCH)
-                    {
-                        new Msgwin(false, "مقدار وارده از مقدار درخواستي بيشتر است!  " + '\n' + " مقدار رسيد شده قبلي : " + RST2.FirstOrDefault() + "       مقدار درخواستي :  " + rst.FirstOrDefault().MEGH + " مانده :  " + MEGHCH).ShowDialog();
+                        return; // Cannot proceed safely
                     }
                 }
+
+                if (CURRENT_ITMES_ROW?.RADAH != null)
+                {
+                    var rst = dbms.DoGetDataSQL<QRE_KH_0>("SELECT     NUMBER,ID, TAG, ANBAR, CODE, VAHED_K, MEGH, MEGHk FROM dbo.INVO_LST WHERE (TAG = 23) And   (NUMBER = " + NUMBER1.Text.ToStringNullSafe() + ") AND  (ID = " + CURRENT_ITMES_ROW.RADAH + ")").ToList();
+                    if (rst.Count == 0)
+                    {
+                        new Msgwin(false, "مغايرت در درخواست خريد و رسيد!!!.").ShowDialog();
+                    }
+                    else
+                    {
+                        var RST2 = dbms.DoGetDataSQL<double?>("SELECT SUM(dbo.INVO_LST.MEGH) AS MEGHS, SUM(dbo.INVO_LST.MEGHk) AS MEGHkS FROM  dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE  (dbo.INVO_LST.TAG = 1) And   (dbo.HEAD_LST.NUMBER1 = " + NUMBER1.Text + ") AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + " ) AND  (dbo.INVO_LST.RADAH = " + CURRENT_ITMES_ROW.RADAH + ") ").ToList();
+                        if (RST2.Count == 0 || IsNull(RST2.FirstOrDefault()))
+                        {
+                            MEGHCH = (double)rst.FirstOrDefault().MEGH;
+                        }
+                        else
+                        {
+                            MEGHCH = ((double)(rst.FirstOrDefault().MEGH - RST2.FirstOrDefault()));
+                        }
+                        if (CURRENT_ITMES_ROW.MEGH > MEGHCH)
+                        {
+                            new Msgwin(false, "مقدار وارده از مقدار درخواستي بيشتر است!  " + '\n' + " مقدار رسيد شده قبلي : " + RST2.FirstOrDefault() + "       مقدار درخواستي :  " + rst.FirstOrDefault().MEGH + " مانده :  " + MEGHCH).ShowDialog();
+                        }
+                    }
+                }
+              
             }
         }
         private void MEGH_R_AfterUpdate()
@@ -2922,6 +3231,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 IsSaveSuccess = false;
                 return;
+            }
+
+            if (IsOnRequestNumber)
+            {
+                InsertRowsByRequestNumber1(false);
             }
 
             ChangeIsHappend = false;
@@ -2991,7 +3305,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             const string QRE_HEADINSUP_PARAMETRIC = @"
                             INSERT INTO dbo.HEAD_LST
                             (
-                                NUMBER, TAG, DATE_N, TAH, VAS, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, 
+                                NUMBER,NUMBER1, TAG, DATE_N, TAH, VAS, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, 
                                 MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, 
                                 ANBARF, FNUMCO, SHIFT, USER_NAME, SGN1, SGN2, SGN4, MBAA, HMBAA, 
                                 TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, 
@@ -2999,7 +3313,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             )
                             VALUES
                             (
-                                @NUMBER, @TAG, @DATE_N, @TAH, @VAS, @CUST_NO, @MOLAH, @M_NAGHD, @MABL_VAR, 
+                                @NUMBER,@NUMBER1, @TAG, @DATE_N, @TAH, @VAS, @CUST_NO, @MOLAH, @M_NAGHD, @MABL_VAR, 
                                 @MOIN_VAR, @MABL_HAV, @MOIN_HAV, @MABL_HAZ, @MOIN_HAZ, @TAKHFIFA, @MOIN_KHF, 
                                 @ANBARF, @FNUMCO, @SHIFT, @USER_NAME, @SGN1, @SGN2, @SGN4, @MBAA, @HMBAA, 
                                 @TICMBAA, @TKHF, @OKF, @SADER, @ARZD, @ARZKIND, @CDDATE, @CDTIME, @OKDATE, 
@@ -3008,6 +3322,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             var parameters = new
                             {
                                 NUMBER = num,
+                                NUMBER1 = NUMBER1.SelectedValue?.ToString(),
                                 TAG = 1, // ثابت
                                 DATE_N = DATE_N.Text.ToRawTarikh(),
                                 TAH = tah,
@@ -3061,15 +3376,41 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
                 else //Update Edit
                 {
-                    var QRE = $@"UPDATE dbo.HEAD_LST SET DATE_N={DATE_N.Text.ToRawTarikh()}, 
-                                        DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"},
-                                        SHIFT = {CL_Generaly.SHIFT_OF_USER},
-                                        FNUMCO={(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},SADER={(SADER.SelectedValue == null ? "NULL" : SADER.SelectedValue)}, 
-                                        TAH=N'{tah}', MOLAH=N'{molah}', CUST_NO=N'{CUST_NO.SelectedValue}',  OKF={Convert.ToInt32(OKF.IsChecked ?? true)},
-                                        SGN1usid={(SGN1usid.SelectedValue is null ? "NULL" : SGN1usid.SelectedValue)},SGN2usid={(SGN2usid.SelectedValue is null ? "NULL" : SGN2usid.SelectedValue)}
-                                        WHERE TAG=1 AND NUMBER={NUMBER.Text}";
+                    var qre = @"
+UPDATE dbo.HEAD_LST
+SET 
+    DATE_N     = @DATE_N,
+    DEPATMAN   = @DEPATMAN,
+    SHIFT      = @SHIFT,
+    FNUMCO     = @FNUMCO,
+    SADER      = @SADER,
+    TAH        = @TAH,
+    MOLAH      = @MOLAH,
+    CUST_NO    = @CUST_NO,
+    OKF        = @OKF,
+    SGN1usid   = @SGN1usid,
+    SGN2usid   = @SGN2usid,
+    NUMBER1    = @NUMBER1
+WHERE TAG = 1 
+  AND NUMBER = @NUMBER";
 
-                    dbms.DoExecuteSQL(QRE);
+                    dbms.DoExecuteSQL(qre, new
+                    {
+                        DATE_N = DATE_N.Text.ToRawTarikh(),
+                        DEPATMAN = DEPATMAN.SelectedValue,
+                        SHIFT = CL_Generaly.SHIFT_OF_USER,
+                        FNUMCO = string.IsNullOrWhiteSpace(FNUMCO.Text) ? null : FNUMCO.Text,
+                        SADER = SADER.SelectedValue,
+                        TAH = tah,
+                        MOLAH = molah,
+                        CUST_NO = CUST_NO.SelectedValue,
+                        OKF = Convert.ToInt32(OKF.IsChecked ?? true),
+                        SGN1usid = SGN1usid.SelectedValue,
+                        SGN2usid = SGN2usid.SelectedValue,
+                        NUMBER1 = string.IsNullOrWhiteSpace(NUMBER1.Text) ? null : NUMBER1.Text,
+                        NUMBER = NUMBER.Text
+                    });
+
                 }
             }
             catch (Exception)
@@ -3358,8 +3699,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             NUMBER1.SelectedValue = null;
             NUMBER1.Text = "0";
-            NUMBER1.Tag = null;
             NUMBER.Text = "0";
+
+            NUMBER1.Tag = null;
+            NUMBER1_TAG = null;
 
             DATE_N.Text = Tarikh.FullCurrentDate; //تاریخ
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری

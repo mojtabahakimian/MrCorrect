@@ -3860,17 +3860,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         void MEGH_AfterUpdate()
         {
-            if (CURRENT_ROW_ITEMS.MABL is null || CURRENT_ROW_ITEMS.MEGHk is null || CURRENT_ROW_ITEMS.MEGH is null)
+            if (CURRENT_ROW_ITEMS is null || string.IsNullOrWhiteSpace(CURRENT_ROW_ITEMS.CODE) || CURRENT_ROW_ITEMS.VAHED_K is null || CURRENT_ROW_ITEMS.MABL is null || CURRENT_ROW_ITEMS.MEGH is null)
             {
                 return;
             }
-            var currentMeghk = CURRENT_ROW_ITEMS.MEGHk.GetValueOrDefault();
+
+            var decimalPlaces = Convert.ToInt32(Baseknow.DIG ?? 2);
             var currentMeghMar = CURRENT_ROW_ITEMS.MEGH_MAR.GetValueOrDefault();
             var wasMeghk = WAS_ROW_ITEM?.MEGHk.GetValueOrDefault() ?? 0;
 
             #region MEGH_AfterUpdate
             double min;
-            long Temp;
             double MAND;
             var RST0 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ROW_ITEMS.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ROW_ITEMS.VAHED_K + ")))").ToList();
             if (RST0.Count == 0)
@@ -3889,27 +3889,34 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     return;
                 }
 
-                CURRENT_ROW_ITEMS.MEGHk = CURRENT_ROW_ITEMS.MEGH * RST0.FirstOrDefault().NESBAT;
-                CURRENT_ROW_ITEMS.MEGH_R = CURRENT_ROW_ITEMS.MEGH * RST0.FirstOrDefault().NESBAT;
+                var nesbat = vahadInfo.NESBAT.GetValueOrDefault();
+                CURRENT_ROW_ITEMS.MEGHk = CURRENT_ROW_ITEMS.MEGH.GetValueOrDefault() * nesbat;
+                CURRENT_ROW_ITEMS.MEGH_R = CURRENT_ROW_ITEMS.MEGH.GetValueOrDefault() * nesbat;
 
 
                 if (CURRENT_ROW_ITEMS.MABL == 0)
                 {
-                    var TheCol1 = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
-                    var DGCInf1 = new DataGridCellInfo(CURRENT_ROW_INDEX, INVO_LST_sub.Columns[TheCol1]);
-                    var THECELL1 = CL_LMethods.GetCell(INVO_LST_sub, CURRENT_ROW_INDEX, TheCol1);
-                    if (!(THECELL1 is null))
-                        THECELL1.IsTabStop = true;
+                    var TheCol1 = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K")?.DisplayIndex ?? -1;
+                    if (TheCol1 >= 0)
+                    {
+                        var DGCInf1 = new DataGridCellInfo(CURRENT_ROW_INDEX, INVO_LST_sub.Columns[TheCol1]);
+                        var THECELL1 = CL_LMethods.GetCell(INVO_LST_sub, CURRENT_ROW_INDEX, TheCol1);
+                        if (!(THECELL1 is null))
+                            THECELL1.IsTabStop = true;
+                    }
 
                     //CURRENT_ROW_ITEMS.MABL_K.TabStop = true;
                 }
                 else
                 {
-                    var TheCol1 = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
-                    var DGCInf1 = new DataGridCellInfo(CURRENT_ROW_INDEX, INVO_LST_sub.Columns[TheCol1]);
-                    var THECELL1 = CL_LMethods.GetCell(INVO_LST_sub, CURRENT_ROW_INDEX, TheCol1);
-                    if (!(THECELL1 is null))
-                        THECELL1.IsTabStop = false;
+                    var TheCol1 = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K")?.DisplayIndex ?? -1;
+                    if (TheCol1 >= 0)
+                    {
+                        var DGCInf1 = new DataGridCellInfo(CURRENT_ROW_INDEX, INVO_LST_sub.Columns[TheCol1]);
+                        var THECELL1 = CL_LMethods.GetCell(INVO_LST_sub, CURRENT_ROW_INDEX, TheCol1);
+                        if (!(THECELL1 is null))
+                            THECELL1.IsTabStop = false;
+                    }
                     //CURRENT_ROW_ITEMS.MABL_K.Text.TabStop = false;
 
                     if (CURRENT_ROW_ITEMS.MEGHk is null)
@@ -3917,10 +3924,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         return;
                     }
 
-                    CURRENT_ROW_ITEMS.MABL_K = Math.Round((double)(CURRENT_ROW_ITEMS.MABL * CURRENT_ROW_ITEMS.MEGHk));
+                    CURRENT_ROW_ITEMS.MABL_K = Math.Round(CURRENT_ROW_ITEMS.MABL.GetValueOrDefault() * CURRENT_ROW_ITEMS.MEGHk.GetValueOrDefault());
                 }
             }
-            if (Baseknow.MOJU && CURRENT_ROW_ITEMS.ANBAR != 0)
+
+            var currentMeghk = CURRENT_ROW_ITEMS.MEGHk.GetValueOrDefault();
+            var currentAnbar = CURRENT_ROW_ITEMS.ANBAR.GetValueOrDefault();
+            if (Baseknow.MOJU && currentAnbar != 0)
             {
                 // RST.Open "STUF_DEF"
                 // RST.Filter = "CODE = '" && Me.CODE && "'"
@@ -3928,26 +3938,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 // If RST.RecordCount = 0 Then
                 // Else
                 // If IsNull(RST.Fields("MIN_M")) Then
-                min = CL_HESABDARI.Getmin((int)CURRENT_ROW_ITEMS.ANBAR, CURRENT_ROW_ITEMS.CODE);
+                min = CL_HESABDARI.Getmin(currentAnbar, CURRENT_ROW_ITEMS.CODE);
                 if (!IsNull(Baseknow.RMOG) && Convert.ToBoolean(Baseknow.RMOG))
                 {
 
-                    var RSTM0 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + CURRENT_ROW_ITEMS.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + CURRENT_ROW_ITEMS.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ROW_ITEMS.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + CURRENT_ROW_ITEMS.ANBAR + ")").ToList();
+                    var RSTM0 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + currentAnbar + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + currentAnbar + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ROW_ITEMS.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + currentAnbar + ")").ToList();
                     if (RSTM0.Count > 0)
                     {
                         var mandValue = RSTM0.FirstOrDefault();
                         MAND = mandValue.GetValueOrDefault();
-                        if (Math.Round((double)(mandValue.GetValueOrDefault() - (currentMeghk - (wasMeghk - currentMeghMar))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
+                        if (Math.Round(mandValue.GetValueOrDefault() - (currentMeghk - (wasMeghk - currentMeghMar)), decimalPlaces) < Math.Round(min, decimalPlaces) && currentAnbar != 0 && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
-                            CURRENT_ROW_ITEMS.MEGH = WAS_ROW_ITEM.MEGH/*.TAG*/;
-                            CURRENT_ROW_ITEMS.MEGHk = WAS_ROW_ITEM.MEGHk/*.TAG*/;
-                            CURRENT_ROW_ITEMS.MABL_K = WAS_ROW_ITEM.MABL_K/*.TAG*/;
-                            CURRENT_ROW_ITEMS.MABL = WAS_ROW_ITEM.MABL/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MEGH = WAS_ROW_ITEM?.MEGH ?? CURRENT_ROW_ITEMS.MEGH/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MEGHk = WAS_ROW_ITEM?.MEGHk ?? CURRENT_ROW_ITEMS.MEGHk/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MABL_K = WAS_ROW_ITEM?.MABL_K ?? CURRENT_ROW_ITEMS.MABL_K/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MABL = WAS_ROW_ITEM?.MABL ?? CURRENT_ROW_ITEMS.MABL/*.TAG*/;
                             chek = true;
-                            var RSTM1 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR).ToList();
-                            string _where = " WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR;
+                            var RSTM1 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + currentAnbar).ToList();
+                            string _where = " WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + currentAnbar;
                             if (RSTM1.Count > 0)
                             {
                                 RSTM1.FirstOrDefault().MOGODI = MAND;
@@ -3959,8 +3969,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                         else
                         {
-                            var RSTM2 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR).ToList();
-                            var _where = " WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR;
+                            var RSTM2 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + currentAnbar).ToList();
+                            var _where = " WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + currentAnbar;
                             if (RSTM2.Count > 0)
                             {
                                 RSTM2.FirstOrDefault().MOGODI = MAND - (currentMeghk - (wasMeghk - currentMeghMar));
@@ -3974,22 +3984,22 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 else
                 {
-                    var _where = "CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR;
+                    var _where = "WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + currentAnbar;
                     var RSTM3 = dbms.DoGetDataSQL<STUF_STK_CSHARP>($"SELECT * FROM dbo.STUF_STK {_where}").ToList();
                     if (RSTM3.Count == 0)
                     {
                         Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
                         msgwin.ShowDialog();
                     }
-                    else if (CURRENT_ROW_ITEMS.CODE == WAS_ROW_ITEM.CODE/*.TAG*/)
+                    else if (CURRENT_ROW_ITEMS.CODE == WAS_ROW_ITEM?.CODE/*.TAG*/)
                     {
                         if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (currentMeghk - (wasMeghk - currentMeghMar)) < min && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
-                            CURRENT_ROW_ITEMS.MEGH = WAS_ROW_ITEM.MEGH/*.TAG*/;
-                            CURRENT_ROW_ITEMS.MEGHk = WAS_ROW_ITEM.MEGHk/*.TAG*/;
-                            CURRENT_ROW_ITEMS.MABL_K = WAS_ROW_ITEM.MABL_K/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MEGH = WAS_ROW_ITEM?.MEGH ?? CURRENT_ROW_ITEMS.MEGH/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MEGHk = WAS_ROW_ITEM?.MEGHk ?? CURRENT_ROW_ITEMS.MEGHk/*.TAG*/;
+                            CURRENT_ROW_ITEMS.MABL_K = WAS_ROW_ITEM?.MABL_K ?? CURRENT_ROW_ITEMS.MABL_K/*.TAG*/;
                             chek = true;
                         }
                     }
@@ -3997,9 +4007,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                         msgwin.ShowDialog();
-                        CURRENT_ROW_ITEMS.MEGH = WAS_ROW_ITEM.MEGH/*.TAG*/;
-                        CURRENT_ROW_ITEMS.MEGHk = WAS_ROW_ITEM.MEGHk/*.TAG*/;
-                        CURRENT_ROW_ITEMS.MABL_K = WAS_ROW_ITEM.MABL_K/*.TAG*/;
+                        CURRENT_ROW_ITEMS.MEGH = WAS_ROW_ITEM?.MEGH ?? CURRENT_ROW_ITEMS.MEGH/*.TAG*/;
+                        CURRENT_ROW_ITEMS.MEGHk = WAS_ROW_ITEM?.MEGHk ?? CURRENT_ROW_ITEMS.MEGHk/*.TAG*/;
+                        CURRENT_ROW_ITEMS.MABL_K = WAS_ROW_ITEM?.MABL_K ?? CURRENT_ROW_ITEMS.MABL_K/*.TAG*/;
                         chek = true;
                     }
                 }
@@ -4025,8 +4035,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                 }
             }
-            CURRENT_ROW_ITEMS.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ROW_ITEMS.CODE, Convert.ToInt64(CURRENT_ROW_ITEMS.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-            CURRENT_ROW_ITEMS.N_MOIN = Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100)) + Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100))) * CURRENT_ROW_ITEMS.TKHN / 100));
+            CURRENT_ROW_ITEMS.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ROW_ITEMS.CODE, Convert.ToInt64(CURRENT_ROW_ITEMS.ANBAR.GetValueOrDefault()), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
+            var nKol = CURRENT_ROW_ITEMS.N_KOL.GetValueOrDefault();
+            var mablK = CURRENT_ROW_ITEMS.MABL_K.GetValueOrDefault();
+            var tkhn = CURRENT_ROW_ITEMS.TKHN.GetValueOrDefault();
+            var nKolDiscount = Math.Round(nKol * mablK / 100);
+            CURRENT_ROW_ITEMS.N_MOIN = nKolDiscount + Math.Round((mablK - nKolDiscount) * tkhn / 100);
             if ((TICMBAA.IsChecked ?? false))
             {
                 var RSTM7 = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
@@ -4034,9 +4048,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     if (RSTM7.FirstOrDefault()?.CMBAA == true)
                     {
-                        if (CURRENT_ROW_ITEMS.IMBAA != Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - CURRENT_ROW_ITEMS.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100)))
+                        var imbaa = Math.Round((CURRENT_ROW_ITEMS.MABL_K.GetValueOrDefault() - CURRENT_ROW_ITEMS.N_MOIN.GetValueOrDefault()) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100);
+                        if (CURRENT_ROW_ITEMS.IMBAA != imbaa)
                         {
-                            CURRENT_ROW_ITEMS.IMBAA = Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - CURRENT_ROW_ITEMS.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100));
+                            CURRENT_ROW_ITEMS.IMBAA = imbaa;
                         }
                     }
                     else if (CURRENT_ROW_ITEMS.IMBAA != 0)
