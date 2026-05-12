@@ -1371,7 +1371,26 @@ namespace Wins.WinMenus.Taarif
                         try
                         {
 
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{NAM.Text}'   WHERE N_KOL  =" + Baseknow.CONKAL + " AND  NUMBER = " + CODE.Text);
+                            dbms.DoExecuteSQL(@"
+                                UPDATE TDETA_HES
+                                SET NAME = @Name
+                                WHERE N_KOL = @NKol
+                                  AND NUMBER = @Number
+                                  AND TNUMBER = (
+                                      SELECT MIN(targetRow.TNUMBER)
+                                      FROM TDETA_HES AS targetRow
+                                      WHERE targetRow.N_KOL = @NKol
+                                        AND targetRow.NUMBER = @Number
+                                  )
+                                  AND NOT EXISTS (
+                                      SELECT 1
+                                      FROM TDETA_HES AS duplicateCheck
+                                      WHERE duplicateCheck.N_KOL = @NKol
+                                        AND duplicateCheck.NUMBER = @Number
+                                        AND duplicateCheck.NAME = @Name
+                                        AND duplicateCheck.TNUMBER <> TDETA_HES.TNUMBER
+                                  )",
+                                new { Name = NAM.Text, NKol = Baseknow.CONKAL, Number = CODE.Text });
                         }
                         catch { }
 

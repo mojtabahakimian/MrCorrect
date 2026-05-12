@@ -124,6 +124,7 @@ namespace Wins.WinMenus.HESABDARI
         public bool ChangeIsHappend { get; private set; } = false;
 
         private string SHART;
+        private bool ShartBuildFailed;
 
         private bool _bl;
         public bool AllowDeletions
@@ -249,6 +250,10 @@ namespace Wins.WinMenus.HESABDARI
         private void GO_RPT_Click(object sender, RoutedEventArgs e)
         {
             Creatshart();
+            if (ShartBuildFailed)
+            {
+                return;
+            }
 
             //var replacedShart = SHART.Replace("ی", "ي").Replace("ک", "ك");
             var replacedShart = CL_HESABDARI.Fixp(SHART);
@@ -400,10 +405,43 @@ namespace Wins.WinMenus.HESABDARI
             }
         }
 
+        private static string SqlUnicodeLiteral(string value)
+        {
+            return "N'" + (value ?? string.Empty).Replace("'", "''") + "'";
+        }
+
+        private bool TryAppendNumericCondition(string columnName, TextBox valueTextBox, TextBox operatorTextBox, TextBox? toTextBox = null)
+        {
+            if (!double.TryParse(valueTextBox.Text, out _))
+            {
+                new Msgwin(false, $"مقدار وارد شده برای {columnName} باید عددی باشد.").ShowDialog();
+                return false;
+            }
+
+            Chshart();
+            if (operatorTextBox.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
+            {
+                if (toTextBox == null || string.IsNullOrEmpty(toTextBox.Text) || !double.TryParse(toTextBox.Text, out _))
+                {
+                    new Msgwin(false, "پارامترها كافي نيست!").ShowDialog();
+                    return false;
+                }
+
+                SHART += $"({columnName} BETWEEN {valueTextBox.Text} AND {toTextBox.Text})";
+            }
+            else
+            {
+                SHART += $"({columnName} {operatorTextBox.Text} {valueTextBox.Text})";
+            }
+
+            return true;
+        }
+
         private void Creatshart()
         {
             // Reset SHART
             SHART = string.Empty;
+            ShartBuildFailed = false;
 
             if (!string.IsNullOrEmpty(DATE_S.Text.ToRawTarikh()))
             {
@@ -418,7 +456,7 @@ namespace Wins.WinMenus.HESABDARI
                 }
                 else
                 {
-                    SHART += $"(DATE_S = {DATE_SB.Text.ToRawTarikh()} '{DATE_S.Text.ToRawTarikh()}')";
+                    SHART += $"(DATE_S {DATE_SB.Text} '{DATE_S.Text.ToRawTarikh()}')";
                 }
             }
 
@@ -478,19 +516,11 @@ namespace Wins.WinMenus.HESABDARI
 
             if (!string.IsNullOrEmpty(TNUMBER.Text))
             {
-                Chshart();
-                if (TNUMBERB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
+                if (!TryAppendNumericCondition("TNUMBER", TNUMBER, TNUMBERB, TNUMBERT))
                 {
-                    if (string.IsNullOrEmpty(TNUMBERT.Text))
-                    {
-                        new Msgwin(false, "پارامترها كافي نيست!").ShowDialog();
-                        return;
-                    }
-                    SHART += $"(TNUMBER BETWEEN {TNUMBER.Text} AND {TNUMBERT.Text})";
-                }
-                else
-                {
-                    SHART += $"(TNUMBER {TNUMBERB.Text} {TNUMBER.Text})";
+                    SHART = string.Empty;
+                    ShartBuildFailed = true;
+                    return;
                 }
             }
 
@@ -500,16 +530,16 @@ namespace Wins.WinMenus.HESABDARI
                 switch (SHARHB.Text)
                 {
                     case "=":
-                        SHART += $"(SHARH = N'{SHARH.Text}')";
+                        SHART += $"(SHARH = {SqlUnicodeLiteral(SHARH.Text)})";
                         break;
                     case "<>":
-                        SHART += $"(SHARH <> N'{SHARH.Text}')";
+                        SHART += $"(SHARH <> {SqlUnicodeLiteral(SHARH.Text)})";
                         break;
                     case "شامل":
-                        SHART += $"(SHARH LIKE N'%{SHARH.Text}%')";
+                        SHART += $"(SHARH LIKE {SqlUnicodeLiteral("%" + SHARH.Text + "%")})";
                         break;
                     case "بدون":
-                        SHART += $"(SHARH NOT LIKE N'%{SHARH.Text}%')";
+                        SHART += $"(SHARH NOT LIKE {SqlUnicodeLiteral("%" + SHARH.Text + "%")})";
                         break;
                 }
             }
@@ -592,16 +622,16 @@ namespace Wins.WinMenus.HESABDARI
                 switch (hesB.Text)
                 {
                     case "=":
-                        SHART += $"(HES = N'{hes.Text}')";
+                        SHART += $"(HES = {SqlUnicodeLiteral(hes.Text)})";
                         break;
                     case "<>":
-                        SHART += $"(HES <> N'{hes.Text}')";
+                        SHART += $"(HES <> {SqlUnicodeLiteral(hes.Text)})";
                         break;
                     case "شامل":
-                        SHART += $"(HES LIKE N'%{hes.Text}%')";
+                        SHART += $"(HES LIKE {SqlUnicodeLiteral("%" + hes.Text + "%")})";
                         break;
                     case "بدون":
-                        SHART += $"(HES NOT LIKE N'%{hes.Text}%')";
+                        SHART += $"(HES NOT LIKE {SqlUnicodeLiteral("%" + hes.Text + "%")})";
                         break;
                 }
             }
