@@ -238,6 +238,13 @@ namespace Wins.WinMenus.HESABDARI
         }
         private void FILL_ALL_COMBOBOXES()
         {
+            BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT CODE, NAMES FROM dbo.TCOD_BANKS ORDER BY NAMES").ToList();
+            BANK.DisplayMemberPath = nameof(TCOD_BANKS.NAMES);
+            BANK.SelectedValuePath = nameof(TCOD_BANKS.CODE);
+
+            HTAG.ItemsSource = dbms.DoGetDataSQL<TAGCOD>("SELECT CODE, BARGAH FROM dbo.TAGCOD ORDER BY CODE").ToList();
+            HTAG.DisplayMemberPath = nameof(TAGCOD.BARGAH);
+            HTAG.SelectedValuePath = nameof(TAGCOD.CODE);
         }
         public void Form_Current()
         {
@@ -418,7 +425,7 @@ namespace Wins.WinMenus.HESABDARI
                 }
                 else
                 {
-                    SHART += $"(DATE_S = {DATE_SB.Text.ToRawTarikh()} '{DATE_S.Text.ToRawTarikh()}')";
+                    SHART += $"(DATE_S {DATE_SB.Text} {DATE_S.Text.ToRawTarikh()})";
                 }
             }
 
@@ -500,16 +507,16 @@ namespace Wins.WinMenus.HESABDARI
                 switch (SHARHB.Text)
                 {
                     case "=":
-                        SHART += $"(SHARH = N'{SHARH.Text}')";
+                        SHART += $"(SHARH = {SqlUnicodeLiteral(SHARH.Text)})";
                         break;
                     case "<>":
-                        SHART += $"(SHARH <> N'{SHARH.Text}')";
+                        SHART += $"(SHARH <> {SqlUnicodeLiteral(SHARH.Text)})";
                         break;
                     case "شامل":
-                        SHART += $"(SHARH LIKE N'%{SHARH.Text}%')";
+                        SHART += $"(SHARH LIKE {SqlLikeContainsLiteral(SHARH.Text)})";
                         break;
                     case "بدون":
-                        SHART += $"(SHARH NOT LIKE N'%{SHARH.Text}%')";
+                        SHART += $"(SHARH NOT LIKE {SqlLikeContainsLiteral(SHARH.Text)})";
                         break;
                 }
             }
@@ -553,13 +560,13 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(N_SERI.Text))
             {
                 Chshart();
-                SHART += $"(N_SERI {N_SERIB.Text} {N_SERI.Text})";
+                SHART += $"(N_SERI {N_SERIB.Text} {NormalizeNumericText(N_SERI.Text)})";
             }
 
             if (!string.IsNullOrEmpty(BANK.Text))
             {
                 Chshart();
-                SHART += $"(BANK {BANKB.Text} {BANK.Text})";
+                SHART += BuildBankCondition();
             }
 
             if (!string.IsNullOrEmpty(NUMBER.Text))
@@ -583,7 +590,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(HTAG.Text))
             {
                 Chshart();
-                SHART += $"(TAG {TAGB.Text} {HTAG.Text})";
+                SHART += $"(TAG {TAGB.Text} {GetComboValueOrText(HTAG)})";
             }
 
             if (!string.IsNullOrEmpty(hes.Text))
@@ -592,16 +599,16 @@ namespace Wins.WinMenus.HESABDARI
                 switch (hesB.Text)
                 {
                     case "=":
-                        SHART += $"(HES = N'{hes.Text}')";
+                        SHART += $"(HES = {SqlUnicodeLiteral(hes.Text)})";
                         break;
                     case "<>":
-                        SHART += $"(HES <> N'{hes.Text}')";
+                        SHART += $"(HES <> {SqlUnicodeLiteral(hes.Text)})";
                         break;
                     case "شامل":
-                        SHART += $"(HES LIKE N'%{hes.Text}%')";
+                        SHART += $"(HES LIKE {SqlLikeContainsLiteral(hes.Text)})";
                         break;
                     case "بدون":
-                        SHART += $"(HES NOT LIKE N'%{hes.Text}%')";
+                        SHART += $"(HES NOT LIKE {SqlLikeContainsLiteral(hes.Text)})";
                         break;
                 }
             }
@@ -610,6 +617,46 @@ namespace Wins.WinMenus.HESABDARI
             {
                 SHART = $"({SHART})";
             }
+        }
+
+        private static string SqlUnicodeLiteral(string value)
+        {
+            return $"N'{value.FixPersianChars().Replace("'", "''")}'";
+        }
+
+        private static string SqlLikeContainsLiteral(string value)
+        {
+            return $"N'%{value.FixPersianChars().Replace("'", "''")}%'";
+        }
+
+        private static string NormalizeNumericText(string value)
+        {
+            return value.Replace(",", string.Empty).Trim();
+        }
+
+        private static string GetComboValueOrText(ComboBox comboBox)
+        {
+            return Convert.ToString(comboBox.SelectedValue ?? comboBox.Text)?.Trim() ?? string.Empty;
+        }
+
+        private string BuildBankCondition()
+        {
+            var operatorText = BANKB.Text;
+            var bankValue = GetComboValueOrText(BANK);
+
+            if (int.TryParse(bankValue, out var bankCode))
+            {
+                return $"(BANK {operatorText} {bankCode})";
+            }
+
+            var bankNameLiteral = SqlUnicodeLiteral(bankValue);
+
+            return operatorText switch
+            {
+                "<>" => $"((BANK NOT IN (SELECT CODE FROM dbo.TCOD_BANKS WHERE NAMES = {bankNameLiteral})) OR BANK IS NULL)",
+                "=" => $"(BANK IN (SELECT CODE FROM dbo.TCOD_BANKS WHERE NAMES = {bankNameLiteral}))",
+                _ => $"(BANK IN (SELECT CODE FROM dbo.TCOD_BANKS WHERE NAMES = {bankNameLiteral}))"
+            };
         }
         private void Chshart()
         {
