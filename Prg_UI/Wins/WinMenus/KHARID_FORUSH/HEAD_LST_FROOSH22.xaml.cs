@@ -3860,13 +3860,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         void MEGH_AfterUpdate()
         {
-            if (CURRENT_ROW_ITEMS.MABL is null || CURRENT_ROW_ITEMS.MEGHk is null || CURRENT_ROW_ITEMS.MEGH is null)
+            if (CURRENT_ROW_ITEMS is null || CURRENT_ROW_ITEMS.MABL is null || CURRENT_ROW_ITEMS.MEGHk is null || CURRENT_ROW_ITEMS.MEGH is null ||
+                CURRENT_ROW_ITEMS.ANBAR is null || CURRENT_ROW_ITEMS.VAHED_K is null || string.IsNullOrWhiteSpace(CURRENT_ROW_ITEMS.CODE))
             {
                 return;
             }
+
+            WAS_ROW_ITEM ??= CURRENT_ROW_ITEMS.Clone() as INVO_LST_FACTOR22 ?? new INVO_LST_FACTOR22();
+
             var currentMeghk = CURRENT_ROW_ITEMS.MEGHk.GetValueOrDefault();
             var currentMeghMar = CURRENT_ROW_ITEMS.MEGH_MAR.GetValueOrDefault();
-            var wasMeghk = WAS_ROW_ITEM?.MEGHk.GetValueOrDefault() ?? 0;
+            var wasMeghk = WAS_ROW_ITEM.MEGHk.GetValueOrDefault();
 
             #region MEGH_AfterUpdate
             double min;
@@ -4025,8 +4029,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                 }
             }
-            CURRENT_ROW_ITEMS.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ROW_ITEMS.CODE, Convert.ToInt64(CURRENT_ROW_ITEMS.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-            CURRENT_ROW_ITEMS.N_MOIN = Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100)) + Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100))) * CURRENT_ROW_ITEMS.TKHN / 100));
+            CURRENT_ROW_ITEMS.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ROW_ITEMS.CODE, Convert.ToInt64(CURRENT_ROW_ITEMS.ANBAR.GetValueOrDefault()), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
+            var rowDiscountPercent = CURRENT_ROW_ITEMS.N_KOL.GetValueOrDefault();
+            var rowAmount = CURRENT_ROW_ITEMS.MABL_K.GetValueOrDefault();
+            var rowSecondDiscountPercent = CURRENT_ROW_ITEMS.TKHN.GetValueOrDefault();
+            var firstDiscount = Math.Round(rowDiscountPercent * rowAmount / 100);
+            CURRENT_ROW_ITEMS.N_MOIN = firstDiscount + Math.Round((rowAmount - firstDiscount) * rowSecondDiscountPercent / 100);
             if ((TICMBAA.IsChecked ?? false))
             {
                 var RSTM7 = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
@@ -4034,9 +4042,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     if (RSTM7.FirstOrDefault()?.CMBAA == true)
                     {
-                        if (CURRENT_ROW_ITEMS.IMBAA != Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - CURRENT_ROW_ITEMS.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100)))
+                        var taxValue = Math.Round((CURRENT_ROW_ITEMS.MABL_K.GetValueOrDefault() - CURRENT_ROW_ITEMS.N_MOIN.GetValueOrDefault()) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100);
+                        if (CURRENT_ROW_ITEMS.IMBAA.GetValueOrDefault() != taxValue)
                         {
-                            CURRENT_ROW_ITEMS.IMBAA = Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - CURRENT_ROW_ITEMS.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100));
+                            CURRENT_ROW_ITEMS.IMBAA = taxValue;
                         }
                     }
                     else if (CURRENT_ROW_ITEMS.IMBAA != 0)
