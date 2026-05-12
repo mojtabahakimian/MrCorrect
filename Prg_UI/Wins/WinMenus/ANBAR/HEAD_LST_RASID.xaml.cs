@@ -502,7 +502,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام مشتری نمیتواند خالی باشد." });
             }
 
-            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5" && IsNull(this.NUMBER1.Text))
+            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5" && string.IsNullOrWhiteSpace(this.NUMBER1.Text))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = " شماره درخواست وارد نشده است ....!" });
             }
@@ -1734,36 +1734,47 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
             {
-                var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 23 and NUMBER = " + this.NUMBER1.Text).ToList();
-                var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 1 and NUMBER = " + this.NUMBER.Text).ToList();
-                if (RST2.Count == 0)
+                if (TryGetLongFromText(this.NUMBER1.Text, out var requestNumber) && TryGetLongFromText(this.NUMBER.Text, out var receiptNumber))
                 {
-                    //while (!rst.EOF)
-                    for (int i = 0; i < rst.Count; i++)
+                    var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 23 AND NUMBER = @RequestNumber", new { RequestNumber = requestNumber }).ToList();
+                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 1 AND NUMBER = @ReceiptNumber", new { ReceiptNumber = receiptNumber }).ToList();
+                    if (RST2.Count == 0)
                     {
-                        //RST2.AddNew();
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.INVO_LST
-                                                        (
-                                                            NUMBER,
-                                                            TAG,
-                                                            ANBAR,
-                                                            CODE,
-                                                            RADAH,
-                                                            VAHED_K
-                                                        )
-                                                        VALUES
-                                                        (   {NUMBER.Text},
-                                                            1,
-                                                            {rst[i].ANBAR},
-                                                            N'{rst[i].CODE}',
-                                                            {rst[i].id},
-                                                            {rst[i].VAHED_K}
-                                                            )");
+                        //while (!rst.EOF)
+                        for (int i = 0; i < rst.Count; i++)
+                        {
+                            //RST2.AddNew();
+                            dbms.DoExecuteSQL(@"INSERT INTO dbo.INVO_LST
+                                                            (
+                                                                NUMBER,
+                                                                TAG,
+                                                                ANBAR,
+                                                                CODE,
+                                                                RADAH,
+                                                                VAHED_K
+                                                            )
+                                                            VALUES
+                                                            (   @ReceiptNumber,
+                                                                1,
+                                                                @Anbar,
+                                                                @Code,
+                                                                @Radah,
+                                                                @VahedK
+                                                                )",
+                                new
+                                {
+                                    ReceiptNumber = receiptNumber,
+                                    Anbar = rst[i].ANBAR,
+                                    Code = rst[i].CODE,
+                                    Radah = rst[i].id,
+                                    VahedK = rst[i].VAHED_K
+                                });
 
-                        //RST2.update();
-                        //rst.MoveNext();
+                            //RST2.update();
+                            //rst.MoveNext();
+                        }
+                        //this.INVO_LST_RASID_SUB.Requery();
                     }
-                    //this.INVO_LST_RASID_SUB.Requery();
                 }
             }
             ;
@@ -1795,32 +1806,43 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             long num = 0;
 
-            // بخش کدهای مربوط به شماره درخواست (بدون تغییر)
+            // بخش کدهای مربوط به شماره درخواست
             if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
             {
-                var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 23 and NUMBER = " + this.NUMBER1.Text).ToList();
-                var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 1 and NUMBER = " + this.NUMBER.Text).ToList();
-                if (RST2.Count == 0)
+                if (TryGetLongFromText(this.NUMBER1.Text, out var requestNumber) && TryGetLongFromText(this.NUMBER.Text, out var receiptNumber))
                 {
-                    for (int i = 0; i < rst.Count; i++)
+                    var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 23 AND NUMBER = @RequestNumber", new { RequestNumber = requestNumber }).ToList();
+                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM dbo.INVO_LST WHERE TAG = 1 AND NUMBER = @ReceiptNumber", new { ReceiptNumber = receiptNumber }).ToList();
+                    if (RST2.Count == 0)
                     {
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.INVO_LST
-                                                        (
-                                                            NUMBER,
-                                                            TAG,
-                                                            ANBAR,
-                                                            CODE,
-                                                            RADAH,
-                                                            VAHED_K
-                                                        )
-                                                        VALUES
-                                                        (   {NUMBER.Text},
-                                                            1,
-                                                            {rst[i].ANBAR},
-                                                            N'{rst[i].CODE}',
-                                                            {rst[i].id},
-                                                            {rst[i].VAHED_K}
-                                                            )");
+                        for (int i = 0; i < rst.Count; i++)
+                        {
+                            dbms.DoExecuteSQL(@"INSERT INTO dbo.INVO_LST
+                                                            (
+                                                                NUMBER,
+                                                                TAG,
+                                                                ANBAR,
+                                                                CODE,
+                                                                RADAH,
+                                                                VAHED_K
+                                                            )
+                                                            VALUES
+                                                            (   @ReceiptNumber,
+                                                                1,
+                                                                @Anbar,
+                                                                @Code,
+                                                                @Radah,
+                                                                @VahedK
+                                                                )",
+                                new
+                                {
+                                    ReceiptNumber = receiptNumber,
+                                    Anbar = rst[i].ANBAR,
+                                    Code = rst[i].CODE,
+                                    Radah = rst[i].id,
+                                    VahedK = rst[i].VAHED_K
+                                });
+                        }
                     }
                 }
             }
@@ -1966,6 +1988,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
         }
+        private bool TryGetLongFromText(string text, out long value)
+        {
+            return long.TryParse(text?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+        }
+
         private bool IsNull(object hTAF2)
         {
             if (hTAF2 is null)
