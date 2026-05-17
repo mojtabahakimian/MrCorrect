@@ -478,7 +478,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (G_Flag == 0)
             {
-                string query = @"INSERT INTO dbo.OTHER_DTL
+                string query = @"IF NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL WHERE NUMBER = @Number AND TAG = @Tag)
+                                          INSERT INTO dbo.OTHER_DTL
                                           (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
                                           VALUES
                                           (@Number, @Tag, @RequestNo, @Barnameh, @Driver, @DriverMob, @CamiunNum, @Maghsad, @CamKhaly, @CamPoor, @Tozih, @Camiun)";

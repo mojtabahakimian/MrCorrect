@@ -4477,6 +4477,9 @@ VALUES
         }
         public static void CREATHES(object KOL, object MOIN, long taf, string nam)
         {
+            if (KOL == null || string.IsNullOrWhiteSpace(KOL.ToString()) ||
+                MOIN == null || string.IsNullOrWhiteSpace(MOIN.ToString()))
+                return;
             var rst = dbms.DoGetDataSQL<DETA_HES_MODEL1>("SELECT * FROM DETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString()).ToList();
             if (rst.Count == 0)
             {
@@ -4517,6 +4520,9 @@ VALUES
         public static bool ISHESAB(object KOL, object MOIN, long taf)
         {
             bool tempISHESAB = false;
+            if (KOL == null || string.IsNullOrWhiteSpace(KOL.ToString()) ||
+                MOIN == null || string.IsNullOrWhiteSpace(MOIN.ToString()))
+                return false;
             var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf).ToList();
             if (rst.Count == 0)
             {
