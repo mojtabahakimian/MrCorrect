@@ -2277,8 +2277,12 @@ namespace Wins.WinSetting
 
                 if (ROW?.USERCO == null) //INSERT
                 {
-                    //OUTPUT INSERTED.ID
-                    USERCO = dbms.DoGetDataSQL<int?>(@$"INSERT INTO dbo.BLOCK_HES(USERCO, HES) OUTPUT INSERTED.USERCO VALUES({USERY.IDD},N'{ROW.HES}')").FirstOrDefault();
+                    USERCO = dbms.DoGetDataSQL<int?>(@"IF NOT EXISTS (SELECT 1 FROM dbo.BLOCK_HES WHERE USERCO = @UserCo AND HES = @Hes)
+                                                          BEGIN
+                                                              INSERT INTO dbo.BLOCK_HES(USERCO, HES) VALUES(@UserCo, @Hes);
+                                                          END
+                                                          SELECT USERCO FROM dbo.BLOCK_HES WHERE USERCO = @UserCo AND HES = @Hes;",
+                                                          new { UserCo = USERY.IDD, Hes = ROW.HES }).FirstOrDefault();
                     if (USERCO != null)
                     {
                         ROW.USERCO = (int?)USERCO;

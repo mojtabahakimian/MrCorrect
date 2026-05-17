@@ -2609,7 +2609,13 @@ namespace Prg_UI.Functions
 
             if (string.IsNullOrEmpty(baseKnow))
             {
-                Baseknow.BEDEHKAR.ToStringNullSafe();
+                baseKnow = Baseknow.BEDEHKAR.ToStringNullSafe();
+            }
+
+            if (string.IsNullOrEmpty(baseKnow))
+            {
+                ClearComboBoxSelection(comboBox);
+                return;
             }
 
             // Handle the '+' or '++' case (open ComboSearch dialog)
@@ -2649,13 +2655,13 @@ namespace Prg_UI.Functions
         {
             try
             {
-                string query = $"SELECT N_KOL, NUMBER, TNUMBER FROM TDETA_HES WHERE N_KOL = {baseKnow} AND NUMBER = 1 AND TNUMBER = {input}";
-                var result = dbms.DoGetDataSQL<SQL1_FACTOR>(query).ToList();
+                string query = "SELECT N_KOL, NUMBER, TNUMBER FROM TDETA_HES WHERE N_KOL = @NKol AND NUMBER = 1 AND TNUMBER = @TNumber";
+                var result = dbms.DoGetDataSQL<SQL1_FACTOR>(query, new { NKol = baseKnow, TNumber = input }).ToList();
 
                 if (result.Count == 1)
                 {
                     string hesValue = $"{baseKnow}-1-{input}";
-                    string dataName = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = N'{hesValue}'").FirstOrDefault();
+                    string dataName = dbms.DoGetDataSQL<string?>("SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = @Hes", new { Hes = hesValue }).FirstOrDefault();
 
                     AddToComboBoxItems(comboBox, hesValue, dataName);
                     comboBox.SelectedValue = hesValue;

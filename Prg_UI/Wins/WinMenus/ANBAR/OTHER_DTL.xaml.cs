@@ -476,30 +476,25 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 Camiun = string.IsNullOrWhiteSpace(CAMIUN.Text) ? null : CAMIUN.Text
             };
 
-            if (G_Flag == 0)
-            {
-                string query = @"INSERT INTO dbo.OTHER_DTL
-                                          (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
-                                          VALUES
-                                          (@Number, @Tag, @RequestNo, @Barnameh, @Driver, @DriverMob, @CamiunNum, @Maghsad, @CamKhaly, @CamPoor, @Tozih, @Camiun)";
-                dbms.DoExecuteSQL(query, param);
-            }
-            else if (G_Flag == 1)
-            {
-                string query = @"UPDATE dbo.OTHER_DTL SET	
+            string query = @"MERGE dbo.OTHER_DTL WITH (HOLDLOCK) AS Target
+                             USING (SELECT @Number AS NUMBER, @Tag AS TAG) AS Source
+                                ON Target.NUMBER = Source.NUMBER AND Target.TAG = Source.TAG
+                              WHEN MATCHED THEN
+                                   UPDATE SET
                                           REQUEST_NO = @RequestNo,
-                                          BARNAMEH = @Barnameh, 
-                                          DRIVER = @Driver, 
-                                          DRIVER_MOB = @DriverMob, 
-                                          CAMIUN_NUM = @CamiunNum, 
-                                          MAGHSAD = @Maghsad, 
-                                          CAM_KHALY = @CamKhaly, 
-                                          CAM_POOR = @CamPoor, 
-                                          TOZIH = @Tozih, 
+                                          BARNAMEH = @Barnameh,
+                                          DRIVER = @Driver,
+                                          DRIVER_MOB = @DriverMob,
+                                          CAMIUN_NUM = @CamiunNum,
+                                          MAGHSAD = @Maghsad,
+                                          CAM_KHALY = @CamKhaly,
+                                          CAM_POOR = @CamPoor,
+                                          TOZIH = @Tozih,
                                           CAMIUN = @Camiun
-                                          WHERE NUMBER = @Number AND TAG = @Tag";
-                dbms.DoExecuteSQL(query, param);
-            }
+                              WHEN NOT MATCHED THEN
+                                   INSERT (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
+                                   VALUES (@Number, @Tag, @RequestNo, @Barnameh, @Driver, @DriverMob, @CamiunNum, @Maghsad, @CamKhaly, @CamPoor, @Tozih, @Camiun);";
+            dbms.DoExecuteSQL(query, param);
             return true;
         }
         /// <summary>
