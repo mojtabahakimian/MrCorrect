@@ -3024,18 +3024,15 @@ VALUES
             else
             {
                 sqlstr = "1 AS col1 ,1 AS col2 ,1 AS col3 ,1 AS col4 ,1 AS col5 ,1 AS col6 ,1 AS col7 ,1 AS col8 ,1 AS col9";
-                sqlstrmp = " ' ' AS coln1 ,' ' AS coln2 ,' ' AS coln3 ,' ' AS coln4 ,' ' AS coln5 ,' ' AS coln6 ,' ' AS coln7 ,' ' AS coln8 ,' ' AS coln9";
+                sqlstrmp = ", ' ' AS coln1 ,' ' AS coln2 ,' ' AS coln3 ,' ' AS coln4 ,' ' AS coln5 ,' ' AS coln6 ,' ' AS coln7 ,' ' AS coln8 ,' ' AS coln9";
             }
 
 
-            try
-            {
-                dbms.DoExecuteSQL("create  view   dbo.stuf_def_nfani as  SELECT     dbo.STUF_DEF.CODE, dbo.STUF_DEF.NAME, dbo.STUF_DEF.N_FANI, " + sqlstr + sqlstrmp + " FROM     dbo.STUF_DEF  " + sqlstrjo + sqlstrwe);
-            }
-            catch (Exception)
-            {
-                dbms.DoExecuteSQL("alter   view   dbo.stuf_def_nfani as  SELECT     dbo.STUF_DEF.CODE, dbo.STUF_DEF.NAME, dbo.STUF_DEF.N_FANI, " + sqlstr + sqlstrmp + " FROM     dbo.STUF_DEF  " + sqlstrjo + sqlstrwe);
-            }
+            var viewSql = "SELECT     dbo.STUF_DEF.CODE, dbo.STUF_DEF.NAME, dbo.STUF_DEF.N_FANI, " + sqlstr + sqlstrmp + " FROM     dbo.STUF_DEF  " + sqlstrjo + sqlstrwe;
+            var viewExists = dbms.DoGetDataSQL<int>("SELECT CASE WHEN OBJECT_ID(N'dbo.stuf_def_nfani', N'V') IS NULL THEN 0 ELSE 1 END").FirstOrDefault() == 1;
+            var ddl = (viewExists ? "alter" : "create") + "   view   dbo.stuf_def_nfani as  " + viewSql;
+
+            dbms.DoExecuteSQL(ddl);
 
 
         }
