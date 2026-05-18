@@ -238,73 +238,75 @@ namespace Wins.WinMenus.Checkha
         {
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
-            if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-            #region BANK_After_Update
-            if (!IsNull(N_SERI.Text) & !IsNull(BANK.SelectedValue))
-            {
-                var rst = dbms.DoGetDataSQL<PAY_GETD>("select * from PAY_GETD where N_SERI=" + N_SERI.Text + " AND BANK = " + BANK.SelectedValue).ToList();
-                if (rst.Count > 0)
-                {
-                    Msgwin msgwin = new Msgwin(false, "چكي با همين سريال و با همين بانك قبلا ثبت شده است  مطمئن شويد كه عمليات را درست انجام مي دهيد. بعداز زدن اينتر مشخصات چك ثبت شده را مشاهده خواهيد نمود");
-                    msgwin.ShowDialog();
-                    //DoCmd.OpenForm("mesag", default, default, default, default, acDialog, "چكي با همين سريال و با همين بانك قبلا ثبت شده است  مطمئن شويد كه عمليات را درست انجام مي دهيد. بعداز زدن اينتر مشخصات چك ثبت شده را مشاهده خواهيد نمود");
-                    this.N_SERI.Text = rst.FirstOrDefault().N_SERI.ToString();
-                    this.BANK.SelectedValue = rst.FirstOrDefault().BANK.ToString();
-                    this.DATE_S.Text = rst.FirstOrDefault().DATE_S.ToString();
-                    this.SHOBEH.SelectedValue = rst.FirstOrDefault().SHOBEH.ToString();
-                    this.LIST_NO.SelectedValue = rst.FirstOrDefault().LIST_NO.ToString();
-                    this.DATE.Text = rst.FirstOrDefault().DATE.ToString();
-                    this.NAME_TAH.SelectedValue = rst.FirstOrDefault().NAME_TAH.ToString();
-                    this.N_HESAB.Text = rst.FirstOrDefault().N_HESAB?.ToString();
-                    this.MABL.Text = rst.FirstOrDefault().MABL.ToString();
-                    this.MABL.IsTabStop = true;
-                    this.MABL.IsReadOnly = false;
-                    this.N_KOL = rst.FirstOrDefault().N_KOL.ToString();
-                    this.N_MOIN = rst.FirstOrDefault().N_MOIN.ToString();
-                    this.N_TAF = rst.FirstOrDefault().N_TAF.ToString();
-                    this.KIND.SelectedValue = rst.FirstOrDefault().KIND.ToString();
-                    this.SANDUGH.SelectedValue = rst.FirstOrDefault().SANDUGH.ToString();
+            if (BANK?.IsEditable == true && e?.OriginalSource is not TextBox) return;
 
+            string seri = N_SERI?.Text?.Trim();
+            string selectedBank = BANK?.SelectedValue?.ToString();
+
+            if (!string.IsNullOrWhiteSpace(seri) && int.TryParse(selectedBank, out int selectedBankCode))
+            {
+                var rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = N'{seri}' AND BANK = {selectedBankCode}")?.ToList();
+                var first = rst?.FirstOrDefault();
+
+                if (first is not null)
+                {
+                    new Msgwin(false, "چكي با همين سريال و با همين بانك قبلا ثبت شده است  مطمئن شويد كه عمليات را درست انجام مي دهيد. بعداز زدن اينتر مشخصات چك ثبت شده را مشاهده خواهيد نمود").ShowDialog();
+
+                    N_SERI.Text = first.N_SERI?.ToString();
+                    BANK.SelectedValue = first.BANK?.ToString();
+                    DATE_S.Text = first.DATE_S?.ToString();
+                    SHOBEH.SelectedValue = first.SHOBEH?.ToString();
+                    LIST_NO.SelectedValue = first.LIST_NO?.ToString();
+                    DATE.Text = first.DATE?.ToString();
+                    NAME_TAH.SelectedValue = first.NAME_TAH?.ToString();
+                    N_HESAB.Text = first.N_HESAB?.ToString();
+                    MABL.Text = first.MABL?.ToString();
+                    MABL.IsTabStop = true;
+                    MABL.IsReadOnly = false;
+                    N_KOL = first.N_KOL?.ToString();
+                    N_MOIN = first.N_MOIN?.ToString();
+                    N_TAF = first.N_TAF?.ToString();
+                    KIND.SelectedValue = first.KIND?.ToString();
+                    SANDUGH.SelectedValue = first.SANDUGH?.ToString();
                 }
             }
 
-            #region NUM_TO_BANK
             if (!NowIsReady)
             {
                 return;
             }
 
-            ComboBox comboBox = sender as ComboBox;
-            var textBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
-            if (textBox != null)
+            if (sender is not ComboBox comboBox)
             {
-                string inputCode = textBox.Text;
-                if (!int.TryParse(inputCode, out int _))
-                {
-                    return;
-                }
-
-                // Cast the ItemsSource back to the correct type, and search for matching bank code
-                var bankList = comboBox.ItemsSource as List<TCOD_BANKS>;
-
-                if (bankList == null) return; // Ensure that the list is properly cast
-
-                var matchingBank = bankList.FirstOrDefault(b => b.CODE == Convert.ToInt32(inputCode));
-
-                if (matchingBank != null)
-                {
-                    BANK.SelectedValue = matchingBank.CODE;
-                    comboBox.SelectedValue = matchingBank.CODE;
-                    return;
-                }
-                else
-                {
-                    comboBox.SelectedValue = null;
-                }
+                return;
             }
-            #endregion
 
-            #endregion
+            if (comboBox.Template?.FindName("PART_EditableTextBox", comboBox) is not TextBox textBox)
+            {
+                return;
+            }
+
+            string inputCode = textBox.Text?.Trim();
+            if (string.IsNullOrEmpty(inputCode) || !int.TryParse(inputCode, out int bankCode))
+            {
+                return;
+            }
+
+            if (comboBox.ItemsSource is not List<TCOD_BANKS> bankList)
+            {
+                return;
+            }
+
+            var matchingBank = bankList.FirstOrDefault(b => b?.CODE == bankCode);
+            if (matchingBank is not null)
+            {
+                BANK.SelectedValue = matchingBank.CODE;
+                comboBox.SelectedValue = matchingBank.CODE;
+            }
+            else
+            {
+                comboBox.SelectedValue = null;
+            }
         }
 
         private void MABL_LostFocus(object sender, RoutedEventArgs e)
