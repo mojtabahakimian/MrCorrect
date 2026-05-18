@@ -2609,7 +2609,13 @@ namespace Prg_UI.Functions
 
             if (string.IsNullOrEmpty(baseKnow))
             {
-                Baseknow.BEDEHKAR.ToStringNullSafe();
+                baseKnow = Baseknow.BEDEHKAR?.ToStringNullSafe();
+            }
+
+            if (string.IsNullOrEmpty(baseKnow))
+            {
+                ClearComboBoxSelection(comboBox);
+                return;
             }
 
             // Handle the '+' or '++' case (open ComboSearch dialog)
