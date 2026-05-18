@@ -5767,9 +5767,11 @@ GO
                     // ===========================================================
                     // 3. Modify â تغییرات ساختاری و بازنویسی Procedureهای خاص
                     // ===========================================================
+                    // بخش اصلاح شده و کامل modify1
                     string modify1 = @"
-
--- 1. تغییر نوع ستون ACC_T از INT به NVARCHAR(50)
+-- ================================================================
+-- ۱. اصلاح ساختار ستون ACC_T در صورت قدیمی بودن دیتابیس
+-- ================================================================
 IF EXISTS (
     SELECT 1 FROM sys.columns 
     WHERE object_id = OBJECT_ID(N'dbo.PAY2_EMPLOYEE') 
@@ -5777,11 +5779,14 @@ IF EXISTS (
       AND system_type_id = TYPE_ID('int')
 )
 BEGIN
+    PRINT N'در حال تغییر نوع ستون ACC_T از INT به NVARCHAR...';
     ALTER TABLE PAY2_EMPLOYEE ALTER COLUMN ACC_T NVARCHAR(50) NULL;
 END;
 GO
 
--- 2. SP_PAY2_GET_ADVANCES — پشتیبانی از کد ترکیبی چند سطحی (ADV_HES)
+-- ================================================================
+-- ۲. SP_PAY2_GET_ADVANCES — محاسبه مساعده هوشمند (نسخه نهایی)
+-- ================================================================
 CREATE OR ALTER PROCEDURE [dbo].[SP_PAY2_GET_ADVANCES]
     @PERIOD_DATE  BIGINT,
     @PAYROLL_N_S  FLOAT,
@@ -5802,7 +5807,7 @@ BEGIN
         RETURN;
     END;
 
-    -- ── پارس کد ترکیبی مثل ""112-1-5"" یا ""213-1-2-4-1-6"" ──────────────
+    -- پارس کد ترکیبی
     DECLARE @parts TABLE (seq INT IDENTITY(1,1), val NVARCHAR(20));
     DECLARE @tmp  NVARCHAR(110) = @FULL_HES + '-';
     DECLARE @prev INT = 1;
@@ -5823,33 +5828,24 @@ BEGIN
     DECLARE @HES_T3 INT = (SELECT TRY_CAST(val AS INT) FROM @parts WHERE seq = 5);
     DECLARE @HES_T4 INT = (SELECT TRY_CAST(val AS INT) FROM @parts WHERE seq = 6);
 
-  IF @HES_K IS NULL OR @HES_M IS NULL
+    IF @HES_K IS NULL OR @HES_M IS NULL
     BEGIN
-        RAISERROR(N'ADV_HES: فرمت نادرست ""%s"". حداقل باید شامل کد کل و معین باشد. مثال: 112-1',
-                  16, 1, @FULL_HES);
+        RAISERROR(N'ADV_HES: فرمت نادرست ""%s"". حداقل باید شامل کد کل و معین باشد.', 16, 1, @FULL_HES);
         RETURN;
     END;
 
-    -- ── تعیین سطح اعمال فیلتر ACC_T پرسنل ────────────────────────────
-    -- ACC_T روی اولین سطح تفصیلی‌ای اعمال می‌شود که در کد کامل مقدار ندارد
-    -- مثال: کد ""112-1-5"" یعنی HES_T=5 ثابته، پس ACC_T روی HES_T2 می‌رود
-    -- مثال: کد ""112-1""   یعنی HES_T نداریم، پس ACC_T روی HES_T می‌رود
     DECLARE @EMP_FILTER_LEVEL TINYINT =
         CASE
-            WHEN @HES_T  IS NULL THEN 3   -- ACC_T → HES_T
-            WHEN @HES_T2 IS NULL THEN 4   -- ACC_T → HES_T2
-            WHEN @HES_T3 IS NULL THEN 5   -- ACC_T → HES_T3
-            ELSE                     6   -- ACC_T → HES_T4
+            WHEN @HES_T  IS NULL THEN 3
+            WHEN @HES_T2 IS NULL THEN 4
+            WHEN @HES_T3 IS NULL THEN 5
+            ELSE                     6
         END;
 
-    DECLARE @USE_T     BIT           = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_USE_HES_T_FILTER') AS BIT);
-    DECLARE @MIN_POS   BIT           = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_MIN_POSITIVE')     AS BIT);
-    DECLARE @ADV_SCOPE NVARCHAR(20)  = ISNULL((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_SCOPE'),'CURRENT_MONTH');
-    DECLARE @PERIOD_MONTH INT        = @PERIOD_DATE / 100;
-
-    -- ── تابع کمکی داخلی: شرط فیلتر کامل حساب ─────────────────────────
-    -- چون SQL Server از inline lambda پشتیبانی نمی‌کند، شرط را به صورت
-    -- یک CTE مشترک می‌نویسیم و در هر سه SELECT استفاده می‌کنیم.
+    DECLARE @USE_T     BIT = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_USE_HES_T_FILTER') AS BIT);
+    DECLARE @MIN_POS   BIT = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_MIN_POSITIVE')     AS BIT);
+    DECLARE @ADV_SCOPE NVARCHAR(20) = ISNULL((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_SCOPE'),'CURRENT_MONTH');
+    DECLARE @PERIOD_MONTH INT = @PERIOD_DATE / 100;
 
     ;WITH AdvBase AS
     (
@@ -5857,84 +5853,47 @@ BEGIN
             E.EMP_ID,
             E.ACC_T                            AS PCODE,
             E.LAST_NAME + N' ' + E.FIRST_NAME  AS FULL_NAME,
-
-            -- ── مانده خام ──────────────────────────────────────────────
             ISNULL((
                 SELECT CAST(SUM(D.BED - D.BES) AS BIGINT)
                 FROM DEED_HED H
                 INNER JOIN DEED_DTL D ON H.N_S = D.N_S
-                WHERE
-                    D.HES_K = @HES_K
-                    AND D.HES_M = @HES_M
-                    -- سطوح ثابت از کد کامل
+                WHERE D.HES_K = @HES_K AND D.HES_M = @HES_M
                     AND (@HES_T  IS NULL OR D.HES_T  = @HES_T)
                     AND (@HES_T2 IS NULL OR D.HES_T2 = @HES_T2)
                     AND (@HES_T3 IS NULL OR D.HES_T3 = @HES_T3)
                     AND (@HES_T4 IS NULL OR D.HES_T4 = @HES_T4)
-                    -- فیلتر per پرسنل روی اولین سطح آزاد
-                    AND (
-                        @USE_T = 0
-                        OR (
+                    AND (@USE_T = 0 OR (
                             (@EMP_FILTER_LEVEL = 3 AND D.HES_T  = E.ACC_T) OR
                             (@EMP_FILTER_LEVEL = 4 AND D.HES_T2 = E.ACC_T) OR
                             (@EMP_FILTER_LEVEL = 5 AND D.HES_T3 = E.ACC_T) OR
                             (@EMP_FILTER_LEVEL = 6 AND D.HES_T4 = E.ACC_T)
-                        )
-                    )
+                        ))
                     AND H.N_S < @PAYROLL_N_S
-                    AND (
-                        @ADV_SCOPE = 'OPEN_BALANCE'
-                        OR [dbo].[FN_PAY2_MONTH](H.DATE_S) = @PERIOD_MONTH
-                    )
+                    AND (@ADV_SCOPE = 'OPEN_BALANCE' OR [dbo].[FN_PAY2_MONTH](H.DATE_S) = @PERIOD_MONTH)
                     AND H.OKF = 1
             ), 0) AS RAW_BALANCE,
-
-            -- ── استثناهای دستی ─────────────────────────────────────────
-            ISNULL((
-                SELECT SUM(EXCL_AMOUNT)
-                FROM PAY2_ADVANCE_EXCL
-                WHERE EMP_ID = E.EMP_ID
-                  AND PERIOD_DATE / 100 = @PERIOD_MONTH
-            ), 0) AS MANUAL_EXCL
-
+            ISNULL((SELECT SUM(EXCL_AMOUNT) FROM PAY2_ADVANCE_EXCL WHERE EMP_ID = E.EMP_ID AND PERIOD_DATE / 100 = @PERIOD_MONTH), 0) AS MANUAL_EXCL
         FROM PAY2_EMPLOYEE E
-        INNER JOIN PAY2_PERIOD P
-            ON P.WS_ID = E.WS_ID
-            AND P.PERIOD_DATE / 100 = @PERIOD_MONTH
-        WHERE E.WS_ID     = @WS_ID
-          AND E.IS_ACTIVE = 1
-          AND E.ACC_T IS NOT NULL
+        INNER JOIN PAY2_PERIOD P ON P.WS_ID = E.WS_ID AND P.PERIOD_DATE / 100 = @PERIOD_MONTH
+        WHERE E.WS_ID = @WS_ID AND E.IS_ACTIVE = 1 AND E.ACC_T IS NOT NULL
     )
-    SELECT
-        EMP_ID,
-        PCODE,
-        FULL_NAME,
-        RAW_BALANCE,
-        MANUAL_EXCL,
-        -- ── مانده نهایی ────────────────────────────────────────────────
-        CASE
-            WHEN @MIN_POS = 1 AND (RAW_BALANCE - MANUAL_EXCL) <= 0
-                THEN 0
-            ELSE CASE
-                    WHEN (RAW_BALANCE - MANUAL_EXCL) < 0 THEN 0
-                    ELSE RAW_BALANCE - MANUAL_EXCL
-                 END
+    SELECT EMP_ID, PCODE, FULL_NAME, RAW_BALANCE, MANUAL_EXCL,
+        CASE WHEN @MIN_POS = 1 AND (RAW_BALANCE - MANUAL_EXCL) <= 0 THEN 0
+             ELSE CASE WHEN (RAW_BALANCE - MANUAL_EXCL) < 0 THEN 0 ELSE RAW_BALANCE - MANUAL_EXCL END
         END AS ADVANCE_DEDUCTION
     FROM AdvBase;
-
 END;
 GO
 
--- 3. SP_PAY2_CALC_RUN — اعمال ISNULL و ANSI_WARNINGS OFF
-
-------------------------------------------------------
-CREATE OR CREATE OR ALTER PROCEDURE [dbo].[SP_PAY2_GEN_DEED]
+-- ================================================================
+-- ۳. SP_PAY2_GEN_DEED — تولید سند حسابداری (نسخه اصلاح شده)
+-- ================================================================
+CREATE OR ALTER PROCEDURE [dbo].[SP_PAY2_GEN_DEED]
     @RUN_ID  INT,
     @CALC_BY INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
-
     DECLARE @STATUS TINYINT, @PER_ID INT, @WS_ID INT, @PER_DATE BIGINT;
 
     SELECT @STATUS = R.STATUS, @PER_ID = R.PER_ID, @WS_ID = P.WS_ID, @PER_DATE = P.PERIOD_DATE
@@ -5947,7 +5906,6 @@ BEGIN
         RETURN;
     END;
 
-    -- متغیرهای حساب‌ها
     DECLARE 
         @ACC_SALARY_TOLID NVARCHAR(50), @ACC_SALARY_EDARI NVARCHAR(50), 
         @ACC_SALARY_FOROSH NVARCHAR(50), @ACC_SALARY_KHADAMAT NVARCHAR(50),
@@ -5955,13 +5913,12 @@ BEGIN
         @ACC_TAX_PAYABLE NVARCHAR(50), @ACC_INS_EXP NVARCHAR(50),
         @ACC_ADV_HES NVARCHAR(50), @ACC_LOAN_HES NVARCHAR(50);
 
-    -- خواندن کدهای حسابداری از تنظیمات کارگاه
     SELECT
         @ACC_SALARY_TOLID   = MAX(CASE WHEN ACC_KEY='SALARY_EXP_TOLID'    THEN ACC_CODE END),
         @ACC_SALARY_EDARI   = MAX(CASE WHEN ACC_KEY='SALARY_EXP_EDARI'    THEN ACC_CODE END),
         @ACC_SALARY_FOROSH  = MAX(CASE WHEN ACC_KEY='SALARY_EXP_FOROSH'   THEN ACC_CODE END),
         @ACC_SALARY_KHADAMAT= MAX(CASE WHEN ACC_KEY='SALARY_EXP_KHADAMAT' THEN ACC_CODE END),
-        @ACC_SALARY_PAY     = MAX(CASE WHEN ACC_KEY='SALARY_PAYABLE'      THEN ACC_CODE END),
+        @ACC_SALARY_PAY     = MAX(CASE WHEN ACC_KEY='SALARY_PAYABLE'     THEN ACC_CODE END),
         @ACC_INS_PAYABLE    = MAX(CASE WHEN ACC_KEY='INS_PAYABLE'         THEN ACC_CODE END),
         @ACC_TAX_PAYABLE    = MAX(CASE WHEN ACC_KEY='TAX_PAYABLE'         THEN ACC_CODE END),
         @ACC_INS_EXP        = MAX(CASE WHEN ACC_KEY='INS_EXP'             THEN ACC_CODE END),
@@ -5969,7 +5926,6 @@ BEGIN
         @ACC_LOAN_HES       = MAX(CASE WHEN ACC_KEY='LOAN_HES'            THEN ACC_CODE END)
     FROM PAY2_WORKSHOP_ACC WHERE WS_ID = @WS_ID;
 
-    -- ایجاد یک CTE برای محاسبه سهم هزینه‌ها بر اساس روزهای کارکرد
     ;WITH SalarySplit AS (
         SELECT 
             RL.EMP_ID, RL.GROSS_PAY,
@@ -5981,7 +5937,6 @@ BEGIN
         INNER JOIN PAY2_ATTENDANCE A ON RL.EMP_ID = A.EMP_ID AND A.PER_ID = @PER_ID
         WHERE RL.RUN_ID = @RUN_ID
     )
-    -- خروجی نهایی برای صدور سند
     SELECT @ACC_SALARY_TOLID AS HES_CODE, N'هزینه حقوق تولید' AS SHARH, SUM(EXP_TOLID) AS BED, 0 AS BES, 'EXP_TOLID' AS ACC_KEY, NULL AS EMP_ID
     FROM SalarySplit HAVING SUM(EXP_TOLID) > 0
     UNION ALL 
@@ -6014,7 +5969,7 @@ BEGIN
     WHERE RL.RUN_ID = @RUN_ID AND RL.ADVANCE_DED > 0;
 END;
 GO
-GO";
+";
                     ExecuteBatches(db, modify1);
 
                     LoadJobData(db);   // <-- این خط اضافه شود
