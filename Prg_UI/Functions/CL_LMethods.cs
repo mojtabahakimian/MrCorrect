@@ -2609,13 +2609,7 @@ namespace Prg_UI.Functions
 
             if (string.IsNullOrEmpty(baseKnow))
             {
-                baseKnow = Baseknow.BEDEHKAR?.ToStringNullSafe();
-            }
-
-            if (string.IsNullOrEmpty(baseKnow))
-            {
-                ClearComboBoxSelection(comboBox);
-                return;
+                Baseknow.BEDEHKAR.ToStringNullSafe();
             }
 
             // Handle the '+' or '++' case (open ComboSearch dialog)
@@ -2655,13 +2649,19 @@ namespace Prg_UI.Functions
         {
             try
             {
-                string query = $"SELECT N_KOL, NUMBER, TNUMBER FROM TDETA_HES WHERE N_KOL = {baseKnow} AND NUMBER = 1 AND TNUMBER = {input}";
-                var result = dbms.DoGetDataSQL<SQL1_FACTOR>(query).ToList();
+                if (!TryParseSqlInt(baseKnow, out var nKol) || !TryParseSqlInt(input, out var tNumber))
+                {
+                    ClearComboBoxSelection(comboBox);
+                    return;
+                }
+
+                const string query = "SELECT N_KOL, NUMBER, TNUMBER FROM TDETA_HES WHERE N_KOL = @NKol AND NUMBER = 1 AND TNUMBER = @TNumber";
+                var result = dbms.DoGetDataSQL<SQL1_FACTOR>(query, new { NKol = nKol, TNumber = tNumber }).ToList();
 
                 if (result.Count == 1)
                 {
-                    string hesValue = $"{baseKnow}-1-{input}";
-                    string dataName = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = N'{hesValue}'").FirstOrDefault();
+                    string hesValue = $"{nKol}-1-{tNumber}";
+                    string dataName = dbms.DoGetDataSQL<string?>("SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = @Hes", new { Hes = hesValue }).FirstOrDefault();
 
                     AddToComboBoxItems(comboBox, hesValue, dataName);
                     comboBox.SelectedValue = hesValue;
@@ -2675,6 +2675,20 @@ namespace Prg_UI.Functions
             {
                 ClearComboBoxSelection(comboBox);
             }
+        }
+
+        private static bool TryParseSqlInt(string value, out int result)
+        {
+            result = 0;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var normalized = value.Trim();
+            return Regex.IsMatch(normalized, @"^\d+$")
+                && int.TryParse(normalized, NumberStyles.None, CultureInfo.InvariantCulture, out result);
         }
 
         // Method to process non-numeric input
@@ -2949,12 +2963,25 @@ namespace Prg_UI.Functions
             {
                 try
                 {
-                    var rst = dbms.DoGetDataSQL<SQL1_FACTOR>("SELECT N_KOL , NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + Baseknow.BEDEHKAR + " and NUMBER = 1 and tNUMBER = " + CUTSNO_TEX).ToList();
+                    if (!TryParseSqlInt(Baseknow.BEDEHKAR.ToStringNullSafe(), out var nKol) || !TryParseSqlInt(CUTSNO_TEX, out var tNumber))
+                    {
+                        if (CUST_NO != null)
+                        {
+                            CUST_NO.SelectedValue = null;
+                            CUST_NO.Text = null;
+                            CUST_NO.Items.Refresh();
+                        }
+
+                        return null;
+                    }
+
+                    const string query = "SELECT N_KOL, NUMBER, TNUMBER FROM TDETA_HES WHERE N_KOL = @NKol AND NUMBER = 1 AND TNUMBER = @TNumber";
+                    var rst = dbms.DoGetDataSQL<SQL1_FACTOR>(query, new { NKol = nKol, TNumber = tNumber }).ToList();
                     if (rst.Count == 1)
                     {
                         var _data_hes = rst.FirstOrDefault()?.n_kol + "-" + rst.FirstOrDefault()?.NUMBER + "-" + rst.FirstOrDefault()?.tNUMBER;
 
-                        var _data_name = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = N'{_data_hes}'").FirstOrDefault();
+                        var _data_name = dbms.DoGetDataSQL<string>("SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = @Hes", new { Hes = _data_hes }).FirstOrDefault();
                         var THEROW = new Custom_CUST_HESAB { hes = _data_hes, NAME = _data_name };
 
                         if (CUST_NO != null)
