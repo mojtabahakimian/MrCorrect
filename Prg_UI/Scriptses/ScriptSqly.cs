@@ -27,6 +27,8 @@ namespace Prg_UI.Scriptses
             CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
+                db.Open();
+
                 //try { db.Execute($@""); } catch { }
 
                 var SanadCount = db.Query<double?>("SELECT COUNT(*) FROM dbo.DEED_HED").FirstOrDefault();
