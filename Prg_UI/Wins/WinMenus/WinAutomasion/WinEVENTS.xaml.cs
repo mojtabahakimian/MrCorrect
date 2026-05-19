@@ -650,26 +650,16 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                             }
 
 
-                            if (CL_LMethods.IsImageTYPE(THE_TYPEFILE)) // اگر عکس , عکس باز کن
+                            try
                             {
-                                try
+                                // باز شدن فایل با اپ پیش‌فرض ویندوز (پایدارتر از Windows Photo Viewer قدیمی)
+                                MY_PROCESS1 = Process.Start(new ProcessStartInfo
                                 {
-                                    var path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                                    MY_PROCESS1 = Process.Start(new ProcessStartInfo()
-                                    {
-                                        FileName = "rundll32.exe",
-                                        Arguments = string.Format(
-                                            "\"{0}{1}\", ImageView_Fullscreen {2}",
-                                            Environment.Is64BitOperatingSystem ?
-                                                path.Replace(" (x86)", "") : path,
-                                            @"\Windows Photo Viewer\PhotoViewer.dll", THE_PATH_FILE),
-                                        WindowStyle = ProcessWindowStyle.Maximized,
-                                        UseShellExecute = false
-                                    });
-                                }
-                                catch (Exception) { MY_PROCESS1 = Process.Start("explorer.exe", THE_PATH_FILE); }
+                                    FileName = THE_PATH_FILE,
+                                    UseShellExecute = true
+                                });
                             }
-                            else
+                            catch (Exception)
                             {
                                 MY_PROCESS1 = Process.Start("explorer.exe", THE_PATH_FILE);
                             }
