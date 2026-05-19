@@ -134,167 +134,145 @@ namespace Wins.WinMenus.HESABDARI
             if (IsCTRLF9)
             {
                 WINTILENAME.Content = "لیست بدهکاران و بستانکاران محدود شده";
-                ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
 
                 string limitedQuery = $@"
-                    SELECT src.*, 
-                           balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
-                           CASE 
-                               WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
-                               ELSE DATEDIFF( 
-                                       DAY, 
-                                       dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
-                                       CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
-                                    ) 
-                           END AS DAYS_FROM_BALANCE_ORIGIN,
-                           balanceOrigin.BALANCE_ORIGIN_NS AS BALANCE_ORIGIN_NS,
-                           balanceOrigin.BALANCE_ORIGIN_DTL_ID AS BALANCE_ORIGIN_DTL_ID
-                    FROM BEDBESMAH{Baseknow.USERCOD} AS src
-                    OUTER APPLY (
-                        SELECT TOP (1) 
-                            CASE 
-                                WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
-                                ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
-                            END AS BALANCE_DATE,
-                            CASE 
-                                WHEN calc.TotalCoverage <= 0 THEN NextRow.N_S
-                                ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
-                            END AS BALANCE_ORIGIN_NS,
-                            CASE 
-                                WHEN calc.TotalCoverage <= 0 THEN NextRow.id
-                                ELSE COALESCE(NextRow.id, CoverRow.id)
-                            END AS BALANCE_ORIGIN_DTL_ID
-                        FROM (
-                            SELECT 
-                                CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
-                            FROM (
-                                SELECT ISNULL(SUM(BES), 0) AS TotalBes, ISNULL(SUM(BED), 0) AS TotalBed
-                                FROM DEED_DTL 
-                                WHERE HES_K = src.HES_K AND HES_M = src.HES_M AND HES_T = src.HES_T 
-                                  AND ISNULL(HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(HES_T4, 0) = ISNULL(src.HES_T4, 0)
-                            ) inner_calc
-                        ) AS calc
-                        OUTER APPLY (
-                                SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount, cover.id
-                            FROM (
-                                    SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF, inner_cover.id,
-                                       CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
-                                FROM (
-                                        SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF, d_inn.id,
-                                               SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
-                                               SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
-                                    FROM DEED_DTL d_inn
-                                    INNER JOIN DEED_HED h_inn ON h_inn.N_S = d_inn.N_S
-                                    WHERE d_inn.HES_K = src.HES_K AND d_inn.HES_M = src.HES_M AND d_inn.HES_T = src.HES_T
-                                      AND ISNULL(d_inn.HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(d_inn.HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(d_inn.HES_T4, 0) = ISNULL(src.HES_T4, 0)
-                                ) inner_cover
-                            ) AS cover
-                            WHERE calc.TotalCoverage > 0 AND cover.RunAmount >= calc.TotalCoverage
-                                ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
-                        ) AS CoverRow
-                        OUTER APPLY (
-                            SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.id
-                            FROM DEED_DTL d_n
-                            INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
-                            WHERE d_n.HES_K = src.HES_K AND d_n.HES_M = src.HES_M AND d_n.HES_T = src.HES_T
-                              AND ISNULL(d_n.HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(d_n.HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(d_n.HES_T4, 0) = ISNULL(src.HES_T4, 0)
-                              AND ISNULL(d_n.SHARH, '') NOT LIKE N'%افتتاح%'
-                              AND (
-                                  calc.TotalCoverage <= 0
-                                  OR
-                                      (CoverRow.DATE_S IS NOT NULL AND (
-                                          h_n.DATE_S > CoverRow.DATE_S OR 
-                                          (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S > CoverRow.N_S) OR
-                                          (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S = CoverRow.N_S AND d_n.RADIF > CoverRow.RADIF)
-                                      ))
-                              )
-                                ORDER BY h_n.DATE_S ASC, d_n.N_S ASC, d_n.RADIF ASC
-                        ) AS NextRow
-                    ) AS balanceOrigin
-                    WHERE (src.HES_K = {KOL_PASSED}) And (src.HES_M = {MOIN_PASSED})
-                    ORDER BY src.HES_K, src.HES_M, src.HES_T";
+           SELECT src.*, 
+                  balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
+                  CASE 
+                      WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
+                      ELSE DATEDIFF( 
+                              DAY, 
+                              dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
+                              CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
+                           ) 
+                  END AS DAYS_FROM_BALANCE_ORIGIN,
+                  balanceOrigin.BALANCE_ORIGIN_NS AS BALANCE_ORIGIN_NS,
+                  balanceOrigin.BALANCE_ORIGIN_DTL_ID AS BALANCE_ORIGIN_DTL_ID
+           FROM BEDBESMAH{Baseknow.USERCOD} AS src
+           OUTER APPLY (
+               -- مرحله ۱: محاسبه جمع کل
+               SELECT 
+                   ISNULL(SUM(BES), 0) AS TotalBes, 
+                   ISNULL(SUM(BED), 0) AS TotalBed
+               FROM DEED_DTL 
+               WHERE HES_K = src.HES_K AND HES_M = src.HES_M AND HES_T = src.HES_T 
+                 AND ISNULL(HES_T2, 0) = ISNULL(src.HES_T2, 0) 
+                 AND ISNULL(HES_T3, 0) = ISNULL(src.HES_T3, 0) 
+                 AND ISNULL(HES_T4, 0) = ISNULL(src.HES_T4, 0)
+           ) AS totals
+           OUTER APPLY (
+               -- مرحله ۲ و ۳: پیدا کردن سطر شروع بدهی جدید
+               SELECT TOP (1) 
+                   running_data.DATE_S AS BALANCE_DATE, 
+                   running_data.N_S AS BALANCE_ORIGIN_NS, 
+                   running_data.id AS BALANCE_ORIGIN_DTL_ID
+               FROM (
+                   SELECT 
+                       d.N_S, h.DATE_S, d.RADIF, d.id, d.SHARH,
+                       SUM(ISNULL(d.BED, 0)) OVER (ORDER BY h.DATE_S ASC, d.N_S ASC, d.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
+                       SUM(ISNULL(d.BES, 0)) OVER (ORDER BY h.DATE_S ASC, d.N_S ASC, d.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
+                   FROM DEED_DTL d
+                   INNER JOIN DEED_HED h ON h.N_S = d.N_S
+                   WHERE d.HES_K = src.HES_K AND d.HES_M = src.HES_M AND d.HES_T = src.HES_T
+                     AND ISNULL(d.HES_T2, 0) = ISNULL(src.HES_T2, 0) 
+                     AND ISNULL(d.HES_T3, 0) = ISNULL(src.HES_T3, 0) 
+                     AND ISNULL(d.HES_T4, 0) = ISNULL(src.HES_T4, 0)
+               ) AS running_data
+               WHERE 
+                   -- حالت اول: مانده بدهکار
+                   (ISNULL(src.BEDBES, 0) > 0 AND running_data.RunBed > totals.TotalBes)
+                   
+                   OR
+                   
+                   -- حالت دوم: مانده بستانکار
+                   (ISNULL(src.BEDBES, 0) < 0 AND running_data.RunBes > totals.TotalBed)
+
+                   OR
+
+                   -- حالت سوم: عدم وجود پرداختی (پوشش صفر) - پرش از سند افتتاحیه با چک کردن شرح سند
+                   (
+                     totals.TotalBes <= 0 
+                     AND ISNULL(src.BEDBES, 0) > 0 
+                     AND running_data.RunBed > 0 
+                     AND ISNULL(running_data.SHARH, '') NOT LIKE N'%افتتاح%'
+                   )
+                   
+               ORDER BY running_data.DATE_S ASC, running_data.N_S ASC, running_data.RADIF ASC
+           ) AS balanceOrigin
+           WHERE (src.HES_K = {KOL_PASSED}) AND (src.HES_M = {MOIN_PASSED})
+           ORDER BY src.HES_K, src.HES_M, src.HES_T";
 
                 MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(limitedQuery).ToList();
             }
             else
             {
-                ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
 
                 const string fullQuery = @"
                              SELECT main.*, 
-                                    balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
-                                    CASE 
-                                        WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
-                                        ELSE DATEDIFF( 
-                                                DAY, 
-                                                dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
-                                                CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
-                                             ) 
-                                    END AS DAYS_FROM_BALANCE_ORIGIN,
-                                    balanceOrigin.BALANCE_ORIGIN_NS AS BALANCE_ORIGIN_NS,
-                                    balanceOrigin.BALANCE_ORIGIN_DTL_ID AS BALANCE_ORIGIN_DTL_ID
-                             FROM Q_BEDEHBESTANH_MAIN AS main
-                             OUTER APPLY (
-                                 SELECT TOP (1) 
-                                     CASE 
-                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
-                                         ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
-                                     END AS BALANCE_DATE,
-                                     CASE 
-                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.N_S
-                                         ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
-                                     END AS BALANCE_ORIGIN_NS,
-                                     CASE 
-                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.id
-                                         ELSE COALESCE(NextRow.id, CoverRow.id)
-                                     END AS BALANCE_ORIGIN_DTL_ID
-                                 FROM (
-                                     SELECT 
-                                         CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
-                                     FROM (
-                                         SELECT ISNULL(SUM(BES), 0) AS TotalBes, ISNULL(SUM(BED), 0) AS TotalBed
-                                         FROM DEED_DTL 
-                                         WHERE HES_K = main.HES_K AND HES_M = main.HES_M AND HES_T = main.HES_T 
-                                           AND ISNULL(HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(HES_T4, 0) = ISNULL(main.HES_T4, 0)
-                                     ) inner_calc
-                                 ) AS calc
-                                 OUTER APPLY (
-                                         SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount, cover.id
-                                     FROM (
-                                             SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF, inner_cover.id,
-                                                CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
-                                         FROM (
-                                                 SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF, d_inn.id,
-                                                        SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
-                                                        SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
-                                             FROM DEED_DTL d_inn
-                                             INNER JOIN DEED_HED h_inn ON h_inn.N_S = d_inn.N_S
-                                             WHERE d_inn.HES_K = main.HES_K AND d_inn.HES_M = main.HES_M AND d_inn.HES_T = main.HES_T
-                                               AND ISNULL(d_inn.HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(d_inn.HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(d_inn.HES_T4, 0) = ISNULL(main.HES_T4, 0)
-                                         ) inner_cover
-                                     ) AS cover
-                                     WHERE calc.TotalCoverage > 0 AND cover.RunAmount >= calc.TotalCoverage
-                                         ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
-                                 ) AS CoverRow
-                                 OUTER APPLY (
-                                     SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.id
-                                     FROM DEED_DTL d_n
-                                     INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
-                                     WHERE d_n.HES_K = main.HES_K AND d_n.HES_M = main.HES_M AND d_n.HES_T = main.HES_T
-                                       AND ISNULL(d_n.HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(d_n.HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(d_n.HES_T4, 0) = ISNULL(main.HES_T4, 0)
-                                       AND (
-                                           calc.TotalCoverage <= 0
-                                           OR
-                                               (CoverRow.DATE_S IS NOT NULL AND (
-                                                   h_n.DATE_S > CoverRow.DATE_S OR 
-                                                   (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S > CoverRow.N_S) OR
-                                                   (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S = CoverRow.N_S AND d_n.RADIF > CoverRow.RADIF)
-                                               ))
-                                       )
-                                         ORDER BY h_n.DATE_S ASC, d_n.N_S ASC, d_n.RADIF ASC
-                                 ) AS NextRow
-                             ) AS balanceOrigin
-                             OPTION (FORCE ORDER, QUERYTRACEON 2312)";
+       balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
+       CASE 
+           WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
+           ELSE DATEDIFF( 
+                   DAY, 
+                   dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
+                   CAST(GETDATE() AS DATE)
+                ) 
+       END AS DAYS_FROM_BALANCE_ORIGIN,
+       balanceOrigin.BALANCE_ORIGIN_NS AS BALANCE_ORIGIN_NS,
+       balanceOrigin.BALANCE_ORIGIN_DTL_ID AS BALANCE_ORIGIN_DTL_ID
+
+FROM Q_BEDEHBESTANH_MAIN AS main
+OUTER APPLY (
+    -- مرحله ۱: محاسبه جمع کل
+    SELECT 
+        ISNULL(SUM(BES), 0) AS TotalBes, 
+        ISNULL(SUM(BED), 0) AS TotalBed
+    FROM DEED_DTL 
+    WHERE HES_K = main.HES_K AND HES_M = main.HES_M AND HES_T = main.HES_T 
+      AND ISNULL(HES_T2, 0) = ISNULL(main.HES_T2, 0) 
+      AND ISNULL(HES_T3, 0) = ISNULL(main.HES_T3, 0) 
+      AND ISNULL(HES_T4, 0) = ISNULL(main.HES_T4, 0)
+) AS totals
+OUTER APPLY (
+    -- مرحله ۲ و ۳: پیدا کردن سطر شروع بدهی جدید
+    SELECT TOP (1) 
+        running_data.DATE_S AS BALANCE_DATE,       -- اصلاح شد: استفاده از running_data
+        running_data.N_S AS BALANCE_ORIGIN_NS,     -- اصلاح شد: استفاده از running_data
+        running_data.id AS BALANCE_ORIGIN_DTL_ID   -- اصلاح شد: استفاده از running_data
+    FROM (
+        SELECT 
+            d.N_S, h.DATE_S, d.RADIF, d.id, h.NO_S,
+            SUM(ISNULL(d.BED, 0)) OVER (ORDER BY h.DATE_S ASC, d.N_S ASC, d.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
+            SUM(ISNULL(d.BES, 0)) OVER (ORDER BY h.DATE_S ASC, d.N_S ASC, d.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
+        FROM DEED_DTL d
+        INNER JOIN DEED_HED h ON h.N_S = d.N_S
+        WHERE d.HES_K = main.HES_K AND d.HES_M = main.HES_M AND d.HES_T = main.HES_T
+          AND ISNULL(d.HES_T2, 0) = ISNULL(main.HES_T2, 0) 
+          AND ISNULL(d.HES_T3, 0) = ISNULL(main.HES_T3, 0) 
+          AND ISNULL(d.HES_T4, 0) = ISNULL(main.HES_T4, 0)
+    ) AS running_data
+    WHERE 
+        -- حالت اول: مانده بدهکار
+        (ISNULL(main.BEDBES, 0) > 0 AND running_data.RunBed > totals.TotalBes)
+        
+        OR
+        
+        -- حالت دوم: مانده بستانکار
+        (ISNULL(main.BEDBES, 0) < 0 AND running_data.RunBes > totals.TotalBed)
+
+        OR
+
+        -- حالت سوم: عدم وجود پرداختی (پوشش صفر) - پرش از سند افتتاحیه
+        (
+          totals.TotalBes <= 0 
+          AND ISNULL(main.BEDBES, 0) > 0 
+          AND running_data.RunBed > 0 
+          AND running_data.NO_S <> 1 -- در صورت نیاز کد سند افتتاحیه (1) را تغییر دهید
+        )
+        
+    ORDER BY running_data.DATE_S ASC, running_data.N_S ASC, running_data.RADIF ASC
+) AS balanceOrigin
+OPTION (FORCE ORDER, QUERYTRACEON 2312);";
 
                 MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(fullQuery).ToList();
             }
