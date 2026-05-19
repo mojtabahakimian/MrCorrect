@@ -654,18 +654,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                             {
                                 try
                                 {
-                                    var path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                                    MY_PROCESS1 = Process.Start(new ProcessStartInfo()
-                                    {
-                                        FileName = "rundll32.exe",
-                                        Arguments = string.Format(
-                                            "\"{0}{1}\", ImageView_Fullscreen {2}",
-                                            Environment.Is64BitOperatingSystem ?
-                                                path.Replace(" (x86)", "") : path,
-                                            @"\Windows Photo Viewer\PhotoViewer.dll", THE_PATH_FILE),
-                                        WindowStyle = ProcessWindowStyle.Maximized,
-                                        UseShellExecute = false
-                                    });
+                                    MY_PROCESS1 = Process.Start(new ProcessStartInfo(THE_PATH_FILE) { UseShellExecute = true });
                                 }
                                 catch (Exception) { MY_PROCESS1 = Process.Start("explorer.exe", THE_PATH_FILE); }
                             }
