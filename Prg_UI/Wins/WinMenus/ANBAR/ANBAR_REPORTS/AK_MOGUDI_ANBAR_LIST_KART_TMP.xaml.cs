@@ -178,6 +178,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 // entirely inside SQL Server — no C# post-processing needed.
                 // SUM OVER (PARTITION BY CODE ORDER BY ...) gives each row the running total
                 // of signed movements up to that point, matching the card report's behaviour.
+                // CAST is explicit because AZDATE/ANBAR/TADATE are strings in C# but the TVF
+                // expects BIGINT/INT — SQL Server implicit conversion is unreliable via Dapper.
                 const string sql = @"
                     SELECT
                         NAME, CODE, NAMES, N_FANI, MEGK, mabl_a, MABLK,
@@ -186,8 +188,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                             ORDER BY DATE_N, BARGAH, NUMBER
                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                         ) AS MEG,
-                        BARGAH, NUMBER, FNUMCO, DATE_N, BEDNAME, avrage
-                    FROM dbo.KART_KALA(@AZDATE, @ANBAR, @TADATE)
+                        BARGAH, NUMBER, FNUMCO, DATE_N, BEDNAME, avrage,
+                        CAST(@ANBAR AS BIGINT) AS ANBAR
+                    FROM dbo.KART_KALA(CAST(@AZDATE AS BIGINT), CAST(@ANBAR AS BIGINT), CAST(@TADATE AS BIGINT))
                     WHERE MEG <> 0
                     ORDER BY CODE, DATE_N, BARGAH, NUMBER";
 
