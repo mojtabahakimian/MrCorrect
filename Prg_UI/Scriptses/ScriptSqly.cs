@@ -27,6 +27,8 @@ namespace Prg_UI.Scriptses
             CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
+                db.Open();
+
                 //try { db.Execute($@""); } catch { }
 
                 var SanadCount = db.Query<double?>("SELECT COUNT(*) FROM dbo.DEED_HED").FirstOrDefault();
@@ -3287,13 +3289,21 @@ FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
                 #region SALARY
-                if (isCustomCall) //
-                {
-                    // ===========================================================
-                    // 1. DDL — جداول، ویوها، فانکشن‌ها، تریگرها
-                    //    ایجاد می‌شوند اگر وجود ندارند؛ آپدیت اگر موجودند
-                    // ===========================================================
-                    string tablescript = @"
+                SalaryScript(isCustomCall, db);
+                #endregion
+
+            }
+        }
+
+        private static void SalaryScript(bool isCustomCall, SqlConnection db)
+        {
+            if (isCustomCall) //
+            {
+                // ===========================================================
+                // 1. DDL — جداول، ویوها، فانکشن‌ها، تریگرها
+                //    ایجاد می‌شوند اگر وجود ندارند؛ آپدیت اگر موجودند
+                // ===========================================================
+                string tablescript = @"
 -- ================================================================
 -- PAY2 — سیستم حقوق و دستمزد — نسخه v6.0
 -- نرم‌افزار مستر کارکت
@@ -3590,9 +3600,11 @@ CREATE TABLE [dbo].[PAY2_WORKSHOP]
     [WS_ID]           INT           NOT NULL IDENTITY(1,1),
     [WS_CODE]         NVARCHAR(20)  NOT NULL,                                    -- کد کارگاه (مرجع TAGCOD.CODE در صورت مهاجرت)
     [WS_NAME]         NVARCHAR(100) NOT NULL,                                    -- نام کارگاه
+    [EMPLOYER_NAME]   NVARCHAR(100) NULL,                                        -- نام کارفرما (فیلد جدید v6)
     [NATIONAL_ID]     NVARCHAR(11)  NULL,                                        -- شناسه ملی کارگاه
     [SOCIAL_INS_CODE] NVARCHAR(20)  NULL,                                        -- کد کارگاه نزد تأمین اجتماعی
     [TAX_CODE]        NVARCHAR(20)  NULL,                                        -- شناسه مالیاتی
+    [POSTAL_CODE]     NVARCHAR(20)  NULL,                                        -- کد پستی کارگاه (فیلد جدید v6)
     [ADDRESS]         NVARCHAR(300) NULL,
     [PHONE]           NVARCHAR(30)  NULL,
     [INS_MODE]        TINYINT       NOT NULL CONSTRAINT DF_WS_INS DEFAULT(1),    -- 1=کارگاه معمولی (SANAD) | 2=تبصره ماده ۷ (SANAD10)
@@ -4439,6 +4451,8 @@ SELECT
     P.PERIOD_DATE,
     W.SOCIAL_INS_CODE,
     W.WS_NAME,
+    W.EMPLOYER_NAME, -- اضافه شده به خروجی لیست بیمه
+    W.POSTAL_CODE,   -- اضافه شده به خروجی لیست بیمه
     E.INS_CODE,
     E.NATIONAL_CODE,
     E.LAST_NAME + N' ' + E.FIRST_NAME AS FULL_NAME,
@@ -4610,12 +4624,12 @@ GO
 -- ================================================================
 GO
 ";
-                    ExecuteBatches(db, tablescript);
+                ExecuteBatches(db, tablescript);
 
-                    // ===========================================================
-                    // 2. Stored Procedures â CREATE OR ALTER (همیشه آخرین نسخه)
-                    // ===========================================================
-                    string procScript = @"
+                // ===========================================================
+                // 2. Stored Procedures â CREATE OR ALTER (همیشه آخرین نسخه)
+                // ===========================================================
+                string procScript = @"
 -- ================================================================
 -- PAY2 — Stored Procedures & Business Logic — v6.0
 -- نرم‌افزار مستر کارکت | کد: PAY2-DB-006
@@ -5762,13 +5776,13 @@ BEGIN
 END;
 GO
 ";
-                    ExecuteBatches(db, procScript);
+                ExecuteBatches(db, procScript);
 
-                    // ===========================================================
-                    // 3. Modify â تغییرات ساختاری و بازنویسی Procedureهای خاص
-                    // ===========================================================
-                    // بخش اصلاح شده و کامل modify1
-                    string modify1 = @"
+                // ===========================================================
+                // 3. Modify â تغییرات ساختاری و بازنویسی Procedureهای خاص
+                // ===========================================================
+                // بخش اصلاح شده و کامل modify1
+                string modify1 = @"
 -- ================================================================
 -- ۱. اصلاح ساختار ستون ACC_T در صورت قدیمی بودن دیتابیس
 -- ================================================================
@@ -5970,14 +5984,21 @@ BEGIN
 END;
 GO
 ";
-                    ExecuteBatches(db, modify1);
+                ExecuteBatches(db, modify1);
 
-                    LoadJobData(db);   // <-- این خط اضافه شود
-                }
-                #endregion
+                //try { db.Execute($@""); } catch { }
+                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;"); } catch { }
+                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;"); } catch { }
+                
+                //-- ساخت ایندکس ترکیبی برای حذف عملیات سورت و اسکن جدول شغل‌ها
+                try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
+ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) 
+INCLUDE ([JOB_ID]);"); } catch { }
 
+                LoadJobData(db);   // <-- این خط اضافه شود
             }
         }
+
         private static void ExecuteBatches(SqlConnection db, string script)
         {
             // Safely split the script ONLY when "GO" is on its own line
