@@ -141,18 +141,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
         {
             NowIsReady = true;
         }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ReGetData();
-
             if (SYNCFUSION_DG != null)
             {
                 SYNCFUSION_DG.FilterChanged += View_FilterChanged;
-                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
-
-                UpdateRowCountLabel();
+                SYNCFUSION_DG.Loaded += (s, args) => UpdateRowCountLabel();
             }
-            //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
+
+            await ReGetDataAsync();
+
+            UpdateRowCountLabel();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -165,7 +164,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
             }
         }
 
-        private void ReGetData()
+        private async Task ReGetDataAsync()
         {
             try
             {
@@ -174,46 +173,40 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 if (string.IsNullOrEmpty(AZDATE)) AZDATE = Baseknow.YEA + "0101";
                 if (string.IsNullOrEmpty(TADATE)) TADATE = "99999999";
 
-                //string query = $@"
-                //    SELECT NAME, CODE, NAMES, N_FANI, MEGK, mabl_a, MABLK, MEG, BARGAH, NUMBER, FNUMCO, DATE_N, BEDNAME, avrage
-                //    FROM dbo.KART_KALA({AZDATE}, {ANBAR}, {TADATE})
-                //    WHERE CODE = '{CODE}' AND MEG <> 0
-                //    ORDER BY DATE_N, BARGAH, NUMBER";
-
-                //var results = dbms.DoGetDataSQL<KartTmpModel>(query).ToList();
-
-
                 string sql = "usp_KART_ANBAR_TOTAL_CLEAN_V3";
-                var parameters = new { AnbarCode = ANBAR, };
-                var results = dbms.DoGetStoreProcedureSQL<KartTmpModel>(sql, parameters).ToList();
+                var spParams = new { AnbarCode = ANBAR };
 
-                // SP returns per-transaction signed movement in MEG (negative for outgoing).
-                // Compute cumulative running balance per item so موجودی reflects actual stock.
-                var orderedResults = results
-                    .GroupBy(r => new { r.CODE, r.ANBAR })
-                    .SelectMany(g =>
-                    {
-                        double running = 0;
-                        return g.OrderBy(r => r.DATE_N)
-                                .ThenBy(r => r.BARGAH)
-                                .ThenBy(r => r.NUMBER)
-                                .Select(r =>
-                                {
-                                    running += r.MEG ?? 0;
-                                    r.MEG = running;
-                                    return r;
-                                });
-                    });
-
-                foreach (var item in orderedResults)
+                // DB fetch + all LINQ processing on background thread to keep UI responsive.
+                // Root fix: SP returns per-transaction signed movement in MEG (negative for
+                // outgoing transactions like حواله فروش). We group by CODE and compute the
+                // cumulative running balance per item, sorted chronologically, so that
+                // ابتدای دوره rows are applied before sales transactions. This matches the
+                // behaviour of KART_KALA used in R_KA_KALA and produces correct موجودی values.
+                var processed = await Task.Run(() =>
                 {
-                    if (item.avrage.HasValue && item.MEG.HasValue)
-                    {
-                        item.Text18 = item.avrage.Value * item.MEG.Value;
-                    }
+                    var raw = dbms.DoGetStoreProcedureSQL<KartTmpModel>(sql, spParams).ToList();
 
+                    return raw
+                        .GroupBy(r => r.CODE)
+                        .SelectMany(g =>
+                        {
+                            double running = 0;
+                            return g.OrderBy(r => r.DATE_N)
+                                    .ThenBy(r => r.BARGAH)
+                                    .ThenBy(r => r.NUMBER)
+                                    .Select(r =>
+                                    {
+                                        running += r.MEG ?? 0;
+                                        r.MEG = running;
+                                        r.Text18 = r.avrage.HasValue ? r.avrage.Value * running : (double?)null;
+                                        return r;
+                                    });
+                        })
+                        .ToList();
+                });
+
+                foreach (var item in processed)
                     KART_DATA.Add(item);
-                }
             }
             catch (Exception ex)
             {
