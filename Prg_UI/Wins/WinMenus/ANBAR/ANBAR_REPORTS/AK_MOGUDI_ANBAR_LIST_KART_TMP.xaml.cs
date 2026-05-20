@@ -187,7 +187,25 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 var parameters = new { AnbarCode = ANBAR, };
                 var results = dbms.DoGetStoreProcedureSQL<KartTmpModel>(sql, parameters).ToList();
 
-                foreach (var item in results)
+                // SP returns per-transaction signed movement in MEG (negative for outgoing).
+                // Compute cumulative running balance per item so موجودی reflects actual stock.
+                var orderedResults = results
+                    .GroupBy(r => new { r.CODE, r.ANBAR })
+                    .SelectMany(g =>
+                    {
+                        double running = 0;
+                        return g.OrderBy(r => r.DATE_N)
+                                .ThenBy(r => r.BARGAH)
+                                .ThenBy(r => r.NUMBER)
+                                .Select(r =>
+                                {
+                                    running += r.MEG ?? 0;
+                                    r.MEG = running;
+                                    return r;
+                                });
+                    });
+
+                foreach (var item in orderedResults)
                 {
                     if (item.avrage.HasValue && item.MEG.HasValue)
                     {
