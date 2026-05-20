@@ -173,40 +173,33 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 if (string.IsNullOrEmpty(AZDATE)) AZDATE = Baseknow.YEA + "0101";
                 if (string.IsNullOrEmpty(TADATE)) TADATE = "99999999";
 
-                string sql = "usp_KART_ANBAR_TOTAL_CLEAN_V3";
-                var spParams = new { AnbarCode = ANBAR };
+                // Use KART_KALA (the same TVF used by R_KA_KALA report) with a SQL window
+                // function to compute the correct cumulative running balance (موجودی) per item
+                // entirely inside SQL Server — no C# post-processing needed.
+                // SUM OVER (PARTITION BY CODE ORDER BY ...) gives each row the running total
+                // of signed movements up to that point, matching the card report's behaviour.
+                const string sql = @"
+                    SELECT
+                        NAME, CODE, NAMES, N_FANI, MEGK, mabl_a, MABLK,
+                        SUM(MEG) OVER (
+                            PARTITION BY CODE
+                            ORDER BY DATE_N, BARGAH, NUMBER
+                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                        ) AS MEG,
+                        BARGAH, NUMBER, FNUMCO, DATE_N, BEDNAME, avrage
+                    FROM dbo.KART_KALA(@AZDATE, @ANBAR, @TADATE)
+                    WHERE MEG <> 0
+                    ORDER BY CODE, DATE_N, BARGAH, NUMBER";
 
-                // DB fetch + all LINQ processing on background thread to keep UI responsive.
-                // Root fix: SP returns per-transaction signed movement in MEG (negative for
-                // outgoing transactions like حواله فروش). We group by CODE and compute the
-                // cumulative running balance per item, sorted chronologically, so that
-                // ابتدای دوره rows are applied before sales transactions. This matches the
-                // behaviour of KART_KALA used in R_KA_KALA and produces correct موجودی values.
                 var processed = await Task.Run(() =>
-                {
-                    var raw = dbms.DoGetStoreProcedureSQL<KartTmpModel>(sql, spParams).ToList();
-
-                    return raw
-                        .GroupBy(r => r.CODE)
-                        .SelectMany(g =>
-                        {
-                            double running = 0;
-                            return g.OrderBy(r => r.DATE_N)
-                                    .ThenBy(r => r.BARGAH)
-                                    .ThenBy(r => r.NUMBER)
-                                    .Select(r =>
-                                    {
-                                        running += r.MEG ?? 0;
-                                        r.MEG = running;
-                                        r.Text18 = r.avrage.HasValue ? r.avrage.Value * running : (double?)null;
-                                        return r;
-                                    });
-                        })
-                        .ToList();
-                });
+                    dbms.DoGetDataSQL<KartTmpModel>(sql, new { AZDATE, ANBAR, TADATE }).ToList());
 
                 foreach (var item in processed)
+                {
+                    if (item.avrage.HasValue && item.MEG.HasValue)
+                        item.Text18 = item.avrage.Value * item.MEG.Value;
                     KART_DATA.Add(item);
+                }
             }
             catch (Exception ex)
             {
