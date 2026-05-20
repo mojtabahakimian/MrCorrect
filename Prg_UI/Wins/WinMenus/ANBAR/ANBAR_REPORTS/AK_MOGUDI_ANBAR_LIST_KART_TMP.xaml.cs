@@ -183,13 +183,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 //var results = dbms.DoGetDataSQL<KartTmpModel>(query).ToList();
 
 
-                string sql = @"
-                    SELECT NAME, CODE, NAMES, N_FANI, MEGK, mabl_a, MABLK, MEG, BARGAH, NUMBER, FNUMCO, DATE_N, BEDNAME, avrage
-                    FROM dbo.KART_KALA(@AZDATE, @ANBAR, @TADATE)
-                    WHERE CODE = @KALACODE AND MEG <> 0
-                    ORDER BY DATE_N, BARGAH, NUMBER";
-                var parameters = new { AZDATE = AZDATE, ANBAR = ANBAR, TADATE = TADATE, KALACODE = CODE };
-                var results = dbms.DoGetDataSQL<KartTmpModel>(sql, parameters).ToList();
+                string sql = "usp_KART_ANBAR_TOTAL_CLEAN_V3";
+                var parameters = new { AnbarCode = ANBAR, };
+                var results = dbms.DoGetStoreProcedureSQL<KartTmpModel>(sql, parameters).ToList();
 
                 foreach (var item in results)
                 {
