@@ -230,6 +230,7 @@
                 <syncfusion:GridTextColumn x:Name="hES_T4Column" HeaderText="تفضیلی 4" MappingName="HES_T4" IsHidden="True"  />
                 <syncfusion:GridTextColumn x:Name="tAFZILNColumn" HeaderText="نام حساب تفضیلی 2" MappingName="TAFZILN" IsHidden="True"  />
                 <syncfusion:GridTextColumn x:Name="hESColumn" HeaderText="حساب" MappingName="HES" IsHidden="True"  />
+                <syncfusion:GridTextColumn x:Name="mAHDisplayColumn" HeaderText="ماه" MappingName="MONTH_S_DISPLAY" Width="140" />
             </syncfusion:SfDataGrid.Columns>
 
 

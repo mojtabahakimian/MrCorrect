@@ -1386,6 +1386,37 @@ namespace Prg_Proccessy.SQLMODELS
             public string TAFZILN { get; set; }
             public string HES { get; set; }
             public string TSH { get; set; }
+
+            public int? MONTH_S { get; set; }
+            public string MONTH_S_DISPLAY
+            {
+                get
+                {
+                    if (!MONTH_S.HasValue || MONTH_S < 1 || MONTH_S > 12)
+                    {
+                        return string.Empty;
+                    }
+
+                    var monthName = MONTH_S.Value switch
+                    {
+                        1 => "فروردین",
+                        2 => "اردیبهشت",
+                        3 => "خرداد",
+                        4 => "تیر",
+                        5 => "مرداد",
+                        6 => "شهریور",
+                        7 => "مهر",
+                        8 => "آبان",
+                        9 => "آذر",
+                        10 => "دی",
+                        11 => "بهمن",
+                        12 => "اسفند",
+                        _ => string.Empty
+                    };
+
+                    return $"{monthName} - {MONTH_S.Value:00}";
+                }
+            }
         }
         /// <summary>
         /// پیش فاکتور 90 30
