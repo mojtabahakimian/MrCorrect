@@ -249,34 +249,46 @@ namespace Wins.WinSetting
                 {
                     e.Handled = true;
                     var DG = BLOCK_CUSTOMER_SUB;
-                    if (DG?.CurrentColumn != null && DG?.SelectedItem != null && DG.CanUserAddRows && DG.IsEnabled && !DG.IsReadOnly)
+
+                    if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = DG.CurrentColumn.SortMemberPath == "EUSER";
-                        bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-
-                        if (isLastColumn)
+                        if (DG?.CurrentColumn != null && DG?.SelectedItem != null && DG.CanUserAddRows && DG.IsEnabled && !DG.IsReadOnly)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = DG.CurrentColumn.SortMemberPath == "EUSER";
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+
+                            if (isLastColumn)
                             {
-                                // Add focus to new row if needed
-                                DG.SelectedIndex++;
-
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[BLOCK_CUSTOMER_SUB_INDEX_DEF_INDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    if (DG.SelectedItem != null)
-                                    {
-                                        DG.BeginEdit();
-                                    }
-                                }), DispatcherPriority.Background);
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[BLOCK_CUSTOMER_SUB_INDEX_DEF_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        if (DG.SelectedItem != null)
+                                        {
+                                            DG.BeginEdit();
+                                        }
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                        {
+                            DataGridExtension.HandleKeyPress(sender, e, DG);
+                        }
+                    }
+
                 }
 
                 e.Handled = true;
@@ -3570,7 +3582,7 @@ namespace Wins.WinSetting
                 else
                 {
                     //if (HES_COMBO?.SelectedValue is null || HES_COMBO?.SelectedValue != CURRENT_ROW_LOCK_CUSTOMER?.HES) //if is different then
-                    if (HES_COMBO?.SelectedValue is null || ENTERED_VALUE_ROW != CURRENT_ROW_LOCK_CUSTOMER?.HES) //if is different then
+                    if (HES_COMBO?.SelectedValue is null || HES_COMBO.SelectedValue?.ToString() != CURRENT_ROW_LOCK_CUSTOMER?.HES) //if is different then
                     {
                         var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HES_COMBO, dbms);
                         if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
@@ -3763,7 +3775,8 @@ namespace Wins.WinSetting
                            dbo.BLOCK_CUSTOMER.ID
                     FROM dbo.BLOCK_CUSTOMER
                         LEFT OUTER JOIN dbo.CUST_HESAB
-                            ON dbo.BLOCK_CUSTOMER.HES = dbo.CUST_HESAB.hes").ToList();
+                            ON dbo.BLOCK_CUSTOMER.HES = dbo.CUST_HESAB.hes 
+                            ORDER BY CRT").ToList();
 
             foreach (var item in RST)
             {

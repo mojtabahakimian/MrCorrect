@@ -7897,42 +7897,30 @@ VALUES
         }
         public static string GETMANDAH(string HES)
         {
-            string GETMANDAHRet = "0";
-            double MMAND = 0;
-
-            if (dbms == null || string.IsNullOrWhiteSpace(HES)) return "0";
+            if (dbms == null || string.IsNullOrWhiteSpace(HES))
+                return "0";
 
             try
             {
-                var sql = "SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE (HES = @hes)";
-                var result = dbms.DoGetDataSQL<double?>(sql, new { hes = HES })?.FirstOrDefault();
+                // Check if account is blocked
+                if (CL_HESABDARI.BLOCKEDMK(HES))
+                    return "مسدود است";
 
-                double mand = 0;
-                if (result != null)
-                {
-                    mand = result ?? 0;
-                }
+                const string sql = "SELECT SUM(BED - BES) AS Balance FROM dbo.DEED_DTL WHERE HES = @hes";
 
-                MMAND = mand;
+                var balance = dbms.DoGetDataSQL<decimal?>(sql, new { HES })?.FirstOrDefault() ?? 0m;
 
-                if (mand != 0)
-                {
-                    if (mand > 0)
-                    {
-                        GETMANDAHRet = $"{mand:#,##0} ريال بدهكار";
-                    }
-                    else
-                    {
-                        GETMANDAHRet = $"{Math.Abs(mand):#,##0} ريال بستانكار";
-                    }
-                }
+                if (balance == 0)
+                    return "0";
+
+                return balance > 0
+                    ? $"{balance:#,##0} ريال بدهكار"
+                    : $"{Math.Abs(balance):#,##0} ريال بستانكار";
             }
-            catch
+            catch (Exception ex)
             {
-                GETMANDAHRet = "0";
+                return "0";
             }
-
-            return GETMANDAHRet;
         }
 
         public static void LOGFACT(double num, long tgg, double RES, string fld)

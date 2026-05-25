@@ -2633,6 +2633,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             if (selectedItem == null)
             {
                 e.Handled = true;  // Stop further execution
+                MANDB.Text = "";
+                MANDS.Text = "";
                 return;
             }
 
@@ -2652,19 +2654,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         {
                             try
                             {
-                                // SPME Fix: Parameterized queries to prevent SQL Injection & optimize execution plan
                                 if (!string.IsNullOrEmpty(_satr?.FHES))
                                 {
-                                    var rst = dbms.DoGetDataSQL<double?>("SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = @Hes", new { Hes = _satr.FHES }).ToList();
-                                    if (rst.Count == 0 || rst.FirstOrDefault() == null)
-                                    {
-                                        MANDB.Text = "0";
-                                    }
-                                    else
-                                    {
-                                        double val = rst.FirstOrDefault().Value;
-                                        MANDB.Text = val > 0 ? Strings.Format(val, "#,### ريال بدهكار") : Strings.Format(val * -1, "#,### ريال بستانكار");
-                                    }
+                                    MANDB.Text = CL_HESABDARI.GETMANDAH(_satr?.FHES);
                                 }
                                 else
                                 {
@@ -2673,16 +2665,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                                 if (!string.IsNullOrEmpty(_satr?.THES))
                                 {
-                                    var rst = dbms.DoGetDataSQL<double?>("SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = @Hes", new { Hes = _satr.THES }).ToList();
-                                    if (rst.Count == 0 || rst.FirstOrDefault() == null)
-                                    {
-                                        MANDS.Text = "0";
-                                    }
-                                    else
-                                    {
-                                        double val = rst.FirstOrDefault().Value;
-                                        MANDS.Text = val > 0 ? Strings.Format(val, "#,### ريال بدهكار") : Strings.Format(val * -1, "#,### ريال بستانكار");
-                                    }
+                                    MANDS.Text = CL_HESABDARI.GETMANDAH(_satr?.THES);
                                 }
                                 else
                                 {
@@ -2691,7 +2674,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             }
                             catch (Microsoft.Data.SqlClient.SqlException)
                             {
-                                // SPME Fix: Graceful degradation on network timeout (Prevents App Crash)
                                 MANDB.Text = "";
                                 MANDS.Text = "";
                             }
