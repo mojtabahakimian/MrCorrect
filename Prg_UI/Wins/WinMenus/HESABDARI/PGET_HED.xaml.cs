@@ -776,12 +776,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public void ReGetData_0()
         {
             var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($@"
-                SELECT p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T, 
-                       p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.IDH, 
-                       p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3, 
-                       p.FHES_T4, p.THES_T4, p.CRT, p.UID, 
+                SELECT p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
+                       p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.MHAZ_NO, p.IDH,
+                       p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3,
+                       p.FHES_T4, p.THES_T4, p.CRT, p.UID,
                        CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE num = p.IDH AND tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
-                       c1.NAME AS NAME_FHES, 
+                       c1.NAME AS NAME_FHES,
                        c2.NAME AS NAME_THES
                 FROM dbo.PGET_LST p
                 LEFT JOIN dbo.CUST_HESAB c1 ON p.FHES = c1.hes
@@ -830,6 +830,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             p.MABL,
             p.N_SERI,
             p.BANK,
+            p.MHAZ_NO,
             p.IDH,
             p.FHES,
             p.THES,
@@ -892,11 +893,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 // 2. Use LEFT JOINs to fetch all data, including the Names, in a SINGLE database round-trip.
                 string query = $@"
-            SELECT 
-                p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T, 
-                p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.IDH, 
-                p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3, 
-                p.FHES_T4, p.THES_T4, p.CRT, p.UID, 
+            SELECT
+                p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
+                p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.MHAZ_NO, p.IDH,
+                p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3,
+                p.FHES_T4, p.THES_T4, p.CRT, p.UID,
                 CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS t WHERE t.num = p.IDH AND t.tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
                 c1.NAME AS NAME_FHES,
                 c2.NAME AS NAME_THES
@@ -964,6 +965,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             p.MABL,
             p.N_SERI,
             p.BANK,
+            p.MHAZ_NO,
             p.IDH,
             p.FHES,
             p.THES,
@@ -1319,6 +1321,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             nAHVAColumn.ItemsSource = dbms.DoGetDataSQL<TCOD_DPSKIND>("SELECT TCOD_DPSKIND.CODE, TCOD_DPSKIND.NAMES FROM TCOD_DPSKIND ORDER BY TCOD_DPSKIND.CODE, TCOD_DPSKIND.NAMES").ToList();
             nAHVAColumn.DisplayMemberPath = "NAMES";
             nAHVAColumn.SelectedValuePath = "CODE";
+
+            //مرکز هزینه
+            mHAZ_NOColumn.ItemsSource = dbms.DoGetDataSQL<TCOD_MARKAZHAZ>("SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
+            mHAZ_NOColumn.DisplayMemberPath = "MHAZNAME";
+            mHAZ_NOColumn.SelectedValuePath = "MHAZ_NO";
 
             ////از حساب
             //FHES_COLUMN.ItemsSource = KHAZANEH_DATA.Select(item => new { item.NAME_FHES, item.FHES }).ToList();
@@ -1727,13 +1734,13 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             {
                 if (Strings.Mid(Baseknow.OPTIONSS, 55, 1) == "5")
                 {
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD,MHAZ_NO) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD,MHAZ_NO FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD,MHAZ_NO) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD,MHAZ_NO FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
                 }
                 else
                 {
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD,MHAZ_NO) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD,MHAZ_NO FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD,MHAZ_NO) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD,MHAZ_NO FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
                 }
             }
             catch (Exception)
@@ -3382,6 +3389,20 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 #endregion
             }
 
+            //مرکز هزینه
+            if (e.Column.SortMemberPath == "MHAZ_NO")
+            {
+                var MHAZ_NO_COMBOBOX = (e.EditingElement as ComboBox);
+                if (MHAZ_NO_COMBOBOX?.SelectedValue is not null)
+                {
+                    CURRENT_ITMES_ROW.MHAZ_NO = Convert.ToInt32(MHAZ_NO_COMBOBOX.SelectedValue);
+                }
+                else
+                {
+                    CURRENT_ITMES_ROW.MHAZ_NO = null;
+                }
+            }
+
             //از حساب
             if (e.Column.SortMemberPath == "FHES")
             {
@@ -4610,7 +4631,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         final_lst.BANK = null;
                     }
                     final_lst.ID = Convert.ToInt32(ID.Text);
-                    var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4)
+                    var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, MHAZ_NO)
                                          OUTPUT INSERTED.IDH
                                          VALUES(
                                          {final_lst.ID} ,
@@ -4620,23 +4641,24 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                          {final_lst.NAHVA} ,
                                          {final_lst.FHES_K}   ,
                                          {final_lst.FHES_M}   ,
-                                         {final_lst.FHES_T}   , 
-                                         {final_lst.THES_K}   , 
+                                         {final_lst.FHES_T}   ,
+                                         {final_lst.THES_K}   ,
                                          {final_lst.THES_M}   ,
                                          {final_lst.THES_T}   ,
                                          N'{final_lst.SHARH}' ,
                                          {(final_lst.MABL is null ? 0 : final_lst.MABL)} ,
                                          {(final_lst.N_SERI is null ? "NULL" : final_lst.N_SERI)} ,
-                                         {(final_lst.BANK is null ? "NULL" : final_lst.BANK)}   , 
+                                         {(final_lst.BANK is null ? "NULL" : final_lst.BANK)}   ,
                                          N'{final_lst.FHES}' ,
-                                         N'{final_lst.THES}' , 
+                                         N'{final_lst.THES}' ,
                                          {final_lst.ARZD},
-                                         {FHES_T2}   , 
-                                         {THES_T2}   , 
-                                         {FHES_T3}   , 
-                                         {THES_T3}   , 
-                                         {FHES_T4}   , 
-                                         {THES_T4}     
+                                         {FHES_T2}   ,
+                                         {THES_T2}   ,
+                                         {FHES_T3}   ,
+                                         {THES_T3}   ,
+                                         {FHES_T4}   ,
+                                         {THES_T4}   ,
+                                         {(final_lst.MHAZ_NO is null ? "NULL" : final_lst.MHAZ_NO.ToString())}
                                           )").FirstOrDefault();
 
                     CURRENT_ITMES_ROW.IDH = Convert.ToInt32(IDH_RESULT_INSERT);
@@ -4645,27 +4667,28 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.PGET_LST
                                         SET DATE = {DATE.Text.ToRawTarikh()},
-                                           NO_AM = {final_lst.NO_AM}, 
-                                           NAHVA = {final_lst.NAHVA}, 
-                                           FHES_K = {(final_lst.FHES_K is null ? "NULL" : final_lst.FHES_K)}, 
-                                           FHES_M = {(final_lst.FHES_M is null ? "NULL" : final_lst.FHES_M)}, 
-                                           FHES_T = {(final_lst.FHES_T is null ? "NULL" : final_lst.FHES_T)}, 
+                                           NO_AM = {final_lst.NO_AM},
+                                           NAHVA = {final_lst.NAHVA},
+                                           FHES_K = {(final_lst.FHES_K is null ? "NULL" : final_lst.FHES_K)},
+                                           FHES_M = {(final_lst.FHES_M is null ? "NULL" : final_lst.FHES_M)},
+                                           FHES_T = {(final_lst.FHES_T is null ? "NULL" : final_lst.FHES_T)},
                                            THES_K = {final_lst.THES_K},
                                            THES_M = {final_lst.THES_M},
-                                           THES_T = {final_lst.THES_T}, 
-                                           SHARH = N'{final_lst.SHARH}', 
+                                           THES_T = {final_lst.THES_T},
+                                           SHARH = N'{final_lst.SHARH}',
                                            MABL = {(final_lst.MABL is null ? "0" : final_lst.MABL)},
-                                           N_SERI = {(final_lst.N_SERI is null ? "NULL" : final_lst.N_SERI)}, 
+                                           N_SERI = {(final_lst.N_SERI is null ? "NULL" : final_lst.N_SERI)},
                                            BANK = {(final_lst.BANK is null ? "NULL" : final_lst.BANK)},
-                                           FHES = N'{final_lst.FHES}', 
-                                           THES = N'{final_lst.THES}', 
+                                           FHES = N'{final_lst.FHES}',
+                                           THES = N'{final_lst.THES}',
                                            ARZD = {final_lst.ARZD},
-                                           FHES_T2 = {(FHES_T2 is null ? "NULL" : FHES_T2)}, 
-                                           THES_T2 = {THES_T2}, 
+                                           FHES_T2 = {(FHES_T2 is null ? "NULL" : FHES_T2)},
+                                           THES_T2 = {THES_T2},
                                            FHES_T3 = {(FHES_T3 is null ? "NULL" : FHES_T3)},
                                            THES_T3 = {THES_T3},
                                            FHES_T4 = {(FHES_T4 is null ? "NULL" : FHES_T4)},
-                                           THES_T4 = {THES_T4}
+                                           THES_T4 = {THES_T4},
+                                           MHAZ_NO = {(final_lst.MHAZ_NO is null ? "NULL" : final_lst.MHAZ_NO.ToString())}
                                         WHERE  IDH = {final_lst.IDH}");
                 }
             }

@@ -3646,12 +3646,12 @@ namespace AUTO_BAZ.Functions
                 }
 
                 cnnManager.ExecuteSqlCommand(
-                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD) " +
-                    "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, THES, ARZD " +
+                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                    "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, THES, ARZD, MHAZ_NO " +
                     "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
                 cnnManager.ExecuteSqlCommand(
-                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD) " +
-                    "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, FHES, ARZD " +
+                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                    "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, FHES, ARZD, MHAZ_NO " +
                     "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
             });
 
