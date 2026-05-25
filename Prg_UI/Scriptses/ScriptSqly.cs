@@ -1986,6 +1986,131 @@ END;";
 									END
 									"); } catch { }
 
+                    try { db.Execute("DROP FUNCTION dbo.MOGHA_ANBAR"); } catch { }
+                    try { db.Execute($@"
+										CREATE FUNCTION [dbo].[MOGHA_ANBAR] (@dt2 INT, @ANBAR INT, @KOL INT)
+										RETURNS TABLE
+										AS
+										RETURN (
+										    WITH
+										    avl_sub AS (
+										        SELECT CODE, SUM(MOGODI_A) AS MEG, SUM(MABL_A) AS SumOfMABL_A, ANBAR
+										        FROM dbo.STUF_FSK
+										        GROUP BY CODE, ANBAR
+										        HAVING ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        UNION ALL
+										        SELECT i.CODE, SUM(i.MEGHk), SUM(i.MABL_K), i.ANBAR
+										        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+										        WHERE i.TAG IN (1, 7, 9, 24) AND h.DATE_N <= @dt2
+										        GROUP BY i.CODE, i.ANBAR
+										        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        UNION ALL
+										        SELECT i.CODE, SUM(i.MEGH_MAR), SUM(i.MABL * i.MEGH_MAR), i.ANBAR
+										        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+										        WHERE i.TAG = 22 AND h.DATE_N <= @dt2 AND i.MEGH_MAR <> 0
+										        GROUP BY i.CODE, i.ANBAR
+										        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        UNION ALL
+										        SELECT i.CODE, SUM(i.MEGHk), SUM(i.MABL_K), i.ANBARF
+										        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+										        WHERE i.TAG = 5 AND h.DATE_N <= @dt2
+										        GROUP BY i.CODE, i.ANBARF
+										        HAVING i.ANBARF LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        UNION ALL
+										        SELECT l.CODE, SUM((l.MOG - l.NUM3) * -1), SUM(ABS(l.MOG - l.NUM3) * l.MABL), a.GRD_ANBAR
+										        FROM dbo.ANBGRD_LST l INNER JOIN dbo.ANBGRD_HEAD a ON l.GRD_NUM = a.GRD_NUM
+										        WHERE a.GRD_DATE <= @dt2 AND a.N_S IS NOT NULL
+										              AND a.GRD_ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        GROUP BY l.CODE, a.GRD_ANBAR
+										        HAVING SUM((l.MOG - l.NUM3) * -1) >= 0
+										    ),
+										    avl AS (
+										        SELECT CODE, SUM(NULLIF(MEG, 0)) AS SMEGH, SUM(SumOfMABL_A) AS SMABLA, ANBAR
+										        FROM avl_sub
+										        GROUP BY CODE, ANBAR
+										    ),
+										    fr_sub AS (
+										        SELECT i.CODE, SUM(i.MEGHk) AS MEG, i.ANBAR
+										        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+										        WHERE i.TAG IN (2, 5, 8, 10, 11, 26) AND h.DATE_N <= @dt2
+										        GROUP BY i.CODE, i.ANBAR
+										        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        UNION ALL
+										        SELECT l.CODE, SUM(l.MOG - l.NUM3), a.GRD_ANBAR
+										        FROM dbo.ANBGRD_LST l INNER JOIN dbo.ANBGRD_HEAD a ON l.GRD_NUM = a.GRD_NUM
+										        WHERE a.GRD_DATE <= @dt2 AND a.N_S IS NOT NULL
+										              AND a.GRD_ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										        GROUP BY l.CODE, a.GRD_ANBAR
+										        HAVING SUM(l.MOG - l.NUM3) > 0
+										        UNION ALL
+										        SELECT i.CODE, SUM(i.MEGHK), i.ANBAR
+										        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+										        WHERE i.TAG = 20 AND h.DATE_N <= @dt2 AND (h.TAMIR = 1 OR h.TAMIR = 4)
+										        GROUP BY i.CODE, i.ANBAR
+										        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+										    ),
+										    fr AS (
+										        SELECT CODE, SUM(MEG) AS MEG, ANBAR
+										        FROM fr_sub
+										        GROUP BY CODE, ANBAR
+										    ),
+										    lastav_base AS (
+										        SELECT i.CODE, i.ANBAR, i.AVRAGE AS AVRAGE, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
+										        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST h ON i.NUMBER = h.NUMBER AND i.TAG = h.TAG
+										        WHERE h.DATE_N <= @dt2 AND i.TAG IN (1, 7, 9, 24)
+										        UNION ALL
+										        SELECT i.CODE, i.ANBARF, i.AVRAGE2, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
+										        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST h ON i.NUMBER = h.NUMBER AND i.TAG = h.TAG
+										        WHERE h.DATE_N <= @dt2 AND i.TAG = 5
+										    ),
+										    lastav AS (
+										        SELECT CODE, ANBAR, AVRAGE,
+										        ROW_NUMBER() OVER (PARTITION BY CODE, ANBAR ORDER BY DATE_N DESC, FNUMCO DESC) AS rn
+										        FROM lastav_base
+										    ),
+										    kart_anbar AS (
+										        SELECT
+										            sf.CODE,
+										            sf.ANBAR,
+										            ROUND(ISNULL(ISNULL(avl.SMEGH, 0) - ISNULL(fr.MEG, 0), 0), 2) AS MAND,
+										            ISNULL(
+										                COALESCE(la.AVRAGE, sf.FI_A, 0) *
+										                ROUND(ISNULL(ISNULL(avl.SMEGH, 0) - ISNULL(fr.MEG, 0), 0), 2),
+										                0
+										            ) AS MABLK
+										        FROM dbo.STUF_FSK sf
+										        INNER JOIN avl ON sf.CODE = avl.CODE AND sf.ANBAR = avl.ANBAR
+										        LEFT  JOIN fr  ON sf.CODE = fr.CODE  AND sf.ANBAR = fr.ANBAR
+										        LEFT  JOIN (SELECT CODE, ANBAR, AVRAGE FROM lastav WHERE rn = 1) la
+										               ON sf.CODE = la.CODE AND sf.ANBAR = la.ANBAR
+										        WHERE sf.ANBAR = @ANBAR
+										    ),
+										    hesab AS (
+										        SELECT d.HES_K, d.HES_M, SUM(d.BED - d.BES) AS mand, d.HES_T, d.HES
+										        FROM dbo.DEED_DTL d INNER JOIN dbo.DEED_HED h ON d.N_S = h.N_S
+										        WHERE h.DATE_S <= @dt2 AND d.HES_K = @KOL AND d.HES_M = @ANBAR
+										        GROUP BY d.HES_K, d.HES_M, d.HES_T, d.HES
+										    )
+										    SELECT
+										        ka.CODE,
+										        ROUND(ka.MABLK, 0) AS MABLK,
+										        ka.MAND,
+										        ISNULL(he.mand, 0) AS mab,
+										        CASE WHEN (ka.MABLK - ISNULL(he.mand, 0)) > 0
+										             THEN ROUND(ka.MABLK - ISNULL(he.mand, 0), 0)
+										             ELSE 0 END AS tafBED,
+										        CASE WHEN (ka.MABLK - ISNULL(he.mand, 0)) <= 0
+										             THEN ROUND(ka.MABLK - ISNULL(he.mand, 0), 0) * -1
+										             ELSE 0 END AS TAFBES,
+										        he.HES_T,
+										        he.HES_K,
+										        he.HES_M,
+										        he.HES
+										    FROM kart_anbar ka
+										    LEFT JOIN hesab he ON ka.CODE = he.HES_T
+										);
+										"); } catch { }
+
                     //Ctrl + F8
                     try { db.Execute("DROP PROC usp_TafzilLedger"); } catch { }
                     try { db.Execute($@"
@@ -2007,10 +2132,24 @@ END;";
 										
 										    -- وایت‌لیست
 										    IF NOT EXISTS (
-										        SELECT 1 FROM (VALUES 
-										            ('N_S'),('DATE_S'),('BED'),('BES'),('SHARH'),('NO_S'),('id'),
-										            ('N_S DESC'),('DATE_S DESC'),('BED DESC'),('BES DESC'),('NO_S DESC')
-										        ) AS ValidCols(ColName) WHERE CHARINDEX(ColName, @SortExpr) > 0
+										        SELECT 1
+										        FROM (VALUES
+										            (N'N_S'),
+										            (N'DATE_S'),
+										            (N'BED'),
+										            (N'BES'),
+										            (N'SHARH'),
+										            (N'NO_S'),
+										            (N'id'),
+										            (N'N_S DESC'),
+										            (N'DATE_S DESC'),
+										            (N'BED DESC'),
+										            (N'BES DESC'),
+										            (N'NO_S DESC'),
+										            (N'DATE_S, BED DESC'),
+										            (N'DATE_S, N_S')
+										        ) AS ValidCols(ColName)
+										        WHERE LTRIM(RTRIM(@SortExpr)) = ValidCols.ColName
 										    )
 										        SET @SafeSort = 'DATE_S, N_S';
 										    ELSE
@@ -2024,6 +2163,7 @@ END;";
 										        RowNum      int,                  
 										        N_S         int,
 										        DATE_S      int, 
+										        MONTH_S     AS ((DATE_S % 10000) / 100),
 										        SHARH       nvarchar(MAX),
 										        BED         float DEFAULT 0,
 										        BES         float DEFAULT 0,
@@ -2094,7 +2234,7 @@ END;";
 										    -- 5) خروجی نهایی
 										    ----------------------------------------------------------
 										    SELECT 
-										        N_S, DATE_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH, 
+										        N_S, DATE_S, MONTH_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH, 
 										        BED, BES, 
 										        ABS(RunningSum) AS MAND,
 										        CASE 
