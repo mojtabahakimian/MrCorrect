@@ -3569,8 +3569,7 @@ namespace Wins.WinSetting
                 }
                 else
                 {
-                    //if (HES_COMBO?.SelectedValue is null || HES_COMBO?.SelectedValue != CURRENT_ROW_LOCK_CUSTOMER?.HES) //if is different then
-                    if (HES_COMBO?.SelectedValue is null || ENTERED_VALUE_ROW != CURRENT_ROW_LOCK_CUSTOMER?.HES) //if is different then
+                    if (HES_COMBO?.SelectedValue is null || HES_COMBO.SelectedValue?.ToString() != CURRENT_ROW_LOCK_CUSTOMER?.HES) //if is different then
                     {
                         var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HES_COMBO, dbms);
                         if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
