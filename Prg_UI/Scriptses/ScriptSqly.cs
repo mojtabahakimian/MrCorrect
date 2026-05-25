@@ -3288,16 +3288,17 @@ SELECT TOP 100 PERCENT
 FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
-                #region SALARY
-                SalaryScript(isCustomCall, db);
-                #endregion
-
+                //1405/03/05
                 if (isCustomCall)
                 {
                     try { db.Execute($@"ALTER TABLE [dbo].[pget_lst] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
 
+
                 }
 
+                #region SALARY
+                SalaryScript(isCustomCall, db);
+                #endregion
             }
         }
 
