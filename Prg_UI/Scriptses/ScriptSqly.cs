@@ -3292,6 +3292,12 @@ ORDER BY B.NAME;"); } catch { }
                 SalaryScript(isCustomCall, db);
                 #endregion
 
+                if (isCustomCall)
+                {
+                    try { db.Execute($@"ALTER TABLE [dbo].[pget_lst] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
+
+                }
+
             }
         }
 
@@ -5989,7 +5995,7 @@ GO
                 //try { db.Execute($@""); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;"); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;"); } catch { }
-                
+
                 //-- ساخت ایندکس ترکیبی برای حذف عملیات سورت و اسکن جدول شغل‌ها
                 try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
 ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) 
