@@ -210,7 +210,10 @@ namespace Wins.WinMenus.Checkha
 									SELECT        dbo.PAY_GETD.N_SERI, dbo.PAY_GETD.BANK, dbo.PAY_GETD.DATE_S, dbo.PAY_GETD.DATE, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.MABL, dbo.PAY_GETD.NAME_TAH, dbo.PAY_GETD.N_HESAB, dbo.PAY_GETD.N_S, 
 									                         dbo.PAY_GETD.N_KOL, dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_KOL2, dbo.PAY_GETD.N_MOIN2, dbo.PAY_GETD.N_KOL3, dbo.PAY_GETD.N_MOIN3, dbo.PAY_GETD.NUMBER, dbo.PAY_GETD.TAG, dbo.PAY_GETD.ANBAR, 
 									                         dbo.PAY_GETD.RADIF, dbo.PAY_GETD.CUST_NO, dbo.PAY_GETD.VAZ, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.N_TAF2, dbo.PAY_GETD.N_TAF3, dbo.CUST_HESAB.NAME, dbo.PAY_GETD.SANDUGH, 
-									                         dbo.PAY_GETD.LIST_NO AS SHOB_COD, dbo.PAY_GETD.KIND, dbo.CHRE_LSPH.RADIF AS LISTNO, dbo.CHRE_LSPH.DATE AS DATE_VAGOZARI, dbo.PAY_GETD.HES1, dbo.PAY_GETD.HES2, dbo.PAY_GETD.HES3, dbo.Udatediff(dbo.PAY_GETD.DATE, 
+									                         dbo.PAY_GETD.LIST_NO AS SHOB_COD, dbo.PAY_GETD.KIND, dbo.CHRE_LSPH.RADIF AS LISTNO, COALESCE(dbo.CHRE_LSPH.DATE, (SELECT TOP (1) L.DATE_V
+									                                                                                                                                             FROM      dbo.PAY_GETD_LOG AS L
+									                                                                                                                                             WHERE   L.N_SERI = dbo.PAY_GETD.N_SERI AND L.BANK = dbo.PAY_GETD.BANK AND L.DATE_S = dbo.PAY_GETD.DATE_S AND L.VAZ = 4
+									                                                                                                                                             ORDER BY L.DATETIM DESC)) AS DATE_VAGOZARI, dbo.PAY_GETD.HES1, dbo.PAY_GETD.HES2, dbo.PAY_GETD.HES3, dbo.Udatediff(dbo.PAY_GETD.DATE, 
 									                         dbo.PAY_GETD.DATE_S) AS modat, dbo.PAY_GETD.ESTELAM, dbo.Uday(dbo.PAY_GETD.DATE_S) AS DS, dbo.Umonth(dbo.PAY_GETD.DATE_S) AS MS, dbo.Uyear(dbo.PAY_GETD.DATE_S) AS YS, 
 									                         dbo.Uday(dbo.PAY_GETD.DATE) AS DD, dbo.Umonth(dbo.PAY_GETD.DATE) AS MD, dbo.Uyear(dbo.PAY_GETD.DATE) AS YD, dbo.PAY_GETD.SAYADI
 									FROM            dbo.TCOD_BANKS INNER JOIN
