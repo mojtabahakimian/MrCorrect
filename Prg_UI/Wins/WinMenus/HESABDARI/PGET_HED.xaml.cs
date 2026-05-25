@@ -773,159 +773,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
         }
-        public void ReGetData_0()
-        {
-            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($@"
-                SELECT p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T, 
-                       p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.IDH, 
-                       p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3, 
-                       p.FHES_T4, p.THES_T4, p.CRT, p.UID, 
-                       CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE num = p.IDH AND tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
-                       c1.NAME AS NAME_FHES, 
-                       c2.NAME AS NAME_THES
-                FROM dbo.PGET_LST p
-                LEFT JOIN dbo.CUST_HESAB c1 ON p.FHES = c1.hes
-                LEFT JOIN dbo.CUST_HESAB c2 ON p.THES = c2.hes
-                WHERE p.ID = {ID.Text}").ToList();
-
-            if (QRE_KHZ_DATA != null)
-            {
-                KHAZANEH_DATA?.Clear();
-                foreach (var item in QRE_KHZ_DATA)
-                {
-                    if (item != null)  // Ensure no null items are added
-                    {
-                        KHAZANEH_DATA?.Add(item);
-                    }
-                }
-            }
-            else
-            {
-                KHAZANEH_DATA?.Clear();
-            }
-
-            this.MABL.Text = SUM_OF_MABL.ToString();
-        }
-        public void ReGetData_3()
-        {
-            //Claude
-            // ═══════════════════════════════════════════════════════════════════
-            // OPTIMIZATION: یک کوئری واحد با JOIN دوگانه جایگزین N+1 کوئری موازی
-            // به جای N*2 رفت‌وبرگشت به دیتابیس، فقط یک بار اتصال برقرار می‌شود
-            // ═══════════════════════════════════════════════════════════════════
-            const string sql = @"
-        SELECT
-            p.ID,
-            p.DATE,
-            p.RADIF,
-            p.NO_AM,
-            p.NAHVA,
-            p.FHES_K,
-            p.FHES_M,
-            p.FHES_T,
-            p.THES_K,
-            p.THES_M,
-            p.THES_T,
-            p.SHARH,
-            p.MABL,
-            p.N_SERI,
-            p.BANK,
-            p.IDH,
-            p.FHES,
-            p.THES,
-            p.ARZD,
-            p.FHES_T2,
-            p.THES_T2,
-            p.FHES_T3,
-            p.THES_T3,
-            p.FHES_T4,
-            p.THES_T4,
-            p.CRT,
-            p.UID,
-            CAST(
-                CASE WHEN EXISTS (
-                    SELECT 1 FROM dbo.TASKS WITH (NOLOCK)
-                    WHERE num = p.IDH AND tg = 34
-                ) THEN 1 ELSE 0 END
-            AS BIT) AS HasAttachment,
-
-            -- ✅ نام حساب مبدا: جایگزین کوئری درون Parallel.For
-            cf.NAME AS NAME_FHES,
-
-            -- ✅ نام حساب مقصد: جایگزین کوئری درون Parallel.For
-            ct.NAME AS NAME_THES
-
-        FROM dbo.PGET_LST AS p WITH (NOLOCK)
-
-        -- LEFT JOIN برای جلوگیری از حذف سطرهایی که NAME ندارند
-        LEFT JOIN dbo.CUST_HESAB AS cf WITH (NOLOCK) ON cf.hes = p.FHES
-        LEFT JOIN dbo.CUST_HESAB AS ct WITH (NOLOCK) ON ct.hes = p.THES
-
-        WHERE p.ID = @ID;";
-
-            // ✅ SQL Injection Fix: استفاده از پارامتر به جای درج مستقیم ID.Text
-            if (!int.TryParse(ID.Text, out int parsedId))
-            {
-                KHAZANEH_DATA?.Clear();
-                this.MABL.Text = "0";
-                return;
-            }
-
-            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>(sql, new { ID = parsedId });
-
-            KHAZANEH_DATA?.Clear();
-
-            if (QRE_KHZ_DATA != null)
-            {
-                foreach (var item in QRE_KHZ_DATA)
-                {
-                    KHAZANEH_DATA?.Add(item);
-                }
-            }
-
-            this.MABL.Text = SUM_OF_MABL.ToString();
-        }
-        public async Task ReGetDataAsync()
-        {
-            // 1. Offload the database call to a background thread to keep the WPF UI completely responsive (no freezing).
-            var QRE_KHZ_DATA = await Task.Run(() =>
-            {
-                // 2. Use LEFT JOINs to fetch all data, including the Names, in a SINGLE database round-trip.
-                string query = $@"
-            SELECT 
-                p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T, 
-                p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.IDH, 
-                p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3, 
-                p.FHES_T4, p.THES_T4, p.CRT, p.UID, 
-                CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS t WHERE t.num = p.IDH AND t.tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
-                c1.NAME AS NAME_FHES,
-                c2.NAME AS NAME_THES
-            FROM dbo.PGET_LST p
-            LEFT JOIN dbo.CUST_HESAB c1 ON p.FHES = c1.hes
-            LEFT JOIN dbo.CUST_HESAB c2 ON p.THES = c2.hes
-            WHERE p.ID = {ID.Text}";
-
-                // Execute ONE query instead of 1 + (2 * N) queries
-                return dbms.DoGetDataSQL<PGET_LST>(query).ToList();
-            });
-
-            // 3. Clear and repopulate the collection safely on the UI thread
-            KHAZANEH_DATA?.Clear();
-
-            if (QRE_KHZ_DATA != null)
-            {
-                foreach (var item in QRE_KHZ_DATA)
-                {
-                    if (item != null)
-                    {
-                        KHAZANEH_DATA?.Add(item);
-                    }
-                }
-            }
-
-            this.MABL.Text = SUM_OF_MABL.ToString();
-        }
-
         public void ReGetData()
         {
             //Claude5
@@ -964,6 +811,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             p.MABL,
             p.N_SERI,
             p.BANK,
+            p.MHAZ_NO,
             p.IDH,
             p.FHES,
             p.THES,
@@ -1325,6 +1173,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             ////به حساب
             //tHESColumn.ItemsSource = KHAZANEH_DATA.Select(item => new { item.NAME_THES, item.THES }).ToList();
+
+            //مرکز هزینه
+            mHAZ_NOColumn.ItemsSource = dbms.DoGetDataSQL<TCOD_MARKAZHAZ>("SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
+            mHAZ_NOColumn.DisplayMemberPath = "MHAZNAME";
+            mHAZ_NOColumn.SelectedValuePath = "MHAZ_NO";
 
         }
 
@@ -3362,7 +3215,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     }
                 }
                 #endregion
-            }
+            }         
 
             //از حساب
             if (e.Column.SortMemberPath == "FHES")
@@ -3950,6 +3803,20 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 //{
                 //    RestoreFocusCell(e);
                 //}
+            }
+
+            //مرکز هزینه
+            if (e.Column.SortMemberPath == "MHAZ_NO")
+            {
+                var MHAZ_NO_COMBOBOX = (e.EditingElement as ComboBox);
+                if (MHAZ_NO_COMBOBOX?.SelectedValue is not null)
+                {
+                    CURRENT_ITMES_ROW.MHAZ_NO = Convert.ToInt32(MHAZ_NO_COMBOBOX.SelectedValue);
+                }
+                else
+                {
+                    CURRENT_ITMES_ROW.MHAZ_NO = null;
+                }
             }
 
             //شرح
@@ -4551,6 +4418,14 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     ErrosMessages.Add(new MsgModel { MessageText_U = "مبلغ خالی است." });
                 }
             }
+            if (final_lst.MHAZ_NO is not null)
+            {
+                var markazHaz = dbms.DoGetDataSQL<int?>("SELECT TOP 1 MHAZ_NO FROM dbo.TCOD_MARKAZHAZ WHERE MHAZ_NO = " + final_lst.MHAZ_NO).FirstOrDefault();
+                if (markazHaz is null)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "مرکز هزینه انتخاب شده معتبر نیست." });
+                }
+            }
             //if (final_lst.ARZD is null)
             //{
             //    ErrosMessages.Add(new MsgModel { MessageText_U = "داده های دیتابیس برای نوع چک ,فیلد نوع ارز خالی است." });
@@ -4592,7 +4467,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         final_lst.BANK = null;
                     }
                     final_lst.ID = Convert.ToInt32(ID.Text);
-                    var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4)
+                    var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, MHAZ_NO)
                                          OUTPUT INSERTED.IDH
                                          VALUES(
                                          {final_lst.ID} ,
@@ -4602,23 +4477,24 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                          {final_lst.NAHVA} ,
                                          {final_lst.FHES_K}   ,
                                          {final_lst.FHES_M}   ,
-                                         {final_lst.FHES_T}   , 
-                                         {final_lst.THES_K}   , 
+                                         {final_lst.FHES_T}   ,
+                                         {final_lst.THES_K}   ,
                                          {final_lst.THES_M}   ,
                                          {final_lst.THES_T}   ,
                                          N'{final_lst.SHARH}' ,
                                          {(final_lst.MABL is null ? 0 : final_lst.MABL)} ,
                                          {(final_lst.N_SERI is null ? "NULL" : final_lst.N_SERI)} ,
-                                         {(final_lst.BANK is null ? "NULL" : final_lst.BANK)}   , 
+                                         {(final_lst.BANK is null ? "NULL" : final_lst.BANK)}   ,
                                          N'{final_lst.FHES}' ,
-                                         N'{final_lst.THES}' , 
+                                         N'{final_lst.THES}' ,
                                          {final_lst.ARZD},
-                                         {FHES_T2}   , 
-                                         {THES_T2}   , 
-                                         {FHES_T3}   , 
-                                         {THES_T3}   , 
-                                         {FHES_T4}   , 
-                                         {THES_T4}     
+                                         {FHES_T2}   ,
+                                         {THES_T2}   ,
+                                         {FHES_T3}   ,
+                                         {THES_T3}   ,
+                                         {FHES_T4}   ,
+                                         {THES_T4}   ,
+                                         {(final_lst.MHAZ_NO is null ? "NULL" : final_lst.MHAZ_NO.ToString())}
                                           )").FirstOrDefault();
 
                     CURRENT_ITMES_ROW.IDH = Convert.ToInt32(IDH_RESULT_INSERT);
@@ -4627,27 +4503,28 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.PGET_LST
                                         SET DATE = {DATE.Text.ToRawTarikh()},
-                                           NO_AM = {final_lst.NO_AM}, 
-                                           NAHVA = {final_lst.NAHVA}, 
-                                           FHES_K = {(final_lst.FHES_K is null ? "NULL" : final_lst.FHES_K)}, 
-                                           FHES_M = {(final_lst.FHES_M is null ? "NULL" : final_lst.FHES_M)}, 
-                                           FHES_T = {(final_lst.FHES_T is null ? "NULL" : final_lst.FHES_T)}, 
+                                           NO_AM = {final_lst.NO_AM},
+                                           NAHVA = {final_lst.NAHVA},
+                                           FHES_K = {(final_lst.FHES_K is null ? "NULL" : final_lst.FHES_K)},
+                                           FHES_M = {(final_lst.FHES_M is null ? "NULL" : final_lst.FHES_M)},
+                                           FHES_T = {(final_lst.FHES_T is null ? "NULL" : final_lst.FHES_T)},
                                            THES_K = {final_lst.THES_K},
                                            THES_M = {final_lst.THES_M},
-                                           THES_T = {final_lst.THES_T}, 
-                                           SHARH = N'{final_lst.SHARH}', 
+                                           THES_T = {final_lst.THES_T},
+                                           SHARH = N'{final_lst.SHARH}',
                                            MABL = {(final_lst.MABL is null ? "0" : final_lst.MABL)},
-                                           N_SERI = {(final_lst.N_SERI is null ? "NULL" : final_lst.N_SERI)}, 
+                                           N_SERI = {(final_lst.N_SERI is null ? "NULL" : final_lst.N_SERI)},
                                            BANK = {(final_lst.BANK is null ? "NULL" : final_lst.BANK)},
-                                           FHES = N'{final_lst.FHES}', 
-                                           THES = N'{final_lst.THES}', 
+                                           FHES = N'{final_lst.FHES}',
+                                           THES = N'{final_lst.THES}',
                                            ARZD = {final_lst.ARZD},
-                                           FHES_T2 = {(FHES_T2 is null ? "NULL" : FHES_T2)}, 
-                                           THES_T2 = {THES_T2}, 
+                                           FHES_T2 = {(FHES_T2 is null ? "NULL" : FHES_T2)},
+                                           THES_T2 = {THES_T2},
                                            FHES_T3 = {(FHES_T3 is null ? "NULL" : FHES_T3)},
                                            THES_T3 = {THES_T3},
                                            FHES_T4 = {(FHES_T4 is null ? "NULL" : FHES_T4)},
-                                           THES_T4 = {THES_T4}
+                                           THES_T4 = {THES_T4},
+                                           MHAZ_NO = {(final_lst.MHAZ_NO is null ? "NULL" : final_lst.MHAZ_NO.ToString())}
                                         WHERE  IDH = {final_lst.IDH}");
                 }
             }
