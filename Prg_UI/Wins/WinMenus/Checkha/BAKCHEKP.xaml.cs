@@ -137,12 +137,12 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
                 this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ.ToString();
 
-                this.BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS INNER JOIN PAY_GETP ON TCOD_BANKS.CODE = PAY_GETP.BANK WHERE (PAY_GETP.N_SERI = " + this.N_SERI.SelectedValue + ") ORDER BY TCOD_BANKS.NAMES").ToList();
+                this.BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>($"SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS INNER JOIN PAY_GETP ON TCOD_BANKS.CODE = PAY_GETP.BANK WHERE (PAY_GETP.N_SERI = N'{this.N_SERI.SelectedValue}') ORDER BY TCOD_BANKS.NAMES").ToList();
                 this.BANK.SelectedValuePath = "CODE";
                 this.BANK.DisplayMemberPath = "NAMES";
                 this.BANK.SelectedIndex = 0;
 
-                this.DATE_S.ItemsSource = dbms.DoGetDataSQL<PAY_GETP>("SELECT DATE_S , BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = " + this.N_SERI.SelectedValue + ") AND (BANK = " + this.BANK.SelectedValue + ")").ToList();
+                this.DATE_S.ItemsSource = dbms.DoGetDataSQL<PAY_GETP>($"SELECT DATE_S , BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = N'{this.N_SERI.SelectedValue}') AND (BANK = N'{this.BANK.SelectedValue}')").ToList();
                 this.DATE_S.SelectedValuePath = "DATE_S";
                 this.DATE_S.DisplayMemberPath = "DATE_S";
                 this.DATE_S.SelectedIndex = 0;
@@ -170,7 +170,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            isClosing = true;         
+            isClosing = true;
 
             //ON_Close
             if (can)
@@ -179,13 +179,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT * FROM PAY_GETP WHERE N_SERI = " + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.SelectedValue).ToList();
+                var rst = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = N'{this.N_SERI.SelectedValue}' AND BANK = N'{this.BANK.SelectedValue}' AND DATE_S = N'{this.DATE_S.SelectedValue}'").ToList();
                 if (rst.Count == 0)
                 {
                 }
                 else
                 {
-                    string _where = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.SelectedValue;
+                    string _where = $" WHERE N_SERI=N'{this.N_SERI.SelectedValue}' AND BANK = N'{this.BANK.SelectedValue}' AND DATE_S = N'{this.DATE_S.SelectedValue}'";
                     rst.FirstOrDefault().N_KOL2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;//Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_K"];
                     rst.FirstOrDefault().N_MOIN2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M;//Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_M"];
                     rst.FirstOrDefault().N_TAF2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T;///Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_T"];
@@ -202,10 +202,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.APV));
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES = Baseknow.APV;
                 }
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.Text);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Right(" برگشت چك پرداختي " + N_SERI.SelectedValue + "بانك" + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.Text + " مورخ " + Strings.Format(Convert.ToDouble(DATE_S.Text.ToRawTarikh()), "####/##/##"), 255);
+
+                double.TryParse(this.MABL.Text, out double _mabl);
+                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = _mabl;
+
+                double.TryParse(this.N_SERI.Text, out double _nSeri);
+                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = _nSeri;
+
+                int.TryParse(this.BANK.SelectedValue?.ToString(), out int _bank);
+                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = _bank;
+
+                double.TryParse(BANK.SelectedValue?.ToString(), out double _bankD);
+                double.TryParse(DATE_S.Text.ToRawTarikh(), out double _dateS);
+                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Right(" برگشت چك پرداختي " + N_SERI.SelectedValue + "بانك" + CL_HESABDARI.GETBANK(_bankD) + " " + SHOBEH.Text + " مورخ " + Strings.Format(_dateS, "####/##/##"), 255);
             }
         }
 
@@ -238,7 +247,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT * FROM PAY_GETP WHERE N_SERI=" + SERIAL_TEX.Text).ToList();
+            var rst = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI=N'{SERIAL_TEX.Text}'").ToList();
             if (rst.Count == 0)
             {
             }
@@ -256,11 +265,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.MOIN.Text = rst.FirstOrDefault().N_MOIN.ToString();
                 this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
                 this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ;
-                this.BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS INNER JOIN PAY_GETP ON TCOD_BANKS.CODE = PAY_GETP.BANK WHERE (PAY_GETP.N_SERI = " + this.N_SERI.SelectedValue + ") ORDER BY TCOD_BANKS.NAMES").ToList();
+                this.BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>($"SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS INNER JOIN PAY_GETP ON TCOD_BANKS.CODE = PAY_GETP.BANK WHERE (PAY_GETP.N_SERI = N'{this.N_SERI.SelectedValue}') ORDER BY TCOD_BANKS.NAMES").ToList();
                 this.BANK.SelectedValuePath = "CODE";
                 this.BANK.DisplayMemberPath = "NAMES";
                 this.BANK.SelectedIndex = 0;
-                this.DATE_S.ItemsSource = dbms.DoGetDataSQL<PAY_GETP>("SELECT DATE_S, BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = " + this.N_SERI.SelectedValue + ") AND (BANK = " + this.BANK.SelectedValue + ")").ToList();
+                this.DATE_S.ItemsSource = dbms.DoGetDataSQL<PAY_GETP>($"SELECT DATE_S, BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = N'{this.N_SERI.SelectedValue}') AND (BANK = N'{this.BANK.SelectedValue}')").ToList();
                 this.DATE_S.SelectedValuePath = "DATE_S";
                 this.DATE_S.DisplayMemberPath = "DATE_S";
                 this.DATE_S.SelectedIndex = 0;
@@ -274,22 +283,22 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             //Click
 
             N_SERI_ON = N_SERI.Text;
-            BANK_ON = BANK.SelectedValue.ToString();
-            DATE_S_ON = DATE_S.SelectedValue.ToString();
+            BANK_ON = BANK.SelectedValue?.ToString();
+            DATE_S_ON = DATE_S.SelectedValue?.ToString();
             MABL_ON = MABL.Text;
 
             DateTime dt;
             dt = DateTime.Now;
-            CL_HESABDARI.TR("PAY_GETD", "N_SERI = " + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue.ToString() + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh(), dt, 1);
+            CL_HESABDARI.TR("PAY_GETD", $"N_SERI = N'{this.N_SERI.Text}' AND BANK = N'{this.BANK.SelectedValue?.ToString()}' AND DATE_S = N'{this.DATE_S.Text.ToRawTarikh()}'", dt, 1);
             can = false;
             if (!IsNull(this.N_SERI.Text) && !IsNull(this.BANK.SelectedValue))
             {
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
 
                 dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
-                    SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.SelectedValue}, DATE = {DATE.Text}, SHOBEH = N'{SHOBEH.Text}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}',
+                    SET N_SERI = N'{N_SERI.Text}', BANK = N'{BANK.SelectedValue}', DATE_S = N'{DATE_S.SelectedValue}', DATE = N'{DATE.Text}', SHOBEH = N'{SHOBEH.Text}', MABL = N'{MABL.Text}', NAME_TAH = N'{_NAME_TAH_}',
                     N_HESAB = N'{N_HESAB.Text}', VAZ = {(VAZ.SelectedValue is null ? "NULL" : VAZ.SelectedValue)}
-                    WHERE N_SERI = {N_SERI_ON} AND BANK = {BANK_ON} AND DATE_S = {DATE_S_ON} AND MABL = {MABL_ON}");
+                    WHERE N_SERI = N'{N_SERI_ON}' AND BANK = N'{BANK_ON}' AND DATE_S = N'{DATE_S_ON}' AND MABL = N'{MABL_ON}'");
 
             }
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
@@ -309,7 +318,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             //After_Update
-            var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT  *  FROM PAY_GETP WHERE N_SERI=" + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue).ToList();
+            var rst = dbms.DoGetDataSQL<PAY_GETP>($"SELECT  *  FROM PAY_GETP WHERE N_SERI=N'{this.N_SERI.Text}' AND BANK = N'{this.BANK.SelectedValue}'").ToList();
             if (rst.Count == 0)
             {
             }
@@ -329,7 +338,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
                 this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ;
 
-                DATE_S.ItemsSource = "SELECT    DATE_S , BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = " + this.N_SERI.Text + ") AND (BANK = " + this.BANK.SelectedValue + ")";
+                DATE_S.ItemsSource = $"SELECT    DATE_S , BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = N'{this.N_SERI.Text}') AND (BANK = N'{this.BANK.SelectedValue}')";
                 DATE_S.SelectedValuePath = "DATE_S";
                 DATE_S.DisplayMemberPath = "DATE_S";
             }

@@ -90,6 +90,9 @@ namespace Prg_Proccessy.SQLMODELS
         private int? _bank;
         public int? BANK { get => _bank; set { if (_bank == value) return; _bank = value; OnPropertyChanged("BANK"); } }
 
+        private int? _mhaz_no;
+        public int? MHAZ_NO { get => _mhaz_no; set { if (_mhaz_no == value) return; _mhaz_no = value; OnPropertyChanged("MHAZ_NO"); } }
+
         private int? _idh;
         public int? IDH { get => _idh; set { if (_idh == value) return; _idh = value; OnPropertyChanged("IDH"); } }
 

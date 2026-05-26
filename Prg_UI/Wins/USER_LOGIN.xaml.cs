@@ -11,6 +11,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Scriptses;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
@@ -366,13 +367,13 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            //new WinBase().Show();
-            //new WIN_GETFIRSTMOG().Show();
+            new WinBase().Show();
+            //new WIN_About().Show();
             //new WinConnectionChoose().Show();
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles

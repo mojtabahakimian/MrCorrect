@@ -27,6 +27,8 @@ namespace Prg_UI.Scriptses
             CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
+                db.Open();
+
                 //try { db.Execute($@""); } catch { }
 
                 var SanadCount = db.Query<double?>("SELECT COUNT(*) FROM dbo.DEED_HED").FirstOrDefault();
@@ -1986,129 +1988,278 @@ END;";
 									END
 									"); } catch { }
 
+                    try { db.Execute("DROP FUNCTION dbo.MOGHA_ANBAR"); } catch { }
+                    try { db.Execute($@"
+CREATE FUNCTION [dbo].[MOGHA_ANBAR] (@dt2 INT, @ANBAR INT, @KOL INT)
+RETURNS TABLE
+AS
+RETURN (
+    WITH
+    -- موجودی اولیه + ورودی‌های انبار (جایگزین AK_MOGO_AVL_KOL_SUB)
+    avl_sub AS (
+        SELECT CODE, SUM(MOGODI_A) AS MEG, SUM(MABL_A) AS SumOfMABL_A, ANBAR
+        FROM dbo.STUF_FSK
+        GROUP BY CODE, ANBAR
+        HAVING ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+        UNION ALL
+
+        SELECT i.CODE, SUM(i.MEGHk), SUM(i.MABL_K), i.ANBAR
+        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+        WHERE i.TAG IN (1, 7, 9, 24) AND h.DATE_N <= @dt2
+        GROUP BY i.CODE, i.ANBAR
+        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+        UNION ALL
+
+        SELECT i.CODE, SUM(i.MEGH_MAR), SUM(i.MABL * i.MEGH_MAR), i.ANBAR
+        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+        WHERE i.TAG = 22 AND h.DATE_N <= @dt2 AND i.MEGH_MAR <> 0
+        GROUP BY i.CODE, i.ANBAR
+        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+        UNION ALL
+
+        SELECT i.CODE, SUM(i.MEGHk), SUM(i.MABL_K), i.ANBARF
+        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+        WHERE i.TAG = 5 AND h.DATE_N <= @dt2
+        GROUP BY i.CODE, i.ANBARF
+        HAVING i.ANBARF LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+        UNION ALL
+
+        SELECT l.CODE, SUM((l.MOG - l.NUM3) * -1), SUM(ABS(l.MOG - l.NUM3) * l.MABL), a.GRD_ANBAR
+        FROM dbo.ANBGRD_LST l INNER JOIN dbo.ANBGRD_HEAD a ON l.GRD_NUM = a.GRD_NUM
+        WHERE a.GRD_DATE <= @dt2 AND a.N_S IS NOT NULL
+              AND a.GRD_ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+        GROUP BY l.CODE, a.GRD_ANBAR
+        HAVING SUM((l.MOG - l.NUM3) * -1) >= 0
+    ),
+    -- جمع کل موجودی اولیه برای هر کالا-انبار (جایگزین AK_MOGO_AVL_KOL + AKMOGO_AVL_KOL)
+    avl AS (
+        SELECT CODE, SUM(NULLIF(MEG, 0)) AS SMEGH, SUM(SumOfMABL_A) AS SMABLA, ANBAR
+        FROM avl_sub
+        GROUP BY CODE, ANBAR
+    ),
+    -- سفارشات فروش باز (جایگزین AK_MOGO_FR_SUB)
+    fr_sub AS (
+        SELECT i.CODE, SUM(i.MEGHk) AS MEG, i.ANBAR
+        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+        WHERE i.TAG IN (2, 5, 8, 10, 11, 26) AND h.DATE_N <= @dt2
+        GROUP BY i.CODE, i.ANBAR
+        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+        UNION ALL
+
+        SELECT l.CODE, SUM(l.MOG - l.NUM3), a.GRD_ANBAR
+        FROM dbo.ANBGRD_LST l INNER JOIN dbo.ANBGRD_HEAD a ON l.GRD_NUM = a.GRD_NUM
+        WHERE a.GRD_DATE <= @dt2 AND a.N_S IS NOT NULL
+              AND a.GRD_ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+        GROUP BY l.CODE, a.GRD_ANBAR
+        HAVING SUM(l.MOG - l.NUM3) > 0
+
+        UNION ALL
+
+        SELECT i.CODE, SUM(i.MEGHK), i.ANBAR
+        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
+        WHERE i.TAG = 20 AND h.DATE_N <= @dt2 AND (h.TAMIR = 1 OR h.TAMIR = 4)
+        GROUP BY i.CODE, i.ANBAR
+        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+    ),
+    -- جمع فروش باز (جایگزین AK_MOGO_FR)
+    fr AS (
+        SELECT CODE, SUM(MEG) AS MEG, ANBAR
+        FROM fr_sub
+        GROUP BY CODE, ANBAR
+    ),
+    -- آخرین وارده برای محاسبه میانگین قیمت: فقط تراکنش‌های ورودی
+    lastav_base AS (
+        -- وارده مستقیم: خرید، برگشت فروش، تولید، سایر ورودی‌ها
+        SELECT i.CODE, i.ANBAR, i.AVRAGE AS AVRAGE, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
+        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST h ON i.NUMBER = h.NUMBER AND i.TAG = h.TAG
+        WHERE h.DATE_N <= @dt2 AND i.TAG IN (1, 7, 9, 24)
+
+        UNION ALL
+
+        -- وارده از انتقال: کالایی که به این انبار منتقل شده (ANBARF = انبار مقصد)
+        SELECT i.CODE, i.ANBARF, i.AVRAGE2, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
+        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST h ON i.NUMBER = h.NUMBER AND i.TAG = h.TAG
+        WHERE h.DATE_N <= @dt2 AND i.TAG = 5
+    ),
+    -- آخرین میانگین قیمت به ازای هر کالا-انبار (جایگزین lastavrage)
+    lastav AS (
+        SELECT CODE, ANBAR, AVRAGE,
+		ROW_NUMBER() OVER (PARTITION BY CODE, ANBAR ORDER BY DATE_N DESC, FNUMCO DESC) AS rn
+        FROM lastav_base
+    ),
+    -- کارت انبار: موجودی عددی + ارزش ریالی (جایگزین mogudi_tafkik + AKMOGUDI_KOL_ANBAR)
+    kart_anbar AS (
+        SELECT
+            sf.CODE,
+            sf.ANBAR,
+            ROUND(ISNULL(ISNULL(avl.SMEGH, 0) - ISNULL(fr.MEG, 0), 0), 2) AS MAND,
+            ISNULL(
+                COALESCE(la.AVRAGE, sf.FI_A, 0) *
+                ROUND(ISNULL(ISNULL(avl.SMEGH, 0) - ISNULL(fr.MEG, 0), 0), 2),
+                0
+            ) AS MABLK
+        FROM dbo.STUF_FSK sf
+        INNER JOIN avl ON sf.CODE = avl.CODE AND sf.ANBAR = avl.ANBAR
+        LEFT  JOIN fr  ON sf.CODE = fr.CODE  AND sf.ANBAR = fr.ANBAR
+        LEFT  JOIN (SELECT CODE, ANBAR, AVRAGE FROM lastav WHERE rn = 1) la
+               ON sf.CODE = la.CODE AND sf.ANBAR = la.ANBAR
+        WHERE sf.ANBAR = @ANBAR
+    ),
+    -- مانده حسابداری (جایگزین HESAB_ANBAR)
+    hesab AS (
+        SELECT d.HES_K, d.HES_M, SUM(d.BED - d.BES) AS mand, d.HES_T, d.HES
+        FROM dbo.DEED_DTL d INNER JOIN dbo.DEED_HED h ON d.N_S = h.N_S
+        WHERE h.DATE_S <= @dt2 AND d.HES_K = @KOL AND d.HES_M = @ANBAR
+        GROUP BY d.HES_K, d.HES_M, d.HES_T, d.HES
+    )
+    SELECT
+        ka.CODE,
+        ROUND(ka.MABLK, 0)                                                             AS MABLK,
+        ka.MAND,
+        ISNULL(he.mand, 0)                                                             AS mab,
+        CASE WHEN (ka.MABLK - ISNULL(he.mand, 0)) > 0
+             THEN ROUND(ka.MABLK - ISNULL(he.mand, 0), 0)
+             ELSE 0 END                                                                AS tafBED,
+        CASE WHEN (ka.MABLK - ISNULL(he.mand, 0)) <= 0
+             THEN ROUND(ka.MABLK - ISNULL(he.mand, 0), 0) * -1
+             ELSE 0 END                                                                AS TAFBES,
+        he.HES_T,
+        he.HES_K,
+        he.HES_M,
+        he.HES
+    FROM kart_anbar ka
+    LEFT JOIN hesab he ON ka.CODE = he.HES_T
+);
+"); } catch { }
+
                     //Ctrl + F8
                     try { db.Execute("DROP PROC usp_TafzilLedger"); } catch { }
                     try { db.Execute($@"
-										CREATE PROC [dbo].[usp_TafzilLedger]
-										    @FromDate     INT,
-										    @ToDate       INT,
-										    @TafzilCode   nvarchar(50),
-										    @SortExpr     nvarchar(400) = N'DATE_S, BED DESC'
-										AS
-										BEGIN
-										    SET ARITHABORT ON;
-										    SET NOCOUNT ON;
-										
-										    ----------------------------------------------------------
-										    -- 0) کنترل امنیت و پیش‌فرض‌ها
-										    ----------------------------------------------------------
-										    DECLARE @SafeSort nvarchar(400);
-										    IF ISNULL(@SortExpr, '') = '' SET @SortExpr = 'DATE_S, BED DESC';
-										
-										    -- وایت‌لیست
-										    IF NOT EXISTS (
-										        SELECT 1 FROM (VALUES 
-										            ('N_S'),('DATE_S'),('BED'),('BES'),('SHARH'),('NO_S'),('id'),
-										            ('N_S DESC'),('DATE_S DESC'),('BED DESC'),('BES DESC'),('NO_S DESC')
-										        ) AS ValidCols(ColName) WHERE CHARINDEX(ColName, @SortExpr) > 0
-										    )
-										        SET @SafeSort = 'DATE_S, N_S';
-										    ELSE
-										        SET @SafeSort = @SortExpr;
-										
-										    ----------------------------------------------------------
-										    -- 1) ساخت جدول موقت
-										    ----------------------------------------------------------
-										    CREATE TABLE #TempLedger (
-										        pk_id       bigint IDENTITY(1,1), 
-										        RowNum      int,                  
-										        N_S         int,
-										        DATE_S      int, 
-										        SHARH       nvarchar(MAX),
-										        BED         float DEFAULT 0,
-										        BES         float DEFAULT 0,
-										        DiffAmt     AS (BED - BES),       
-										        RunningSum  float DEFAULT 0,      
-										        TASH        nvarchar(10),
-										        NO_S        int,
-										        N_SERI      nvarchar(50),
-										        HES         nvarchar(50),
-										        HES_K       nvarchar(50),
-										        HES_M       nvarchar(50),
-										        HES_T       nvarchar(50),
-										        HES_T2      nvarchar(50),
-										        TAFZILN     nvarchar(200),
-										        BANK        nvarchar(100),
-										        [NUMBER]    nvarchar(50),
-										        TAG         nvarchar(MAX),
-										        ARZD        nvarchar(50),
-										        base        int,
-										        SourceID    bigint
-										    );
-										
-										    ----------------------------------------------------------
-										    -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
-										    ----------------------------------------------------------
-										    -- فقط بازه انتخابی را می‌آوریم
-										    INSERT INTO #TempLedger (
-										        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
-										        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
-										    )
-										    SELECT 
-										        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, @TafzilCode,
-										        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, id
-										    FROM dbo.QDAFTARTAFZIL2_H(@FromDate, @ToDate, @TafzilCode);
-										
-										    ----------------------------------------------------------
-										    -- 3) اعمال سورت داینامیک
-										    ----------------------------------------------------------
-										    DECLARE @SQL nvarchar(MAX);
-										    
-										    -- همه رکوردها را شماره‌گذاری کن
-										    SET @SQL = N'
-										        UPDATE T
-										        SET RowNum = SortedData.NewRowID
-										        FROM #TempLedger T
-										        INNER JOIN (
-										            SELECT pk_id, ROW_NUMBER() OVER (ORDER BY ' + @SafeSort + N') AS NewRowID
-										            FROM #TempLedger
-										        ) SortedData ON T.pk_id = SortedData.pk_id;
-										    ';
-										
-										    EXEC sp_executesql @SQL;
-										
-										    ----------------------------------------------------------
-										    -- 4) محاسبه مانده در خط (Quirky Update)
-										    ----------------------------------------------------------
-										    CREATE CLUSTERED INDEX [IX_TempLedger_Sort] ON #TempLedger (RowNum);
-										
-										    DECLARE @RunningTotal float = 0;
-										
-										    -- آپدیت دقیق و سریع
-										    UPDATE #TempLedger
-										    SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
-										    FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
-										    OPTION (MAXDOP 1);
-										
-										    ----------------------------------------------------------
-										    -- 5) خروجی نهایی
-										    ----------------------------------------------------------
-										    SELECT 
-										        N_S, DATE_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH, 
-										        BED, BES, 
-										        ABS(RunningSum) AS MAND,
-										        CASE 
-										            WHEN RunningSum > 0 THEN N'بد'
-										            WHEN RunningSum < 0 THEN N'بس'
-										            ELSE N'--'
-										        END AS TASH,
-										        HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
-										    FROM #TempLedger
-										    ORDER BY RowNum;
-										
-										    DROP TABLE #TempLedger;
-										END
-										"); } catch { }
+CREATE PROC [dbo].[usp_TafzilLedger]
+    @FromDate     INT,
+    @ToDate       INT,
+    @TafzilCode   nvarchar(50),
+    @SortExpr     nvarchar(400) = N'DATE_S, BED DESC'
+AS
+BEGIN
+    SET ARITHABORT ON;
+    SET NOCOUNT ON;
+
+    ----------------------------------------------------------
+    -- 0) کنترل امنیت و پیش‌فرض‌ها
+    ----------------------------------------------------------
+    DECLARE @SafeSort nvarchar(400);
+    IF ISNULL(@SortExpr, '') = '' SET @SortExpr = 'DATE_S, BED DESC';
+
+    -- وایت‌لیست
+    IF NOT EXISTS (
+        SELECT 1 FROM (VALUES
+            ('N_S'),('DATE_S'),('BED'),('BES'),('SHARH'),('NO_S'),('id'),
+            ('N_S DESC'),('DATE_S DESC'),('BED DESC'),('BES DESC'),('NO_S DESC')
+        ) AS ValidCols(ColName) WHERE CHARINDEX(ColName, @SortExpr) > 0
+    )
+        SET @SafeSort = 'DATE_S, N_S';
+    ELSE
+        SET @SafeSort = @SortExpr;
+
+    ----------------------------------------------------------
+    -- 1) ساخت جدول موقت
+    ----------------------------------------------------------
+    CREATE TABLE #TempLedger (
+        pk_id       bigint IDENTITY(1,1),
+        RowNum      int,
+        N_S         int,
+        DATE_S      int,
+        MONTH_S     AS ((DATE_S % 10000) / 100),
+        SHARH       nvarchar(MAX),
+        BED         float DEFAULT 0,
+        BES         float DEFAULT 0,
+        DiffAmt     AS (BED - BES),
+        RunningSum  float DEFAULT 0,
+        TASH        nvarchar(10),
+        NO_S        int,
+        N_SERI      nvarchar(50),
+        HES         nvarchar(50),
+        HES_K       nvarchar(50),
+        HES_M       nvarchar(50),
+        HES_T       nvarchar(50),
+        HES_T2      nvarchar(50),
+        TAFZILN     nvarchar(200),
+        BANK        nvarchar(100),
+        [NUMBER]    nvarchar(50),
+        TAG         nvarchar(MAX),
+        ARZD        nvarchar(50),
+        base        int,
+        SourceID    bigint
+    );
+
+    ----------------------------------------------------------
+    -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
+    ----------------------------------------------------------
+    -- فقط بازه انتخابی را می‌آوریم
+    INSERT INTO #TempLedger (
+        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
+        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
+    )
+    SELECT
+        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, @TafzilCode,
+        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, id
+    FROM dbo.QDAFTARTAFZIL2_H(@FromDate, @ToDate, @TafzilCode);
+
+    ----------------------------------------------------------
+    -- 3) اعمال سورت داینامیک
+    ----------------------------------------------------------
+    DECLARE @SQL nvarchar(MAX);
+
+    -- همه رکوردها را شماره‌گذاری کن
+    SET @SQL = N'
+        UPDATE T
+        SET RowNum = SortedData.NewRowID
+        FROM #TempLedger T
+        INNER JOIN (
+            SELECT pk_id, ROW_NUMBER() OVER (ORDER BY ' + @SafeSort + N') AS NewRowID
+            FROM #TempLedger
+        ) SortedData ON T.pk_id = SortedData.pk_id;
+    ';
+
+    EXEC sp_executesql @SQL;
+
+    ----------------------------------------------------------
+    -- 4) محاسبه مانده در خط (Quirky Update)
+    ----------------------------------------------------------
+    CREATE CLUSTERED INDEX [IX_TempLedger_Sort] ON #TempLedger (RowNum);
+
+    DECLARE @RunningTotal float = 0;
+
+    -- آپدیت دقیق و سریع
+    UPDATE #TempLedger
+    SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
+    FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
+    OPTION (MAXDOP 1);
+
+    ----------------------------------------------------------
+    -- 5) خروجی نهایی
+    ----------------------------------------------------------
+    SELECT
+        N_S, DATE_S, MONTH_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH,
+        BED, BES,
+        ABS(RunningSum) AS MAND,
+        CASE
+            WHEN RunningSum > 0 THEN N'بد'
+            WHEN RunningSum < 0 THEN N'بس'
+            ELSE N'--'
+        END AS TASH,
+        HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
+    FROM #TempLedger
+    ORDER BY RowNum;
+	DROP TABLE #TempLedger;
+END
+"); } catch { }
 
                     //SELECT * FROM dbo.VISITOR_DTL_KALA(0, 99991230, N'%')WHERE DEPATMAN = 20;
                     try { db.Execute($@"ALTER FUNCTION dbo.VISITOR_DTL_KALA
@@ -3286,14 +3437,29 @@ SELECT TOP 100 PERCENT
 FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
-                #region SALARY
-                if (isCustomCall) //
+                //1405/03/05
+                if (isCustomCall)
                 {
-                    // ===========================================================
-                    // 1. DDL — جداول، ویوها، فانکشن‌ها، تریگرها
-                    //    ایجاد می‌شوند اگر وجود ندارند؛ آپدیت اگر موجودند
-                    // ===========================================================
-                    string tablescript = @"
+                    try { db.Execute($@"ALTER TABLE [dbo].[pget_lst] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
+
+
+                }
+
+                #region SALARY
+                SalaryScript(isCustomCall, db);
+                #endregion
+            }
+        }
+
+        private static void SalaryScript(bool isCustomCall, SqlConnection db)
+        {
+            if (isCustomCall) //
+            {
+                // ===========================================================
+                // 1. DDL — جداول، ویوها، فانکشن‌ها، تریگرها
+                //    ایجاد می‌شوند اگر وجود ندارند؛ آپدیت اگر موجودند
+                // ===========================================================
+                string tablescript = @"
 -- ================================================================
 -- PAY2 — سیستم حقوق و دستمزد — نسخه v6.0
 -- نرم‌افزار مستر کارکت
@@ -3590,9 +3756,11 @@ CREATE TABLE [dbo].[PAY2_WORKSHOP]
     [WS_ID]           INT           NOT NULL IDENTITY(1,1),
     [WS_CODE]         NVARCHAR(20)  NOT NULL,                                    -- کد کارگاه (مرجع TAGCOD.CODE در صورت مهاجرت)
     [WS_NAME]         NVARCHAR(100) NOT NULL,                                    -- نام کارگاه
+    [EMPLOYER_NAME]   NVARCHAR(100) NULL,                                        -- نام کارفرما (فیلد جدید v6)
     [NATIONAL_ID]     NVARCHAR(11)  NULL,                                        -- شناسه ملی کارگاه
     [SOCIAL_INS_CODE] NVARCHAR(20)  NULL,                                        -- کد کارگاه نزد تأمین اجتماعی
     [TAX_CODE]        NVARCHAR(20)  NULL,                                        -- شناسه مالیاتی
+    [POSTAL_CODE]     NVARCHAR(20)  NULL,                                        -- کد پستی کارگاه (فیلد جدید v6)
     [ADDRESS]         NVARCHAR(300) NULL,
     [PHONE]           NVARCHAR(30)  NULL,
     [INS_MODE]        TINYINT       NOT NULL CONSTRAINT DF_WS_INS DEFAULT(1),    -- 1=کارگاه معمولی (SANAD) | 2=تبصره ماده ۷ (SANAD10)
@@ -4439,6 +4607,8 @@ SELECT
     P.PERIOD_DATE,
     W.SOCIAL_INS_CODE,
     W.WS_NAME,
+    W.EMPLOYER_NAME, -- اضافه شده به خروجی لیست بیمه
+    W.POSTAL_CODE,   -- اضافه شده به خروجی لیست بیمه
     E.INS_CODE,
     E.NATIONAL_CODE,
     E.LAST_NAME + N' ' + E.FIRST_NAME AS FULL_NAME,
@@ -4610,12 +4780,12 @@ GO
 -- ================================================================
 GO
 ";
-                    ExecuteBatches(db, tablescript);
+                ExecuteBatches(db, tablescript);
 
-                    // ===========================================================
-                    // 2. Stored Procedures â CREATE OR ALTER (همیشه آخرین نسخه)
-                    // ===========================================================
-                    string procScript = @"
+                // ===========================================================
+                // 2. Stored Procedures â CREATE OR ALTER (همیشه آخرین نسخه)
+                // ===========================================================
+                string procScript = @"
 -- ================================================================
 -- PAY2 — Stored Procedures & Business Logic — v6.0
 -- نرم‌افزار مستر کارکت | کد: PAY2-DB-006
@@ -5762,13 +5932,13 @@ BEGIN
 END;
 GO
 ";
-                    ExecuteBatches(db, procScript);
+                ExecuteBatches(db, procScript);
 
-                    // ===========================================================
-                    // 3. Modify â تغییرات ساختاری و بازنویسی Procedureهای خاص
-                    // ===========================================================
-                    // بخش اصلاح شده و کامل modify1
-                    string modify1 = @"
+                // ===========================================================
+                // 3. Modify â تغییرات ساختاری و بازنویسی Procedureهای خاص
+                // ===========================================================
+                // بخش اصلاح شده و کامل modify1
+                string modify1 = @"
 -- ================================================================
 -- ۱. اصلاح ساختار ستون ACC_T در صورت قدیمی بودن دیتابیس
 -- ================================================================
@@ -5970,14 +6140,21 @@ BEGIN
 END;
 GO
 ";
-                    ExecuteBatches(db, modify1);
+                ExecuteBatches(db, modify1);
 
-                    LoadJobData(db);   // <-- این خط اضافه شود
-                }
-                #endregion
+                //try { db.Execute($@""); } catch { }
+                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;"); } catch { }
+                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;"); } catch { }
 
+                //-- ساخت ایندکس ترکیبی برای حذف عملیات سورت و اسکن جدول شغل‌ها
+                try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
+ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) 
+INCLUDE ([JOB_ID]);"); } catch { }
+
+                LoadJobData(db);   // <-- این خط اضافه شود
             }
         }
+
         private static void ExecuteBatches(SqlConnection db, string script)
         {
             // Safely split the script ONLY when "GO" is on its own line
