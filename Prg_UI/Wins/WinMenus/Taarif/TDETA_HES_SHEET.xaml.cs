@@ -478,11 +478,27 @@ namespace Wins.WinMenus.Taarif
 
                                             try
                                             {
-                                                IsDeletedSomething = true;
+                                                var taf2ChildCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.TDETA_HES2 WHERE N_KOL = {N_KOL} AND NUMBER = {NUMBER} AND TNUMBER = {_tnumber}").FirstOrDefault();
+                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {_tnumber}").FirstOrDefault();
+                                                if (taf2ChildCount > 0 || gerdeshCount > 0)
+                                                {
+                                                    e.Handled = true;
+                                                    if (taf2ChildCount > 0)
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای {taf2ChildCount} زیرحساب تفضیلی 2 است - ابتدا زیرحساب‌ها را حذف کنید." });
+                                                    if (gerdeshCount > 0)
+                                                    {
+                                                        var snadNums = string.Join("، ", dbms.DoGetDataSQL<double>($@"SELECT DISTINCT TOP 5 N_S FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {_tnumber} ORDER BY N_S").Select(s => ((long)s).ToString()));
+                                                        string moreTxt = gerdeshCount > 5 ? " و ..." : "";
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب در {gerdeshCount} ردیف از اسناد حسابداری استفاده شده است (شماره سند: {snadNums}{moreTxt}) و نمیتوان آنرا حذف کرد!" });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    ESLAH_ROW((int?)_tnumber);
 
-                                                ESLAH_ROW((int?)_tnumber);
-
-                                                dbms.DoExecuteSQL($@" DELETE FROM dbo.TDETA_HES WHERE IDD = {_idd} ");
+                                                    dbms.DoExecuteSQL($@" DELETE FROM dbo.TDETA_HES WHERE IDD = {_idd} ");
+                                                    IsDeletedSomething = true;
+                                                }
                                             }
                                             catch (SqlException ex)
                                             {

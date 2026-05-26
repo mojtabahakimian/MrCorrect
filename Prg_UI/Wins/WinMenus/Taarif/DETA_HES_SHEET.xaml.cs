@@ -399,9 +399,25 @@ namespace Wins.WinMenus.Taarif
 
                                             try
                                             {
-                                                IsDeletedSomething = true;
-
-                                                dbms.DoExecuteSQL($@"DELETE FROM dbo.DETA_HES WHERE ID = {_id}");
+                                                var tafChildCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.TDETA_HES WHERE N_KOL = {N_KOL} AND NUMBER = {_NUMBER}").FirstOrDefault();
+                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {_NUMBER}").FirstOrDefault();
+                                                if (tafChildCount > 0 || gerdeshCount > 0)
+                                                {
+                                                    e.Handled = true;
+                                                    if (tafChildCount > 0)
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای {tafChildCount} زیرحساب تفضیلی است - ابتدا زیرحساب‌ها را حذف کنید." });
+                                                    if (gerdeshCount > 0)
+                                                    {
+                                                        var snadNums = string.Join("، ", dbms.DoGetDataSQL<double>($@"SELECT DISTINCT TOP 5 N_S FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {_NUMBER} ORDER BY N_S").Select(s => ((long)s).ToString()));
+                                                        string moreTxt = gerdeshCount > 5 ? " و ..." : "";
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب در {gerdeshCount} ردیف از اسناد حسابداری استفاده شده است (شماره سند: {snadNums}{moreTxt}) و نمیتوان آنرا حذف کرد!" });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    dbms.DoExecuteSQL($@"DELETE FROM dbo.DETA_HES WHERE ID = {_id}");
+                                                    IsDeletedSomething = true;
+                                                }
                                             }
                                             catch (SqlException ex)
                                             {

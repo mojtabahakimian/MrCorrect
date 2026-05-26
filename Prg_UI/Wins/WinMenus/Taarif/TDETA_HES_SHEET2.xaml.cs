@@ -473,40 +473,46 @@ namespace Wins.WinMenus.Taarif
                                             var _hes = item.GetType().GetProperty("HESAB").GetValue(item);
 
 
-                                            //var RST = dbms.DoGetDataSQL<string?>("SELECT HES FROM DEED_DTL WHERE HES LIKE '" + N_KOL + "-" + NUMBER + "-" + TNUMBER + "-" + _tnumber2 + "%'").ToList();
-                                            //if (RST.Count > 0)
-                                            //{
-                                            //    e.Handled = true;
-
-                                            //    ErrosMessages.Add(new MsgModel { MessageText_U = $"حساب داراي گردش مي باشد قابل حذف نيست {_hes}" });
-                                            //}
-                                            //else
+                                            try
                                             {
-                                                try
+                                                var taf3ChildCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.TDETA_HES3 WHERE N_KOL = {N_KOL} AND NUMBER = {NUMBER} AND TNUMBER = {TNUMBER} AND TNUMBER2 = {_tnumber2}").FirstOrDefault();
+                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {TNUMBER} AND HES_T2 = {_tnumber2}").FirstOrDefault();
+                                                if (taf3ChildCount > 0 || gerdeshCount > 0)
                                                 {
-                                                    IsDeletedSomething = true;
-
+                                                    e.Handled = true;
+                                                    if (taf3ChildCount > 0)
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای {taf3ChildCount} زیرحساب تفضیلی 3 است - ابتدا زیرحساب‌ها را حذف کنید." });
+                                                    if (gerdeshCount > 0)
+                                                    {
+                                                        var snadNums = string.Join("، ", dbms.DoGetDataSQL<double>($@"SELECT DISTINCT TOP 5 N_S FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {TNUMBER} AND HES_T2 = {_tnumber2} ORDER BY N_S").Select(s => ((long)s).ToString()));
+                                                        string moreTxt = gerdeshCount > 5 ? " و ..." : "";
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب در {gerdeshCount} ردیف از اسناد حسابداری استفاده شده است (شماره سند: {snadNums}{moreTxt}) و نمیتوان آنرا حذف کرد!" });
+                                                    }
+                                                }
+                                                else
+                                                {
                                                     ESLAH_ROW((int?)_tnumber2);
 
                                                     dbms.DoExecuteSQL($@" DELETE FROM dbo.TDETA_HES2 WHERE IDD = {_idd} ");
+                                                    IsDeletedSomething = true;
                                                 }
-                                                catch (SqlException ex)
+                                            }
+                                            catch (SqlException ex)
+                                            {
+                                                if (ex.Number == 547)
                                                 {
-                                                    if (ex.Number == 547)
-                                                    {
-                                                        e.Handled = true;
+                                                    e.Handled = true;
 
-                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای گردش است و نمیتوان آنرا حذف کرد!" });
-                                                    }
-                                                    else
-                                                    {
-                                                        ErrosMessages.Add(new MsgModel { MessageText_U = "حذف به دلیل خطا در بروز پایگاه داده انجام نشد!" });
-                                                    }
+                                                    ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای گردش است و نمیتوان آنرا حذف کرد!" });
                                                 }
-                                                catch (Exception)
+                                                else
                                                 {
-                                                    ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف!" });
+                                                    ErrosMessages.Add(new MsgModel { MessageText_U = "حذف به دلیل خطا در بروز پایگاه داده انجام نشد!" });
                                                 }
+                                            }
+                                            catch (Exception)
+                                            {
+                                                ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف!" });
                                             }
                                         }
                                     }

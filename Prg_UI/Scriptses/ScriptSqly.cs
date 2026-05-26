@@ -22,12 +22,19 @@ namespace Prg_UI.Scriptses
         /// <summary>
         /// Update Database Via Scripts ...
         /// </summary>
-        public static void LetsGo(bool isCustomCall = false)
+        public static void LetsGo(bool isCustomCall = false, int _type_ = -1)
         {
             CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
                 db.Open();
+
+                #region SALARY
+                if (_type_ == 2) //مخصوص حقوق
+                {
+                    SalaryScript(isCustomCall, db);
+                }
+                #endregion
 
                 //try { db.Execute($@""); } catch { }
 
@@ -3440,14 +3447,11 @@ ORDER BY B.NAME;"); } catch { }
                 //1405/03/05
                 if (isCustomCall)
                 {
-                    try { db.Execute($@"ALTER TABLE [dbo].[pget_lst] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
-
-
+                    try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
+                    try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به جدول تاریخچه خزانه
                 }
 
-                #region SALARY
-                SalaryScript(isCustomCall, db);
-                #endregion
+
             }
         }
 

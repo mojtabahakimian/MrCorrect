@@ -5016,51 +5016,46 @@ VALUES
             }
             return fldl;
         }
+        private static string BuildColDef(THE_ONE1 col)
+        {
+            if (col.xtype == 99 || col.xtype == 35 || col.xtype == 231 || col.xtype == 167 || col.xtype == 175 || col.xtype == 239)
+            {
+                if (col.TYP.ToLower() == "nvarchar" || col.TYP.ToLower() == "varchar" || col.TYP.ToLower() == "nchar" || col.TYP.ToLower() == "char")
+                {
+                    if (col.length <= 0 || col.length >= 8000)
+                        return "[" + col.name + "] [" + col.TYP + "](MAX) NULL";
+                    else
+                        return "[" + col.name + "] [" + col.TYP + "](" + col.length + ") NULL";
+                }
+                return "[" + col.name + "] [" + col.TYP + "] NULL";
+            }
+            return "[" + col.name + "] [" + col.TYP + "] NULL";
+        }
+
         public static void TREXIXTCREATE(string tbl)
         {
             string FLS = "";
             var rst = dbms.DoGetDataSQL<string>("SELECT     sys.sysobjects.name AS clmn FROM         sys.sysobjects WHERE     (sys.sysobjects.name = N'TR_" + tbl + "') ").ToList();
+            var RST2 = dbms.DoGetDataSQL<THE_ONE1>("SELECT     TOP (100) PERCENT sys.syscolumns.name, sys.systypes.name AS TYP, sys.syscolumns.xtype, sys.syscolumns.length FROM         sys.syscolumns INNER JOIN  sys.systypes ON sys.syscolumns.xtype = sys.systypes.xtype INNER JOIN   sys.sysobjects ON sys.syscolumns.id = sys.sysobjects.id WHERE     (sys.sysobjects.name = N'" + tbl + "') AND (sys.systypes.name <> N'sysname') ORDER BY sys.syscolumns.colid").ToList();
+
             if (rst.Count == 0)
             {
                 FLS = "CREATE TABLE [dbo].[TR_" + tbl + "] (";
-                var RST2 = dbms.DoGetDataSQL<THE_ONE1>("SELECT     TOP (100) PERCENT sys.syscolumns.name, sys.systypes.name AS TYP, sys.syscolumns.xtype, sys.syscolumns.length FROM         sys.syscolumns INNER JOIN  sys.systypes ON sys.syscolumns.xtype = sys.systypes.xtype INNER JOIN   sys.sysobjects ON sys.syscolumns.id = sys.sysobjects.id WHERE     (sys.sysobjects.name = N'" + tbl + "') AND (sys.systypes.name <> N'sysname') ORDER BY sys.syscolumns.colid").ToList();
                 foreach (var RST2Fields in RST2)
                 {
-                    if (RST2Fields.xtype == 99 || RST2Fields.xtype == 35 || RST2Fields.xtype == 231 || RST2Fields.xtype == 167 || RST2Fields.xtype == 175 || RST2Fields.xtype == 239)
+                    var isTridd = string.Equals(RST2Fields.name, "TRIDD", StringComparison.OrdinalIgnoreCase);
+                    if (isTridd)
                     {
-                        if (RST2Fields.TYP.ToLower() == "nvarchar" || RST2Fields.TYP.ToLower() == "varchar" || RST2Fields.TYP.ToLower() == "nchar" || RST2Fields.TYP.ToLower() == "char")
-                        {
-                            if (RST2Fields.length <= 0 || RST2Fields.length >= 8000)
-                                FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "](MAX) NULL,";
-                            else
-                                FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "](" + RST2Fields.length + ") NULL,";
-                        }
-                        else
-                        {
-                            FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
-                        }
+                        var supportsIdentity = string.Equals(RST2Fields.TYP, "int", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "bigint", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "smallint", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "tinyint", StringComparison.OrdinalIgnoreCase);
+                        var identityClause = supportsIdentity ? " IDENTITY(1,1)" : string.Empty;
+                        FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "]" + identityClause + " NOT NULL,";
                     }
                     else
                     {
-                        //FLS = FLS + "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
-                        var isTridd = string.Equals(RST2Fields.name, "TRIDD", StringComparison.OrdinalIgnoreCase);
-                        if (isTridd)
-                        {
-                            var supportsIdentity = string.Equals(RST2Fields.TYP, "int", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "bigint", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "smallint", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "tinyint", StringComparison.OrdinalIgnoreCase);
-                            var identityClause = supportsIdentity ? " IDENTITY(1,1)" : string.Empty;
-                            FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "]" + identityClause + " NOT NULL,";
-                        }
-                        else
-                        {
-                            FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
-                        }
+                        FLS += BuildColDef(RST2Fields) + ",";
                     }
-                    //RST2.MoveNext();
-                    //Wend;
                 }
-                //FLS = FLS + "[UP_DATE] [bigint] NOT NULL,[UP_TIME] [float] NOT NULL,[UP_USER_NAME] [nvarchar](40) NULL, [PC_NAME] [nvarchar](50) NULL, [IPADD] [nvarchar](50) NULL,[TRIDD] [int] IDENTITY(1,1) NOT NULL, PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";//
 
-                // Gather existing column names to avoid adding duplicates
                 var columnNames = RST2.Select(r => r.name.ToUpperInvariant()).ToHashSet();
                 if (!columnNames.Contains("UP_DATE"))
                     FLS += "[UP_DATE] [bigint] NOT NULL,";
@@ -5078,7 +5073,21 @@ VALUES
                 FLS += "PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";
 
                 dbms.DoExecuteSQL(FLS);
-                //DoCmd.RunSQL FLS;
+            }
+            else
+            {
+                // Table exists — add any source columns that are missing from the TR_ table
+                var trCols = dbms.DoGetDataSQL<string>(
+                    "SELECT sys.syscolumns.name FROM sys.syscolumns INNER JOIN sys.sysobjects ON sys.syscolumns.id = sys.sysobjects.id WHERE sys.sysobjects.name = N'TR_" + tbl + "'"
+                ).Select(c => c.ToUpperInvariant()).ToHashSet();
+
+                foreach (var col in RST2)
+                {
+                    if (!trCols.Contains(col.name.ToUpperInvariant()))
+                    {
+                        try { dbms.DoExecuteSQL("ALTER TABLE [dbo].[TR_" + tbl + "] ADD " + BuildColDef(col)); } catch { }
+                    }
+                }
             }
         }
 

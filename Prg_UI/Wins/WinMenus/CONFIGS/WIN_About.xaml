@@ -108,6 +108,7 @@
                             <Button FontSize="10" Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15" x:Name="Command39" Content="کدینگ استان" Margin="5" Click="Command39_Click"/>
                             <Button FontSize="10" Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15" x:Name="Command41" Content="اسکریپت" Margin="5" Click="Command41_Click"/>
                             <Button FontSize="10" Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15" x:Name="Command42" Content="تبدیل ۱۴۰۰" Margin="5" Click="Command42_Click"/>
+                            <Button FontSize="10" Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15" Content="اسکریپت حقوق" Margin="5" Click="Button_Click"/>
                         </UniformGrid>
                     </Grid>
                 </TabItem>
