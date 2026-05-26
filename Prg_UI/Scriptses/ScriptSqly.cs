@@ -2128,7 +2128,16 @@ END;";
 
 											        SELECT i.CODE, SUM(i.MEGHk), SUM(i.MABL_K), i.ANBAR
 											        FROM dbo.HEAD_LST h INNER JOIN dbo.INVO_LST i ON h.TAG = i.TAG AND h.NUMBER = i.NUMBER
-											        WHERE i.TAG IN (1, 3, 7, 9, 24) AND h.DATE_N <= @dt2
+											        WHERE i.TAG IN (1, 7, 9, 24) AND h.DATE_N <= @dt2
+											        GROUP BY i.CODE, i.ANBAR
+											        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+											        UNION ALL
+
+											        -- برگشت فروش (TAG=4): سر فاکتور در HEAD_LST_FBK است
+											        SELECT i.CODE, SUM(i.MEGHk), SUM(i.MABL_K), i.ANBAR
+											        FROM dbo.HEAD_LST_FBK h INNER JOIN dbo.INVO_LST i ON h.NUMBER1 = i.NUMBER AND h.dtag = i.TAG
+											        WHERE h.DATE_N <= @dt2
 											        GROUP BY i.CODE, i.ANBAR
 											        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
 
@@ -2185,6 +2194,15 @@ END;";
 											        WHERE i.TAG = 20 AND h.DATE_N <= @dt2 AND (h.TAMIR = 1 OR h.TAMIR = 4)
 											        GROUP BY i.CODE, i.ANBAR
 											        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
+
+											        UNION ALL
+
+											        -- برگشت خرید (TAG=3): سر فاکتور در HEAD_LST_KBK است
+											        SELECT i.CODE, SUM(i.MEGHk) AS MEG, i.ANBAR
+											        FROM dbo.HEAD_LST_KBK h INNER JOIN dbo.INVO_LST i ON h.NUMBER1 = i.NUMBER AND h.dtag = i.TAG
+											        WHERE h.DATE_N <= @dt2
+											        GROUP BY i.CODE, i.ANBAR
+											        HAVING i.ANBAR LIKE CAST(@ANBAR AS NVARCHAR(10))
 											    ),
 											    fr AS (
 											        SELECT CODE, SUM(MEG) AS MEG, ANBAR
@@ -2194,13 +2212,20 @@ END;";
 											    lastav_base AS (
 											        SELECT i.CODE, i.ANBAR, i.AVRAGE AS AVRAGE, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
 											        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST h ON i.NUMBER = h.NUMBER AND i.TAG = h.TAG
-											        WHERE h.DATE_N <= @dt2 AND i.TAG IN (1, 3, 7, 9, 24)
+											        WHERE h.DATE_N <= @dt2 AND i.TAG IN (1, 7, 9, 24)
 
 											        UNION ALL
 
 											        SELECT i.CODE, i.ANBARF, i.AVRAGE2, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
 											        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST h ON i.NUMBER = h.NUMBER AND i.TAG = h.TAG
 											        WHERE h.DATE_N <= @dt2 AND i.TAG = 5
+
+											        UNION ALL
+
+											        -- برگشت فروش: قیمت میانگین از AVRAGE در INVO_LST
+											        SELECT i.CODE, i.ANBAR, i.AVRAGE AS AVRAGE, h.DATE_N, ISNULL(h.FNUMCO, 0) AS FNUMCO
+											        FROM dbo.INVO_LST i INNER JOIN dbo.HEAD_LST_FBK h ON i.NUMBER = h.NUMBER1 AND i.TAG = h.dtag
+											        WHERE h.DATE_N <= @dt2
 											    ),
 											    lastav AS (
 											        SELECT CODE, ANBAR, AVRAGE,
