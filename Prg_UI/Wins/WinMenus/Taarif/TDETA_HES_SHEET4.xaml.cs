@@ -474,7 +474,7 @@ namespace Wins.WinMenus.Taarif
 
                                             try
                                             {
-                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {TNUMBER} AND HES_T2 = {_tnumber2} AND HES_T3 = {_tnumber3} AND HES_T4 = {_tnumber4}").FirstOrDefault();
+                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {TNUMBER} AND HES_T2 = {TNUMBER2} AND HES_T3 = {TNUMBER3} AND HES_T4 = {_tnumber4}").FirstOrDefault();
                                                 if (gerdeshCount > 0)
                                                 {
                                                     e.Handled = true;

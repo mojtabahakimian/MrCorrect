@@ -478,8 +478,9 @@ namespace Wins.WinMenus.Taarif
 
                                             try
                                             {
+                                                var taf2ChildCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.TDETA_HES2 WHERE N_KOL = {N_KOL} AND NUMBER = {NUMBER} AND TNUMBER = {_tnumber}").FirstOrDefault();
                                                 var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {_tnumber}").FirstOrDefault();
-                                                if (gerdeshCount > 0)
+                                                if (taf2ChildCount > 0 || gerdeshCount > 0)
                                                 {
                                                     e.Handled = true;
                                                     ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای گردش است و نمیتوان آنرا حذف کرد!" });
