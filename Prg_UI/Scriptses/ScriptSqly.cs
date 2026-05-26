@@ -3441,6 +3441,7 @@ ORDER BY B.NAME;"); } catch { }
                 if (isCustomCall)
                 {
                     try { db.Execute($@"ALTER TABLE [dbo].[pget_lst] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
+                    try { db.Execute($@"ALTER TABLE [dbo].[TR_pget_lst] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به جدول تاریخچه خزانه
 
 
                 }
