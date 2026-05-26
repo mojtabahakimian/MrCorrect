@@ -478,11 +478,20 @@ namespace Wins.WinMenus.Taarif
 
                                             try
                                             {
-                                                IsDeletedSomething = true;
+                                                var taf2ChildCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.TDETA_HES2 WHERE N_KOL = {N_KOL} AND NUMBER = {NUMBER} AND TNUMBER = {_tnumber}").FirstOrDefault();
+                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {_tnumber}").FirstOrDefault();
+                                                if (taf2ChildCount > 0 || gerdeshCount > 0)
+                                                {
+                                                    e.Handled = true;
+                                                    ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای گردش است و نمیتوان آنرا حذف کرد!" });
+                                                }
+                                                else
+                                                {
+                                                    ESLAH_ROW((int?)_tnumber);
 
-                                                ESLAH_ROW((int?)_tnumber);
-
-                                                dbms.DoExecuteSQL($@" DELETE FROM dbo.TDETA_HES WHERE IDD = {_idd} ");
+                                                    dbms.DoExecuteSQL($@" DELETE FROM dbo.TDETA_HES WHERE IDD = {_idd} ");
+                                                    IsDeletedSomething = true;
+                                                }
                                             }
                                             catch (SqlException ex)
                                             {

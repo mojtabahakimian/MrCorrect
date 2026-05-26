@@ -434,9 +434,17 @@ namespace Wins.WinMenus.Taarif
 
                                             try
                                             {
-                                                IsDeletedSomething = true;
-
-                                                dbms.DoExecuteSQL($@"DELETE FROM dbo.TOTA_HES WHERE ID = {_id}");
+                                                var gerdeshCount = dbms.DoGetDataSQL<int>($@"SELECT COUNT(*) FROM dbo.DEED_DTL WHERE HES_K = {_NUMBER}").FirstOrDefault();
+                                                if (gerdeshCount > 0)
+                                                {
+                                                    e.Handled = true;
+                                                    ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای گردش است و نمیتوان آنرا حذف کرد!" });
+                                                }
+                                                else
+                                                {
+                                                    dbms.DoExecuteSQL($@"DELETE FROM dbo.TOTA_HES WHERE ID = {_id}");
+                                                    IsDeletedSomething = true;
+                                                }
                                             }
                                             catch (SqlException ex)
                                             {
