@@ -483,7 +483,14 @@ namespace Wins.WinMenus.Taarif
                                                 if (taf2ChildCount > 0 || gerdeshCount > 0)
                                                 {
                                                     e.Handled = true;
-                                                    ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای گردش است و نمیتوان آنرا حذف کرد!" });
+                                                    if (taf2ChildCount > 0)
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب دارای {taf2ChildCount} زیرحساب تفضیلی 2 است - ابتدا زیرحساب‌ها را حذف کنید." });
+                                                    if (gerdeshCount > 0)
+                                                    {
+                                                        var snadNums = string.Join("، ", dbms.DoGetDataSQL<double>($@"SELECT DISTINCT TOP 5 N_S FROM dbo.DEED_DTL WHERE HES_K = {N_KOL} AND HES_M = {NUMBER} AND HES_T = {_tnumber} ORDER BY N_S").Select(s => ((long)s).ToString()));
+                                                        string moreTxt = gerdeshCount > 5 ? " و ..." : "";
+                                                        ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب در {gerdeshCount} ردیف از اسناد حسابداری استفاده شده است (شماره سند: {snadNums}{moreTxt}) و نمیتوان آنرا حذف کرد!" });
+                                                    }
                                                 }
                                                 else
                                                 {

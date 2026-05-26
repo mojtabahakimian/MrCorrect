@@ -1679,6 +1679,16 @@ namespace Wins.WinMenus.Taarif
             {
                 if (NewRecord || HEADER?.IDD == 0) { return; }
 
+                if (!string.IsNullOrEmpty(HESH))
+                {
+                    var transactionExists = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 HES FROM dbo.DEED_DTL WHERE HES = '{HESH}' OR HES LIKE '{HESH}-%'").FirstOrDefault();
+                    if (!string.IsNullOrEmpty(transactionExists))
+                    {
+                        new Msgwin(false, "حساب این مشتری دارای گردش است و نمی توان آنرا حذف کرد").ShowDialog();
+                        return;
+                    }
+                }
+
                 Msgwin msgwin = new Msgwin(true, "آیا از حذف این مشتری اطمینان دارید ؟");
                 msgwin.ShowDialog();
                 if (msgwin.DialogResult is true)
