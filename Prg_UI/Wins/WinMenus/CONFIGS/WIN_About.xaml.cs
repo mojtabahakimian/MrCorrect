@@ -326,5 +326,17 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 SERVERNAM.Text = _sazmanData.SERVERNAM;
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Msgwin msgwin = new Msgwin(true, "آیا از اجرای اسکریپت حقوق اطمینان دارید؟"); msgwin.ShowDialog();
+            if (msgwin.DialogResult != true)
+            {
+                return;
+            }
+
+            ScriptSqly.LetsGo(false, 2); //حقوق و دستمزد
+            new Msgwin(false, "اسکریپت حقوق اجرا شدند.").Show();
+        }
     }
 }
