@@ -351,7 +351,7 @@ namespace Functions
 
                                     if (MAND.HasValue)
                                     {
-                                        double remainingQty = MAND.Value - (MEGHk - (MEGHk - MEGH_MAR));
+                                        double remainingQty = MAND.Value - (MEGHk - MEGH_MAR);
                                         if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
                                         {
                                             errorMessages.Add(new MsgModel
