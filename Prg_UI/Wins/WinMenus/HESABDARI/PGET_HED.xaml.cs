@@ -5013,6 +5013,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             Msgwin msgwin = new Msgwin(true, "آیا از حذف اطمینان دارید؟");
             msgwin.ShowDialog();
 
+            if (msgwin.DialogResult is not true)
+            {
+                return;
+            }
+
             if (KHAZANEH_DATA?.Count == 0)
             {
                 if (!string.IsNullOrEmpty(ID.Text) && ID.Text != "0")
@@ -5064,246 +5069,252 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     AllRows.Add(PGET_LST_SUB.SelectedItems[i] as PGET_LST);
                 }
 
-                if (AllRows.Count <= 0 || AllRows is null)
+                if (AllRows is null || AllRows.Count <= 0)
                     return;
 
-                if (msgwin.DialogResult is true)
+                foreach (PGET_LST item in AllRows)
                 {
-                    foreach (PGET_LST item in AllRows)
+                    if (item == null) { continue; }
+
+                    if (CL_LMethods.IsNewPlaceHolder(PGET_LST_SUB, item)) { continue; }
+
+                    switch (item.NO_AM)
                     {
-                        if (item == null) { continue; }
-
-                        if (CL_LMethods.IsNewPlaceHolder(PGET_LST_SUB, item)) { continue; }
-
-                        switch (item.NO_AM)
-                        {
-                            case 2:
+                        case 2:
+                            {
+                                switch (item.NAHVA) // پرداخت
                                 {
-                                    switch (item.NAHVA) // پرداخت
-                                    {
-                                        case 1:
-                                            {
-                                                KHAZANE_Row_Deleter(item);
+                                    case 1:
+                                        {
+                                            KHAZANE_Row_Deleter(item);
 
-                                                break;
-                                            } // پرداخت نقد
-                                        case 2:
+                                            break;
+                                        } // پرداخت نقد
+                                    case 2:
+                                        {
+                                            if (!IsNull(item.N_SERI))
                                             {
-                                                if (!IsNull(item.N_SERI))
+                                                var rst = dbms.DoGetDataSQL<PAY_GETD>("select * from PAY_GETP where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
+                                                var cheque = rst.FirstOrDefault();
+                                                if (cheque is not null)
                                                 {
-                                                    var rst = dbms.DoGetDataSQL<PAY_GETD>("select * from PAY_GETP where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
-                                                    if (rst.Count > 0)
+                                                    if ((!IsNull(cheque.N_KOL2) && cheque.N_KOL2 != 911) || !IsNull(cheque.N_KOL3))
                                                     {
-                                                        if ((!IsNull(rst.FirstOrDefault().N_KOL2) && rst.FirstOrDefault().N_KOL2 != 911) || !IsNull(rst.FirstOrDefault().N_KOL3))
-                                                        {
-                                                            Msgwin msgwin1 = new Msgwin(false, "چكي كه وصولي يا  برگشتي خورده قابل حذف نيست");
-                                                            msgwin1.ShowDialog();
+                                                        Msgwin msgwin1 = new Msgwin(false, "چكي كه وصولي يا  برگشتي خورده قابل حذف نيست");
+                                                        msgwin1.ShowDialog();
 
-                                                            // DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "چكي كه وصولي يا  برگشتي خورده قابل حذف نيست");
-                                                            // CANCEL = Conversions.ToInteger(true);
-                                                        }
-                                                        else
-                                                        {
-                                                            // rst.Fields("N_KOL2") = 911
-                                                            rst.FirstOrDefault().N_KOL = 911;
-                                                            // rst.Fields("N_moin2") = 1
-                                                            rst.FirstOrDefault().N_MOIN = 1;
-                                                            // rst.Fields("N_taf2") = 1
-                                                            rst.FirstOrDefault().N_TAF = 1;
-                                                            rst.FirstOrDefault().HES1 = "911-1-1";
-
-                                                            string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
-                                                            dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL = 911 ,N_MOIN = 1 , N_TAF = 1 , hes1 = N'911-1-1' {_where} ");
-                                                            KHAZANE_Row_Deleter(item);
-                                                            //rst.update();
-                                                        }
+                                                        // DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "چكي كه وصولي يا  برگشتي خورده قابل حذف نيست");
+                                                        // CANCEL = Conversions.ToInteger(true);
                                                     }
-                                                    //rst.Close();
-                                                }
+                                                    else
+                                                    {
+                                                        // rst.Fields("N_KOL2") = 911
+                                                        cheque.N_KOL = 911;
+                                                        // rst.Fields("N_moin2") = 1
+                                                        cheque.N_MOIN = 1;
+                                                        // rst.Fields("N_taf2") = 1
+                                                        cheque.N_TAF = 1;
+                                                        cheque.HES1 = "911-1-1";
 
-                                                break;
-                                            } // پرداخت چک
-                                        case 3:
+                                                        string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
+                                                        dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL = 911 ,N_MOIN = 1 , N_TAF = 1 , hes1 = N'911-1-1' {_where} ");
+                                                        KHAZANE_Row_Deleter(item);
+                                                        //rst.update();
+                                                    }
+                                                }
+                                                //rst.Close();
+                                            }
+
+                                            break;
+                                        } // پرداخت چک
+                                    case 3:
+                                        {
+                                            KHAZANE_Row_Deleter(item);
+
+                                            break;
+                                        } // پرداخت پرداخت سایر
+                                    case 4:
+                                        {
+                                            if (IsNull(item.N_SERI) || IsNull(item.BANK))
                                             {
+                                                item.N_SERI = 0;
+                                                item.BANK = 0;
+                                            }
+                                            var rst = dbms.DoGetDataSQL<PAY_GETD>("select * from PAY_GETD where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
+                                            var cheque = rst.FirstOrDefault();
+                                            if (cheque is null)
+                                            {
+                                                item.N_SERI = null;
+                                                item.BANK = null;
+                                            }
+                                            else
+                                            {
+                                                string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
+                                                cheque.N_KOL = null;
+                                                cheque.N_MOIN = null;
+                                                cheque.N_TAF = null;
+                                                cheque.HES1 = null;
+                                                dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL = NULL ,N_MOIN = NULL , N_TAF = NULL , hes1 =NULL {_where} ");
                                                 KHAZANE_Row_Deleter(item);
+                                                CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, cheque.DATE_S, (int)cheque.SANDUGH);
 
-                                                break;
-                                            } // پرداخت پرداخت سایر
-                                        case 4:
+                                                // rst.update();
+                                            }
+                                            //rst.Close();
+                                            break;
+                                        } // پرداخت واگذاری چک
+                                    case 5:
+                                        {
+                                            List<PAY_GETD> rst = null;
+                                            if (IsNull(item.N_SERI) || IsNull(item.BANK))
                                             {
-                                                if (IsNull(item.N_SERI) || IsNull(item.BANK))
+                                                item.N_SERI = 0;
+                                                item.BANK = 0;
+                                            }
+                                            if (item.N_SERI == 0 && item.BANK == 0)
+                                            {
+                                                rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE ID = {item.ID}").ToList();
+
+                                            }
+                                            else
+                                            {
+                                                rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
+
+                                            }
+                                            var cheque = rst.FirstOrDefault();
+                                            if (cheque is null)
+                                            {
+                                                item.N_SERI = null;
+                                                item.BANK = null;
+                                            }
+                                            else
+                                            {
+                                                string _where = " WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
+
+                                                cheque.N_KOL2 = null;
+                                                cheque.N_MOIN2 = null;
+                                                cheque.N_TAF2 = null;
+                                                cheque.HES2 = null;
+                                                //rst.update();
+
+                                                dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL2 = Null ,N_MOIN2 = Null , N_TAF2 = Null , HES2 = Null {_where} ");
+                                                KHAZANE_Row_Deleter(item);
+                                                if (!string.IsNullOrEmpty(item.N_SERI.ToStringNullSafe()) && !string.IsNullOrEmpty(item.BANK.ToStringNullSafe()) && !string.IsNullOrEmpty(cheque.DATE_S.ToStringNullSafe()))
                                                 {
-                                                    item.N_SERI = 0;
-                                                    item.BANK = 0;
+                                                    CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, cheque.DATE_S, (int)cheque.SANDUGH);
+
                                                 }
+                                            }
+                                            //rst.Close();
+                                            break;
+                                        } // پرداخت برگشت چک
+                                }
+
+                                break;
+                            }
+                        case 1:
+                            {
+                                switch (item.NAHVA) // دريافت
+                                {
+                                    case 1:
+                                        {
+                                            KHAZANE_Row_Deleter(item);
+
+                                            break;
+                                        } // دریافت نقد
+                                    case 2:
+                                        {
+                                            if (!IsNull(item.N_SERI))
+                                            {
                                                 var rst = dbms.DoGetDataSQL<PAY_GETD>("select * from PAY_GETD where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
-                                                if (rst.Count == 0)
+                                                var cheque = rst.FirstOrDefault();
+                                                if (cheque is not null)
                                                 {
-                                                    item.N_SERI = null;
-                                                    item.BANK = null;
-                                                }
-                                                else
-                                                {
-                                                    string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
-                                                    rst.FirstOrDefault().N_KOL = null;
-                                                    rst.FirstOrDefault().N_MOIN = null;
-                                                    rst.FirstOrDefault().N_TAF = null;
-                                                    rst.FirstOrDefault().HES1 = null;
-                                                    dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL = NULL ,N_MOIN = NULL , N_TAF = NULL , hes1 =NULL {_where} ");
-                                                    KHAZANE_Row_Deleter(item);
-
-                                                    // rst.update();
-                                                }
-                                                CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
-                                                //rst.Close();
-                                                break;
-                                            } // پرداخت واگذاری چک
-                                        case 5:
-                                            {
-                                                List<PAY_GETD> rst = null;
-                                                if (IsNull(item.N_SERI) || IsNull(item.BANK))
-                                                {
-                                                    item.N_SERI = 0;
-                                                    item.BANK = 0;
-                                                }
-                                                if (item.N_SERI == 0 && item.BANK == 0)
-                                                {
-                                                    rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE ID = {item.ID}").ToList();
-
-                                                }
-                                                else
-                                                {
-                                                    rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
-
-                                                }
-                                                if (rst.Count == 0)
-                                                {
-                                                    item.N_SERI = null;
-                                                    item.BANK = null;
-                                                }
-                                                else
-                                                {
-                                                    string _where = " WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
-
-                                                    rst.FirstOrDefault().N_KOL2 = null;
-                                                    rst.FirstOrDefault().N_MOIN2 = null;
-                                                    rst.FirstOrDefault().N_TAF2 = null;
-                                                    rst.FirstOrDefault().HES2 = null;
-                                                    //rst.update();
-
-                                                    dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL2 = Null ,N_MOIN2 = Null , N_TAF2 = Null , HES2 = Null {_where} ");
-                                                    KHAZANE_Row_Deleter(item);
-                                                }
-                                                if (!string.IsNullOrEmpty(item.N_SERI.ToStringNullSafe()) && !string.IsNullOrEmpty(item.BANK.ToStringNullSafe()) && !string.IsNullOrEmpty(rst.FirstOrDefault().DATE_S.ToStringNullSafe()))
-                                                {
-                                                    CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
-
-                                                }
-                                                //rst.Close();
-                                                break;
-                                            } // پرداخت برگشت چک
-                                    }
-
-                                    break;
-                                }
-                            case 1:
-                                {
-                                    switch (item.NAHVA) // دريافت
-                                    {
-                                        case 1:
-                                            {
-                                                KHAZANE_Row_Deleter(item);
-
-                                                break;
-                                            } // دریافت نقد
-                                        case 2:
-                                            {
-                                                if (!IsNull(item.N_SERI))
-                                                {
-                                                    var rst = dbms.DoGetDataSQL<PAY_GETD>("select * from PAY_GETD where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
-                                                    if (rst.Count > 0)
+                                                    if ((!IsNull(cheque.N_KOL2) && cheque.N_KOL2 != 911) || !IsNull(cheque.N_KOL3))
                                                     {
-                                                        if ((!IsNull(rst.FirstOrDefault().N_KOL2) && rst.FirstOrDefault().N_KOL2 != 911) || !IsNull(rst.FirstOrDefault().N_KOL3))
-                                                        {
-                                                            Msgwin msgwin1 = new Msgwin(false, "چكي كه وصولي يا واگذاري يا برگشتي خورده قابل حذف نيست");
-                                                            msgwin1.ShowDialog();
-                                                            //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "چكي كه وصولي يا واگذاري يا برگشتي خورده قابل حذف نيست");
-                                                            CANCEL = true;
-                                                        }
-                                                        else
-                                                        {
-                                                            var test = rst.FirstOrDefault();
-                                                            if ((rst.FirstOrDefault().N_KOL == Baseknow.BANKHA || rst.FirstOrDefault().N_KOL == 911) || IsNull(rst.FirstOrDefault().N_KOL))
-                                                            {
-                                                                //were here
-                                                            }
-
-                                                            string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
-
-                                                            // rst.Fields("N_KOL2") = 911
-                                                            rst.FirstOrDefault().N_KOL = 911;
-                                                            // rst.Fields("N_moin2") = 1
-                                                            rst.FirstOrDefault().N_MOIN = 1;
-                                                            // rst.Fields("N_taf2") = 1
-                                                            rst.FirstOrDefault().N_TAF = 1;
-                                                            rst.FirstOrDefault().HES1 = "911-1-1";
-                                                            //rst.update();
-
-                                                            dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL = 911 , N_MOIN = 1 , N_TAF = 1 , HES1 = N'911-1-1' {_where} ");
-                                                            KHAZANE_Row_Deleter(item);
-
-                                                        }
+                                                        Msgwin msgwin1 = new Msgwin(false, "چكي كه وصولي يا واگذاري يا برگشتي خورده قابل حذف نيست");
+                                                        msgwin1.ShowDialog();
+                                                        //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "چكي كه وصولي يا واگذاري يا برگشتي خورده قابل حذف نيست");
+                                                        CANCEL = true;
                                                     }
-                                                    CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
-                                                    //rst.Close();
-                                                    //return;
-                                                }
-                                                else
-                                                {
-                                                    KHAZANE_Row_Deleter(item);
-                                                }
-                                                break;
-                                            } // دریافت چک
-                                        case 3:
-                                            {
-                                                KHAZANE_Row_Deleter(item);
+                                                    else
+                                                    {
+                                                        var test = cheque;
+                                                        if ((cheque.N_KOL == Baseknow.BANKHA || cheque.N_KOL == 911) || IsNull(cheque.N_KOL))
+                                                        {
+                                                            //were here
+                                                        }
 
-                                                break;
-                                            } // دریافت سایر
-                                        case 5:
-                                            {
-                                                if (IsNull(item.N_SERI) || IsNull(item.BANK))
-                                                {
-                                                    item.N_SERI = 0;
-                                                    item.BANK = 0;
-                                                }
-                                                var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT * FROM PAY_GETP WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
-                                                if (rst.Count == 0)
-                                                {
-                                                    item.N_SERI = null;
-                                                    item.BANK = null;
-                                                }
-                                                else
-                                                {
-                                                    string _where = " WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
+                                                        string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
 
-                                                    rst.FirstOrDefault().N_KOL2 = null;
-                                                    rst.FirstOrDefault().N_MOIN2 = null;
-                                                    rst.FirstOrDefault().N_TAF2 = null;
-                                                    rst.FirstOrDefault().HES2 = null;
-                                                    //rst.update();
+                                                        // rst.Fields("N_KOL2") = 911
+                                                        cheque.N_KOL = 911;
+                                                        // rst.Fields("N_moin2") = 1
+                                                        cheque.N_MOIN = 1;
+                                                        // rst.Fields("N_taf2") = 1
+                                                        cheque.N_TAF = 1;
+                                                        cheque.HES1 = "911-1-1";
+                                                        //rst.update();
 
-                                                    dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL2 = Null , N_MOIN2 = Null , N_TAF2 = Null , HES2 = Null {_where} ");
-                                                    KHAZANE_Row_Deleter(item);
+                                                        dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL = 911 , N_MOIN = 1 , N_TAF = 1 , HES1 = N'911-1-1' {_where} ");
+                                                        KHAZANE_Row_Deleter(item);
+
+                                                    }
+                                                }
+                                                if (cheque is not null)
+                                                {
+                                                    CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, cheque.DATE_S, (int)cheque.SANDUGH);
                                                 }
                                                 //rst.Close();
-                                                break;
-                                            } // دریافت برگشت چک
-                                    }
+                                                //return;
+                                            }
+                                            else
+                                            {
+                                                KHAZANE_Row_Deleter(item);
+                                            }
+                                            break;
+                                        } // دریافت چک
+                                    case 3:
+                                        {
+                                            KHAZANE_Row_Deleter(item);
 
-                                    break;
+                                            break;
+                                        } // دریافت سایر
+                                    case 5:
+                                        {
+                                            if (IsNull(item.N_SERI) || IsNull(item.BANK))
+                                            {
+                                                item.N_SERI = 0;
+                                                item.BANK = 0;
+                                            }
+                                            var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT * FROM PAY_GETP WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK).ToList();
+                                            var cheque = rst.FirstOrDefault();
+                                            if (cheque is null)
+                                            {
+                                                item.N_SERI = null;
+                                                item.BANK = null;
+                                            }
+                                            else
+                                            {
+                                                string _where = " WHERE N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
+
+                                                cheque.N_KOL2 = null;
+                                                cheque.N_MOIN2 = null;
+                                                cheque.N_TAF2 = null;
+                                                cheque.HES2 = null;
+                                                //rst.update();
+
+                                                dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL2 = Null , N_MOIN2 = Null , N_TAF2 = Null , HES2 = Null {_where} ");
+                                                KHAZANE_Row_Deleter(item);
+                                            }
+                                            //rst.Close();
+                                            break;
+                                        } // دریافت برگشت چک
                                 }
-                        }
+
+                                break;
+                            }
+                    }
                     }
                 }
             }
