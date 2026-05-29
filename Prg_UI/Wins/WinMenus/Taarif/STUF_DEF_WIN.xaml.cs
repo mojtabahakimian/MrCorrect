@@ -1043,7 +1043,7 @@ namespace Wins.WinMenus.Taarif
         private bool N_FaniIsDuplicate(bool _DisplayMsg = true)
         {
             //N_FANI_AfterUpdate
-            if (!string.IsNullOrEmpty(N_FANI.Text) && !string.IsNullOrEmpty(CODE.Text))
+            if (!string.IsNullOrWhiteSpace(N_FANI.Text) && !string.IsNullOrWhiteSpace(CODE.Text) && CODE.Text != "0")
             {
                 var rst = dbms.DoGetDataSQL<_KALA_QRE_0>("SELECT N_FANI,CODE FROM STUF_DEF WHERE N_FANI = '" + N_FANI.Text + "'").FirstOrDefault();
                 if (rst is not null)
