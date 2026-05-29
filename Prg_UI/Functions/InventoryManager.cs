@@ -351,7 +351,16 @@ namespace Functions
 
                                     if (MAND.HasValue)
                                     {
-                                        double remainingQty = MAND.Value - (MEGHk - MEGH_MAR);
+                                        double remainingQty = 0;
+                                        if (performQuery && !string.IsNullOrEmpty(query)) //حاوی کوئری برای برای تغییر مقدار کالا
+                                        {
+                                            //کوئری توی تراکنش ایزوله اجازه ثبت موقت رو داده تا ببینه موجودی چقدر تهش میمونه پس اینجا مانده یعنی مانده ای از کالا که کسر شده
+                                            remainingQty = MAND.Value;
+                                        }
+                                        else
+                                        {
+                                            remainingQty = MAND.Value - (MEGHk - MEGH_MAR);
+                                        }
                                         if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
                                         {
                                             errorMessages.Add(new MsgModel

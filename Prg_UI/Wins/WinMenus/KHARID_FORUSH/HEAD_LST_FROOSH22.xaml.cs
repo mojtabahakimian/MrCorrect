@@ -63,7 +63,7 @@ using Msgwin = Prg_UI.HelperWins.Msgwin;
 //3- SANAD مد محافظت شده تعریف نشده برای سند زدن
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_FROOSH22 : Window, ISearchableWindow
+    public partial class HEAD_LST_FROOSH22 : Window, ISearchableWindow, IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -1395,6 +1395,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
                 // Add other searchable properties
             };
+        }
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "نام مشتری", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
         }
         #endregion
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
