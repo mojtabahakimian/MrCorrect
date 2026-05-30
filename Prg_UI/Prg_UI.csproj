@@ -18,7 +18,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 
 		<!-- نسخه فایل اجرایی (در Properties فایل exe نمایش داده می‌شود) -->
-		<FileVersion>1.0.0.410</FileVersion>
+		<FileVersion>1.0.0.412</FileVersion>
 
 		<!-- عنوان برنامه که در برخی متادیتاهای ویندوز استفاده می‌شود -->
 		<Title>MrCorrect</Title>
