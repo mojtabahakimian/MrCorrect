@@ -3215,7 +3215,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     }
                 }
                 #endregion
-            }         
+            }
 
             //از حساب
             if (e.Column.SortMemberPath == "FHES")
@@ -5153,8 +5153,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                     KHAZANE_Row_Deleter(item);
 
                                                     // rst.update();
+                                                    CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
                                                 }
-                                                CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
                                                 //rst.Close();
                                                 break;
                                             } // پرداخت واگذاری چک
@@ -5193,11 +5193,12 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                                                     dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL2 = Null ,N_MOIN2 = Null , N_TAF2 = Null , HES2 = Null {_where} ");
                                                     KHAZANE_Row_Deleter(item);
-                                                }
-                                                if (!string.IsNullOrEmpty(item.N_SERI.ToStringNullSafe()) && !string.IsNullOrEmpty(item.BANK.ToStringNullSafe()) && !string.IsNullOrEmpty(rst.FirstOrDefault().DATE_S.ToStringNullSafe()))
-                                                {
-                                                    CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
 
+                                                    if (!string.IsNullOrEmpty(item.N_SERI.ToStringNullSafe()) && !string.IsNullOrEmpty(item.BANK.ToStringNullSafe()) && !string.IsNullOrEmpty(rst.FirstOrDefault().DATE_S.ToStringNullSafe()))
+                                                    {
+                                                        CL_HESABDARI.GETDLOG(1, item.N_SERI.ToString(), (int)item.BANK, rst.FirstOrDefault().DATE_S, (int)rst.FirstOrDefault().SANDUGH);
+
+                                                    }
                                                 }
                                                 //rst.Close();
                                                 break;

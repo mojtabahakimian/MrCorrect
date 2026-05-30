@@ -11041,34 +11041,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             report["NUMBER_PARAM"] = NUMBER1.Text;
             ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
-            #region GroupFooter3_Format
-            //SELECT TOP 1 TFSAZMAN FROM dbo.SAZMAN
-            if (Baseknow.TFSAZMAN != "2")
-            {
-                (report.GetComponentByName("MANDAH") as StiText).Enabled = true;
-                (report.GetComponentByName("MANDG") as StiText).Enabled = true;
-
-                //EXEC dbo.GETKOL => SELECT CUST_NO FROM HEAD_LST WHERE TAG = 13 AND NUMBER = 5338 --Current Invoice NUMBER
-                //var rst_0 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-
-                //if (rst_0 == null)
-                //{
-                //    (report.GetComponentByName("MANDAH") as StiText).Text = "0";
-                //}
-                //else
-                //{
-                //    var _mandah = Interaction.IIf(rst_0 > 0, Strings.Format(rst_0, "##,# ريال بدهكار"), Strings.Format(rst_0 * -1, "##,# ريال بستانكار"));
-                //    (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
-                //}
-
-                (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
-            }
-            else
-            {
-                (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
-                (report.GetComponentByName("MANDG") as StiText).Enabled = false;
-            }
-            #endregion
+        
 
             #region PageHeader_Format
             string FRF;
@@ -11251,11 +11224,27 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 (report.GetComponentByName("Label179") as StiText).Text = Baseknow.TFCODE_E;
             }
             (report.GetComponentByName("Label224") as StiText).Text = "%ماليات و عوارض:";
-            if (Baseknow.TFSAZMAN == "2")
+            #region GroupFooter3_Format
+            //SELECT TOP 1 TFSAZMAN FROM dbo.SAZMAN
+            if (Baseknow.TFSAZMAN != "2")
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = true;
+                (report.GetComponentByName("MANDG") as StiText).Enabled = true;
+
+                string ResultMand = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
+                (report.GetComponentByName("MANDAH") as StiText).Text = ResultMand;
+
+                if (ResultMand == "مسدود است")
+                {
+                    (report.GetComponentByName("MANDG") as StiText).Enabled = false;
+                }
+            }
+            else
             {
                 (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
                 (report.GetComponentByName("MANDG") as StiText).Enabled = false;
             }
+            #endregion
             if (Strings.Mid(Baseknow.OPTIONSS, 2, 1) == "5")
             {
                 (report.GetComponentByName("Label197") as StiText).Enabled = false;
