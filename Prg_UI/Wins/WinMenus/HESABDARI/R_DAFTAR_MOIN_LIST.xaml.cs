@@ -34,10 +34,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
     public partial class R_DAFTAR_MOIN_LIST : Window
     {
-        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null)
+        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null, string tempTableNameForCleanup = null)
         {
             OPEN_ARG = acFormDS;
             FULLHESAB_NAME = _fullhesabname;
+            TempTableNameForCleanup = tempTableNameForCleanup;
             InitializeComponent();
 
             this.DataContext = this;
@@ -108,8 +109,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         UniversControl universControl = new UniversControl();
         public object OPEN_ARG { get; set; }
         public string FULLHESAB_NAME { get; set; }
+        public string TempTableNameForCleanup { get; set; }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            if (!string.IsNullOrWhiteSpace(TempTableNameForCleanup))
+            {
+                try
+                {
+                    dbms.DoExecuteSQL($"IF OBJECT_ID(N'dbo.{TempTableNameForCleanup}', N'U') IS NOT NULL DROP TABLE dbo.[{TempTableNameForCleanup}]");
+                }
+                catch { }
+            }
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             #region SecuritCheck

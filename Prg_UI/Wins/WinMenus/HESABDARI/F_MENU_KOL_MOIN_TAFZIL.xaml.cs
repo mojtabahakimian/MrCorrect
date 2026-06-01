@@ -294,17 +294,17 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 case 1:
                     {
-                        SORTT = "ORDER BY N_S, BED DESC";
+                        SORTT = "ORDER BY N_S, BED DESC, id";
                         break;
                     }
                 case 2:
                     {
-                        SORTT = "ORDER BY base, BED DESC";
+                        SORTT = "ORDER BY base, BED DESC, id";
                         break;
                     }
                 case 3:
                     {
-                        SORTT = "ORDER BY DATE_S, BED DESC";
+                        SORTT = "ORDER BY DATE_S, BED DESC, id";
                         break;
                     }
             }
@@ -463,13 +463,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     if (true)
                     {
-                        dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
-                        //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM   " +
+                        string tempTableName = $"MOIN{Baseknow.USERCOD}_{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid():N}".Substring(0, 50);
+                        string tempTableSqlName = $"dbo.[{tempTableName}]";
+                        string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO " + tempTableSqlName + "  FROM   " +
                             "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
                         dbms.DoExecuteSQL(QRE);
                         MAN = 0d;
-                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM MOIN{Baseknow.USERCOD}").ToList();
+                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM {tempTableSqlName} {SORTT}").ToList();
                         for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
                         {
                             string tashkhis = "";
@@ -488,10 +488,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             }
 
                             rst[rst_EOF].MAND = MAN;
-                            dbms.DoExecuteSQL($"UPDATE MOIN{Baseknow.USERCOD} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
+                            dbms.DoExecuteSQL($"UPDATE {tempTableSqlName} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
                         }
 
-                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"MOIN{Baseknow.USERCOD} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
+                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"{tempTableSqlName} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ", tempTableName);
                         ProcLoader.Stop(Prc);
 
                         if (OPEN_ARG is not null)
