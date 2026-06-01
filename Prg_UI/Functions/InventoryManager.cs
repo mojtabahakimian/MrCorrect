@@ -328,7 +328,7 @@ namespace Functions
                                     {
                                         //بروز رسانی جدول برای موجودی موقت
                                         TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                            new { MOGODI = MAND.HasValue, CODE, ANBAR });
+                                            new { MOGODI = MAND.Value, CODE, ANBAR });
 
                                     }
                                 }

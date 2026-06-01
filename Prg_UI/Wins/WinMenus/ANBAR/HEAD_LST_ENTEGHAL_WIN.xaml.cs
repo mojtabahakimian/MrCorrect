@@ -1804,7 +1804,7 @@ namespace Wins.WinMenus.ANBAR
                             }
                             else
                             {
-                                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, "", null, false);
+                                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, "", null, true);
                                 if (errorMsgs.Count > 0)
                                 {
                                     Msgwin msgwin = new Msgwin(false, errorMsgs.FirstOrDefault()?.MessageText_U ?? "موجودی کافی نیست.");
@@ -1917,7 +1917,7 @@ namespace Wins.WinMenus.ANBAR
                     }
                     else
                     {
-                        var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, "", null, false);
+                        var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, "", null, true);
                         if (errorMsgs.Count > 0)
                         {
                             Msgwin msgwin = new Msgwin(false, errorMsgs.FirstOrDefault()?.MessageText_U ?? "موجودی کافی نیست.");
