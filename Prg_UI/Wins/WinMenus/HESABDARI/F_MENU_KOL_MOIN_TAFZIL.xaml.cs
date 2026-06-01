@@ -463,35 +463,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     if (true)
                     {
-                        dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
-                        //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM   " +
-                            "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        dbms.DoExecuteSQL(QRE);
-                        MAN = 0d;
-                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM MOIN{Baseknow.USERCOD}").ToList();
-                        for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
-                        {
-                            string tashkhis = "";
-                            MAN = (double)(MAN + rst[rst_EOF].MAND);
-                            if (MAN < 0)
-                            {
-                                tashkhis = "بس";
-                            }
-                            else if (MAN > 0)
-                            {
-                                tashkhis = "بد";
-                            }
-                            else
-                            {
-                                tashkhis = "--";
-                            }
+                        string SortPass = SORTT?.Replace("ORDER BY", null);
+                        if (string.IsNullOrWhiteSpace(SortPass)) SortPass = "DATE_S, BED DESC";
 
-                            rst[rst_EOF].MAND = MAN;
-                            dbms.DoExecuteSQL($"UPDATE MOIN{Baseknow.USERCOD} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
-                        }
+                        var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = AZ_DT_PARAM, ToDate = TA_DT_PARAM, TafzilCode = this.Combo34.SelectedValue.ToString(), SortExpr = SortPass }).ToList();
 
-                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"MOIN{Baseknow.USERCOD} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
+                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST(rst, Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
                         ProcLoader.Stop(Prc);
 
                         if (OPEN_ARG is not null)

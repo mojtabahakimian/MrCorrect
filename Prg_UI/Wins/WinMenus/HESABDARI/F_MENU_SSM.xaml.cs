@@ -522,21 +522,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 try
                 {
-                    string tableName = "MOIN" + Baseknow.USERCOD;
-                    dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}') DROP TABLE {tableName}");
+                    var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = 1, ToDate = 99999999, TafzilCode = item.CUST_NO, SortExpr = "DATE_S, BED DESC" }).ToList();
 
-                    // Assuming QDAFTARTAFZIL2_H is a TVF
-                    string sql = $@"SELECT N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, 
-                                    SUM(BED - BES) OVER (ORDER BY DATE_S, BED DESC ROWS UNBOUNDED PRECEDING) AS MAND, 
-                                    id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4, TAFZILN, HES 
-                                    INTO dbo.{tableName} 
-                                    FROM dbo.QDAFTARTAFZIL2_H(1, 99999999, '{item.CUST_NO}') QDAFTARTAFZIL2_H 
-                                    ORDER BY DATE_S, BED DESC";
-
-                    dbms.DoExecuteSQL(sql);
-
-                    // Open Report Window - using generic name as placeholder or known one
-                    new R_DAFTAR_MOIN_LIST().ShowDialog();
+                    new R_DAFTAR_MOIN_LIST(rst, item.CUST_NO).ShowDialog();
                 }
                 catch (Exception ex)
                 {
