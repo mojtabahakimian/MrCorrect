@@ -1804,7 +1804,7 @@ namespace Wins.WinMenus.ANBAR
                             }
                             else
                             {
-                                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, "", null, false);
+                                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, null);
                                 if (errorMsgs.Count > 0)
                                 {
                                     Msgwin msgwin = new Msgwin(false, errorMsgs.FirstOrDefault()?.MessageText_U ?? "موجودی کافی نیست.");
@@ -1917,7 +1917,7 @@ namespace Wins.WinMenus.ANBAR
                     }
                     else
                     {
-                        var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, "", null, false);
+                        var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { CURRENT_ITMES_ROW }, null);
                         if (errorMsgs.Count > 0)
                         {
                             Msgwin msgwin = new Msgwin(false, errorMsgs.FirstOrDefault()?.MessageText_U ?? "موجودی کافی نیست.");
@@ -1979,104 +1979,30 @@ namespace Wins.WinMenus.ANBAR
                     Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
                     msgwin.Show();
                 }
-                else if ((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG))
+                else 
                 {
-                    var rst3 = dbms.DoGetDataSQL<double?>("SELECT  ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0) AS mand  FROM dbo.AK_MOGO_AVL_KOL(99999999," + this.ANBAR.SelectedValue + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + this.ANBAR.SelectedValue + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + this.ANBAR.SelectedValue + ")").ToList();
-                    if (rst3.Count > 0)
+                    CURRENT_ITMES_ROW.ANBAR = Convert.ToInt32(ANBAR.SelectedValue);
+                    var items = new List<object> { CURRENT_ITMES_ROW };
+                    var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(items, null, null, autoManageTransaction: true, isBarGashti: false);
+
+                    if (errorMsgs.Any())
                     {
-                        MAND = Convert.ToDouble(rst3.FirstOrDefault());
-                        if (Math.Round((double)(MAND - (CURRENT_ITMES_ROW.MEGHk - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR)), Convert.ToInt32(Baseknow.DIG)) < Math.Round(min, Convert.ToInt32(Baseknow.DIG)) && Convert.ToInt32(this.ANBAR.SelectedValue) != 0)
-                        {
-                            new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min).ShowDialog();
-                            CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
-                            CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
-
-                            var rst4 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBAR.SelectedValue).ToList();
-                            if (rst4.Count > 0)
-                            {
-                                rst4.FirstOrDefault().MOGODI = MAND;
-                                rst4.FirstOrDefault().MOGODI_A = 0;
-
-                                dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {rst4.FirstOrDefault().MOGODI} , MOGODI_A = {rst4.FirstOrDefault().MOGODI_A} WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBAR.SelectedValue);
-
-
-                            }
-
-                            var rst5 = dbms.DoGetDataSQL<double?>("SELECT  ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + this.ANBARF.SelectedValue + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + this.ANBARF.SelectedValue + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + this.ANBARF.SelectedValue + ")").ToList();
-                            if (rst5.Count > 0)
-                            {
-                                MAND = Convert.ToDouble(rst5.FirstOrDefault());
-                            }
-
-                            var rst6 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBARF.SelectedValue).ToList();
-                            if (rst6.Count > 0)
-                            {
-
-                                rst6.FirstOrDefault().MOGODI = MAND;
-                                rst6.FirstOrDefault().MOGODI_A = 0;
-
-                                dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {rst6.FirstOrDefault().MOGODI} , MOGODI_A = {rst6.FirstOrDefault().MOGODI_A} WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBAR.SelectedValue);
-
-                            }
-                        }
-                        else
-                        {
-                            var rst7 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBAR.SelectedValue).ToList();
-                            if (rst7.Count > 0)
-                            {
-
-                                rst7.FirstOrDefault().MOGODI = Convert.ToDouble(MAND - (CURRENT_ITMES_ROW.MEGHk - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR));
-                                rst7.FirstOrDefault().MOGODI_A = 0;
-
-                                dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {rst7.FirstOrDefault().MOGODI} , MOGODI_A = {rst7.FirstOrDefault().MOGODI_A} WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBAR.SelectedValue);
-
-                            }
-
-                            var rst8 = dbms.DoGetDataSQL<double?>("SELECT  ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0) AS mand  FROM dbo.AK_MOGO_AVL_KOL(99999999," + this.ANBARF.SelectedValue + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + this.ANBARF.SelectedValue + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + this.ANBARF.SelectedValue + ")").ToList();
-                            if (rst8.Count > 0)
-                            {
-                                MAND = Convert.ToDouble(rst8.FirstOrDefault());
-                            }
-
-                            var rst9 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBARF.SelectedValue).ToList();
-                            if (rst9.Count > 0)
-                            {
-
-                                rst9.FirstOrDefault().MOGODI = Convert.ToDouble(MAND + CURRENT_ITMES_ROW.MEGHk);
-                                rst9.FirstOrDefault().MOGODI_A = 0;
-
-
-                                dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {rst9.FirstOrDefault().MOGODI} , MOGODI_A = {rst9.FirstOrDefault().MOGODI_A} WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + this.ANBARF.SelectedValue);
-                            }
-                        }
-                    }
-                }
-                else if (CURRENT_ITMES_ROW.CODE == WAS_ROW_ITEM.CODE)
-                {
-                    if (rst2.FirstOrDefault().MOGODI + rst2.FirstOrDefault().MOGODI_A - CURRENT_ITMES_ROW.MEGHk - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR < min && Baseknow.MOJU)
-                    {
-                        new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min).ShowDialog();
+                        IVM.ShowErrorMessages(errorMsgs);
                         CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
                         CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
                     }
-                }
-                else if (rst2.FirstOrDefault().MOGODI + rst2.FirstOrDefault().MOGODI_A - CURRENT_ITMES_ROW.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR < min && Baseknow.MOJU)
-                {
-                    new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min).ShowDialog();
-                    CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
-                    CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
-                }
-                var rst10 = dbms.DoGetDataSQL<HLE_QT5>("SELECT Sum(DTL_MANF.MABLK) AS SumOfMABLK, HEAD_MANF.IMBIBE_MANF, HEAD_MANF.IMBIBE_SAR FROM HEAD_MANF INNER JOIN DTL_MANF ON (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) WHERE (((HEAD_MANF.CODE) = '" + CURRENT_ITMES_ROW.CODE + "')) GROUP BY HEAD_MANF.IMBIBE_MANF, HEAD_MANF.IMBIBE_SAR").ToList();
-                if (rst10.Count > 0)
-                {
-                    CURRENT_ITMES_ROW.MABL = rst10.FirstOrDefault().SumOfMABLK + rst10.FirstOrDefault().IMBIBE_MANF + rst10.FirstOrDefault().IMBIBE_SAR;
+                    var rst10 = dbms.DoGetDataSQL<HLE_QT5>("SELECT Sum(DTL_MANF.MABLK) AS SumOfMABLK, HEAD_MANF.IMBIBE_MANF, HEAD_MANF.IMBIBE_SAR FROM HEAD_MANF INNER JOIN DTL_MANF ON (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) WHERE (((HEAD_MANF.CODE) = '" + CURRENT_ITMES_ROW.CODE + "')) GROUP BY HEAD_MANF.IMBIBE_MANF, HEAD_MANF.IMBIBE_SAR").ToList();
+                    if (rst10.Count > 0)
+                    {
+                        CURRENT_ITMES_ROW.MABL = rst10.FirstOrDefault().SumOfMABLK + rst10.FirstOrDefault().IMBIBE_MANF + rst10.FirstOrDefault().IMBIBE_SAR;
+                        CURRENT_ITMES_ROW.MABL_K = CURRENT_ITMES_ROW.MABL * CURRENT_ITMES_ROW.MEGHk;
+                        CURRENT_ITMES_ROW.AVRAGE = CURRENT_ITMES_ROW.MABL;
+                    }
+                    //ميانگين
+                    CURRENT_ITMES_ROW.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ITMES_ROW.CODE, Convert.ToInt64(this.ANBAR.SelectedValue), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
+                    CURRENT_ITMES_ROW.MABL = CURRENT_ITMES_ROW.AVRAGE;
                     CURRENT_ITMES_ROW.MABL_K = CURRENT_ITMES_ROW.MABL * CURRENT_ITMES_ROW.MEGHk;
-                    CURRENT_ITMES_ROW.AVRAGE = CURRENT_ITMES_ROW.MABL;
                 }
-                //ميانگين
-                CURRENT_ITMES_ROW.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ITMES_ROW.CODE, Convert.ToInt64(this.ANBAR.SelectedValue), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                CURRENT_ITMES_ROW.MABL = CURRENT_ITMES_ROW.AVRAGE;
-                CURRENT_ITMES_ROW.MABL_K = CURRENT_ITMES_ROW.MABL * CURRENT_ITMES_ROW.MEGHk;
             }
             INVO_LST_ENTEGHAL_SUB_PreviewMouseDown(null, null);
             #endregion

@@ -3390,14 +3390,14 @@ VALUES
         public static int GetGrade(string HES)
         {
             int tempGetGrade = 0;
-            var rst = dbms.DoGetDataSQL<int>("SELECT GRADEID FROM AZAE WHERE HES = '" + HES + "'").FirstOrDefault();
-            if (ReferenceEquals(rst, null) || rst == 0)
+            var rst = dbms.DoGetDataSQL<int?>("SELECT GRADEID FROM AZAE WHERE HES = @HES", new { HES }).FirstOrDefault();
+            if (!rst.HasValue || rst.Value == 0)
             {
                 tempGetGrade = -1;
             }
             else
             {
-                tempGetGrade = rst;
+                tempGetGrade = rst.Value;
             }
             return tempGetGrade;
         }
