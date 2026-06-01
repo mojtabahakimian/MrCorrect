@@ -294,17 +294,17 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 case 1:
                     {
-                        SORTT = "ORDER BY N_S, BED DESC";
+                        SORTT = "ORDER BY N_S, BED DESC, DATE_S, id";
                         break;
                     }
                 case 2:
                     {
-                        SORTT = "ORDER BY base, BED DESC";
+                        SORTT = "ORDER BY base, BED DESC, DATE_S, N_S, id";
                         break;
                     }
                 case 3:
                     {
-                        SORTT = "ORDER BY DATE_S, BED DESC";
+                        SORTT = "ORDER BY DATE_S, BED DESC, N_S, id";
                         break;
                     }
             }
@@ -463,35 +463,45 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     if (true)
                     {
-                        dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
-                        //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM   " +
-                            "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        dbms.DoExecuteSQL(QRE);
-                        MAN = 0d;
-                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM MOIN{Baseknow.USERCOD}").ToList();
-                        for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
+                        string ledgerTableName = $"MOIN{Baseknow.USERCOD}_{Guid.NewGuid():N}";
+                        string orderColumns = SORTT?.Replace("ORDER BY", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();
+                        if (string.IsNullOrWhiteSpace(orderColumns))
                         {
-                            string tashkhis = "";
-                            MAN = (double)(MAN + rst[rst_EOF].MAND);
-                            if (MAN < 0)
-                            {
-                                tashkhis = "بس";
-                            }
-                            else if (MAN > 0)
-                            {
-                                tashkhis = "بد";
-                            }
-                            else
-                            {
-                                tashkhis = "--";
-                            }
-
-                            rst[rst_EOF].MAND = MAN;
-                            dbms.DoExecuteSQL($"UPDATE MOIN{Baseknow.USERCOD} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
+                            orderColumns = "DATE_S, BED DESC, N_S, id";
+                            SORTT = $"ORDER BY {orderColumns}";
                         }
 
-                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"MOIN{Baseknow.USERCOD} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
+                        string selectedHes = this.Combo34.SelectedValue.ToStringNullSafe().Replace("'", "''");
+
+                        //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
+                        string QRE = $@"SELECT TOP(2000000000000)
+                                   IDENTITY(bigint, 1, 1) AS MR_ROWID,
+                                   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH
+                            INTO dbo.{ledgerTableName}
+                            FROM dbo.QDAFTARTAFZIL2_H({AZ_DT_PARAM} , {TA_DT_PARAM} , '{selectedHes}') QDAFTARTAFZIL2_H
+                            {SORTT}";
+                        dbms.DoExecuteSQL(QRE);
+
+                        string updateRunningBalanceSql = $@";WITH OrderedLedger AS
+                            (
+                                SELECT
+                                    MR_ROWID,
+                                    SUM(ISNULL(MAND, 0)) OVER (ORDER BY {orderColumns}, MR_ROWID ROWS UNBOUNDED PRECEDING) AS RunningBalance
+                                FROM dbo.{ledgerTableName}
+                            )
+                            UPDATE Ledger
+                            SET
+                                MAND = OrderedLedger.RunningBalance,
+                                TSH = CASE
+                                    WHEN OrderedLedger.RunningBalance < 0 THEN N'بس'
+                                    WHEN OrderedLedger.RunningBalance > 0 THEN N'بد'
+                                    ELSE N'--'
+                                END
+                            FROM dbo.{ledgerTableName} AS Ledger
+                            INNER JOIN OrderedLedger ON OrderedLedger.MR_ROWID = Ledger.MR_ROWID";
+                        dbms.DoExecuteSQL(updateRunningBalanceSql);
+
+                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"dbo.{ledgerTableName} {SORTT}, MR_ROWID", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ", ledgerTableName);
                         ProcLoader.Stop(Prc);
 
                         if (OPEN_ARG is not null)

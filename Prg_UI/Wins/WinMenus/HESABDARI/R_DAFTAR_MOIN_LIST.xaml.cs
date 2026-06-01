@@ -34,10 +34,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
     public partial class R_DAFTAR_MOIN_LIST : Window
     {
-        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null)
+        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null, string cleanupTableName = null)
         {
             OPEN_ARG = acFormDS;
             FULLHESAB_NAME = _fullhesabname;
+            CleanupTableName = cleanupTableName;
             InitializeComponent();
 
             this.DataContext = this;
@@ -108,6 +109,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         UniversControl universControl = new UniversControl();
         public object OPEN_ARG { get; set; }
         public string FULLHESAB_NAME { get; set; }
+        public string CleanupTableName { get; set; }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -179,6 +181,22 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             CL_LMethods.FocusLastSfDataGridRow(SYNCFUSION_DG);
 
             ProcLoader.Stop(Prc);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            if (string.IsNullOrWhiteSpace(CleanupTableName))
+            {
+                return;
+            }
+
+            try
+            {
+                dbms.DoExecuteSQL($"IF OBJECT_ID(N'dbo.{CleanupTableName}', N'U') IS NOT NULL DROP TABLE dbo.{CleanupTableName}");
+            }
+            catch { }
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
