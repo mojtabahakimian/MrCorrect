@@ -63,9 +63,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         //Header Window End;
         #endregion
         public string AZ_DT_PARAM { get; set; } = "0";
-        public string TA_DT_PARAM { get; set; } = "9999999999";
+        public string TA_DT_PARAM { get; set; } = "99999999";
         public Window? THEOWENER { get; set; }
-        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999", Window? _ownerwin_ = null)
+        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "99999999", Window? _ownerwin_ = null)
         {
             InitializeComponent();
 
@@ -466,7 +466,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         string SortPass = SORTT?.Replace("ORDER BY", null);
                         if (string.IsNullOrWhiteSpace(SortPass)) SortPass = "DATE_S, BED DESC";
 
-                        var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = AZ_DT_PARAM, ToDate = TA_DT_PARAM, TafzilCode = this.Combo34.SelectedValue.ToString(), SortExpr = SortPass }).ToList();
+                        var fromDate = ParseLedgerDateParam(AZ_DT_PARAM, 0);
+                        var toDate = ParseLedgerDateParam(TA_DT_PARAM, 99999999);
+
+                        var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = fromDate, ToDate = toDate, TafzilCode = this.Combo34.SelectedValue.ToString(), SortExpr = SortPass }).ToList();
 
                         R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST(rst, Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
                         ProcLoader.Stop(Prc);
@@ -732,6 +735,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //    }
             //}
         }
+        private static int ParseLedgerDateParam(string value, int fallbackValue)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedValue)
+                ? parsedValue
+                : fallbackValue;
+        }
+
         private void Command6_Click(object sender, RoutedEventArgs e)
         {
             Close();
