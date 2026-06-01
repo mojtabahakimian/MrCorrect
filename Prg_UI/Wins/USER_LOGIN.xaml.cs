@@ -373,7 +373,7 @@ namespace Prg_UI.Wins
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
 
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);

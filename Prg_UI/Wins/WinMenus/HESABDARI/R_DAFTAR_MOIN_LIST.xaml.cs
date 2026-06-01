@@ -131,10 +131,23 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             Label_hesab.Content = $"نتیجه لیست دفتر تفضیلی {FULLHESAB_NAME}";
 
             DAFTAR_DATA?.Clear();
-            var MasterHead = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM {OPEN_ARG}").ToList();
-            foreach (var item in MasterHead)
+
+            IEnumerable<MOIN_CUSTOM> masterHead = null;
+            if (OPEN_ARG is IEnumerable<MOIN_CUSTOM> listArg)
             {
-                DAFTAR_DATA.Add(item);
+                masterHead = listArg;
+            }
+            else if (OPEN_ARG is string tableName && !string.IsNullOrWhiteSpace(tableName))
+            {
+                masterHead = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM {tableName}");
+            }
+
+            if (masterHead != null)
+            {
+                foreach (var item in masterHead)
+                {
+                    DAFTAR_DATA.Add(item);
+                }
             }
 
             #region BEFORE
@@ -162,13 +175,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     UserId = Baseknow.USERCOD,
                     UserName = CL_HESABDARI.TruncateString(Baseknow.UUSER, 49),
-                    AmalId = CL_HESABDARI.TruncateString(OPEN_ARG.ToStringNullSafe(), 49)
+                    AmalId = CL_HESABDARI.TruncateString(OPEN_ARG is string s ? s : FULLHESAB_NAME, 49)
                 });
                 dbms.DoExecuteSQL(insertAmaliatSql, new
                 {
                     UserId = Baseknow.USERCOD,
                     UserName = CL_HESABDARI.TruncateString(FULLHESAB_NAME, 49),
-                    AmalId = CL_HESABDARI.TruncateString(OPEN_ARG.ToStringNullSafe(), 49)
+                    AmalId = CL_HESABDARI.TruncateString(OPEN_ARG is string s2 ? s2 : FULLHESAB_NAME, 49)
                 });
             }
             catch { }
