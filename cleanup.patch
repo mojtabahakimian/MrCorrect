@@ -1,0 +1,28 @@
+--- Prg_UI/Wins/WinMenus/HESABDARI/F_MENU_KOL_MOIN_TAFZIL.xaml.cs
++++ Prg_UI/Wins/WinMenus/HESABDARI/F_MENU_KOL_MOIN_TAFZIL.xaml.cs
+@@ -462,17 +462,19 @@
+
+                     if (true)
+                     {
+-                        // Cleanup old orphaned tables for this user
++                        // Cleanup old orphaned tables for this user safely (older than 1 day)
+                         try
+                         {
+-                            var oldTables = dbms.DoGetDataSQL<string>($"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE 'MOIN{Baseknow.USERCOD}\\_%' ESCAPE '\\'").ToList();
+-                            foreach (var oldTable in oldTables)
+-                            {
+-                                dbms.DoExecuteSQL($"DROP TABLE dbo.{oldTable}");
+-                            }
++                            string cleanupQuery = $@"
++                                DECLARE @Sql NVARCHAR(MAX) = '';
++                                SELECT @Sql += 'DROP TABLE dbo.' + QUOTENAME(name) + ';'
++                                FROM sys.tables
++                                WHERE name LIKE 'MOIN{Baseknow.USERCOD}\_%' ESCAPE '\'
++                                  AND create_date < DATEADD(day, -1, GETDATE());
++                                IF @Sql <> '' EXEC sp_executesql @Sql;";
++                            dbms.DoExecuteSQL(cleanupQuery);
+                         }
+                         catch { }
+
+                         // Generate unique table name
+                         string uniqueTableName = $"MOIN{Baseknow.USERCOD}_{Guid.NewGuid().ToString("N").Substring(0, 8)}";

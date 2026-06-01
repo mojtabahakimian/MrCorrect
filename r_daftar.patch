@@ -1,0 +1,10 @@
+--- Prg_UI/Wins/WinMenus/HESABDARI/R_DAFTAR_MOIN_LIST.xaml.cs
++++ Prg_UI/Wins/WinMenus/HESABDARI/R_DAFTAR_MOIN_LIST.xaml.cs
+@@ -45,6 +45,7 @@
+
+             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
++            this.Closed += R_DAFTAR_MOIN_LIST_Closed;
+         }
+         #region Header Window Begin
+         //Header Window Begin

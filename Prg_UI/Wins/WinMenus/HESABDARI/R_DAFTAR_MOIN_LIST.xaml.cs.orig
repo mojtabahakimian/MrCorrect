@@ -44,7 +44,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
-            this.Closed += R_DAFTAR_MOIN_LIST_Closed;
         }
         #region Header Window Begin
         //Header Window Begin
