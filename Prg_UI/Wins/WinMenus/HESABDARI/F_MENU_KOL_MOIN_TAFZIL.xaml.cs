@@ -455,7 +455,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     var F_AZ = DT1.Text.ToRawTarikh();
                     var F_TA = DT2.Text.ToRawTarikh();
-                    if (this.IsVisible && !string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA))
+                    if (!string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA))
                     {
                         AZ_DT_PARAM = F_AZ;
                         TA_DT_PARAM = F_TA;
