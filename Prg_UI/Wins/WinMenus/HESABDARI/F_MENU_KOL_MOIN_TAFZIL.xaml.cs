@@ -463,13 +463,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     if (true)
                     {
-                        string tempTableName = $"MOIN{Baseknow.USERCOD}_{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid():N}".Substring(0, 50);
-                        string tempTableSqlName = $"dbo.[{tempTableName}]";
-                        string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO " + tempTableSqlName + "  FROM   " +
+                        string QRE = "SELECT TOP(2000000000000) N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH FROM   " +
                             "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        dbms.DoExecuteSQL(QRE);
                         MAN = 0d;
-                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM {tempTableSqlName} {SORTT}").ToList();
+                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>(QRE).ToList();
                         for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
                         {
                             string tashkhis = "";
@@ -488,10 +485,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             }
 
                             rst[rst_EOF].MAND = MAN;
-                            dbms.DoExecuteSQL($"UPDATE {tempTableSqlName} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
+                            rst[rst_EOF].TSH = tashkhis;
                         }
 
-                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"{tempTableSqlName} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ", tempTableName);
+                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST(null, Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ", preparedData: rst);
                         ProcLoader.Stop(Prc);
 
                         if (OPEN_ARG is not null)

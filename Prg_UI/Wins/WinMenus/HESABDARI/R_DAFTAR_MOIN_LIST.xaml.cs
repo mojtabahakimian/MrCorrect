@@ -34,11 +34,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
     public partial class R_DAFTAR_MOIN_LIST : Window
     {
-        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null, string tempTableNameForCleanup = null)
+        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null, string tempTableNameForCleanup = null, IEnumerable<MOIN_CUSTOM> preparedData = null)
         {
             OPEN_ARG = acFormDS;
             FULLHESAB_NAME = _fullhesabname;
             TempTableNameForCleanup = tempTableNameForCleanup;
+            PreparedData = preparedData?.ToList();
             InitializeComponent();
 
             this.DataContext = this;
@@ -110,6 +111,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public object OPEN_ARG { get; set; }
         public string FULLHESAB_NAME { get; set; }
         public string TempTableNameForCleanup { get; set; }
+        private List<MOIN_CUSTOM> PreparedData { get; set; }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
@@ -148,7 +150,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             Label_hesab.Content = $"نتیجه لیست دفتر تفضیلی {FULLHESAB_NAME}";
 
             DAFTAR_DATA?.Clear();
-            var MasterHead = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM {OPEN_ARG}").ToList();
+            var MasterHead = PreparedData ?? dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM {OPEN_ARG}").ToList();
             foreach (var item in MasterHead)
             {
                 DAFTAR_DATA.Add(item);
