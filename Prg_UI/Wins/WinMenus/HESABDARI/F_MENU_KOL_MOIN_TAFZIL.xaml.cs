@@ -33,6 +33,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
     public partial class F_MENU_KOL_MOIN_TAFZIL : Window
     {
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+        private class TafzilLedgerRow : MOIN_CUSTOM
+        {
+            public string TASH
+            {
+                get => TSH;
+                set => TSH = value;
+            }
+        }
+
         public object OPEN_ARG { get; set; }
         public object HKOL { get; private set; }
         public object HMOIN { get; private set; }
@@ -259,7 +269,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             string PATH;
             var SORTT = default(string);
             int i;
-            double MAN;
             if (IsNull(this.HTAF2))
             {
                 this.HTTAF = this.HKOL + "-" + this.HMOIN + "-" + this.HTAF;
@@ -470,30 +479,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     if (true)
                     {
-                        string QRE = "SELECT TOP(2000000000000) N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH FROM   " +
-                            "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                        MAN = 0d;
-                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>(QRE).ToList();
-                        for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
+                        var sortExpr = SORTT?.Replace("ORDER BY", string.Empty).Trim();
+                        var rst = dbms.DoGetStoreProcedureSQL<TafzilLedgerRow>("usp_TafzilLedger", new
                         {
-                            string tashkhis = "";
-                            MAN = (double)(MAN + rst[rst_EOF].MAND);
-                            if (MAN < 0)
-                            {
-                                tashkhis = "بس";
-                            }
-                            else if (MAN > 0)
-                            {
-                                tashkhis = "بد";
-                            }
-                            else
-                            {
-                                tashkhis = "--";
-                            }
-
-                            rst[rst_EOF].MAND = MAN;
-                            rst[rst_EOF].TSH = tashkhis;
-                        }
+                            FromDate = Convert.ToInt32(AZ_DT_PARAM),
+                            ToDate = Convert.ToInt32(TA_DT_PARAM),
+                            TafzilCode = Combo34.SelectedValue.ToString(),
+                            SortExpr = sortExpr
+                        }).Cast<MOIN_CUSTOM>().ToList();
 
                         R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST(null, Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ", preparedData: rst);
                         ProcLoader.Stop(Prc);
