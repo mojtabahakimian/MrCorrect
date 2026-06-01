@@ -64,6 +64,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         #endregion
         public string AZ_DT_PARAM { get; set; } = "0";
         public string TA_DT_PARAM { get; set; } = "9999999999";
+        private bool HasExplicitDateParameters { get; set; }
         public Window? THEOWENER { get; set; }
         public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999", Window? _ownerwin_ = null)
         {
@@ -82,6 +83,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     AZ_DT_PARAM = _AZ_TARIKH_;
                     TA_DT_PARAM = _TA_TARIKH_;
+                    HasExplicitDateParameters = !IsDefaultDateRange(_AZ_TARIKH_, _TA_TARIKH_);
                 }
 
                 if (open_arg == "TAF")
@@ -121,6 +123,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
 
 
+
+        private bool IsDefaultDateRange(string azTarikh, string taTarikh)
+        {
+            return azTarikh == "0" && !string.IsNullOrWhiteSpace(taTarikh) && taTarikh.All(ch => ch == '9');
+        }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -455,7 +462,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     var F_AZ = DT1.Text.ToRawTarikh();
                     var F_TA = DT2.Text.ToRawTarikh();
-                    if (this.IsVisible && !string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA))
+                    if (!string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA) && (this.IsVisible || !HasExplicitDateParameters))
                     {
                         AZ_DT_PARAM = F_AZ;
                         TA_DT_PARAM = F_TA;
