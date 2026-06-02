@@ -2145,9 +2145,9 @@ RETURN (
 "); } catch { }
 
                     //Ctrl + F8
-                    try { db.Execute("DROP PROC usp_TafzilLedger"); } catch { }
+                    //Ctrl + F8 - دفتر تفضیلی - همیشه اجرا می‌شود تا امضای صحیح روی DB باشد
                     try { db.Execute($@"
-CREATE PROC [dbo].[usp_TafzilLedger]
+CREATE OR ALTER PROC [dbo].[usp_TafzilLedger]
     @FromDate     INT,
     @ToDate       INT,
     @TafzilCode   nvarchar(50),
@@ -2190,17 +2190,17 @@ BEGIN
         RunningSum  float DEFAULT 0,
         TASH        nvarchar(10),
         NO_S        int,
-        N_SERI      nvarchar(50),
+        N_SERI      float NULL,
         HES         nvarchar(50),
-        HES_K       nvarchar(50),
-        HES_M       nvarchar(50),
-        HES_T       nvarchar(50),
-        HES_T2      nvarchar(50),
+        HES_K       int NULL,
+        HES_M       int NULL,
+        HES_T       int NULL,
+        HES_T2      int NULL,
         TAFZILN     nvarchar(200),
-        BANK        nvarchar(100),
-        [NUMBER]    nvarchar(50),
-        TAG         nvarchar(MAX),
-        ARZD        nvarchar(50),
+        BANK        int NULL,
+        [NUMBER]    float NULL,
+        TAG         float NULL,
+        ARZD        float NULL,
         base        int,
         SourceID    bigint
     );
@@ -2208,7 +2208,6 @@ BEGIN
     ----------------------------------------------------------
     -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
     ----------------------------------------------------------
-    -- فقط بازه انتخابی را می‌آوریم
     INSERT INTO #TempLedger (
         N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
         HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
@@ -2223,7 +2222,6 @@ BEGIN
     ----------------------------------------------------------
     DECLARE @SQL nvarchar(MAX);
 
-    -- همه رکوردها را شماره‌گذاری کن
     SET @SQL = N'
         UPDATE T
         SET RowNum = SortedData.NewRowID
@@ -2243,7 +2241,6 @@ BEGIN
 
     DECLARE @RunningTotal float = 0;
 
-    -- آپدیت دقیق و سریع
     UPDATE #TempLedger
     SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
     FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
@@ -2264,7 +2261,7 @@ BEGIN
         HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
     FROM #TempLedger
     ORDER BY RowNum;
-	DROP TABLE #TempLedger;
+    DROP TABLE #TempLedger;
 END
 "); } catch { }
 
