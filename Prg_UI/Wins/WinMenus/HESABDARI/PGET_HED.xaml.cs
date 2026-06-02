@@ -1044,6 +1044,21 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             }
         }
+        public void RefreshAfterUpdate()
+        {
+            var freshData = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>($"SELECT TOP 1 ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED WHERE ID = {ID.Text}").FirstOrDefault();
+            var underlyingCollection = RecordsData.Source as List<Prg_Proccessy.SQLMODELS.PGET_HED>;
+            if (freshData != null && underlyingCollection != null)
+            {
+                var existing = underlyingCollection.FirstOrDefault(x => x.ID == freshData.ID);
+                if (existing != null)
+                {
+                    foreach (var prop in typeof(Prg_Proccessy.SQLMODELS.PGET_HED).GetProperties().Where(p => p.CanWrite))
+                        prop.SetValue(existing, prop.GetValue(freshData));
+                    RecordsData.View.Refresh();
+                }
+            }
+        }
         public void RefreshAfterDelete()
         {
             var LastCurrentPosition = RecordsData.View.CurrentPosition;
@@ -1730,6 +1745,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     dbms.DoExecuteSQL(updateSql, updateParameters);
 
                     SuccessSave = true;
+                    RefreshAfterUpdate();
                 }
                 catch (SqlException ex)
                 {
