@@ -971,8 +971,26 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         new { ID = HEADER.ID })).FirstOrDefault();
                     if (HEADER != null && DBData != null)
                     {
-                        foreach (var prop in typeof(Prg_Proccessy.SQLMODELS.PGET_HED).GetProperties().Where(p => p.CanWrite))
-                            prop.SetValue(HEADER, prop.GetValue(DBData));
+                        HEADER.ID        = DBData.ID;
+                        HEADER.DATE      = DBData.DATE;
+                        HEADER.MOLAH     = DBData.MOLAH;
+                        HEADER.N_S       = DBData.N_S;
+                        HEADER.DEPATMAN  = DBData.DEPATMAN;
+                        HEADER.SHIFT     = DBData.SHIFT;
+                        HEADER.CUST_KIND = DBData.CUST_KIND;
+                        HEADER.USER_NAME = DBData.USER_NAME;
+                        HEADER.KIND      = DBData.KIND;
+                        HEADER.IDK       = DBData.IDK;
+                        HEADER.OKF       = DBData.OKF;
+                        HEADER.RPLICA    = DBData.RPLICA;
+                        HEADER.SGN1      = DBData.SGN1;
+                        HEADER.SGN2      = DBData.SGN2;
+                        HEADER.SGN3      = DBData.SGN3;
+                        HEADER.sgn1usid  = DBData.sgn1usid;
+                        HEADER.sgn2usid  = DBData.sgn2usid;
+                        HEADER.sgn3usid  = DBData.sgn3usid;
+                        HEADER.CRT       = DBData.CRT;
+                        HEADER.UID       = DBData.UID;
                         RecordsData.View.Refresh();
                     }
                 }
@@ -1077,8 +1095,26 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 var existing = underlyingCollection.FirstOrDefault(x => x.ID == freshData.ID);
                 if (existing != null)
                 {
-                    foreach (var prop in typeof(Prg_Proccessy.SQLMODELS.PGET_HED).GetProperties().Where(p => p.CanWrite))
-                        prop.SetValue(existing, prop.GetValue(freshData));
+                    existing.ID        = freshData.ID;
+                    existing.DATE      = freshData.DATE;
+                    existing.MOLAH     = freshData.MOLAH;
+                    existing.N_S       = freshData.N_S;
+                    existing.DEPATMAN  = freshData.DEPATMAN;
+                    existing.SHIFT     = freshData.SHIFT;
+                    existing.CUST_KIND = freshData.CUST_KIND;
+                    existing.USER_NAME = freshData.USER_NAME;
+                    existing.KIND      = freshData.KIND;
+                    existing.IDK       = freshData.IDK;
+                    existing.OKF       = freshData.OKF;
+                    existing.RPLICA    = freshData.RPLICA;
+                    existing.SGN1      = freshData.SGN1;
+                    existing.SGN2      = freshData.SGN2;
+                    existing.SGN3      = freshData.SGN3;
+                    existing.sgn1usid  = freshData.sgn1usid;
+                    existing.sgn2usid  = freshData.sgn2usid;
+                    existing.sgn3usid  = freshData.sgn3usid;
+                    existing.CRT       = freshData.CRT;
+                    existing.UID       = freshData.UID;
                     RecordsData.View.Refresh();
                 }
             }
