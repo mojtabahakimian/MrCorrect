@@ -879,99 +879,123 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             this.MABL.Text = SUM_OF_MABL.ToString();
         }
 
-        private void MoveReGetData(Jahat jahat, int? custom_postiion = null)
+        private bool _navigationBusy = false;
+        private async void MoveReGetData(Jahat jahat, int? custom_postiion = null)
         {
-            int RecordCount() { return ((System.Windows.Data.ListCollectionView)RecordsData.View)?.Count ?? 0; }
+            if (_navigationBusy) return;
+            _navigationBusy = true;
 
-            void DisplayCounts()
+            try
             {
-                var RVC = RecordsData.View?.CurrentPosition;
-                if (RVC is not null && RecordsData.View?.CurrentItem is not null)
+                int RecordCount() { return ((System.Windows.Data.ListCollectionView)RecordsData.View)?.Count ?? 0; }
+
+                void DisplayCounts()
                 {
-                    //Current Record
-                    if (RecordsData.View.CurrentPosition + 1 <= RecordCount())
+                    var RVC = RecordsData.View?.CurrentPosition;
+                    if (RVC is not null && RecordsData.View?.CurrentItem is not null)
                     {
-                        Current_Rec.Text = Convert.ToString(RVC + 1); // to display number of record in normal way to user, not displaying zero (1)
-                    }
-                    else
-                    {
-                        Current_Rec.Text = RVC.ToString();
-                    }
-                }
-
-                RecCount.Text = (RecordCount()).ToString(); //Record Count
-            }
-
-            if ((ChangeIsHappend) && !ConfirmExitWithoutSaving())
-            {
-                return;
-            }
-
-            switch (jahat)
-            {
-                case Jahat.FirstItem: //اولین
-                    NewRecord = false;
-                    RecordsData.View.MoveCurrentToFirst();
-                    break;
-                case Jahat.BackItem: //قبلی
-                    if (RecordsData.View.CurrentPosition > 0) //Possible To Back
-                    {
-                        if (NewRecord)
+                        //Current Record
+                        if (RecordsData.View.CurrentPosition + 1 <= RecordCount())
                         {
-                            jahat = Jahat.LastItem;
-                            RecordsData.View.MoveCurrentToLast();
+                            Current_Rec.Text = Convert.ToString(RVC + 1); // to display number of record in normal way to user, not displaying zero (1)
                         }
                         else
                         {
-                            RecordsData.View.MoveCurrentToPrevious();
+                            Current_Rec.Text = RVC.ToString();
                         }
-                        NewRecord = false;
                     }
-                    break;
 
-                case Jahat.NextItem: //بعدی
-                    if (RecordsData.View.CurrentPosition < RecordCount() - 1)
+                    RecCount.Text = (RecordCount()).ToString(); //Record Count
+                }
+
+                if ((ChangeIsHappend) && !ConfirmExitWithoutSaving())
+                {
+                    return;
+                }
+
+                switch (jahat)
+                {
+                    case Jahat.FirstItem: //اولین
+                        NewRecord = false;
+                        RecordsData.View.MoveCurrentToFirst();
+                        break;
+                    case Jahat.BackItem: //قبلی
+                        if (RecordsData.View.CurrentPosition > 0) //Possible To Back
+                        {
+                            if (NewRecord)
+                            {
+                                jahat = Jahat.LastItem;
+                                RecordsData.View.MoveCurrentToLast();
+                            }
+                            else
+                            {
+                                RecordsData.View.MoveCurrentToPrevious();
+                            }
+                            NewRecord = false;
+                        }
+                        break;
+
+                    case Jahat.NextItem: //بعدی
+                        if (RecordsData.View.CurrentPosition < RecordCount() - 1)
+                        {
+                            NewRecord = false;
+                            RecordsData.View.MoveCurrentToNext();
+                        }
+                        break;
+
+                    case Jahat.LastItem: //آخرین
+                        RecordsData.View.MoveCurrentToLast();
+                        break;
+
+                    case Jahat.CustomPosition:
+                        if (custom_postiion > -1)
+                        {
+                            NewRecord = false;
+                            RecordsData.View.MoveCurrentToPosition((int)custom_postiion);
+                        }
+                        break;
+
+                    case Jahat.NewItem: //جدید خالی
+                        NewRecord = true;
+                        RecordsData.View.MoveCurrentToLast();
+                        Clear_PGET_HED();
+                        break;
+                }
+
+                // Sync current in-memory item with fresh DB data (async — UI stays responsive)
+                if (jahat != Jahat.NewItem && RecordsData.View.CurrentItem != null)
+                {
+                    var HEADER = RecordsData.View.CurrentItem as Prg_Proccessy.SQLMODELS.PGET_HED;
+                    var DBData = (await dbms.DoGetDataSQLAsync<Prg_Proccessy.SQLMODELS.PGET_HED>(
+                        "SELECT TOP 1 ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED WHERE ID = @ID",
+                        new { ID = HEADER.ID })).FirstOrDefault();
+                    if (HEADER != null && DBData != null)
                     {
-                        NewRecord = false;
-                        RecordsData.View.MoveCurrentToNext();
+                        foreach (var prop in typeof(Prg_Proccessy.SQLMODELS.PGET_HED).GetProperties().Where(p => p.CanWrite))
+                            prop.SetValue(HEADER, prop.GetValue(DBData));
+                        RecordsData.View.Refresh();
                     }
-                    break;
+                }
 
-                case Jahat.LastItem: //آخرین
-                    RecordsData.View.MoveCurrentToLast();
-                    break;
+                DisplayCounts();
 
-                case Jahat.CustomPosition:
-                    if (custom_postiion > -1)
-                    {
-                        NewRecord = false;
-                        RecordsData.View.MoveCurrentToPosition((int)custom_postiion);
-                    }
-                    break;
+                UiDataUpdate(jahat);
 
-                case Jahat.NewItem: //جدید خالی
-                    NewRecord = true;
-                    RecordsData.View.MoveCurrentToLast();
+                if (jahat == Jahat.NewItem)
+                {
                     Clear_PGET_HED();
-                    break;
+                }
+                else
+                {
+                    Form_Current();
+                }
+
+                ChangeIsHappend = false; // Reset it
             }
-
-
-
-            DisplayCounts();
-
-            UiDataUpdate(jahat);
-
-            if (jahat == Jahat.NewItem)
+            finally
             {
-                Clear_PGET_HED();
+                _navigationBusy = false;
             }
-            else
-            {
-                Form_Current();
-            }
-
-            ChangeIsHappend = false; // Reset it
         }
         private void UiDataUpdate(Jahat jahat)
         {
