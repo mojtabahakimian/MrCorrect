@@ -168,6 +168,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         //public ObservableCollection<PGET_LST> KHAZANEH_DATA { get; set; } = new ObservableCollection<PGET_LST>();
 
         public RangeObservableCollection<PGET_LST> KHAZANEH_DATA { get; } = new RangeObservableCollection<PGET_LST>();
+        private DEED_HED _currentDeedData = null;
+
+        private static readonly string PGET_LST_SQL = @"
+    SELECT
+        p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
+        p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK,
+        p.MHAZ_NO, p.IDH, p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2,
+        p.FHES_T3, p.THES_T3, p.FHES_T4, p.THES_T4, p.CRT, p.UID,
+        CAST(CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
+        cf.NAME AS NAME_FHES,
+        ct.NAME AS NAME_THES
+    FROM dbo.PGET_LST AS p WITH (NOLOCK)
+    LEFT JOIN (SELECT DISTINCT num FROM dbo.TASKS WITH (NOLOCK) WHERE tg = 34) AS tk ON tk.num = p.IDH
+    OUTER APPLY (SELECT TOP 1 NAME FROM dbo.CUST_HESAB WITH (NOLOCK) WHERE hes = p.FHES) AS cf
+    OUTER APPLY (SELECT TOP 1 NAME FROM dbo.CUST_HESAB WITH (NOLOCK) WHERE hes = p.THES) AS ct
+    WHERE p.ID = @ID ORDER BY p.IDH
+    OPTION (OPTIMIZE FOR (@ID UNKNOWN));";
+
         public CollectionViewSource RecordsData { get; set; } = new CollectionViewSource();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -787,87 +805,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
             // ──────────────────────────────────────────────────────────────────
-            // ULTIMATE SQL:
-            //   ✅ EXISTS → LEFT JOIN روی ست از پیش فیلترشده  (یک بار اجرا، نه N بار)
-            //   ✅ OUTER APPLY TOP 1  برای NAME_FHES / NAME_THES (ایمن در برابر تکراری بودن hes)
-            //   ✅ OPTION(OPTIMIZE FOR UNKNOWN) برای جلوگیری از پلن کش بد
-            //   ✅ WITH(NOLOCK) روی تمام جداول برای حداکثر موازی‌سازی خواندن
-            //   ✅ پارامتر @ID برای جلوگیری از SQL Injection
-            // ──────────────────────────────────────────────────────────────────
-            const string sql = @"
-        SELECT
-            p.ID,
-            p.DATE,
-            p.RADIF,
-            p.NO_AM,
-            p.NAHVA,
-            p.FHES_K,
-            p.FHES_M,
-            p.FHES_T,
-            p.THES_K,
-            p.THES_M,
-            p.THES_T,
-            p.SHARH,
-            p.MABL,
-            p.N_SERI,
-            p.BANK,
-            p.MHAZ_NO,
-            p.IDH,
-            p.FHES,
-            p.THES,
-            p.ARZD,
-            p.FHES_T2,
-            p.THES_T2,
-            p.FHES_T3,
-            p.THES_T3,
-            p.FHES_T4,
-            p.THES_T4,
-            p.CRT,
-            p.UID,
-
-            -- ✅ BOTTLENECK #1 FIX: EXISTS → pre-filtered LEFT JOIN
-            -- موتور SQL ست را یک بار می‌سازد، نه N بار
-            CAST(
-                CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END
-            AS BIT)                         AS HasAttachment,
-
-            -- ✅ BOTTLENECK #2 FIX: OUTER APPLY TOP 1
-            -- در صورت تکراری بودن hes هیچ‌گاه سطر تکراری ایجاد نمی‌کند
-            cf.NAME                         AS NAME_FHES,
-            ct.NAME                         AS NAME_THES
-
-        FROM dbo.PGET_LST AS p WITH (NOLOCK)
-
-        -- یک بار کل TASKS را با tg=34 فیلتر می‌کند، سپس JOIN می‌زند
-        LEFT JOIN (
-            SELECT DISTINCT num
-            FROM   dbo.TASKS WITH (NOLOCK)
-            WHERE  tg = 34
-        ) AS tk ON tk.num = p.IDH
-
-        -- TOP 1 ایمن: اگر hes تکراری باشد سطر اضافه نمی‌گیرد
-        OUTER APPLY (
-            SELECT TOP 1 NAME
-            FROM   dbo.CUST_HESAB WITH (NOLOCK)
-            WHERE  hes = p.FHES
-        ) AS cf
-
-        OUTER APPLY (
-            SELECT TOP 1 NAME
-            FROM   dbo.CUST_HESAB WITH (NOLOCK)
-            WHERE  hes = p.THES
-        ) AS ct
-
-        WHERE p.ID = @ID ORDER BY p.IDH
-
-        -- ✅ BOTTLENECK #3 FIX: جلوگیری از استفاده از پلن کش نامناسب
-        OPTION (OPTIMIZE FOR (@ID UNKNOWN));";
-
-            // ──────────────────────────────────────────────────────────────────
             // ✅ BOTTLENECK #4 FIX: AsList() از Dapper — بدون کپی اضافی حافظه
             //    (ToList() یک List جدید می‌سازد؛ AsList() از بافر داخلی استفاده می‌کند)
             // ──────────────────────────────────────────────────────────────────
-            var result = dbms.DoGetDataSQL<PGET_LST>(sql, new { ID = parsedId })
+            var result = dbms.DoGetDataSQL<PGET_LST>(PGET_LST_SQL, new { ID = parsedId })
                              ?.AsList();
 
             // ──────────────────────────────────────────────────────────────────
@@ -962,13 +903,27 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         break;
                 }
 
-                // Sync current in-memory item with fresh DB data (async — UI stays responsive)
+                // Fire all 3 queries in parallel — total latency = slowest query, not sum
                 if (jahat != Jahat.NewItem && RecordsData.View.CurrentItem != null)
                 {
                     var HEADER = RecordsData.View.CurrentItem as Prg_Proccessy.SQLMODELS.PGET_HED;
-                    var DBData = (await dbms.DoGetDataSQLAsync<Prg_Proccessy.SQLMODELS.PGET_HED>(
+                    int  currentId = HEADER.ID ?? 0;
+                    double? currentNS = HEADER.N_S;
+
+                    var taskHeader = dbms.DoGetDataSQLAsync<Prg_Proccessy.SQLMODELS.PGET_HED>(
                         "SELECT TOP 1 ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED WHERE ID = @ID",
-                        new { ID = HEADER.ID })).FirstOrDefault();
+                        new { ID = currentId });
+
+                    var taskDeed = currentNS != null
+                        ? dbms.DoGetDataSQLAsync<DEED_HED>("SELECT * FROM DBO.DEED_HED WITH (NOLOCK) WHERE N_S = @NS", new { NS = currentNS })
+                        : Task.FromResult<IEnumerable<DEED_HED>>(Enumerable.Empty<DEED_HED>());
+
+                    var taskLst = dbms.DoGetDataSQLAsync<PGET_LST>(PGET_LST_SQL, new { ID = currentId });
+
+                    await Task.WhenAll(taskHeader, taskDeed, taskLst);
+
+                    // Apply PGET_HED header
+                    var DBData = taskHeader.Result.FirstOrDefault();
                     if (HEADER != null && DBData != null)
                     {
                         HEADER.ID        = DBData.ID;
@@ -993,6 +948,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         HEADER.UID       = DBData.UID;
                         RecordsData.View.Refresh();
                     }
+
+                    // Cache deed data for Form_Current and UiDataUpdate (no re-query needed)
+                    _currentDeedData = taskDeed.Result.FirstOrDefault();
+
+                    // Apply PGET_LST detail grid
+                    KHAZANEH_DATA.ReplaceAll(taskLst.Result?.AsList());
+                    this.MABL.Text = SUM_OF_MABL.ToString();
                 }
 
                 DisplayCounts();
@@ -1052,9 +1014,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 N_S.Text = HEADER.N_S.ToStringNullSafe();
 
-                if (!string.IsNullOrEmpty(N_S.Text))
+                if (_currentDeedData != null)
                 {
-                    MABNA.Text = dbms.DoGetDataSQL<string>($"SELECT TOP 1 BASE FROM DEED_HED WHERE N_S = {N_S.Text}").FirstOrDefault();
+                    MABNA.Text = _currentDeedData.@base?.ToString();
                 }
 
                 //OKF.IsChecked = false;
@@ -1063,8 +1025,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     OKF.IsChecked = HEADER.OKF;
                 }
                 PGET_LST_SUB.IsReadOnly = true;
-
-                ReGetData(); //Load DataGrid's data
             }
         }
         private bool ConfirmExitWithoutSaving()
@@ -1431,7 +1391,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         private void Form_Current()
         {
-            ApplyDataGridItems();
             if (IsNull(this.ID.Text) || this.ID.Text == "0")
             {
                 PGET_LST_SUB.IsReadOnly = true;
@@ -1455,17 +1414,12 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
                 else
                 {
-                    List<DEED_HED> rst = null;
-                    rst = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DBO.DEED_HED WHERE N_S = " + N_S.Text).ToList();
-                    if (rst != null && rst.Count > 0)
+                    if (_currentDeedData != null)
                     {
-                        this.MABNA.Text = rst.FirstOrDefault().@base.ToString();
-                        if (rst.FirstOrDefault().GHATEI)
+                        this.MABNA.Text = _currentDeedData.@base?.ToString();
+                        if (_currentDeedData.GHATEI)
                         {
-
                             LETSANAD = false;
-                            //this.AllowDeletions = false;
-                            //this.AllowEdits = false;
                             this.InvokeWhenHandleReady(hwnd =>
                             {
                                 CL_LMethods.AllowDeletions(this.GetType().Name, false, new WindowInteropHelper(this).Handle);
@@ -1478,8 +1432,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         else
                         {
                             LETSANAD = true;
-                            //this.AllowDeletions = true;
-                            //this.AllowEdits = true;
                             this.InvokeWhenHandleReady(hwnd =>
                             {
                                 CL_LMethods.AllowDeletions(this.GetType().Name, true, new WindowInteropHelper(this).Handle);
@@ -1490,7 +1442,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             this.PGET_LST_SUB.CanUserDeleteRows = true;
                         }
                     }
-                    //rst.Close();
                 }
 
             }
