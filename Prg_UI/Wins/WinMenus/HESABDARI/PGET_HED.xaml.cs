@@ -174,7 +174,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         // CUST_HESAB lookups are expensive (full scan of TDETA_HES ~36 k rows due to
         // non-sargable CONVERT key). Caching eliminates the OUTER APPLY cost after the
         // first navigation that encounters a given hes value.
-        private static readonly Dictionary<string, string?> _hesNameCache = new();
+        private readonly Dictionary<string, string?> _hesNameCache = new();
         private sealed class HesNameRow { public string? hes { get; set; } public string? NAME { get; set; } }
 
         // Full query with OUTER APPLY — used by ReGetData() (after-save path, not hot-path).
