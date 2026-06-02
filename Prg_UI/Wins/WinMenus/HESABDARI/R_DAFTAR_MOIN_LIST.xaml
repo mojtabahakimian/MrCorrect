@@ -205,7 +205,7 @@
                         <Binding Path="BES"  StringFormat="{}{0:#,0;#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-                <syncfusion:GridTextColumn x:Name="tshColumn" HeaderText="تش" MappingName="TSH" Width="60" TextAlignment="Center"/>
+                <syncfusion:GridTextColumn x:Name="tshColumn" HeaderText="تش" MappingName="TASH" Width="60" TextAlignment="Center"/>
                 <syncfusion:GridTextColumn x:Name="mANDColumn" HeaderText="مانده" MappingName="MAND"  Width="150" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MAND"  StringFormat="{}{0:#,0;#,0}" />

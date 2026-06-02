@@ -22,5 +22,6 @@
         public int? sgn3usid { get; set; }
         public DateTime? CRT { get; set; }
         public int? UID { get; set; }
+        public string? BASE { get; set; }
     }
 }

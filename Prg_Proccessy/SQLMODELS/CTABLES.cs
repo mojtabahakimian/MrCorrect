@@ -1385,6 +1385,7 @@ namespace Prg_Proccessy.SQLMODELS
             public Nullable<int> HES_T4 { get; set; }
             public string TAFZILN { get; set; }
             public string HES { get; set; }
+            public string TASH { get; set; }
             public string TSH { get; set; }
 
             public int? MONTH_S { get; set; }
