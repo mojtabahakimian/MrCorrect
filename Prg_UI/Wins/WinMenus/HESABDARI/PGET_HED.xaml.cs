@@ -746,16 +746,18 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
             var query = $@"
-                        SELECT ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA,
-                               SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID
-                        FROM dbo.PGET_HED
+                        SELECT h.ID, h.DATE, h.MOLAH, h.N_S, h.DEPATMAN, h.SHIFT, h.CUST_KIND, h.USER_NAME, h.KIND, h.IDK, h.OKF, h.RPLICA,
+                               h.SGN1, h.SGN2, h.SGN3, h.sgn1usid, h.sgn2usid, h.sgn3usid, h.CRT, h.UID, deed.BASE
+                        FROM dbo.PGET_HED AS h WITH (NOLOCK)
+                        OUTER APPLY (
+                            SELECT TOP 1 BASE
+                            FROM dbo.DEED_HED WITH (NOLOCK)
+                            WHERE N_S = h.N_S
+                        ) AS deed
                         {whereClause}
-                        ORDER BY DATE, ID";
+                        ORDER BY h.DATE, h.ID";
 
             var MasterHead = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>(query).ToList();
-            RecordsData.Source = MasterHead;
-
-            //var MasterHead = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>($"SELECT ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED  ORDER BY DATE, ID ").ToList(); // WHERE ID = {ID.Text}
             RecordsData.Source = MasterHead;
 
             if (NUMBER_TO_OPEN > 0)
@@ -788,7 +790,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             // ──────────────────────────────────────────────────────────────────
             // ULTIMATE SQL:
-            //   ✅ EXISTS → LEFT JOIN روی ست از پیش فیلترشده  (یک بار اجرا، نه N بار)
+            //   ✅ EXISTS محدود به ردیف‌های همین سند برای وضعیت پیوست
             //   ✅ OUTER APPLY TOP 1  برای NAME_FHES / NAME_THES (ایمن در برابر تکراری بودن hes)
             //   ✅ OPTION(OPTIMIZE FOR UNKNOWN) برای جلوگیری از پلن کش بد
             //   ✅ WITH(NOLOCK) روی تمام جداول برای حداکثر موازی‌سازی خواندن
@@ -825,10 +827,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             p.CRT,
             p.UID,
 
-            -- ✅ BOTTLENECK #1 FIX: EXISTS → pre-filtered LEFT JOIN
-            -- موتور SQL ست را یک بار می‌سازد، نه N بار
+            -- خواندن وضعیت پیوست فقط برای ردیف‌های همین خزانه انجام می‌شود.
+            -- ساخت SELECT DISTINCT از کل TASKS در هر جابه‌جایی رکورد باعث کندی Navigation می‌شد.
             CAST(
-                CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END
+                CASE WHEN EXISTS (
+                    SELECT 1
+                    FROM dbo.TASKS AS t WITH (NOLOCK)
+                    WHERE t.tg = 34 AND t.num = p.IDH
+                ) THEN 1 ELSE 0 END
             AS BIT)                         AS HasAttachment,
 
             -- ✅ BOTTLENECK #2 FIX: OUTER APPLY TOP 1
@@ -837,13 +843,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             ct.NAME                         AS NAME_THES
 
         FROM dbo.PGET_LST AS p WITH (NOLOCK)
-
-        -- یک بار کل TASKS را با tg=34 فیلتر می‌کند، سپس JOIN می‌زند
-        LEFT JOIN (
-            SELECT DISTINCT num
-            FROM   dbo.TASKS WITH (NOLOCK)
-            WHERE  tg = 34
-        ) AS tk ON tk.num = p.IDH
 
         -- TOP 1 ایمن: اگر hes تکراری باشد سطر اضافه نمی‌گیرد
         OUTER APPLY (
@@ -956,32 +955,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     break;
             }
 
-            //Update CurrentViewItem
-            if (RecordsData.View.CurrentItem != null)
-            {
-                var HEADER = RecordsData.View.CurrentItem as Prg_Proccessy.SQLMODELS.PGET_HED;
-                var DBData = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>($"SELECT TOP 1 ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED WHERE ID = {HEADER.ID}").FirstOrDefault();
-                if (HEADER != null && DBData != null)
-                {
-                    // Get all the properties of the object
-                    var properties = typeof(Prg_Proccessy.SQLMODELS.PGET_HED).GetProperties();
-                    foreach (var property in properties)
-                    {
-                        // Check if the property has a setter
-                        if (property.CanWrite)
-                        {
-                            // Get the value of the property from DBData
-                            var value = property.GetValue(DBData);
-                            // Set the value of the property on currentItem
-                            property.SetValue(HEADER, value);
-                        }
-                    }
-                    // Refresh the view to reflect the changes
-                    RecordsData.View.Refresh();
-                }
-            }
-
-
+            // اطلاعات سربرگ در ReGetMasterData بارگذاری شده است؛
+            // اجرای SELECT و Refresh کل View در هر Navigation باعث مکث قابل مشاهده می‌شد.
             DisplayCounts();
 
             UiDataUpdate(jahat);
@@ -1034,10 +1009,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 N_S.Text = HEADER.N_S.ToStringNullSafe();
 
-                if (!string.IsNullOrEmpty(N_S.Text))
-                {
-                    MABNA.Text = dbms.DoGetDataSQL<string>($"SELECT TOP 1 BASE FROM DEED_HED WHERE N_S = {N_S.Text}").FirstOrDefault();
-                }
+                MABNA.Text = string.IsNullOrEmpty(N_S.Text) ? string.Empty : HEADER.BASE.ToStringNullSafe();
 
                 //OKF.IsChecked = false;
                 if (HEADER.OKF is not null)
@@ -1057,7 +1029,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         public void RefreshAfterInsert()
         {
-            var itemtoadd = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>($"SELECT TOP 1 ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED WHERE ID = {ID.Text}").FirstOrDefault();
+            var itemtoadd = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>($@"
+                        SELECT h.ID, h.DATE, h.MOLAH, h.N_S, h.DEPATMAN, h.SHIFT, h.CUST_KIND, h.USER_NAME, h.KIND, h.IDK, h.OKF, h.RPLICA,
+                               h.SGN1, h.SGN2, h.SGN3, h.sgn1usid, h.sgn2usid, h.sgn3usid, h.CRT, h.UID, deed.BASE
+                        FROM dbo.PGET_HED AS h WITH (NOLOCK)
+                        OUTER APPLY (
+                            SELECT TOP 1 BASE
+                            FROM dbo.DEED_HED WITH (NOLOCK)
+                            WHERE N_S = h.N_S
+                        ) AS deed
+                        WHERE h.ID = {ID.Text}").FirstOrDefault();
 
             var underlyingCollection = RecordsData.Source as List<Prg_Proccessy.SQLMODELS.PGET_HED>; // Assuming the underlying collection is a List<T>, adjust if it's a different type
             if (itemtoadd != null && underlyingCollection != null)
