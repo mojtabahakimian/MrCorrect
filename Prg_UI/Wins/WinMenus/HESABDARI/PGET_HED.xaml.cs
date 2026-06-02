@@ -956,30 +956,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     break;
             }
 
-            //Update CurrentViewItem
-            if (RecordsData.View.CurrentItem != null)
-            {
-                var HEADER = RecordsData.View.CurrentItem as Prg_Proccessy.SQLMODELS.PGET_HED;
-                var DBData = dbms.DoGetDataSQL<Prg_Proccessy.SQLMODELS.PGET_HED>($"SELECT TOP 1 ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID FROM dbo.PGET_HED WHERE ID = {HEADER.ID}").FirstOrDefault();
-                if (HEADER != null && DBData != null)
-                {
-                    // Get all the properties of the object
-                    var properties = typeof(Prg_Proccessy.SQLMODELS.PGET_HED).GetProperties();
-                    foreach (var property in properties)
-                    {
-                        // Check if the property has a setter
-                        if (property.CanWrite)
-                        {
-                            // Get the value of the property from DBData
-                            var value = property.GetValue(DBData);
-                            // Set the value of the property on currentItem
-                            property.SetValue(HEADER, value);
-                        }
-                    }
-                    // Refresh the view to reflect the changes
-                    RecordsData.View.Refresh();
-                }
-            }
 
 
             DisplayCounts();
