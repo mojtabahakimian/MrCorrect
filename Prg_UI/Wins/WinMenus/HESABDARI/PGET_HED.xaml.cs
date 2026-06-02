@@ -170,6 +170,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public RangeObservableCollection<PGET_LST> KHAZANEH_DATA { get; } = new RangeObservableCollection<PGET_LST>();
         private DEED_HED _currentDeedData = null;
 
+        // Session-level cache: hes code → account NAME.
+        // CUST_HESAB lookups are expensive (full scan of TDETA_HES ~36 k rows due to
+        // non-sargable CONVERT key). Caching eliminates the OUTER APPLY cost after the
+        // first navigation that encounters a given hes value.
+        private static readonly Dictionary<string, string?> _hesNameCache = new();
+        private sealed class HesNameRow { public string? hes { get; set; } public string? NAME { get; set; } }
+
+        // Full query with OUTER APPLY — used by ReGetData() (after-save path, not hot-path).
         private static readonly string PGET_LST_SQL = @"
     SELECT
         p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
@@ -185,6 +193,18 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
     OUTER APPLY (SELECT TOP 1 NAME FROM dbo.CUST_HESAB WITH (NOLOCK) WHERE hes = p.THES) AS ct
     WHERE p.ID = @ID ORDER BY p.IDH
     OPTION (OPTIMIZE FOR (@ID UNKNOWN));";
+
+        // Navigation query — no OUTER APPLY. Names come from _hesNameCache instead.
+        private static readonly string PGET_LST_SQL_BASE = @"
+    SELECT
+        p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
+        p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK,
+        p.MHAZ_NO, p.IDH, p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2,
+        p.FHES_T3, p.THES_T3, p.FHES_T4, p.THES_T4, p.CRT, p.UID,
+        CAST(CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS HasAttachment
+    FROM dbo.PGET_LST AS p WITH (NOLOCK)
+    LEFT JOIN (SELECT DISTINCT num FROM dbo.TASKS WITH (NOLOCK) WHERE tg = 34) AS tk ON tk.num = p.IDH
+    WHERE p.ID = @ID ORDER BY p.IDH;";
 
         public CollectionViewSource RecordsData { get; set; } = new CollectionViewSource();
 
@@ -811,6 +831,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             var result = dbms.DoGetDataSQL<PGET_LST>(PGET_LST_SQL, new { ID = parsedId })
                              ?.AsList();
 
+            // Warm the cache from these results so navigations that follow skip CUST_HESAB
+            if (result != null)
+                foreach (var r in result)
+                {
+                    if (r.FHES != null) _hesNameCache[r.FHES] = r.NAME_FHES;
+                    if (r.THES != null) _hesNameCache[r.THES] = r.NAME_THES;
+                }
+
             // ──────────────────────────────────────────────────────────────────
             // ✅ BOTTLENECK #5 FIX: ReplaceAll → یک CollectionChanged برای کل لیست
             //    (به جای N بار CollectionChanged در foreach معمولی)
@@ -918,7 +946,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         ? dbms.DoGetDataSQLAsync<DEED_HED>("SELECT * FROM DBO.DEED_HED WITH (NOLOCK) WHERE N_S = @NS", new { NS = currentNS })
                         : Task.FromResult<IEnumerable<DEED_HED>>(Enumerable.Empty<DEED_HED>());
 
-                    var taskLst = dbms.DoGetDataSQLAsync<PGET_LST>(PGET_LST_SQL, new { ID = currentId });
+                    // Use base SQL (no OUTER APPLY) — names resolved from _hesNameCache below
+                    var taskLst = dbms.DoGetDataSQLAsync<PGET_LST>(PGET_LST_SQL_BASE, new { ID = currentId });
 
                     await Task.WhenAll(taskHeader, taskDeed, taskLst);
 
@@ -952,8 +981,30 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     // Cache deed data for Form_Current and UiDataUpdate (no re-query needed)
                     _currentDeedData = taskDeed.Result.FirstOrDefault();
 
-                    // Apply PGET_LST detail grid
-                    KHAZANEH_DATA.ReplaceAll(taskLst.Result?.AsList());
+                    // Resolve account names via cache — batch-fetch any not yet cached
+                    var lstRows = taskLst.Result?.AsList() ?? new List<PGET_LST>();
+                    var uncachedHes = lstRows
+                        .SelectMany(r => new[] { r.FHES, r.THES })
+                        .Where(h => h != null && !_hesNameCache.ContainsKey(h!))
+                        .Distinct()
+                        .ToList();
+                    if (uncachedHes.Count > 0)
+                    {
+                        var fetched = await dbms.DoGetDataSQLAsync<HesNameRow>(
+                            "SELECT hes, MIN(NAME) AS NAME FROM dbo.CUST_HESAB WITH (NOLOCK) WHERE hes IN @hes GROUP BY hes",
+                            new { hes = uncachedHes });
+                        foreach (var r in fetched)
+                            if (r.hes != null) _hesNameCache[r.hes] = r.NAME;
+                        foreach (var h in uncachedHes.Where(h => !_hesNameCache.ContainsKey(h!)))
+                            _hesNameCache[h!] = null;
+                    }
+                    foreach (var row in lstRows)
+                    {
+                        row.NAME_FHES = row.FHES != null && _hesNameCache.TryGetValue(row.FHES, out var fn) ? fn : null;
+                        row.NAME_THES = row.THES != null && _hesNameCache.TryGetValue(row.THES, out var tn) ? tn : null;
+                    }
+
+                    KHAZANEH_DATA.ReplaceAll(lstRows);
                     this.MABL.Text = SUM_OF_MABL.ToString();
                 }
 
