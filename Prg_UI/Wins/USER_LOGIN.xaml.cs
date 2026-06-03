@@ -297,7 +297,10 @@ namespace Prg_UI.Wins
                 {
                     SMSPINFO.USERNAME = RST?.SMS_USERNAME;
                     SMSPINFO.PASSWORD = RST?.SMS_PASSWORD;
-                    SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
+                    if (!string.IsNullOrWhiteSpace(RST?.SMS_TSMSHOST))
+                    {
+                        SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
+                    }
                     SMSPINFO.API_KEY = RST?.SMS_LIBKEY;
 
                     switch (RST?.SMSTYPE)
