@@ -6317,6 +6317,13 @@ GO
                 //try { db.Execute($@""); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;"); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;"); } catch { }
+                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD 
+    [PROVINCE] NVARCHAR(50) NULL,             -- نام استان
+    [CITY] NVARCHAR(50) NULL,                 -- نام شهر
+    [REGISTRATION_NUMBER] NVARCHAR(20) NULL,  -- شماره ثبت
+    [SSO_BRANCH] NVARCHAR(50) NULL,           -- شعبه تامین اجتماعی
+    [FINANCIAL_MANAGER] NVARCHAR(100) NULL,   -- مدیر مالی
+    [ADMIN_MANAGER] NVARCHAR(100) NULL;       -- معاون اداری مالی"); } catch { }
 
                 //-- ساخت ایندکس ترکیبی برای حذف عملیات سورت و اسکن جدول شغل‌ها
                 try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
