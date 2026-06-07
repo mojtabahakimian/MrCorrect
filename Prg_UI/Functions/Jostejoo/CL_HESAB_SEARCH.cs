@@ -1,90 +1,125 @@
-﻿using Microsoft.VisualBasic;
 using Prg_UI.Wins.WinOther;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Windows.Media;
 
 namespace Prg_UI.Functions.Jostejoo
 {
     public static class CL_HESAB_SEARCH
     {
+        // ورودی شبیه کد حساب: 1 تا 4 بخش عددی جدا شده با خط تیره (مثلا 101-2-3 یا 101-2-3-4)
+        private static readonly Regex AccountCodePattern = new Regex(@"^\d{1,9}(-\d{1,9}){0,3}$", RegexOptions.Compiled);
+
         public static void Go_Search_Hesab(string _TXT_, string FRMNAME, Visual thevisu)
         {
-            var MyTextSearch = _TXT_;
-            var shart = "";
-            var shart2 = "";
-            if (string.IsNullOrEmpty(MyTextSearch))
-            {
-                ResOfSearch resOfSearch = new ResOfSearch(null, FRMNAME, null, thevisu);
-                resOfSearch.ShowDialog();
-            }
-            else
-            {
-                int i = 0;
-                int K = 1;
-                while (i < MyTextSearch.Length)
-                {
-                    if (MyTextSearch.Substring(i, 1) == " ")
-                    {
-                        if (shart.Length > 0)
-                        {
-                            if (Strings.Len(shart) > 0)
-                            {
-                                shart = shart + " and (NAME LIKE N'%" + Strings.Mid(MyTextSearch, K + 1, i - K + 1 - 1).Trim() + "%' or NAME LIKE  N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K + 1, i - K + 1 - 1), "ی", "ي"), "ک", "ك").Trim() + "%' or  NAME LIKE  N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K + 1, i - K + 1 - 1), "ي", "ی"), "ک", "ك").Trim() + "%')";
-                                shart2 = shart2 + " and (TNAME LIKE N'%" + Strings.Mid(MyTextSearch, K + 1, i - K + 1 - 1).Trim() + "%' or TNAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K + 1, i - K + 1 - 1), "ي", "ی"), "ک", "ك").Trim() + "%')";
-                                K = i;
-                            }
-                            else
-                            {
-                                shart = "(NAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1).Trim() + "%' or  NAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1), "ی", "ي").Trim(), "ک", "ك") + "%')";
-                                shart2 = "(TNAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1).Trim() + "%' or TNAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1), "ي", "ی").Trim(), "ک", "ك") + "%')";
-                                K = i;
-                            }
-                        }
-                        else
-                        {
-                            string s = Strings.Mid(MyTextSearch, K, i - K + 1 + 1).ToString();
-                            shart = "(NAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1).Trim() + "%' or  NAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1), "ی", "ي"), "ک", "ك").Trim() + "%')";
-                            shart2 = "(TNAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1).Trim() + "%' or TNAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1), "ي", "ی"), "ک", "ك").Trim() + "%')";
-                            K = i;
-                        }
-                    }
-                    i = i + 1;
-                }
-                if (i != K)
-                {
-                    if (Strings.Len(shart) > 0)
-                    {
-                        shart = shart + " and (NAME LIKE N'%" + Strings.Mid(MyTextSearch, K + 1, i - K + 1 + 1).Trim() + "%' or  NAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K + 1, i - K + 1 + 1), "ی", "ي"), "ک", "ك").Trim() + "%' or  NAME LIKE  N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1 + 1), "ي", "ی"), "ک", "ك").Trim() + "%')";
-                        shart2 = shart2 + " and (TNAME LIKE N'%" + Strings.Mid(MyTextSearch, K + 1, i - K + 1 + 1).Trim() + "%' or  TNAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K + 1, i - K + 1 + 1), "ي", "ی"), "ک", "ك").Trim() + "%')";
-                        K = i;
-                    }
-                    else
-                    {
-                        string test = Strings.Mid(MyTextSearch, K, i - K + 1 + 1);
-                        shart = "NAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1 + 1).Trim() + "%' or  NAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1 + 1).Trim(), "ی", "ي"), "ک", "ك") + "%' OR NAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1 + 1).Trim() + "%' or  NAME LIKE  N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1 + 1), "ي", "ی"), "ک", "ك").Trim() + "%'";
-                        shart2 = "TNAME LIKE N'%" + Strings.Mid(MyTextSearch, K, i - K + 1 + 1).Trim() + "%' or TNAME LIKE N'%" + Strings.Replace(Strings.Replace(Strings.Mid(MyTextSearch, K, i - K + 1 + 1).Trim(), "ي", "ی"), "ک", "ك") + "%'";
-                        K = i;
-                    }
-                }
+            var rawTerm = (_TXT_ ?? string.Empty).Trim();
 
-                if (Strings.Len(MyTextSearch) == 1)
-                {
-                    shart = "NAME LIKE N'%" + Strings.Replace(Strings.Replace(MyTextSearch, "ی", "ي"), "ک", "ك").Trim() + "%'";
-                    shart2 = "TNAME LIKE N'%" + Strings.Replace(Strings.Replace(MyTextSearch, "ي", "ی"), "ک", "ك").Trim() + "%'";
-                }
-                if (Strings.Len(shart) > 1)
-                {
-                    shart = "(( " + shart + ") or (" + shart2 + "))";
-                }
-
-                ResOfSearch resOfSearch = new ResOfSearch(shart, FRMNAME, null, thevisu);
-                resOfSearch.ShowDialog();
+            string shart = null;
+            if (!string.IsNullOrEmpty(rawTerm))
+            {
+                shart = BuildAccountCodeWhere(rawTerm) ?? BuildNameSearchWhere(rawTerm);
             }
+
+            var resOfSearch = new ResOfSearch(shart, FRMNAME, null, thevisu);
+            resOfSearch.ShowDialog();
+        }
+
+        // اگر ورودی شبیه کد حساب باشد (مثل 101-2-3)، با تطبیق دقیق (=) روی ستون‌های کد جستجو می‌کنیم.
+        // این کار برخلاف LIKE '%...%' روی ایندکس قابل استفاده است (Sargable) و خیلی سریع‌تر اجرا می‌شود؛
+        // دقیقا همین حالت پرتکرار، یعنی تایپ کد حساب هنگام ورود سریع ردیف‌های سند، کند بودن جستجو را محسوس می‌کرد.
+        private static string BuildAccountCodeWhere(string rawTerm)
+        {
+            var normalized = NormalizeAccountCode(rawTerm);
+            if (!AccountCodePattern.IsMatch(normalized))
+                return null;
+
+            var parts = normalized.Split('-');
+            var numbers = new int[parts.Length];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!int.TryParse(parts[i], out numbers[i]))
+                    return null;
+            }
+
+            var conditions = new List<string> { $"N_KOL = {numbers[0]}" };
+            if (numbers.Length >= 2) conditions.Add($"NUMBER = {numbers[1]}");
+            if (numbers.Length >= 3) conditions.Add($"TNUMBER = {numbers[2]}");
+            if (numbers.Length == 4) conditions.Add($"tnumber2 = N'{string.Join("-", numbers)}'");
+
+            return string.Join(" AND ", conditions);
+        }
+
+        // جستجوی نام: متن به کلمات تقسیم می‌شود و هر کلمه باید (در یکی از حالت‌های نوشتاری ی/ي و ک/ك)
+        // در NAME یا در TNAME وجود داشته باشد. مقادیر همیشه Escape می‌شوند تا نه کوئری بشکند و نه
+        // کاراکترهای خاص LIKE (% _ [ ]) به عنوان الگو تفسیر شوند.
+        private static string BuildNameSearchWhere(string rawTerm)
+        {
+            var words = rawTerm.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                               .Select(w => w.Trim())
+                               .Where(w => w.Length > 0)
+                               .ToList();
+
+            if (words.Count == 0)
+                return null;
+
+            var nameClauses = new List<string>();
+            var tnameClauses = new List<string>();
+
+            foreach (var word in words)
+            {
+                var variants = new[]
+                {
+                    EscapeForLike(word),
+                    EscapeForLike(ToArabicVariant(word)),
+                    EscapeForLike(ToPersianVariant(word))
+                }.Distinct().ToList();
+
+                nameClauses.Add("(" + string.Join(" OR ", variants.Select(v => $"NAME LIKE N'%{v}%'")) + ")");
+                tnameClauses.Add("(" + string.Join(" OR ", variants.Select(v => $"TNAME LIKE N'%{v}%'")) + ")");
+            }
+
+            var byName = string.Join(" AND ", nameClauses);
+            var byTName = string.Join(" AND ", tnameClauses);
+
+            return $"(({byName}) OR ({byTName}))";
+        }
+
+        private static string ToArabicVariant(string value) => value.Replace('ی', 'ي').Replace('ک', 'ك');
+
+        private static string ToPersianVariant(string value) => value.Replace('ي', 'ی').Replace('ك', 'ک');
+
+        // جلوگیری از SQL Injection و از تفسیر شدن کاراکترهای خاص LIKE به عنوان الگو
+        private static string EscapeForLike(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+
+            return value
+                .Replace("'", "''")
+                .Replace("[", "[[]")
+                .Replace("%", "[%]")
+                .Replace("_", "[_]");
+        }
+
+        private static string NormalizeAccountCode(string value)
+        {
+            var sb = new StringBuilder(value.Length);
+            foreach (char ch in value.Trim())
+            {
+                if (ch >= '0' && ch <= '9')
+                    sb.Append(ch);
+                else if (ch >= '۰' && ch <= '۹')
+                    sb.Append((char)('0' + (ch - '۰')));
+                else if (ch >= '٠' && ch <= '٩')
+                    sb.Append((char)('0' + (ch - '٠')));
+                else if (ch == '-' || ch == '‐' || ch == '–' || ch == '—' || ch == '−')
+                    sb.Append('-');
+                else if (!char.IsWhiteSpace(ch))
+                    sb.Append(ch);
+            }
+            return sb.ToString();
         }
     }
 }
