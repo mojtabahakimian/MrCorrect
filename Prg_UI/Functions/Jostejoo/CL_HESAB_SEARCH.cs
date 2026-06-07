@@ -10,8 +10,11 @@ namespace Prg_UI.Functions.Jostejoo
 {
     public static class CL_HESAB_SEARCH
     {
-        // ورودی شبیه کد حساب: 1 تا 4 بخش عددی جدا شده با خط تیره (مثلا 101-2-3 یا 101-2-3-4)
-        private static readonly Regex AccountCodePattern = new Regex(@"^\d{1,9}(-\d{1,9}){0,3}$", RegexOptions.Compiled);
+        // ورودی شبیه کد حساب: حداقل دو بخش عددی جدا شده با خط‌تیره (مثلا 101-2 یا 101-2-3 یا 101-2-3-4).
+        // عمداً عدد تنها (بدون خط‌تیره) را شامل نمی‌شود؛ چون این تابع برای جستجوی بر اساس نام هم به کار
+        // می‌رود و کاربر ممکن است یک عدد ساده را به‌عنوان بخشی از نام تایپ کند — آن حالت باید همچنان با
+        // LIKE روی نام جستجو شود تا رفتار قبلی این فرم‌ها حفظ شود.
+        private static readonly Regex AccountCodePattern = new Regex(@"^\d{1,9}(-\d{1,9}){1,3}$", RegexOptions.Compiled);
 
         public static void Go_Search_Hesab(string _TXT_, string FRMNAME, Visual thevisu)
         {
