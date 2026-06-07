@@ -136,23 +136,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             return data;
         }
 
-        // CL_HESABDARI.ISTAF برای تشخیص "تفصیلی‌دار بودن" حساب، در کامیت هر ردیف یک کوئری روی
-        // TDETA_HES/HES2/HES3/HES4 می‌زند. چون این ویژگی برای یک کد حساب در طول جلسه ثابت است،
-        // نتیجه را کش می‌کنیم تا برای حساب‌های تکراری هنگام ورود سریع، رفت‌وبرگشت تکراری نداشته باشیم.
-        private static readonly ConcurrentDictionary<string, bool> _isTafCache = new();
-
-        private bool IsTafCached(string hes)
-        {
-            if (string.IsNullOrEmpty(hes)) return false;
-
-            if (_isTafCache.TryGetValue(hes, out var cached))
-                return cached;
-
-            var result = CL_HESABDARI.ISTAF(hes);
-            _isTafCache[hes] = result;
-            return result;
-        }
-
         public object ENTERED_VALUE_ROW { get; private set; }
 
         public int CURRENT_COLUMN_INDEX { get; private set; }
@@ -1786,7 +1769,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
             #endregion
 
             #region HES_Before_Update
-            if (IsTafCached(CURRENT_ITMES_ROW.HES))
+            if (CL_HESABDARI.ISTAF(CURRENT_ITMES_ROW.HES))
             {
                 Child14_CANCEL_EDIT();
                 Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
