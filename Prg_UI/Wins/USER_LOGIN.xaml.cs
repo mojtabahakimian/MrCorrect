@@ -297,7 +297,10 @@ namespace Prg_UI.Wins
                 {
                     SMSPINFO.USERNAME = RST?.SMS_USERNAME;
                     SMSPINFO.PASSWORD = RST?.SMS_PASSWORD;
-                    SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
+                    if (!string.IsNullOrWhiteSpace(RST?.SMS_TSMSHOST))
+                    {
+                        SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
+                    }
                     SMSPINFO.API_KEY = RST?.SMS_LIBKEY;
 
                     switch (RST?.SMSTYPE)
@@ -367,13 +370,14 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            //new WinBase().Show();
+            new WinBase().Show();
             //new WIN_About().Show();
             //new WinConnectionChoose().Show();
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
 
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);

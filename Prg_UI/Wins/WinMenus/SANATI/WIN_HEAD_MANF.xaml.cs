@@ -2111,17 +2111,45 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             {
                 // rst.AddNew ... rst.Update
                 dbms.DoExecuteSQL(
-                    @"INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
-                          VALUES (@N_KOL, @NUMBER, @TNUMBER, @NAME, -1)",
+                    @"
+                    BEGIN TRY
+                        INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
+                        VALUES (@N_KOL, @NUMBER, @TNUMBER, @NAME, -1)
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @N_KOL AND NUMBER = @NUMBER AND TNUMBER = @TNUMBER)
+                            BEGIN
+                                INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
+                                VALUES (@N_KOL, @NUMBER, @TNUMBER, LEFT(@NAME, 240) + N' (' + CAST(CAST(@TNUMBER AS INT) AS NVARCHAR(20)) + N')', -1)
+                            END
+                        END
+                        ELSE THROW;
+                    END CATCH;
+                    ",
                     new { N_KOL = hazTol, NUMBER = TopHeadCode, TNUMBER = CurrentRowCode, NAME = kalaName });
             }
             else
             {
                 // If rst.Fields(...) = ... Then rst.Fields(...)=... : Update همه فیلدها
                 dbms.DoExecuteSQL(
-                    @"UPDATE dbo.TDETA_HES
-                          SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=@NAME, BED_BES=-1
-                          WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER",
+                    @"
+                    BEGIN TRY
+                        UPDATE dbo.TDETA_HES
+                        SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=@NAME, BED_BES=-1
+                        WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            UPDATE dbo.TDETA_HES
+                            SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=LEFT(@NAME, 240) + N' (' + CAST(CAST(@TNUMBER AS INT) AS NVARCHAR(20)) + N')', BED_BES=-1
+                            WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER
+                        END
+                        ELSE THROW;
+                    END CATCH;
+                    ",
                     new { N_KOL = hazTol, NUMBER = TopHeadCode, TNUMBER = CurrentRowCode, NAME = kalaName }
                 );
             }
@@ -2136,17 +2164,45 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (!existsConKal)
             {
                 dbms.DoExecuteSQL(
-                    @"INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
-                          VALUES (@N_KOL, @NUMBER, @TNUMBER, @NAME, -1)",
+                    @"
+                    BEGIN TRY
+                        INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
+                        VALUES (@N_KOL, @NUMBER, @TNUMBER, @NAME, -1)
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @N_KOL AND NUMBER = @NUMBER AND TNUMBER = @TNUMBER)
+                            BEGIN
+                                INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
+                                VALUES (@N_KOL, @NUMBER, @TNUMBER, LEFT(@NAME, 240) + N' (' + CAST(CAST(@TNUMBER AS INT) AS NVARCHAR(20)) + N')', -1)
+                            END
+                        END
+                        ELSE THROW;
+                    END CATCH;
+                    ",
                     new { N_KOL = conKal, NUMBER = TopHeadCode, TNUMBER = CurrentRowCode, NAME = kalaName }
                 );
             }
             else
             {
                 dbms.DoExecuteSQL(
-                    @"UPDATE dbo.TDETA_HES
-                          SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=@NAME, BED_BES=-1
-                          WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER",
+                    @"
+                    BEGIN TRY
+                        UPDATE dbo.TDETA_HES
+                        SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=@NAME, BED_BES=-1
+                        WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            UPDATE dbo.TDETA_HES
+                            SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=LEFT(@NAME, 240) + N' (' + CAST(CAST(@TNUMBER AS INT) AS NVARCHAR(20)) + N')', BED_BES=-1
+                            WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER
+                        END
+                        ELSE THROW;
+                    END CATCH;
+                    ",
                     new { N_KOL = conKal, NUMBER = TopHeadCode, TNUMBER = CurrentRowCode, NAME = kalaName }
                 );
             }
@@ -2161,17 +2217,45 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (!existsAmalKard)
             {
                 dbms.DoExecuteSQL(
-                    @"INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
-                          VALUES (@N_KOL, @NUMBER, @TNUMBER, @NAME, -1)",
+                    @"
+                    BEGIN TRY
+                        INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
+                        VALUES (@N_KOL, @NUMBER, @TNUMBER, @NAME, -1)
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @N_KOL AND NUMBER = @NUMBER AND TNUMBER = @TNUMBER)
+                            BEGIN
+                                INSERT INTO dbo.TDETA_HES (N_KOL, [NUMBER], TNUMBER, [NAME], BED_BES)
+                                VALUES (@N_KOL, @NUMBER, @TNUMBER, LEFT(@NAME, 240) + N' (' + CAST(CAST(@TNUMBER AS INT) AS NVARCHAR(20)) + N')', -1)
+                            END
+                        END
+                        ELSE THROW;
+                    END CATCH;
+                    ",
                     new { N_KOL = amalKard, NUMBER = TopHeadCode, TNUMBER = CurrentRowCode, NAME = rateName }
                 );
             }
             else
             {
                 dbms.DoExecuteSQL(
-                    @"UPDATE dbo.TDETA_HES
-                          SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=@NAME, BED_BES=-1
-                          WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER",
+                    @"
+                    BEGIN TRY
+                        UPDATE dbo.TDETA_HES
+                        SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=@NAME, BED_BES=-1
+                        WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            UPDATE dbo.TDETA_HES
+                            SET N_KOL=@N_KOL, [NUMBER]=@NUMBER, TNUMBER=@TNUMBER, [NAME]=LEFT(@NAME, 240) + N' (' + CAST(CAST(@TNUMBER AS INT) AS NVARCHAR(20)) + N')', BED_BES=-1
+                            WHERE N_KOL=@N_KOL AND [NUMBER]=@NUMBER AND TNUMBER=@TNUMBER
+                        END
+                        ELSE THROW;
+                    END CATCH;
+                    ",
                     new { N_KOL = amalKard, NUMBER = TopHeadCode, TNUMBER = CurrentRowCode, NAME = rateName }
                 );
             }

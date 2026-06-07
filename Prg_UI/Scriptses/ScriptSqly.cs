@@ -2145,9 +2145,9 @@ RETURN (
 "); } catch { }
 
                     //Ctrl + F8
-                    try { db.Execute("DROP PROC usp_TafzilLedger"); } catch { }
+                    //Ctrl + F8 - دفتر تفضیلی - همیشه اجرا می‌شود تا امضای صحیح روی DB باشد
                     try { db.Execute($@"
-CREATE PROC [dbo].[usp_TafzilLedger]
+CREATE OR ALTER PROC [dbo].[usp_TafzilLedger]
     @FromDate     INT,
     @ToDate       INT,
     @TafzilCode   nvarchar(50),
@@ -2190,17 +2190,17 @@ BEGIN
         RunningSum  float DEFAULT 0,
         TASH        nvarchar(10),
         NO_S        int,
-        N_SERI      nvarchar(50),
+        N_SERI      float NULL,
         HES         nvarchar(50),
-        HES_K       nvarchar(50),
-        HES_M       nvarchar(50),
-        HES_T       nvarchar(50),
-        HES_T2      nvarchar(50),
+        HES_K       int NULL,
+        HES_M       int NULL,
+        HES_T       int NULL,
+        HES_T2      int NULL,
         TAFZILN     nvarchar(200),
-        BANK        nvarchar(100),
-        [NUMBER]    nvarchar(50),
-        TAG         nvarchar(MAX),
-        ARZD        nvarchar(50),
+        BANK        int NULL,
+        [NUMBER]    float NULL,
+        TAG         float NULL,
+        ARZD        float NULL,
         base        int,
         SourceID    bigint
     );
@@ -2208,7 +2208,6 @@ BEGIN
     ----------------------------------------------------------
     -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
     ----------------------------------------------------------
-    -- فقط بازه انتخابی را می‌آوریم
     INSERT INTO #TempLedger (
         N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
         HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
@@ -2223,7 +2222,6 @@ BEGIN
     ----------------------------------------------------------
     DECLARE @SQL nvarchar(MAX);
 
-    -- همه رکوردها را شماره‌گذاری کن
     SET @SQL = N'
         UPDATE T
         SET RowNum = SortedData.NewRowID
@@ -2243,7 +2241,6 @@ BEGIN
 
     DECLARE @RunningTotal float = 0;
 
-    -- آپدیت دقیق و سریع
     UPDATE #TempLedger
     SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
     FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
@@ -2264,7 +2261,7 @@ BEGIN
         HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
     FROM #TempLedger
     ORDER BY RowNum;
-	DROP TABLE #TempLedger;
+    DROP TABLE #TempLedger;
 END
 "); } catch { }
 
@@ -3159,8 +3156,11 @@ END
                     #endregion
                 }
 
-                //تابع تبدیل تاریخ جلالی به میلادی
-                try { db.Execute($@"CREATE FUNCTION dbo.fn_JalaliIntToGregorianDate (@JalaliInt BIGINT)
+                //1405/03/05
+                if (isCustomCall)
+                {
+                    //تابع تبدیل تاریخ جلالی به میلادی
+                    try { db.Execute($@"CREATE FUNCTION dbo.fn_JalaliIntToGregorianDate (@JalaliInt BIGINT)
 									RETURNS DATETIME
 									AS
 									BEGIN
@@ -3265,7 +3265,7 @@ END
 									    );
 									END"); } catch { }
 
-                try { db.Execute(@"CREATE TABLE [dbo].[Travelreason]
+                    try { db.Execute(@"CREATE TABLE [dbo].[Travelreason]
 (
 [Code] [int] NULL,
 [TravelreasonName] [nvarchar] (25) COLLATE Arabic_CI_AS NULL,
@@ -3274,9 +3274,9 @@ END
 ) ON [PRIMARY]
 "); } catch { }
 
-                //1405/01/08
-                //اصلاح محاسبه مبلغ موجودی در گزارش تراز یک انبار:
-                try { db.Execute(@"ALTER FUNCTION [dbo].[TARAZ_ANBAR_KHAS](@FORMS___F_MENU_ANBAR_TARAZ___DT2 BIGINT, @ANB INT)
+                    //1405/01/08
+                    //اصلاح محاسبه مبلغ موجودی در گزارش تراز یک انبار:
+                    try { db.Execute(@"ALTER FUNCTION [dbo].[TARAZ_ANBAR_KHAS](@FORMS___F_MENU_ANBAR_TARAZ___DT2 BIGINT, @ANB INT)
 RETURNS TABLE
 AS
 RETURN(
@@ -3351,8 +3351,8 @@ RETURN(
     ORDER BY B.NAME
 );"); } catch { }
 
-                //اصلاح محاسبه مبلغ موجودی در تراز کل انبار ها:
-                try { db.Execute(@"ALTER VIEW [dbo].[TARAZ_ANBAR_KOL]
+                    //اصلاح محاسبه مبلغ موجودی در تراز کل انبار ها:
+                    try { db.Execute(@"ALTER VIEW [dbo].[TARAZ_ANBAR_KOL]
 AS
 -- 1. استخراج تمام تراکنش‌ها از تابع کارت انبار با مشخص کردن ردیف برای آخرین فی معتبر هر انبار
 WITH Ledger AS (
@@ -3444,9 +3444,6 @@ SELECT TOP 100 PERCENT
 FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
-                //1405/03/05
-                if (isCustomCall)
-                {
                     try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
                     try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به جدول تاریخچه خزانه
                     
@@ -4548,67 +4545,60 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- خواندن کد کامل حساب مساعده
+    -- 1. خواندن کد کامل حساب مساعده
     DECLARE @FULL_HES NVARCHAR(100);
     SELECT @FULL_HES = ACC_CODE 
-    FROM PAY2_WORKSHOP_ACC
+    FROM PAY2_WORKSHOP_ACC WITH (NOLOCK)
     WHERE WS_ID = @WS_ID AND ACC_KEY = 'ADV_HES';
 
     IF @FULL_HES IS NULL
     BEGIN
-        RAISERROR(N'PAY2_WORKSHOP_ACC: ADV_HES برای کارگاه %d تنظیم نشده است.', 16, 1, @WS_ID);
+        RAISERROR(N'حساب مساعده (ADV_HES) برای این کارگاه تنظیم نشده است.', 16, 1);
         RETURN;
     END;
 
-    -- ── پارس کد ترکیبی مثل ""112-1-5"" یا ""213-1-2-4-1-6"" ──────────────
-    DECLARE @parts TABLE (seq INT IDENTITY(1,1), val NVARCHAR(20));
-    DECLARE @tmp  NVARCHAR(110) = @FULL_HES + '-';
-    DECLARE @prev INT = 1;
-    DECLARE @pos  INT = CHARINDEX('-', @tmp, 1);
+    -- 2. پارس کردن کد ترکیبی با استفاده از JSON_VALUE 
+    DECLARE @JsonArr NVARCHAR(250) = N'[""' + REPLACE(@FULL_HES, '-', '"",""') + N'""]';
+    
+    DECLARE @HES_K  INT = TRY_CAST(NULLIF(JSON_VALUE(@JsonArr, '$[0]'), '') AS INT);
+    DECLARE @HES_M  INT = TRY_CAST(NULLIF(JSON_VALUE(@JsonArr, '$[1]'), '') AS INT);
+    DECLARE @HES_T  INT = TRY_CAST(NULLIF(JSON_VALUE(@JsonArr, '$[2]'), '') AS INT);
+    DECLARE @HES_T2 INT = TRY_CAST(NULLIF(JSON_VALUE(@JsonArr, '$[3]'), '') AS INT);
+    DECLARE @HES_T3 INT = TRY_CAST(NULLIF(JSON_VALUE(@JsonArr, '$[4]'), '') AS INT);
+    DECLARE @HES_T4 INT = TRY_CAST(NULLIF(JSON_VALUE(@JsonArr, '$[5]'), '') AS INT);
 
-    WHILE @pos > 0
+    -- بررسی امنیتی حساب
+    IF @HES_K IS NULL OR @HES_M IS NULL
     BEGIN
-        INSERT INTO @parts(val)
-        VALUES(SUBSTRING(@tmp, @prev, @pos - @prev));
-        SET @prev = @pos + 1;
-        SET @pos  = CHARINDEX('-', @tmp, @prev);
-    END;
-
-    DECLARE @HES_K  INT = (SELECT CAST(val AS INT) FROM @parts WHERE seq = 1);
-    DECLARE @HES_M  INT = (SELECT CAST(val AS INT) FROM @parts WHERE seq = 2);
-    DECLARE @HES_T  INT = (SELECT TRY_CAST(val AS INT) FROM @parts WHERE seq = 3);
-    DECLARE @HES_T2 INT = (SELECT TRY_CAST(val AS INT) FROM @parts WHERE seq = 4);
-    DECLARE @HES_T3 INT = (SELECT TRY_CAST(val AS INT) FROM @parts WHERE seq = 5);
-    DECLARE @HES_T4 INT = (SELECT TRY_CAST(val AS INT) FROM @parts WHERE seq = 6);
-
-  IF @HES_K IS NULL OR @HES_M IS NULL
-    BEGIN
-        RAISERROR(N'ADV_HES: فرمت نادرست ""%s"". حداقل باید شامل کد کل و معین باشد. مثال: 112-1',
-                  16, 1, @FULL_HES);
+        RAISERROR(N'فرمت حساب مساعده نادرست است. باید حداقل شامل کل و معین باشد (مثال: 112-1).', 16, 1);
         RETURN;
     END;
 
-    -- ── تعیین سطح اعمال فیلتر ACC_T پرسنل ────────────────────────────
-    -- ACC_T روی اولین سطح تفصیلی‌ای اعمال می‌شود که در کد کامل مقدار ندارد
-    -- مثال: کد ""112-1-5"" یعنی HES_T=5 ثابته، پس ACC_T روی HES_T2 می‌رود
-    -- مثال: کد ""112-1""   یعنی HES_T نداریم، پس ACC_T روی HES_T می‌رود
+    -- 3. تعیین سطح اعمال فیلتر کد پرسنل (ACC_T)
     DECLARE @EMP_FILTER_LEVEL TINYINT =
         CASE
-            WHEN @HES_T  IS NULL THEN 3   -- ACC_T → HES_T
-            WHEN @HES_T2 IS NULL THEN 4   -- ACC_T → HES_T2
-            WHEN @HES_T3 IS NULL THEN 5   -- ACC_T → HES_T3
-            ELSE                     6   -- ACC_T → HES_T4
+            WHEN @HES_T  IS NULL THEN 3   
+            WHEN @HES_T2 IS NULL THEN 4   
+            WHEN @HES_T3 IS NULL THEN 5   
+            ELSE                     6    
         END;
 
-    DECLARE @USE_T     BIT           = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_USE_HES_T_FILTER') AS BIT);
-    DECLARE @MIN_POS   BIT           = CAST((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_MIN_POSITIVE')     AS BIT);
-    DECLARE @ADV_SCOPE NVARCHAR(20)  = ISNULL((SELECT CFG_VALUE FROM PAY2_CONFIG WHERE CFG_KEY='ADV_SCOPE'),'CURRENT_MONTH');
-    DECLARE @PERIOD_MONTH INT        = @PERIOD_DATE / 100;
+    -- 4. خواندن تنظیمات اضافی به صورت ایمن
+    DECLARE @USE_T BIT = 1, @MIN_POS BIT = 1, @ADV_SCOPE NVARCHAR(20) = 'CURRENT_MONTH';
+    
+    SELECT 
+        @USE_T     = ISNULL(CAST(MAX(CASE WHEN CFG_KEY = 'ADV_USE_HES_T_FILTER' THEN TRY_CAST(CFG_VALUE AS INT) END) AS BIT), 1),
+        @MIN_POS   = ISNULL(CAST(MAX(CASE WHEN CFG_KEY = 'ADV_MIN_POSITIVE'   THEN TRY_CAST(CFG_VALUE AS INT) END) AS BIT), 1),
+        @ADV_SCOPE = ISNULL(MAX(CASE WHEN CFG_KEY = 'ADV_SCOPE' THEN CFG_VALUE END), 'CURRENT_MONTH')
+    FROM PAY2_CONFIG WITH (NOLOCK)
+    WHERE CFG_KEY IN ('ADV_USE_HES_T_FILTER', 'ADV_MIN_POSITIVE', 'ADV_SCOPE');
 
-    -- ── تابع کمکی داخلی: شرط فیلتر کامل حساب ─────────────────────────
-    -- چون SQL Server از inline lambda پشتیبانی نمی‌کند، شرط را به صورت
-    -- یک CTE مشترک می‌نویسیم و در هر سه SELECT استفاده می‌کنیم.
+    -- 5. محاسبه بازه تاریخ به صورت امن و بدون تقسیم خطرناک
+    -- تبدیل 14030700 به بازه 14030700 تا 14030799
+    DECLARE @MONTH_START BIGINT = (@PERIOD_DATE / 100) * 100;       
+    DECLARE @MONTH_END   BIGINT = @MONTH_START + 99;  
 
+    -- 6. اجرای کوئری نهایی مالی
     ;WITH AdvBase AS
     (
         SELECT
@@ -4616,49 +4606,57 @@ BEGIN
             E.ACC_T                            AS PCODE,
             E.LAST_NAME + N' ' + E.FIRST_NAME  AS FULL_NAME,
 
-            -- ── مانده خام ──────────────────────────────────────────────
+            -- مانده خام از حسابداری
             ISNULL((
                 SELECT CAST(SUM(D.BED - D.BES) AS BIGINT)
-                FROM DEED_HED H
-                INNER JOIN DEED_DTL D ON H.N_S = D.N_S
+                FROM DEED_HED H WITH (NOLOCK)
+                INNER JOIN DEED_DTL D WITH (NOLOCK) ON H.N_S = D.N_S
                 WHERE
                     D.HES_K = @HES_K
                     AND D.HES_M = @HES_M
-                    -- سطوح ثابت از کد کامل
-                    AND (@HES_T  IS NULL OR D.HES_T  = @HES_T)
-                    AND (@HES_T2 IS NULL OR D.HES_T2 = @HES_T2)
-                    AND (@HES_T3 IS NULL OR D.HES_T3 = @HES_T3)
-                    AND (@HES_T4 IS NULL OR D.HES_T4 = @HES_T4)
-                    -- فیلتر per پرسنل روی اولین سطح آزاد
+                    -- 🚀 فیلتر دقیق سطوح بالادستی (باید دقیقاً برابر با مقدار کانفیگ باشند)
+                    AND (@EMP_FILTER_LEVEL <= 3 OR D.HES_T  = @HES_T)
+                    AND (@EMP_FILTER_LEVEL <= 4 OR D.HES_T2 = @HES_T2)
+                    AND (@EMP_FILTER_LEVEL <= 5 OR D.HES_T3 = @HES_T3)
+                    AND (@EMP_FILTER_LEVEL <= 6 OR D.HES_T4 = @HES_T4)
+                    
+                    -- 🚀 فیلتر سطح پرسنل (یا فعال نیست، یا باید دقیقاً برابر با کد پرسنل باشد)
                     AND (
                         @USE_T = 0
-                        OR (
-                            (@EMP_FILTER_LEVEL = 3 AND D.HES_T  = E.ACC_T) OR
-                            (@EMP_FILTER_LEVEL = 4 AND D.HES_T2 = E.ACC_T) OR
-                            (@EMP_FILTER_LEVEL = 5 AND D.HES_T3 = E.ACC_T) OR
-                            (@EMP_FILTER_LEVEL = 6 AND D.HES_T4 = E.ACC_T)
-                        )
+                        OR TRY_CAST(NULLIF(TRIM(E.ACC_T), '') AS INT) = 
+                           CASE @EMP_FILTER_LEVEL 
+                                WHEN 3 THEN D.HES_T 
+                                WHEN 4 THEN D.HES_T2 
+                                WHEN 5 THEN D.HES_T3 
+                                WHEN 6 THEN D.HES_T4 
+                           END
                     )
-                    AND H.N_S < @PAYROLL_N_S
+
+                    -- 🚀 جلوگیری از نشت داده (سطوح پایین‌تر از پرسنل باید خالی یا صفر باشند)
+                    AND (@EMP_FILTER_LEVEL >= 4 OR ISNULL(D.HES_T2, 0) = 0)
+                    AND (@EMP_FILTER_LEVEL >= 5 OR ISNULL(D.HES_T3, 0) = 0)
+                    AND (@EMP_FILTER_LEVEL >= 6 OR ISNULL(D.HES_T4, 0) = 0)
+
+                    AND H.N_S < ISNULL(@PAYROLL_N_S, 999999999)
+                    AND H.OKF = 1
                     AND (
                         @ADV_SCOPE = 'OPEN_BALANCE'
-                        OR [dbo].[FN_PAY2_MONTH](H.DATE_S) = @PERIOD_MONTH
+                        OR (H.DATE_S BETWEEN @MONTH_START AND @MONTH_END) 
                     )
-                    AND H.OKF = 1
             ), 0) AS RAW_BALANCE,
 
-            -- ── استثناهای دستی ─────────────────────────────────────────
+            -- استثناهای دستی مساعده
             ISNULL((
                 SELECT SUM(EXCL_AMOUNT)
-                FROM PAY2_ADVANCE_EXCL
+                FROM PAY2_ADVANCE_EXCL WITH (NOLOCK)
                 WHERE EMP_ID = E.EMP_ID
-                  AND PERIOD_DATE / 100 = @PERIOD_MONTH
+                  AND PERIOD_DATE BETWEEN @MONTH_START AND @MONTH_END
             ), 0) AS MANUAL_EXCL
 
-        FROM PAY2_EMPLOYEE E
-        INNER JOIN PAY2_PERIOD P
+        FROM PAY2_EMPLOYEE E WITH (NOLOCK)
+        INNER JOIN PAY2_PERIOD P WITH (NOLOCK)
             ON P.WS_ID = E.WS_ID
-            AND P.PERIOD_DATE / 100 = @PERIOD_MONTH
+            AND P.PERIOD_DATE = @PERIOD_DATE 
         WHERE E.WS_ID     = @WS_ID
           AND E.IS_ACTIVE = 1
           AND E.ACC_T IS NOT NULL
@@ -4669,7 +4667,6 @@ BEGIN
         FULL_NAME,
         RAW_BALANCE,
         MANUAL_EXCL,
-        -- ── مانده نهایی ────────────────────────────────────────────────
         CASE
             WHEN @MIN_POS = 1 AND (RAW_BALANCE - MANUAL_EXCL) <= 0
                 THEN 0
@@ -4678,7 +4675,8 @@ BEGIN
                     ELSE RAW_BALANCE - MANUAL_EXCL
                  END
         END AS ADVANCE_DEDUCTION
-    FROM AdvBase;
+    FROM AdvBase
+    OPTION (RECOMPILE); 
 
 END;
 
@@ -6319,6 +6317,13 @@ GO
                 //try { db.Execute($@""); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;"); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;"); } catch { }
+                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD 
+    [PROVINCE] NVARCHAR(50) NULL,             -- نام استان
+    [CITY] NVARCHAR(50) NULL,                 -- نام شهر
+    [REGISTRATION_NUMBER] NVARCHAR(20) NULL,  -- شماره ثبت
+    [SSO_BRANCH] NVARCHAR(50) NULL,           -- شعبه تامین اجتماعی
+    [FINANCIAL_MANAGER] NVARCHAR(100) NULL,   -- مدیر مالی
+    [ADMIN_MANAGER] NVARCHAR(100) NULL;       -- معاون اداری مالی"); } catch { }
 
                 //-- ساخت ایندکس ترکیبی برای حذف عملیات سورت و اسکن جدول شغل‌ها
                 try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
