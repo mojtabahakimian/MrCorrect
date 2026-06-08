@@ -225,6 +225,17 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
+
+                    <DataGridTemplateColumn Header="پارامتر ها" x:Name="PARAMS_COLUMN" Visibility="Hidden">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="PARAMS_BTN" IsTabStop="False" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="Black" Padding="2" Click="PARAMS_BTN_Click" Tag="{Binding}">
+                                    <materialDesign:PackIcon Kind="FileDocument" Margin="0,0,0,0" Height="17" Width="21" Foreground="#7F252526" />
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                 </DataGrid.Columns>
 
             </DataGrid>
