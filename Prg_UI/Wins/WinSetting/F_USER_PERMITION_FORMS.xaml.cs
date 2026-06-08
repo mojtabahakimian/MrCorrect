@@ -664,10 +664,21 @@ namespace Wins.WinSetting
         private void SavePermissions()
         {
             var selectedUsers = ALL_USERS.Where(u => u.IsSelected).ToList();
-            // علاوه بر دسترسی‌هایی که چک‌باکس کنار آنها تیک خورده، دسترسی‌هایی که کاربر مقادیر آنها را تغییر داده
-            // (IsModified) هم باید لحاظ شوند، چون با جابجایی آیتم انتخاب‌شده در لیست (SelectionMode=Single)
-            // مقدار IsSelected آیتم‌های قبلی به دلیل بایند دوطرفه با ListBoxItem.IsSelected ریست می‌شود.
-            var selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected || p.IsModified).ToList();
+
+            List<SALS_PERMIS> selectedPermissions;
+            if (SS.IsChecked ?? false) //انتخاب تکی
+            {
+                // در حالت انتخاب تکی، با جابجایی آیتم انتخاب‌شده در لیست (SelectionMode=Single)، مقدار
+                // IsSelected آیتم‌های قبلی به دلیل بایند دوطرفه با ListBoxItem.IsSelected ریست می‌شود؛
+                // پس باید دسترسی‌هایی که مقادیرشان تغییر کرده (IsModified) را هم لحاظ کنیم.
+                selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected || p.IsModified).ToList();
+            }
+            else
+            {
+                // در حالت انتخاب چندگانه، انتخاب آیتم‌ها جایگزین یکدیگر نمی‌شود، پس IsSelected
+                // معیار درستی برای تشخیص دسترسی‌های موردنظر کاربر برای ذخیره است.
+                selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected).ToList();
+            }
 
             bool Happenned = false;
             int PSC = 0;
@@ -778,6 +789,9 @@ namespace Wins.WinSetting
                 {
                     permission.IsSelected = initialPermission.IsSelected;
                 }
+
+                // پاکسازی فلگ تغییرات تأییدنشده تا پس از بازگردانی، چیزی برای ذخیره باقی نماند
+                permission.IsModified = false;
             }
 
             // Restore users
