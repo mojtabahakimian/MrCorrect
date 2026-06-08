@@ -664,7 +664,10 @@ namespace Wins.WinSetting
         private void SavePermissions()
         {
             var selectedUsers = ALL_USERS.Where(u => u.IsSelected).ToList();
-            var selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected).ToList();
+            // علاوه بر دسترسی‌هایی که چک‌باکس کنار آنها تیک خورده، دسترسی‌هایی که کاربر مقادیر آنها را تغییر داده
+            // (IsModified) هم باید لحاظ شوند، چون با جابجایی آیتم انتخاب‌شده در لیست (SelectionMode=Single)
+            // مقدار IsSelected آیتم‌های قبلی به دلیل بایند دوطرفه با ListBoxItem.IsSelected ریست می‌شود.
+            var selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected || p.IsModified).ToList();
 
             bool Happenned = false;
             int PSC = 0;
@@ -690,6 +693,7 @@ namespace Wins.WinSetting
                             WHERE USERCO = {user.IDD} AND OBJECT = {permission.OBJECT}");
 
                             permission.IsSelected = false; //reset selection
+                            permission.IsModified = false;
                         }
                     }
                     else
@@ -702,6 +706,7 @@ namespace Wins.WinSetting
                             WHERE USERCO = {user.IDD} AND OBJECT = {permission.OBJECT}");
 
                         permission.IsSelected = false; //reset selection
+                        permission.IsModified = false;
                     }
 
                     _ = AuditLogger.LogActionAsync(
@@ -741,7 +746,7 @@ namespace Wins.WinSetting
                     }
 
                     // Reset IsSelected for all permissions
-                    foreach (var p in PERMISIONS_DATA) { p.IsSelected = false; }
+                    foreach (var p in PERMISIONS_DATA) { p.IsSelected = false; p.IsModified = false; }
                     // Reset IsSelected for all users
                     foreach (var p in ALL_USERS) { p.IsSelected = false; }
 
@@ -1192,6 +1197,7 @@ namespace Wins.WinSetting
                         if (permissionToUpdateInDataSource.RUN != newRunState) // فقط در صورت تغییر واقعی، به‌روزرسانی کنید
                         {
                             permissionToUpdateInDataSource.RUN = newRunState;
+                            permissionToUpdateInDataSource.IsModified = true;
                             ChangeIsHappend = true; // علامت‌گذاری وقوع تغییر
                         }
                     }
@@ -1233,6 +1239,7 @@ namespace Wins.WinSetting
                         if (permissionToUpdateInDataSource.SEE != _READ_) // فقط در صورت تغییر واقعی، به‌روزرسانی کنید
                         {
                             permissionToUpdateInDataSource.SEE = _READ_;
+                            permissionToUpdateInDataSource.IsModified = true;
                             ChangeIsHappend = true; // علامت‌گذاری وقوع تغییر
                         }
                     }
@@ -1272,6 +1279,7 @@ namespace Wins.WinSetting
                         if (permissionToUpdateInDataSource.UPD != _UPDATE_) // فقط در صورت تغییر واقعی، به‌روزرسانی کنید
                         {
                             permissionToUpdateInDataSource.UPD = _UPDATE_;
+                            permissionToUpdateInDataSource.IsModified = true;
                             ChangeIsHappend = true; // علامت‌گذاری وقوع تغییر
                         }
                     }
@@ -1311,6 +1319,7 @@ namespace Wins.WinSetting
                         if (permissionToUpdateInDataSource.DEL != _DELETE_) // فقط در صورت تغییر واقعی، به‌روزرسانی کنید
                         {
                             permissionToUpdateInDataSource.DEL = _DELETE_;
+                            permissionToUpdateInDataSource.IsModified = true;
                             ChangeIsHappend = true; // علامت‌گذاری وقوع تغییر
                         }
                     }
@@ -1351,6 +1360,7 @@ namespace Wins.WinSetting
                         if (permissionToUpdateInDataSource.INP != _INSERT_) // فقط در صورت تغییر واقعی، به‌روزرسانی کنید
                         {
                             permissionToUpdateInDataSource.INP = _INSERT_;
+                            permissionToUpdateInDataSource.IsModified = true;
                             ChangeIsHappend = true; // علامت‌گذاری وقوع تغییر
                         }
                     }

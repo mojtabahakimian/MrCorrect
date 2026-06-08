@@ -51,7 +51,11 @@ namespace Prg_Proccessy.SQLMODELS
                 _isSelected = value;
                 OnPropertyChanged("IsSelected");
             }
-        }  
+        }
+
+        // فلگ داخلی برای ردیابی تغییرات چک‌باکس‌ها (اجرا/مشاهده/...)؛ به هیچ عنصر UI بایند نمی‌شود
+        // تا با تغییر آیتم انتخاب‌شده در لیست (که IsSelected را ریست می‌کند) از بین نرود.
+        public bool IsModified { get; set; }
         
         private SALS_PERMIS _selectedrow;
         public SALS_PERMIS SelectedRow
