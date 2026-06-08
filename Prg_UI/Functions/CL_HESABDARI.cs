@@ -2417,6 +2417,35 @@ namespace Prg_Proccessy.FUNCTIONS
         }
 
 
+        private static string SqlUnicodeLiteral(string value)
+        {
+            return "N'" + (value ?? string.Empty).Replace("'", "''") + "'";
+        }
+
+        private static string ToArabicKeYe(string value)
+        {
+            return (value ?? string.Empty)
+                .Replace('ی', 'ي')
+                .Replace('ک', 'ك');
+        }
+
+        private static string BuildUserNameRestriction(string userName)
+        {
+            var normalizedUserName = CL_LMethods.NormalizeArabicPersian(userName);
+            var userNames = new[]
+            {
+                userName,
+                normalizedUserName,
+                ToArabicKeYe(userName),
+                ToArabicKeYe(normalizedUserName)
+            }
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.Ordinal)
+            .Select(name => "(USER_NAME = " + SqlUnicodeLiteral(name) + ")");
+
+            return "(" + string.Join(" or ", userNames) + ")";
+        }
+
         public static string UserOnChart(int USERCOD)
         {
             string UserOnChartRet = "";
@@ -2431,13 +2460,15 @@ namespace Prg_Proccessy.FUNCTIONS
                     {
                         goto allu;
                     }
-                    else if (string.IsNullOrEmpty(vs))
+
+                    var userRestriction = BuildUserNameRestriction(DECODEUN(item.SAL_NAME));
+                    if (string.IsNullOrEmpty(vs))
                     {
-                        vs = "(USER_NAME = N'" + DECODEUN(item.SAL_NAME) + "') ";
+                        vs = userRestriction + " ";
                     }
                     else
                     {
-                        vs = vs + " or (USER_NAME = N'" + DECODEUN(item.SAL_NAME) + "') ";
+                        vs = vs + " or " + userRestriction + " ";
                     }
                     //RST.MoveNext();
                 }
