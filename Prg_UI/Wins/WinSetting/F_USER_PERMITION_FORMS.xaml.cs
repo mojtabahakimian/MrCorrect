@@ -518,6 +518,7 @@ namespace Wins.WinSetting
                 {
                     item.CAPTION = item.CAPTION.FixPersianChars();
                 }
+                item.IsModified = false;
                 PERMISIONS_DATA.Add(item);
             }
         }
@@ -664,7 +665,15 @@ namespace Wins.WinSetting
         private void SavePermissions()
         {
             var selectedUsers = ALL_USERS.Where(u => u.IsSelected).ToList();
-            var selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected).ToList();
+            List<SALS_PERMIS> selectedPermissions;
+            if (SS.IsChecked ?? false)
+            {
+                selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected || p.IsModified).ToList();
+            }
+            else
+            {
+                selectedPermissions = PERMISIONS_DATA.Where(p => p.IsSelected).ToList();
+            }
 
             bool Happenned = false;
             int PSC = 0;
@@ -690,6 +699,7 @@ namespace Wins.WinSetting
                             WHERE USERCO = {user.IDD} AND OBJECT = {permission.OBJECT}");
 
                             permission.IsSelected = false; //reset selection
+                            permission.IsModified = false;
                         }
                     }
                     else
@@ -702,6 +712,7 @@ namespace Wins.WinSetting
                             WHERE USERCO = {user.IDD} AND OBJECT = {permission.OBJECT}");
 
                         permission.IsSelected = false; //reset selection
+                        permission.IsModified = false;
                     }
 
                     _ = AuditLogger.LogActionAsync(
@@ -741,7 +752,7 @@ namespace Wins.WinSetting
                     }
 
                     // Reset IsSelected for all permissions
-                    foreach (var p in PERMISIONS_DATA) { p.IsSelected = false; }
+                    foreach (var p in PERMISIONS_DATA) { p.IsSelected = false; p.IsModified = false; }
                     // Reset IsSelected for all users
                     foreach (var p in ALL_USERS) { p.IsSelected = false; }
 
@@ -783,6 +794,12 @@ namespace Wins.WinSetting
                 {
                     user.IsSelected = initialUser.IsSelected;
                 }
+            }
+
+            // Reset IsModified on restored permissions
+            foreach (var permission in PERMISIONS_DATA)
+            {
+                permission.IsModified = false;
             }
 
             // Restore checkbox states

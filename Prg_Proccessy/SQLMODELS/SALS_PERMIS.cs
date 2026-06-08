@@ -17,16 +17,27 @@ namespace Prg_Proccessy.SQLMODELS
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
         private DateTime? _crt;
         public DateTime? CRT { get => _crt; set { if (_crt == value) return; _crt = value; OnPropertyChanged("CRT"); } }
+        private bool _isModified;
+        public bool IsModified
+        {
+            get => _isModified;
+            set
+            {
+                _isModified = value;
+                OnPropertyChanged("IsModified");
+            }
+        }
+
         private bool? _del;
-        public bool? DEL { get => _del; set { if (_del == value) return; _del = value; OnPropertyChanged("DEL"); } }
+        public bool? DEL { get => _del; set { if (_del == value) return; _del = value; IsModified = true; OnPropertyChanged("DEL"); } }
         private bool? _upd;
-        public bool? UPD { get => _upd; set { if (_upd == value) return; _upd = value; OnPropertyChanged("UPD"); } }
+        public bool? UPD { get => _upd; set { if (_upd == value) return; _upd = value; IsModified = true; OnPropertyChanged("UPD"); } }
         private bool? _inp;
-        public bool? INP { get => _inp; set { if (_inp == value) return; _inp = value; OnPropertyChanged("INP"); } }
+        public bool? INP { get => _inp; set { if (_inp == value) return; _inp = value; IsModified = true; OnPropertyChanged("INP"); } }
         private bool? _see;
-        public bool? SEE { get => _see; set { if (_see == value) return; _see = value; OnPropertyChanged("SEE"); } }
+        public bool? SEE { get => _see; set { if (_see == value) return; _see = value; IsModified = true; OnPropertyChanged("SEE"); } }
         private bool? _run;
-        public bool? RUN { get => _run; set { if (_run == value) return; _run = value; OnPropertyChanged("RUN"); } }
+        public bool? RUN { get => _run; set { if (_run == value) return; _run = value; IsModified = true; OnPropertyChanged("RUN"); } }
         private int? _object;
         public int? OBJECT { get => _object; set { if (_object == value) return; _object = value; OnPropertyChanged("OBJECT"); } }
         private int? _userco;
