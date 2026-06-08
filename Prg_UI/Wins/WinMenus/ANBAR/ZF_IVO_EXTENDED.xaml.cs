@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.SANATI;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
@@ -131,6 +132,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         //(WIN_COME as HEAD_LST_RASID).TAH.Text = paramsString; //فیلد تحویل گیرنده
                         dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET SHARAYET = N'{paramsString}'
                                              WHERE NUMBER = {(WIN_COME as HEAD_LST_RASID).NUMBER.Text} AND TAG IN (1) ");
+                        break;
+
+                    case HAVALAH_ENTER:
+                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET SHARAYET = N'{paramsString}'
+                                             WHERE NUMBER = {(WIN_COME as HAVALAH_ENTER).NUMBER.Text} AND TAG IN (9) ");
                         break;
 
                     case HEAD_LST_KHADAMAT:

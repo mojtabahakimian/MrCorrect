@@ -32,7 +32,7 @@ namespace Prg_UI.Scriptses
                 #region SALARY
                 if (_type_ == 2) //مخصوص حقوق
                 {
-                    SalaryScript(isCustomCall, db);
+                    SalaryScript(true, db);
                 }
                 #endregion
 

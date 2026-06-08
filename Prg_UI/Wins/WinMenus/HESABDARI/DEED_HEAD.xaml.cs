@@ -16,6 +16,7 @@ using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -117,6 +118,23 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public Search_Model FROM_SEARCH { get; set; } = new Search_Model();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+        // هنگام ورود سریع ردیف‌ها، هر بار کامیت سلول حساب/نام‌حساب یک رفت‌وبرگشت شبکه‌ای همزمان روی UI Thread
+        // ایجاد می‌کرد که روی شبکه (برخلاف لوکال) باعث هنگ کوتاه دقیقا هنگام رسیدن فوکوس به ستون شرح می‌شد.
+        // کش کردن نتیجه CUST_HESAB بر اساس کد حساب، رفت‌وبرگشت‌های تکراری برای حساب‌های تکراری را حذف می‌کند.
+        private static readonly ConcurrentDictionary<string, CUST_HESAB?> _custHesabCache = new();
+
+        private CUST_HESAB? GetCustHesabCached(string hes)
+        {
+            if (string.IsNullOrEmpty(hes)) return null;
+
+            if (_custHesabCache.TryGetValue(hes, out var cached))
+                return cached;
+
+            var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + hes + "'").FirstOrDefault();
+            _custHesabCache[hes] = data;
+            return data;
+        }
 
         public object ENTERED_VALUE_ROW { get; private set; }
 
@@ -1412,7 +1430,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                     {
 
                         //CL_HESAB_SEARCH.Go_Search_Hesab(ENTERED_VALUE_ROW.ToString(), "DEED_HEAD", I_AM_SANAD);
-                        var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT * FROM dbo.CUST_HESAB WHERE hes = N'" + ENTERED_VALUE_ROW + "'").FirstOrDefault();
+                        var data = GetCustHesabCached(ENTERED_VALUE_ROW.ToStringNullSafe());
                         if (data is not null && !string.IsNullOrEmpty(data.hes))
                         {
                             CURRENT_ITMES_ROW.HES = data.hes;
@@ -1554,8 +1572,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 }
                 if (CURRENT_ITMES_ROW.HES is not null && CURRENT_ITMES_ROW.HES != "")
                 {
-                    var NAME = dbms.DoGetDataSQL<CUST_HESAB>($"SELECT hes , NAME FROM  CUST_HESAB WHERE hes = N'{CURRENT_ITMES_ROW.HES}'").ToList();
-                    CURRENT_ITMES_ROW.NAME_HES = NAME.FirstOrDefault()?.NAME;
+                    CURRENT_ITMES_ROW.NAME_HES = GetCustHesabCached(CURRENT_ITMES_ROW.HES)?.NAME;
                 }
             }
 
@@ -2308,7 +2325,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 CURRENT_ITMES_ROW = item;
 
                 //برای اینکه اگر فقط حساب ها وارد شده بود , بیاد بقیه مشتقات اون رو هم خودش بگیره
-                var _HESNAME_ = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{CURRENT_ITMES_ROW.HES}'").FirstOrDefault();
+                var _HESNAME_ = GetCustHesabCached(CURRENT_ITMES_ROW.HES)?.NAME;
                 if (!string.IsNullOrEmpty(_HESNAME_))
                 {
                     CURRENT_ITMES_ROW.NAME_HES = _HESNAME_;

@@ -12,6 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinOther;
 using Rpts;
 using Stimulsoft.Report;
@@ -546,6 +547,15 @@ namespace Wins.WinMenus.SANATI
             else
             {
                 N_KOL_COLUMN.Visibility = Visibility.Hidden;
+            }
+
+            if (Strings.Mid(Baseknow.OPTIONSS, 68, 1) == "5")
+            {
+                PARAMS_COLUMN.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                PARAMS_COLUMN.Visibility = Visibility.Hidden;
             }
             #endregion
 
@@ -2572,6 +2582,11 @@ namespace Wins.WinMenus.SANATI
 
             ////SANAD();
 
+            if (Strings.Mid(Baseknow.OPTIONSS, 68, 1) == "5")
+            {
+                PARAMS_COLUMN.Visibility = Visibility.Visible;
+            }
+
             if (MasterTopErrorMessages.Any())
             {
                 INVO_LST_SUB_CANCEL_EDIT();
@@ -3074,6 +3089,29 @@ namespace Wins.WinMenus.SANATI
         private void Command106_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void PARAMS_BTN_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button)
+            {
+                var BTN_DATA = (sender as Button).Tag;
+                if (BTN_DATA.ToStringNullSafe() is "{DataGrid.NewItemPlaceholder}") { return; }
+
+                var SATR_HAVALEH = (INVO_LST_FACTOR22)BTN_DATA;
+                if (!IsNull(SATR_HAVALEH.id))
+                {
+                    var Id = dbms.DoGetDataSQL<Int64?>("Select id From dbo.IVO_EXTENDED WHERE id=" + SATR_HAVALEH.id).SingleOrDefault();
+                    if (Id == null)
+                        dbms.DoExecuteSQL("insert into [dbo].[IVO_EXTENDED] values(" + SATR_HAVALEH.id + ",0,0,0,0,0,0,0,0,0,0,getdate()," + Baseknow.USERCOD + ")");
+                    new ZF_IVO_EXTENDED((int)SATR_HAVALEH.id, I_AM_VK_SAKHTEH).ShowDialog();
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp("ابتدا دکمه ذخیره را بزنید سپس قسمت پارامتر ها رو باز کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                    return;
+                }
+            }
         }
 
         private void N_S_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
