@@ -1485,7 +1485,7 @@ namespace Prg_Proccessy.SQLMODELS
             public double? TAG { get; set; }
             public double? tamir { get; set; }
         }
-        public class OTHER_DTL_SUB_MONITOR : INotifyPropertyChanged, ICloneable , IEditableObject
+        public class OTHER_DTL_SUB_MONITOR : INotifyPropertyChanged, ICloneable, IEditableObject
         {
             public object Clone()
             {
@@ -2418,21 +2418,130 @@ namespace Prg_Proccessy.SQLMODELS
             public DateTime? CRT { get; set; }
             public int? UID { get; set; }
         }
-        public class IVO_EXTENDED_CSHARP
+        public class IVO_EXTENDED_CSHARP : IEditableObject
         {
             public long? id { get; set; }
-            public double? FLD1 { get; set; }
-            public double? FLD2 { get; set; }
-            public double? FLD3 { get; set; }
-            public double? FLD4 { get; set; }
-            public double? FLD5 { get; set; }
-            public double? FLD6 { get; set; }
-            public double? FLD7 { get; set; }
-            public double? FLD8 { get; set; }
-            public double? FLD9 { get; set; }
-            public double? FLD10 { get; set; }
+            public double? FLD1 { get; set; } = 0;
+            public double? FLD2 { get; set; } = 0;
+            public double? FLD3 { get; set; } = 0;
+            public double? FLD4 { get; set; } = 0;
+            public double? FLD5 { get; set; } = 0;
+            public double? FLD6 { get; set; } = 0;
+            public double? FLD7 { get; set; } = 0;
+            public double? FLD8 { get; set; } = 0;
+            public double? FLD9 { get; set; } = 0;
+            public double? FLD10 { get; set; } = 0;
+            public double? FLD11 { get; set; } = 0;
+            public double? FLD12 { get; set; } = 0;
+            public double? FLD13 { get; set; } = 0;
+            public double? FLD14 { get; set; } = 0;
+
             public DateTime? CRT { get; set; }
             public int? UID { get; set; }
+
+            public IVO_EXTENDED_CSHARP()
+            {
+                FLD1 = 0;
+                FLD2 = 0;
+                FLD3 = 0;
+                FLD4 = 0;
+                FLD5 = 0;
+                FLD6 = 0;
+                FLD7 = 0;
+                FLD8 = 0;
+                FLD9 = 0;
+                FLD10 = 0;
+                FLD11 = 0;
+                FLD12 = 0;
+                FLD13 = 0;
+                FLD14 = 0;
+            }
+
+            private struct BackupData
+            {
+                public long? id;
+                public double? FLD1;
+                public double? FLD2;
+                public double? FLD3;
+                public double? FLD4;
+                public double? FLD5;
+                public double? FLD6;
+                public double? FLD7;
+                public double? FLD8;
+                public double? FLD9;
+                public double? FLD10;
+                public double? FLD11;
+                public double? FLD12;
+                public double? FLD13;
+                public double? FLD14;
+                public DateTime? CRT;
+                public int? UID;
+            }
+
+            private BackupData _backupData;
+            private bool _inEdit = false;
+            public void BeginEdit()
+            {
+                if (!_inEdit)
+                {
+                    _backupData = new BackupData
+                    {
+                        id = this.id,
+                        FLD1 = this.FLD1,
+                        FLD2 = this.FLD2,
+                        FLD3 = this.FLD3,
+                        FLD4 = this.FLD4,
+                        FLD5 = this.FLD5,
+                        FLD6 = this.FLD6,
+                        FLD7 = this.FLD7,
+                        FLD8 = this.FLD8,
+                        FLD9 = this.FLD9,
+                        FLD10 = this.FLD10,
+                        FLD11 = this.FLD11,
+                        FLD12 = this.FLD12,
+                        FLD13 = this.FLD13,
+                        FLD14 = this.FLD14,
+                        CRT = this.CRT,
+                        UID = this.UID
+                    };
+                    _inEdit = true;
+                }
+            }
+            public void CancelEdit()
+            {
+                if (_inEdit)
+                {
+                    // برگرداندن مقادیر به حالت بک‌آپ گرفته شده
+                    this.id = _backupData.id;
+                    this.FLD1 = _backupData.FLD1;
+                    this.FLD2 = _backupData.FLD2;
+                    this.FLD3 = _backupData.FLD3;
+                    this.FLD4 = _backupData.FLD4;
+                    this.FLD5 = _backupData.FLD5;
+                    this.FLD6 = _backupData.FLD6;
+                    this.FLD7 = _backupData.FLD7;
+                    this.FLD8 = _backupData.FLD8;
+                    this.FLD9 = _backupData.FLD9;
+                    this.FLD10 = _backupData.FLD10;
+                    this.FLD11 = _backupData.FLD11;
+                    this.FLD12 = _backupData.FLD12;
+                    this.FLD13 = _backupData.FLD13;
+                    this.FLD14 = _backupData.FLD14;
+                    this.CRT = _backupData.CRT;
+                    this.UID = _backupData.UID;
+
+                    _inEdit = false;
+                }
+            }
+            public void EndEdit()
+            {
+                if (_inEdit)
+                {
+                    // دور ریختن بک‌آپ و پایان حالت ویرایش
+                    _backupData = new BackupData();
+                    _inEdit = false;
+                }
+            }
         }
         public class QRE_KH_04
         {
