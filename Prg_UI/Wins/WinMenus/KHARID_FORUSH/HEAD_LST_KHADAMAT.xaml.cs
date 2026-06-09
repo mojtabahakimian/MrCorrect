@@ -4317,7 +4317,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 if (ROW?.id != null)
                 {
-                    var _id_ = dbms.DoGetDataSQL<long?>("SELECT ID FROM dbo.IVO_EXTENDED WHERE id=" + ROW?.id).SingleOrDefault();
+                    var _id_ = dbms.DoGetDataSQL<long?>("SELECT ID FROM dbo.IVO_EXTENDED WHERE id=" + ROW?.id).FirstOrDefault();
                     if (_id_ == null)
                     {
                         dbms.DoExecuteSQL("INSERT INTO dbo.IVO_EXTENDED (id,FLD1,FLD2,FLD3,FLD4,FLD5,FLD6,FLD7,FLD8,FLD9,FLD10,CRT,UID) VALUES(" + ROW.id + ",0,0,0,0,0,0,0,0,0,0,GETDATE()," + Baseknow.USERCOD + ")");
