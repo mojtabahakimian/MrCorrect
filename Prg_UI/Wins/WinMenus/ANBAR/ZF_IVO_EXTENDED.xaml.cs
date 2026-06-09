@@ -68,6 +68,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             InitializeComponent();
             Id = _Id;
             WIN_COME = _YOUR_VL_WIN;
+            _rows.CollectionChanged += (s, e) => Btn_DelRow.IsEnabled = _rows.Count > 1;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -109,11 +110,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Btn_DelRow_Click(object sender, RoutedEventArgs e)
         {
             DG_Rows.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
-            if (!(DG_Rows.SelectedItem is IVO_EXTENDED_CSHARP selected)) return;
-
-            if (_rows.Count <= 1)
+            if (!(DG_Rows.SelectedItem is IVO_EXTENDED_CSHARP selected))
             {
-                new Msgwin(false, "حداقل یک سطر باید وجود داشته باشد").ShowDialog();
+                new Msgwin(false, "ابتدا یک سطر را انتخاب کنید").ShowDialog();
                 return;
             }
 

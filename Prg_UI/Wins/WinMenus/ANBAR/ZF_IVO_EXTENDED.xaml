@@ -97,7 +97,7 @@
                         Width="110" Padding="8,1,8,4" Click="Btn_AddRow_Click" IsTabStop="False"/>
                 <Button x:Name="Btn_DelRow" Content="حذف سطر" Margin="0,0,8,0"
                         BorderBrush="{x:Null}" FontSize="10" Height="32" Foreground="#DDFFFFFF" FontWeight="Bold"
-                        Width="90" Padding="8,1,8,4" Click="Btn_DelRow_Click" IsTabStop="False"/>
+                        Width="90" Padding="8,1,8,4" Click="Btn_DelRow_Click" IsTabStop="False" IsEnabled="False"/>
                 <Button x:Name="Save" Content="ذخیره"
                         BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" FontSize="10" Height="32"
                         Foreground="#DDFFFFFF" FontWeight="Bold" Width="100" TabIndex="10"
