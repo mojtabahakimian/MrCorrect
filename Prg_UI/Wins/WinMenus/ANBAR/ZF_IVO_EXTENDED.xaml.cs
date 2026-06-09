@@ -7,7 +7,9 @@ using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -94,6 +96,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void Btn_DelRow_Click(object sender, RoutedEventArgs e)
         {
+            DG_Rows.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
             if (DG_Rows.SelectedItem is IVO_EXTENDED_CSHARP selected)
             {
                 if (_rows.Count > 1)
@@ -107,28 +110,30 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             DG_Rows.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
 
-            double V(double? v) => v ?? 0;
+            // Use InvariantCulture to avoid locale decimal-separator issues (e.g. fa-IR: "1,5" instead of "1.5")
+            string V(double? v) => (v ?? 0).ToString(CultureInfo.InvariantCulture);
 
-            dbms.DoExecuteSQL($"DELETE FROM dbo.IVO_EXTENDED WHERE id = {Id}");
-
+            // Build one atomic SQL batch: if any INSERT fails, XACT_ABORT rolls back the DELETE too
+            var sql = new StringBuilder();
+            sql.Append("SET XACT_ABORT ON; BEGIN TRANSACTION; ");
+            sql.Append($"DELETE FROM dbo.IVO_EXTENDED WHERE id = {Id}; ");
             foreach (var row in _rows)
             {
-                dbms.DoExecuteSQL($@"INSERT INTO dbo.IVO_EXTENDED
+                sql.Append($@"INSERT INTO dbo.IVO_EXTENDED
                     (id, FLD1, FLD2, FLD3, FLD4, FLD5, FLD6, FLD7, FLD8, FLD9, FLD10, FLD11, FLD12, FLD13, FLD14, CRT, UID)
-                    VALUES (
-                        {Id},
+                    VALUES ({Id},
                         {V(row.FLD1)}, {V(row.FLD2)}, {V(row.FLD3)}, {V(row.FLD4)},
                         {V(row.FLD5)}, {V(row.FLD6)}, {V(row.FLD7)}, {V(row.FLD8)},
                         {V(row.FLD9)}, {V(row.FLD10)}, {V(row.FLD11)}, {V(row.FLD12)},
                         {V(row.FLD13)}, {V(row.FLD14)},
-                        GETDATE(), {Baseknow.USERCOD ?? 0}
-                    )");
+                        GETDATE(), {Baseknow.USERCOD ?? 0}); ");
             }
-
-            universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            sql.Append("COMMIT TRANSACTION;");
 
             try
             {
+                dbms.DoExecuteSQL(sql.ToString());
+
                 string paramsString = BuildParamsString();
 
                 switch (WIN_COME)
@@ -157,10 +162,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                     default: break;
                 }
+
+                universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
             catch (Exception)
             {
                 new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
+                return;
             }
 
             Close();
@@ -168,33 +176,35 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private string BuildParamsString()
         {
-            if (_rows.Count == 1)
-            {
-                var r = _rows[0];
-                return "چربي:" + (r.FLD1 ?? 0) +
-                       "- ماده خشک:" + (r.FLD2 ?? 0) +
-                       "- رطوبت:" + (r.FLD3 ?? 0) +
-                       "- پي اچ:" + (r.FLD4 ?? 0) +
-                       "- نمک:" + (r.FLD5 ?? 0) +
-                       "- دانسيته:" + (r.FLD6 ?? 0) +
-                       "- پروتئين:" + (r.FLD7 ?? 0) +
-                       "- انجماد:" + (r.FLD8 ?? 0) +
-                       "- اسيد:" + (r.FLD9 ?? 0) +
-                       "- الکل:" + (r.FLD10 ?? 0) +
-                       "- کلي فرم:" + (r.FLD11 ?? 0) +
-                       "- استاف:" + (r.FLD12 ?? 0) +
-                       "- اشيرشيا:" + (r.FLD13 ?? 0) +
-                       "- ذرات سوخته:" + (r.FLD14 ?? 0);
-            }
-            return $"{_rows.Count} سطر ثبت شد";
+            string RowLine(IVO_EXTENDED_CSHARP r) =>
+                "چربي:" + (r.FLD1 ?? 0) +
+                "- ماده خشک:" + (r.FLD2 ?? 0) +
+                "- رطوبت:" + (r.FLD3 ?? 0) +
+                "- پي اچ:" + (r.FLD4 ?? 0) +
+                "- نمک:" + (r.FLD5 ?? 0) +
+                "- دانسيته:" + (r.FLD6 ?? 0) +
+                "- پروتئين:" + (r.FLD7 ?? 0) +
+                "- انجماد:" + (r.FLD8 ?? 0) +
+                "- اسيد:" + (r.FLD9 ?? 0) +
+                "- الکل:" + (r.FLD10 ?? 0) +
+                "- کلي فرم:" + (r.FLD11 ?? 0) +
+                "- استاف:" + (r.FLD12 ?? 0) +
+                "- اشيرشيا:" + (r.FLD13 ?? 0) +
+                "- ذرات سوخته:" + (r.FLD14 ?? 0);
+
+            return string.Join(" | ", _rows.Select((r, i) =>
+                _rows.Count > 1 ? $"[{i + 1}] {RowLine(r)}" : RowLine(r)));
         }
 
         private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
-                e.Handled = true;
-                CL_LMethods.SendKey_US(Key.Tab);
+                if (!Save.IsFocused)
+                {
+                    e.Handled = true;
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
             }
         }
 
