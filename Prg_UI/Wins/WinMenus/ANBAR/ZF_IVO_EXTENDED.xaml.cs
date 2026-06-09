@@ -90,9 +90,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Btn_AddRow_Click(object sender, RoutedEventArgs e)
         {
             DG_Rows.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
+            if (IsRowEmpty(_rows.Last()))
+            {
+                new Msgwin(false, "لطفاً ابتدا سطر فعلی را پر کنید").ShowDialog();
+                return;
+            }
             _rows.Add(new IVO_EXTENDED_CSHARP { id = Id });
             DG_Rows.ScrollIntoView(_rows.Last());
         }
+
+        private static bool IsRowEmpty(IVO_EXTENDED_CSHARP r) =>
+            (r.FLD1 ?? 0) == 0 && (r.FLD2 ?? 0) == 0 && (r.FLD3 ?? 0) == 0 &&
+            (r.FLD4 ?? 0) == 0 && (r.FLD5 ?? 0) == 0 && (r.FLD6 ?? 0) == 0 &&
+            (r.FLD7 ?? 0) == 0 && (r.FLD8 ?? 0) == 0 && (r.FLD9 ?? 0) == 0 &&
+            (r.FLD10 ?? 0) == 0 && (r.FLD11 ?? 0) == 0 && (r.FLD12 ?? 0) == 0 &&
+            (r.FLD13 ?? 0) == 0 && (r.FLD14 ?? 0) == 0;
 
         private void Btn_DelRow_Click(object sender, RoutedEventArgs e)
         {
@@ -113,11 +125,18 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // Use InvariantCulture to avoid locale decimal-separator issues (e.g. fa-IR: "1,5" instead of "1.5")
             string V(double? v) => (v ?? 0).ToString(CultureInfo.InvariantCulture);
 
+            var rowsToSave = _rows.Where(r => !IsRowEmpty(r)).ToList();
+            if (!rowsToSave.Any())
+            {
+                new Msgwin(false, "حداقل یک سطر با داده باید وجود داشته باشد").ShowDialog();
+                return;
+            }
+
             // Build one atomic SQL batch: if any INSERT fails, XACT_ABORT rolls back the DELETE too
             var sql = new StringBuilder();
             sql.Append("SET XACT_ABORT ON; BEGIN TRANSACTION; ");
             sql.Append($"DELETE FROM dbo.IVO_EXTENDED WHERE id = {Id}; ");
-            foreach (var row in _rows)
+            foreach (var row in rowsToSave)
             {
                 sql.Append($@"INSERT INTO dbo.IVO_EXTENDED
                     (id, FLD1, FLD2, FLD3, FLD4, FLD5, FLD6, FLD7, FLD8, FLD9, FLD10, FLD11, FLD12, FLD13, FLD14, CRT, UID)
@@ -134,7 +153,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 dbms.DoExecuteSQL(sql.ToString());
 
-                string paramsString = BuildParamsString();
+                string paramsString = BuildParamsString(rowsToSave);
 
                 switch (WIN_COME)
                 {
@@ -174,7 +193,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             Close();
         }
 
-        private string BuildParamsString()
+        private string BuildParamsString(System.Collections.Generic.List<IVO_EXTENDED_CSHARP> rows)
         {
             string RowLine(IVO_EXTENDED_CSHARP r) =>
                 "چربي:" + (r.FLD1 ?? 0) +
@@ -192,8 +211,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 "- اشيرشيا:" + (r.FLD13 ?? 0) +
                 "- ذرات سوخته:" + (r.FLD14 ?? 0);
 
-            return string.Join(" | ", _rows.Select((r, i) =>
-                _rows.Count > 1 ? $"[{i + 1}] {RowLine(r)}" : RowLine(r)));
+            return string.Join(" | ", rows.Select((r, i) =>
+                rows.Count > 1 ? $"[{i + 1}] {RowLine(r)}" : RowLine(r)));
         }
 
         private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
