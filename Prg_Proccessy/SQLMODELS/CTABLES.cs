@@ -2431,6 +2431,10 @@ namespace Prg_Proccessy.SQLMODELS
             public double? FLD8 { get; set; }
             public double? FLD9 { get; set; }
             public double? FLD10 { get; set; }
+            public double? FLD11 { get; set; }
+            public double? FLD12 { get; set; }
+            public double? FLD13 { get; set; }
+            public double? FLD14 { get; set; }
             public DateTime? CRT { get; set; }
             public int? UID { get; set; }
         }
