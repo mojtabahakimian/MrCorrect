@@ -62,6 +62,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         public Visual WIN_COME { get; set; }
 
         private ObservableCollection<IVO_EXTENDED_CSHARP> _rows = new ObservableCollection<IVO_EXTENDED_CSHARP>();
+        private int _dbRowCount = 0;
 
         public ZF_IVO_EXTENDED(int _Id, Visual _YOUR_VL_WIN)
         {
@@ -85,13 +86,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (_rows.Count == 0)
                 _rows.Add(new IVO_EXTENDED_CSHARP { id = Id });
 
+            // Remember how many rows came from DB so we never treat them as "empty user input"
+            _dbRowCount = _rows.Count;
             DG_Rows.ItemsSource = _rows;
         }
 
         private void Btn_AddRow_Click(object sender, RoutedEventArgs e)
         {
             DG_Rows.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
-            if (IsRowEmpty(_rows.Last()))
+            // Only block adding a new row if the last row was added by the user this session AND is still empty
+            bool lastRowIsNewAndEmpty = _rows.Count > _dbRowCount && IsRowEmpty(_rows.Last());
+            if (lastRowIsNewAndEmpty)
             {
                 new Msgwin(false, "لطفاً ابتدا سطر فعلی را پر کنید").ShowDialog();
                 return;
@@ -129,7 +134,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // Use InvariantCulture to avoid locale decimal-separator issues (e.g. fa-IR: "1,5" instead of "1.5")
             string V(double? v) => (v ?? 0).ToString(CultureInfo.InvariantCulture);
 
-            var rowsToSave = _rows.Where(r => !IsRowEmpty(r)).ToList();
+            // DB rows are always saved; only new rows added this session are filtered if empty
+            var rowsToSave = _rows
+                .Where((r, i) => i < _dbRowCount || !IsRowEmpty(r))
+                .ToList();
             if (!rowsToSave.Any())
             {
                 new Msgwin(false, "حداقل یک سطر با داده باید وجود داشته باشد").ShowDialog();

@@ -73,14 +73,22 @@ BEGIN
         PRINT 'Dropped PK: ' + @pkName;
     END
 
-    -- Step 2: Add auto-increment PK column seq
+    -- Step 2a: Add seq IDENTITY column (separate guard from Step 2b so a partial-run is recoverable)
     IF NOT EXISTS (SELECT 1 FROM sys.columns
                    WHERE object_id = OBJECT_ID('dbo.IVO_EXTENDED') AND name = 'seq')
     BEGIN
         ALTER TABLE dbo.IVO_EXTENDED ADD [seq] INT IDENTITY(1,1) NOT NULL;
+        PRINT 'Added seq column.';
+    END
+
+    -- Step 2b: Add PK on seq (guarded independently so re-run fixes a partially-run script)
+    IF NOT EXISTS (SELECT 1 FROM sys.key_constraints
+                   WHERE name = 'PK_IVO_EXTENDED'
+                     AND parent_object_id = OBJECT_ID('dbo.IVO_EXTENDED'))
+    BEGIN
         ALTER TABLE dbo.IVO_EXTENDED
             ADD CONSTRAINT PK_IVO_EXTENDED PRIMARY KEY CLUSTERED ([seq]);
-        PRINT 'Added auto-increment PK column seq.';
+        PRINT 'Added PK constraint on seq.';
     END
 
     -- Step 3: Index on id for fast parent-record lookups
