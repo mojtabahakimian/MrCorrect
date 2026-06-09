@@ -3103,7 +3103,7 @@ namespace Wins.WinMenus.SANATI
                 {
                     var Id = dbms.DoGetDataSQL<Int64?>("Select id From dbo.IVO_EXTENDED WHERE id=" + SATR_HAVALEH.id).SingleOrDefault();
                     if (Id == null)
-                        dbms.DoExecuteSQL("insert into [dbo].[IVO_EXTENDED] values(" + SATR_HAVALEH.id + ",0,0,0,0,0,0,0,0,0,0,getdate()," + Baseknow.USERCOD + ")");
+                        dbms.DoExecuteSQL("INSERT INTO dbo.IVO_EXTENDED (id,FLD1,FLD2,FLD3,FLD4,FLD5,FLD6,FLD7,FLD8,FLD9,FLD10,CRT,UID) VALUES(" + SATR_HAVALEH.id + ",0,0,0,0,0,0,0,0,0,0,GETDATE()," + Baseknow.USERCOD + ")");
                     new ZF_IVO_EXTENDED((int)SATR_HAVALEH.id, I_AM_VK_SAKHTEH).ShowDialog();
                 }
                 else
