@@ -109,13 +109,18 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Btn_DelRow_Click(object sender, RoutedEventArgs e)
         {
             DG_Rows.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
-            if (DG_Rows.SelectedItem is IVO_EXTENDED_CSHARP selected)
+            if (!(DG_Rows.SelectedItem is IVO_EXTENDED_CSHARP selected)) return;
+
+            if (_rows.Count <= 1)
             {
-                if (_rows.Count > 1)
-                    _rows.Remove(selected);
-                else
-                    new Msgwin(false, "حداقل یک سطر باید وجود داشته باشد").ShowDialog();
+                new Msgwin(false, "حداقل یک سطر باید وجود داشته باشد").ShowDialog();
+                return;
             }
+
+            var confirm = MessageBox.Show("آیا از حذف این سطر اطمینان دارید؟", "حذف سطر",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (confirm == MessageBoxResult.Yes)
+                _rows.Remove(selected);
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)

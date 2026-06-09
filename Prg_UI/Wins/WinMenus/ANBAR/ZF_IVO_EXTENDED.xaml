@@ -67,7 +67,7 @@
                       HeadersVisibility="Column"
                       FlowDirection="RightToLeft"
                       FontSize="11"
-                      RowHeight="30"
+                      RowHeight="40"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
                       GridLinesVisibility="All"
