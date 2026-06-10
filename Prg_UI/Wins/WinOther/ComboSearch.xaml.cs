@@ -142,10 +142,11 @@ namespace Prg_UI.Wins.WinOther
                 shart2 = BuildSearchCondition("TNAME", MyTextSearch);
             }
 
-            // Combine shart and shart2 into one condition
+            // Combine shart and shart2 into one condition.
+            // Also match ignoring spaces so e.g. typing "عقابکوه" finds "عقاب کوه" (and vice versa).
             if (!string.IsNullOrEmpty(shart) && !string.IsNullOrEmpty(shart2))
             {
-                shart = $"(({shart}) OR ({shart2}))";
+                shart = $"(({shart}) OR ({shart2}) OR {BuildSpaceInsensitiveCondition("NAME", MyTextSearch)} OR {BuildSpaceInsensitiveCondition("TNAME", MyTextSearch)})";
             }
 
             // Show the result of the search using the constructed condition
@@ -167,6 +168,14 @@ namespace Prg_UI.Wins.WinOther
 
             // Build the search condition for the given column
             return $"({columnName} LIKE N'%{sanitizedWord}%' OR {columnName} LIKE N'%{ReplacePerArab(sanitizedWord, false)}%' OR {columnName} LIKE N'%{ReplacePerArab(sanitizedWord, true)}%')";
+        }
+        private string BuildSpaceInsensitiveCondition(string columnName, string searchText)
+        {
+            // Compare with all spaces removed from both sides, so names stored with spaces
+            // (e.g. "عقاب کوه") are found even when the user types them without spaces ("عقابکوه").
+            string compact = SanitizeSearchInput(searchText).Replace(" ", "");
+            string column = $"REPLACE({columnName}, N' ', N'')";
+            return $"({column} LIKE N'%{compact}%' OR {column} LIKE N'%{ReplacePerArab(compact, false)}%' OR {column} LIKE N'%{ReplacePerArab(compact, true)}%')";
         }
         private string SanitizeSearchInput(string input)
         {

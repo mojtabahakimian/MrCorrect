@@ -198,6 +198,8 @@ namespace Wins.WinOther
 
             // Normalize the search text by trimming whitespace and converting to lower case
             searchText = CL_LMethods.NormalizeArabicPersian(searchText).Trim();
+            // نسخهٔ بدون فاصله برای تطبیق فضای‌خالی‌نادیده (مثلا «عقابکوه» باید «عقاب کوه» را پیدا کند)
+            string compactSearchText = searchText.Replace(" ", "");
 
             var collectionView = CollectionViewSource.GetDefaultView(_dataGrid.ItemsSource);
             collectionView.Filter = item =>
@@ -209,7 +211,10 @@ namespace Wins.WinOther
 
                 // Normalize and compare the display value
                 displayValue = CL_LMethods.NormalizeArabicPersian(displayValue).Trim();
-                return displayValue.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase) >= 0;
+                if (displayValue.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                    return true;
+
+                return displayValue.Replace(" ", "").IndexOf(compactSearchText, StringComparison.CurrentCultureIgnoreCase) >= 0;
             };
 
             collectionView.Refresh();
