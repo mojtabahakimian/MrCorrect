@@ -146,7 +146,10 @@ namespace Prg_UI.Wins.WinOther
                 }
                 if (Strings.Len(shart) > 1)
                 {
-                    shart = "(( " + shart + ") or (" + shart2 + "))";
+                    // تطبیق بدون درنظرگرفتن فاصله: مثلا تایپ "عقابکوه" نام ذخیره‌شدهٔ "عقاب کوه" را هم پیدا کند
+                    string compact = MainRawText.Replace("'", "''").Replace(" ", "");
+                    string shart3 = "(REPLACE(NAME, N' ', N'') LIKE N'%" + Strings.Replace(Strings.Replace(compact, "ی", "ي"), "ک", "ك") + "%' OR REPLACE(NAME, N' ', N'') LIKE N'%" + Strings.Replace(Strings.Replace(compact, "ي", "ی"), "ك", "ک") + "%')";
+                    shart = "(( " + shart + ") or (" + shart2 + ") or (" + shart3 + "))";
                 }
             }
 

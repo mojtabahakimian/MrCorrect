@@ -87,7 +87,20 @@ namespace Prg_UI.Functions.Jostejoo
             var byName = string.Join(" AND ", nameClauses);
             var byTName = string.Join(" AND ", tnameClauses);
 
-            return $"(({byName}) OR ({byTName}))";
+            // تطبیق بدون درنظرگرفتن فاصله: فاصله‌ها هم از عبارت جستجو و هم از ستون حذف می‌شوند تا
+            // مثلا تایپ «عقابکوه» نام ذخیره‌شدهٔ «عقاب کوه» را هم پیدا کند (و برعکس).
+            var compact = rawTerm.Replace(" ", "");
+            var compactVariants = new[]
+            {
+                EscapeForLike(compact),
+                EscapeForLike(ToArabicVariant(compact)),
+                EscapeForLike(ToPersianVariant(compact))
+            }.Distinct().ToList();
+
+            var byNameCompact = string.Join(" OR ", compactVariants.Select(v => $"REPLACE(NAME, N' ', N'') LIKE N'%{v}%'"));
+            var byTNameCompact = string.Join(" OR ", compactVariants.Select(v => $"REPLACE(TNAME, N' ', N'') LIKE N'%{v}%'"));
+
+            return $"(({byName}) OR ({byTName}) OR ({byNameCompact}) OR ({byTNameCompact}))";
         }
 
         private static string ToArabicVariant(string value) => value.Replace('ی', 'ي').Replace('ک', 'ك');
