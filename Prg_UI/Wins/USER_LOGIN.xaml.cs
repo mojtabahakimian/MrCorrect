@@ -909,7 +909,10 @@ namespace Prg_UI.Wins
                             await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = $"تلاش مجدد {attempt}/{MAX_RETRIES}...");
                         }
 
-                        await CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset);
+                        // کل عملیات کپی در Thread پس‌زمینه اجرا می‌شود؛ باز کردن FileStream روی مسیر شبکه
+                        // همگام (Sync) است و اگر روی Thread رابط کاربری انجام شود، Share کند یا قطع
+                        // می‌تواند فرم لاگین را فریز کند (آپدیت‌های UI از داخل متد با Dispatcher انجام می‌شود)
+                        await Task.Run(() => CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset));
 
                         // Verify the result (size + executable header) before swapping anything
                         if (!VerifyDownloadedFile(tempExePath, sourceLength))
@@ -1030,6 +1033,16 @@ namespace Prg_UI.Wins
             string logPath = Path.Combine(localUpdateDir, UPDATE_LOG_FILE);
             int currentPid = Environment.ProcessId;
 
+            // متن فارسی هشدارِ آخرین‌راه‌حل در فایل جداگانه UTF-8 نوشته می‌شود؛
+            // cmd متن غیر ASCII داخل خود bat را (با یا بدون BOM) خراب نمایش می‌دهد
+            string alertMsgPath = Path.Combine(localUpdateDir, $"update_alert_{userSuffix}.txt");
+            File.WriteAllText(alertMsgPath,
+                "بروزرسانی خودکار ناتمام ماند و برنامه به صورت خودکار اجرا نشد.\r\n" +
+                "لطفا برنامه را به صورت دستی اجرا کنید.\r\n" +
+                "در صورت تکرار مشکل با پشتیبانی تماس بگیرید.\r\n" +
+                "(گزارش خطا: فایل update_log.txt در پوشه update کنار برنامه)",
+                Encoding.UTF8);
+
             // Hardened Batch Script
             // 1. Waits (bounded) for THIS process to exit before swapping
             // 2. If the exe is locked (e.g. other Remote Desktop users), renames it aside:
@@ -1096,10 +1109,10 @@ del ""{oldExe}"" > nul 2>&1
 del ""{tempExe}"" > nul 2>&1
 del ""{metaPath}"" > nul 2>&1
 start """" /D ""{currentDir}"" ""{currentExe}""
-if errorlevel 1 (
-    ping -n 3 127.0.0.1 > nul
-    start """" /D ""{currentDir}"" ""{currentExe}""
-)
+if not errorlevel 1 goto END
+ping -n 3 127.0.0.1 > nul
+start """" /D ""{currentDir}"" ""{currentExe}""
+if errorlevel 1 goto ALERT
 goto END
 
 :FAILED
@@ -1107,14 +1120,23 @@ echo [%date% %time%] UPDATE FAILED after %RETRY_COUNT% attempts >> %LOG_FILE% 2>
 echo [%date% %time%] swap failed >> ""{flagPath}""
 rem make sure a runnable exe is in place (restore the backup if the swap left none)
 if not exist ""{currentExe}"" move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
+if not exist ""{currentExe}"" goto ALERT
 rem restart the application so the user is not left with nothing
 start """" /D ""{currentDir}"" ""{currentExe}""
-if errorlevel 1 (
-    ping -n 3 127.0.0.1 > nul
-    start """" /D ""{currentDir}"" ""{currentExe}""
-)
+if not errorlevel 1 goto END
+ping -n 3 127.0.0.1 > nul
+start """" /D ""{currentDir}"" ""{currentExe}""
+if errorlevel 1 goto ALERT
+goto END
+
+rem last resort: the application could not be restarted at all - show a visible alert
+rem (the Persian text lives in a UTF-8 file written by the app; the bat stays pure ASCII)
+:ALERT
+echo [%date% %time%] app did not restart - showing alert >> %LOG_FILE% 2>nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command ""Add-Type -AssemblyName System.Windows.Forms; $t=[System.IO.File]::ReadAllText('{alertMsgPath}',[System.Text.Encoding]::UTF8); [System.Windows.Forms.MessageBox]::Show($t,'MrCorrect',0,48)"" > nul 2>&1
 
 :END
+del ""{alertMsgPath}"" > nul 2>&1
 del ""%~f0"" & exit
 ";
 
