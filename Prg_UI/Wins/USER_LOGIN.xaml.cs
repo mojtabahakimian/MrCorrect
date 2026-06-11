@@ -413,9 +413,10 @@ namespace Prg_UI.Wins
                 // Disable UI interactions immediately
                 DisableLoginUI();
 
-                // Await the task to ensure exceptions are caught within the context if possible, 
-                // though usually top-level event handlers are void.
+                // مسیر موفق با Environment.Exit تمام می‌شود و مسیرهای خطا خروج برنامه را در صف می‌گذارند؛
+                // در هر دو حالت نباید ادامه دهیم و UI لاگینِ غیرفعال‌شده را نمایش بدهیم
                 await PerformAutoUpdateAsync();
+                return;
             }
 
 
@@ -876,10 +877,15 @@ namespace Prg_UI.Wins
                     try
                     {
                         // اطلاعات فایل سرور در هر تلاش دوباره خوانده می‌شود تا تعویض شدن فایل وسط دانلود تشخیص داده شود
-                        var sourceInfo = await RunNetworkCheckAsync(() => new FileInfo(sourcePath), "خواندن اطلاعات فایل سرور");
-                        long sourceLength = sourceInfo.Length;
+                        // خود خواندن Length و LastWriteTime باید داخل لامبدا باشد؛ سازنده FileInfo هیچ I/O انجام نمی‌دهد
+                        // و دسترسی به Property بیرون از لامبدا، عملا Timeout را بی‌اثر می‌کرد
+                        var (sourceLength, sourceTicks) = await RunNetworkCheckAsync(() =>
+                        {
+                            var fi = new FileInfo(sourcePath);
+                            return (fi.Length, fi.LastWriteTimeUtc.Ticks);
+                        }, "خواندن اطلاعات فایل سرور");
                         expectedSize = sourceLength;
-                        string sourceSignature = $"{sourceLength}|{sourceInfo.LastWriteTimeUtc.Ticks}";
+                        string sourceSignature = $"{sourceLength}|{sourceTicks}";
 
                         // Resume only if the partial file belongs to the SAME server file (size + timestamp signature)
                         long startOffset = ComputeResumeOffset(tempExePath, metaPath, sourceSignature, sourceLength);
@@ -934,7 +940,7 @@ namespace Prg_UI.Wins
                 }
 
                 // 6. Execute Atomic Swap Script
-                ExecuteUpdateScript(currentExe, tempExePath, currentDir, localUpdateDir, metaPath, flagPath, expectedSize);
+                ExecuteUpdateScript(currentExe, tempExePath, currentDir, localUpdateDir, metaPath, flagPath, expectedSize, userSuffix);
             }
             catch (Exception ex)
             {
@@ -1017,9 +1023,8 @@ namespace Prg_UI.Wins
             }
         }
 
-        private void ExecuteUpdateScript(string currentExe, string tempExe, string currentDir, string localUpdateDir, string metaPath, string flagPath, long expectedSize)
+        private void ExecuteUpdateScript(string currentExe, string tempExe, string currentDir, string localUpdateDir, string metaPath, string flagPath, long expectedSize, string userSuffix)
         {
-            string userSuffix = GetSafeUserSuffix();
             string batPath = Path.Combine(localUpdateDir, $"update_installer_{userSuffix}.bat");
             string oldExe = currentExe + OLD_FILE_SUFFIX;
             string logPath = Path.Combine(localUpdateDir, UPDATE_LOG_FILE);
@@ -1057,19 +1062,22 @@ set /a RETRY_COUNT+=1
 if %RETRY_COUNT% gtr 30 goto FAILED
 ping -n 2 127.0.0.1 > nul
 
-rem direct overwrite (works when no process holds the exe)
-copy /Y ""{tempExe}"" ""{currentExe}"" > nul 2>&1
-if not errorlevel 1 goto VERIFY
-
-rem exe is locked (e.g. other Remote Desktop sessions) - rename works even while it is running
+rem always move the current exe aside FIRST so a good backup exists on every path
+rem (rename works even while the exe is running or held open by other RDP sessions)
 del ""{oldExe}"" > nul 2>&1
 move /Y ""{currentExe}"" ""{oldExe}"" > nul 2>&1
+if not exist ""{oldExe}"" (
+    echo [%time%] attempt %RETRY_COUNT%: exe locked for rename >> %LOG_FILE% 2>nul
+    goto RETRY_COPY
+)
+
 copy /Y ""{tempExe}"" ""{currentExe}"" > nul 2>&1
 if not errorlevel 1 goto VERIFY
 
-rem copy still failed - undo the rename if it happened, then retry
-if not exist ""{currentExe}"" move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
-echo [%time%] attempt %RETRY_COUNT% failed - file locked >> %LOG_FILE% 2>nul
+rem copy failed - remove any partial file, restore the backup, then retry
+del ""{currentExe}"" > nul 2>&1
+move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
+echo [%time%] attempt %RETRY_COUNT%: copy failed >> %LOG_FILE% 2>nul
 goto RETRY_COPY
 
 :VERIFY
@@ -1077,10 +1085,8 @@ set NEW_SIZE=0
 for %%A in (""{currentExe}"") do set NEW_SIZE=%%~zA
 if ""%NEW_SIZE%""==""{expectedSize}"" goto SUCCESS
 echo [%time%] verify failed: size %NEW_SIZE% expected {expectedSize} >> %LOG_FILE% 2>nul
-if exist ""{oldExe}"" (
-    del ""{currentExe}"" > nul 2>&1
-    move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
-)
+del ""{currentExe}"" > nul 2>&1
+move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
 goto FAILED
 
 :SUCCESS
@@ -1099,8 +1105,14 @@ goto END
 :FAILED
 echo [%date% %time%] UPDATE FAILED after %RETRY_COUNT% attempts >> %LOG_FILE% 2>nul
 echo [%date% %time%] swap failed >> ""{flagPath}""
-rem restart the application anyway so the user is not left with nothing
+rem make sure a runnable exe is in place (restore the backup if the swap left none)
+if not exist ""{currentExe}"" move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
+rem restart the application so the user is not left with nothing
 start """" /D ""{currentDir}"" ""{currentExe}""
+if errorlevel 1 (
+    ping -n 3 127.0.0.1 > nul
+    start """" /D ""{currentDir}"" ""{currentExe}""
+)
 
 :END
 del ""%~f0"" & exit
@@ -1194,7 +1206,17 @@ del ""%~f0"" & exit
         {
             try
             {
-                return File.Exists(flagPath) ? File.ReadAllLines(flagPath).Length : 0;
+                if (!File.Exists(flagPath)) return 0;
+
+                // شکست‌های قدیمی (مثلا قطعی شبکه هفته‌های قبل، شاید توسط کاربر دیگری روی همین سرور)
+                // نباید بروزرسانی امروز را مسدود کنند
+                if ((DateTime.UtcNow - File.GetLastWriteTimeUtc(flagPath)).TotalDays > 7)
+                {
+                    try { File.Delete(flagPath); } catch { }
+                    return 0;
+                }
+
+                return File.ReadAllLines(flagPath).Length;
             }
             catch
             {
@@ -1222,6 +1244,11 @@ del ""%~f0"" & exit
                 {
                     try { File.Delete(oldExe); } catch { /* هنوز توسط کاربر دیگری باز است */ }
                 }
+
+                // فایل‌های به‌جامانده از فرمت قدیمی آپدیتر (بدون پسوند کاربر) که دیگر استفاده نمی‌شوند
+                string exeName = Path.GetFileName(currentExe);
+                CleanupTemp(Path.Combine(localUpdateDir, exeName + TEMP_FILE_SUFFIX));
+                CleanupTemp(Path.Combine(localUpdateDir, "update_installer.bat"));
 
                 var logInfo = new FileInfo(Path.Combine(localUpdateDir, UPDATE_LOG_FILE));
                 if (logInfo.Exists && logInfo.Length > 1024 * 1024)
@@ -1266,7 +1293,9 @@ del ""%~f0"" & exit
 
         private void ShowErrorAndExit(string message)
         {
-            new Msgwin(false, message).ShowDialog();
+            // حالت متن بزرگ + پنجره بلندتر؛ پیام‌های چندخطی راهنما در حالت عادی بریده می‌شدند
+            var msgwin = new Msgwin(false, message, "", true) { Height = 420 };
+            msgwin.ShowDialog();
             CL_LMethods.GoExitTheApplication();
         }
         #endregion
