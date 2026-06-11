@@ -779,9 +779,14 @@ namespace Prg_UI.Wins
         private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
         private const string UPDATE_LOCAL_FOLDER = "update";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
+        private const string OLD_FILE_SUFFIX = ".old";
+        private const string UPDATE_FAIL_FLAG = "update_failed.flag";
+        private const string UPDATE_LOG_FILE = "update_log.txt";
         private const int COPY_BUFFER_SIZE = 81920; // 80KB
         private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
+        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15; // Timeout for UNC metadata operations (File.Exists / FileInfo)
         private const int MAX_RETRIES = 10;
+        private const int MAX_SWAP_FAILURES = 2; // بعد از این تعداد شکست در جایگزینی، راهنمای دستی نمایش داده می‌شود
 
         private void DisableLoginUI()
         {
@@ -820,13 +825,29 @@ namespace Prg_UI.Wins
                 string exeName = Path.GetFileName(currentExe);
                 sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
 
-                // Local update subfolder for temp download and batch script
+                // Local update subfolder for temp download and batch script.
+                // نام فایل‌ها per-user است تا روی Remote Desktop (چند کاربر همزمان روی یک پوشه) تداخل پیش نیاید
                 string localUpdateDir = Path.Combine(currentDir, UPDATE_LOCAL_FOLDER);
                 Directory.CreateDirectory(localUpdateDir);
-                tempExePath = Path.Combine(localUpdateDir, exeName + TEMP_FILE_SUFFIX);
+                string userSuffix = GetSafeUserSuffix();
+                tempExePath = Path.Combine(localUpdateDir, $"{exeName}.{userSuffix}{TEMP_FILE_SUFFIX}");
+                string metaPath = tempExePath + ".meta";
+                string flagPath = Path.Combine(localUpdateDir, UPDATE_FAIL_FLAG);
 
-                // 2. Pre-Flight Checks
-                if (!File.Exists(sourcePath))
+                // 2. If the previous swap attempts kept failing, stop the auto-retry loop and guide the user
+                int failCount = GetUpdateFailCount(flagPath);
+                if (failCount >= MAX_SWAP_FAILURES)
+                {
+                    try { File.Delete(flagPath); } catch { }
+                    ShowErrorAndExit("بروزرسانی خودکار چند بار ناموفق بود.\n\n" + BuildManualUpdateGuide(sourcePath));
+                    return;
+                }
+
+                CleanupLeftoverUpdateFiles(currentExe, localUpdateDir);
+
+                // 3. Pre-Flight Checks (UNC ops with timeout so a dead share cannot freeze the UI)
+                bool sourceExists = await RunNetworkCheckAsync(() => File.Exists(sourcePath), "بررسی فایل روی سرور");
+                if (!sourceExists)
                 {
                     ShowErrorAndExit("نسخه جدید در سرور یافت نشد. مسیر:\n" + sourcePath);
                     return;
@@ -838,46 +859,44 @@ namespace Prg_UI.Wins
                     return;
                 }
 
-                // 3. Prepare UI
+                // 4. Prepare UI
                 if (UpdatePanel != null)
                 {
                     UpdatePanel.Visibility = Visibility.Visible;
                     if (UpdateLbl != null) UpdateLbl.Content = "در حال اتصال به سرور...";
                 }
 
-                // 4. Download Loop with Retry and Resume
+                // 5. Download Loop with Retry and Resume
                 bool downloadSuccess = false;
                 Exception lastException = null;
+                long expectedSize = 0;
 
                 for (int attempt = 1; attempt <= MAX_RETRIES; attempt++)
                 {
                     try
                     {
-                        // Calculate resume offset
-                        long startOffset = 0;
-                        if (File.Exists(tempExePath))
-                        {
-                            var fi = new FileInfo(tempExePath);
-                            var sourceFi = new FileInfo(sourcePath);
+                        // اطلاعات فایل سرور در هر تلاش دوباره خوانده می‌شود تا تعویض شدن فایل وسط دانلود تشخیص داده شود
+                        var sourceInfo = await RunNetworkCheckAsync(() => new FileInfo(sourcePath), "خواندن اطلاعات فایل سرور");
+                        long sourceLength = sourceInfo.Length;
+                        expectedSize = sourceLength;
+                        string sourceSignature = $"{sourceLength}|{sourceInfo.LastWriteTimeUtc.Ticks}";
 
-                            if (fi.Length < sourceFi.Length)
+                        // Resume only if the partial file belongs to the SAME server file (size + timestamp signature)
+                        long startOffset = ComputeResumeOffset(tempExePath, metaPath, sourceSignature, sourceLength);
+
+                        if (startOffset == sourceLength && sourceLength > 0)
+                        {
+                            // دانلود قبلی کامل بوده؛ فقط صحت فایل بررسی می‌شود
+                            if (VerifyDownloadedFile(tempExePath, sourceLength))
                             {
-                                startOffset = fi.Length;
+                                downloadSuccess = true;
+                                break;
                             }
-                            else if (fi.Length >= sourceFi.Length)
-                            {
-                                // Already downloaded or corrupt (larger).
-                                // If equal, assume success.
-                                if (fi.Length == sourceFi.Length)
-                                {
-                                    downloadSuccess = true;
-                                    break;
-                                }
-                                // If larger, delete and restart
-                                File.Delete(tempExePath);
-                                startOffset = 0;
-                            }
+                            CleanupTemp(tempExePath);
+                            startOffset = 0;
                         }
+
+                        try { File.WriteAllText(metaPath, sourceSignature); } catch { }
 
                         if (attempt > 1 && UpdateLbl != null)
                         {
@@ -885,6 +904,14 @@ namespace Prg_UI.Wins
                         }
 
                         await CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset);
+
+                        // Verify the result (size + executable header) before swapping anything
+                        if (!VerifyDownloadedFile(tempExePath, sourceLength))
+                        {
+                            CleanupTemp(tempExePath);
+                            throw new IOException("فایل دانلود شده ناقص یا خراب است.");
+                        }
+
                         downloadSuccess = true;
                         break; // Success
                     }
@@ -901,13 +928,18 @@ namespace Prg_UI.Wins
                     throw lastException ?? new Exception("Download failed after multiple attempts.");
                 }
 
-                // 5. Execute Atomic Swap Script
-                ExecuteUpdateScript(currentExe, tempExePath, exeName, currentDir, localUpdateDir);
+                if (UpdateLbl != null)
+                {
+                    await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = "در حال نصب بروزرسانی...");
+                }
+
+                // 6. Execute Atomic Swap Script
+                ExecuteUpdateScript(currentExe, tempExePath, currentDir, localUpdateDir, metaPath, flagPath, expectedSize);
             }
             catch (Exception ex)
             {
                 CleanupTemp(tempExePath);
-                ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}");
+                ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}\n\n{BuildManualUpdateGuide(sourcePath)}");
             }
         }
 
@@ -974,57 +1006,240 @@ namespace Prg_UI.Wins
                         });
                     }
                 }
+
+                await destinationStream.FlushAsync();
+
+                // قطع شدن استریم قبل از پایان فایل نباید موفقیت حساب شود (باعث جایگزینی فایل خراب می‌شد)
+                if (totalRead < totalBytes)
+                {
+                    throw new IOException("اتصال به سرور قطع شد و فایل کامل دریافت نشد.");
+                }
             }
         }
 
-        private void ExecuteUpdateScript(string currentExe, string tempExe, string exeName, string currentDir, string localUpdateDir)
+        private void ExecuteUpdateScript(string currentExe, string tempExe, string currentDir, string localUpdateDir, string metaPath, string flagPath, long expectedSize)
         {
-            string batPath = Path.Combine(localUpdateDir, "update_installer.bat");
+            string userSuffix = GetSafeUserSuffix();
+            string batPath = Path.Combine(localUpdateDir, $"update_installer_{userSuffix}.bat");
+            string oldExe = currentExe + OLD_FILE_SUFFIX;
+            string logPath = Path.Combine(localUpdateDir, UPDATE_LOG_FILE);
+            int currentPid = Environment.ProcessId;
 
             // Hardened Batch Script
-            // 1. Loops trying to overwrite (handles file locking) with max retry limit
-            // 2. Starts app in correct Working Directory (/D)
-            // 3. Quotes paths to handle spaces
+            // 1. Waits (bounded) for THIS process to exit before swapping
+            // 2. If the exe is locked (e.g. other Remote Desktop users), renames it aside:
+            //    ویندوز اجازه تغییر نام فایل EXE در حال اجرا را می‌دهد، حتی وقتی کاربران دیگر آن را باز دارند
+            // 3. Verifies the new exe size before accepting the swap; restores the old exe on failure
+            // 4. ALWAYS restarts the application (new or restored old version) so the user is never stranded
+            // 5. No 'pause' (the window is hidden -> pause used to hang invisibly forever)
+            // 6. Uses 'ping' for delays ('timeout' fails in some non-interactive/RDP console contexts)
+            // 7. Logs everything to update_log.txt and writes a failure flag the app checks on next start
             string batchScript = $@"@echo off
 title Updating Application...
-echo Waiting for application to close...
-set RETRY_COUNT=0
+set LOG_FILE=""{logPath}""
+echo. >> %LOG_FILE% 2>nul
+echo [%date% %time%] [{userSuffix}] update script started (pid {currentPid}) >> %LOG_FILE% 2>nul
 
+rem ---- Wait (max ~15s) for the old application process to exit ----
+set WAIT_COUNT=0
+:WAIT_EXIT
+set /a WAIT_COUNT+=1
+if %WAIT_COUNT% gtr 15 goto COPY_PHASE
+tasklist /FI ""PID eq {currentPid}"" 2>nul | find ""{currentPid}"" >nul 2>&1
+if errorlevel 1 goto COPY_PHASE
+ping -n 2 127.0.0.1 > nul
+goto WAIT_EXIT
+
+:COPY_PHASE
+set RETRY_COUNT=0
 :RETRY_COPY
 set /a RETRY_COUNT+=1
-if %RETRY_COUNT% gtr 30 (
-    echo Update failed: file remained locked after 30 attempts.
-    pause
-    exit /b 1
-)
-timeout /t 1 /nobreak > nul
-copy /Y ""{tempExe}"" ""{currentExe}"" > nul 2>&1
-if %errorlevel% neq 0 (
-    echo File is locked. Retrying ^(%RETRY_COUNT%/30^)...
-    goto RETRY_COPY
-)
+if %RETRY_COUNT% gtr 30 goto FAILED
+ping -n 2 127.0.0.1 > nul
 
-echo Update Successful. Starting application...
+rem direct overwrite (works when no process holds the exe)
+copy /Y ""{tempExe}"" ""{currentExe}"" > nul 2>&1
+if not errorlevel 1 goto VERIFY
+
+rem exe is locked (e.g. other Remote Desktop sessions) - rename works even while it is running
+del ""{oldExe}"" > nul 2>&1
+move /Y ""{currentExe}"" ""{oldExe}"" > nul 2>&1
+copy /Y ""{tempExe}"" ""{currentExe}"" > nul 2>&1
+if not errorlevel 1 goto VERIFY
+
+rem copy still failed - undo the rename if it happened, then retry
+if not exist ""{currentExe}"" move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
+echo [%time%] attempt %RETRY_COUNT% failed - file locked >> %LOG_FILE% 2>nul
+goto RETRY_COPY
+
+:VERIFY
+set NEW_SIZE=0
+for %%A in (""{currentExe}"") do set NEW_SIZE=%%~zA
+if ""%NEW_SIZE%""==""{expectedSize}"" goto SUCCESS
+echo [%time%] verify failed: size %NEW_SIZE% expected {expectedSize} >> %LOG_FILE% 2>nul
+if exist ""{oldExe}"" (
+    del ""{currentExe}"" > nul 2>&1
+    move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
+)
+goto FAILED
+
+:SUCCESS
+echo [%date% %time%] update installed successfully >> %LOG_FILE% 2>nul
+del ""{flagPath}"" > nul 2>&1
+del ""{oldExe}"" > nul 2>&1
+del ""{tempExe}"" > nul 2>&1
+del ""{metaPath}"" > nul 2>&1
+start """" /D ""{currentDir}"" ""{currentExe}""
+if errorlevel 1 (
+    ping -n 3 127.0.0.1 > nul
+    start """" /D ""{currentDir}"" ""{currentExe}""
+)
+goto END
+
+:FAILED
+echo [%date% %time%] UPDATE FAILED after %RETRY_COUNT% attempts >> %LOG_FILE% 2>nul
+echo [%date% %time%] swap failed >> ""{flagPath}""
+rem restart the application anyway so the user is not left with nothing
 start """" /D ""{currentDir}"" ""{currentExe}""
 
-:CLEANUP
-del ""{tempExe}"" > nul 2>&1
+:END
 del ""%~f0"" & exit
 ";
 
             File.WriteAllText(batPath, batchScript);
 
+            // اجرای مستقیم از طریق cmd.exe؛ روی بعضی کلاینت‌ها ShellExecute برای فایل bat
+            // (به علت خراب بودن File Association) کار نمی‌کرد و برنامه دیگر باز نمی‌شد
             var startInfo = new ProcessStartInfo
             {
-                FileName = batPath,
-                UseShellExecute = true, // Required for batch file execution in this context
-                WindowStyle = ProcessWindowStyle.Hidden
+                FileName = Path.Combine(Environment.SystemDirectory, "cmd.exe"),
+                Arguments = $"/c \"{batPath}\"",
+                WorkingDirectory = localUpdateDir,
+                UseShellExecute = false,
+                CreateNoWindow = true
             };
 
             Process.Start(startInfo);
 
             // Force kill current process to ensure file handle is released
             Environment.Exit(0);
+        }
+
+        /// <summary>
+        /// فقط در صورتی ادامه دانلود (Resume) مجاز است که فایل ناقص قبلی متعلق به همین نسخه سرور باشد
+        /// (در غیر این صورت چسباندن ادامه فایل جدید به فایل قدیمی، خروجی خراب با سایز درست می‌ساخت)
+        /// </summary>
+        private long ComputeResumeOffset(string tempExePath, string metaPath, string sourceSignature, long sourceLength)
+        {
+            try
+            {
+                if (!File.Exists(tempExePath)) return 0;
+
+                string previousSignature = File.Exists(metaPath) ? File.ReadAllText(metaPath) : null;
+                if (previousSignature != sourceSignature)
+                {
+                    File.Delete(tempExePath);
+                    return 0;
+                }
+
+                long tempLength = new FileInfo(tempExePath).Length;
+                if (tempLength > sourceLength)
+                {
+                    File.Delete(tempExePath);
+                    return 0;
+                }
+
+                return tempLength;
+            }
+            catch
+            {
+                try { File.Delete(tempExePath); } catch { }
+                return 0;
+            }
+        }
+
+        private bool VerifyDownloadedFile(string path, long expectedLength)
+        {
+            try
+            {
+                var fi = new FileInfo(path);
+                if (!fi.Exists || fi.Length != expectedLength || expectedLength <= 0) return false;
+
+                // بررسی امضای فایل اجرایی ویندوز (MZ)
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return fs.ReadByte() == 'M' && fs.ReadByte() == 'Z';
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// عملیات روی مسیر شبکه (UNC) با Timeout اجرا می‌شود تا در صورت قطع بودن شبکه، برنامه هنگ نکند
+        /// </summary>
+        private static async Task<T> RunNetworkCheckAsync<T>(Func<T> operation, string operationName)
+        {
+            try
+            {
+                return await Task.Run(operation).WaitAsync(TimeSpan.FromSeconds(NETWORK_CHECK_TIMEOUT_SECONDS));
+            }
+            catch (TimeoutException)
+            {
+                throw new IOException($"عدم پاسخ از سرور ({operationName}). لطفا اتصال شبکه را بررسی کنید.");
+            }
+        }
+
+        private static int GetUpdateFailCount(string flagPath)
+        {
+            try
+            {
+                return File.Exists(flagPath) ? File.ReadAllLines(flagPath).Length : 0;
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        private static string GetSafeUserSuffix()
+        {
+            string user = Environment.UserName ?? string.Empty;
+            var sb = new StringBuilder();
+            foreach (char c in user)
+            {
+                if (char.IsLetterOrDigit(c)) sb.Append(c);
+            }
+            return sb.Length > 0 ? sb.ToString() : "user";
+        }
+
+        private void CleanupLeftoverUpdateFiles(string currentExe, string localUpdateDir)
+        {
+            try
+            {
+                string oldExe = currentExe + OLD_FILE_SUFFIX;
+                if (File.Exists(oldExe))
+                {
+                    try { File.Delete(oldExe); } catch { /* هنوز توسط کاربر دیگری باز است */ }
+                }
+
+                var logInfo = new FileInfo(Path.Combine(localUpdateDir, UPDATE_LOG_FILE));
+                if (logInfo.Exists && logInfo.Length > 1024 * 1024)
+                {
+                    try { logInfo.Delete(); } catch { }
+                }
+            }
+            catch { }
+        }
+
+        private static string BuildManualUpdateGuide(string sourcePath)
+        {
+            return "راهنمای رفع مشکل بروزرسانی:\n" +
+                   "1- نرم افزار را در همه سیستم ها و همه کاربران (Remote Desktop) ببندید و دوباره اجرا کنید.\n" +
+                   "2- اگر مشکل ادامه داشت، برنامه را یک بار با کلیک راست و گزینه Run as Administrator اجرا کنید.\n" +
+                   "3- در غیر این صورت فایل جدید را به صورت دستی از مسیر زیر کپی و جایگزین فایل برنامه کنید:\n" +
+                   (string.IsNullOrEmpty(sourcePath) ? UPDATE_SERVER_PATH : sourcePath) + "\n" +
+                   "4- در صورت نیاز با پشتیبانی تماس بگیرید (فایل update_log.txt در پوشه update کنار برنامه به عیب یابی کمک می کند).";
         }
 
         private bool HasWritePermission(string path)
