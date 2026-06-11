@@ -776,77 +776,122 @@ namespace Prg_UI.Wins
         }
 
         #region AutoUpdate
-        // Configuration Constants
-        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
-        private const string UPDATE_LOCAL_FOLDER = "update";
-        private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
-        private const string OLD_FILE_SUFFIX = ".old";
-        private const string UPDATE_FAIL_FLAG = "update_failed.flag";
-        private const string UPDATE_LOG_FILE = "update_log.txt";
-        private const int COPY_BUFFER_SIZE = 81920; // 80KB
-        private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
-        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15; // Timeout for UNC metadata operations (File.Exists / FileInfo)
-        private const int MAX_RETRIES = 10;
-        private const int MAX_SWAP_FAILURES = 2; // بعد از این تعداد شکست در جایگزینی، راهنمای دستی نمایش داده می‌شود
+        // ─────────────────────────── ثابت‌های پیکربندی ───────────────────────────
 
+        // مسیر Share شبکه که نسخه جدید EXE در آن قرار می‌گیرد (منبع آپدیت)
+        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
+
+        // نام زیرپوشه‌ای کنار EXE برنامه که فایل‌های موقت آپدیت (دانلود، اسکریپت، لاگ) در آن ساخته می‌شود
+        private const string UPDATE_LOCAL_FOLDER = "update";
+
+        // پسوند فایل موقتِ دانلود؛ نسخه جدید اول با این پسوند دانلود می‌شود و بعدِ تأیید سلامت، جایگزین EXE اصلی می‌گردد
+        private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
+
+        // پسوند فایل Backup؛ هنگام جایگزینی، EXE قدیمی موقتاً به این نام تغییر نام داده می‌شود تا در صورت خطا قابل بازگشت باشد
+        private const string OLD_FILE_SUFFIX = ".old";
+
+        // فایل پرچم شکست: هر بار که اسکریپت جایگزینی شکست بخورد یک خط به آن اضافه می‌شود؛
+        // برنامه در اجرای بعدی تعداد خطوط را می‌شمارد تا از حلقه بی‌نهایتِ «تلاش/شکست» جلوگیری کند
+        private const string UPDATE_FAIL_FLAG = "update_failed.flag";
+
+        // فایل لاگ مراحل آپدیت (هم اسکریپت bat در آن می‌نویسد) — برای عیب‌یابی توسط پشتیبانی
+        private const string UPDATE_LOG_FILE = "update_log.txt";
+
+        // اندازه بافر کپی: هر بار 80 کیلوبایت از شبکه خوانده و روی دیسک نوشته می‌شود
+        private const int COPY_BUFFER_SIZE = 81920; // 80KB
+
+        // اگر «یک عملیات خواندن» از شبکه بیشتر از این مقدار طول بکشد یعنی اتصال مرده است (تایم‌اوت بی‌تحرکی)
+        private const int READ_TIMEOUT_SECONDS = 20;
+
+        // تایم‌اوت عملیات‌های سبک شبکه مثل File.Exists و خواندن سایز/تاریخ فایل روی مسیر UNC
+        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15;
+
+        // حداکثر تعداد تلاش برای دانلود (با ادامه از همان نقطه قطع شدن)
+        private const int MAX_RETRIES = 10;
+
+        // بعد از این تعداد شکست در جایگزینی فایل، به جای تلاش دوباره، راهنمای رفع مشکل دستی نمایش داده می‌شود
+        private const int MAX_SWAP_FAILURES = 2;
+
+        /// <summary>
+        /// کنترل‌های فرم لاگین را غیرفعال می‌کند تا کاربر وسط فرایند آپدیت نتواند لاگین کند
+        /// </summary>
         private void DisableLoginUI()
         {
             try
             {
-                if (CmbUsers != null) CmbUsers.IsEnabled = false;
-                if (Rmzo != null) Rmzo.IsEnabled = false;
-                if (SecoRmzo != null) SecoRmzo.IsEnabled = false;
-                if (Greet != null) Greet.IsEnabled = false;
-                if (dispass != null) dispass.IsEnabled = false;
+                if (CmbUsers != null) CmbUsers.IsEnabled = false;      // لیست کاربران
+                if (Rmzo != null) Rmzo.IsEnabled = false;              // فیلد رمز (مخفی)
+                if (SecoRmzo != null) SecoRmzo.IsEnabled = false;      // فیلد رمز (نمایان)
+                if (Greet != null) Greet.IsEnabled = false;            // دکمه ورود
+                if (dispass != null) dispass.IsEnabled = false;        // تیک نمایش رمز
             }
-            catch { /* Ignore UI state errors during shutdown */ }
+            catch { /* خطای وضعیت UI هنگام بسته شدن برنامه مهم نیست */ }
         }
 
+        /// <summary>
+        /// متد اصلی بروزرسانی خودکار. مراحل:
+        /// 1) پیدا کردن مسیر EXE فعلی و ساخت مسیرها
+        /// 2) بررسی پرچم شکست‌های قبلی (جلوگیری از حلقه بی‌نهایت)
+        /// 3) چک‌های اولیه (وجود فایل در سرور + دسترسی نوشتن)
+        /// 4) نمایش پنل Progressbar
+        /// 5) حلقه دانلود با تلاش مجدد و ادامه دانلود (Resume) + اعتبارسنجی فایل
+        /// 6) ساخت و اجرای اسکریپت جایگزینی و بستن برنامه
+        /// هر خطایی در هر مرحله ⇐ نمایش پیام + راهنمای دستی و خروج
+        /// </summary>
         private async Task PerformAutoUpdateAsync()
         {
-            string tempExePath = null;
-            string sourcePath = null;
+            string tempExePath = null;   // مسیر فایل موقت دانلود (بیرون از try تا در catch قابل پاکسازی باشد)
+            string sourcePath = null;    // مسیر فایل جدید روی سرور (بیرون از try تا در پیام خطا قابل نمایش باشد)
 
             try
             {
-                // 1. Resolve Paths Securely
+                // ── مرحله 1: پیدا کردن مسیر EXE در حال اجرا ──
+                // روش اصلی (NET 6+): مسیر دقیق پروسه جاری
                 string currentExe = Environment.ProcessPath;
                 if (string.IsNullOrEmpty(currentExe))
                 {
+                    // روش پشتیبان اگر روش اول جواب نداد: از روی ماژول اصلی پروسه
                     using var proc = Process.GetCurrentProcess();
                     currentExe = proc.MainModule?.FileName;
                 }
 
+                // اگر مسیر EXE پیدا نشد ادامه دادن خطرناک است (نمی‌دانیم چه فایلی را جایگزین کنیم)
                 if (string.IsNullOrEmpty(currentExe) || !File.Exists(currentExe))
                 {
                     throw new FileNotFoundException("Critical Error: Cannot resolve current executable path.");
                 }
 
-                string currentDir = Path.GetDirectoryName(currentExe);
-                string exeName = Path.GetFileName(currentExe);
-                sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
+                string currentDir = Path.GetDirectoryName(currentExe);          // پوشه‌ای که برنامه از آن اجرا شده
+                string exeName = Path.GetFileName(currentExe);                  // فقط نام فایل، مثلا MrCorrect.exe
+                sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);         // فایل جدید روی سرور با همان نام
 
-                // Local update subfolder for temp download and batch script.
-                // نام فایل‌ها per-user است تا روی Remote Desktop (چند کاربر همزمان روی یک پوشه) تداخل پیش نیاید
+                // ── ساخت پوشه و مسیرهای محلی آپدیت ──
+                // نام فایل‌های موقت per-user است (پسوند نام کاربر ویندوز) تا روی Remote Desktop،
+                // چند کاربر که همزمان آپدیت می‌گیرند روی فایل‌های همدیگر ننویسند
                 string localUpdateDir = Path.Combine(currentDir, UPDATE_LOCAL_FOLDER);
-                Directory.CreateDirectory(localUpdateDir);
-                string userSuffix = GetSafeUserSuffix();
-                tempExePath = Path.Combine(localUpdateDir, $"{exeName}.{userSuffix}{TEMP_FILE_SUFFIX}");
-                string metaPath = tempExePath + ".meta";
-                string flagPath = Path.Combine(localUpdateDir, UPDATE_FAIL_FLAG);
+                Directory.CreateDirectory(localUpdateDir);                       // اگر پوشه نبود ساخته می‌شود
+                string userSuffix = GetSafeUserSuffix();                         // نام کاربر ویندوز، فقط حروف و اعداد
+                tempExePath = Path.Combine(localUpdateDir, $"{exeName}.{userSuffix}{TEMP_FILE_SUFFIX}"); // فایل موقت دانلود
+                string metaPath = tempExePath + ".meta";                         // امضای نسخه سرور (سایز|تاریخ) برای تشخیص اعتبار Resume
+                string flagPath = Path.Combine(localUpdateDir, UPDATE_FAIL_FLAG); // پرچم شکست (مشترک بین همه کاربران؛ مشکل جایگزینی ماشینی است نه کاربری)
 
-                // 2. If the previous swap attempts kept failing, stop the auto-retry loop and guide the user
+                // ── مرحله 2: اگر دفعات قبل جایگزینی شکست خورده، حلقه «تلاش/شکست» را قطع کن ──
+                // (اسکریپت bat بعد از هر شکست یک خط به Flag اضافه می‌کند و برنامه قدیمی را دوباره باز می‌کند؛
+                //  بدون این بررسی، برنامه دوباره آپدیت می‌گرفت و دوباره شکست می‌خورد... تا بی‌نهایت)
                 int failCount = GetUpdateFailCount(flagPath);
                 if (failCount >= MAX_SWAP_FAILURES)
                 {
-                    try { File.Delete(flagPath); } catch { }
+                    try { File.Delete(flagPath); } catch { }                     // پاک می‌کنیم تا اجرای بعدی دوباره شانس آپدیت خودکار داشته باشد
                     ShowErrorAndExit("بروزرسانی خودکار چند بار ناموفق بود.\n\n" + BuildManualUpdateGuide(sourcePath));
                     return;
                 }
 
+                // پاکسازی به‌جامانده‌های آپدیت‌های قبلی (فایل .old، فایل‌های فرمت قدیمی، لاگ حجیم)
                 CleanupLeftoverUpdateFiles(currentExe, localUpdateDir);
 
-                // 3. Pre-Flight Checks (UNC ops with timeout so a dead share cannot freeze the UI)
+                // ── مرحله 3: چک‌های اولیه ──
+                // File.Exists روی مسیر شبکه قطع، می‌تواند دقایق طولانی هنگ کند؛
+                // پس داخل RunNetworkCheckAsync با تایم‌اوت 15 ثانیه اجرا می‌شود
                 bool sourceExists = await RunNetworkCheckAsync(() => File.Exists(sourcePath), "بررسی فایل روی سرور");
                 if (!sourceExists)
                 {
@@ -854,56 +899,64 @@ namespace Prg_UI.Wins
                     return;
                 }
 
+                // اگر کاربر اجازه نوشتن در پوشه برنامه را ندارد (مثلا Program Files بدون Admin)،
+                // جایگزینی EXE قطعا شکست می‌خورد؛ بهتر است از همین اول به او بگوییم
                 if (!HasWritePermission(currentDir))
                 {
                     ShowErrorAndExit("عدم دسترسی به پوشه برنامه.\nلطفا برنامه را به عنوان Administrator اجرا کنید.");
                     return;
                 }
 
-                // 4. Prepare UI
+                // ── مرحله 4: نمایش پنل آپدیت (Progressbar + متن وضعیت) ──
                 if (UpdatePanel != null)
                 {
                     UpdatePanel.Visibility = Visibility.Visible;
                     if (UpdateLbl != null) UpdateLbl.Content = "در حال اتصال به سرور...";
                 }
 
-                // 5. Download Loop with Retry and Resume
-                bool downloadSuccess = false;
-                Exception lastException = null;
-                long expectedSize = 0;
+                // ── مرحله 5: حلقه دانلود با تلاش مجدد و ادامه دانلود (Resume) ──
+                bool downloadSuccess = false;       // آیا دانلود سالم تمام شد؟
+                Exception lastException = null;     // آخرین خطا، برای نمایش اگر همه تلاش‌ها شکست خورد
+                long expectedSize = 0;              // سایز فایل سرور؛ بعدا به اسکریپت bat هم داده می‌شود تا جایگزینی را تأیید کند
 
                 for (int attempt = 1; attempt <= MAX_RETRIES; attempt++)
                 {
                     try
                     {
-                        // اطلاعات فایل سرور در هر تلاش دوباره خوانده می‌شود تا تعویض شدن فایل وسط دانلود تشخیص داده شود
-                        // خود خواندن Length و LastWriteTime باید داخل لامبدا باشد؛ سازنده FileInfo هیچ I/O انجام نمی‌دهد
-                        // و دسترسی به Property بیرون از لامبدا، عملا Timeout را بی‌اثر می‌کرد
+                        // سایز و تاریخِ فایل سرور در «هر تلاش» دوباره خوانده می‌شود تا اگر ادمین وسط کار
+                        // فایل سرور را عوض کرد، متوجه شویم و دانلود نیمه‌کاره قبلی را دور بریزیم.
+                        // نکته مهم: خواندن Length و LastWriteTime باید «داخل لامبدا» باشد؛ سازنده FileInfo
+                        // هیچ I/O انجام نمی‌دهد (Lazy است) و اگر Property بیرون خوانده می‌شد، تایم‌اوت بی‌اثر بود
                         var (sourceLength, sourceTicks) = await RunNetworkCheckAsync(() =>
                         {
                             var fi = new FileInfo(sourcePath);
                             return (fi.Length, fi.LastWriteTimeUtc.Ticks);
                         }, "خواندن اطلاعات فایل سرور");
                         expectedSize = sourceLength;
+                        // «امضای» نسخه سرور = سایز + تاریخ آخرین تغییر؛ اگر هرکدام عوض شود یعنی فایل سرور جدید است
                         string sourceSignature = $"{sourceLength}|{sourceTicks}";
 
-                        // Resume only if the partial file belongs to the SAME server file (size + timestamp signature)
+                        // محاسبه نقطه شروع: اگر فایل ناقصی از قبل هست و متعلق به «همین» نسخه سرور است،
+                        // از همان‌جا ادامه می‌دهیم؛ وگرنه از صفر (جزئیات داخل خود متد)
                         long startOffset = ComputeResumeOffset(tempExePath, metaPath, sourceSignature, sourceLength);
 
                         if (startOffset == sourceLength && sourceLength > 0)
                         {
-                            // دانلود قبلی کامل بوده؛ فقط صحت فایل بررسی می‌شود
+                            // فایل از قبل «کامل» دانلود شده (مثلا در اجرای قبلی برنامه)؛ فقط سلامتش را چک کن
                             if (VerifyDownloadedFile(tempExePath, sourceLength))
                             {
                                 downloadSuccess = true;
-                                break;
+                                break;                       // دانلود لازم نیست؛ مستقیم برو سراغ جایگزینی
                             }
-                            CleanupTemp(tempExePath);
+                            CleanupTemp(tempExePath);        // کامل بود ولی خراب ⇐ حذف و دانلود از صفر
                             startOffset = 0;
                         }
 
+                        // امضای نسخه سرور را «قبل از» شروع دانلود ذخیره می‌کنیم تا اگر وسط دانلود قطع شد،
+                        // تلاش بعدی بداند فایل ناقص مال کدام نسخه است (شرط لازم برای Resume امن)
                         try { File.WriteAllText(metaPath, sourceSignature); } catch { }
 
+                        // از تلاش دوم به بعد، شماره تلاش را به کاربر نشان بده
                         if (attempt > 1 && UpdateLbl != null)
                         {
                             await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = $"تلاش مجدد {attempt}/{MAX_RETRIES}...");
@@ -914,24 +967,25 @@ namespace Prg_UI.Wins
                         // می‌تواند فرم لاگین را فریز کند (آپدیت‌های UI از داخل متد با Dispatcher انجام می‌شود)
                         await Task.Run(() => CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset));
 
-                        // Verify the result (size + executable header) before swapping anything
+                        // بعد از دانلود، قبل از هر جایگزینی: سایز دقیق + هدر MZ فایل اجرایی بررسی می‌شود
                         if (!VerifyDownloadedFile(tempExePath, sourceLength))
                         {
-                            CleanupTemp(tempExePath);
+                            CleanupTemp(tempExePath);        // فایل خراب نباید برای Resume بعدی بماند
                             throw new IOException("فایل دانلود شده ناقص یا خراب است.");
                         }
 
                         downloadSuccess = true;
-                        break; // Success
+                        break; // دانلود سالم تمام شد؛ از حلقه تلاش‌ها خارج شو
                     }
                     catch (Exception ex)
                     {
+                        // هر خطایی (قطعی شبکه، تایم‌اوت، فایل خراب و...) ⇐ 2 ثانیه صبر و تلاش بعدی
                         lastException = ex;
-                        // Wait before retry
                         await Task.Delay(2000);
                     }
                 }
 
+                // اگر هر 10 تلاش شکست خورد، آخرین خطا را به بلوک catch بیرونی پرتاب کن (نمایش پیام + راهنما)
                 if (!downloadSuccess)
                 {
                     throw lastException ?? new Exception("Download failed after multiple attempts.");
@@ -942,72 +996,83 @@ namespace Prg_UI.Wins
                     await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = "در حال نصب بروزرسانی...");
                 }
 
-                // 6. Execute Atomic Swap Script
+                // ── مرحله 6: ساخت و اجرای اسکریپت جایگزینی ──
+                // این متد برنامه را با Environment.Exit می‌بندد و دیگر برنمی‌گردد
                 ExecuteUpdateScript(currentExe, tempExePath, currentDir, localUpdateDir, metaPath, flagPath, expectedSize, userSuffix);
             }
             catch (Exception ex)
             {
+                // هر خطای پیش‌بینی‌نشده در کل فرایند: فایل موقت پاک، پیام خطا + راهنمای دستی، خروج از برنامه
                 CleanupTemp(tempExePath);
                 ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}\n\n{BuildManualUpdateGuide(sourcePath)}");
             }
         }
 
+        /// <summary>
+        /// کپی فایل از سرور به دیسک محلی، تکه‌تکه (80KB)، با Progressbar و تایم‌اوت روی هر خواندن.
+        /// startOffset اگر بزرگتر از صفر باشد یعنی ادامه‌ی یک دانلود نیمه‌کاره (Resume).
+        /// </summary>
         private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset)
         {
-            // Open source
+            // باز کردن فایل مبدأ روی شبکه — فقط خواندن؛ FileShare.Read یعنی بقیه هم بتوانند همزمان بخوانند
+            // پارامتر آخر (true) یعنی استریم در حالت Async باز شود
             using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, COPY_BUFFER_SIZE, true))
-            // Open destination (OpenOrCreate to support resume)
+            // باز کردن فایل مقصد — OpenOrCreate تا اگر فایل نیمه‌کاره از قبل هست برای Resume باز شود؛
+            // FileShare.None یعنی هیچ‌کس دیگری همزمان به آن دست نزند
             using (var destinationStream = new FileStream(destination, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
             {
-                long totalBytes = sourceStream.Length;
+                long totalBytes = sourceStream.Length;   // سایز کل فایل سرور (برای درصد پیشرفت و تشخیص پایان)
 
-                // Seek to offset
                 if (startOffset > 0)
                 {
-                    if (startOffset > totalBytes) startOffset = 0; // Safety check
+                    // Resume: هر دو استریم را به نقطه قطع شدن قبلی جلو ببر
+                    if (startOffset > totalBytes) startOffset = 0; // محافظت: Offset بزرگتر از فایل بی‌معنی است
 
                     sourceStream.Seek(startOffset, SeekOrigin.Begin);
                     destinationStream.Seek(startOffset, SeekOrigin.Begin);
                 }
                 else
                 {
-                    // Ensure we start from 0 if no offset (truncate if exists but we want fresh start)
+                    // دانلود از صفر: اگر فایل مقصد از قبل محتوایی داشت، خالی‌اش کن
                     destinationStream.SetLength(0);
                 }
 
-                var buffer = new byte[COPY_BUFFER_SIZE];
-                long totalRead = startOffset;
-                int bytesRead;
+                var buffer = new byte[COPY_BUFFER_SIZE]; // بافر 80 کیلوبایتی برای هر نوبت خواندن/نوشتن
+                long totalRead = startOffset;            // چند بایت تا الان داریم (شامل بخش Resume شده)
+                int bytesRead;                           // چند بایت در «این نوبت» خوانده شد
 
-                var lastUpdate = DateTime.MinValue;
+                var lastUpdate = DateTime.MinValue;      // زمان آخرین آپدیت Progressbar (برای محدود کردن دفعات آپدیت UI)
 
                 while (totalRead < totalBytes)
                 {
-                    // Read with timeout
+                    // خواندن یک تکه از فایل سرور (به صورت Async شروع می‌شود)
                     var readTask = sourceStream.ReadAsync(buffer, 0, buffer.Length);
 
                     try
                     {
-                        // Use WaitAsync for timeout logic
-                        // This prevents indefinite hanging on a dead connection
+                        // اگر این خواندن بیشتر از 20 ثانیه طول بکشد یعنی اتصال مرده است؛
+                        // بدون این، برنامه روی شبکه قطع برای همیشه گیر می‌کرد
                         bytesRead = await readTask.WaitAsync(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS));
                     }
                     catch (TimeoutException)
                     {
+                        // تبدیل تایم‌اوت به IOException تا حلقه تلاش مجددِ بیرونی آن را بگیرد و دوباره تلاش کند
                         throw new IOException("Connection timed out (Read).");
                     }
 
-                    if (bytesRead == 0) break; // End of stream
+                    if (bytesRead == 0) break; // صفر یعنی استریم تمام شد (پایین‌تر چک می‌کنیم واقعا کامل بوده یا قطعی)
 
-                    // Write to local file
+                    // نوشتن همان تکه روی فایل محلی
                     await destinationStream.WriteAsync(buffer, 0, bytesRead);
                     totalRead += bytesRead;
 
+                    // آپدیت Progressbar حداکثر هر 100 میلی‌ثانیه یک بار (وگرنه UI با هزاران آپدیت کند می‌شود)
                     if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
                     {
                         double progress = (double)totalRead / totalBytes * 100;
                         lastUpdate = DateTime.Now;
 
+                        // این متد روی Thread پس‌زمینه اجرا می‌شود؛ دستکاری کنترل‌های WPF فقط از طریق Dispatcher مجاز است
                         await this.Dispatcher.InvokeAsync(() =>
                         {
                             if (UpdatePrg != null) UpdatePrg.Value = progress;
@@ -1016,9 +1081,12 @@ namespace Prg_UI.Wins
                     }
                 }
 
+                // اطمینان از اینکه همه بایت‌ها واقعا روی دیسک نوشته شده‌اند (نه فقط در بافر حافظه)
                 await destinationStream.FlushAsync();
 
-                // قطع شدن استریم قبل از پایان فایل نباید موفقیت حساب شود (باعث جایگزینی فایل خراب می‌شد)
+                // نکته حیاتی: اگر استریم زودتر از پایان فایل تمام شد (bytesRead == 0 وسط کار)،
+                // این یعنی قطعی شبکه — نباید موفقیت حساب شود وگرنه فایل ناقص جایگزین EXE اصلی می‌شد
+                // (این دقیقا همان باگی بود که باعث می‌شد Progressbar صد درصد شود ولی برنامه دیگر باز نشود)
                 if (totalRead < totalBytes)
                 {
                     throw new IOException("اتصال به سرور قطع شد و فایل کامل دریافت نشد.");
@@ -1026,12 +1094,17 @@ namespace Prg_UI.Wins
             }
         }
 
+        /// <summary>
+        /// اسکریپت bat جایگزینی را می‌سازد، اجرا می‌کند و برنامه را می‌بندد (این متد هرگز برنمی‌گردد).
+        /// چرا bat؟ چون یک برنامه نمی‌تواند فایل EXE «در حال اجرای» خودش را جایگزین کند؛
+        /// پس یک پروسه جدا (cmd) باید بعد از بسته شدن برنامه این کار را انجام دهد.
+        /// </summary>
         private void ExecuteUpdateScript(string currentExe, string tempExe, string currentDir, string localUpdateDir, string metaPath, string flagPath, long expectedSize, string userSuffix)
         {
-            string batPath = Path.Combine(localUpdateDir, $"update_installer_{userSuffix}.bat");
-            string oldExe = currentExe + OLD_FILE_SUFFIX;
-            string logPath = Path.Combine(localUpdateDir, UPDATE_LOG_FILE);
-            int currentPid = Environment.ProcessId;
+            string batPath = Path.Combine(localUpdateDir, $"update_installer_{userSuffix}.bat"); // فایل bat (per-user تا کاربران RDP تداخل نکنند)
+            string oldExe = currentExe + OLD_FILE_SUFFIX;                                        // نام Backup فایل قدیمی هنگام جایگزینی
+            string logPath = Path.Combine(localUpdateDir, UPDATE_LOG_FILE);                      // لاگ مراحل اسکریپت
+            int currentPid = Environment.ProcessId;                                              // شماره پروسه فعلی؛ اسکریپت منتظر بسته شدنش می‌ماند
 
             // متن فارسی هشدارِ آخرین‌راه‌حل در فایل جداگانه UTF-8 نوشته می‌شود؛
             // cmd متن غیر ASCII داخل خود bat را (با یا بدون BOM) خراب نمایش می‌دهد
@@ -1051,15 +1124,50 @@ namespace Prg_UI.Wins
             // مسیر داخل رشته تک‌کوتیشن PowerShell قرار می‌گیرد؛ آپاستروف احتمالی باید دوبل شود
             string alertMsgPathPs = alertMsgPath.Replace("'", "''");
 
-            // Hardened Batch Script
-            // 1. Waits (bounded) for THIS process to exit before swapping
-            // 2. If the exe is locked (e.g. other Remote Desktop users), renames it aside:
-            //    ویندوز اجازه تغییر نام فایل EXE در حال اجرا را می‌دهد، حتی وقتی کاربران دیگر آن را باز دارند
-            // 3. Verifies the new exe size before accepting the swap; restores the old exe on failure
-            // 4. ALWAYS restarts the application (new or restored old version) so the user is never stranded
-            // 5. No 'pause' (the window is hidden -> pause used to hang invisibly forever)
-            // 6. Uses 'ping' for delays ('timeout' fails in some non-interactive/RDP console contexts)
-            // 7. Logs everything to update_log.txt and writes a failure flag the app checks on next start
+            // ─────────────────── شرح کامل منطق اسکریپت bat (خط به خط) ───────────────────
+            // نکته نگارشی: این یک رشته Interpolated است؛ {متغیر} با مقدار C# جایگزین می‌شود و "" یعنی یک " واقعی.
+            //
+            // ● ابتدای اسکریپت:
+            //     @echo off            ⇐ دستورات در کنسول چاپ نشوند
+            //     set LOG_FILE=...     ⇐ مسیر فایل لاگ در یک متغیر (همه مراحل در آن ثبت می‌شود)
+            //
+            // ● بخش WAIT_EXIT — انتظار برای بسته شدن برنامه (حداکثر ~15 ثانیه):
+            //     با tasklist چک می‌کند پروسه برنامه (با همین PID) هنوز زنده است یا نه.
+            //     «ping -n 2 127.0.0.1» معادل ~1 ثانیه تأخیر است (به جای دستور timeout که در
+            //     بعضی Session های RDP خطای Input redirection می‌دهد). اگر بعد از 15 بار هنوز
+            //     زنده بود، ادامه می‌دهد — چون حلقه کپی خودش حالت قفل بودن فایل را مدیریت می‌کند.
+            //
+            // ● بخش COPY_PHASE / RETRY_COPY — جایگزینی فایل (حداکثر 30 تلاش، هر کدام ~1 ثانیه فاصله):
+            //     1) del oldExe        ⇐ پاک کردن Backup قدیمی احتمالی از دفعات قبل
+            //     2) move currentExe → oldExe ⇐ ترفند کلیدی: ویندوز «تغییر نام» EXE در حال اجرا را
+            //        مجاز می‌داند (برخلاف Overwrite/Delete) حتی وقتی کاربران دیگر RDP آن را باز دارند.
+            //        با این کار همیشه اول یک Backup سالم ساخته می‌شود.
+            //     3) اگر تغییر نام نشد (if not exist oldExe) ⇐ ثبت در لاگ و تلاش بعدی
+            //     4) copy tempExe → currentExe ⇐ کپی نسخه جدید سر جای نام اصلی
+            //     5) اگر کپی شکست خورد ⇐ فایل ناقص پاک، Backup برگردانده (move oldExe → currentExe) و تلاش بعدی
+            //
+            // ● بخش VERIFY — تأیید جایگزینی:
+            //     سایز فایل جدید (%%~zA) با سایز مورد انتظار که C# پاس داده مقایسه می‌شود؛
+            //     اگر فرق داشت یعنی کپی خراب بوده ⇐ فایل خراب حذف، Backup برگردانده، برو به FAILED
+            //
+            // ● بخش SUCCESS — موفقیت:
+            //     پرچم شکست + Backup + فایل موقت + فایل متا پاک می‌شوند، سپس برنامه (نسخه جدید) با
+            //     start اجرا می‌شود. «ver > nul» قبل از start برای صفر کردن errorlevel کهنه است
+            //     (بعضی دستورات cmd در حالت موفق errorlevel را ریست نمی‌کنند و باعث هشدار اشتباه می‌شد).
+            //     اگر start شکست خورد، 2 ثانیه صبر و یک بار دیگر تلاش می‌شود؛ شکست دوباره ⇐ ALERT
+            //
+            // ● بخش FAILED — شکست بعد از 30 تلاش:
+            //     یک خط به فایل پرچم اضافه می‌شود (برنامه در اجرای بعد آن را می‌شمارد)،
+            //     اگر EXE سر جایش نیست Backup برگردانده می‌شود، و برنامه (نسخه قدیمی) دوباره اجرا
+            //     می‌شود تا کاربر بدون برنامه نماند. اگر اجرا هم نشد ⇐ ALERT
+            //
+            // ● بخش ALERT — آخرین راه‌حل (برنامه به هیچ شکلی اجرا نشد):
+            //     با PowerShell یک MessageBox ویندوزی نمایش داده می‌شود؛ متن فارسی آن از فایل
+            //     UTF-8 ای خوانده می‌شود که C# بالاتر نوشت (تا bat تماماً ASCII بماند و فارسی خراب نشود)
+            //
+            // ● بخش END — پاکسازی نهایی:
+            //     فایل متن هشدار حذف و در آخر اسکریپت «خودش را» حذف می‌کند (del %~f0)
+            // ─────────────────────────────────────────────────────────────────────────────
             string batchScript = $@"@echo off
 title Updating Application...
 set LOG_FILE=""{logPath}""
@@ -1152,38 +1260,45 @@ del ""{alertMsgPath}"" > nul 2>&1
 del ""%~f0"" & exit
 ";
 
+            // نوشتن محتوای اسکریپت روی دیسک (محتوا تماماً ASCII است؛ Encoding مشکلی ایجاد نمی‌کند)
             File.WriteAllText(batPath, batchScript);
 
-            // اجرای مستقیم از طریق cmd.exe؛ روی بعضی کلاینت‌ها ShellExecute برای فایل bat
-            // (به علت خراب بودن File Association) کار نمی‌کرد و برنامه دیگر باز نمی‌شد
+            // اجرای اسکریپت مستقیماً از طریق cmd.exe (نه ShellExecute)؛ روی بعضی کلاینت‌ها
+            // File Association فایل‌های bat خراب بود و ShellExecute هیچ کاری نمی‌کرد —
+            // نتیجه‌اش این بود که برنامه بسته می‌شد ولی هیچ‌وقت دوباره باز نمی‌شد
             var startInfo = new ProcessStartInfo
             {
-                FileName = Path.Combine(Environment.SystemDirectory, "cmd.exe"),
-                Arguments = $"/c \"{batPath}\"",
+                FileName = Path.Combine(Environment.SystemDirectory, "cmd.exe"), // مسیر کامل cmd از پوشه System32 (نه وابسته به PATH)
+                Arguments = $"/c \"{batPath}\"",   // c/ یعنی اسکریپت را اجرا کن و بعد cmd را ببند
                 WorkingDirectory = localUpdateDir,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                UseShellExecute = false,           // اجرای مستقیم پروسه، بدون واسطه Shell ویندوز
+                CreateNoWindow = true              // بدون پنجره سیاه cmd (کاربر چیزی نمی‌بیند)
             };
 
             Process.Start(startInfo);
 
-            // Force kill current process to ensure file handle is released
+            // بستن فوری و قطعی برنامه تا قفل فایل EXE (از طرف این پروسه) آزاد شود و اسکریپت بتواند جایگزینی را انجام دهد
             Environment.Exit(0);
         }
 
         /// <summary>
-        /// فقط در صورتی ادامه دانلود (Resume) مجاز است که فایل ناقص قبلی متعلق به همین نسخه سرور باشد
-        /// (در غیر این صورت چسباندن ادامه فایل جدید به فایل قدیمی، خروجی خراب با سایز درست می‌ساخت)
+        /// محاسبه نقطه شروع دانلود: فقط در صورتی ادامه دانلود (Resume) مجاز است که فایل ناقص قبلی
+        /// متعلق به «همین» نسخه سرور باشد. در غیر این صورت چسباندن ادامه فایل جدید به نیمه فایل قدیمی،
+        /// یک فایل خراب با سایز درست می‌ساخت که از همه چک‌های سایز رد می‌شد!
+        /// خروجی: 0 = از صفر دانلود کن | بین 0 و سایز = از این نقطه ادامه بده | برابر سایز = از قبل کامل است
         /// </summary>
         private long ComputeResumeOffset(string tempExePath, string metaPath, string sourceSignature, long sourceLength)
         {
             try
             {
+                // اصلا فایل نیمه‌کاره‌ای وجود ندارد ⇐ دانلود از صفر
                 if (!File.Exists(tempExePath)) return 0;
 
+                // امضای ذخیره‌شده هنگام دانلود قبلی را بخوان و با امضای فعلی سرور مقایسه کن
                 string previousSignature = File.Exists(metaPath) ? File.ReadAllText(metaPath) : null;
                 if (previousSignature != sourceSignature)
                 {
+                    // فایل سرور از آن موقع عوض شده ⇐ نیمه قبلی بی‌ارزش است؛ حذف و دانلود از صفر
                     File.Delete(tempExePath);
                     return 0;
                 }
@@ -1191,19 +1306,27 @@ del ""%~f0"" & exit
                 long tempLength = new FileInfo(tempExePath).Length;
                 if (tempLength > sourceLength)
                 {
+                    // فایل ناقص از فایل سرور بزرگ‌تر است؟! وضعیت نامعتبر ⇐ حذف و دانلود از صفر
                     File.Delete(tempExePath);
                     return 0;
                 }
 
+                // فایل ناقص معتبر است؛ از انتهای آن ادامه بده (اگر برابر سایز بود یعنی کامل است)
                 return tempLength;
             }
             catch
             {
+                // هر خطایی در خواندن متا/فایل ⇐ امن‌ترین حالت: همه‌چیز را پاک کن و از صفر شروع کن
                 try { File.Delete(tempExePath); } catch { }
                 return 0;
             }
         }
 
+        /// <summary>
+        /// اعتبارسنجی فایل دانلودشده قبل از جایگزینی:
+        /// 1) سایز باید «دقیقا» برابر سایز فایل سرور باشد
+        /// 2) دو بایت اول باید 'MZ' باشد (امضای استاندارد همه فایل‌های اجرایی ویندوز)
+        /// </summary>
         private bool VerifyDownloadedFile(string path, long expectedLength)
         {
             try
@@ -1211,18 +1334,22 @@ del ""%~f0"" & exit
                 var fi = new FileInfo(path);
                 if (!fi.Exists || fi.Length != expectedLength || expectedLength <= 0) return false;
 
-                // بررسی امضای فایل اجرایی ویندوز (MZ)
+                // خواندن دو بایت اول فایل و مقایسه با امضای MZ
                 using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
                 return fs.ReadByte() == 'M' && fs.ReadByte() == 'Z';
             }
             catch
             {
+                // فایل قابل باز شدن نیست (قفل/خراب) ⇐ نامعتبر
                 return false;
             }
         }
 
         /// <summary>
-        /// عملیات روی مسیر شبکه (UNC) با Timeout اجرا می‌شود تا در صورت قطع بودن شبکه، برنامه هنگ نکند
+        /// اجرای یک عملیات روی مسیر شبکه (UNC) با محدودیت زمانی:
+        /// عملیات داخل Task.Run به Thread پس‌زمینه می‌رود (تا UI قفل نشود) و WaitAsync رویش
+        /// تایم‌اوت 15 ثانیه‌ای می‌گذارد (تا روی شبکه قطع، بی‌نهایت منتظر نمانیم).
+        /// نکته: عملیات I/O باید واقعا «داخل لامبدای operation» انجام شود وگرنه تایم‌اوت بی‌اثر است.
         /// </summary>
         private static async Task<T> RunNetworkCheckAsync<T>(Func<T> operation, string operationName)
         {
@@ -1232,67 +1359,88 @@ del ""%~f0"" & exit
             }
             catch (TimeoutException)
             {
+                // تبدیل به IOException با پیام فارسی قابل فهم؛ حلقه تلاش مجدد بیرونی آن را مدیریت می‌کند
                 throw new IOException($"عدم پاسخ از سرور ({operationName}). لطفا اتصال شبکه را بررسی کنید.");
             }
         }
 
+        /// <summary>
+        /// شمارش تعداد شکست‌های قبلی جایگزینی (تعداد خطوط فایل پرچم که اسکریپت bat نوشته است)
+        /// </summary>
         private static int GetUpdateFailCount(string flagPath)
         {
             try
             {
-                if (!File.Exists(flagPath)) return 0;
+                if (!File.Exists(flagPath)) return 0; // هیچ شکستی ثبت نشده
 
-                // شکست‌های قدیمی (مثلا قطعی شبکه هفته‌های قبل، شاید توسط کاربر دیگری روی همین سرور)
-                // نباید بروزرسانی امروز را مسدود کنند
+                // شکست‌های قدیمی (مثلا قطعی شبکه هفته‌های قبل، شاید توسط کاربر دیگری روی همین سرور RDP)
+                // نباید بروزرسانی امروز را مسدود کنند ⇐ پرچم قدیمی‌تر از 7 روز نادیده گرفته و پاک می‌شود
                 if ((DateTime.UtcNow - File.GetLastWriteTimeUtc(flagPath)).TotalDays > 7)
                 {
                     try { File.Delete(flagPath); } catch { }
                     return 0;
                 }
 
+                // هر خط = یک شکست
                 return File.ReadAllLines(flagPath).Length;
             }
             catch
             {
+                // فایل هست ولی قابل خواندن نیست ⇐ محتاطانه «یک شکست» حساب کن (آپدیت هنوز تلاش می‌شود)
                 return 1;
             }
         }
 
+        /// <summary>
+        /// نام کاربر ویندوز را به یک پسوند امن برای نام فایل تبدیل می‌کند (فقط حروف و اعداد).
+        /// این پسوند باعث می‌شود فایل‌های موقت هر کاربر RDP از هم جدا باشند.
+        /// </summary>
         private static string GetSafeUserSuffix()
         {
             string user = Environment.UserName ?? string.Empty;
             var sb = new StringBuilder();
             foreach (char c in user)
             {
-                if (char.IsLetterOrDigit(c)) sb.Append(c);
+                if (char.IsLetterOrDigit(c)) sb.Append(c); // کاراکترهای غیرمجاز در نام فایل (و فاصله) حذف می‌شوند
             }
-            return sb.Length > 0 ? sb.ToString() : "user";
+            return sb.Length > 0 ? sb.ToString() : "user"; // اگر چیزی نماند، یک نام پیش‌فرض
         }
 
+        /// <summary>
+        /// پاکسازی به‌جامانده‌های آپدیت‌های قبلی، ابتدای هر فرایند آپدیت:
+        /// فایل Backup قدیمی (.old)، فایل‌های فرمت قدیمی آپدیتر، و لاگ اگر بیش از حد بزرگ شده باشد
+        /// </summary>
         private void CleanupLeftoverUpdateFiles(string currentExe, string localUpdateDir)
         {
             try
             {
+                // فایل .old که اسکریپت دفعه قبل موفق به حذفش نشده (مثلا چون کاربر دیگری هنوز نسخه قدیمی را باز داشت)
                 string oldExe = currentExe + OLD_FILE_SUFFIX;
                 if (File.Exists(oldExe))
                 {
-                    try { File.Delete(oldExe); } catch { /* هنوز توسط کاربر دیگری باز است */ }
+                    try { File.Delete(oldExe); } catch { /* هنوز توسط کاربر دیگری باز است؛ دفعه بعد پاک می‌شود */ }
                 }
 
-                // فایل‌های به‌جامانده از فرمت قدیمی آپدیتر (بدون پسوند کاربر) که دیگر استفاده نمی‌شوند
+                // فایل‌های به‌جامانده از نسخه‌های قبلی آپدیتر (که نام‌گذاری per-user نداشتند)
+                // اینها دیگر هیچ‌وقت استفاده نمی‌شوند و فقط حجم اشغال می‌کردند
                 string exeName = Path.GetFileName(currentExe);
                 CleanupTemp(Path.Combine(localUpdateDir, exeName + TEMP_FILE_SUFFIX));
                 CleanupTemp(Path.Combine(localUpdateDir, "update_installer.bat"));
 
+                // جلوگیری از بزرگ شدن بی‌رویه فایل لاگ (بیش از 1 مگابایت ⇐ از نو شروع شود)
                 var logInfo = new FileInfo(Path.Combine(localUpdateDir, UPDATE_LOG_FILE));
                 if (logInfo.Exists && logInfo.Length > 1024 * 1024)
                 {
                     try { logInfo.Delete(); } catch { }
                 }
             }
-            catch { }
+            catch { /* پاکسازی اختیاری است؛ شکستش نباید جلوی آپدیت را بگیرد */ }
         }
 
+        /// <summary>
+        /// متن راهنمای رفع مشکل برای کاربر عادی — وقتی آپدیت خودکار به مشکل خورده باشد.
+        /// اگر مسیر فایل سرور هنوز معلوم نشده باشد (خطا در مراحل اولیه)، مسیر کلی Share نمایش داده می‌شود.
+        /// </summary>
         private static string BuildManualUpdateGuide(string sourcePath)
         {
             return "راهنمای رفع مشکل بروزرسانی:\n" +
@@ -1303,6 +1451,11 @@ del ""%~f0"" & exit
                    "4- در صورت نیاز با پشتیبانی تماس بگیرید (فایل update_log.txt در پوشه update کنار برنامه به عیب یابی کمک می کند).";
         }
 
+        /// <summary>
+        /// تست عملی دسترسی نوشتن در یک پوشه: یک فایل آزمایشی با نام تصادفی ساخته می‌شود؛
+        /// DeleteOnClose یعنی به محض بسته شدن، خودش حذف می‌شود (هیچ ردی نمی‌ماند).
+        /// این روش از خواندن ACL ها مطمئن‌تر است چون نتیجه «واقعی» را نشان می‌دهد.
+        /// </summary>
         private bool HasWritePermission(string path)
         {
             try
@@ -1313,10 +1466,13 @@ del ""%~f0"" & exit
             }
             catch
             {
-                return false;
+                return false; // هر خطایی (Access Denied و...) یعنی دسترسی نوشتن نداریم
             }
         }
 
+        /// <summary>
+        /// حذف امن یک فایل موقت — اگر وجود داشته باشد؛ خطاها بی‌صدا نادیده گرفته می‌شوند
+        /// </summary>
         private void CleanupTemp(string path)
         {
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
@@ -1325,12 +1481,16 @@ del ""%~f0"" & exit
             }
         }
 
+        /// <summary>
+        /// نمایش پیام خطا به کاربر و سپس خروج از برنامه.
+        /// از حالت متن بزرگ با پنجره بلندتر استفاده می‌شود چون پیام‌های چندخطی راهنما
+        /// در حالت عادی Msgwin (پنجره کوتاه بدون اسکرول) بریده می‌شدند و کاربر نمی‌توانست بخواند.
+        /// </summary>
         private void ShowErrorAndExit(string message)
         {
-            // حالت متن بزرگ + پنجره بلندتر؛ پیام‌های چندخطی راهنما در حالت عادی بریده می‌شدند
             var msgwin = new Msgwin(false, message, "", true) { Height = 420 };
-            msgwin.ShowDialog();
-            CL_LMethods.GoExitTheApplication();
+            msgwin.ShowDialog();                  // منتظر می‌ماند تا کاربر پیام را ببیند و OK بزند
+            CL_LMethods.GoExitTheApplication();   // خروج برنامه را در صف Dispatcher قرار می‌دهد
         }
         #endregion
 
