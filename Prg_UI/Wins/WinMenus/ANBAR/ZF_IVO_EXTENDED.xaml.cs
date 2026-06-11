@@ -72,9 +72,45 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             _rows.CollectionChanged += (s, e) => Btn_DelRow.IsEnabled = _rows.Count > 1;
         }
 
+        private bool _updatingChecks;
+
+        private System.Windows.Controls.CheckBox[] ColumnChecks() => new[]
+        {
+            Chk_FLD1, Chk_FLD2, Chk_FLD3, Chk_FLD4, Chk_FLD5, Chk_FLD6, Chk_FLD7,
+            Chk_FLD8, Chk_FLD9, Chk_FLD10, Chk_FLD11, Chk_FLD12, Chk_FLD13, Chk_FLD14
+        };
+
+        private void Chk_All_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (_updatingChecks || !IsInitialized) return;
+            _updatingChecks = true;
+            bool check = Chk_All.IsChecked == true;
+            foreach (var chk in ColumnChecks())
+                chk.IsChecked = check;
+            _updatingChecks = false;
+        }
+
+        private void ColumnCheck_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (_updatingChecks) return;
+            _updatingChecks = true;
+            var checks = ColumnChecks();
+            // Indeterminate when only some columns are ticked
+            Chk_All.IsChecked = checks.All(c => c.IsChecked == true) ? true
+                              : checks.All(c => c.IsChecked != true) ? (bool?)false
+                              : null;
+            _updatingChecks = false;
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            foreach (var chk in ColumnChecks())
+            {
+                chk.Checked += ColumnCheck_CheckedChanged;
+                chk.Unchecked += ColumnCheck_CheckedChanged;
+            }
 
             if (Id > 0)
             {
