@@ -1035,13 +1035,21 @@ namespace Prg_UI.Wins
 
             // متن فارسی هشدارِ آخرین‌راه‌حل در فایل جداگانه UTF-8 نوشته می‌شود؛
             // cmd متن غیر ASCII داخل خود bat را (با یا بدون BOM) خراب نمایش می‌دهد
+            // (شکست در نوشتن این فایلِ اختیاری نباید کل بروزرسانی را متوقف کند)
             string alertMsgPath = Path.Combine(localUpdateDir, $"update_alert_{userSuffix}.txt");
-            File.WriteAllText(alertMsgPath,
-                "بروزرسانی خودکار ناتمام ماند و برنامه به صورت خودکار اجرا نشد.\r\n" +
-                "لطفا برنامه را به صورت دستی اجرا کنید.\r\n" +
-                "در صورت تکرار مشکل با پشتیبانی تماس بگیرید.\r\n" +
-                "(گزارش خطا: فایل update_log.txt در پوشه update کنار برنامه)",
-                Encoding.UTF8);
+            try
+            {
+                File.WriteAllText(alertMsgPath,
+                    "بروزرسانی خودکار ناتمام ماند و برنامه به صورت خودکار اجرا نشد.\r\n" +
+                    "لطفا برنامه را به صورت دستی اجرا کنید.\r\n" +
+                    "در صورت تکرار مشکل با پشتیبانی تماس بگیرید.\r\n" +
+                    "(گزارش خطا: فایل update_log.txt در پوشه update کنار برنامه)",
+                    Encoding.UTF8);
+            }
+            catch { }
+
+            // مسیر داخل رشته تک‌کوتیشن PowerShell قرار می‌گیرد؛ آپاستروف احتمالی باید دوبل شود
+            string alertMsgPathPs = alertMsgPath.Replace("'", "''");
 
             // Hardened Batch Script
             // 1. Waits (bounded) for THIS process to exit before swapping
@@ -1108,6 +1116,7 @@ del ""{flagPath}"" > nul 2>&1
 del ""{oldExe}"" > nul 2>&1
 del ""{tempExe}"" > nul 2>&1
 del ""{metaPath}"" > nul 2>&1
+ver > nul
 start """" /D ""{currentDir}"" ""{currentExe}""
 if not errorlevel 1 goto END
 ping -n 3 127.0.0.1 > nul
@@ -1122,6 +1131,9 @@ rem make sure a runnable exe is in place (restore the backup if the swap left no
 if not exist ""{currentExe}"" move /Y ""{oldExe}"" ""{currentExe}"" > nul 2>&1
 if not exist ""{currentExe}"" goto ALERT
 rem restart the application so the user is not left with nothing
+rem ('ver' clears any stale errorlevel left by earlier failed commands - some cmd
+rem commands like 'start' do not reliably reset it on success, causing false alerts)
+ver > nul
 start """" /D ""{currentDir}"" ""{currentExe}""
 if not errorlevel 1 goto END
 ping -n 3 127.0.0.1 > nul
@@ -1133,7 +1145,7 @@ rem last resort: the application could not be restarted at all - show a visible 
 rem (the Persian text lives in a UTF-8 file written by the app; the bat stays pure ASCII)
 :ALERT
 echo [%date% %time%] app did not restart - showing alert >> %LOG_FILE% 2>nul
-powershell -NoProfile -ExecutionPolicy Bypass -Command ""Add-Type -AssemblyName System.Windows.Forms; $t=[System.IO.File]::ReadAllText('{alertMsgPath}',[System.Text.Encoding]::UTF8); [System.Windows.Forms.MessageBox]::Show($t,'MrCorrect',0,48)"" > nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command ""Add-Type -AssemblyName System.Windows.Forms; $t=[System.IO.File]::ReadAllText('{alertMsgPathPs}',[System.Text.Encoding]::UTF8); [System.Windows.Forms.MessageBox]::Show($t,'MrCorrect',0,48)"" > nul 2>&1
 
 :END
 del ""{alertMsgPath}"" > nul 2>&1
