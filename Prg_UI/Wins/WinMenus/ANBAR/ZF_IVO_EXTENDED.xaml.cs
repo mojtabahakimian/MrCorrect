@@ -61,6 +61,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         public int Id { get; set; }
         public Visual WIN_COME { get; set; }
 
+        // HEAD_LST.MOLAH and SHARAYET are nvarchar(200)
+        private const int MAX_PARAMS_FIELD_LEN = 200;
+
         private ObservableCollection<IVO_EXTENDED_CSHARP> _rows = new ObservableCollection<IVO_EXTENDED_CSHARP>();
         private int _dbRowCount = 0;
         public ZF_IVO_EXTENDED(int _Id, Visual _YOUR_VL_WIN)
@@ -184,6 +187,20 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 return;
             }
 
+            string paramsString = BuildParamsString(rowsToSave);
+
+            // HEAD_LST.MOLAH / SHARAYET are nvarchar(200); validate before anything is
+            // written so the user can untick a few columns and save again
+            bool updatesHeadLst = WIN_COME is HEAD_LST_KHAREED1 || WIN_COME is HEAD_LST_RASID
+                               || WIN_COME is HAVALAH_ENTER || WIN_COME is HEAD_LST_KHADAMAT;
+            if (updatesHeadLst && paramsString.Length > MAX_PARAMS_FIELD_LEN)
+            {
+                new Msgwin(false,
+                    $"متن پارامترهای انتخاب‌شده {paramsString.Length} کاراکتر است و {paramsString.Length - MAX_PARAMS_FIELD_LEN} کاراکتر از ظرفیت فیلد ({MAX_PARAMS_FIELD_LEN} کاراکتر) بیشتر است." +
+                    "\nلطفاً تیک تعدادی از ستون‌ها را بردارید و دوباره ذخیره کنید.").ShowDialog();
+                return;
+            }
+
             // Build one atomic SQL batch: if any INSERT fails, XACT_ABORT rolls back the DELETE too
             var sql = new StringBuilder();
             sql.Append("SET XACT_ABORT ON; BEGIN TRANSACTION; ");
@@ -204,8 +221,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             try
             {
                 dbms.DoExecuteSQL(sql.ToString());
-
-                string paramsString = BuildParamsString(rowsToSave);
 
                 // No column ticked => nothing to push into MOLAH/SHARAYET; keep their current value
                 switch (string.IsNullOrEmpty(paramsString) ? null : WIN_COME)
