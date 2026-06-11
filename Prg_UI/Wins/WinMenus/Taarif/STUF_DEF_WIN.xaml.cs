@@ -1228,6 +1228,51 @@ namespace Wins.WinMenus.Taarif
             }
         }
 
+        private void SafeUpdateTDetaHesName(long nKol, long number, long? tNumber, string name)
+        {
+            string sql;
+            if (tNumber.HasValue)
+            {
+                sql = @"
+                BEGIN TRY
+                    UPDATE TDETA_HES 
+                    SET NAME = @Name 
+                    WHERE N_KOL = @NKol AND NUMBER = @Number AND TNUMBER = @TNumber;
+                END TRY
+                BEGIN CATCH
+                    IF ERROR_NUMBER() IN (2601, 2627)
+                    BEGIN
+                        UPDATE TDETA_HES 
+                        SET NAME = LEFT(@Name, 240) + N' (' + CAST(@TNumber AS NVARCHAR(20)) + N')'
+                        WHERE N_KOL = @NKol AND NUMBER = @Number AND TNUMBER = @TNumber;
+                    END
+                    ELSE THROW;
+                END CATCH;
+                ";
+                dbms.DoExecuteSQL(sql, new { NKol = nKol, Number = number, TNumber = tNumber.Value, Name = name });
+            }
+            else
+            {
+                sql = @"
+                BEGIN TRY
+                    UPDATE TDETA_HES 
+                    SET NAME = @Name 
+                    WHERE N_KOL = @NKol AND NUMBER = @Number;
+                END TRY
+                BEGIN CATCH
+                    IF ERROR_NUMBER() IN (2601, 2627)
+                    BEGIN
+                        UPDATE TDETA_HES 
+                        SET NAME = LEFT(@Name, 240) + N' (' + CAST(TNUMBER AS NVARCHAR(20)) + N')'
+                        WHERE N_KOL = @NKol AND NUMBER = @Number;
+                    END
+                    ELSE THROW;
+                END CATCH;
+                ";
+                dbms.DoExecuteSQL(sql, new { NKol = nKol, Number = number, Name = name });
+            }
+        }
+
         private void NAM_AfterUpdate()
         {
             if (!this.NewRecord)
@@ -1242,7 +1287,7 @@ namespace Wins.WinMenus.Taarif
                         {
                             try
                             {
-                                dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{NAM.Text}' WHERE N_KOL = " + Baseknow.MOGODIA + " AND  NUMBER = " + RST2[i].ANBAR + " AND TNUMBER = " + CODE.Text);
+                                SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.MOGODIA), Convert.ToInt64(RST2[i].ANBAR), Convert.ToInt64(CODE.Text), NAM.Text);
                             }
                             catch { }
 
@@ -1262,7 +1307,7 @@ namespace Wins.WinMenus.Taarif
                         var _NAME_ = "فروش " + NAM.Text;
                         try
                         {
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}' WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = 1 AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.FROSH), 1, Convert.ToInt64(CODE.Text), _NAME_);
                         }
                         catch { }
                         //rst.update();
@@ -1276,7 +1321,7 @@ namespace Wins.WinMenus.Taarif
                         var _NAME_ = "فروش " + NAM.Text;
                         try
                         {
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}' WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.FROSH), Convert.ToInt64(CODE.Text), null, _NAME_);
                         }
                         catch { }
 
@@ -1289,8 +1334,7 @@ namespace Wins.WinMenus.Taarif
                     {
                         try
                         {
-
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{NAM.Text}' WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = " + CODE.Text + " AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.FROSH), Convert.ToInt64(CODE.Text), Convert.ToInt64(CODE.Text), NAM.Text);
                         }
                         catch { }
                         //rst1.update();
@@ -1304,8 +1348,7 @@ namespace Wins.WinMenus.Taarif
                     {
                         try
                         {
-
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{NAM.Text}'  WHERE N_KOL  = " + Baseknow.PHAZ_TOL + " AND  NUMBER = 1  AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.PHAZ_TOL), 1, Convert.ToInt64(CODE.Text), NAM.Text);
                         }
                         catch { }
                         //rst.update();
@@ -1320,8 +1363,7 @@ namespace Wins.WinMenus.Taarif
                         var _NAME_ = "مواد مصرفي " + NAM.Text;
                         try
                         {
-
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}'  WHERE N_KOL  = " + Baseknow.HAZ_TOL + " AND  NUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.HAZ_TOL), Convert.ToInt64(CODE.Text), null, _NAME_);
                         }
                         catch { }
                         //rst.update();
@@ -1336,7 +1378,7 @@ namespace Wins.WinMenus.Taarif
                         var _NAME_ = " قيمت تمام شده  " + NAM.Text;
                         try
                         {
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}'  WHERE N_KOL  =" + Baseknow.GHEYMAT + " AND  NUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.GHEYMAT), Convert.ToInt64(CODE.Text), null, _NAME_);
                         }
                         catch { }
                         //rst.update();
@@ -1352,8 +1394,7 @@ namespace Wins.WinMenus.Taarif
 
                         try
                         {
-
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}'  WHERE N_KOL  =" + Baseknow.GHEYMAT + " AND  NUMBER = " + CODE.Text + " AND  TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.GHEYMAT), Convert.ToInt64(CODE.Text), Convert.ToInt64(CODE.Text), _NAME_);
                         }
                         catch { }
 
@@ -1406,8 +1447,7 @@ namespace Wins.WinMenus.Taarif
                         var _NAME_ = " عملكرد  " + NAM.Text;
                         try
                         {
-
-                            dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}'  WHERE N_KOL  =" + Baseknow.AMALKARD + " AND  NUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.AMALKARD), Convert.ToInt64(CODE.Text), null, _NAME_);
                         }
                         catch { }
                         //rst.update();
@@ -1416,14 +1456,15 @@ namespace Wins.WinMenus.Taarif
                 //rst.Close();
                 if (true)
                 {
-                    var rst = dbms.DoGetDataSQL<string?>("SELECT NAME FROM TDETA_HES WHERE N_KOL  = " + Baseknow.HAZ_TOL + " And TNUMBER = " + CODE.Text).ToList();
+                    var rst = dbms.DoGetDataSQL<long?>("SELECT NUMBER FROM TDETA_HES WHERE N_KOL  = " + Baseknow.HAZ_TOL + " And TNUMBER = " + CODE.Text).ToList();
                     if (rst is not null)
                     {
                         for (int i = 0; i < rst.Count; i++) // while (!rst.EOF())
                         {
                             try
                             {
-                                dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{NAM.Text}'  WHERE N_KOL  = " + Baseknow.HAZ_TOL + " And TNUMBER = " + CODE.Text);
+                                if (rst[i].HasValue)
+                                    SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.HAZ_TOL), rst[i].Value, Convert.ToInt64(CODE.Text), NAM.Text);
                             }
                             catch (Exception)
                             {
@@ -1436,14 +1477,15 @@ namespace Wins.WinMenus.Taarif
                 //rst.Close();
                 if (true)
                 {
-                    var rst = dbms.DoGetDataSQL<string?>("SELECT NAME FROM TDETA_HES WHERE N_KOL  = " + Baseknow.CONKAL + " And TNUMBER = " + CODE.Text).ToList();
+                    var rst = dbms.DoGetDataSQL<long?>("SELECT NUMBER FROM TDETA_HES WHERE N_KOL  = " + Baseknow.CONKAL + " And TNUMBER = " + CODE.Text).ToList();
                     if (rst is not null)
                     {
                         for (int i = 0; i < rst.Count; i++) //while (!rst.EOF())
                         {
                             try
                             {
-                                dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{NAM.Text}'  WHERE N_KOL  = " + Baseknow.CONKAL + " And TNUMBER = " + CODE.Text);
+                                if (rst[i].HasValue)
+                                    SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.CONKAL), rst[i].Value, Convert.ToInt64(CODE.Text), NAM.Text);
                             }
                             catch (Exception)
                             {
@@ -1455,7 +1497,7 @@ namespace Wins.WinMenus.Taarif
                 //rst.Close();
                 if (true)
                 {
-                    var rst = dbms.DoGetDataSQL<string?>("SELECT NAME FROM TDETA_HES WHERE N_KOL  = " + Baseknow.AMALKARD + " And TNUMBER = " + CODE.Text).ToList();
+                    var rst = dbms.DoGetDataSQL<long?>("SELECT NUMBER FROM TDETA_HES WHERE N_KOL  = " + Baseknow.AMALKARD + " And TNUMBER = " + CODE.Text).ToList();
                     if (rst is not null)
                     {
                         for (int i = 0; i < rst.Count; i++) //while (!rst.EOF())
@@ -1464,7 +1506,8 @@ namespace Wins.WinMenus.Taarif
                             {
                                 var _NAME_ = "نرخ " + NAM.Text;
 
-                                dbms.DoExecuteSQL($@"UPDATE TDETA_HES SET NAME = N'{_NAME_}'  WHERE N_KOL  = " + Baseknow.AMALKARD + " And TNUMBER = " + CODE.Text);
+                                if (rst[i].HasValue)
+                                    SafeUpdateTDetaHesName(Convert.ToInt64(Baseknow.AMALKARD), rst[i].Value, Convert.ToInt64(CODE.Text), _NAME_);
                             }
                             catch (Exception)
                             {
