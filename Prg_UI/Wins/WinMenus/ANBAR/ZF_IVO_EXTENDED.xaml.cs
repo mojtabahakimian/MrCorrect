@@ -61,6 +61,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         public int Id { get; set; }
         public Visual WIN_COME { get; set; }
 
+        private const int MAX_PARAMS_FIELD_LEN = 200; // HEAD_LST.MOLAH and SHARAYET are nvarchar(200)
+
         private ObservableCollection<IVO_EXTENDED_CSHARP> _rows = new ObservableCollection<IVO_EXTENDED_CSHARP>();
         private int _dbRowCount = 0;
         public ZF_IVO_EXTENDED(int _Id, Visual _YOUR_VL_WIN)
@@ -72,9 +74,45 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             _rows.CollectionChanged += (s, e) => Btn_DelRow.IsEnabled = _rows.Count > 1;
         }
 
+        private bool _updatingChecks;
+
+        private System.Windows.Controls.CheckBox[] ColumnChecks() => new[]
+        {
+            Chk_FLD1, Chk_FLD2, Chk_FLD3, Chk_FLD4, Chk_FLD5, Chk_FLD6, Chk_FLD7,
+            Chk_FLD8, Chk_FLD9, Chk_FLD10, Chk_FLD11, Chk_FLD12, Chk_FLD13, Chk_FLD14
+        };
+
+        private void Chk_All_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (_updatingChecks || !IsInitialized) return;
+            _updatingChecks = true;
+            bool check = Chk_All.IsChecked == true;
+            foreach (var chk in ColumnChecks())
+                chk.IsChecked = check;
+            _updatingChecks = false;
+        }
+
+        private void ColumnCheck_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (_updatingChecks) return;
+            _updatingChecks = true;
+            var checks = ColumnChecks();
+            // Indeterminate when only some columns are ticked
+            Chk_All.IsChecked = checks.All(c => c.IsChecked == true) ? true
+                              : checks.All(c => c.IsChecked != true) ? (bool?)false
+                              : null;
+            _updatingChecks = false;
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            foreach (var chk in ColumnChecks())
+            {
+                chk.Checked += ColumnCheck_CheckedChanged;
+                chk.Unchecked += ColumnCheck_CheckedChanged;
+            }
 
             if (Id > 0)
             {
@@ -148,6 +186,19 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 return;
             }
 
+            string paramsString = BuildParamsString(rowsToSave);
+            // HEAD_LST.MOLAH / SHARAYET are nvarchar(200); validate before anything is
+            // written so the user can untick a few columns and save again
+            bool updatesHeadLst = WIN_COME is HEAD_LST_KHAREED1 || WIN_COME is HEAD_LST_RASID
+                               || WIN_COME is HAVALAH_ENTER || WIN_COME is HEAD_LST_KHADAMAT;
+            if (updatesHeadLst && paramsString.Length > MAX_PARAMS_FIELD_LEN)
+            {
+                new Msgwin(false,
+                    $"متن پارامترهای انتخاب‌شده {paramsString.Length} کاراکتر است و {paramsString.Length - MAX_PARAMS_FIELD_LEN} کاراکتر از ظرفیت فیلد ({MAX_PARAMS_FIELD_LEN} کاراکتر) بیشتر است." +
+                    "\nلطفاً تیک تعدادی از ستون‌ها را بردارید و دوباره ذخیره کنید.").ShowDialog();
+                return;
+            }
+
             // Build one atomic SQL batch: if any INSERT fails, XACT_ABORT rolls back the DELETE too
             var sql = new StringBuilder();
             sql.Append("SET XACT_ABORT ON; BEGIN TRANSACTION; ");
@@ -169,14 +220,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 dbms.DoExecuteSQL(sql.ToString());
 
-                string paramsString = BuildParamsString(rowsToSave);
-
-                switch (WIN_COME)
+                // No column ticked => nothing to push into MOLAH/SHARAYET; keep their current value
+                switch (string.IsNullOrEmpty(paramsString) ? null : WIN_COME)
                 {
                     case HEAD_LST_KHAREED1:
-                        (WIN_COME as HEAD_LST_KHAREED1).MOLAH.Text = paramsString;
                         dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET MOLAH = N'{paramsString}'
                                              WHERE NUMBER = {(WIN_COME as HEAD_LST_KHAREED1).NUMBER.Text} AND TAG IN (12)");
+                        (WIN_COME as HEAD_LST_KHAREED1).MOLAH.Text = paramsString;
                         break;
 
                     case HEAD_LST_RASID:
@@ -184,15 +234,16 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                              WHERE NUMBER = {(WIN_COME as HEAD_LST_RASID).NUMBER.Text} AND TAG IN (1)");
                         break;
 
-                    case HAVALAH_ENTER:
-                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET SHARAYET = N'{paramsString}'
+                    case HAVALAH_ENTER: //برگه ورود کالای ساخته شده
+                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET MOLAH = N'{paramsString}'
                                              WHERE NUMBER = {(WIN_COME as HAVALAH_ENTER).NUMBER.Text} AND TAG IN (9)");
+                        (WIN_COME as HAVALAH_ENTER).MOLAH.Text = paramsString;
                         break;
 
                     case HEAD_LST_KHADAMAT:
-                        (WIN_COME as HEAD_LST_KHADAMAT).MOLAH.Text = paramsString;
                         dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET MOLAH = N'{paramsString}'
                                              WHERE NUMBER = {(WIN_COME as HEAD_LST_KHADAMAT).NUMBER.Text} AND TAG IN (14)");
+                        (WIN_COME as HEAD_LST_KHADAMAT).MOLAH.Text = paramsString;
                         break;
 
                     default: break;
@@ -211,24 +262,33 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private string BuildParamsString(System.Collections.Generic.List<IVO_EXTENDED_CSHARP> rows)
         {
-            string RowLine(IVO_EXTENDED_CSHARP r) =>
-                "چربي:" + (r.FLD1 ?? 0) +
-                "- ماده خشک:" + (r.FLD2 ?? 0) +
-                "- رطوبت:" + (r.FLD3 ?? 0) +
-                "- پي اچ:" + (r.FLD4 ?? 0) +
-                "- نمک:" + (r.FLD5 ?? 0) +
-                "- دانسيته:" + (r.FLD6 ?? 0) +
-                "- پروتئين:" + (r.FLD7 ?? 0) +
-                "- انجماد:" + (r.FLD8 ?? 0) +
-                "- اسيد:" + (r.FLD9 ?? 0) +
-                "- الکل:" + (r.FLD10 ?? 0) +
-                "- کلي فرم:" + (r.FLD11 ?? 0) +
-                "- استاف:" + (r.FLD12 ?? 0) +
-                "- اشيرشيا:" + (r.FLD13 ?? 0) +
-                "- ذرات سوخته:" + (r.FLD14 ?? 0);
+            // Only the columns the user has ticked are included; with multiple rows the
+            // value of each ticked column is aggregated (summed) into a single entry.
+            var parts = new System.Collections.Generic.List<string>();
 
-            return string.Join(" | ", rows.Select((r, i) =>
-                rows.Count > 1 ? $"[{i + 1}] {RowLine(r)}" : RowLine(r)));
+            void AddIfChecked(System.Windows.Controls.CheckBox chk, string label, Func<IVO_EXTENDED_CSHARP, double?> get)
+            {
+                if (chk.IsChecked != true) return;
+                double total = rows.Sum(r => get(r) ?? 0);
+                parts.Add(label + ":" + total.ToString(CultureInfo.InvariantCulture));
+            }
+
+            AddIfChecked(Chk_FLD1, "چربي", r => r.FLD1);
+            AddIfChecked(Chk_FLD2, "ماده خشک", r => r.FLD2);
+            AddIfChecked(Chk_FLD3, "رطوبت", r => r.FLD3);
+            AddIfChecked(Chk_FLD4, "پي اچ", r => r.FLD4);
+            AddIfChecked(Chk_FLD5, "نمک", r => r.FLD5);
+            AddIfChecked(Chk_FLD6, "دانسيته", r => r.FLD6);
+            AddIfChecked(Chk_FLD7, "پروتئين", r => r.FLD7);
+            AddIfChecked(Chk_FLD8, "انجماد", r => r.FLD8);
+            AddIfChecked(Chk_FLD9, "اسيد", r => r.FLD9);
+            AddIfChecked(Chk_FLD10, "الکل", r => r.FLD10);
+            AddIfChecked(Chk_FLD11, "کلي فرم", r => r.FLD11);
+            AddIfChecked(Chk_FLD12, "استاف", r => r.FLD12);
+            AddIfChecked(Chk_FLD13, "اشيرشيا", r => r.FLD13);
+            AddIfChecked(Chk_FLD14, "ذرات سوخته", r => r.FLD14);
+
+            return string.Join("- ", parts);
         }
 
         private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
