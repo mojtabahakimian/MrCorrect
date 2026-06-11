@@ -171,7 +171,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 string paramsString = BuildParamsString(rowsToSave);
 
-                switch (WIN_COME)
+                // No column ticked => nothing to push into MOLAH/SHARAYET; keep their current value
+                switch (string.IsNullOrEmpty(paramsString) ? null : WIN_COME)
                 {
                     case HEAD_LST_KHAREED1:
                         (WIN_COME as HEAD_LST_KHAREED1).MOLAH.Text = paramsString;
@@ -211,24 +212,33 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private string BuildParamsString(System.Collections.Generic.List<IVO_EXTENDED_CSHARP> rows)
         {
-            string RowLine(IVO_EXTENDED_CSHARP r) =>
-                "چربي:" + (r.FLD1 ?? 0) +
-                "- ماده خشک:" + (r.FLD2 ?? 0) +
-                "- رطوبت:" + (r.FLD3 ?? 0) +
-                "- پي اچ:" + (r.FLD4 ?? 0) +
-                "- نمک:" + (r.FLD5 ?? 0) +
-                "- دانسيته:" + (r.FLD6 ?? 0) +
-                "- پروتئين:" + (r.FLD7 ?? 0) +
-                "- انجماد:" + (r.FLD8 ?? 0) +
-                "- اسيد:" + (r.FLD9 ?? 0) +
-                "- الکل:" + (r.FLD10 ?? 0) +
-                "- کلي فرم:" + (r.FLD11 ?? 0) +
-                "- استاف:" + (r.FLD12 ?? 0) +
-                "- اشيرشيا:" + (r.FLD13 ?? 0) +
-                "- ذرات سوخته:" + (r.FLD14 ?? 0);
+            // Only the columns the user has ticked are included; with multiple rows the
+            // value of each ticked column is aggregated (summed) into a single entry.
+            var parts = new System.Collections.Generic.List<string>();
 
-            return string.Join(" | ", rows.Select((r, i) =>
-                rows.Count > 1 ? $"[{i + 1}] {RowLine(r)}" : RowLine(r)));
+            void AddIfChecked(System.Windows.Controls.CheckBox chk, string label, Func<IVO_EXTENDED_CSHARP, double?> get)
+            {
+                if (chk.IsChecked != true) return;
+                double total = rows.Sum(r => get(r) ?? 0);
+                parts.Add(label + ":" + total.ToString(CultureInfo.InvariantCulture));
+            }
+
+            AddIfChecked(Chk_FLD1, "چربي", r => r.FLD1);
+            AddIfChecked(Chk_FLD2, "ماده خشک", r => r.FLD2);
+            AddIfChecked(Chk_FLD3, "رطوبت", r => r.FLD3);
+            AddIfChecked(Chk_FLD4, "پي اچ", r => r.FLD4);
+            AddIfChecked(Chk_FLD5, "نمک", r => r.FLD5);
+            AddIfChecked(Chk_FLD6, "دانسيته", r => r.FLD6);
+            AddIfChecked(Chk_FLD7, "پروتئين", r => r.FLD7);
+            AddIfChecked(Chk_FLD8, "انجماد", r => r.FLD8);
+            AddIfChecked(Chk_FLD9, "اسيد", r => r.FLD9);
+            AddIfChecked(Chk_FLD10, "الکل", r => r.FLD10);
+            AddIfChecked(Chk_FLD11, "کلي فرم", r => r.FLD11);
+            AddIfChecked(Chk_FLD12, "استاف", r => r.FLD12);
+            AddIfChecked(Chk_FLD13, "اشيرشيا", r => r.FLD13);
+            AddIfChecked(Chk_FLD14, "ذرات سوخته", r => r.FLD14);
+
+            return string.Join("- ", parts);
         }
 
         private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
