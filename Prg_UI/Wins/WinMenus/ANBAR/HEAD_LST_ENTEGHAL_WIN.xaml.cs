@@ -866,6 +866,8 @@ namespace Wins.WinMenus.ANBAR
 
         private void GetSanadsNums(double? SanadNumber)
         {
+            if (SanadNumber == null) return;
+
             var _MABNA_ = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 base FROM dbo.DEED_HED WHERE N_S = {SanadNumber}").FirstOrDefault();
 
             if (_MABNA_ != null)
