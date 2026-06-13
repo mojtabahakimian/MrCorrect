@@ -2421,59 +2421,59 @@ namespace Prg_Proccessy.SQLMODELS
         public class IVO_EXTENDED_CSHARP : IEditableObject
         {
             public long? id { get; set; }
-            public double? FLD1 { get; set; } = 0;
-            public double? FLD2 { get; set; } = 0;
-            public double? FLD3 { get; set; } = 0;
-            public double? FLD4 { get; set; } = 0;
-            public double? FLD5 { get; set; } = 0;
-            public double? FLD6 { get; set; } = 0;
-            public double? FLD7 { get; set; } = 0;
-            public double? FLD8 { get; set; } = 0;
-            public double? FLD9 { get; set; } = 0;
-            public double? FLD10 { get; set; } = 0;
-            public double? FLD11 { get; set; } = 0;
-            public double? FLD12 { get; set; } = 0;
-            public double? FLD13 { get; set; } = 0;
-            public double? FLD14 { get; set; } = 0;
+            public string FLD1 { get; set; } = "";
+            public string FLD2 { get; set; } = "";
+            public string FLD3 { get; set; } = "";
+            public string FLD4 { get; set; } = "";
+            public string FLD5 { get; set; } = "";
+            public string FLD6 { get; set; } = "";
+            public string FLD7 { get; set; } = "";
+            public string FLD8 { get; set; } = "";
+            public string FLD9 { get; set; } = "";
+            public string FLD10 { get; set; } = "";
+            public string FLD11 { get; set; } = "";
+            public string FLD12 { get; set; } = "";
+            public string FLD13 { get; set; } = "";
+            public string FLD14 { get; set; } = "";
 
             public DateTime? CRT { get; set; }
             public int? UID { get; set; }
 
             public IVO_EXTENDED_CSHARP()
             {
-                FLD1 = 0;
-                FLD2 = 0;
-                FLD3 = 0;
-                FLD4 = 0;
-                FLD5 = 0;
-                FLD6 = 0;
-                FLD7 = 0;
-                FLD8 = 0;
-                FLD9 = 0;
-                FLD10 = 0;
-                FLD11 = 0;
-                FLD12 = 0;
-                FLD13 = 0;
-                FLD14 = 0;
+                FLD1 = "";
+                FLD2 = "";
+                FLD3 = "";
+                FLD4 = "";
+                FLD5 = "";
+                FLD6 = "";
+                FLD7 = "";
+                FLD8 = "";
+                FLD9 = "";
+                FLD10 = "";
+                FLD11 = "";
+                FLD12 = "";
+                FLD13 = "";
+                FLD14 = "";
             }
 
             private struct BackupData
             {
                 public long? id;
-                public double? FLD1;
-                public double? FLD2;
-                public double? FLD3;
-                public double? FLD4;
-                public double? FLD5;
-                public double? FLD6;
-                public double? FLD7;
-                public double? FLD8;
-                public double? FLD9;
-                public double? FLD10;
-                public double? FLD11;
-                public double? FLD12;
-                public double? FLD13;
-                public double? FLD14;
+                public string FLD1;
+                public string FLD2;
+                public string FLD3;
+                public string FLD4;
+                public string FLD5;
+                public string FLD6;
+                public string FLD7;
+                public string FLD8;
+                public string FLD9;
+                public string FLD10;
+                public string FLD11;
+                public string FLD12;
+                public string FLD13;
+                public string FLD14;
                 public DateTime? CRT;
                 public int? UID;
             }

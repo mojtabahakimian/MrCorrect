@@ -144,11 +144,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
 
         private static bool IsRowEmpty(IVO_EXTENDED_CSHARP r) =>
-            (r.FLD1 ?? 0) == 0 && (r.FLD2 ?? 0) == 0 && (r.FLD3 ?? 0) == 0 &&
-            (r.FLD4 ?? 0) == 0 && (r.FLD5 ?? 0) == 0 && (r.FLD6 ?? 0) == 0 &&
-            (r.FLD7 ?? 0) == 0 && (r.FLD8 ?? 0) == 0 && (r.FLD9 ?? 0) == 0 &&
-            (r.FLD10 ?? 0) == 0 && (r.FLD11 ?? 0) == 0 && (r.FLD12 ?? 0) == 0 &&
-            (r.FLD13 ?? 0) == 0 && (r.FLD14 ?? 0) == 0;
+            string.IsNullOrWhiteSpace(r.FLD1) && string.IsNullOrWhiteSpace(r.FLD2) && string.IsNullOrWhiteSpace(r.FLD3) &&
+            string.IsNullOrWhiteSpace(r.FLD4) && string.IsNullOrWhiteSpace(r.FLD5) && string.IsNullOrWhiteSpace(r.FLD6) &&
+            string.IsNullOrWhiteSpace(r.FLD7) && string.IsNullOrWhiteSpace(r.FLD8) && string.IsNullOrWhiteSpace(r.FLD9) &&
+            string.IsNullOrWhiteSpace(r.FLD10) && string.IsNullOrWhiteSpace(r.FLD11) && string.IsNullOrWhiteSpace(r.FLD12) &&
+            string.IsNullOrWhiteSpace(r.FLD13) && string.IsNullOrWhiteSpace(r.FLD14);
 
         private void Btn_DelRow_Click(object sender, RoutedEventArgs e)
         {
@@ -174,6 +174,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             // Use InvariantCulture to avoid locale decimal-separator issues (e.g. fa-IR: "1,5" instead of "1.5")
             string V(double? v) => (v ?? 0).ToString(CultureInfo.InvariantCulture);
+            string VStr(string v) {
+                if (string.IsNullOrWhiteSpace(v)) return "0";
+                var s = v.Replace(",", ".").Replace("٫", ".");
+                if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double d)) return d.ToString(CultureInfo.InvariantCulture);
+                return "0";
+            }
+            string VText(string v) => $"N'{v?.Replace("'", "''")}'";
 
             // DB rows are always saved; only new rows added this session are filtered if empty
             var rowsToSave = _rows
@@ -208,10 +215,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 sql.Append($@"INSERT INTO dbo.IVO_EXTENDED
                     (id, FLD1, FLD2, FLD3, FLD4, FLD5, FLD6, FLD7, FLD8, FLD9, FLD10, FLD11, FLD12, FLD13, FLD14, CRT, UID)
                     VALUES ({Id},
-                        {V(row.FLD1)}, {V(row.FLD2)}, {V(row.FLD3)}, {V(row.FLD4)},
-                        {V(row.FLD5)}, {V(row.FLD6)}, {V(row.FLD7)}, {V(row.FLD8)},
-                        {V(row.FLD9)}, {V(row.FLD10)}, {V(row.FLD11)}, {V(row.FLD12)},
-                        {V(row.FLD13)}, {V(row.FLD14)},
+                        {VStr(row.FLD1)}, {VStr(row.FLD2)}, {VStr(row.FLD3)}, {VStr(row.FLD4)},
+                        {VStr(row.FLD5)}, {VStr(row.FLD6)}, {VStr(row.FLD7)}, {VStr(row.FLD8)},
+                        {VStr(row.FLD9)}, {VStr(row.FLD10)}, {VText(row.FLD11)}, {VStr(row.FLD12)},
+                        {VStr(row.FLD13)}, {VText(row.FLD14)},
                         GETDATE(), {Baseknow.USERCOD ?? 0}); ");
             }
             sql.Append("COMMIT TRANSACTION;");
@@ -266,27 +273,47 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // value of each ticked column is aggregated (summed) into a single entry.
             var parts = new System.Collections.Generic.List<string>();
 
-            void AddIfChecked(System.Windows.Controls.CheckBox chk, string label, Func<IVO_EXTENDED_CSHARP, double?> get)
+            void AddIfCheckedNumber(System.Windows.Controls.CheckBox chk, string label, Func<IVO_EXTENDED_CSHARP, double?> get)
             {
                 if (chk.IsChecked != true) return;
                 double total = rows.Sum(r => get(r) ?? 0);
                 parts.Add(label + ":" + total.ToString(CultureInfo.InvariantCulture));
             }
 
-            AddIfChecked(Chk_FLD1, "چربي", r => r.FLD1);
-            AddIfChecked(Chk_FLD2, "ماده خشک", r => r.FLD2);
-            AddIfChecked(Chk_FLD3, "رطوبت", r => r.FLD3);
-            AddIfChecked(Chk_FLD4, "پي اچ", r => r.FLD4);
-            AddIfChecked(Chk_FLD5, "نمک", r => r.FLD5);
-            AddIfChecked(Chk_FLD6, "دانسيته", r => r.FLD6);
-            AddIfChecked(Chk_FLD7, "پروتئين", r => r.FLD7);
-            AddIfChecked(Chk_FLD8, "انجماد", r => r.FLD8);
-            AddIfChecked(Chk_FLD9, "اسيد", r => r.FLD9);
-            AddIfChecked(Chk_FLD10, "الکل", r => r.FLD10);
-            AddIfChecked(Chk_FLD11, "کلي فرم", r => r.FLD11);
-            AddIfChecked(Chk_FLD12, "استاف", r => r.FLD12);
-            AddIfChecked(Chk_FLD13, "اشيرشيا", r => r.FLD13);
-            AddIfChecked(Chk_FLD14, "ذرات سوخته", r => r.FLD14);
+            void AddIfCheckedNumberStr(System.Windows.Controls.CheckBox chk, string label, Func<IVO_EXTENDED_CSHARP, string> get)
+            {
+                if (chk.IsChecked != true) return;
+                double total = 0;
+                foreach(var r in rows) {
+                    string v = get(r);
+                    if (!string.IsNullOrWhiteSpace(v)) {
+                        var s = v.Replace(",", ".").Replace("٫", ".");
+                        if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double d)) total += d;
+                    }
+                }
+                parts.Add(label + ":" + total.ToString(CultureInfo.InvariantCulture));
+            }
+
+            void AddIfCheckedString(System.Windows.Controls.CheckBox chk, string label, Func<IVO_EXTENDED_CSHARP, string> get)
+            {
+                if (chk.IsChecked != true) return;
+                var vals = rows.Select(r => get(r)).Where(v => !string.IsNullOrWhiteSpace(v)).Distinct();
+                if (vals.Any()) parts.Add(label + ":" + string.Join(", ", vals));
+            }
+            AddIfCheckedNumberStr(Chk_FLD1, "چربي", r => r.FLD1);
+            AddIfCheckedNumberStr(Chk_FLD2, "ماده خشک", r => r.FLD2);
+            AddIfCheckedNumberStr(Chk_FLD3, "رطوبت", r => r.FLD3);
+            AddIfCheckedNumberStr(Chk_FLD4, "پي اچ", r => r.FLD4);
+            AddIfCheckedNumberStr(Chk_FLD5, "نمک", r => r.FLD5);
+            AddIfCheckedNumberStr(Chk_FLD6, "دانسيته", r => r.FLD6);
+            AddIfCheckedNumberStr(Chk_FLD7, "پروتئين", r => r.FLD7);
+            AddIfCheckedNumberStr(Chk_FLD8, "انجماد", r => r.FLD8);
+            AddIfCheckedNumberStr(Chk_FLD9, "اسيد", r => r.FLD9);
+            AddIfCheckedNumberStr(Chk_FLD10, "الکل", r => r.FLD10);
+            AddIfCheckedString(Chk_FLD11, "کلي فرم", r => r.FLD11);
+            AddIfCheckedNumberStr(Chk_FLD12, "استاف", r => r.FLD12);
+            AddIfCheckedNumberStr(Chk_FLD13, "اشيرشيا", r => r.FLD13);
+            AddIfCheckedString(Chk_FLD14, "ذرات سوخته", r => r.FLD14);
 
             return string.Join("- ", parts);
         }

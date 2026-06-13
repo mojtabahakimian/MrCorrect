@@ -77,127 +77,141 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding FLD1,  UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD1" Content="چربی" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD1" Content="چربی" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD2,  UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD2" Content="ماده خشک" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD2" Content="ماده خشک" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD3,  UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD3" Content="رطوبت" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD3" Content="رطوبت" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD4,  UpdateSourceTrigger=LostFocus}" MinWidth="60" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD4" Content="PH" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD4" Content="PH" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD5,  UpdateSourceTrigger=LostFocus}" MinWidth="60" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD5" Content="نمک" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD5" Content="نمک" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD6,  UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD6" Content="دانسیته" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD6" Content="دانسیته" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD7,  UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD7" Content="پروتیین" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD7" Content="پروتیین" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD8,  UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD8" Content="انجماد" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD8" Content="انجماد" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD9,  UpdateSourceTrigger=LostFocus}" MinWidth="60" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD9" Content="اسید" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD9" Content="اسید" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD10, UpdateSourceTrigger=LostFocus}" MinWidth="60" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD10" Content="الکل" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD10" Content="الکل" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD11, UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD11" Content="کلی فرم" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD11" Content="کلی فرم" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD12, UpdateSourceTrigger=LostFocus}" MinWidth="60" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD12" Content="استاف" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD12" Content="استاف" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD13, UpdateSourceTrigger=LostFocus}" MinWidth="72" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD13" Content="اشیرشیا" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD13" Content="اشیرشیا" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding FLD14, UpdateSourceTrigger=LostFocus}" MinWidth="80" Width="auto" CanUserSort="False">
                         <DataGridTextColumn.Header>
-                            <CheckBox x:Name="Chk_FLD14" Content="ذرات سوخته" IsChecked="True" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
+                            <CheckBox x:Name="Chk_FLD14" Content="ذرات سوخته" IsChecked="False" FlowDirection="RightToLeft" ToolTip="درج این پارامتر در ملاحظات/شرایط هنگام ذخیره"/>
                         </DataGridTextColumn.Header>
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
@@ -205,7 +219,7 @@
             </DataGrid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0">
-                <CheckBox x:Name="Chk_All" Content="انتخاب همه" IsChecked="True" IsThreeState="False"
+                <CheckBox x:Name="Chk_All" Content="انتخاب همه" IsChecked="False" IsThreeState="False"
                           FlowDirection="RightToLeft" VerticalAlignment="Center" Margin="0,0,16,0"
                           ToolTip="تیک یا برداشتن تیک همه ستون‌ها"
                           Checked="Chk_All_CheckedChanged" Unchecked="Chk_All_CheckedChanged"/>
