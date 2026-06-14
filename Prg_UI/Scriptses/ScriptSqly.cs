@@ -3750,7 +3750,6 @@ END
 
             }
         }
-
         private static void SalaryScript(bool isCustomCall, SqlConnection db)
         {
             if (isCustomCall) //
@@ -6196,6 +6195,56 @@ BEGIN
     OPTION (RECOMPILE); 
 
 END;
+GO
+
+-- ================================================================
+-- ۳. باز کردن قید CK_CALC_BASIS برای مقدار 3 (ساعتی)
+-- ================================================================
+IF EXISTS (SELECT 1 FROM sys.check_constraints
+           WHERE name = 'CK_CALC_BASIS'
+             AND parent_object_id = OBJECT_ID(N'dbo.PAY2_ITEM_DEF')
+             AND definition NOT LIKE '%(3)%')
+BEGIN
+    ALTER TABLE dbo.PAY2_ITEM_DEF DROP CONSTRAINT CK_CALC_BASIS;
+    ALTER TABLE dbo.PAY2_ITEM_DEF ADD CONSTRAINT CK_CALC_BASIS CHECK ([CALC_BASIS] IN (1,2,3));
+END;
+GO
+
+-- ================================================================
+-- ۴. سایر قیدهای احتمالی روی BASIS_OV که مقدار 3 را مجاز نمی‌دانند
+-- ================================================================
+DECLARE @sql NVARCHAR(MAX) = N'';
+SELECT @sql = @sql + N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(cc.parent_object_id))
+            + N'.' + QUOTENAME(OBJECT_NAME(cc.parent_object_id))
+            + N' DROP CONSTRAINT ' + QUOTENAME(cc.name) + N';' + CHAR(10)
+FROM sys.check_constraints cc
+WHERE OBJECT_NAME(cc.parent_object_id) IN ('PAY2_DECREE_LINE', 'PAY2_OVERRIDE', 'PAY2_ITEM_TMPL_LINE')
+  AND cc.definition LIKE '%BASIS_OV%'
+  AND cc.definition NOT LIKE '%(3)%';
+IF LEN(@sql) > 0
+    EXEC sp_executesql @sql;
+GO
+
+-- ================================================================
+-- ۵. پشتیبانی از نوع مرخصی «ساعتی» (مقدار 6) در جدول PAY2_LEAVE
+--
+-- انواع مرخصی:
+--   1=استحقاقی  2=استعلاجی  3=بدون حقوق  4=زایمان  5=مأموریت  6=ساعتی (جدید)
+--
+-- اگر CHECK CONSTRAINT روی LEV_TYPE مقدار 6 را مجاز نمی‌داند، حذف می‌شود.
+-- سقف مرخصی ساعتی (3 ساعت و 20 دقیقه) در سمت سرور (Pay2EmployeesController)
+-- و سمت کلاینت اعتبارسنجی می‌شود.
+-- ================================================================
+DECLARE @sql NVARCHAR(MAX) = N'';
+SELECT @sql = @sql + N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(cc.parent_object_id))
+            + N'.' + QUOTENAME(OBJECT_NAME(cc.parent_object_id))
+            + N' DROP CONSTRAINT ' + QUOTENAME(cc.name) + N';' + CHAR(10)
+FROM sys.check_constraints cc
+WHERE OBJECT_NAME(cc.parent_object_id) = 'PAY2_LEAVE'
+  AND cc.definition LIKE '%LEV_TYPE%'
+  AND cc.definition NOT LIKE '%(6)%';
+IF LEN(@sql) > 0
+    EXEC sp_executesql @sql;
 GO
 ";
                 ExecuteBatches(db, modify1);
