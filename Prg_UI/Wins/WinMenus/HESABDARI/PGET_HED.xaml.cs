@@ -3320,7 +3320,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
                 else
                 {
-                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>($"SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = N'{ENTERED_VALUE_ROW.ToStringNullSafe().Trim()}'").ToList();
+                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>("SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = @hes", new { hes = ENTERED_VALUE_ROW.ToStringNullSafe().Trim() }).ToList();
 
                     if (RES_HESAB.Count > 0)
                     {
@@ -3475,7 +3475,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
                 else
                 {
-                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>($"SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = N'{ENTERED_VALUE_ROW.ToStringNullSafe().Trim()}'").ToList();
+                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>("SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = @hes", new { hes = ENTERED_VALUE_ROW.ToStringNullSafe().Trim() }).ToList();
                     if (RES_HESAB.Count > 0)
                     {
                         CURRENT_ITMES_ROW.THES = RES_HESAB.FirstOrDefault().hes;
@@ -4278,7 +4278,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 {
                     double? KOL = null, MOIN = null, TAF = null, TAF2 = null, TAF3 = null, TAF4 = null;
 
-                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>($"SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = N'{item.FHES}'").ToList();
+                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>("SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = @hes", new { hes = item.FHES }).ToList();
                     if (RES_HESAB.Count > 0)
                     {
                         CURRENT_ITMES_ROW.FHES = RES_HESAB.FirstOrDefault().hes;
@@ -4313,7 +4313,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 {
                     double? KOL = null, MOIN = null, TAF = null, TAF2 = null, TAF3 = null, TAF4 = null;
 
-                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>($"SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = N'{item.THES}'").ToList();
+                    var RES_HESAB = dbms.DoGetDataSQL<QueryT2>("SELECT TOP(1) NAME,hes FROM dbo.CUST_HESAB WHERE hes = @hes", new { hes = item.THES }).ToList();
                     if (RES_HESAB.Count > 0)
                     {
                         CURRENT_ITMES_ROW.THES = RES_HESAB.FirstOrDefault().hes;
@@ -4513,13 +4513,14 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             try
             {
+                if (final_lst.N_SERI == 0 || final_lst.BANK == 0)
+                {
+                    final_lst.N_SERI = null;
+                    final_lst.BANK = null;
+                }
+
                 if (final_lst.IDH is null || final_lst.IDH <= 0) //INSERT
                 {
-                    if (final_lst.N_SERI == 0 || final_lst.BANK == 0)
-                    {
-                        final_lst.N_SERI = null;
-                        final_lst.BANK = null;
-                    }
                     final_lst.ID = Convert.ToInt32(ID.Text);
                     var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, MHAZ_NO)
                                          OUTPUT INSERTED.IDH
