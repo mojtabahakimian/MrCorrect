@@ -6167,8 +6167,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         int retVal = ExecutePricingUpdate(
                             Convert.ToInt32(NUMBER.Text),
                             TAG,
-                            PEPID.SelectedValue is null ? 0 : Convert.ToInt32(PEPID.SelectedValue),
-                            PEID.SelectedValue is null ? 0 : Convert.ToInt32(PEID.SelectedValue),
+                            0,
+                            0,
                             Convert.ToInt32(MODAT_PPID.SelectedValue),
                             TICMBAA.IsChecked == true,
                             Convert.ToInt32(CUST_KIND.SelectedValue),

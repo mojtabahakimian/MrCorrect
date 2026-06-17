@@ -6412,11 +6412,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (ROW.MABL != mabl_gheymat && !isJayzeh)
                     {
                         ROW.MABL = mabl_gheymat;
-                        ErrosMessages.Add(new MsgModel { MessageText_U = $"مبلغ کل این سطر کالا با این مشخصات : کد کالا {ROW.CODE} به مقدار کل {ROW.MEGHk} با مبلغ {ROW.MABL} مغایرت داشت و من آنرا به مبلغ کل {mabl_gheymat} اصلاح کردم " });
                     }
                     if (ROW.N_KOL != nkol_gheymat)
                     {
-                        ErrosMessages.Add(new MsgModel { MessageText_U = $"تخفیف این سطر کالا با این مشخصات : کد کالا {ROW.CODE} به مقدار کل {ROW.MEGHk} با مبلغ {ROW.MABL} مغایرت داشت و من آنرا به تخفیف {nkol_gheymat} اصلاح کردم " });
                         ROW.N_KOL = nkol_gheymat;
                         ROW.TKHN = tkhn_gheymat;
                     }
@@ -13118,8 +13116,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         int retVal = ExecutePricingUpdate(
                             Convert.ToInt32(NUMBER.Text),
                             fTAG, //13
-                            PEPID.SelectedValue is null ? 0 : Convert.ToInt32(PEPID.SelectedValue),
-                            PEID.SelectedValue is null ? 0 : Convert.ToInt32(PEID.SelectedValue),
+                            0,
+                            0,
                             Convert.ToInt32(MODAT_PPID.SelectedValue),
                             TICMBAA.IsChecked == true,
                             Convert.ToInt32(CUST_KIND.SelectedValue),

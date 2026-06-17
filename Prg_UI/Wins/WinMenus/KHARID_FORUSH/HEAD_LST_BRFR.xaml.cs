@@ -1484,21 +1484,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         int retVal = ExecutePricingUpdate(
                             Convert.ToInt32(NUMBER.Text),
                             FTAG, // 25
-                            PEPID.SelectedValue is null ? 0 : Convert.ToInt32(PEPID.SelectedValue),
-                            PEID.SelectedValue is null ? 0 : Convert.ToInt32(PEID.SelectedValue),
+                            0,
+                            0,
                             Convert.ToInt32(MODAT_PPID.SelectedValue),
                             TICMBAA.IsChecked == true,
                             Convert.ToInt32(CUST_KIND.SelectedValue),
                             Convert.ToInt32(DATE_N.Text.ToRawTarikh()),
                             Convert.ToInt32(DEPATMAN.SelectedValue));
-
-                        // اگر اعلامیه تخفیف خالی یا صفر است، مقادیر تخفیف را در دیتابیس صفر کن
-                        if (PEID.SelectedValue == null || Convert.ToInt32(PEID.SelectedValue) == 0)
-                        {
-                            // HTAG = 24 (سطرهای فاکتور برگشت فروش)
-                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0 WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG}");
-                            DoCmdHeaderSave();
-                        }
 
                         string? strSpecificError = default;
                         if (retVal != 0)

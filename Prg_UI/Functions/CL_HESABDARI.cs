@@ -1767,11 +1767,8 @@ namespace Prg_Proccessy.FUNCTIONS
                             string where = " WHERE(dbo.INVO_LST.NUMBER = " + System.Convert.ToString(NUMB) + ") And(dbo.INVO_LST.TAG = " + System.Convert.ToString(TGG == 13 ? 2 : TGG) + ")";
                             foreach (var item in rst2)
                             {
-                                dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_KOL = {rst3.Select(x => x.TF1).FirstOrDefault()}  {where}   AND CODE = {item.CODE} AND MABL_K = {item.MABL_K} AND IMBAA = {item.IMBAA} AND N_KOL = {item.N_KOL} AND MEGHk = {item.MEGHk} ");
-                                dbms.DoExecuteSQL($"UPDATE INVO_LST SET TKHN = {rst3.Select(x => x.TF2).FirstOrDefault()}  {where}  AND CODE = {item.CODE} AND MABL_K = {item.MABL_K} AND IMBAA = {item.IMBAA} AND N_KOL = {item.N_KOL} AND MEGHk = {item.MEGHk} ");
                                 TFF = Math.Round(item.MABL_K * rst3.Select(x => x.TF1).FirstOrDefault() / 100) + Math.Round((item.MABL_K - Math.Round(item.MABL_K) * rst3.Select(x => x.TF1).FirstOrDefault() / 100) * rst3.Select(x => x.TF2).FirstOrDefault() / 100);
                                 stf = stf + TFF;
-                                dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_MOIN = {TFF}  {where}  AND CODE = {item.CODE} AND MABL_K = {item.MABL_K} AND IMBAA = {item.IMBAA} AND N_KOL = {item.N_KOL} AND MEGHk = {item.MEGHk} ");
                                 if (Convert.ToBoolean(TICMBAA))
                                 {
                                     if (item.CMBAA == false)
@@ -1787,7 +1784,7 @@ namespace Prg_Proccessy.FUNCTIONS
                                 {
                                     IMBA = 0;
                                 }
-                                dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = {IMBA}  {where}  AND CODE = {item.CODE} AND MABL_K = {item.MABL_K} AND IMBAA = {item.IMBAA} AND N_KOL = {item.N_KOL} AND MEGHk = {item.MEGHk} ");
+                                dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_KOL = {rst3.Select(x => x.TF1).FirstOrDefault()}, TKHN = {rst3.Select(x => x.TF2).FirstOrDefault()}, N_MOIN = {TFF}, IMBAA = {IMBA}  {where}  AND CODE = {item.CODE} AND MABL_K = {item.MABL_K} AND MEGHk = {item.MEGHk} ");
                                 MLBAA = MLBAA + IMBA;
                             }
                         }
@@ -1825,11 +1822,8 @@ namespace Prg_Proccessy.FUNCTIONS
                         string where = " WHERE (dbo.INVO_LST.NUMBER = " + Convert.ToString(NUMB) + ") And (dbo.INVO_LST.TAG = " + Convert.ToString(TGG == 13 ? 2 : TGG) + ") ";
                         foreach (var RST2_Fields in RST2_Rec)
                         {
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_KOL = {rst3.Select(x => x.TF1).FirstOrDefault()} {where}  AND CODE = {RST2_Fields.CODE} AND MABL_K = {RST2_Fields.MABL_K} AND IMBAA = {RST2_Fields.IMBAA} AND N_KOL = {RST2_Fields.N_KOL} AND MEGHk = {RST2_Fields.MEGHk} ");
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET TKHN = {rst3.Select(x => x.TF2).FirstOrDefault()} {where}  AND CODE = {RST2_Fields.CODE} AND MABL_K = {RST2_Fields.MABL_K} AND IMBAA = {RST2_Fields.IMBAA} AND N_KOL = {RST2_Fields.N_KOL} AND MEGHk = {RST2_Fields.MEGHk} ");
                             TFF = Math.Round(RST2_Fields.MABL_K * Convert.ToDouble(rst3.Select(x => x.TF1).FirstOrDefault()) / 100) + Math.Round((RST2_Fields.MABL_K - Math.Round(RST2_Fields.MABL_K * Convert.ToDouble(rst3.Select(x => x.TF1).FirstOrDefault()) / 100)) * Convert.ToDouble(rst3.Select(x => x.TF2).FirstOrDefault()) / 100);
                             stf = stf + TFF;
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_MOIN = {TFF} {where}  AND CODE = {RST2_Fields.CODE} AND MABL_K = {RST2_Fields.MABL_K} AND IMBAA = {RST2_Fields.IMBAA} AND N_KOL = {RST2_Fields.N_KOL} AND MEGHk = {RST2_Fields.MEGHk} ");
                             if (Convert.ToBoolean(TICMBAA))
                             {
                                 if ((bool)RST2_Fields.CMBAA)
@@ -1845,10 +1839,8 @@ namespace Prg_Proccessy.FUNCTIONS
                             {
                                 IMBA = 0;
                             }
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = {IMBA} {where}  AND CODE = {RST2_Fields.CODE} AND MABL_K = {RST2_Fields.MABL_K} AND IMBAA = {RST2_Fields.IMBAA} AND N_KOL = {RST2_Fields.N_KOL} AND MEGHk = {RST2_Fields.MEGHk} ");
+                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_KOL = {rst3.Select(x => x.TF1).FirstOrDefault()}, TKHN = {rst3.Select(x => x.TF2).FirstOrDefault()}, N_MOIN = {TFF}, IMBAA = {IMBA} {where}  AND CODE = {RST2_Fields.CODE} AND MABL_K = {RST2_Fields.MABL_K} AND MEGHk = {RST2_Fields.MEGHk} ");
                             MLBAA = MLBAA + IMBA;
-                            //RST2.update();
-                            //RST2.MoveNext();
                         }
                     }
                     else
@@ -2114,7 +2106,6 @@ namespace Prg_Proccessy.FUNCTIONS
                 }
                 else
                 {
-                    dbms.DoExecuteSQL("UPDATE INVO_LST  SET N_KOL = 0 ,N_MOIN = 0,TKHN = 0  WHERE  NUMBER = " + NUMB + "  AND CODE = '" + CODECC + "'  AND TAG = " + ((tgg == 13) ? 2 : tgg));
                     new Msgwin(false, " توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت و اين کالا اعلاميه  تخفيف مشخص نشده است.").ShowDialog();
                 }
             }
@@ -2133,7 +2124,6 @@ namespace Prg_Proccessy.FUNCTIONS
                 }
                 else
                 {
-                    dbms.DoExecuteSQL("UPDATE INVO_LST  SET N_KOL = 0 ,N_MOIN = 0,TKHN = 0  WHERE  NUMBER = " + NUMB + "  AND CODE = '" + CODECC + "'  AND TAG = " + ((tgg == 13) ? 2 : tgg));
                     new Msgwin(false, " توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت و اين کالا اعلاميه  تخفيف مشخص نشده است.").ShowDialog();
                 }
             }
