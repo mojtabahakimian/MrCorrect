@@ -790,7 +790,7 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									         SELECT TOP 1 @CurrentPEPID = PEPID 
 									         FROM dbo.PRICE_ELAMIE 
 									         WHERE PEPDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
-									         ORDER BY PEPID DESC;
+									         ORDER BY PEPDATE DESC, PEPID DESC;
 									     END
 									     ELSE
 									     BEGIN
@@ -817,7 +817,7 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									         SELECT TOP 1 @CurrentPEID = PEID 
 									         FROM dbo.PRICE_ELAMIETF 
 									         WHERE PEDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
-									         ORDER BY PEID DESC;
+									         ORDER BY PEDATE DESC, PEID DESC;
 									     END
 									     ELSE
 									     BEGIN

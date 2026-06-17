@@ -3331,7 +3331,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     "SELECT TOP (1) PEID " +
                     "FROM dbo.PRICE_ELAMIETF " +
                     $"WHERE (PEDATE <= {tarikh}) AND (PEPDEPART = {departId}) " +
-                    "ORDER BY PEID DESC";
+                    "ORDER BY PEDATE DESC, PEID DESC";
 
                 int? lastPEID = dbms.DoGetDataSQL<int?>(sqlGetPEID).FirstOrDefault();
 
