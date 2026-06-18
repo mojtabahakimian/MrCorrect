@@ -203,14 +203,20 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         {
             var report = new StiReport();
             using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER3.mrt");
+            if (pathreport == null)
+                throw new Exception("فایل گزارش GOZARESH_FROOSH_USER3.mrt یافت نشد.");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
-            (report.GetComponentByName("AZDATE") as StiText).Text = DT1.Text.ToString();
-            (report.GetComponentByName("TADATE") as StiText).Text = DT2.Text.ToString();
+            var azdate = report.GetComponentByName("AZDATE") as StiText;
+            var tadate = report.GetComponentByName("TADATE") as StiText;
+            if (azdate != null) azdate.Text = DT1.Text.ToString();
+            if (tadate != null) tadate.Text = DT2.Text.ToString();
 
+            if (DEPART.SelectedValue == null)
+                throw new Exception("واحد انتخاب نشده است.");
 
             var depart = DEPART.SelectedValue.ToString();
             var dt1 = DT1.Text.ToRawTarikh();
@@ -237,24 +243,19 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             // 1. دریافت مقادیر Footer گزارش
             var footerData = dbms.DoGetDataSQL<ReportFooterDto>(sqlAggregates, new { DT1 = dt1, DT2 = dt2, DEPART = depart }).FirstOrDefault();
 
-            // 3. تزریق مقادیر محاسبه شده دیتابیس به متغیرهای گزارش
+            // تزریق مقادیر محاسبه شده به متغیرهای گزارش (از indexer استفاده می‌شود تا اگر متغیر از قبل وجود دارد خطا ندهد)
             if (footerData != null)
             {
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Naghd_Count", footerData.NaghdCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Takhfif_Count", footerData.TakhfifCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Var_Count", footerData.VarCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Hav_Count", footerData.HavCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Asn_Count", footerData.AsnCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_MAND", footerData.BedMand));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_TEDAD", footerData.BedTedad));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_MAND", footerData.BesMand));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_TEDAD", footerData.BesTedad));
+                report["Var_Naghd_Count"] = footerData.NaghdCount;
+                report["Var_Takhfif_Count"] = footerData.TakhfifCount;
+                report["Var_Var_Count"] = footerData.VarCount;
+                report["Var_Hav_Count"] = footerData.HavCount;
+                report["Var_Asn_Count"] = footerData.AsnCount;
+                report["Var_Bed_MAND"] = footerData.BedMand;
+                report["Var_Bed_TEDAD"] = footerData.BedTedad;
+                report["Var_Bes_MAND"] = footerData.BesMand;
+                report["Var_Bes_TEDAD"] = footerData.BesTedad;
             }
-
-            // در اینجا می‌توانید داده‌های اصلی رکوردها را نیز Bind کنید
-            // var mainData = dbms.DoGetDataSQL<YourMainModel>("SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART, @DT1, @DT2)", new { DT1 = dt1, DT2 = dt2, DEPART = depart });
-            // report.RegData("GOZARESH_FROOSH_ROZANEH3", mainData);
-
 
             new WINRPT(report, "گزارش خلاصه فروش روزانه کاربران").Show();
         }
@@ -299,23 +300,19 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             StiReport report = new StiReport();
             report.Load("GOZARESH_FROOSH_USER3.mrt");
 
-            // 3. تزریق مقادیر محاسبه شده دیتابیس به متغیرهای گزارش
+            // تزریق مقادیر محاسبه شده به متغیرهای گزارش
             if (footerData != null)
             {
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Naghd_Count", footerData.NaghdCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Takhfif_Count", footerData.TakhfifCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Var_Count", footerData.VarCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Hav_Count", footerData.HavCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Asn_Count", footerData.AsnCount));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_MAND", footerData.BedMand));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_TEDAD", footerData.BedTedad));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_MAND", footerData.BesMand));
-                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_TEDAD", footerData.BesTedad));
+                report["Var_Naghd_Count"] = footerData.NaghdCount;
+                report["Var_Takhfif_Count"] = footerData.TakhfifCount;
+                report["Var_Var_Count"] = footerData.VarCount;
+                report["Var_Hav_Count"] = footerData.HavCount;
+                report["Var_Asn_Count"] = footerData.AsnCount;
+                report["Var_Bed_MAND"] = footerData.BedMand;
+                report["Var_Bed_TEDAD"] = footerData.BedTedad;
+                report["Var_Bes_MAND"] = footerData.BesMand;
+                report["Var_Bes_TEDAD"] = footerData.BesTedad;
             }
-
-            // در اینجا می‌توانید داده‌های اصلی رکوردها را نیز Bind کنید
-            // var mainData = dbms.DoGetDataSQL<YourMainModel>("SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART, @DT1, @DT2)", new { DT1 = dt1, DT2 = dt2, DEPART = depart });
-            // report.RegData("GOZARESH_FROOSH_ROZANEH3", mainData);
 
             report.Compile();
             report.Show();
@@ -431,7 +428,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             }
             catch (Exception ex)
             {
-                new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
+                new Msgwin(false, $"خطا در انجام عملیات:\n{ex.Message}").ShowDialog();
             }
         }
 

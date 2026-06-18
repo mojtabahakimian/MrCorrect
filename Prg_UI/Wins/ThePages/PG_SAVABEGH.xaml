@@ -134,7 +134,7 @@
                 </ItemsControl.ItemsPanel>
 
                 <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Width="315">
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghFactorFroosh_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/SellH.png" CacheOption="OnLoad"/>
@@ -143,7 +143,7 @@
                         <Label Content="سوابق فروش" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghFactorKharid_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/BuyH.png" CacheOption="OnLoad"/>
@@ -152,7 +152,7 @@
                         <Label Content="سوابق خرید" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghBargashtFroosh_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/BuyReturnH.png" CacheOption="OnLoad"/>
@@ -161,7 +161,7 @@
                         <Label Content="سوابق برگشت فروش" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghBargashtKharid_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/KharidReturnH.png" CacheOption="OnLoad"/>
@@ -170,7 +170,7 @@
                         <Label Content="سوابق برگشت خرید" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghKhadamat_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/ServiceH.png" CacheOption="OnLoad"/>
@@ -179,7 +179,7 @@
                         <Label Content="سوابق خدمات" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghHavaleFroosh_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/HavaleSellH.png" CacheOption="OnLoad"/>
@@ -188,7 +188,7 @@
                         <Label Content="سوابق حواله فروش" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghResidKharid_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/ResidBuyH.png" CacheOption="OnLoad"/>
@@ -197,38 +197,38 @@
                         <Label Content="سوابق رسید خرید" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghTolid_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/TolidH.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="سوابق تولید" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="سوابق ورود کالای ساخته شده" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
                 </StackPanel>
 
                 <StackPanel FlowDirection="RightToLeft" Orientation="Vertical">
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghKhorojMavad_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/MavalExitH.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="سوابق خروج مواد" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="سوابق خروج مواد اولیه" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghKhorojSayer_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/SayerExitH.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="سوابق خروج سایر" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="سوابق خروج سایر مواد" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghEnteghalAnbar_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/EnteghalH.png" CacheOption="OnLoad"/>
@@ -237,7 +237,7 @@
                         <Label Content="سوابق انتقال کالا از انبار به انبار" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghSanadDasti_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/SanadDastiH.png" CacheOption="OnLoad"/>
@@ -246,7 +246,7 @@
                         <Label Content="سوابق سند دستی" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghTarifKala_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/KalaTarifH.png" CacheOption="OnLoad"/>
@@ -282,7 +282,7 @@
                         <Label Content="سوابق مرخصی" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghPishFactor_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/PishFactorH.png" CacheOption="OnLoad"/>
