@@ -111,6 +111,10 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             //For_Open:
             DEPART.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPART.Items.Refresh();
+            if (DEPART.SelectedValue == null && DEPART.Items.Count > 0)
+            {
+                DEPART.SelectedIndex = 0;
+            }
 
             if (Baseknow.UGRP == "3")
             {
@@ -212,7 +216,13 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             (report.GetComponentByName("TADATE") as StiText).Text = DT2.Text.ToString();
 
 
-            var depart = DEPART.SelectedValue.ToString();
+            var depart = DEPART.SelectedValue?.ToString();
+            if (string.IsNullOrWhiteSpace(depart))
+            {
+                new Msgwin(false, "واحد انتخاب نشده است").ShowDialog();
+                return;
+            }
+
             var dt1 = DT1.Text.ToRawTarikh();
             var dt2 = DT2.Text.ToRawTarikh();
 
@@ -362,7 +372,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     USERR.Text = "%";
                 }
 
-                if (string.IsNullOrEmpty(DT1.Text) || string.IsNullOrEmpty(DT2.Text) || string.IsNullOrEmpty(DEPART.Text))
+                if (string.IsNullOrEmpty(DT1.Text) || string.IsNullOrEmpty(DT2.Text) || string.IsNullOrEmpty(DEPART.Text) || DEPART.SelectedValue == null)
                 {
                     new Msgwin(false, "پارامترها كافي نيست").ShowDialog();
                     return;
@@ -431,7 +441,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             }
             catch (Exception ex)
             {
-                new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
+                new Msgwin(false, $"خطا در انجام عملیات: {ex.Message}").ShowDialog();
             }
         }
 
