@@ -110,11 +110,8 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             FILL_ALL_COMBOBOXES();
 
             //For_Open:
+            // در صورت پیدا نشدن واحد پیش‌فرض کاربر، واحد دیگری انتخاب نمی‌کنیم تا گزارش اشتباه نمایش داده نشود.
             DEPART.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPART.Items.Refresh();
-            if (DEPART.SelectedValue == null && DEPART.Items.Count > 0)
-            {
-                DEPART.SelectedIndex = 0;
-            }
 
             if (Baseknow.UGRP == "3")
             {
