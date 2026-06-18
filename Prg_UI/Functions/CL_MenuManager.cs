@@ -979,6 +979,10 @@ namespace Functions
             /// </summary>
             TR_HISTORY_SAYER_HAVALE_ANBAR,
             /// <summary>
+            /// سوابق برگشت خرید عادی
+            /// </summary>
+            TR_HISTORY_KHARID_RETURN_NORMAL,
+            /// <summary>
             /// سوابق برگشت فروش عادی
             /// </summary>
             TR_HISTORY_FROOSH_RETURN_NORMAL,
@@ -991,9 +995,17 @@ namespace Functions
             /// </summary>
             TR_HISTORY_FACTOR_FROOSH,
             /// <summary>
+            /// سوابق فاکتور خدمات
+            /// </summary>
+            TR_HISTORY_FACTOR_KHADAMAT,
+            /// <summary>
             /// سوابق پیش فاکتور
             /// </summary>
             TR_HISTORY_PISH_FACTOR,
+            /// <summary>
+            /// سوابق درخواست خرید
+            /// </summary>
+            TR_HISTORY_DARKHAST_KHARID,
             /// <summary>
             /// سوابق برگشت فروش آزاد
             /// </summary>
@@ -1003,15 +1015,15 @@ namespace Functions
             /// </summary>
             TR_HISTORY_KHARID_RETURN_AZAD,
             /// <summary>
-            /// برگه ورود کالای ساخته شده
+            /// سوابق برگه ورود کالای ساخته شده
             /// </summary>
             TR_HISTORY_VOROD_KALA_SAKHTEH,
             /// <summary>
-            /// برگه خروج مواد اولیه جهت تولید
+            /// سوابق برگه خروج مواد اولیه جهت تولید
             /// </summary>
             TR_HISTORY_KHOROJ_MAVAD_AVALIYEH,
             /// <summary>
-            /// صدور برگه خروج سایر مواد از انبار
+            /// سوابق برگه خروج سایر مواد از انبار
             /// </summary>
             TR_HISTORY_KHOROJ_SAYER_MAVAD,
             /// <summary>
@@ -1161,6 +1173,10 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(26), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
+                case WinNameType.TR_HISTORY_KHARID_RETURN_NORMAL: //سوابق برگشت خرید عادی
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(3), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.TR_HISTORY_FROOSH_RETURN_NORMAL: //سوابق برگشت فروش عادی
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(4), isModalDialog: false, allowMultipleInstances: false);
                     break;
@@ -1173,8 +1189,16 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(13), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
+                case WinNameType.TR_HISTORY_FACTOR_KHADAMAT: //سوابق فاکتور خدمات
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(14), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.TR_HISTORY_PISH_FACTOR: //سوابق پیش فاکتور
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(20), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_DARKHAST_KHARID: //سوابق درخواست خرید
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(23), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
                 case WinNameType.TR_HISTORY_FROOSH_RETURN_AZAD: //سوابق برگشت فروش آزاد
