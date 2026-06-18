@@ -868,14 +868,14 @@ namespace Wins.WinMenus.ANBAR
         {
             if (SanadNumber == null) return;
 
-            var _MABNA_ = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 base FROM dbo.DEED_HED WHERE N_S = {SanadNumber}").FirstOrDefault();
+            var _MABNA_ = dbms.DoGetDataSQL<int?>("SELECT TOP 1 base FROM dbo.DEED_HED WHERE N_S = @SanadNumber", new { SanadNumber }).FirstOrDefault();
 
             if (_MABNA_ != null)
             {
                 N_S.Text = SanadNumber.ToString();
                 MABNA.Text = _MABNA_.ToString();
 
-                dbms.DoExecuteSQL($@"UPDATE HEAD_LST SET N_S = {SanadNumber} WHERE NUMBER = {NUMBER.Text} AND TAG = 5"); //بروز رسانی سند
+                dbms.DoExecuteSQL("UPDATE HEAD_LST SET N_S = @SanadNumber WHERE NUMBER = @Number AND TAG = 5", new { SanadNumber, Number = NUMBER.Text }); //بروز رسانی سند
             }
         }
 
@@ -1981,7 +1981,7 @@ namespace Wins.WinMenus.ANBAR
                     Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
                     msgwin.Show();
                 }
-                else 
+                else
                 {
                     CURRENT_ITMES_ROW.ANBAR = Convert.ToInt32(ANBAR.SelectedValue);
                     var items = new List<object> { CURRENT_ITMES_ROW };

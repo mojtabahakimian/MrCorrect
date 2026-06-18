@@ -1981,10 +1981,8 @@ namespace Wins.WinMenus.Taarif
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                          SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                          NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                          WHERE N_KOL = " + Baseknow.MOGODIA + " AND  NUMBER = " + Row.ANBAR + " AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2011,10 +2009,8 @@ namespace Wins.WinMenus.Taarif
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = 1 AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
 
                     }
@@ -2073,10 +2069,8 @@ END");
                             }
                             else
                             {
-                                dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = " + CODE.Text + " AND TNUMBER = " + CODE.Text);
+                                SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                                dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                             }
                             //rst.update();
                         }
@@ -2104,10 +2098,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.PHAZ_TOL + " AND  NUMBER = 1  AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2137,10 +2129,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.PHAZ_TOL + " AND  NUMBER = 1  AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
 
                         //rst.update();
@@ -2168,10 +2158,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = 1 AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2233,10 +2221,8 @@ END");
                             }
                             else
                             {
-                                dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.FROSH + " AND  NUMBER = " + CODE.Text + " AND TNUMBER = " + CODE.Text);
+                                SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                                dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                             }
                             //rst.update();
                         }
@@ -2265,10 +2251,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.MOGODIA + " AND  NUMBER = " + Row.ANBAR + " AND TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2363,10 +2347,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.GHEYMAT + " AND  NUMBER = " + CODE.Text + " AND  TNUMBER = " + CODE.Text);
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2428,10 +2410,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.CONKAL + " AND  NUMBER = " + CODE.Text + " AND TNUMBER = 99999996");
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2458,10 +2438,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.CONKAL + " AND  NUMBER = " + CODE.Text + " AND  TNUMBER = 99999997");
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2489,10 +2467,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.CONKAL + " AND  NUMBER = " + CODE.Text + " AND TNUMBER = 99999999");
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -2519,10 +2495,8 @@ END");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                 SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                 NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                 WHERE N_KOL = " + Baseknow.CONKAL + " AND  NUMBER = " + CODE.Text + " AND  TNUMBER = 99999998");
+                            SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                            dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                         }
                         //rst.update();
                     }
@@ -3342,10 +3316,8 @@ END");
                 }
                 else
                 {
-                    dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                          SET N_KOL = {_N_KOL_}, NUMBER = {_NUMBER_}, TNUMBER = {_TNUMBER_}, 
-                                          NAME = N'{_NAME_}', BED_BES = {_BED_BES_}
-                                          WHERE N_KOL = " + Baseknow.TFROSH + " AND " + "NUMBER = " + ROW.CUST_CO + " AND " + "TNUMBER = " + ROW.TAKH_COD);
+                    SafeUpdateTDetaHesName(Convert.ToInt64(_N_KOL_), Convert.ToInt64(_NUMBER_), Convert.ToInt64(_TNUMBER_), _NAME_);
+                    dbms.DoExecuteSQL($"UPDATE TDETA_HES SET BED_BES = {_BED_BES_} WHERE N_KOL = {_N_KOL_} AND NUMBER = {_NUMBER_} AND TNUMBER = {_TNUMBER_}");
                 }
             }
 
