@@ -5183,7 +5183,7 @@ BEGIN
                             -- v6.1: درصدی از حقوق پایه «ماهیانه» (نرخ روزانه × 30) با تناسب روز کارکرد
                             -- @BASE_SAL_B محاسبه‌شده = نرخ روزانه × DAYSB ÷ 30  →  ضرب در @MONTH_DAYS = نرخ روزانه × DAYSB
                             DECLARE @BASE_SAL_B BIGINT = ISNULL((SELECT TOP 1 AMOUNT FROM #ItemCalc WHERE ITEM_CODE = 'BASE_SAL_B'), 0);
-                            SET @CALC_AMOUNT = CAST(@BASE_SAL_B * @MONTH_DAYS * @ITEM_AMOUNT / 100.0 AS BIGINT);
+                            SET @CALC_AMOUNT = CAST(ROUND(@BASE_SAL_B * @MONTH_DAYS * @ITEM_AMOUNT / 100.0, 0) AS BIGINT);
                         END;
                     END;
                     ELSE
