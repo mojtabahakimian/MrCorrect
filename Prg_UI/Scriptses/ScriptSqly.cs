@@ -3998,6 +3998,7 @@ VALUES
  N'حداکثر روز انتقال مرخصی به سال بعد', N'ماده ۶۶ ق.ک — ۹ روز',
  N'ممنوع|۹ روز (قانون)|نامحدود', 'INT', 2),
 
+('LEAVE_HOURLY_MAX_MINS', '200', NULL, '200', N'مرخصی', N'حداکثر زمان مرخصی ساعتی (دقیقه)', N'حداکثر دقایق مجاز برای ثبت در یک برگ مرخصی ساعتی (مثلاً ۲۰۰ دقیقه = ۳ ساعت و ۲۰ دقیقه)', NULL, 'INT', 2),
 -- ─── تسویه حساب ────────────────────────────────────────────────
 ('BONUS_MODE',           'MIN_WAGE',      'MIN_WAGE|ACTUAL|CUSTOM',  'MIN_WAGE',     N'تسویه',
  N'مبنای محاسبه عیدی',
@@ -4325,7 +4326,7 @@ CREATE TABLE [dbo].[PAY2_ITEM_TMPL_LINE]
 (
     [TMPL_ID]   INT      NOT NULL,
     [ITEM_ID]   INT      NOT NULL,
-    [DEF_AMOUNT] BIGINT  NOT NULL CONSTRAINT DF_TL_AMT DEFAULT(0),
+    [DEF_AMOUNT] DECIMAL(18,2) NOT NULL CONSTRAINT DF_TL_AMT DEFAULT(0),
     [INS_OV]    BIT      NULL,                                               -- NULL=از تعریف آیتم
     [TAX_OV]    BIT      NULL,
     [BASIS_OV]  TINYINT  NULL,
@@ -4386,7 +4387,7 @@ CREATE TABLE [dbo].[PAY2_DECREE_LINE]
 (
     [DEC_ID]   INT      NOT NULL,
     [ITEM_ID]  INT      NOT NULL,
-    [AMOUNT]   BIGINT   NOT NULL CONSTRAINT DF_DL_AMT DEFAULT(0),
+    [AMOUNT]   DECIMAL(18,2) NOT NULL CONSTRAINT DF_DL_AMT DEFAULT(0),
     [INS_OV]   BIT      NULL,                                                -- NULL=از PAY2_ITEM_DEF
     [TAX_OV]   BIT      NULL,
     [BASIS_OV] TINYINT  NULL,
@@ -5120,8 +5121,8 @@ BEGIN
         BEGIN
             -- گام ۵ — محاسبه هر آیتم حکم
             DECLARE
-                @ITEM_ID INT, @ITEM_CODE NVARCHAR(30), @ITEM_TYPE TINYINT, @ITEM_AMOUNT BIGINT,
-                @ITEM_BASIS TINYINT, @ITEM_INS BIT, @ITEM_TAX BIT, @ITEM_PBD TINYINT,  
+                @ITEM_ID INT, @ITEM_CODE NVARCHAR(30), @ITEM_TYPE TINYINT, @ITEM_AMOUNT DECIMAL(18,2),
+                @ITEM_BASIS TINYINT, @ITEM_INS BIT, @ITEM_TAX BIT, @ITEM_PBD TINYINT,
                 @OV_INS BIT, @OV_TAX BIT, @OV_BASIS TINYINT, @CALC_AMOUNT BIGINT = 0;
 
             DECLARE cur_line CURSOR LOCAL FAST_FORWARD FOR
@@ -5182,7 +5183,7 @@ BEGIN
                             -- v6.1: درصدی از حقوق پایه «ماهیانه» (نرخ روزانه × 30) با تناسب روز کارکرد
                             -- @BASE_SAL_B محاسبه‌شده = نرخ روزانه × DAYSB ÷ 30  →  ضرب در @MONTH_DAYS = نرخ روزانه × DAYSB
                             DECLARE @BASE_SAL_B BIGINT = ISNULL((SELECT TOP 1 AMOUNT FROM #ItemCalc WHERE ITEM_CODE = 'BASE_SAL_B'), 0);
-                            SET @CALC_AMOUNT = CAST(@BASE_SAL_B * @MONTH_DAYS * @ITEM_AMOUNT / 100.0 AS BIGINT);
+                            SET @CALC_AMOUNT = CAST(ROUND(@BASE_SAL_B * @MONTH_DAYS * @ITEM_AMOUNT / 100.0, 0) AS BIGINT);
                         END;
                     END;
                     ELSE
