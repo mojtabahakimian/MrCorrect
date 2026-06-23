@@ -1674,6 +1674,7 @@ namespace AUTO_BAZ.Functions
                     {
                         if (HFRST[HFRST_EOF].TAKHFIF != 0)
                         {
+                            CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف");
                             object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
 
                             //SDRST.AddNew(); // تخفيف فروش
@@ -1730,6 +1731,8 @@ namespace AUTO_BAZ.Functions
                                         }
                                         else
                                         {
+                                            CREATHES(Baseknow.TFROSH, HFRST[HFRST_EOF].CUST_KIND, Convert.ToInt64(rst6[rst6_EOF].TAKH_COD), "تخفيف " + rst6[rst6_EOF].TAKH_COD);
+
                                             object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
 
                                             //SDRST.AddNew(); // تخفيف فروش
@@ -1745,7 +1748,14 @@ namespace AUTO_BAZ.Functions
                                             TAG = 13;
                                             takh = takh + Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
                                             //SDRST.update();
-                                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                                            try
+                                            {
+                                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                LogWriter.WriteLog($"خطا در قسمت تخفيف فروش : {SHARH} {HFRST[HFRST_EOF].NUMBER}: {ex.Message} | Stack: {ex.StackTrace} |");
+                                            }
 
                                         }
                                     }
@@ -1754,10 +1764,31 @@ namespace AUTO_BAZ.Functions
                             }
                             if (HFRST[HFRST_EOF].TAKHFIF != takh)
                             {
-                                HFRST[HFRST_EOF].TAKHFIF = takh;
+                                double residual = (double)(HFRST[HFRST_EOF].TAKHFIF - takh);
+                                if (residual != 0)
+                                {
+                                    CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف");
+                                    object N_S, HES_K, HES_M, HES_T, SHARH, hes, NUMBER, ARZD, TAG = default;
 
-                                dbms.DoExecuteSQL($"UPDATE HEAD_LST SET TAKHFIF = {takh}  WHERE (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND (TAG = 13)");
-                                //HFRST.update();
+                                    N_S = max_ns;
+                                    HES_K = Baseknow.TFROSH;
+                                    HES_M = 1;
+                                    HES_T = 1;
+                                    SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                                    hes = Baseknow.TFROSH + "-1-1";
+                                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                    TAG = 13;
+
+                                    if (residual > 0)
+                                    {
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                    }
+                                    else
+                                    {
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                    }
+                                }
                             }
                         }
                         else
@@ -1833,9 +1864,31 @@ namespace AUTO_BAZ.Functions
                             }
                             if (HFRST[HFRST_EOF].TAKHFIF != takh)
                             {
-                                HFRST[HFRST_EOF].TAKHFIF = takh;
-                                dbms.DoExecuteSQL($"UPDATE HEAD_LST SET TAKHFIF = {takh}  WHERE (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND (TAG = 13)");
-                                //HFRST.update();
+                                double residual = (double)(HFRST[HFRST_EOF].TAKHFIF - takh);
+                                if (residual != 0)
+                                {
+                                    CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف");
+                                    object N_S, HES_K, HES_M, HES_T, SHARH, hes, NUMBER, ARZD, TAG = default;
+
+                                    N_S = max_ns;
+                                    HES_K = Baseknow.TFROSH;
+                                    HES_M = 1;
+                                    HES_T = 1;
+                                    SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                                    hes = Baseknow.TFROSH + "-1-1";
+                                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                    TAG = 13;
+
+                                    if (residual > 0)
+                                    {
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                    }
+                                    else
+                                    {
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                    }
+                                }
                             }
                         }
                     }

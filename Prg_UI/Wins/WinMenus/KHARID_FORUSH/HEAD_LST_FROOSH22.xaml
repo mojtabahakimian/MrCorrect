@@ -501,17 +501,7 @@
                     <Label Content="مبلغ تخفیف :" Margin="0,100,80,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top" Grid.Row="1"/>
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_VAR2"   Text="{Binding ElementName=MABL_VAR,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}" Height="27" Margin="0,36,151,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_VAR2_NumericLostFocus" Grid.Row="1" PreviewKeyDown="MABL_VAR2_PreviewKeyDown" MaxLength="16" />
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAV2"   Text="{Binding ElementName=MABL_HAV,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}" Height="27" Margin="0,68,151,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"   NumericLostFocus="MABL_HAV2_NumericLostFocus" Grid.Row="1" MaxLength="16" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="TAKHFIF2"   CustomUpdateSourceTrigger="PropertyChanged" Height="27" Margin="0,101,151,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" NumericLostFocus="TAKHFIF2_NumericLostFocus" Grid.Row="1" PreviewKeyDown="TAKHFIF2_PreviewKeyDown" MaxLength="16" IsHitTestVisible="False" >
-                        <CNC:NumericTextBox.Style>
-                            <Style TargetType="CNC:NumericTextBox">
-                                <Setter Property="IsEnabled" Value="False" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=PEID,Path=SelectedIndex,UpdateSourceTrigger=PropertyChanged}" Value="-1">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CNC:NumericTextBox.Style>
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="TAKHFIF2"   CustomUpdateSourceTrigger="PropertyChanged" Height="27" Margin="0,101,151,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" NumericLostFocus="TAKHFIF2_NumericLostFocus" Grid.Row="1" PreviewKeyDown="TAKHFIF2_PreviewKeyDown" MaxLength="16" IsHitTestVisible="False" IsReadOnly="True" IsEnabled="False" >
                     </CNC:NumericTextBox>
                     <Label Content="معین کارت :" Margin="0,4,291,0"  FlowDirection="RightToLeft" FontSize="10" Width="61" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Row="1"/>
                     <TextBox x:Name="MOIN_VAR2" Height="27" Margin="0,4,357,0" Text="{Binding ElementName=MOIN_VAR,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="89"   PreviewLostKeyboardFocus="MOIN_VAR2_PreviewLostKeyboardFocus" Grid.Row="1" />
@@ -937,17 +927,7 @@
                     <Label Content="جمع مبلغ چکها :" Margin="0,0,362,107"  FlowDirection="RightToLeft" FontSize="10" Width="76" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_VAR"   Text="0" Height="27" Margin="0,97,104,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16"  />
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAV"   Text="0" Height="27" Margin="0,128,104,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_HAV_NumericLostFocus"  MaxLength="16" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" IsReadOnly="True" x:Name="TAKHFIF" Text="{Binding ElementName=TAKHFIF2,Path=Text,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" CustomUpdateSourceTrigger="PropertyChanged"  Height="27" Margin="0,160,104,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" NumericLostFocus="TAKHFIF_NumericLostFocus" MaxLength="16" >
-                        <CNC:NumericTextBox.Style>
-                            <Style TargetType="CNC:NumericTextBox">
-                                <Setter Property="IsEnabled" Value="False" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=PEID,Path=SelectedIndex,UpdateSourceTrigger=PropertyChanged}" Value="-1">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CNC:NumericTextBox.Style>
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" IsReadOnly="True" x:Name="TAKHFIF" Text="{Binding ElementName=TAKHFIF2,Path=Text,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" CustomUpdateSourceTrigger="PropertyChanged"  Height="27" Margin="0,160,104,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" NumericLostFocus="TAKHFIF_NumericLostFocus" MaxLength="16" IsEnabled="False" >
                     </CNC:NumericTextBox>
 
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAZ" Text="0" Height="27" Margin="0,192,104,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_HAZ_NumericLostFocus" MaxLength="16" />
