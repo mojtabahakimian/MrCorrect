@@ -780,6 +780,7 @@ namespace Wins.WinMenus.Taarif
             int RDCount = RecordsData.View != null ? RecordsData.View.Cast<object>().Count() : 0;
             if (jahat == INavigator.Jahat.NewItem || RDCount == 0)
             {
+                if (RDCount == 0) NewRecord = true;
                 ClearFreshNew();
             }
             else
@@ -1088,7 +1089,10 @@ namespace Wins.WinMenus.Taarif
 
                             if (NEWIDD != null)
                             {
-                                HEADER.IDD = (int)NEWIDD;
+                                if (HEADER != null)
+                                {
+                                    HEADER.IDD = (int)NEWIDD;
+                                }
                                 CustomerCode.Text = TNUMBER.ToString();
                             }
 
@@ -1096,18 +1100,21 @@ namespace Wins.WinMenus.Taarif
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
-                                     SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
-                                     ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
-                                     CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
-                                     MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
-                                     ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
-                                     Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
-                                     Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
-                                     OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
-                                     SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
-                                     tob = {tob.SelectedValue}
-                                     WHERE IDD = {HEADER.IDD}");
+                            if (HEADER != null)
+                            {
+                                dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES
+                                         SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
+                                         ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
+                                         CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
+                                         MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
+                                         ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
+                                         Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
+                                         Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
+                                         OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
+                                         SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
+                                         tob = {tob.SelectedValue}
+                                         WHERE IDD = {HEADER.IDD}");
+                            }
                         }
                     }
                     catch (SqlException ex)
@@ -1160,7 +1167,10 @@ namespace Wins.WinMenus.Taarif
 
                             if (NEWIDD != null)
                             {
-                                HEADER.IDD = (int)NEWIDD;
+                                if (HEADER != null)
+                                {
+                                    HEADER.IDD = (int)NEWIDD;
+                                }
                                 CustomerCode.Text = TNUMBER2.ToString();
                             }
 
@@ -1168,18 +1178,21 @@ namespace Wins.WinMenus.Taarif
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES2
-                                     SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
-                                     ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
-                                     CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
-                                     MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
-                                     ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
-                                     Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
-                                     Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
-                                     OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
-                                     SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
-                                     tob = {tob.SelectedValue}
-                                     WHERE IDD = {HEADER.IDD}");
+                            if (HEADER != null)
+                            {
+                                dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES2
+                                         SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
+                                         ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
+                                         CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
+                                         MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
+                                         ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
+                                         Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
+                                         Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
+                                         OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
+                                         SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
+                                         tob = {tob.SelectedValue}
+                                         WHERE IDD = {HEADER.IDD}");
+                            }
                         }
                     }
                     catch (SqlException ex)
@@ -1233,7 +1246,10 @@ namespace Wins.WinMenus.Taarif
 
                             if (NEWIDD != null)
                             {
-                                HEADER.IDD = (int)NEWIDD;
+                                if (HEADER != null)
+                                {
+                                    HEADER.IDD = (int)NEWIDD;
+                                }
                                 CustomerCode.Text = TNUMBER3.ToString();
                             }
 
@@ -1241,18 +1257,21 @@ namespace Wins.WinMenus.Taarif
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES3
-                                     SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
-                                     ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
-                                     CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
-                                     MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
-                                     ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
-                                     Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
-                                     Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
-                                     OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
-                                     SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
-                                     tob = {tob.SelectedValue}
-                                     WHERE IDD = {HEADER.IDD}");
+                            if (HEADER != null)
+                            {
+                                dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES3
+                                         SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
+                                         ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
+                                         CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
+                                         MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
+                                         ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
+                                         Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
+                                         Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
+                                         OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
+                                         SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
+                                         tob = {tob.SelectedValue}
+                                         WHERE IDD = {HEADER.IDD}");
+                            }
                         }
                     }
                     catch (SqlException ex)
@@ -1307,7 +1326,10 @@ namespace Wins.WinMenus.Taarif
 
                             if (NEWIDD != null)
                             {
-                                HEADER.IDD = (int)NEWIDD;
+                                if (HEADER != null)
+                                {
+                                    HEADER.IDD = (int)NEWIDD;
+                                }
                                 CustomerCode.Text = TNUMBER4.ToString();
                             }
 
@@ -1315,18 +1337,21 @@ namespace Wins.WinMenus.Taarif
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES4
-                                     SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
-                                     ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
-                                     CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
-                                     MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
-                                     ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
-                                     Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
-                                     Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
-                                     OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
-                                     SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
-                                     tob = {tob.SelectedValue}
-                                     WHERE IDD = {HEADER.IDD}");
+                            if (HEADER != null)
+                            {
+                                dbms.DoExecuteSQL($@"UPDATE dbo.TDETA_HES4
+                                         SET  NAME = N'{NAMES.Text.Trim()}', TOZIH = N'{TOZIH.Text.Trim()}',
+                                         ADDRESS = N'{ADDRESS.Text.Trim()}', TEL = N'{TEL.Text.Trim()}',
+                                         CODE_E = N'{CODE_E.Text}', ECODE = N'{ECODE.Text}', PCODE = N'{PCODE.Text}',
+                                         MCODEM = N'{MCODEM.Text}', CUST_COD = {CUST_COD.SelectedValue}, MOBILE = N'{MOBILE.Text}',
+                                         ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
+                                         Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())}, 
+                                         Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
+                                         OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
+                                         SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)} , 
+                                         tob = {tob.SelectedValue}
+                                         WHERE IDD = {HEADER.IDD}");
+                            }
                         }
                     }
                     catch (SqlException ex)

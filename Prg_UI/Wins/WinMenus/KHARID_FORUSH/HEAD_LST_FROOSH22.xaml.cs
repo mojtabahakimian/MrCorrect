@@ -1524,7 +1524,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (SavedSuccessBtn)
                     {
                         TAKHFIF takhfif = new TAKHFIF(I_AM_FOROOSH22);
-                        takhfif.ShowDialog();
+                        if (takhfif.CanOpen)
+                            takhfif.Show();
                     }
                 }
             }
@@ -2134,7 +2135,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var ghat = default(bool);
                 if (Baseknow.TKHF == 1)
                 {
-                    this.TAKHFIF.IsReadOnly = false;
+                    //this.TAKHFIF.IsReadOnly = false;
                     this.TAKHFIF2.IsReadOnly = false;
 
                     IF_AZAD_THENLOCK();
@@ -2648,7 +2649,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             M_NAGHD.IsReadOnly = !CAN;
             MABL_VAR.IsReadOnly = !CAN;
             MABL_HAV.IsReadOnly = !CAN;
-            TAKHFIF.IsReadOnly = !CAN;
+            //TAKHFIF.IsReadOnly = !CAN;
             MABL_HAZ.IsReadOnly = !CAN;
             FNUMCO.IsReadOnly = !CAN;
 
@@ -9225,7 +9226,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (SavedSuccessBtn)
                     {
                         TAKHFIF takhfif = new TAKHFIF(I_AM_FOROOSH22);
-                        takhfif.ShowDialog();
+                        if (takhfif.CanOpen)
+                            takhfif.Show();
                     }
                 }
             }
