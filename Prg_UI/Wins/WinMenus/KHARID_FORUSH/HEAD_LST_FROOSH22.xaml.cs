@@ -1524,7 +1524,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (SavedSuccessBtn)
                     {
                         TAKHFIF takhfif = new TAKHFIF(I_AM_FOROOSH22);
-                        takhfif.Show();
+                        if (takhfif.CanOpen)
+                            takhfif.Show();
                     }
                 }
             }
@@ -9225,7 +9226,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (SavedSuccessBtn)
                     {
                         TAKHFIF takhfif = new TAKHFIF(I_AM_FOROOSH22);
-                        takhfif.ShowDialog();
+                        if (takhfif.CanOpen)
+                            takhfif.Show();
                     }
                 }
             }

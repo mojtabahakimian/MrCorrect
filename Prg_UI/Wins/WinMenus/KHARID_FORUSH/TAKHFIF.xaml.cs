@@ -59,6 +59,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         //Header Window End;
         #endregion
         public Visual THEWIN { get; set; }
+        public bool CanOpen { get; private set; } = true;
         public TAKHFIF(Visual _the_win)
         {
             THEWIN = _the_win;
@@ -67,7 +68,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             if (Baseknow.TKHF == 2)
             {
                 new Msgwin(false, "تخفيفات مصوب بصورت دستي قابل تغيير نيست").ShowDialog();
-                Close();
+                CanOpen = false;
+                return;
             }
 
             bool _cango = true;
@@ -91,7 +93,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             if (_cango == false)
             {
-                Close();
+                CanOpen = false;
             }
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
