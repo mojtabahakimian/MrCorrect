@@ -1193,6 +1193,10 @@ namespace AUTO_BAZ.Functions
 
                     }
 
+                    // FIX: تخفیف هدر که در خط بدهکار «خالص» مشتری لحاظ شد را پیش از ورود به شاخه تخفیف نگه می‌داریم
+                    // (شاخه تخفیف ممکن است HFRST.TAKHFIF را بازنویسی کند؛ این مقدار همان چیزی است که مشتری بابت آن بدهکار شده)
+                    double _custTakhfif_ = Math.Round(HFRST[HFRST_EOF].TAKHFIF);
+
                     var jst_sec = dbms.DoGetDataSQL<QRE12>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.AVRAGE FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE     (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.INVO_LST.TAG = 2) ").ToList();
                     //while (!jst_sec.EOF())
                     for (int jst_sec_EOF = 0; jst_sec_EOF < jst_sec.Count; jst_sec_EOF++)
@@ -1670,6 +1674,10 @@ namespace AUTO_BAZ.Functions
                         }
                         //SDRST.update();
                     }
+                    // FIX: شاخه تخفیف را محصور می‌کنیم تا اگر ساخت حساب تفصیلی تخفیف (CREATHES) خطا دهد
+                    // یا درج خط تخفیف انجام نشود، بقیه سند و مرحله «تراز کردن تخفیف» در ادامه حتماً اجرا شود.
+                    try
+                    {
                     if (Baseknow.TKHF == 1)
                     {
                         if (HFRST[HFRST_EOF].TAKHFIF != 0)
@@ -1839,6 +1847,43 @@ namespace AUTO_BAZ.Functions
                             }
                         }
                     }
+                    }
+                    catch (Exception _exDisc_)
+                    {
+                        LogWriter.WriteLog($"#FIX خطا در شاخه تخفیف سند فروش حواله {HFRST[HFRST_EOF]?.NUMBER1} سند {max_ns}: {_exDisc_.Message} | Stack: {_exDisc_.StackTrace}");
+                    }
+
+                    // ===== FIX: تضمین تراز سند فروش از بابت تخفیف =====
+                    // خط بدهکار مشتری «خالص» (فروش منهای تخفیف هدر) و فروش «ناخالص» بستانکار ثبت می‌شود؛
+                    // بنابراین مجموع خطوط تخفیف باید دقیقاً برابر تخفیف هدر باشد. اگر به هر دلیلی (شکست CREATHES،
+                    // درج‌نشدن خط تخفیف، یا مغایرت N_MOIN سطری با تخفیف هدر) کسری بماند، کسری را روی حساب
+                    // پیش‌فرض تخفیف فروش (TFROSH-1-1) ثبت می‌کنیم تا سند تراز شود و مشتری همان مبلغ خالص فاکتور را بدهکار بماند.
+                    try
+                    {
+                        if (!IsNull(Baseknow.TFROSH) && Convert.ToDouble(Baseknow.TFROSH) > 0)
+                        {
+                            long _tfroshK_ = Convert.ToInt64(Baseknow.TFROSH);
+                            double _postedTakh_ = dbms.DoGetDataSQL<double?>($"SELECT ISNULL(SUM(BED),0) - ISNULL(SUM(BES),0) FROM dbo.DEED_DTL WHERE N_S = {max_ns} AND TAG = 13 AND NUMBER = {HFRST[HFRST_EOF].NUMBER} AND HES_K = {_tfroshK_}").FirstOrDefault() ?? 0d;
+                            double _residual_ = Math.Round(_custTakhfif_ - _postedTakh_);
+                            if (Math.Abs(_residual_) >= 1d)
+                            {
+                                CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف فروش");
+                                string _shB_ = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " (تراز کننده تخفيف)", 255);
+                                double _arzB_ = Convert.ToDouble(Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD));
+                                string _colB_ = _residual_ > 0d ? "BED" : "BES";
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,{_colB_},NUMBER,ARZD,TAG) VALUES ({max_ns},{_tfroshK_},1,1,N'{_shB_}',N'{_tfroshK_}-1-1',{Math.Abs(_residual_)},{HFRST[HFRST_EOF].NUMBER},{_arzB_},13)");
+                                // تخفیف هدر را با همان مقداری که در بدهکار مشتری لحاظ شد هماهنگ می‌کنیم تا Frisok مغایرت نگیرد
+                                HFRST[HFRST_EOF].TAKHFIF = _custTakhfif_;
+                                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET TAKHFIF = {_custTakhfif_} WHERE NUMBER = {HFRST[HFRST_EOF].NUMBER} AND TAG IN (2,13)");
+                                LogWriter.WriteLog($"#FIX تراز تخفیف سند فروش: حواله {HFRST[HFRST_EOF].NUMBER1} سند {max_ns} | تخفیف هدر={_custTakhfif_} ثبت‌شده‌قبلی={_postedTakh_} خط‌تراز={_residual_}");
+                            }
+                        }
+                    }
+                    catch (Exception _exBal_)
+                    {
+                        LogWriter.WriteLog($"#FIX خطا در تراز کردن تخفیف سند فروش حواله {HFRST[HFRST_EOF]?.NUMBER1}: {_exBal_.Message}");
+                    }
+
                     if (HFRST[HFRST_EOF].MABL_HAV != 0)
                     {
                         object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG = default;
