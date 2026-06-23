@@ -996,6 +996,35 @@ namespace AUTO_BAZ.Functions
             // *************************************************************
         }
 
+        /// <summary>
+        /// مابه‌التفاوتِ «تخفیفِ اعمال‌شده در بدهکار مشتری» و «تخفیف‌های کددارِ ثبت‌شده» را
+        /// به حساب تخفیف فروش عمومی (TFROSH-1-1) منظور می‌کند تا سند فروش همیشه تراز بماند.
+        /// این وضعیت زمانی پیش می‌آید که برای بخشی از تخفیف فاکتور، کد تخفیف (TAKHPERS / کد کالا)
+        /// تعریف نشده باشد؛ پیش از این اصلاح در چنین حالتی سند ناتراز می‌ماند و مبلغ تخفیف فاکتور
+        /// (TAKHFIF) با مقدار جزئیِ کدها بازنویسی و مخدوش می‌شد.
+        /// </summary>
+        private static void BookGenericDiscountRemainder(double? max_ns, double appliedTakhfif, double bookedTakhfif, HEAD_LST_CSHARP HF)
+        {
+            double remainder = Math.Round(appliedTakhfif - bookedTakhfif);
+            if (remainder == 0d)
+            {
+                return;
+            }
+
+            // اطمینان از وجود حساب تخفیف عمومی تا درج DEED_DTL به‌خاطر کلید خارجی FK_DEED_DTL_TDETA_HES شکست نخورد.
+            CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف فروش");
+
+            string SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HF.NUMBER1 + " مورخ" + Strings.Format(HF.DATE_N, "####/##/##"), 255);
+            string hes = Baseknow.TFROSH + "-1-1";
+            object ARZD = Interaction.IIf(IsNull(HF.ARZD), 1, HF.ARZD);
+
+            // اگر تخفیف کددار کمتر از تخفیف فاکتور بود مابه‌التفاوت بدهکار (BED) و در حالت عکس بستانکار (BES) می‌شود.
+            string amountColumn = remainder > 0d ? "BED" : "BES";
+            double amountValue = Math.Abs(remainder);
+
+            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,{amountColumn},NUMBER,ARZD,TAG) VALUES ({max_ns},{Baseknow.TFROSH},1,1,N'{SHARH}',N'{hes}',{amountValue},{HF.NUMBER},{ARZD},13)");
+        }
+
         public static (double?, bool) GENSANADFROOSH(object fnum, long TNUM, bool InternalCalling = true)
         {
             double? SANAD_NUMBER = null;
@@ -1670,10 +1699,16 @@ namespace AUTO_BAZ.Functions
                         }
                         //SDRST.update();
                     }
+                    // مبلغ تخفیفی که در بدهکار مشتری (درج سطر اصلی فاکتور در بالا) اعمال شد؛ مجموع سطرهای
+                    // تخفیفِ سند باید دقیقاً برابر همین مقدار باشد تا سند تراز بماند و تخفیف از بین نرود.
+                    double appliedTakhfif = HFRST[HFRST_EOF].TAKHFIF ?? 0d;
                     if (Baseknow.TKHF == 1)
                     {
                         if (HFRST[HFRST_EOF].TAKHFIF != 0)
                         {
+                            // اطمینان از وجود حساب تخفیف عمومی تا درج DEED_DTL به‌خاطر کلید خارجی
+                            // FK_DEED_DTL_TDETA_HES شکست نخورد و سطر تخفیف حذف/سند ناتراز نشود.
+                            CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف فروش");
                             object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
 
                             //SDRST.AddNew(); // تخفيف فروش
@@ -1752,13 +1787,11 @@ namespace AUTO_BAZ.Functions
                                     //rst6.MoveNext();
                                 }
                             }
-                            if (HFRST[HFRST_EOF].TAKHFIF != takh)
-                            {
-                                HFRST[HFRST_EOF].TAKHFIF = takh;
-
-                                dbms.DoExecuteSQL($"UPDATE HEAD_LST SET TAKHFIF = {takh}  WHERE (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND (TAG = 13)");
-                                //HFRST.update();
-                            }
+                            // اگر مجموع تخفیف‌های کددار (takh) با تخفیف ثبت‌شده‌ی فاکتور برابر نبود
+                            // (مثلاً برای بخشی از فاکتور کد تخفیف TAKHPERS تعریف نشده باشد)، به‌جای
+                            // بازنویسیِ مخرّبِ TAKHFIF، مابه‌التفاوت را به حساب تخفیف عمومی منظور می‌کنیم
+                            // تا سند تراز بماند و تخفیفِ اعمال‌شده در بدهکار مشتری از بین نرود.
+                            BookGenericDiscountRemainder(max_ns, appliedTakhfif, takh ?? 0d, HFRST[HFRST_EOF]);
                         }
                         else
                         {
@@ -1831,12 +1864,9 @@ namespace AUTO_BAZ.Functions
                                     //rst7.MoveNext();
                                 }
                             }
-                            if (HFRST[HFRST_EOF].TAKHFIF != takh)
-                            {
-                                HFRST[HFRST_EOF].TAKHFIF = takh;
-                                dbms.DoExecuteSQL($"UPDATE HEAD_LST SET TAKHFIF = {takh}  WHERE (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND (TAG = 13)");
-                                //HFRST.update();
-                            }
+                            // مانند حالت بالا: مابه‌التفاوت تخفیفِ بدون کد را به حساب تخفیف عمومی منظور
+                            // می‌کنیم تا سند تراز بماند و TAKHFIF فاکتور دست‌نخورده باقی بماند.
+                            BookGenericDiscountRemainder(max_ns, appliedTakhfif, takh ?? 0d, HFRST[HFRST_EOF]);
                         }
                     }
                     if (HFRST[HFRST_EOF].MABL_HAV != 0)
