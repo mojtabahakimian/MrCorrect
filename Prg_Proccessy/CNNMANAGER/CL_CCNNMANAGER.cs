@@ -113,6 +113,7 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             // Append "TrustServerCertificate=True;" for .NET Core compatibility.
             connectionStringBuilder.TrustServerCertificate = true;
+            connectionStringBuilder.Encrypt = false;
 
             connectionStringBuilder.MaxPoolSize = 1000; // ADDED: Prevent Connection Pool Exhaustion safety net
 
@@ -904,6 +905,7 @@ namespace Prg_SendInvoice.CNNMANAGER
 
                     var builder = new SqlConnectionStringBuilder(CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr));
                     builder.TrustServerCertificate = true;
+                    builder.Encrypt = false;
                     builder.MultipleActiveResultSets = true;
                     builder.MaxPoolSize = 1000;
                     CONNECTION_STR = builder.ConnectionString + ";";
