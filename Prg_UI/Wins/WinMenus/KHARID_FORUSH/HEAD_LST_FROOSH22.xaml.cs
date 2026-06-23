@@ -1192,7 +1192,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
-                this.TAKHFIF2.IsReadOnly = false;
+                // FIX: مبلغ تخفیف هدر فقط در حالت تخفیف دستی (TKHF==1) آزاد است؛ در حالت‌های تخفیف سطری
+                // باید قفل بماند و صرفاً جمع تخفیف سطرها (INVO_LST.N_MOIN) را نمایش دهد، وگرنه کاربر می‌تواند
+                // مبلغی متفاوت تایپ کند که با تخفیف سطری نمی‌خواند و سند را ناتراز می‌کند.
+                this.TAKHFIF2.IsReadOnly = (Baseknow.TKHF != 1);
                 //this.Text163.IsReadOnly = false;
             }
             if (Strings.Mid(Baseknow.OPTIONSS, 54, 1) == "5")
@@ -2528,7 +2531,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 M_NAGHD2.IsReadOnly = false;// مبلغ نقد
                 MABL_VAR2.IsReadOnly = false;//مبلغ کارت بانک
                 MABL_HAV2.IsReadOnly = false;// مبلغ بن یا حواله
-                TAKHFIF2.IsReadOnly = false;// مبلغ تخفیف
+                // FIX: حتی در حالت ویرایش، مبلغ تخفیف هدر فقط در حالت تخفیف دستی (TKHF==1) آزاد است؛
+                // در حالت‌های تخفیف سطری قفل می‌ماند تا فقط جمع تخفیف سطرها را نشان دهد و دستی تغییر نکند.
+                TAKHFIF2.IsReadOnly = (Baseknow.TKHF != 1);// مبلغ تخفیف
                 MOIN_VAR2.IsReadOnly = false;// معین کارت
                 MOIN_HAV2.IsReadOnly = false;//معین بن
                 //Text163.IsReadOnly = false;// درصد تخفیف
