@@ -1765,6 +1765,9 @@ namespace AUTO_BAZ.Functions
                                         }
                                         else
                                         {
+                                            // هم‌راستا با شاخه‌ی بالا: اطمینان از وجود حساب تخفیف تا درج
+                                            // به‌خاطر کلید خارجی FK_DEED_DTL_TDETA_HES شکست نخورد و کل بازسازی نیمه‌کاره رها نشود.
+                                            CREATHES(Baseknow.TFROSH, HFRST[HFRST_EOF].CUST_KIND, Convert.ToInt64(rst6[rst6_EOF].TAKH_COD), "تخفيف " + rst6[rst6_EOF].TAKH_COD);
                                             object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
 
                                             //SDRST.AddNew(); // تخفيف فروش
