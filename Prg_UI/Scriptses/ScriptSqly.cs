@@ -5216,7 +5216,8 @@ BEGIN
                         IF @SHIFT_MODE = 'FIXED'
                             SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))) AS BIGINT);
                         ELSE
-                            SET @CALC_AMOUNT = CAST(ROUND((@CURRENT_DEC_DAILY_BASE * 30.0 * @ITEM_AMOUNT / 100.0) * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))), 0) AS BIGINT);
+                            -- v6.2 (رفع باگ): @CURRENT_DEC_DAILY_BASE مقدارِ «ماهانه»‌ی پایه است (نه روزانه)؛ ضربِ نادرست در 30 حذف شد تا حق شیفتِ درصدی ۳۰برابر نشود
+                            SET @CALC_AMOUNT = CAST(ROUND((@CURRENT_DEC_DAILY_BASE * @ITEM_AMOUNT / 100.0) * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))), 0) AS BIGINT);
                     END
 
                     -- v6.1 (حفظ‌شده): مبنای ساعتی — آیتم‌های اضافه‌کار از ساعات کارکرد خودشان استفاده می‌کنند
