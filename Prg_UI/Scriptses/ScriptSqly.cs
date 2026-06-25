@@ -5197,7 +5197,7 @@ BEGIN
 
                     -- 🛠 اصلاح باگ ۳۰برابری: مبلغ پایه ماهانه است و باید بر تعداد روز ماه تقسیم شود
                     IF @ITEM_CODE IN ('BASE_SAL', 'BASE_SAL_B')
-                        SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * @PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(18,6)) AS BIGINT);
+                        SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * @PAY_DAYS AS BIGINT);
 
                     ELSE IF @ITEM_CODE IN ('HOME','CHILDREN','GROCERY')
                     BEGIN
@@ -5217,7 +5217,7 @@ BEGIN
                             SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))) AS BIGINT);
                         ELSE
                             -- v6.2 (رفع باگ): @CURRENT_DEC_DAILY_BASE مقدارِ «ماهانه»‌ی پایه است (نه روزانه)؛ ضربِ نادرست در 30 حذف شد تا حق شیفتِ درصدی ۳۰برابر نشود
-                            SET @CALC_AMOUNT = CAST(ROUND((@CURRENT_DEC_DAILY_BASE * @ITEM_AMOUNT / 100.0) * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))), 0) AS BIGINT);
+                            SET @CALC_AMOUNT = CAST(ROUND((@CURRENT_DEC_DAILY_BASE * @PAY_DAYS * @ITEM_AMOUNT / 100.0), 0) AS BIGINT);
                     END
 
                     -- v6.1 (حفظ‌شده): مبنای ساعتی — آیتم‌های اضافه‌کار از ساعات کارکرد خودشان استفاده می‌کنند
@@ -5275,7 +5275,7 @@ BEGIN
             FROM PAY2_DECREE D INNER JOIN PAY2_DECREE_LINE DL ON D.DEC_ID = DL.DEC_ID INNER JOIN PAY2_ITEM_DEF ID ON DL.ITEM_ID = ID.ITEM_ID
             WHERE D.EMP_ID = @EMP_ID AND D.IS_CONFIRMED = 1 AND ID.ITEM_CODE IN ('BASE_SAL', 'BASE_SAL_B') ORDER BY D.EFF_FROM DESC;
 
-            SET @EFFECTIVE_HOURLY = ISNULL((CAST(@FALLBACK_MONTHLY_BASE AS DECIMAL(18,2)) / CAST(@MONTH_DAYS AS DECIMAL(18,6))) / NULLIF(@OT_HOUR_BASE, 0), 0);
+            SET @EFFECTIVE_HOURLY = ISNULL(CAST(@FALLBACK_MONTHLY_BASE AS DECIMAL(18,2)) / NULLIF(@OT_HOUR_BASE, 0), 0);
         END
 
         IF @OT_NORMAL_H > 0 AND NOT EXISTS (SELECT 1 FROM @ItemCalc WHERE ITEM_CODE = 'OT_NORMAL')
