@@ -4064,7 +4064,8 @@ CREATE TABLE [dbo].[PAY2_WORKSHOP]
 (
     [WS_ID]           INT           NOT NULL IDENTITY(1,1),
     [WS_CODE]         NVARCHAR(20)  NOT NULL,                                    -- کد کارگاه (مرجع TAGCOD.CODE در صورت مهاجرت)
-    [WS_NAME]         NVARCHAR(100) NOT NULL,                                    -- نام کارگاه
+    [WS_NAME]         NVARCHAR(100) NOT NULL,
+    [SHIFT_MODE]      NVARCHAR(10)  NULL,                                    -- نام کارگاه
     [EMPLOYER_NAME]   NVARCHAR(100) NULL,                                        -- نام کارفرما (فیلد جدید v6)
     [NATIONAL_ID]     NVARCHAR(11)  NULL,                                        -- شناسه ملی کارگاه
     [SOCIAL_INS_CODE] NVARCHAR(20)  NULL,                                        -- کد کارگاه نزد تأمین اجتماعی
@@ -4339,6 +4340,7 @@ CREATE TABLE [dbo].[PAY2_ITEM_TMPL_LINE]
     [INS_OV]    BIT      NULL,                                               -- NULL=از تعریف آیتم
     [TAX_OV]    BIT      NULL,
     [BASIS_OV]  TINYINT  NULL,
+    [SHIFT_MODE_OV] NVARCHAR(10) NULL,
 
     CONSTRAINT PK_PAY2_TMPL_LINE PRIMARY KEY ([TMPL_ID], [ITEM_ID]),
     CONSTRAINT FK_TL_TMPL FOREIGN KEY ([TMPL_ID]) REFERENCES [PAY2_ITEM_TEMPLATE]([TMPL_ID]) ON DELETE CASCADE,
@@ -4360,7 +4362,8 @@ CREATE TABLE [dbo].[PAY2_DECREE]
     [DEC_ID]       INT           NOT NULL IDENTITY(1,1),
     [EMP_ID]       INT           NOT NULL,
     [WS_ID]        INT           NOT NULL,
-    [ISSUED_DATE]  BIGINT        NOT NULL,                                   -- تاریخ صدور شمسی
+    [ISSUED_DATE]  BIGINT        NOT NULL,
+    [SHIFT_MODE]   NVARCHAR(10)  NULL,                                   -- تاریخ صدور شمسی
     [EFF_FROM]     BIGINT        NOT NULL,                                   -- تاریخ شروع اجرا (شمسی)
     [EFF_TO]       BIGINT        NULL,                                       -- پایان اجرا (NULL=تا حکم بعدی)
     [EDU_LEVEL]    TINYINT       NULL,
@@ -4400,6 +4403,7 @@ CREATE TABLE [dbo].[PAY2_DECREE_LINE]
     [INS_OV]   BIT      NULL,                                                -- NULL=از PAY2_ITEM_DEF
     [TAX_OV]   BIT      NULL,
     [BASIS_OV] TINYINT  NULL,
+    [SHIFT_MODE_OV] NVARCHAR(10) NULL,
 
     CONSTRAINT PK_PAY2_DECREE_LINE PRIMARY KEY ([DEC_ID], [ITEM_ID]),
     CONSTRAINT FK_DL_DEC  FOREIGN KEY ([DEC_ID])  REFERENCES [PAY2_DECREE]([DEC_ID]) ON DELETE CASCADE,
@@ -5106,6 +5110,9 @@ BEGIN
         @EMP_ID INT, @IS_MANAGER BIT, @INS_TYPE TINYINT,
         @TAX_EXEMPT_FLAG BIT, @REGION_DEP TINYINT, @ACC_T NVARCHAR(50);
 
+    DECLARE @WS_SHIFT_MODE NVARCHAR(10);
+    SELECT @WS_SHIFT_MODE = NULLIF(SHIFT_MODE, N'') FROM PAY2_WORKSHOP WHERE WS_ID = @WS_ID;
+
     DECLARE cur_emp CURSOR LOCAL FAST_FORWARD READ_ONLY FOR
         SELECT E.EMP_ID, E.IS_MANAGER, E.INS_TYPE, E.TAX_EXEMPT, E.REGION_DEPRIVATION, E.ACC_T
         FROM PAY2_EMPLOYEE E
@@ -5132,12 +5139,12 @@ BEGIN
             @PERF_AMOUNT = ISNULL(PERF_AMOUNT,0), @TRANSP_AMOUNT = ISNULL(TRANSP_AMOUNT,0), @KASR_OTHER = ISNULL(KASR_OTHER,0)
         FROM PAY2_ATTENDANCE WHERE PER_ID = @PER_ID AND EMP_ID = @EMP_ID;
 
-        DECLARE @DEC_ID INT, @DEC_FROM BIGINT, @DEC_TO BIGINT;
+        DECLARE @DEC_ID INT, @DEC_FROM BIGINT, @DEC_TO BIGINT, @DEC_SHIFT_MODE NVARCHAR(10);
         DECLARE @PER_START BIGINT = @PERIOD_DATE + 1;
         DECLARE @PER_END   BIGINT = @PERIOD_DATE + @MONTH_DAYS;
 
         DECLARE cur_dec CURSOR LOCAL FAST_FORWARD READ_ONLY FOR
-            SELECT DEC_ID, EFF_FROM, ISNULL(EFF_TO, 99991231)
+            SELECT DEC_ID, EFF_FROM, ISNULL(EFF_TO, 99991231), NULLIF(SHIFT_MODE, N'')
             FROM PAY2_DECREE
             WHERE EMP_ID = @EMP_ID AND IS_CONFIRMED = 1
               AND EFF_FROM <= @PER_END
@@ -5145,7 +5152,7 @@ BEGIN
             ORDER BY EFF_FROM;
 
         OPEN cur_dec;
-        FETCH NEXT FROM cur_dec INTO @DEC_ID, @DEC_FROM, @DEC_TO;
+        FETCH NEXT FROM cur_dec INTO @DEC_ID, @DEC_FROM, @DEC_TO, @DEC_SHIFT_MODE;
 
         WHILE @@FETCH_STATUS = 0
         BEGIN
@@ -5169,18 +5176,19 @@ BEGIN
 
                 DECLARE
                     @ITEM_ID INT, @ITEM_CODE NVARCHAR(30), @ITEM_TYPE TINYINT, @ITEM_AMOUNT DECIMAL(18,2),
-                    @ITEM_BASIS TINYINT, @ITEM_INS BIT, @ITEM_TAX BIT, @ITEM_PBD TINYINT,
+                    @ITEM_BASIS TINYINT, @ITEM_INS BIT, @ITEM_TAX BIT, @ITEM_PBD TINYINT, @DL_SHIFT_MODE_OV NVARCHAR(10),
                     @OV_INS BIT, @OV_TAX BIT, @OV_BASIS TINYINT, @CALC_AMOUNT BIGINT = 0;
 
                 DECLARE cur_line CURSOR LOCAL FAST_FORWARD READ_ONLY FOR
                     SELECT DL.ITEM_ID, ID.ITEM_CODE, ID.ITEM_TYPE, ISNULL(DL.AMOUNT, 0),
+                        DL.SHIFT_MODE_OV,
                         ISNULL(DL.BASIS_OV, ID.CALC_BASIS), ISNULL(DL.INS_OV, ID.INS_SUBJECT), ISNULL(DL.TAX_OV, ID.TAX_SUBJECT), ID.PAY_BASE_DAYS
                     FROM PAY2_DECREE_LINE DL INNER JOIN PAY2_ITEM_DEF ID ON DL.ITEM_ID = ID.ITEM_ID
                     WHERE DL.DEC_ID = @DEC_ID AND ID.IS_ACTIVE = 1 AND ID.ITEM_CODE NOT IN ('INS_DED','TAX_DED','LOAN_DED','ADVANCE_DED')
                     ORDER BY ID.SORT_ORDER;
 
                 OPEN cur_line;
-                FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
+                FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @DL_SHIFT_MODE_OV, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
 
                 WHILE @@FETCH_STATUS = 0
                 BEGIN
@@ -5213,7 +5221,8 @@ BEGIN
 
                     ELSE IF @ITEM_CODE = 'SHIFT'
                     BEGIN
-                        IF @SHIFT_MODE = 'FIXED'
+                        DECLARE @EFF_SHIFT_MODE NVARCHAR(10) = COALESCE(NULLIF(@DL_SHIFT_MODE_OV, N''), @DEC_SHIFT_MODE, @WS_SHIFT_MODE, @SHIFT_MODE, 'PCT');
+                        IF @EFF_SHIFT_MODE = 'FIXED'
                             SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))) AS BIGINT);
                         ELSE
                             -- v6.2 (رفع باگ): @CURRENT_DEC_DAILY_BASE مقدارِ «ماهانه»‌ی پایه است (نه روزانه)؛ ضربِ نادرست در 30 حذف شد تا حق شیفتِ درصدی ۳۰برابر نشود
@@ -5249,12 +5258,12 @@ BEGIN
                     INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
                     VALUES (@ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @CALC_AMOUNT, @ITEM_INS, @ITEM_TAX);
 
-                    FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
+                    FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @DL_SHIFT_MODE_OV, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
                 END;
                 CLOSE cur_line; DEALLOCATE cur_line;
             END;
 
-            FETCH NEXT FROM cur_dec INTO @DEC_ID, @DEC_FROM, @DEC_TO;
+            FETCH NEXT FROM cur_dec INTO @DEC_ID, @DEC_FROM, @DEC_TO, @DEC_SHIFT_MODE;
         END;
         CLOSE cur_dec; DEALLOCATE cur_dec;
 
@@ -6315,6 +6324,51 @@ GO
                 try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
 ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) 
 INCLUDE ([JOB_ID]);"); } catch { }
+
+                // Migration 009: افزودن تنظیمات حق شیفت به تفکیک کارگاه و پرسنل
+                try
+                {
+                    db.Execute($@"
+                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_WORKSHOP') AND name = 'SHIFT_MODE')
+                        BEGIN
+                            ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_WS_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));
+                        END
+                    ");
+                }
+                catch { }
+
+                try
+                {
+                    db.Execute($@"
+                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_DECREE') AND name = 'SHIFT_MODE')
+                        BEGIN
+                            ALTER TABLE [dbo].[PAY2_DECREE] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_DEC_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));
+                        END
+                    ");
+                }
+                catch { }
+
+                try
+                {
+                    db.Execute($@"
+                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_DECREE_LINE') AND name = 'SHIFT_MODE_OV')
+                        BEGIN
+                            ALTER TABLE [dbo].[PAY2_DECREE_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_DL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));
+                        END
+                    ");
+                }
+                catch { }
+
+                try
+                {
+                    db.Execute($@"
+                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_ITEM_TMPL_LINE') AND name = 'SHIFT_MODE_OV')
+                        BEGIN
+                            ALTER TABLE [dbo].[PAY2_ITEM_TMPL_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_TL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));
+                        END
+                    ");
+                }
+                catch { }
 
                 LoadJobData(db);   // <-- این خط اضافه شود
             }
