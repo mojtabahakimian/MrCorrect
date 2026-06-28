@@ -4289,11 +4289,11 @@ VALUES
 ('HOME',        N'خواربار و مسکن',           1, 1, 1, 1, 1, 2, 1, 3),   -- قانون ۲۸ روز
 ('CHILDREN',    N'حق اولاد',                 1, 1, 0, 1, 1, 2, 1, 4),   -- معاف بیمه، مشمول مالیات
 ('FAMILY_ALLOW',N'حق تأهل',                  1, 2, 1, 1, 1, 2, 1, 5),   -- ماهیانه
-('ATTRACT',     N'حق جذب',                   1, 2, 1, 1, 1, 2, 1, 6),
+('ATTRACT',     N'حق جذب',                   1, 2, 1, 1, 1, 2, 1, 6),   -- ماهیانه
 ('GROCERY',     N'بن کارگری',                1, 1, 1, 0, 1, 2, 1, 7),   -- مشمول بیمه، معاف مالیات
 ('HARD_COND',   N'شرایط محیط کار',           1, 2, 1, 1, 1, 2, 1, 8),
 ('NAHAR',       N'حق نهار',                  1, 2, 0, 0, 2, 2, 1, 9),   -- معاف بیمه/مالیات
-('SHIFT',       N'حق شیفت/نوبت/شب‌کاری',    1, 1, 1, 1, 1, 2, 1, 10),  -- درصد از BASE_SAL_B
+('SHIFT',       N'حق شیفت/نوبت/شب‌کاری',    1, 1, 0, 1, 1, 2, 1, 10),  -- درصد از BASE_SAL_B
 ('OTHER_FIX',   N'سایر ثابت',               1, 2, 1, 1, 1, 2, 1, 11),
 ('OT_NORMAL',   N'اضافه‌کار عادی',           2, 1, 1, 1, 1, 2, 1, 12),
 ('OT_HOLIDAY',  N'اضافه‌کار تعطیل',          2, 1, 1, 1, 1, 2, 1, 13),
@@ -4947,6 +4947,7 @@ GO
 --
 -- جمع: ۲۱ جدول، ۲ View، ۲ Function، ۱ Stored Procedure، ۱ Trigger
 -- ================================================================
+
 GO
 ";
                 ExecuteBatches(db, tablescript);
@@ -5102,7 +5103,7 @@ BEGIN
     -- Table Variable برای حفظ پرفورمنس
     DECLARE @ItemCalc TABLE (
         ITEM_ID INT, ITEM_CODE NVARCHAR(30), ITEM_TYPE TINYINT,
-        AMOUNT BIGINT, INS_SUBJECT BIT, TAX_SUBJECT BIT
+        AMOUNT BIGINT, INS_AMOUNT BIGINT, INS_SUBJECT BIT, TAX_SUBJECT BIT
     );
 
     -- گام ۳ — حلقه روی پرسنل فعال کارگاه
@@ -5169,26 +5170,28 @@ BEGIN
                 DECLARE @PRORATE_FACTOR DECIMAL(18,6) = CAST(@DEC_ACTIVE_DAYS AS DECIMAL(18,6)) / CAST(@MONTH_DAYS AS DECIMAL(18,6));
 
                 -- مبلغ پایه روزانه خام حکم (برای محاسبه حق شیفت درصدی)
+                -- 🚀 فیکس: اولویت اکید با حقوق رسمی (BASE_SAL_B) است تا درصد شیفت درست محاسبه شود
                 DECLARE @CURRENT_DEC_DAILY_BASE DECIMAL(18,2) = 0;
                 SELECT TOP 1 @CURRENT_DEC_DAILY_BASE = AMOUNT
                 FROM PAY2_DECREE_LINE DL INNER JOIN PAY2_ITEM_DEF ID ON DL.ITEM_ID = ID.ITEM_ID
-                WHERE DL.DEC_ID = @DEC_ID AND ID.ITEM_CODE IN ('BASE_SAL', 'BASE_SAL_B') ORDER BY DL.AMOUNT DESC;
+                WHERE DL.DEC_ID = @DEC_ID AND ID.ITEM_CODE IN ('BASE_SAL', 'BASE_SAL_B')
+                ORDER BY CASE WHEN ID.ITEM_CODE = 'BASE_SAL_B' THEN 1 ELSE 2 END;
 
                 DECLARE
                     @ITEM_ID INT, @ITEM_CODE NVARCHAR(30), @ITEM_TYPE TINYINT, @ITEM_AMOUNT DECIMAL(18,2),
-                    @ITEM_BASIS TINYINT, @ITEM_INS BIT, @ITEM_TAX BIT, @ITEM_PBD TINYINT, @DL_SHIFT_MODE_OV NVARCHAR(10),
-                    @OV_INS BIT, @OV_TAX BIT, @OV_BASIS TINYINT, @CALC_AMOUNT BIGINT = 0;
+                    @ITEM_BASIS TINYINT, @ITEM_INS BIT, @ITEM_TAX BIT, @ITEM_PBD TINYINT, @ITEM_IBD TINYINT, @DL_SHIFT_MODE_OV NVARCHAR(10),
+                    @OV_INS BIT, @OV_TAX BIT, @OV_BASIS TINYINT, @CALC_AMOUNT BIGINT = 0, @INS_CALC_AMOUNT BIGINT = 0;
 
                 DECLARE cur_line CURSOR LOCAL FAST_FORWARD READ_ONLY FOR
                     SELECT DL.ITEM_ID, ID.ITEM_CODE, ID.ITEM_TYPE, ISNULL(DL.AMOUNT, 0),
                         DL.SHIFT_MODE_OV,
-                        ISNULL(DL.BASIS_OV, ID.CALC_BASIS), ISNULL(DL.INS_OV, ID.INS_SUBJECT), ISNULL(DL.TAX_OV, ID.TAX_SUBJECT), ID.PAY_BASE_DAYS
+                        ISNULL(DL.BASIS_OV, ID.CALC_BASIS), ISNULL(DL.INS_OV, ID.INS_SUBJECT), ISNULL(DL.TAX_OV, ID.TAX_SUBJECT), ID.PAY_BASE_DAYS, ID.INS_BASE_DAYS
                     FROM PAY2_DECREE_LINE DL INNER JOIN PAY2_ITEM_DEF ID ON DL.ITEM_ID = ID.ITEM_ID
                     WHERE DL.DEC_ID = @DEC_ID AND ID.IS_ACTIVE = 1 AND ID.ITEM_CODE NOT IN ('INS_DED','TAX_DED','LOAN_DED','ADVANCE_DED')
                     ORDER BY ID.SORT_ORDER;
 
                 OPEN cur_line;
-                FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @DL_SHIFT_MODE_OV, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
+                FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @DL_SHIFT_MODE_OV, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD, @ITEM_IBD;
 
                 WHILE @@FETCH_STATUS = 0
                 BEGIN
@@ -5200,37 +5203,40 @@ BEGIN
                     IF @OV_TAX IS NOT NULL SET @ITEM_TAX = @OV_TAX;
                     IF @OV_BASIS IS NOT NULL SET @ITEM_BASIS = @OV_BASIS;
 
-                    DECLARE @PAY_DAYS DECIMAL(18,6) = (CASE @ITEM_PBD WHEN 1 THEN @DAYS ELSE @DAYSB END) * @PRORATE_FACTOR;
-                    DECLARE @BASE_DAYS_RAW DECIMAL(5,2) = (CASE @ITEM_PBD WHEN 1 THEN @DAYS ELSE @DAYSB END);
+                    DECLARE @PAY_DAYS      DECIMAL(18,6) = (CASE @ITEM_PBD WHEN 1 THEN @DAYS ELSE @DAYSB END) * @PRORATE_FACTOR;
+                    DECLARE @BASE_DAYS_RAW DECIMAL(5,2)  = (CASE @ITEM_PBD WHEN 1 THEN @DAYS ELSE @DAYSB END);
+                    DECLARE @INS_DAYS      DECIMAL(18,6) = (CASE @ITEM_IBD WHEN 1 THEN @DAYS ELSE @DAYSB END) * @PRORATE_FACTOR;
+                    DECLARE @INS_DAYS_RAW  DECIMAL(5,2)  = (CASE @ITEM_IBD WHEN 1 THEN @DAYS ELSE @DAYSB END);
 
-                    -- 🛠 اصلاح باگ ۳۰برابری: مبلغ پایه ماهانه است و باید بر تعداد روز ماه تقسیم شود
                     IF @ITEM_CODE IN ('BASE_SAL', 'BASE_SAL_B')
-                        SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * @PAY_DAYS AS BIGINT);
-
+                    BEGIN
+                        SET @CALC_AMOUNT     = CAST(@ITEM_AMOUNT * @PAY_DAYS AS BIGINT);
+                        SET @INS_CALC_AMOUNT = CAST(@ITEM_AMOUNT * @INS_DAYS AS BIGINT);
+                    END
                     ELSE IF @ITEM_CODE IN ('HOME','CHILDREN','GROCERY')
                     BEGIN
-                        DECLARE @FULL_MONTH BIGINT = CASE WHEN @BASE_DAYS_RAW >= 28 THEN CAST(@ITEM_AMOUNT AS BIGINT) ELSE CAST(@ITEM_AMOUNT * (@BASE_DAYS_RAW / 30.0) AS BIGINT) END;
-                        SET @CALC_AMOUNT = CAST(@FULL_MONTH * @PRORATE_FACTOR AS BIGINT);
+                        DECLARE @FULL_MONTH     BIGINT = CASE WHEN @BASE_DAYS_RAW >= 28 THEN CAST(@ITEM_AMOUNT AS BIGINT) ELSE CAST(@ITEM_AMOUNT * (@BASE_DAYS_RAW / 30.0) AS BIGINT) END;
+                        DECLARE @FULL_MONTH_INS BIGINT = CASE WHEN @INS_DAYS_RAW  >= 28 THEN CAST(@ITEM_AMOUNT AS BIGINT) ELSE CAST(@ITEM_AMOUNT * (@INS_DAYS_RAW  / 30.0) AS BIGINT) END;
+                        SET @CALC_AMOUNT     = CAST(@FULL_MONTH     * @PRORATE_FACTOR AS BIGINT);
+                        SET @INS_CALC_AMOUNT = CAST(@FULL_MONTH_INS * @PRORATE_FACTOR AS BIGINT);
                     END
-
                     ELSE IF @ITEM_CODE = 'NAHAR'
                     BEGIN
                         DECLARE @NAHAR_DAYS DECIMAL(18,6) = (@DAYSB - @FRID_COUNT - @LEAVE_DAYS + @TDAYS) * @PRORATE_FACTOR;
                         SET @CALC_AMOUNT = CASE WHEN @NAHAR_DAYS > 0 THEN CAST(@ITEM_AMOUNT * @NAHAR_DAYS AS BIGINT) ELSE CAST(@ITEM_AMOUNT * @PAY_DAYS AS BIGINT) END;
+                        SET @INS_CALC_AMOUNT = @CALC_AMOUNT;
                     END
-
                     ELSE IF @ITEM_CODE = 'SHIFT'
                     BEGIN
                         DECLARE @EFF_SHIFT_MODE NVARCHAR(10) = COALESCE(NULLIF(@DL_SHIFT_MODE_OV, N''), @DEC_SHIFT_MODE, @WS_SHIFT_MODE, @SHIFT_MODE, 'PCT');
                         IF @EFF_SHIFT_MODE = 'FIXED'
                             SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))) AS BIGINT);
                         ELSE
-                            -- v6.2 (رفع باگ): @CURRENT_DEC_DAILY_BASE مقدارِ «ماهانه»‌ی پایه است (نه روزانه)؛ ضربِ نادرست در 30 حذف شد تا حق شیفتِ درصدی ۳۰برابر نشود
                             SET @CALC_AMOUNT = CAST(ROUND((@CURRENT_DEC_DAILY_BASE * @PAY_DAYS * @ITEM_AMOUNT / 100.0), 0) AS BIGINT);
+                        SET @INS_CALC_AMOUNT = @CALC_AMOUNT;
                     END
-
-                    -- v6.1 (حفظ‌شده): مبنای ساعتی — آیتم‌های اضافه‌کار از ساعات کارکرد خودشان استفاده می‌کنند
                     ELSE IF @ITEM_BASIS = 3
+                    BEGIN
                         SET @CALC_AMOUNT =
                             CASE @ITEM_CODE
                                 WHEN 'OT_NORMAL'  THEN CAST(@ITEM_AMOUNT * @OT_NORMAL_H  AS BIGINT)
@@ -5238,27 +5244,32 @@ BEGIN
                                 WHEN 'OT_ADMIN'   THEN CAST(@ITEM_AMOUNT * @OT_ADMIN_H   AS BIGINT)
                                 ELSE CAST(@ITEM_AMOUNT * @PAY_DAYS * @OT_HOUR_BASE AS BIGINT)
                             END;
-
-                    -- آیتم‌های ماهیانه (basis=2): کسر به‌نسبت غیبت اختیاری است (کلید MONTHLY_ITEM_PRORATE)
-                    -- PRORATE=1: کاهش با غیبت و تسهیم تغییر حکم وسط ماه | PRORATE=0: فقط تسهیم تغییر حکم، بدون اثر غیبت
+                        SET @INS_CALC_AMOUNT = @CALC_AMOUNT;
+                    END
                     ELSE IF @ITEM_BASIS = 2
+                    BEGIN
                         SET @CALC_AMOUNT = CASE
                             WHEN @MONTHLY_PRORATE = 1
                                 THEN CAST(@ITEM_AMOUNT * (@PAY_DAYS / CAST(@MONTH_DAYS AS DECIMAL(5,2))) AS BIGINT)
                             ELSE CAST(@ITEM_AMOUNT * @PRORATE_FACTOR AS BIGINT)
                         END;
-
-                    -- 🛠 اصلاح باگ ۳۰برابری: آیتم‌های روزانهٔ مبلغ‌ماهانه بر تعداد روز ماه تقسیم می‌شوند
+                        SET @INS_CALC_AMOUNT = @CALC_AMOUNT;
+                    END
                     ELSE IF @ITEM_BASIS = 1
-                        SET @CALC_AMOUNT = CAST(@ITEM_AMOUNT * @PAY_DAYS AS BIGINT);
-
+                    BEGIN
+                        SET @CALC_AMOUNT     = CAST(@ITEM_AMOUNT * @PAY_DAYS AS BIGINT);
+                        SET @INS_CALC_AMOUNT = CAST(@ITEM_AMOUNT * @INS_DAYS AS BIGINT);
+                    END
                     ELSE
+                    BEGIN
                         SET @CALC_AMOUNT = ISNULL(@ITEM_AMOUNT, 0);
+                        SET @INS_CALC_AMOUNT = @CALC_AMOUNT;
+                    END
 
-                    INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-                    VALUES (@ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @CALC_AMOUNT, @ITEM_INS, @ITEM_TAX);
+                    INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+                    VALUES (@ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @CALC_AMOUNT, @INS_CALC_AMOUNT, @ITEM_INS, @ITEM_TAX);
 
-                    FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @DL_SHIFT_MODE_OV, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD;
+                    FETCH NEXT FROM cur_line INTO @ITEM_ID, @ITEM_CODE, @ITEM_TYPE, @ITEM_AMOUNT, @DL_SHIFT_MODE_OV, @ITEM_BASIS, @ITEM_INS, @ITEM_TAX, @ITEM_PBD, @ITEM_IBD;
                 END;
                 CLOSE cur_line; DEALLOCATE cur_line;
             END;
@@ -5288,28 +5299,28 @@ BEGIN
         END
 
         IF @OT_NORMAL_H > 0 AND NOT EXISTS (SELECT 1 FROM @ItemCalc WHERE ITEM_CODE = 'OT_NORMAL')
-            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-            SELECT ITEM_ID, 'OT_NORMAL', 2, CAST(@EFFECTIVE_HOURLY * @OT_NORMAL_H * @OT_NORMAL_MULT AS BIGINT), INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_NORMAL';
+            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'OT_NORMAL', 2, CAST(@EFFECTIVE_HOURLY * @OT_NORMAL_H * @OT_NORMAL_MULT AS BIGINT), CAST(@EFFECTIVE_HOURLY * @OT_NORMAL_H * @OT_NORMAL_MULT AS BIGINT), INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_NORMAL';
 
         IF @OT_HOLIDAY_H > 0 AND NOT EXISTS (SELECT 1 FROM @ItemCalc WHERE ITEM_CODE = 'OT_HOLIDAY')
-            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-            SELECT ITEM_ID, 'OT_HOLIDAY', 2, CAST(@EFFECTIVE_HOURLY * @OT_HOLIDAY_H * @OT_HOLIDAY_MULT AS BIGINT), INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_HOLIDAY';
+            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'OT_HOLIDAY', 2, CAST(@EFFECTIVE_HOURLY * @OT_HOLIDAY_H * @OT_HOLIDAY_MULT AS BIGINT), CAST(@EFFECTIVE_HOURLY * @OT_HOLIDAY_H * @OT_HOLIDAY_MULT AS BIGINT), INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_HOLIDAY';
 
         IF @OT_ADMIN_H > 0 AND NOT EXISTS (SELECT 1 FROM @ItemCalc WHERE ITEM_CODE = 'OT_ADMIN')
-            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-            SELECT ITEM_ID, 'OT_ADMIN', 2, CAST(@EFFECTIVE_HOURLY * @OT_ADMIN_H * @OT_NORMAL_MULT AS BIGINT), INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_ADMIN';
+            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'OT_ADMIN', 2, CAST(@EFFECTIVE_HOURLY * @OT_ADMIN_H * @OT_NORMAL_MULT AS BIGINT), CAST(@EFFECTIVE_HOURLY * @OT_ADMIN_H * @OT_NORMAL_MULT AS BIGINT), INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'OT_ADMIN';
 
         IF @PERF_AMOUNT > 0
-            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-            SELECT ITEM_ID, 'PERF_BONUS', 2, @PERF_AMOUNT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'PERF_BONUS';
+            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'PERF_BONUS', 2, @PERF_AMOUNT, @PERF_AMOUNT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'PERF_BONUS';
 
         IF @TRANSP_AMOUNT > 0
-            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-            SELECT ITEM_ID, 'TRANSP', 2, @TRANSP_AMOUNT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'TRANSP';
+            INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+            SELECT ITEM_ID, 'TRANSP', 2, @TRANSP_AMOUNT, @TRANSP_AMOUNT, INS_SUBJECT, TAX_SUBJECT FROM PAY2_ITEM_DEF WHERE ITEM_CODE = 'TRANSP';
 
         -- v6.1 (حفظ‌شده): گارد ضدِ دوبار‌شماری آیتم‌هایی که هم در حکم و هم در PAY2_ATT_VALUE هستند
-        INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_SUBJECT, TAX_SUBJECT)
-        SELECT AV.ITEM_ID, ID.ITEM_CODE, ID.ITEM_TYPE, AV.VALUE, ID.INS_SUBJECT, ID.TAX_SUBJECT
+        INSERT INTO @ItemCalc (ITEM_ID, ITEM_CODE, ITEM_TYPE, AMOUNT, INS_AMOUNT, INS_SUBJECT, TAX_SUBJECT)
+        SELECT AV.ITEM_ID, ID.ITEM_CODE, ID.ITEM_TYPE, AV.VALUE, AV.VALUE, ID.INS_SUBJECT, ID.TAX_SUBJECT
         FROM PAY2_ATT_VALUE AV INNER JOIN PAY2_ITEM_DEF ID ON AV.ITEM_ID = ID.ITEM_ID
         WHERE AV.PER_ID = @PER_ID AND AV.EMP_ID = @EMP_ID AND AV.VALUE <> 0
           AND NOT EXISTS (SELECT 1 FROM @ItemCalc X WHERE X.ITEM_ID = AV.ITEM_ID);
@@ -5318,9 +5329,9 @@ BEGIN
         DECLARE @GROSS_PAY BIGINT=0, @INS_BASE BIGINT=0, @INS_WORKER BIGINT=0, @INS_EMPLOYER BIGINT=0;
 
         SELECT @GROSS_PAY = ISNULL(SUM(AMOUNT), 0) FROM @ItemCalc WHERE ITEM_TYPE IN (1, 2);
-        SELECT @INS_BASE = ISNULL(SUM(AMOUNT), 0) FROM @ItemCalc WHERE INS_SUBJECT = 1 AND ITEM_TYPE IN (1, 2);
+        SELECT @INS_BASE = ISNULL(SUM(INS_AMOUNT), 0) FROM @ItemCalc WHERE INS_SUBJECT = 1 AND ITEM_TYPE IN (1, 2);
 
-        DECLARE @EFFECTIVE_INS_CEILING BIGINT = CAST((@INS_CEILING / 30.0) * @DAYSB AS BIGINT);
+        DECLARE @EFFECTIVE_INS_CEILING BIGINT = CAST((@INS_CEILING / 30.0) * (CASE WHEN @DAYSB > 0 THEN @DAYSB ELSE @DAYS END) AS BIGINT);
         IF @INS_CEILING_APPLY = 1 AND @INS_TYPE <> 3
             SET @INS_BASE = CASE WHEN @INS_BASE > @EFFECTIVE_INS_CEILING THEN @EFFECTIVE_INS_CEILING ELSE @INS_BASE END;
 
@@ -6306,6 +6317,7 @@ WHERE OBJECT_NAME(cc.parent_object_id) = 'PAY2_LEAVE'
 IF LEN(@sql) > 0
     EXEC sp_executesql @sql;
 GO
+
 ";
                 ExecuteBatches(db, modify1);
 
