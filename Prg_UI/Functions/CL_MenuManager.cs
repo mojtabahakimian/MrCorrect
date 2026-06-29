@@ -2386,6 +2386,9 @@ namespace Functions
                         //new HEAD_LST_ENTEGHAL_WIN(_NUM_).Show();
                         break;
 
+
+                 
+
                     case 12:
                         CL_MenuManager.OpenWinMenu(
                               CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID,
@@ -2478,8 +2481,16 @@ namespace Functions
                         CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PMORAKH, default, Convert.ToInt32(_NUM_));
                         break;
 
-                    case 38:
-                        //new HAVALAH_EXIT_SAYER(_NUM_).Show();
+                    case 11: //خروج سایر
+                    case 38: //خروج سایر
+                        CL_MenuManager.OpenWinMenu(
+                              CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER,
+                              Thewindowthis,
+                              Convert.ToDouble(_NUM_),
+                              false,
+                              false,
+                              _isCalledFromAutomasion_    // FromAutomation
+                              );
                         break;
 
                     case 39:
