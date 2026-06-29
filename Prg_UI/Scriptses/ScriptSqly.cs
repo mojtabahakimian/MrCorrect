@@ -4948,6 +4948,7 @@ GO
 -- جمع: ۲۱ جدول، ۲ View، ۲ Function، ۱ Stored Procedure، ۱ Trigger
 -- ================================================================
 
+-- Migration 010: Fix configurations for Shift Allowance
 GO
 ";
                 ExecuteBatches(db, tablescript);
@@ -5328,7 +5329,8 @@ BEGIN
         -- گام ۷ — محاسبه بیمه
         DECLARE @GROSS_PAY BIGINT=0, @INS_BASE BIGINT=0, @INS_WORKER BIGINT=0, @INS_EMPLOYER BIGINT=0;
 
-        SELECT @GROSS_PAY = ISNULL(SUM(AMOUNT), 0) FROM @ItemCalc WHERE ITEM_TYPE IN (1, 2);
+        -- فیکس: عدم دخالت حقوق رسمی در جمع مزایا (ناخالص پرداختی واقعی) تا فیش دوبرابر نشود
+        SELECT @GROSS_PAY = ISNULL(SUM(AMOUNT), 0) FROM @ItemCalc WHERE ITEM_TYPE IN (1, 2) AND ITEM_CODE <> 'BASE_SAL_B';
         SELECT @INS_BASE = ISNULL(SUM(INS_AMOUNT), 0) FROM @ItemCalc WHERE INS_SUBJECT = 1 AND ITEM_TYPE IN (1, 2);
 
         DECLARE @EFFECTIVE_INS_CEILING BIGINT = CAST((@INS_CEILING / 30.0) * (CASE WHEN @DAYSB > 0 THEN @DAYSB ELSE @DAYS END) AS BIGINT);
