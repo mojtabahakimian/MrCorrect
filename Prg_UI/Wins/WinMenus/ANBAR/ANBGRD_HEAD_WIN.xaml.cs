@@ -1680,7 +1680,7 @@ namespace Wins.WinMenus.ANBAR
             }
             try
             {
-                dbms.DoExecuteSQL("INSERT INTO dbo.ANBGRD_LST  (CODE, MOG, GRD_NUM) SELECT CODE, MAND, " + this.GRD_NUM.Text + " AS GN FROM dbo.MOGUDI(" + this.GRD_DATE.Text.ToRawTarikh() + "," + this.GRD_ANBAR.SelectedValue + ") MOGUDI");
+                dbms.DoExecuteSQL("INSERT INTO dbo.ANBGRD_LST  (CODE, MOG, GRD_NUM) SELECT CODE, MAND, " + this.GRD_NUM.Text + " AS GN FROM dbo.MOGUDI(" + this.GRD_DATE.Text.ToRawTarikh() + "," + this.GRD_ANBAR.SelectedValue + ") MOGUDI WHERE NOT EXISTS (SELECT 1 FROM dbo.ANBGRD_LST WHERE CODE = MOGUDI.CODE AND GRD_NUM = " + this.GRD_NUM.Text + ")");
             }
             catch (Exception)
             {

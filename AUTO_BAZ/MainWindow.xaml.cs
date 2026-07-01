@@ -913,7 +913,7 @@ namespace AUTO_BAZ
                             }
                             i = i + 1L;
                         }
-                        rst_STUF_STK[h].MOGODI = Math.Round(rst_STUF_STK[h].MOGODI * Math.Pow(10, (double)Baseknow.DIG)) / Math.Pow(10, (double)Baseknow.DIG);
+                        //rst_STUF_STK[h].MOGODI = Math.Round(rst_STUF_STK[h].MOGODI * Math.Pow(10, (double)Baseknow.DIG)) / Math.Pow(10, (double)Baseknow.DIG);
 
                         dbms.DoExecuteSQL($@"UPDATE dbo.STUF_STK SET MOGODI = {rst_STUF_STK[h].MOGODI} WHERE CODE = {rst_STUF_STK[h].CODE} AND ANBAR = {rst_STUF_STK[h].ANBAR}");
 
@@ -1053,7 +1053,7 @@ namespace AUTO_BAZ
                                     case 1: // خريد
                                         {
                                             MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                            MOGUDI = Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6);
+                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1109,7 +1109,7 @@ namespace AUTO_BAZ
                                             {
                                                 MBKM = MBKM + (RST2[eof].MEGHk ?? 0) * MIAN;
                                             }
-                                            MOGUDI = Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6);
+                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1198,7 +1198,7 @@ namespace AUTO_BAZ
                                     case 6: // انتقالي ورود
                                         {
                                             MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                            MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6), 6);
+                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1280,7 +1280,7 @@ namespace AUTO_BAZ
                                                 //rst3Filter_.update();
                                             }
                                             MBKM = MBKM + rst3Filter_.FirstOrDefault().MABL_K;
-                                            MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6), 6);
+                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1305,7 +1305,7 @@ namespace AUTO_BAZ
                                     case 17: // كسري انبار
                                         {
                                             MBKM = MBKM + MIAN * (RST2[eof].MEGHk ?? 0);
-                                            MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6), 6);
+                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1535,7 +1535,7 @@ namespace AUTO_BAZ
                                                                 // MBKM = MBKM + rst[rstI].2.Fields("MABL_K")
                                                                 var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
                                                                 //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].NUMBER;
-                                                                MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[f].MEGHk ?? 0), 6), 6);
+                                                                MOGUDI = MOGUDI + (RST2[f].MEGHk ?? 0);
                                                                 RST6Filter.FirstOrDefault().MABL = MIAN;
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
                                                                 //RST6.update();
@@ -1758,7 +1758,7 @@ namespace AUTO_BAZ
                                                                 // MBKM = MBKM + rst2.Fields("MABL_K")
                                                                 var RST6Filter_ = RST6.Where(x => x.CODE == RST2[w].CODE && x.GRD_NUM == RST2[w].NUMBER).FirstOrDefault();
                                                                 //RST6.Filter = "code = '" + RST2[w].CODE + "' and GRD_NUM = " + RST2[w].NUMBER;
-                                                                MOGUDI = Math.Round(Math.Round((double)(MOGUDI + RST2[w].MEGHk), 6), 6);
+                                                                MOGUDI = (double)(MOGUDI + RST2[w].MEGHk);
                                                                 RST6Filter_.MABL = MIAN;
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter_.GRD_NUM}");
                                                                 //RST6Filter_.update();
@@ -1847,7 +1847,7 @@ namespace AUTO_BAZ
                                                     case 1: // خريد
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = Math.Round((double)(MOGUDI + RST2[e].MEGHk), 6);
+                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -1895,7 +1895,7 @@ namespace AUTO_BAZ
                                                     case 24: // برگشت فروش سال قبل
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = Math.Round((double)(MOGUDI + RST2[e].MEGHk), 6);
+                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -1996,7 +1996,7 @@ namespace AUTO_BAZ
                                                     case 6: // انتقالي ورود
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = Math.Round((double)(MOGUDI + RST2[e].MEGHk), 6);
+                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -2052,7 +2052,7 @@ namespace AUTO_BAZ
                                                     case 9:    // توليد
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = Math.Round((double)(MOGUDI + RST2[e].MEGHk), 6);
+                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -2081,7 +2081,7 @@ namespace AUTO_BAZ
                                                     case 17: // كسري انبار
                                                         {
                                                             MBKM = (double)(MBKM + MIAN * RST2[e].MEGHk);
-                                                            MOGUDI = Math.Round((double)(MOGUDI + RST2[e].MEGHk), 6);
+                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;

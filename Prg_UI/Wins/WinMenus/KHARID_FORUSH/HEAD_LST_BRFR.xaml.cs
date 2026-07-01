@@ -1496,7 +1496,18 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         if (PEID.SelectedValue == null || Convert.ToInt32(PEID.SelectedValue) == 0)
                         {
                             // HTAG = 24 (سطرهای فاکتور برگشت فروش)
-                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0 WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG}");
+                            // The VAT (IMBAA) should be preserved or recalculated based on TICMBAA
+                            dbms.DoExecuteSQL($@"UPDATE il
+                                               SET 
+                                                   il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+                                                   il.IMBAA = CASE 
+                                                       WHEN {(TICMBAA.IsChecked == true ? 1 : 0)} = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+                                                           FLOOR(il.MABL_K * sd.vra / 100.0)
+                                                       ELSE 0 
+                                                   END
+                                               FROM dbo.INVO_LST il
+                                               JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+                                               WHERE il.NUMBER = {NUMBER.Text} AND il.TAG = {HTAG}");
                             DoCmdHeaderSave();
                         }
 
