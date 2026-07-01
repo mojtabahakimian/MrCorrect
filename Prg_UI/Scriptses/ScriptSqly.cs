@@ -944,14 +944,32 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									         END
 									         ELSE 
 									         BEGIN
-									             UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0 
-									             WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+									             UPDATE il
+									             SET 
+									                 il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+									                 il.IMBAA = CASE 
+									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+									                         FLOOR(il.MABL_K * sd.vra / 100.0)
+									                     ELSE 0 
+									                 END
+									             FROM dbo.INVO_LST il
+									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg;
 									         END
 									     END
 									     ELSE 
 									     BEGIN
-									         UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0
-									         WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+									         UPDATE il
+									         SET 
+									             il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+									             il.IMBAA = CASE 
+									                 WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+									                     FLOOR(il.MABL_K * sd.vra / 100.0)
+									                 ELSE 0 
+									             END
+									         FROM dbo.INVO_LST il
+									         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg;
 									     END
 									 
 									     SELECT 
@@ -1455,14 +1473,32 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
                     //        END
                     //        ELSE 
                     //        BEGIN
-                    //            UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0 
-                    //            WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0;
+                    //            UPDATE il
+                    //            SET 
+                    //                il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+                    //                il.IMBAA = CASE 
+                    //                    WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+                    //                        FLOOR(il.MABL_K * sd.vra / 100.0)
+                    //                    ELSE 0 
+                    //                END
+                    //            FROM dbo.INVO_LST il
+                    //            JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+                    //            WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
                     //        END
                     //    END
                     //    ELSE 
                     //    BEGIN
-                    //        UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0
-                    //        WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0;
+                    //        UPDATE il
+                    //        SET 
+                    //            il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+                    //            il.IMBAA = CASE 
+                    //                WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+                    //                    FLOOR(il.MABL_K * sd.vra / 100.0)
+                    //                ELSE 0 
+                    //            END
+                    //        FROM dbo.INVO_LST il
+                    //        JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+                    //        WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
                     //    END
 
                     //    SELECT 
@@ -3446,7 +3482,7 @@ ORDER BY B.NAME;"); } catch { }
 
                     try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
                     try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به جدول تاریخچه خزانه
-                    
+
                     try { db.Execute($@"ALTER FUNCTION [dbo].[MOGHA_ANBAR] (@dt2 INT, @ANBAR INT, @KOL INT)
 RETURNS TABLE
 AS
@@ -3616,7 +3652,7 @@ RETURN (
     FROM kart_anbar ka
     LEFT JOIN hesab he ON ka.CODE = he.HES_T
 );"); } catch { }
-                    
+
                     try { db.Execute($@"
 IF NOT EXISTS (SELECT 1 FROM sys.objects
                WHERE object_id = OBJECT_ID(N'dbo.IVO_EXTENDED') AND type = 'U')
