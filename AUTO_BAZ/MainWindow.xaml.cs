@@ -269,6 +269,13 @@ namespace AUTO_BAZ
         /// مدل برای انتقال وضعیت میزنا پیشرفت
         /// </summary>
         private AutoBazBridge AutoBazBridgeViewModel = new AutoBazBridge();
+
+        private static double AddAverageQuantity(double currentQuantity, double? quantityDelta)
+        {
+            // Keep quantities that feed AVRAGE/AVRAGE2 calculations unrounded; only monetary totals are rounded.
+            return currentQuantity + (quantityDelta ?? 0d);
+        }
+
         public MainWindow(/*bool[] booleanArray = null, bool singleCallerPart = false*/)
         {
             InitializeComponent();
@@ -1053,7 +1060,7 @@ namespace AUTO_BAZ
                                     case 1: // خريد
                                         {
                                             MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[eof].MEGHk);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1109,7 +1116,7 @@ namespace AUTO_BAZ
                                             {
                                                 MBKM = MBKM + (RST2[eof].MEGHk ?? 0) * MIAN;
                                             }
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[eof].MEGHk);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1198,7 +1205,7 @@ namespace AUTO_BAZ
                                     case 6: // انتقالي ورود
                                         {
                                             MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[eof].MEGHk);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1280,7 +1287,7 @@ namespace AUTO_BAZ
                                                 //rst3Filter_.update();
                                             }
                                             MBKM = MBKM + rst3Filter_.FirstOrDefault().MABL_K;
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[eof].MEGHk);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1305,7 +1312,7 @@ namespace AUTO_BAZ
                                     case 17: // كسري انبار
                                         {
                                             MBKM = MBKM + MIAN * (RST2[eof].MEGHk ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[eof].MEGHk);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1535,7 +1542,7 @@ namespace AUTO_BAZ
                                                                 // MBKM = MBKM + rst[rstI].2.Fields("MABL_K")
                                                                 var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
                                                                 //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].NUMBER;
-                                                                MOGUDI = MOGUDI + (RST2[f].MEGHk ?? 0);
+                                                                MOGUDI = AddAverageQuantity(MOGUDI, RST2[f].MEGHk);
                                                                 RST6Filter.FirstOrDefault().MABL = MIAN;
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
                                                                 //RST6.update();
@@ -1758,7 +1765,7 @@ namespace AUTO_BAZ
                                                                 // MBKM = MBKM + rst2.Fields("MABL_K")
                                                                 var RST6Filter_ = RST6.Where(x => x.CODE == RST2[w].CODE && x.GRD_NUM == RST2[w].NUMBER).FirstOrDefault();
                                                                 //RST6.Filter = "code = '" + RST2[w].CODE + "' and GRD_NUM = " + RST2[w].NUMBER;
-                                                                MOGUDI = (double)(MOGUDI + RST2[w].MEGHk);
+                                                                MOGUDI = AddAverageQuantity(MOGUDI, RST2[w].MEGHk);
                                                                 RST6Filter_.MABL = MIAN;
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter_.GRD_NUM}");
                                                                 //RST6Filter_.update();
@@ -1847,7 +1854,7 @@ namespace AUTO_BAZ
                                                     case 1: // خريد
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
+                                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -1895,7 +1902,7 @@ namespace AUTO_BAZ
                                                     case 24: // برگشت فروش سال قبل
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
+                                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -1996,7 +2003,7 @@ namespace AUTO_BAZ
                                                     case 6: // انتقالي ورود
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
+                                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -2052,7 +2059,7 @@ namespace AUTO_BAZ
                                                     case 9:    // توليد
                                                         {
                                                             MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
+                                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
@@ -2081,7 +2088,7 @@ namespace AUTO_BAZ
                                                     case 17: // كسري انبار
                                                         {
                                                             MBKM = (double)(MBKM + MIAN * RST2[e].MEGHk);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
+                                                            MOGUDI = AddAverageQuantity(MOGUDI, RST2[e].MEGHk);
                                                             if (MBKM == 0d)
                                                             {
                                                                 MIAN = 0d;
