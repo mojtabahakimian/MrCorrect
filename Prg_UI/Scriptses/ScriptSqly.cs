@@ -5473,9 +5473,17 @@ BEGIN
 
         SET @OTHER_DED = ISNULL(@KASR_OTHER, 0);
         SET @TOTAL_DED = @INS_WORKER + @TAX_AMOUNT + @LOAN_DED + @ADVANCE_DED + @OTHER_DED;
-        SET @NET_PAY = @GROSS_PAY - @TOTAL_DED;
+        
+        -- فرمول تراز: پیدا کردن اختلاف گرد کردن و اعمال آن روی ناخالص پرداختی
+        DECLARE @RAW_NET BIGINT = @GROSS_PAY - @TOTAL_DED;
+        SET @NET_PAY = @RAW_NET;
 
-        IF @ROUND_MODE > 1 SET @NET_PAY = ISNULL(ROUND(@NET_PAY / CAST(@ROUND_MODE AS FLOAT), 0) * @ROUND_MODE, 0);
+        IF @ROUND_MODE > 1 
+            SET @NET_PAY = ISNULL(ROUND(CAST(@RAW_NET AS FLOAT) / @ROUND_MODE, 0) * @ROUND_MODE, 0);
+
+        -- اختلافی که بخاطر گرد کردن ایجاد شده را به ناخالص اضافه/کم میکنیم تا معادله تراز بماند
+        DECLARE @ROUNDING_DIFF BIGINT = @NET_PAY - @RAW_NET;
+        SET @GROSS_PAY = @GROSS_PAY + @ROUNDING_DIFF; 
 
         SET @LEAVE_BAL_DAYS = NULL;
         SELECT @LEAVE_BAL_DAYS = CAST(BALANCE_MIN AS DECIMAL(10,2)) / 440.0 FROM PAY2_LEAVE_BAL WHERE EMP_ID = @EMP_ID AND YEAR = @PERIOD_DATE / 10000;
@@ -5583,16 +5591,29 @@ BEGIN
     FROM PAY2_WORKSHOP_ACC WHERE WS_ID = @WS_ID;
 
     -- ایجاد یک CTE برای محاسبه سهم هزینه‌ها بر اساس روزهای کارکرد
-    ;WITH SalarySplit AS (
+    ;WITH SalarySplitBase AS (
         SELECT 
-            RL.EMP_ID, RL.GROSS_PAY,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN RL.GROSS_PAY * (A.DAYS_TOLID / A.WORK_DAYS) ELSE 0 END AS BIGINT) AS EXP_TOLID,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN RL.GROSS_PAY * (A.DAYS_EDARI / A.WORK_DAYS) ELSE 0 END AS BIGINT) AS EXP_EDARI,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN RL.GROSS_PAY * (A.DAYS_FOROSH / A.WORK_DAYS) ELSE 0 END AS BIGINT) AS EXP_FOROSH,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN RL.GROSS_PAY * (A.DAYS_KHADAMAT / A.WORK_DAYS) ELSE 0 END AS BIGINT) AS EXP_KHADAMAT
+            RL.EMP_ID, 
+            RL.GROSS_PAY,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_TOLID / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS EXP_TOLID,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_EDARI / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS EXP_EDARI,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_FOROSH / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS EXP_FOROSH,
+            A.WORK_DAYS, A.DAYS_KHADAMAT
         FROM PAY2_RUN_LINE RL
         INNER JOIN PAY2_ATTENDANCE A ON RL.EMP_ID = A.EMP_ID AND A.PER_ID = @PER_ID
         WHERE RL.RUN_ID = @RUN_ID
+    ),
+    SalarySplit AS (
+        SELECT 
+            EMP_ID, GROSS_PAY, EXP_TOLID, EXP_EDARI, EXP_FOROSH,
+            -- شاهکار ریاضی: واحد آخر (خدمات) برابر است با: کل حقوق منهای هزینه‌های قبلی
+            -- این کار تمام ریال‌های گمشده ناشی از گرد کردن را برمی‌گرداند و سند را تراز می‌کند
+            CASE 
+                WHEN WORK_DAYS > 0 AND DAYS_KHADAMAT > 0 
+                THEN GROSS_PAY - (EXP_TOLID + EXP_EDARI + EXP_FOROSH)
+                ELSE 0 
+            END AS EXP_KHADAMAT
+        FROM SalarySplitBase
     )
     -- خروجی نهایی برای صدور سند
     SELECT @ACC_SALARY_TOLID AS HES_CODE, N'هزینه حقوق تولید' AS SHARH, SUM(EXP_TOLID) AS BED, 0 AS BES, 'EXP_TOLID' AS ACC_KEY, NULL AS EMP_ID
@@ -5610,8 +5631,9 @@ BEGIN
     SELECT @ACC_INS_EXP, N'هزینه بیمه کارفرما', SUM(INS_EMPLOYER), 0, 'INS_EXP', NULL
     FROM PAY2_RUN_LINE WHERE RUN_ID = @RUN_ID HAVING SUM(INS_EMPLOYER) > 0
     UNION ALL 
-    SELECT @ACC_SALARY_PAY, 
-        N'پرداختنی حقوق خالص: ' + E.LAST_NAME + N' ' + E.FIRST_NAME, 
+    SELECT 
+        CASE WHEN RL.NET_PAY < 0 THEN ISNULL(E.ACC_T, @ACC_SALARY_PAY) ELSE @ACC_SALARY_PAY END, 
+        N'حقوق پرداختنی: ' + E.LAST_NAME + N' ' + E.FIRST_NAME, 
         CASE WHEN RL.NET_PAY < 0 THEN ABS(RL.NET_PAY) ELSE 0 END, 
         CASE WHEN RL.NET_PAY > 0 THEN RL.NET_PAY ELSE 0 END, 
         'SALARY_PAYABLE', 
