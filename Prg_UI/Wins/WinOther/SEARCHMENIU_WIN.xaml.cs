@@ -519,18 +519,17 @@ namespace Wins.WinOther
 
         private void SEARCH_TEXT_MENU_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var searchText = SEARCH_TEXT_MENU.Text.Trim().ToLower();
+            var searchText = NormalizeSearchText(SEARCH_TEXT_MENU.Text);
 
             if (CHB_STATIC_FIND.IsChecked == true)
             {
                 // Static list mode - maintain the full list
                 LISTBOX_MENU.ItemsSource = MenuItemModels.Where(m => m.ISCONFIRMED).ToList();
 
-                if (!string.IsNullOrEmpty(searchText) && !string.IsNullOrWhiteSpace(searchText))
+                if (!string.IsNullOrWhiteSpace(searchText))
                 {
                     // Find the first item that matches the search text
-                    var matchingItem = MenuItemModels.FirstOrDefault(item =>
-                        item.CAPTION.ToLower().Contains(searchText) && item.ISCONFIRMED);
+                    var matchingItem = MenuItemModels.FirstOrDefault(item => IsMenuItemMatched(item, searchText));
 
                     if (matchingItem != null)
                     {
@@ -550,11 +549,13 @@ namespace Wins.WinOther
             else
             {
                 // Dynamic list mode - original behavior
-                if (!string.IsNullOrEmpty(searchText) && !string.IsNullOrWhiteSpace(searchText))
+                if (!string.IsNullOrWhiteSpace(searchText))
                 {
                     LISTBOX_MENU.Visibility = Visibility.Visible;
-                    var filteredItems = MenuItemModels.Where(item =>
-                        item.CAPTION.ToLower().Contains(searchText) && item.ISCONFIRMED).ToList();
+                    var filteredItems = MenuItemModels
+                        .Where(item => IsMenuItemMatched(item, searchText))
+                        .OrderBy(item => GetSearchRank(item, searchText))
+                        .ToList();
                     LISTBOX_MENU.ItemsSource = filteredItems;
                 }
                 else
@@ -564,9 +565,100 @@ namespace Wins.WinOther
             }
         }
 
+        private bool IsMenuItemMatched(MenuItemModel item, string normalizedSearchText)
+        {
+            if (!item.ISCONFIRMED) return false;
+
+            var normalizedCaption = NormalizeSearchText(item.CAPTION);
+            if (normalizedCaption.Contains(normalizedSearchText)) return true;
+
+            return CHB_FUZZY_FIND.IsChecked == true && IsFuzzyMatch(normalizedCaption, normalizedSearchText);
+        }
+
+        private int GetSearchRank(MenuItemModel item, string normalizedSearchText)
+        {
+            var normalizedCaption = NormalizeSearchText(item.CAPTION);
+            if (normalizedCaption.Contains(normalizedSearchText)) return 0;
+
+            return GetBestTokenWindowDistance(normalizedCaption, normalizedSearchText);
+        }
+
+        private static string NormalizeSearchText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+            return text.Trim()
+                .ToLower()
+                .Replace('ي', 'ی')
+                .Replace('ك', 'ک')
+                .Replace("‌", " ");
+        }
+
+        private static bool IsFuzzyMatch(string normalizedCaption, string normalizedSearchText)
+        {
+            var distance = GetBestTokenWindowDistance(normalizedCaption, normalizedSearchText);
+            return distance <= GetAllowedFuzzyDistance(normalizedSearchText.Length);
+        }
+
+        private static int GetBestTokenWindowDistance(string normalizedCaption, string normalizedSearchText)
+        {
+            var captionWords = normalizedCaption.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var searchWords = normalizedSearchText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (captionWords.Length == 0 || searchWords.Length == 0) return int.MaxValue;
+
+            var windowSize = Math.Min(searchWords.Length, captionWords.Length);
+            var bestDistance = int.MaxValue;
+
+            for (int i = 0; i <= captionWords.Length - windowSize; i++)
+            {
+                var candidate = string.Join(" ", captionWords.Skip(i).Take(windowSize));
+                bestDistance = Math.Min(bestDistance, CalculateLevenshteinDistance(candidate, normalizedSearchText));
+            }
+
+            bestDistance = Math.Min(bestDistance, CalculateLevenshteinDistance(normalizedCaption, normalizedSearchText));
+            return bestDistance;
+        }
+
+        private static int GetAllowedFuzzyDistance(int searchTextLength)
+        {
+            if (searchTextLength <= 4) return 1;
+            if (searchTextLength <= 12) return 2;
+
+            return Math.Max(2, searchTextLength / 5);
+        }
+
+        private static int CalculateLevenshteinDistance(string source, string target)
+        {
+            if (source == target) return 0;
+            if (source.Length == 0) return target.Length;
+            if (target.Length == 0) return source.Length;
+
+            var distances = new int[source.Length + 1, target.Length + 1];
+            for (int i = 0; i <= source.Length; i++) distances[i, 0] = i;
+            for (int j = 0; j <= target.Length; j++) distances[0, j] = j;
+
+            for (int i = 1; i <= source.Length; i++)
+            {
+                for (int j = 1; j <= target.Length; j++)
+                {
+                    var cost = source[i - 1] == target[j - 1] ? 0 : 1;
+                    distances[i, j] = Math.Min(
+                        Math.Min(distances[i - 1, j] + 1, distances[i, j - 1] + 1),
+                        distances[i - 1, j - 1] + cost);
+                }
+            }
+
+            return distances[source.Length, target.Length];
+        }
+
         private void CHB_STATIC_FIND_Click(object sender, RoutedEventArgs e)
         {
-            //SEARCH_TEXT_MENU_TextChanged(SEARCH_TEXT_MENU, null);
+            SEARCH_TEXT_MENU_TextChanged(SEARCH_TEXT_MENU, null);
+        }
+
+        private void CHB_FUZZY_FIND_Click(object sender, RoutedEventArgs e)
+        {
+            SEARCH_TEXT_MENU_TextChanged(SEARCH_TEXT_MENU, null);
         }
     }
 }

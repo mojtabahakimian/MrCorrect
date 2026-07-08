@@ -53,7 +53,7 @@
         </Popup>
         <!--HEADER↑-->
 
-        <TextBox x:Name="SEARCH_TEXT_MENU" Text="" FlowDirection="RightToLeft" Height="25" TextChanged="SEARCH_TEXT_MENU_TextChanged" Padding="1,1,0,4" Margin="104,44,15,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="SEARCH_TEXT_MENU" Text="" FlowDirection="RightToLeft" Height="25" TextChanged="SEARCH_TEXT_MENU_TextChanged" Padding="1,1,0,4" Margin="230,44,15,0" VerticalAlignment="Top"/>
         <ListBox x:Name="LISTBOX_MENU" SelectedIndex="0" FlowDirection="RightToLeft" 
          Margin="15,83,15,27" SelectedValuePath="WIN_NAME" 
          PreviewMouseLeftButtonUp="LISTBOX_MENU_PreviewMouseLeftButtonUp">
@@ -68,6 +68,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <CheckBox x:Name="CHB_STATIC_FIND" Content="لیست ثابت" IsChecked="False" Margin="13,50,704,0" Height="25" VerticalAlignment="Top" Click="CHB_STATIC_FIND_Click"/>
+        <CheckBox x:Name="CHB_FUZZY_FIND" Content="جستجوی فازی" IsChecked="True" Margin="105,50,585,0" Height="25" VerticalAlignment="Top" Click="CHB_FUZZY_FIND_Click"/>
 
     </Grid>
 </Window>
