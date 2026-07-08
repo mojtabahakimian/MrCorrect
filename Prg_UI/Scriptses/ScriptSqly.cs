@@ -2180,127 +2180,6 @@ RETURN (
 );
 "); } catch { }
 
-                    //Ctrl + F8
-                    //Ctrl + F8 - دفتر تفضیلی - همیشه اجرا می‌شود تا امضای صحیح روی DB باشد
-                    try { db.Execute($@"
-CREATE OR ALTER PROC [dbo].[usp_TafzilLedger]
-    @FromDate     INT,
-    @ToDate       INT,
-    @TafzilCode   nvarchar(50),
-    @SortExpr     nvarchar(400) = N'DATE_S, BED DESC'
-AS
-BEGIN
-    SET ARITHABORT ON;
-    SET NOCOUNT ON;
-
-    ----------------------------------------------------------
-    -- 0) کنترل امنیت و پیش‌فرض‌ها
-    ----------------------------------------------------------
-    DECLARE @SafeSort nvarchar(400);
-    IF ISNULL(@SortExpr, '') = '' SET @SortExpr = 'DATE_S, BED DESC';
-
-    -- وایت‌لیست
-    IF NOT EXISTS (
-        SELECT 1 FROM (VALUES
-            ('N_S'),('DATE_S'),('BED'),('BES'),('SHARH'),('NO_S'),('id'),
-            ('N_S DESC'),('DATE_S DESC'),('BED DESC'),('BES DESC'),('NO_S DESC')
-        ) AS ValidCols(ColName) WHERE CHARINDEX(ColName, @SortExpr) > 0
-    )
-        SET @SafeSort = 'DATE_S, N_S';
-    ELSE
-        SET @SafeSort = @SortExpr;
-
-    ----------------------------------------------------------
-    -- 1) ساخت جدول موقت
-    ----------------------------------------------------------
-    CREATE TABLE #TempLedger (
-        pk_id       bigint IDENTITY(1,1),
-        RowNum      int,
-        N_S         int,
-        DATE_S      int,
-        MONTH_S     AS ((DATE_S % 10000) / 100),
-        SHARH       nvarchar(MAX),
-        BED         float DEFAULT 0,
-        BES         float DEFAULT 0,
-        DiffAmt     AS (BED - BES),
-        RunningSum  float DEFAULT 0,
-        TASH        nvarchar(10),
-        NO_S        int,
-        N_SERI      float NULL,
-        HES         nvarchar(50),
-        HES_K       int NULL,
-        HES_M       int NULL,
-        HES_T       int NULL,
-        HES_T2      int NULL,
-        TAFZILN     nvarchar(200),
-        BANK        int NULL,
-        [NUMBER]    float NULL,
-        TAG         float NULL,
-        ARZD        float NULL,
-        base        int,
-        SourceID    bigint
-    );
-
-    ----------------------------------------------------------
-    -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
-    ----------------------------------------------------------
-    INSERT INTO #TempLedger (
-        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
-        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
-    )
-    SELECT
-        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, @TafzilCode,
-        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, id
-    FROM dbo.QDAFTARTAFZIL2_H(@FromDate, @ToDate, @TafzilCode);
-
-    ----------------------------------------------------------
-    -- 3) اعمال سورت داینامیک
-    ----------------------------------------------------------
-    DECLARE @SQL nvarchar(MAX);
-
-    SET @SQL = N'
-        UPDATE T
-        SET RowNum = SortedData.NewRowID
-        FROM #TempLedger T
-        INNER JOIN (
-            SELECT pk_id, ROW_NUMBER() OVER (ORDER BY ' + @SafeSort + N') AS NewRowID
-            FROM #TempLedger
-        ) SortedData ON T.pk_id = SortedData.pk_id;
-    ';
-
-    EXEC sp_executesql @SQL;
-
-    ----------------------------------------------------------
-    -- 4) محاسبه مانده در خط (Quirky Update)
-    ----------------------------------------------------------
-    CREATE CLUSTERED INDEX [IX_TempLedger_Sort] ON #TempLedger (RowNum);
-
-    DECLARE @RunningTotal float = 0;
-
-    UPDATE #TempLedger
-    SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
-    FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
-    OPTION (MAXDOP 1);
-
-    ----------------------------------------------------------
-    -- 5) خروجی نهایی
-    ----------------------------------------------------------
-    SELECT
-        N_S, DATE_S, MONTH_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH,
-        BED, BES,
-        ABS(RunningSum) AS MAND,
-        CASE
-            WHEN RunningSum > 0 THEN N'بد'
-            WHEN RunningSum < 0 THEN N'بس'
-            ELSE N'--'
-        END AS TASH,
-        HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
-    FROM #TempLedger
-    ORDER BY RowNum;
-    DROP TABLE #TempLedger;
-END
-"); } catch { }
-
                     //SELECT * FROM dbo.VISITOR_DTL_KALA(0, 99991230, N'%')WHERE DEPATMAN = 20;
                     try { db.Execute($@"ALTER FUNCTION dbo.VISITOR_DTL_KALA
 									(
@@ -3779,6 +3658,133 @@ BEGIN
         ALTER TABLE dbo.IVO_EXTENDED ADD [FLD14] NVARCHAR(50) NULL CONSTRAINT DF_IVO_EXTENDED_FLD14 DEFAULT (N'');
         PRINT 'Added FLD14 (ذرات سوخته).';
     END
+END
+"); } catch { }
+                }
+
+                if (isCustomCall) //1405/04/12
+                {
+
+                    //Ctrl + F8 - دفتر تفضیلی - همیشه اجرا می‌شود تا امضای صحیح روی DB باشد
+                    try { db.Execute($@"
+CREATE OR ALTER PROC [dbo].[usp_TafzilLedger]
+    @FromDate     INT,
+    @ToDate       INT,
+    @TafzilCode   nvarchar(50),
+    @SortExpr     nvarchar(400) = N'DATE_S, BED DESC'
+AS
+BEGIN
+    SET ARITHABORT ON;
+    SET NOCOUNT ON;
+
+    ----------------------------------------------------------
+    -- 0) کنترل امنیت و پیش‌فرض‌ها
+    ----------------------------------------------------------
+    DECLARE @SafeSort nvarchar(400);
+    IF ISNULL(@SortExpr, '') = '' SET @SortExpr = 'DATE_S, BED DESC';
+
+    -- وایت‌لیست
+    IF NOT EXISTS (
+        SELECT 1 FROM (VALUES
+            ('N_S'),('DATE_S'),('BED'),('BES'),('SHARH'),('NO_S'),('id'),
+            ('N_S DESC'),('DATE_S DESC'),('BED DESC'),('BES DESC'),('NO_S DESC')
+        ) AS ValidCols(ColName) WHERE CHARINDEX(ColName, @SortExpr) > 0
+    )
+        SET @SafeSort = 'DATE_S, N_S';
+    ELSE
+        SET @SafeSort = @SortExpr;
+
+    ----------------------------------------------------------
+    -- 1) ساخت جدول موقت
+    ----------------------------------------------------------
+    CREATE TABLE #TempLedger (
+        pk_id       bigint IDENTITY(1,1),
+        RowNum      int,
+        N_S         int,
+        DATE_S      int,
+        MONTH_S     AS ((DATE_S % 10000) / 100),
+        SHARH       nvarchar(MAX),
+        BED         float DEFAULT 0,
+        BES         float DEFAULT 0,
+        DiffAmt     AS (BED - BES),
+        RunningSum  float DEFAULT 0,
+        TASH        nvarchar(10),
+        NO_S        int,
+        N_SERI      nvarchar(50),
+        HES         nvarchar(50),
+        HES_K       nvarchar(50),
+        HES_M       nvarchar(50),
+        HES_T       nvarchar(50),
+        HES_T2      nvarchar(50),
+        TAFZILN     nvarchar(200),
+        BANK        nvarchar(100),
+        [NUMBER]    nvarchar(50),
+        TAG         nvarchar(MAX),
+        ARZD        nvarchar(50),
+        base        int,
+        SourceID    bigint
+    );
+
+    ----------------------------------------------------------
+    -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
+    ----------------------------------------------------------
+    -- فقط بازه انتخابی را می‌آوریم
+    INSERT INTO #TempLedger (
+        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
+        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
+    )
+    SELECT
+        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, @TafzilCode,
+        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, id
+    FROM dbo.QDAFTARTAFZIL2_H(@FromDate, @ToDate, @TafzilCode);
+
+    ----------------------------------------------------------
+    -- 3) اعمال سورت داینامیک
+    ----------------------------------------------------------
+    DECLARE @SQL nvarchar(MAX);
+
+    -- همه رکوردها را شماره‌گذاری کن
+    SET @SQL = N'
+        UPDATE T
+        SET RowNum = SortedData.NewRowID
+        FROM #TempLedger T
+        INNER JOIN (
+            SELECT pk_id, ROW_NUMBER() OVER (ORDER BY ' + @SafeSort + N') AS NewRowID
+            FROM #TempLedger
+        ) SortedData ON T.pk_id = SortedData.pk_id;
+    ';
+
+    EXEC sp_executesql @SQL;
+
+    ----------------------------------------------------------
+    -- 4) محاسبه مانده در خط (Quirky Update)
+    ----------------------------------------------------------
+    CREATE CLUSTERED INDEX [IX_TempLedger_Sort] ON #TempLedger (RowNum);
+
+    DECLARE @RunningTotal float = 0;
+
+    -- آپدیت دقیق و سریع
+    UPDATE #TempLedger
+    SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
+    FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
+    OPTION (MAXDOP 1);
+
+    ----------------------------------------------------------
+    -- 5) خروجی نهایی
+    ----------------------------------------------------------
+    SELECT
+        N_S, DATE_S, MONTH_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH,
+        BED, BES,
+        ABS(RunningSum) AS MAND,
+        CASE
+            WHEN RunningSum > 0 THEN N'بد'
+            WHEN RunningSum < 0 THEN N'بس'
+            ELSE N'--'
+        END AS TASH,
+        HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
+    FROM #TempLedger
+    ORDER BY RowNum;
+DROP TABLE #TempLedger;
 END
 "); } catch { }
                 }
@@ -5562,9 +5568,9 @@ BEGIN
     FROM PAY2_RUN R INNER JOIN PAY2_PERIOD P ON R.PER_ID = P.PER_ID
     WHERE R.RUN_ID = @RUN_ID;
 
-    IF @STATUS <> 2
+    IF @STATUS NOT IN (2, 3)
     BEGIN
-        RAISERROR(N'اجرای %d باید ابتدا نهایی شود.', 16, 1, @RUN_ID);
+        RAISERROR(N'اجرای %d باید ابتدا نهایی یا سند آن صادر شده باشد.', 16, 1, @RUN_ID);
         RETURN;
     END;
 
@@ -5590,30 +5596,34 @@ BEGIN
         @ACC_LOAN_HES       = MAX(CASE WHEN ACC_KEY='LOAN_HES'            THEN ACC_CODE END)
     FROM PAY2_WORKSHOP_ACC WHERE WS_ID = @WS_ID;
 
-    -- ایجاد یک CTE برای محاسبه سهم هزینه‌ها بر اساس روزهای کارکرد
+    -- 🚀 FIX 2: الگوریتم آبشاری دقیق (Waterfall Remainder Allocation) برای تراز ریالی
     ;WITH SalarySplitBase AS (
         SELECT 
             RL.EMP_ID, 
             RL.GROSS_PAY,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_TOLID / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS EXP_TOLID,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_EDARI / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS EXP_EDARI,
-            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_FOROSH / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS EXP_FOROSH,
-            A.WORK_DAYS, A.DAYS_KHADAMAT
+            A.WORK_DAYS, A.DAYS_TOLID, A.DAYS_EDARI, A.DAYS_FOROSH, A.DAYS_KHADAMAT,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_TOLID / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS R_T,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_EDARI / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS R_E,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_FOROSH / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS R_F,
+            CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND(RL.GROSS_PAY * (A.DAYS_KHADAMAT / A.WORK_DAYS), 0) ELSE 0 END AS BIGINT) AS R_K
         FROM PAY2_RUN_LINE RL
         INNER JOIN PAY2_ATTENDANCE A ON RL.EMP_ID = A.EMP_ID AND A.PER_ID = @PER_ID
         WHERE RL.RUN_ID = @RUN_ID
     ),
+    SalarySplitDiff AS (
+        -- پیدا کردن دقیق میزان اختلاف گرد کردن برای هر پرسنل
+        SELECT *, (GROSS_PAY - (R_T + R_E + R_F + R_K)) AS Diff FROM SalarySplitBase
+    ),
     SalarySplit AS (
+        -- اعمال آبشاری اختلاف فقط روی اولین دپارتمانی که کارکردش بزرگتر از صفر است
         SELECT 
-            EMP_ID, GROSS_PAY, EXP_TOLID, EXP_EDARI, EXP_FOROSH,
-            -- شاهکار ریاضی: واحد آخر (خدمات) برابر است با: کل حقوق منهای هزینه‌های قبلی
-            -- این کار تمام ریال‌های گمشده ناشی از گرد کردن را برمی‌گرداند و سند را تراز می‌کند
-            CASE 
-                WHEN WORK_DAYS > 0 AND DAYS_KHADAMAT > 0 
-                THEN GROSS_PAY - (EXP_TOLID + EXP_EDARI + EXP_FOROSH)
-                ELSE 0 
-            END AS EXP_KHADAMAT
-        FROM SalarySplitBase
+            EMP_ID, GROSS_PAY,
+            CASE WHEN DAYS_TOLID > 0 THEN R_T + Diff ELSE R_T END AS EXP_TOLID,
+            CASE WHEN DAYS_TOLID = 0 AND DAYS_EDARI > 0 THEN R_E + Diff ELSE R_E END AS EXP_EDARI,
+            CASE WHEN DAYS_TOLID = 0 AND DAYS_EDARI = 0 AND DAYS_FOROSH > 0 THEN R_F + Diff ELSE R_F END AS EXP_FOROSH,
+            -- 🚀 FIX: حذف شرط DAYS_KHADAMAT > 0 برای تبدیل شدن به سوپاپ اطمینان مطلق (ضمانت ۱۰۰٪ تراز سند)
+            CASE WHEN DAYS_TOLID = 0 AND DAYS_EDARI = 0 AND DAYS_FOROSH = 0 THEN R_K + Diff ELSE R_K END AS EXP_KHADAMAT
+        FROM SalarySplitDiff
     )
     -- خروجی نهایی برای صدور سند
     SELECT @ACC_SALARY_TOLID AS HES_CODE, N'هزینه حقوق تولید' AS SHARH, SUM(EXP_TOLID) AS BED, 0 AS BES, 'EXP_TOLID' AS ACC_KEY, NULL AS EMP_ID
@@ -5632,7 +5642,7 @@ BEGIN
     FROM PAY2_RUN_LINE WHERE RUN_ID = @RUN_ID HAVING SUM(INS_EMPLOYER) > 0
     UNION ALL 
     SELECT 
-        CASE WHEN RL.NET_PAY < 0 THEN ISNULL(E.ACC_T, @ACC_SALARY_PAY) ELSE @ACC_SALARY_PAY END, 
+        ISNULL(E.ACC_T, @ACC_SALARY_PAY),
         N'حقوق پرداختنی: ' + E.LAST_NAME + N' ' + E.FIRST_NAME, 
         CASE WHEN RL.NET_PAY < 0 THEN ABS(RL.NET_PAY) ELSE 0 END, 
         CASE WHEN RL.NET_PAY > 0 THEN RL.NET_PAY ELSE 0 END, 
@@ -5865,8 +5875,8 @@ BEGIN
     SELECT @ACC_COST_LEAVE, N'هزینه بازخرید مرخصی', LEAVE_PAY, 0, 'COST_LEAVE', NULL 
     FROM PAY2_SETTLEMENT WHERE SET_ID=@SET_ID AND LEAVE_PAY > 0
     UNION ALL
-    SELECT @ACC_SALARY_PAY, N'پرداختنی تسویه حساب: ' + @EMP_NAME, 0, CAST(EIDI+BON+LEAVE_PAY+SANAVAT+PREV_CREDIT+OTHER_INCOME-PREV_DEBIT-EIDI_TAX-LOAN_BALANCE-OTHER_DED AS BIGINT), 'SETTLE_PAYABLE', @EMP_ID 
-    FROM PAY2_SETTLEMENT WHERE SET_ID=@SET_ID
+    SELECT ISNULL(E.ACC_T, @ACC_SALARY_PAY), N'پرداختنی تسویه حساب: ' + @EMP_NAME, 0, CAST(EIDI+BON+LEAVE_PAY+SANAVAT+PREV_CREDIT+OTHER_INCOME-PREV_DEBIT-EIDI_TAX-LOAN_BALANCE-OTHER_DED AS BIGINT), 'SETTLE_PAYABLE', S.EMP_ID
+    FROM PAY2_SETTLEMENT S INNER JOIN PAY2_EMPLOYEE E ON S.EMP_ID = E.EMP_ID WHERE SET_ID=@SET_ID
     UNION ALL
     SELECT ISNULL(E.ACC_T, @ACC_LOAN_HES), N'وصول مانده وام از تسویه: ' + @EMP_NAME, 0, LOAN_BALANCE, 'LOAN_COLLECT', @EMP_ID 
     FROM PAY2_SETTLEMENT S INNER JOIN PAY2_EMPLOYEE E ON S.EMP_ID = E.EMP_ID WHERE SET_ID=@SET_ID AND LOAN_BALANCE > 0

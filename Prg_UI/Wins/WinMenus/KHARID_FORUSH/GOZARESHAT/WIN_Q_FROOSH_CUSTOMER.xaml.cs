@@ -119,7 +119,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     WINTILENAME.Content = "گزارش ارزش افزوده فروش - گزارش فصلی";
                     SALE_AMOUNT_COLUMN.IsHidden = false; //Show this Column
                     NET_SALE_COLUMN.IsHidden = false;
-                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT hes, NAME, FROOSH, SumOfTAKHFIF, FROOSHKH, SMBAA, GHABEL, KK, ADDRESS, CITY, CODE_E, ECODE, IYALAT, MCODEM, MOBILE, PCODE, TEL, TOZIH FROM dbo.Q_FROOSH_CUSTOMER(N'{DT1}', N'{DT2}')").ToList();
+                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT DISTINCT hes, NAME, FROOSH, SumOfTAKHFIF, FROOSHKH, SMBAA, GHABEL, KK, ADDRESS, CITY, CODE_E, ECODE, IYALAT, MCODEM, MOBILE, PCODE, TEL, TOZIH FROM dbo.Q_FROOSH_CUSTOMER(N'{DT1}', N'{DT2}')").ToList();
                     break;
 
                 case "FASLIBR":
@@ -127,21 +127,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     SALE_BACK_AMOUNT_COLUMN.IsHidden = false;
                     NET_SALE_COLUMN.IsHidden = false;
                     NET_SALE_COLUMN.HeaderText = "برگشت فروش خالص";
-                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT hes, NAME, FROOSHbr, SumOfTAKHFIF, FROOSHKH, SMBAA, GHABEL, KK, ADDRESS, CITY, CODE_E, ECODE, IYALAT, MCODEM, MOBILE, PCODE, TEL, TOZIH FROM dbo.qsl_fasli_bargash_main(N'{DT1}', N'{DT2}')").ToList();
+                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT DISTINCT hes, NAME, FROOSHbr, SumOfTAKHFIF, FROOSHKH, SMBAA, GHABEL, KK, ADDRESS, CITY, CODE_E, ECODE, IYALAT, MCODEM, MOBILE, PCODE, TEL, TOZIH FROM dbo.qsl_fasli_bargash_main(N'{DT1}', N'{DT2}')").ToList();
                     break;
 
                 case "FASLIKHBR":
                     WINTILENAME.Content = "گزارش فصلی برگشت خرید";
                     KHAREEDKH_COLUMN.IsHidden = false;
                     KHAREEDbr_COLUMN.IsHidden = false;
-                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT * FROM dbo.qsl_fasli_bargash_main_KH(N'{DT1}', N'{DT2}')").ToList();
+                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT DISTINCT * FROM dbo.qsl_fasli_bargash_main_KH(N'{DT1}', N'{DT2}')").ToList();
                     break;
 
                 case "KHCUST":
                     WINTILENAME.Content = "گزارش ارزش افزوده خرید - گزارش فصلی";
                     KHARED_COLUMN.IsHidden = false;
                     KHAREDKH_COLUMN.IsHidden = false;
-                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT * FROM dbo.Q_KHARED_CUSTOMER(N'{DT1}', N'{DT2}')").ToList();
+                    MasterHead = dbms.DoGetDataSQL<Q_FROOSH_CUSTOMER>(@$"SELECT DISTINCT * FROM dbo.Q_KHARED_CUSTOMER(N'{DT1}', N'{DT2}')").ToList();
                     break;
 
 
