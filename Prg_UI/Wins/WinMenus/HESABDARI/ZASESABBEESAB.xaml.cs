@@ -557,10 +557,12 @@ namespace Wins.WinMenus.HESABDARI
                 WHERE (HMBAA = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
                 IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب ماليات بر ارزش افزوده فاکتورها انجام شد');
 
-                -- 9. سربرگ فاکتور (CUST_NO بر اساس DATE_N)
+                -- 9. سربرگ فاکتور/حواله (CUST_NO بر اساس DATE_N)
+                -- بعضي فاکتورها/حواله‌ها در HEAD_LST.N_S به سند حسابداري وصل نيستند؛
+                -- بنابراين مسير جايگزين DATE_N نبايد به محدوده شماره سند محدود شود.
                 UPDATE dbo.HEAD_LST SET CUST_NO = @ToHes
-                WHERE (CUST_NO = @AzHes) AND (DATE_N BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
-                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب فاکتورها انجام شد');
+                WHERE (CUST_NO = @AzHes) AND (DATE_N BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب فاکتورها و حواله‌ها انجام شد');
 
                 -- 10. واگذار به حساب (PAY_GETD)
                 UPDATE dbo.PAY_GETD SET HES1 = @ToHes, N_KOL = @HKol, N_MOIN = @HMoin, N_TAF = @HTaf
