@@ -8,8 +8,10 @@ using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
 using Prg_UI.Wins.WinMenus.TR;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -587,11 +589,54 @@ namespace Wins.WinOther
         {
             if (string.IsNullOrWhiteSpace(text)) return string.Empty;
 
-            return text.Trim()
-                .ToLower()
-                .Replace('ي', 'ی')
-                .Replace('ك', 'ک')
-                .Replace("‌", " ");
+            var normalizedBuilder = new StringBuilder(text.Length);
+            var previousWasWhiteSpace = true;
+
+            foreach (var currentChar in text.Trim().ToLowerInvariant())
+            {
+                var normalizedChar = NormalizePersianChar(currentChar);
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(normalizedChar);
+
+                if (unicodeCategory == UnicodeCategory.NonSpacingMark)
+                {
+                    continue;
+                }
+
+                if (char.IsLetterOrDigit(normalizedChar))
+                {
+                    normalizedBuilder.Append(normalizedChar);
+                    previousWasWhiteSpace = false;
+                    continue;
+                }
+
+                if (!previousWasWhiteSpace)
+                {
+                    normalizedBuilder.Append(' ');
+                    previousWasWhiteSpace = true;
+                }
+            }
+
+            return normalizedBuilder.ToString().Trim();
+        }
+
+        private static char NormalizePersianChar(char currentChar)
+        {
+            switch (currentChar)
+            {
+                case 'ي':
+                case 'ى':
+                    return 'ی';
+                case 'ك':
+                    return 'ک';
+                case 'أ':
+                case 'إ':
+                case 'آ':
+                    return 'ا';
+                case 'ة':
+                    return 'ه';
+                default:
+                    return currentChar;
+            }
         }
 
         private static bool IsFuzzyMatch(string normalizedCaption, string normalizedSearchText)
@@ -612,10 +657,10 @@ namespace Wins.WinOther
             for (int i = 0; i <= captionWords.Length - windowSize; i++)
             {
                 var candidate = string.Join(" ", captionWords.Skip(i).Take(windowSize));
-                bestDistance = Math.Min(bestDistance, CalculateLevenshteinDistance(candidate, normalizedSearchText));
+                bestDistance = Math.Min(bestDistance, CalculateDamerauLevenshteinDistance(candidate, normalizedSearchText));
             }
 
-            bestDistance = Math.Min(bestDistance, CalculateLevenshteinDistance(normalizedCaption, normalizedSearchText));
+            bestDistance = Math.Min(bestDistance, CalculateDamerauLevenshteinDistance(normalizedCaption, normalizedSearchText));
             return bestDistance;
         }
 
@@ -627,7 +672,7 @@ namespace Wins.WinOther
             return Math.Max(2, searchTextLength / 5);
         }
 
-        private static int CalculateLevenshteinDistance(string source, string target)
+        private static int CalculateDamerauLevenshteinDistance(string source, string target)
         {
             if (source == target) return 0;
             if (source.Length == 0) return target.Length;
@@ -642,9 +687,16 @@ namespace Wins.WinOther
                 for (int j = 1; j <= target.Length; j++)
                 {
                     var cost = source[i - 1] == target[j - 1] ? 0 : 1;
-                    distances[i, j] = Math.Min(
-                        Math.Min(distances[i - 1, j] + 1, distances[i, j - 1] + 1),
-                        distances[i - 1, j - 1] + cost);
+                    var deletionDistance = distances[i - 1, j] + 1;
+                    var insertionDistance = distances[i, j - 1] + 1;
+                    var substitutionDistance = distances[i - 1, j - 1] + cost;
+
+                    distances[i, j] = Math.Min(Math.Min(deletionDistance, insertionDistance), substitutionDistance);
+
+                    if (i > 1 && j > 1 && source[i - 1] == target[j - 2] && source[i - 2] == target[j - 1])
+                    {
+                        distances[i, j] = Math.Min(distances[i, j], distances[i - 2, j - 2] + 1);
+                    }
                 }
             }
 
