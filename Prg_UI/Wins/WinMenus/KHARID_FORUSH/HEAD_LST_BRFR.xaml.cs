@@ -3346,6 +3346,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 _n_s = n_sVal.ToString();
             }
 
+            var hmbaaValue = CMB_HMBAA.SelectedValue?.ToString();
+            if (string.IsNullOrWhiteSpace(hmbaaValue))
+            {
+                hmbaaValue = HMBAA.Text;
+            }
+
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, NUMBER1 = {NUMBER1.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)}, 
                     N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
@@ -3353,7 +3359,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     M_NAGHD = {M_NAGHD.Text},TAKHFIF = {TAKHFIF.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', MAS = {MAS.Text},
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{hmbaaValue}', MAS = {MAS.Text},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},
                     USER_NAME = N'{USER_NAME.Text}',
@@ -5082,6 +5088,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (Convert.ToDouble(MBAA.Text) > 0 & IsNull(HMBAA.Text))
             {
                 HMBAA.Text = Baseknow.HESMBAA;
+                CMB_HMBAA.SelectedValue = HMBAA.Text;
             }
         }
         private void TAKHFIF_PERCENT_NumericLostFocus(object sender, RoutedEventArgs e)
@@ -5657,66 +5664,127 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
-            var SMBAA = default(double);
-            if (!_navigationManager.IsNewRecord)
+            CalculateIMBAA();
+            BTN_SAVE_Click(null, null);
+            INVO_LST_SUB_ReGetData();
+        }
+
+        public void CalculateIMBAA()
+        {
+            double smbaa = 0d;
+            var number = this.NUMBER.Text;
+            const int tag = 24;
+
+            if (_navigationManager.IsNewRecord)
             {
-                if (TICMBAA.IsChecked is true)
+                return;
+            }
+
+            var invoiceList = dbms.DoGetDataSQL<INVO_LST_CSHARP>(
+                "SELECT * FROM INVO_LST WHERE NUMBER = @NUMBER AND TAG = @TAG",
+                new { NUMBER = number, TAG = tag }).ToList();
+
+            if (TICMBAA.IsChecked == true)
+            {
+                double.TryParse(MBAA.Text, out var currentMbaa);
+
+                var codes = invoiceList.Select(x => x.CODE).Distinct().ToList();
+                if (!codes.Any())
                 {
-                    var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM INVO_LST WHERE NUMBER = " + NUMBER.Text + " AND TAG = 24").ToList();
-                    var _where = " WHERE NUMBER = " + this.NUMBER.Text + " AND TAG = 24";
-                    for (int i = 0; i < rst.Count; i++)
-                    {
-                        var RST2 = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + rst[i].CODE + "'").FirstOrDefault();
-                        if (!(RST2 is null))
-                        {
-                            if ((bool)RST2.CMBAA)
-                            {
-                                rst[i].IMBAA = Math.Round((double)((rst[i].MABL_K - rst[i].N_MOIN) * CL_HESABDARI.GetArzesh(rst[i].CODE) / 100));
-                                SMBAA = SMBAA + Math.Round((double)((rst[i].MABL_K - rst[i].N_MOIN) * CL_HESABDARI.GetArzesh(rst[i].CODE) / 100));
-                            }
-                            else
-                            {
-                                rst[i].IMBAA = 0;
-                            }
-                        }
-                        dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET IMBAA = {rst[i].IMBAA} {_where} AND id = {rst[i].id} ");
-                    }
-                    if (SMBAA != Convert.ToDouble(MBAA.Text) && SMBAA > 0d)
-                    {
-                        MBAA.Text = SMBAA.ToString();
-                        HMBAA.Text = Baseknow.HESMBAA;
-                    }
-                }
-                else
-                {
-                    var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT IMBAA FROM dbo.INVO_LST WHERE NUMBER = " + this.NUMBER.Text + " AND TAG = 24").ToList();
-                    var _where = " WHERE NUMBER = " + this.NUMBER.Text + " AND TAG = 24";
-                    for (int i = 0; i < rst.Count; i++)
-                    {
-                        rst[i].IMBAA = 0;
-                        dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET IMBAA = {0} {_where} ");
-                    }
-                    if (Convert.ToDouble(MBAA.Text) > 0)
-                    {
-                        this.MBAA.Text = "0";
-                        this.HMBAA.Text = null;
-                    }
-                }
-                if (this.TICMBAA.IsChecked is false)
-                {
-                    this.HMBAA.IsReadOnly = false;
-                    CMB_HMBAA.IsEnabled = true;
-                }
-                else
-                {
-                    this.MBAA.IsReadOnly = true;
+                    ClearTaxFields();
                     this.HMBAA.IsReadOnly = true;
+                    this.MBAA.IsReadOnly = true;
                     CMB_HMBAA.IsEnabled = false;
+                    return;
                 }
 
-                BTN_SAVE_Click(null, null);
+                var cmbaaMap = dbms.DoGetDataSQL<HLF2>(
+                    "SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE IN @Codes",
+                    new { Codes = codes }).ToDictionary(x => x.CODE, x => x.CMBAA);
 
-                INVO_LST_SUB_ReGetData();
+                foreach (var row in invoiceList)
+                {
+                    bool cmbaa = cmbaaMap.TryGetValue(row.CODE, out var cmbaaObj) && Convert.ToBoolean(cmbaaObj);
+                    if (cmbaa)
+                    {
+                        row.IMBAA = Math.Round((double)((row.MABL_K - row.N_MOIN) * CL_HESABDARI.GetArzesh(row.CODE) / 100));
+                        smbaa += Convert.ToDouble(row.IMBAA);
+                    }
+                    else
+                    {
+                        row.IMBAA = 0;
+                    }
+
+                    var itemInCollection = INVO_LST_FACTOR22_DATA.FirstOrDefault(x => x.id == row.id);
+                    if (itemInCollection != null)
+                    {
+                        itemInCollection.IMBAA = row.IMBAA;
+                    }
+                }
+
+                foreach (var row in invoiceList)
+                {
+                    dbms.DoExecuteSQL(
+                        "UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE NUMBER = @NUMBER AND TAG = @TAG AND id = @ID",
+                        new { IMBAA = row.IMBAA, NUMBER = number, TAG = tag, ID = row.id });
+                }
+
+                if (smbaa > 0d)
+                {
+                    if (smbaa != currentMbaa)
+                    {
+                        this.MBAA.Text = smbaa.ToString();
+                    }
+
+                    this.HMBAA.Text = Baseknow.HESMBAA;
+                    this.CMB_HMBAA.SelectedValue = this.HMBAA.Text;
+                }
+                else
+                {
+                    ClearTaxFields();
+                }
+            }
+            else
+            {
+                foreach (var row in invoiceList)
+                {
+                    row.IMBAA = 0;
+
+                    var itemInCollection = INVO_LST_FACTOR22_DATA.FirstOrDefault(x => x.id == row.id);
+                    if (itemInCollection != null)
+                    {
+                        itemInCollection.IMBAA = 0;
+                    }
+
+                    dbms.DoExecuteSQL(
+                        "UPDATE dbo.INVO_LST SET IMBAA = 0 WHERE NUMBER = @NUMBER AND TAG = @TAG AND id = @ID",
+                        new { NUMBER = number, TAG = tag, ID = row.id });
+                }
+
+                if (Convert.ToDouble(MBAA.Text) > 0)
+                {
+                    this.MBAA.Text = "0";
+                    this.HMBAA.Text = null;
+                }
+
+                ClearTaxFields();
+            }
+
+            this.HMBAA.IsReadOnly = TICMBAA.IsChecked == true;
+            this.MBAA.IsReadOnly = TICMBAA.IsChecked == true;
+            CMB_HMBAA.IsEnabled = TICMBAA.IsChecked != true;
+        }
+
+        private void ClearTaxFields()
+        {
+            MBAA.Text = "0"; //مبلغ مالیات
+            HMBAA.Text = null; //معین مالیات
+
+            if (CMB_HMBAA is not null)
+            {
+                CMB_HMBAA.SelectedIndex = -1;
+                CMB_HMBAA.SelectedValue = null;
+                CMB_HMBAA.Text = null;
             }
         }
 
