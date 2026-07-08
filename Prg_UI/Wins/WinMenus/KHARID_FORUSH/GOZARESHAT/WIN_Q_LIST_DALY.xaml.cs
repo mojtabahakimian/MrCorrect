@@ -100,7 +100,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             {
                 //MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>(@$"SELECT * FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2})").ToList();
                 MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>
-                    ($@"SELECT q.DATE_N, q.NUMBER, q.SumOfM_NAGHD, q.SumOfMABL_VAR, q.SumOfMABL_HAV,
+                    ($@"SELECT DISTINCT q.DATE_N, q.NUMBER, q.SumOfM_NAGHD, q.SumOfMABL_VAR, q.SumOfMABL_HAV,
                         q.SumOfMABL_HAZ, q.SumOfTAKHFIF, q.hes, q.NAME, q.DEPATMAN, q.USER_NAME, q.SHIFT,
                         q.SHNAME, q.DEPNAME, q.USS, q.kk, q.jamf, q.simbaa, q.jamch, q.ECODE, q.SMBAA, q.mand,
                         q.MOLAH, q.TEL, q.CUST_KIND, q.CUSTKNAME, q.MOIN_HAV, q.MOIN_HAZ, q.MOIN_VAR, q.date_h, 
@@ -109,7 +109,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         q.ARZKIND, q.JAY, q.MODAT_PPID, q.PEPID, q.PEID, q.MCODEM, q.MOBILE, q.OSTANID, q.SHAHRID,
                         t.TheSuccess, t.Taxid, t.Inno
                         FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2}) q
-                             LEFT JOIN dbo.TAXDTL t ON t.NUMBER=q.NUMBER AND t.TheSuccess=1;
+                             OUTER APPLY (SELECT TOP 1 TheSuccess, Taxid, Inno FROM dbo.TAXDTL WHERE NUMBER=q.NUMBER AND TheSuccess=1 ORDER BY Taxid DESC) t;
                         ").ToList();
             }
 

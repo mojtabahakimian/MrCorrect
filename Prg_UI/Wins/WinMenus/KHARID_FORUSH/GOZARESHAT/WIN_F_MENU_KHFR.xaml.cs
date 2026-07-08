@@ -325,7 +325,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                             {
                                 report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
                             }
-                            (report.GetComponentByName("Text73") as StiText).Text = $"تاریخ : {Tarikh.FullCurrentDate}";
+                            //(report.GetComponentByName("Text73") as StiText).Text = $"تاریخ : {Tarikh.FullCurrentDate}";
                             (report.GetComponentByName("F_SELL_N") as StiText).Text = Baseknow.NAME.ToString();
                             (report.GetComponentByName("F_GLOBALNUMBER_N") as StiText).Text = Baseknow.ECODE.ToString();
                             (report.GetComponentByName("F_CODE_N") as StiText).Text = Baseknow.MCODEM.ToString();
