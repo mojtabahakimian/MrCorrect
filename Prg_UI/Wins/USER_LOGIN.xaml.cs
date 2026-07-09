@@ -292,7 +292,12 @@ namespace Prg_UI.Wins
 
             try
             {
-                var RST = dbms.DoGetDataSQL<SAZMAN>($"SELECT SMS_USERNAME,SMS_PASSWORD ,SMS_LIBKEY , SMS_TSMSHOST , DSMS , PRMFR , SMSACT , SMS_OWNER , SMSTYPE FROM dbo.SAZMAN").FirstOrDefault();
+
+                string sqlSms = @"IF COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NOT NULL 
+                                      SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,SMSTYPE FROM dbo.SAZMAN 
+                                  ELSE 
+                                      SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,'TSMS' AS SMSTYPE FROM dbo.SAZMAN";
+                var RST = dbms.DoGetDataSQL<SAZMAN>(sqlSms).FirstOrDefault();
                 if (RST != null)
                 {
                     SMSPINFO.USERNAME = RST?.SMS_USERNAME;
@@ -371,13 +376,13 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            new WinBase().Show();
+            //new WinBase().Show();
             //new WIN_About().Show();
             //new WinConnectionChoose().Show();
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
 
             //new WIN_F_NEWYEAR().Show();
