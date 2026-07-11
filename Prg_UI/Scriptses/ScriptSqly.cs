@@ -6810,11 +6810,12 @@ BEGIN
         (U.Lvl = 4 AND T2.TNUMBER2 IS NULL) OR
         (U.Lvl = 5 AND T3.TNUMBER3 IS NULL) OR
         (U.Lvl = 6 AND T4.TNUMBER4 IS NULL) OR
-        U.Lvl > 6 OR U.M IS NULL;
+        U.Lvl > 6 OR 
+        U.T1 IS NULL; -- 🚀 تغییر حیاتی: U.M به U.T1 تغییر یافت تا حساب‌های کمتر از ۳ سطح بلوکه شوند
 
     IF LEN(@MissingAccounts) > 0
     BEGIN
-        DECLARE @ErrAcc NVARCHAR(MAX) = N'صدور سند متوقف شد. حساب‌های زیر در سیستم حسابداری تعریف نشده‌اند: ' + SUBSTRING(@MissingAccounts, 1, LEN(@MissingAccounts)-2);
+        DECLARE @ErrAcc NVARCHAR(MAX) = N'صدور سند متوقف شد. حساب‌های زیر نامعتبرند یا فاقد حداقل ۳ سطح (کل-معین-تفصیلی) می‌باشند: ' + SUBSTRING(@MissingAccounts, 1, LEN(@MissingAccounts)-2);
         RAISERROR(@ErrAcc, 16, 1);
         RETURN;
     END
@@ -6830,7 +6831,7 @@ END;");
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"خطای بحرانی در Migration دیتابیس (PAY2_RUN.DEED_MODE). آپدیت متوقف شد: {ex.Message}", ex);
+                    throw new Exception($"خطای بحرانی در دیتابیس (SP_PAY2_GEN_DEED). آپدیت متوقف شد: {ex.Message}", ex);
                 }
 
                 LoadJobData(db);   // <-- این خط اضافه شود
