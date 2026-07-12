@@ -5030,8 +5030,9 @@ GO
 -- خروجی:
 --   @NEW_RUN_ID   OUTPUT — شناسه PAY2_RUN ایجادشده
 -- ================================================================
+-- ================================================================
 -- ۱. SP_PAY2_CALC_RUN — موتور محاسبه حقوق ماهیانه 
--- (نسخه نهایی: موتور قطعی دو دفتره / Dual-Track Engine)
+-- (نسخه نهایی: موتور قطعی دو دفتره / Dual-Track Engine + فیکس باگ Fallback)
 -- ================================================================
 CREATE OR ALTER PROCEDURE [dbo].[SP_PAY2_CALC_RUN]
     @WS_ID       INT,
@@ -5247,6 +5248,10 @@ BEGIN
                 FROM PAY2_DECREE_LINE DL INNER JOIN PAY2_ITEM_DEF ID ON DL.ITEM_ID = ID.ITEM_ID
                 WHERE DL.DEC_ID = @DEC_ID;
 
+                -- 🚨 [CRITICAL FIX]: Fallback دقیقاً در جای درست، قبل از اعمال فرمول‌های درصدی
+                IF @DAILY_NOMINAL = 0 SET @DAILY_NOMINAL = @DAILY_OFFICIAL;
+                IF @DAILY_OFFICIAL = 0 SET @DAILY_OFFICIAL = @DAILY_NOMINAL;
+
                 DECLARE cur_line CURSOR LOCAL FAST_FORWARD READ_ONLY FOR
                     SELECT DL.ITEM_ID, ID.ITEM_CODE, ID.ITEM_TYPE, ISNULL(DL.AMOUNT, 0),
                         DL.SHIFT_MODE_OV,
@@ -5349,9 +5354,7 @@ BEGIN
         END;
         CLOSE cur_dec; DEALLOCATE cur_dec;
 
-        -- 🚀 Fallback برای زمان‌هایی که فقط یکی از حقوق‌ها ثبت شده است
-        IF @DAILY_NOMINAL = 0 SET @DAILY_NOMINAL = @DAILY_OFFICIAL;
-        IF @DAILY_OFFICIAL = 0 SET @DAILY_OFFICIAL = @DAILY_NOMINAL;
+        -- 🚨 باگ‌فیکس: خطوط Fallback از اینجا به طور کامل حذف شدند، زیرا در بالای حلقه اقلام انجام شده است.
 
         IF EXISTS (SELECT 1 FROM @ItemCalc WHERE ITEM_CODE = 'BASE_SAL') AND EXISTS (SELECT 1 FROM @ItemCalc WHERE ITEM_CODE = 'BASE_SAL_B')
             SET @HAS_BOTH_SAL = 1;
