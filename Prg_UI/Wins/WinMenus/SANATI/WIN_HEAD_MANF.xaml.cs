@@ -2041,10 +2041,20 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 if (e.Row.IsNewItem || IsPastingRows)
                 {
                     const string insertSql = @"
-                    INSERT INTO dbo.DTL_MANF 
-                        (FNUMB, CODE, ANBAR, VAHED_K, MEGH, MEGHk, PERT, SMABL, MABLK, TOZIH, CRT, UID)
-                    VALUES 
-                    (@FNUMB, @CODE, @ANBAR, @VAHED_K, @MEGH, @MEGHk, @PERT, @SMABL, @MABLK, @TOZIH, GETDATE(), @UID)";
+                    BEGIN TRY
+                        INSERT INTO dbo.DTL_MANF 
+                            (FNUMB, CODE, ANBAR, VAHED_K, MEGH, MEGHk, PERT, SMABL, MABLK, TOZIH, CRT, UID)
+                        VALUES 
+                            (@FNUMB, @CODE, @ANBAR, @VAHED_K, @MEGH, @MEGHk, @PERT, @SMABL, @MABLK, @TOZIH, GETDATE(), @UID)
+                    END TRY
+                    BEGIN CATCH
+                        IF ERROR_NUMBER() IN (2601, 2627)
+                        BEGIN
+                            THROW 51000, 'این کالا قبلاً در این فرمول ثبت شده است. از وارد کردن کالای تکراری خودداری نمایید.', 1;
+                        END
+                        ELSE
+                            THROW;
+                    END CATCH";
 
                     dbms.DoExecuteSQL(insertSql, TheRow);
                 }
@@ -2070,9 +2080,9 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             catch (SqlException ex)
             {
                 DG_SUB_CANCEL_EDIT();
-                if (ex.Number == 2601 || ex.Number == 2627)
+                if (ex.Number == 2601 || ex.Number == 2627 || ex.Number == 51000)
                 {
-                    new Msgwin(false, "داده تکراری است آنرا اصلاح کنید").ShowDialog();
+                    new Msgwin(false, !string.IsNullOrEmpty(ex.Message) && ex.Number == 51000 ? ex.Message : "این کالا قبلاً در این فرمول ثبت شده است.").ShowDialog();
                 }
                 else
                 {

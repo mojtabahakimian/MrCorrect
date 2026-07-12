@@ -284,8 +284,9 @@ namespace Wins.WinMenus.HESABDARI
             {
                 if (item != null)
                 {
-                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
-                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.IDD.Equals(Convert.ToDouble(item.IDD)));
+                    // اصلاح اصلی اینجاست: مقایسه مستقیم دو فیلد IDD بدون نیاز به تبدیل به Double
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.IDD == item.IDD);
+
                     if (itemfound != null)
                     {
                         _navigationManager.IsNewRecord = false;
@@ -301,7 +302,11 @@ namespace Wins.WinMenus.HESABDARI
 
                         // 2) Tell the navigation manager to move to that position
                         _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
-                        //OnCurrentRecordChanged(itemfound);
+                    }
+                    else
+                    {
+                        // اضافه کردن این پیغام کمک میکند تا اگر مشکلی بود در سکوت متوقف نشود
+                        new Msgwin(false, "خطا: رکورد انتخاب شده در حافظه فرم یافت نشد.").Show();
                     }
                 }
             }

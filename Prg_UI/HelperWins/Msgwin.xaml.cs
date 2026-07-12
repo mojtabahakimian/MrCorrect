@@ -71,7 +71,9 @@ namespace Prg_UI.HelperWins
             IsBigTxt = _isbigtxt;
 
             if (activeInstance != null)
-                activeInstance.Close();
+            {
+                try { activeInstance.Close(); } catch { }
+            }
 
             activeInstance = this;
             activeInstance.Closed += (sender, e) => activeInstance = null;
@@ -162,7 +164,9 @@ namespace Prg_UI.HelperWins
         public static void ShowSequential(string message)
         {
             if (activeInstance != null)
-                activeInstance.Close();
+            {
+                try { activeInstance.Close(); } catch { }
+            }
 
             activeInstance = new Msgwin(false, message);
             activeInstance.Closed += (sender, e) => activeInstance = null;
