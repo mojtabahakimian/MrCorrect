@@ -6552,10 +6552,8 @@ BEGIN
     END
 
     -- ─────────────────────────────────────────────────────────────────
-    -- گاردهای امنیتی (جلوگیری از منفی شدن خالص و کمبود حساب‌ها)
+    -- گاردهای امنیتی (جلوگیری از کمبود حساب‌ها)
     -- ─────────────────────────────────────────────────────────────────
-
-
     IF @ACC_SALARY_PAY IS NULL
     BEGIN
         RAISERROR(N'حساب پرداختنی حقوق (SALARY_PAYABLE) برای کارگاه تنظیم نشده است.', 16, 1);
@@ -6604,7 +6602,7 @@ BEGIN
     END
 
     -- ─────────────────────────────────────────────────────────────────
-    -- جدول موقت محاسبات و ایجاد ردیف‌های خام (Summary vs Traceable)
+    -- جدول موقت محاسبات و ایجاد ردیف‌های خام
     -- ─────────────────────────────────────────────────────────────────
     CREATE TABLE #SalarySplit (
         EMP_ID INT PRIMARY KEY,
@@ -6680,9 +6678,15 @@ BEGIN
         UNION ALL 
         SELECT CAST(@ACC_INS_EXP AS NVARCHAR(100)), CAST(N'هزینه بیمه کارفرما ' + @ML AS NVARCHAR(500)), CAST(SUM(INS_EMPLOYER) AS BIGINT), CAST(0 AS BIGINT), CAST('INS_EXP' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 5
         FROM #SalarySplit HAVING SUM(INS_EMPLOYER) > 0
+        
+        -- 🚀 فیکس تراز در حالت کلی: افزودن امکان بدهکار شدنِ حقوق در صورت خالص منفی
         UNION ALL 
         SELECT CAST(@ACC_SALARY_PAY AS NVARCHAR(100)), CAST(N'حقوق پرداختنی ' + @ML AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(SUM(NET_PAY) AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 6
         FROM #SalarySplit HAVING SUM(NET_PAY) > 0
+        UNION ALL 
+        SELECT CAST(@ACC_SALARY_PAY AS NVARCHAR(100)), CAST(N'بدهی حقوق (خالص منفی) ' + @ML AS NVARCHAR(500)), CAST(ABS(SUM(NET_PAY)) AS BIGINT), CAST(0 AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 6
+        FROM #SalarySplit HAVING SUM(NET_PAY) < 0
+        
         UNION ALL 
         SELECT CAST(@ACC_INS_PAYABLE AS NVARCHAR(100)), CAST(N'بیمه تأمین اجتماعی ' + @ML AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(SUM(INS_WORKER + INS_EMPLOYER) AS BIGINT), CAST('INS_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 7
         FROM #SalarySplit HAVING SUM(INS_WORKER + INS_EMPLOYER) > 0
@@ -6716,9 +6720,15 @@ BEGIN
         UNION ALL 
         SELECT CAST(@ACC_INS_EXP AS NVARCHAR(100)), CAST(N'هزینه بیمه کارفرما ' + @ML AS NVARCHAR(500)), CAST(SUM(INS_EMPLOYER) AS BIGINT), CAST(0 AS BIGINT), CAST('INS_EXP' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 5
         FROM #SalarySplit HAVING SUM(INS_EMPLOYER) > 0
+        
+        -- 🚀 فیکس تراز در حالت تفصیلی: اگر خالص پرداختی منفی شود، شخص به شرکت بدهکار است (بدهکار ثبت می‌شود)
         UNION ALL 
         SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'حقوق پرداختنی: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(NET_PAY AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 6
         FROM #SalarySplit WHERE NET_PAY > 0
+        UNION ALL 
+        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'بدهی حقوق (خالص منفی): ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(ABS(NET_PAY) AS BIGINT), CAST(0 AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 6
+        FROM #SalarySplit WHERE NET_PAY < 0
+        
         UNION ALL 
         SELECT CAST(@ACC_INS_PAYABLE AS NVARCHAR(100)), CAST(N'بیمه سهم کارگر ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(INS_WORKER AS BIGINT), CAST('INS_PAYABLE_W' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 7
         FROM #SalarySplit WHERE INS_WORKER > 0
@@ -6740,7 +6750,7 @@ BEGIN
     END
 
     -- ─────────────────────────────────────────────────────────────────
-    -- 🚨 اعتبارسنجی Set-Based سطح دیتابیس (بدون خطای کاذب رشته‌ای)
+    -- 🚨 اعتبارسنجی Set-Based سطح دیتابیس
     -- ─────────────────────────────────────────────────────────────────
     CREATE TABLE #UniqueAccounts (
         HES_CODE NVARCHAR(100) COLLATE database_default
@@ -6754,7 +6764,7 @@ BEGIN
     ;WITH Parsed AS (
         SELECT 
             HES_CODE,
-            -- 🚀 حذف دابل کوتیشن‌های زاید (باقیمانده از سی‌شارپ) برای ساخت JSON معتبر در T-SQL
+            -- 🚀 اصلاح کلیدی: جایگزین کردن """" با "" جهت ساخت JSON معتبر در T-SQL
             TRY_CAST(JSON_VALUE('[""' + REPLACE(HES_CODE, '-', '"",""') + '""]', '$[0]') AS INT) AS K,
             TRY_CAST(JSON_VALUE('[""' + REPLACE(HES_CODE, '-', '"",""') + '""]', '$[1]') AS INT) AS M,
             TRY_CAST(JSON_VALUE('[""' + REPLACE(HES_CODE, '-', '"",""') + '""]', '$[2]') AS INT) AS T1,
@@ -6791,7 +6801,7 @@ BEGIN
         (U.Lvl = 5 AND T3.TNUMBER3 IS NULL) OR
         (U.Lvl = 6 AND T4.TNUMBER4 IS NULL) OR
         U.Lvl > 6 OR 
-        U.T1 IS NULL; -- قفل سخت‌گیرانه برای اطمینان از وجود حداقل ۳ سطح (کل-معین-تفصیلی)
+        U.T1 IS NULL;
 
     IF LEN(@MissingAccounts) > 0
     BEGIN
