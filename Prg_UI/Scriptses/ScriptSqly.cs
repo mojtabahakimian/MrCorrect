@@ -6555,17 +6555,7 @@ BEGIN
     -- ─────────────────────────────────────────────────────────────────
     -- گاردهای امنیتی (جلوگیری از منفی شدن خالص و کمبود حساب‌ها)
     -- ─────────────────────────────────────────────────────────────────
-    DECLARE @NegEmpId INT, @NegEmpName NVARCHAR(100), @NegAmount BIGINT;
-    SELECT TOP 1 @NegEmpId = RL.EMP_ID, @NegEmpName = E.LAST_NAME + N' ' + E.FIRST_NAME, @NegAmount = RL.NET_PAY
-    FROM PAY2_RUN_LINE RL INNER JOIN PAY2_EMPLOYEE E ON RL.EMP_ID = E.EMP_ID
-    WHERE RL.RUN_ID = @RUN_ID AND RL.NET_PAY < 0;
-
-    IF @NegEmpId IS NOT NULL
-    BEGIN
-        DECLARE @Err1 NVARCHAR(500) = N'صدور سند متوقف شد: خالص پرداختی پرسنل منفی است. کد: ' + CAST(@NegEmpId AS NVARCHAR) + N' | نام: ' + @NegEmpName + N' | مبلغ بدهی: ' + CAST(ABS(@NegAmount) AS NVARCHAR) + N' ریال.';
-        RAISERROR(@Err1, 16, 1);
-        RETURN;
-    END
+  
 
     IF @ACC_SALARY_PAY IS NULL
     BEGIN
