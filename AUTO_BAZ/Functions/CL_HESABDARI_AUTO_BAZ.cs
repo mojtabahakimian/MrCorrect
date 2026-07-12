@@ -6323,16 +6323,23 @@ namespace AUTO_BAZ.Functions
                     {
 
                     }
-                    if (!IsNull(HFRST[HFRST_EOF].HMBAA))
+                    var hMbaa = HFRST[HFRST_EOF].HMBAA;
+                    if (!IsNull(hMbaa) && !string.IsNullOrWhiteSpace(hMbaa))
                     {
-                        GETTAF3(HFRST[HFRST_EOF].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        GETTAF3(hMbaa, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
                     }
-                    string HES_T2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
-                    string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
-                    string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+                    else
+                    {
+                        LogWriter.WriteLog($@"#WARNING  در بازسازی سند برگشت فروش آزاد : برای شماره فاکتور (حواله) {HFRST[HFRST_EOF].NUMBER1} حساب مالیات آن وجود نداشت , بنابر این با حساب پیش فرض مالیات در حسابهای خودگردان سند زدم " );
+                        GETTAF3(Baseknow.HESMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        hMbaa = Baseknow.HESMBAA;
+                    }
+                    string HES_T2T = (HTAF2 is null || Convert.ToDouble(HTAF2) == 0) ? "NULL" : HTAF2.ToString();
+                    string HES_T3T = (HTAF3 is null || Convert.ToDouble(HTAF3) == 0) ? "NULL" : HTAF3.ToString();
+                    string HES_T4T = (HTAF4 is null || Convert.ToDouble(HTAF4) == 0) ? "NULL" : HTAF4.ToString();
                     dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BED,NUMBER,ARZD,TAG)
                                             VALUES({max_ns},{HKOL},{HMOIN},{HTAF},{HES_T2T},{HES_T3T},{HES_T4T}
-                                        ,N'{HFRST[HFRST_EOF].HMBAA}'
+                                        ,N'{hMbaa}'
                                         ,N'{Strings.Left(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور برگشت فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255)}'
                                         ,{Math.Round((double)HFRST[HFRST_EOF].MBAA)},
                                         {HFRST[HFRST_EOF].NUMBER}

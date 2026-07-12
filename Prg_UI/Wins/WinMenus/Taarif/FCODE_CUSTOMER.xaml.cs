@@ -1063,29 +1063,57 @@ namespace Wins.WinMenus.Taarif
                     {
                         if (NewRecord)
                         {
-                            NEWIDD = dbms.DoGetDataSQL<int?>($@" INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME, TOZIH, ADDRESS, TEL, CODE_E, ECODE, PCODE, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID, USERCO, USER_NAME, tob)
-                                OUTPUT INSERTED.IDD
-                                VALUES({KOL},
-                                {MOIN}   ,
-                                {TNUMBER}  ,
-                                N'{NAMES.Text.Trim()}' ,
-                                N'{TOZIH.Text.Trim()}' ,
-                                N'{ADDRESS.Text.Trim()}' ,
-                                N'{TEL.Text.Trim()}' ,
-                                N'{CODE_E.Text}' ,
-                                N'{ECODE.Text}' ,
-                                N'{PCODE.Text}' ,
-                                N'{MCODEM.Text}' ,
-                                {CUST_COD.SelectedValue}   ,
-                                N'{MOBILE.Text}' ,
-                                N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}' ,
-                                {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())} ,
-                                {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())} ,
-                                {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)}   ,
-                                {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)}   ,
-                                {Baseknow.USERCOD}   ,
-                                N'{Baseknow.UUSER}' ,
-                                {tob.SelectedValue})").FirstOrDefault();
+                            NEWIDD = dbms.DoGetDataSQL<int?>($@"
+                                IF EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = {KOL} AND NUMBER = {MOIN} AND TNUMBER = {TNUMBER})
+                                BEGIN
+                                    UPDATE dbo.TDETA_HES
+                                    SET NAME = N'{NAMES.Text.Trim()}',
+                                        TOZIH = N'{TOZIH.Text.Trim()}',
+                                        ADDRESS = N'{ADDRESS.Text.Trim()}',
+                                        TEL = N'{TEL.Text.Trim()}',
+                                        CODE_E = N'{CODE_E.Text}',
+                                        ECODE = N'{ECODE.Text}',
+                                        PCODE = N'{PCODE.Text}',
+                                        MCODEM = N'{MCODEM.Text}',
+                                        CUST_COD = {CUST_COD.SelectedValue},
+                                        MOBILE = N'{MOBILE.Text}',
+                                        ROUTE_NAME = N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
+                                        Longitude = {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())},
+                                        Latitude = {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
+                                        OSTANID = {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
+                                        SHAHRID = {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)},
+                                        USERCO = {Baseknow.USERCOD},
+                                        USER_NAME = N'{Baseknow.UUSER}',
+                                        tob = {tob.SelectedValue}
+                                    OUTPUT INSERTED.IDD
+                                    WHERE N_KOL = {KOL} AND NUMBER = {MOIN} AND TNUMBER = {TNUMBER};
+                                END
+                                ELSE
+                                BEGIN
+                                    INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME, TOZIH, ADDRESS, TEL, CODE_E, ECODE, PCODE, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID, USERCO, USER_NAME, tob)
+                                    OUTPUT INSERTED.IDD
+                                    VALUES({KOL},
+                                    {MOIN},
+                                    {TNUMBER},
+                                    N'{NAMES.Text.Trim()}',
+                                    N'{TOZIH.Text.Trim()}',
+                                    N'{ADDRESS.Text.Trim()}',
+                                    N'{TEL.Text.Trim()}',
+                                    N'{CODE_E.Text}',
+                                    N'{ECODE.Text}',
+                                    N'{PCODE.Text}',
+                                    N'{MCODEM.Text}',
+                                    {CUST_COD.SelectedValue},
+                                    N'{MOBILE.Text}',
+                                    N'{(ROUTE_NAME.SelectedValue is null ? "NULL" : ROUTE_NAME.SelectedValue)}',
+                                    {(string.IsNullOrEmpty(Longitude.Text.Trim()) ? "NULL" : Longitude.Text.Trim())},
+                                    {(string.IsNullOrEmpty(Latitude.Text.Trim()) ? "NULL" : Latitude.Text.Trim())},
+                                    {(OSTANID.SelectedValue is null ? "NULL" : OSTANID.SelectedValue)},
+                                    {(SHAHRID.SelectedValue is null ? "NULL" : SHAHRID.SelectedValue)},
+                                    {Baseknow.USERCOD},
+                                    N'{Baseknow.UUSER}',
+                                    {tob.SelectedValue});
+                                END").FirstOrDefault();
 
                             if (NEWIDD != null)
                             {
