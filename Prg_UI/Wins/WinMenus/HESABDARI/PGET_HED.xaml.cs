@@ -4607,8 +4607,40 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             }
 
             #endregion
+            SyncEndorsedReceivedCheckAccount(final_lst);
             this.MABL.Text = SUM_OF_MABL.ToString();
             return true;
+        }
+
+        private void SyncEndorsedReceivedCheckAccount(PGET_LST final_lst)
+        {
+            if (final_lst?.NO_AM != 2 || final_lst.NAHVA != 4 || final_lst.N_SERI is null || final_lst.BANK is null)
+            {
+                return;
+            }
+
+            var receivedCheck = dbms.DoGetDataSQL<PAY_GETD>($@"SELECT TOP 1 * FROM dbo.PAY_GETD
+                                                                    WHERE N_SERI = {final_lst.N_SERI}
+                                                                      AND BANK = {final_lst.BANK}
+                                                                    ORDER BY DATE_S DESC").FirstOrDefault();
+            if (receivedCheck == null)
+            {
+                return;
+            }
+
+            var endorsedToHes = string.IsNullOrWhiteSpace(final_lst.THES)
+                ? $"{final_lst.THES_K}-{final_lst.THES_M}-{final_lst.THES_T}"
+                : final_lst.THES;
+
+            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET
+                                    N_KOL = {(final_lst.THES_K is null ? "NULL" : final_lst.THES_K)},
+                                    N_MOIN = {(final_lst.THES_M is null ? "NULL" : final_lst.THES_M)},
+                                    N_TAF = {(final_lst.THES_T is null ? "NULL" : final_lst.THES_T)},
+                                    HES1 = N'{endorsedToHes}',
+                                    VAZ = 4
+                                WHERE ID = {receivedCheck.ID}");
+
+            CL_HESABDARI.GETDLOG(4, final_lst.N_SERI.ToString(), (int)final_lst.BANK, (long)receivedCheck.DATE_S, (int)receivedCheck.SANDUGH);
         }
 
         //#سیو کردن بخش بالایی فرم
@@ -5204,7 +5236,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                     rst.FirstOrDefault().N_MOIN = null;
                                                     rst.FirstOrDefault().N_TAF = null;
                                                     rst.FirstOrDefault().HES1 = null;
-                                                    dbms.DoExecuteSQL($@"UPDATE PAY_GETP SET N_KOL = NULL ,N_MOIN = NULL , N_TAF = NULL , hes1 =NULL {_where} ");
+                                                    dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL = NULL ,N_MOIN = NULL , N_TAF = NULL , hes1 =NULL {_where} ");
                                                     KHAZANE_Row_Deleter(item);
 
                                                     // rst.update();
