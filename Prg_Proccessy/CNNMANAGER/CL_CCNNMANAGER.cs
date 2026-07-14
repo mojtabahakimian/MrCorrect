@@ -271,6 +271,11 @@ namespace Prg_SendInvoice.CNNMANAGER
 
                     LogSqlQuery(sql, sqlEx);
 
+                    if (sqlEx.Number == 18452)
+                    {
+                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
+                    }
+
                     throw;
                 }
                 catch (Exception er)
@@ -326,6 +331,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
                     LogSqlQuery(sql, ex);
+
+                    if (ex.Number == 18452)
+                    {
+                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", ex);
+                    }
+
                     throw; // Rethrow if not deadlock or max retries reached
                 }
                 catch (Exception er)
@@ -374,6 +385,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
+
+                    if (sqlEx.Number == 18452)
+                    {
+                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
+                    }
+
                     throw;
                 }
                 catch (Exception er)
@@ -401,70 +418,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
         }
-        //Safe {↓
-        public IEnumerable<TEntity> DoGetDataSQL_Safe<TEntity>(string sql, object parameters = null)
-        {
-            using (IDbConnection db = new SqlConnection(CONNECTION_STR))
-            {
-                //db.Open();
-                using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
-                {
-                    try
-                    {
-                        var commandDefinition = new CommandDefinition(sql, parameters: parameters, commandTimeout: 300);
-                        var results = db.Query<TEntity>(commandDefinition);
-                        transaction.Commit();
-                        db?.Close();
-                        return results;
-                    }
-                    catch
-                    {
-                        transaction.Rollback();
-                    }
-                }
-                return null;
-            }
-        }
-
-        //Safe ↑}
         //var rowsAffected = dbms.DoExecuteSQL("UPDATE MyTable SET Column1 = @value WHERE Id = @id", new { value = "NewValue", id = 1 });
 
         //Asyncronize{↓
-        public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync2<TEntity>(string sql, object parameters = null)
-        {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
-            {
-                try
-                {
-                    await db.OpenAsync().ConfigureAwait(false);
-                    //var commandDefinition = new CommandDefinition(sql, parameters, commandTimeout: 300, flags: CommandFlags.Buffered);
-                    return await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    throw; // Consider handling the exception based on your use-case
-                }
-            }
-        }
-        public async Task ExecuteStoredProcedureAsync(string storedProcedureName, object parameters = null)
-        {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
-            {
-                try
-                {
-                    await db.OpenAsync().ConfigureAwait(false);
-                    await db.ExecuteAsync(storedProcedureName, parameters, commandType: CommandType.StoredProcedure, commandTimeout: 3600).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    throw; // Consider handling the exception based on your use-case
-                }
-                finally
-                {
-                    db?.Close();
-                }
-            }
-        }
         public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync<TEntity>(string sql, object? parameters = null)
         {
             using (SqlConnection db = new SqlConnection(CONNECTION_STR))
@@ -476,6 +432,14 @@ namespace Prg_SendInvoice.CNNMANAGER
                     var results = await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600);
                     //await db.ExecuteAsync("SET ARITHABORT OFF");
                     return results;
+                }
+                catch (SqlException ex)
+                {
+                    if (ex.Number == 18452)
+                    {
+                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", ex);
+                    }
+                    throw; // Rethrow the exception to be handled by the caller
                 }
                 catch
                 {
@@ -589,6 +553,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
+
+                    if (sqlEx.Number == 18452)
+                    {
+                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
+                    }
+
                     throw;
                 }
                 catch (OperationCanceledException)
@@ -681,6 +651,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
+
+                    if (sqlEx.Number == 18452)
+                    {
+                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
+                    }
+
                     throw;
                 }
                 catch (OperationCanceledException)
