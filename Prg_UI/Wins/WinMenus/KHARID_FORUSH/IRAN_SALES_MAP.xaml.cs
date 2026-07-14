@@ -151,23 +151,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             var Checkeses = GetAllCheckBoxStates(Mahha_SPanel);
 
-            dbms.DoExecuteSQL("DELETE FROM OSTAN_RPT");
-
-            if (Checkeses.Length < 1)
-            {
-            }
-            else
-            {
-                dbms.DoExecuteSQL(@$"INSERT INTO dbo.OSTAN_RPT(WeightInKilograms, TotalAmount, Province, ProvinceCode)
-                                                            SELECT SUM(CAST(coln6 AS FLOAT)* MEGHk) AS VAZN, SUM(MABL_K) AS MABL_K, OSNAME, OSTANID
-                                                            FROM KALAS
-                                                            WHERE((TAGCODE=2)AND col1=01 AND (MM IN ({Checkeses})))
-                                                            GROUP BY OSTANID, OSNAME
-                                                            OPTION(FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP);");
-            }
-
-
-            var QreData = dbms.DoGetDataSQL<OSTAN_RPT>(@"SELECT * FROM OSTAN_RPT").ToList();
+            var QreData = Checkeses.Length < 1
+                ? new List<OSTAN_RPT>()
+                : dbms.DoGetDataSQL<OSTAN_RPT>(@$"
+                    SELECT
+                        ROW_NUMBER() OVER (ORDER BY OSTANID) AS ID,
+                        SUM(CAST(coln6 AS FLOAT) * MEGHk) AS WeightInKilograms,
+                        SUM(MABL_K) AS TotalAmount,
+                        OSNAME AS Province,
+                        OSTANID AS ProvinceCode
+                    FROM KALAS
+                    WHERE (TAGCODE = 2)
+                        AND col1 = 01
+                        AND (MM IN ({Checkeses}))
+                    GROUP BY OSTANID, OSNAME
+                    OPTION (FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP);").ToList();
 
             //IF DATA IS NULL:
             //Reset Data (COL1,COL2,COL3)
