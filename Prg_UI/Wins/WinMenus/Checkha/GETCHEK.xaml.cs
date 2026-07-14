@@ -187,6 +187,16 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     SANDUGH.SelectedValue = CheckExistData.FirstOrDefault()?.SANDUGH?.ToString();
                     SAYADI.Text = CheckExistData.FirstOrDefault()?.SAYADI?.ToString();
 
+                    var loadedCheck = CheckExistData.FirstOrDefault();
+                    bool hasCheckMovement = loadedCheck?.VAZ == 4 ||
+                                            loadedCheck?.N_KOL2 != null ||
+                                            loadedCheck?.N_KOL3 != null;
+
+                    if (hasCheckMovement)
+                    {
+                        HES.IsEnabled = false;
+                        HES.ToolTip = "حساب واگذاری این چک دارای گردش است و فقط از طریق عملیات خزانه‌داری قابل تغییر می‌باشد.";
+                    }
 
                     // ✅ ذخیره کلید اولیه برای استفاده در Save
                     _original_N_SERI = CheckExistData.FirstOrDefault()?.N_SERI;
@@ -409,40 +419,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
         }
 
-        /// <summary>
-        /// متد جدید برای بروزرسانی HES1 در PAY_GETD هنگام تغییر مشتری در دریافت چک
-        /// این متد از مغایرت بین خزانه و دفتر چک جلوگیری می‌کند
-        /// </summary>
-        /// <param name="id">شناسه رکورد چک</param>
-        /// <param name="newCustNo">شناسه حساب جدید مشتری (CUST_NO)</param>
-        private void UpdateCheckHES1WhenCustomerChanges(long? id, string newCustNo)
-        {
-            if (id == null || id <= 0)
-            {
-                return;
-            }
-
-            try
-            {
-                // بروزرسانی HES1 در PAY_GETD 
-                // HES1 نشان‌دهنده حساب شخصی است که چک از او دریافت شده
-                // این فیلد باید همیشه با CUST_NO همگام باشد تا مغایرت ایجاد نشود
-                dbms.DoExecuteSQL(@"
-                    UPDATE dbo.PAY_GETD 
-                    SET HES1 = @HES1
-                    WHERE ID = @ID",
-                    new
-                    {
-                        HES1 = newCustNo,
-                        ID = id
-                    });
-            }
-            catch (Exception ex)
-            {
-                //System.Diagnostics.Debug.WriteLine($"Error in UpdateCheckHES1WhenCustomerChanges: {ex.Message}");
-            }
-        }
-
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -616,59 +592,44 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                 var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
 
-                string selected = HES?.SelectedValue?.ToString(); //به حساب
-                bool isVagozarShodeh = existingRecord?.VAZ == 4; //وضعیت این چک واگذار شده
-                string oldCustNo = existingRecord?.CUST_NO;
+                string selected = HES?.SelectedValue?.ToString()?.Trim(); // حساب مقصد/واگذاری؛ مستقل از CUST_NO
+                bool hasCheckMovement = existingRecord?.VAZ == 4 ||
+                                        existingRecord?.N_KOL2 != null ||
+                                        existingRecord?.N_KOL3 != null;
+                string destinationHes;
 
-                // بررسی آیا مشتری تغییر کرده است
-                bool customerChanged = !string.IsNullOrWhiteSpace(oldCustNo) &&
-                                       !string.IsNullOrWhiteSpace(CUST_NO) &&
-                                       oldCustNo.Trim() != "911-1-1" && //حذف شده انتظامی نباشه
-                                       oldCustNo != CUST_NO;
-
-                if (customerChanged)
+                if (hasCheckMovement)
                 {
-                    selected = CUST_NO;
+                    // پس از ورود چک به گردش، حساب‌های واگذاری فقط باید توسط فرم‌های
+                    // FORCHEK / BAKCHEK / وصول تغییر کنند؛ ویرایش مشخصات چک نباید آن‌ها را بازنویسی کند.
+                    N_KOL = existingRecord?.N_KOL?.ToString();
+                    N_MOIN = existingRecord?.N_MOIN?.ToString();
+                    N_TAF = existingRecord?.N_TAF?.ToString();
+                    destinationHes = existingRecord?.HES1;
                 }
-                // =====================================================================
-                // *** بررسی تغییر مشتری برای بروزرسانی HES1 ***
-                // =====================================================================
-                // ذخیره مقدار قدیمی CUST_NO قبل از بروزرسانی برای مقایسه
-                // =====================================================================
-                if (!string.IsNullOrEmpty(selected))
+                else if (string.IsNullOrWhiteSpace(selected) || selected == "911-1-1")
                 {
-                    if (selected.Trim() == "911-1-1") //حذف شده انتظامی
-                    {
-                        N_KOL = N_MOIN = N_TAF = null;
-                        if (HES?.SelectedValue != null)
-                        {
-                            HES.SelectedValue = null;
-                        }
-                    }
-                    else
-                    {
-                        if (!isVagozarShodeh && !string.IsNullOrWhiteSpace(HES?.SelectedValue?.ToString()) && CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
-                        {
-                            new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
-                            CANCEL = true;
-                            return;
-                        }
+                    N_KOL = N_MOIN = N_TAF = null;
+                    destinationHes = null;
 
-                        if (string.IsNullOrWhiteSpace(N_KOL) || N_KOL == "911")
-                        {
-                            //No Get Out
-                        }
-                        else
-                        {
-                            N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
-                            N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
-                            N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
-                        }
+                    if (selected == "911-1-1" && HES?.SelectedValue != null)
+                    {
+                        HES.SelectedValue = null;
                     }
                 }
                 else
                 {
-                    N_KOL = N_MOIN = N_TAF = null;
+                    if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
+                    {
+                        new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
+                        CANCEL = true;
+                        return;
+                    }
+
+                    N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
+                    N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
+                    N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+                    destinationHes = selected;
                 }
 
                 try
@@ -695,13 +656,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         N_KOL = string.IsNullOrEmpty(N_KOL) ? (object)DBNull.Value : N_KOL,
                         N_MOIN = string.IsNullOrEmpty(N_MOIN) ? (object)DBNull.Value : N_MOIN,
                         N_TAF = string.IsNullOrEmpty(N_TAF) ? (object)DBNull.Value : N_TAF,
+                        HES1 = string.IsNullOrWhiteSpace(destinationHes) ? (object)DBNull.Value : destinationHes,
                         ID = CurrentRecordID
                     };
 
                     if (existingRecord != null)
                     {
-                        string HESUPDATE_SQL = $"{(isVagozarShodeh ? " ,HES1 = @CUST_NO" : "")}";
-                        var updateSql = $@"UPDATE dbo.PAY_GETD 
+                        var updateSql = @"UPDATE dbo.PAY_GETD 
                                 SET N_SERI = @N_SERI, 
                                     BANK = @BANK, 
                                     DATE_S = @DATE_S, 
@@ -720,33 +681,21 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                     N_HESAB = @N_HESAB, 
                                     N_KOL = @N_KOL, 
                                     N_MOIN = @N_MOIN, 
-                                    N_TAF = @N_TAF
-                                    {HESUPDATE_SQL}
+                                    N_TAF = @N_TAF,
+                                    HES1 = @HES1
                                 WHERE ID = @ID";
                         dbms.DoExecuteSQL(updateSql, parameters);
-
-                        // =====================================================================
-                        // *** بروزرسانی HES1 اگر مشتری تغییر کرده باشد ***
-                        // این کار برای اطمینان از همگام بودن HES1 با CUST_NO انجام می‌شود
-                        // =====================================================================
-                        if (customerChanged)
-                        {
-                            UpdateCheckHES1WhenCustomerChanges(
-                                CurrentRecordID,
-                                CUST_NO);
-                        }
-                        // =====================================================================
                     }
                     else
                     {
                         var insertSql = @"INSERT INTO dbo.PAY_GETD(
                                      N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, 
                                      ANBAR, RADIF, CUST_NO, VAZ, LIST_NO, KIND, SANDUGH, 
-                                     N_HESAB, SAYADI, N_KOL, N_MOIN, N_TAF)
+                                     N_HESAB, SAYADI, N_KOL, N_MOIN, N_TAF, HES1)
                                  VALUES(
                                      @N_SERI, @BANK, @DATE_S, @DATE, @SHOBEH, @MABL, @NAME_TAH, 
                                      @ANBAR, @RADIF, @CUST_NO, @VAZ, @LIST_NO, @KIND, @SANDUGH, 
-                                     @N_HESAB, @SAYADI, @N_KOL, @N_MOIN, @N_TAF)";
+                                     @N_HESAB, @SAYADI, @N_KOL, @N_MOIN, @N_TAF, @HES1)";
 
                         dbms.DoExecuteSQL(insertSql, parameters);
                     }

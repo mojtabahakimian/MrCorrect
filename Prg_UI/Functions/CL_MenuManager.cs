@@ -917,7 +917,7 @@ namespace Functions
             /// </summary>
             TARAZHES_WIN,
             /// <summary>
-            /// تعریف شروط گریدهای مشتریان
+            /// تعریف شروط گرید های مشتریان
             /// </summary>
             WIN_GRADE_SHART_FUNC_FORM,
             /// لیست چکهای پرداختی با مبالغ
@@ -2110,7 +2110,7 @@ namespace Functions
                     );
                     break;
 
-                case WinNameType.IRAN_SALES_MAP: //گزارش فروش روی نقشه
+                case WinNameType.IRAN_SALES_MAP: //گزارش فروش روی نقشه ایران
                     CL_LMethods.OpenWindow(OWNERWIN, new IRAN_SALES_MAP());
                     break;
 

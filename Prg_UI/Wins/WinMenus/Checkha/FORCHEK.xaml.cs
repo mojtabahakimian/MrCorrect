@@ -385,15 +385,25 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     var parentItem = pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
                     if (parentItem != null)
                     {
-                        rst.FirstOrDefault().N_KOL = parentItem.THES_K;
-                        rst.FirstOrDefault().N_MOIN = parentItem.THES_M;
-                        rst.FirstOrDefault().N_TAF = parentItem.THES_T;
+                        var n_kol = CL_HESABDARI.GETKOL(parentItem.THES);
+                        var n_moin = CL_HESABDARI.GETMOIN(parentItem.THES);
+                        var n_taf = CL_HESABDARI.GETTAF(parentItem.THES);
+
+                        rst.FirstOrDefault().N_KOL = n_kol == 0 ? null : (int?)n_kol;
+                        rst.FirstOrDefault().N_MOIN = n_moin == 0 ? null : (int?)n_moin;
+                        rst.FirstOrDefault().N_TAF = n_taf == 0 ? null : (int?)n_taf;
                         rst.FirstOrDefault().HES1 = parentItem.THES;
                         rst.FirstOrDefault().VAZ = 4;
                         rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
 
+                        var sql_n_kol = rst.FirstOrDefault().N_KOL?.ToString() ?? "NULL";
+                        var sql_n_moin = rst.FirstOrDefault().N_MOIN?.ToString() ?? "NULL";
+                        var sql_n_taf = rst.FirstOrDefault().N_TAF?.ToString() ?? "NULL";
+                        var sql_vaz = rst.FirstOrDefault().VAZ?.ToString() ?? "NULL";
+                        var sql_sandugh = rst.FirstOrDefault().SANDUGH?.ToString() ?? "NULL";
+
                         string _WHERE_ = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_MOIN = {rst.FirstOrDefault().N_MOIN}, VAZ = {rst.FirstOrDefault().VAZ}, SANDUGH = {rst.FirstOrDefault().SANDUGH} , N_KOL = {rst.FirstOrDefault().N_KOL} , N_TAF = {rst.FirstOrDefault().N_TAF} , HES1 = N'{rst.FirstOrDefault().HES1}' {_WHERE_}");
+                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_MOIN = {sql_n_moin}, VAZ = {sql_vaz}, SANDUGH = {sql_sandugh} , N_KOL = {sql_n_kol} , N_TAF = {sql_n_taf} , HES1 = N'{rst.FirstOrDefault().HES1}' {_WHERE_}");
 
                         if (rst.FirstOrDefault().KIND == 0)
                         {

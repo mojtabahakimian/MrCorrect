@@ -11,6 +11,7 @@ using Stimulsoft.Report;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
@@ -596,14 +597,16 @@ namespace Wins.WinSetting
         {
             if (!NowIsReady) { return; }
 
-            string searchText = serus.Text.ToLower();
-            var filteredUsers = ALL_USERS.Where(u => u.SAL_NAME.ToLower().Contains(searchText)).DistinctBy(p => p.SAL_NAME).ToList();
+            string searchText = serus.Text;
+            var filteredUsers = FilterByFuzzyText(ALL_USERS, u => u.SAL_NAME, searchText)
+                .DistinctBy(p => p.SAL_NAME)
+                .ToList();
             // Assuming you have a ListBox for users named UserListBox
             UserListBox.ItemsSource = filteredUsers;
         }
         private void SearchFilterPermissions()
         {
-            string searchText = srch.Text.ToLower();
+            string searchText = srch.Text;
 
             var LastUserSelected = GetLastSelectedItemSafely<SALA_DTL>(UserListBox);
 
@@ -612,12 +615,160 @@ namespace Wins.WinSetting
                 return;
             }
 
-            var filteredPermissions = PERMISIONS_DATA
-                .Where(p => p.CAPTION != null && p.USERCO == LastUserSelected.IDD && p.CAPTION.ToLower().Contains(searchText))
+            var filteredPermissions = FilterByFuzzyText(
+                    PERMISIONS_DATA.Where(p => p.CAPTION != null && p.USERCO == LastUserSelected.IDD),
+                    p => p.CAPTION,
+                    searchText)
                 .DistinctBy(p => p.CAPTION)
                 .ToList();
 
             PermissionListBox.ItemsSource = filteredPermissions;
+        }
+
+        private static IEnumerable<T> FilterByFuzzyText<T>(IEnumerable<T> source, Func<T, string?> textSelector, string searchText)
+        {
+            var normalizedSearchText = NormalizeSearchText(searchText);
+            if (string.IsNullOrEmpty(normalizedSearchText))
+            {
+                return source;
+            }
+
+            return source
+                .Select(item => new
+                {
+                    Item = item,
+                    NormalizedText = NormalizeSearchText(textSelector(item))
+                })
+                .Where(x => x.NormalizedText.Contains(normalizedSearchText) || IsFuzzyMatch(x.NormalizedText, normalizedSearchText))
+                .OrderBy(x => GetFuzzySearchRank(x.NormalizedText, normalizedSearchText))
+                .Select(x => x.Item);
+        }
+
+        private static int GetFuzzySearchRank(string normalizedText, string normalizedSearchText)
+        {
+            if (normalizedText.Contains(normalizedSearchText)) return 0;
+
+            return GetBestTokenWindowDistance(normalizedText, normalizedSearchText);
+        }
+
+        private static string NormalizeSearchText(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+
+            var normalizedBuilder = new StringBuilder(text.Length);
+            var previousWasWhiteSpace = true;
+
+            foreach (var currentChar in text.Trim().ToLowerInvariant())
+            {
+                var normalizedChar = NormalizePersianChar(currentChar);
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(normalizedChar);
+
+                if (unicodeCategory == UnicodeCategory.NonSpacingMark)
+                {
+                    continue;
+                }
+
+                if (char.IsLetterOrDigit(normalizedChar))
+                {
+                    normalizedBuilder.Append(normalizedChar);
+                    previousWasWhiteSpace = false;
+                    continue;
+                }
+
+                if (!previousWasWhiteSpace)
+                {
+                    normalizedBuilder.Append(' ');
+                    previousWasWhiteSpace = true;
+                }
+            }
+
+            return normalizedBuilder.ToString().Trim();
+        }
+
+        private static char NormalizePersianChar(char currentChar)
+        {
+            switch (currentChar)
+            {
+                case 'ي':
+                case 'ى':
+                    return 'ی';
+                case 'ك':
+                    return 'ک';
+                case 'أ':
+                case 'إ':
+                case 'آ':
+                    return 'ا';
+                case 'ة':
+                    return 'ه';
+                default:
+                    return currentChar;
+            }
+        }
+
+        private static bool IsFuzzyMatch(string normalizedText, string normalizedSearchText)
+        {
+            if (string.IsNullOrEmpty(normalizedText) || string.IsNullOrEmpty(normalizedSearchText)) return false;
+
+            var distance = GetBestTokenWindowDistance(normalizedText, normalizedSearchText);
+            return distance <= GetAllowedFuzzyDistance(normalizedSearchText.Length);
+        }
+
+        private static int GetBestTokenWindowDistance(string normalizedText, string normalizedSearchText)
+        {
+            var textWords = normalizedText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var searchWords = normalizedSearchText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (textWords.Length == 0 || searchWords.Length == 0) return int.MaxValue;
+
+            var windowSize = Math.Min(searchWords.Length, textWords.Length);
+            var bestDistance = int.MaxValue;
+
+            for (int i = 0; i <= textWords.Length - windowSize; i++)
+            {
+                var candidate = string.Join(" ", textWords.Skip(i).Take(windowSize));
+                bestDistance = Math.Min(bestDistance, CalculateDamerauLevenshteinDistance(candidate, normalizedSearchText));
+            }
+
+            bestDistance = Math.Min(bestDistance, CalculateDamerauLevenshteinDistance(normalizedText, normalizedSearchText));
+            return bestDistance;
+        }
+
+        private static int GetAllowedFuzzyDistance(int searchTextLength)
+        {
+            if (searchTextLength <= 4) return 1;
+            if (searchTextLength <= 12) return 2;
+
+            return Math.Max(2, searchTextLength / 5);
+        }
+
+        private static int CalculateDamerauLevenshteinDistance(string source, string target)
+        {
+            if (source == target) return 0;
+            if (source.Length == 0) return target.Length;
+            if (target.Length == 0) return source.Length;
+
+            var distances = new int[source.Length + 1, target.Length + 1];
+            for (int i = 0; i <= source.Length; i++) distances[i, 0] = i;
+            for (int j = 0; j <= target.Length; j++) distances[0, j] = j;
+
+            for (int i = 1; i <= source.Length; i++)
+            {
+                for (int j = 1; j <= target.Length; j++)
+                {
+                    var cost = source[i - 1] == target[j - 1] ? 0 : 1;
+                    var deletionDistance = distances[i - 1, j] + 1;
+                    var insertionDistance = distances[i, j - 1] + 1;
+                    var substitutionDistance = distances[i - 1, j - 1] + cost;
+
+                    distances[i, j] = Math.Min(Math.Min(deletionDistance, insertionDistance), substitutionDistance);
+
+                    if (i > 1 && j > 1 && source[i - 1] == target[j - 2] && source[i - 2] == target[j - 1])
+                    {
+                        distances[i, j] = Math.Min(distances[i, j], distances[i - 2, j - 2] + 1);
+                    }
+                }
+            }
+
+            return distances[source.Length, target.Length];
         }
 
         private void BTN_MAKE_ACTIVE_ALL_Click(object sender, RoutedEventArgs e)
@@ -1749,8 +1900,10 @@ namespace Wins.WinSetting
             //جستجو گر کاربری در انبار ها
             if (!NowIsReady) { return; }
 
-            string searchText = UserSearchBox.Text.ToLower();
-            var filteredUsers = SECOND_ALL_USERS.Where(u => u.SAL_NAME.ToLower().Contains(searchText)).DistinctBy(p => p.SAL_NAME).ToList();
+            string searchText = UserSearchBox.Text;
+            var filteredUsers = FilterByFuzzyText(SECOND_ALL_USERS, u => u.SAL_NAME, searchText)
+                .DistinctBy(p => p.SAL_NAME)
+                .ToList();
             UserListBoxAnbar.ItemsSource = filteredUsers;
         }
 
@@ -3208,8 +3361,10 @@ namespace Wins.WinSetting
             //جستجو گر کاربری در انبار ها
             if (!NowIsReady) { return; }
 
-            string searchText = UserSearchBoxSuby.Text.ToLower();
-            var filteredUsers = SECOND_ALL_USERS.Where(u => u.SAL_NAME.ToLower().Contains(searchText)).DistinctBy(p => p.SAL_NAME).ToList();
+            string searchText = UserSearchBoxSuby.Text;
+            var filteredUsers = FilterByFuzzyText(SECOND_ALL_USERS, u => u.SAL_NAME, searchText)
+                .DistinctBy(p => p.SAL_NAME)
+                .ToList();
             UserListBoxSuby.ItemsSource = filteredUsers;
         }
 

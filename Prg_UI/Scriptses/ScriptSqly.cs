@@ -47,6 +47,21 @@ namespace Prg_UI.Scriptses
 
                 if (isCustomCall)
                 {
+
+                    try
+                    {
+                        db.Execute(@"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OSTAN_RPT]') AND type in (N'U'))
+                                 BEGIN
+                                     CREATE TABLE [dbo].[OSTAN_RPT] ( 
+                                         ID INT IDENTITY(1, 1) PRIMARY KEY, 
+                                         WeightInKilograms DECIMAL(18, 2), 
+                                         TotalAmount DECIMAL(18, 2), 
+                                         Province NVARCHAR(255), 
+                                         ProvinceCode INT)
+                                 END");
+                    }
+                    catch { }
+
                     #region ALTER OTHER_DTL
 
                     // Prevent truncation errors when saving longer truck plate/description values.

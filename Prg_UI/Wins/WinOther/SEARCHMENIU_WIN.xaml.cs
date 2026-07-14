@@ -179,7 +179,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "راس گیری", WIN_NAME = WinNameType.RAAS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "فاکتور خرید", WIN_NAME = WinNameType.HEAD_LST_KHAREED1_RASID });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف فرمت گرید بندی مشتریان (فرمت رده بندی مشتری)", WIN_NAME = WinNameType.GRADE_FORMAT_WIN });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = false, CAPTION = "فروش روی نقشه", WIN_NAME = CL_MenuManager.WinNameType.IRAN_SALES_MAP });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = false, CAPTION = "فروش روی نقشه ایران", WIN_NAME = CL_MenuManager.WinNameType.IRAN_SALES_MAP });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نبض فعالیت سازمان", WIN_NAME = CL_MenuManager.WinNameType.NABZEDARY });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش کارت انبار یک کالا", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_KART });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کدینگ مپ", WIN_NAME = CL_MenuManager.WinNameType.TCOD_MAP_GRP_WIN });
