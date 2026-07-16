@@ -7678,9 +7678,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             if (SAYER_VISITOR_DATA == null || SAYER_VISITOR_DATA.Count == 0)
                 return;
 
-            // اگر JF یا TAKHFIF خالی یا نامعتبر باشند، از محاسبه خارج شویم
-            if (!double.TryParse(JF.Text, out double jfValue) || !double.TryParse(TAKHFIF.Text, out double takhfifValue))
-                return;
+            var commissionBaseAmount = GetVisitorCommissionBaseAmount();
 
             // برای هر ویزیتور که مبلغش ثابت نیست، پورسانت را بروز کنیم
             foreach (var visitor in SAYER_VISITOR_DATA)
@@ -7688,8 +7686,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 // فقط آیتم‌هایی که STAT = false (مبلغ ثابت نیست)
                 if (visitor.STAT == false && visitor.DARSAD.HasValue && visitor.ID.HasValue)
                 {
-                    // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
-                    visitor.PURSANT = Math.Round((jfValue - takhfifValue) * visitor.DARSAD.Value / 100);
+                    // فرمول: PURSANT = مبلغ خالص اقلام بعد از تخفیف ردیفی * DARSAD / 100
+                    visitor.PURSANT = Math.Round(commissionBaseAmount * visitor.DARSAD.Value / 100);
 
                     try
                     {
@@ -7732,6 +7730,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
             Text190.Text = sum.ToString();
+        }
+
+        private double GetVisitorCommissionBaseAmount()
+        {
+            var rowNetTotal = FACTOR22_INVO_DATA?.Sum(row => Math.Max(0, (row.MABL_K ?? 0) - (row.N_MOIN ?? 0))) ?? 0;
+            if (rowNetTotal > 0)
+            {
+                return rowNetTotal;
+            }
+
+            double.TryParse(JF.Text, out double jfValue);
+            double.TryParse(TAKHFIF.Text, out double takhfifValue);
+            return Math.Max(0, jfValue - takhfifValue);
         }
 
         private bool IsRowValid(INVO_LST_FACTOR22 TheRow)
@@ -10341,7 +10352,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         if (Information.IsNumeric(tozihdata.FirstOrDefault()))
                         {
                             CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(tozihdata.FirstOrDefault().Replace("%", ""));
-                            CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
+                            CURRENT_ROW_VISITOR.PURSANT = (double)((GetVisitorCommissionBaseAmount()) * CURRENT_ROW_VISITOR.DARSAD / 100);
                             if ((bool)CURRENT_ROW_VISITOR.STAT)
                             {
                                 CURRENT_ROW_VISITOR.STAT = false;
@@ -10358,7 +10369,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (!string.IsNullOrEmpty(rst?.FirstOrDefault()) && Information.IsNumeric(rst.FirstOrDefault()))
                     {
                         CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(rst.FirstOrDefault());
-                        CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
+                        CURRENT_ROW_VISITOR.PURSANT = (double)((GetVisitorCommissionBaseAmount()) * CURRENT_ROW_VISITOR.DARSAD / 100);
                         if ((bool)CURRENT_ROW_VISITOR.STAT)
                         {
                             CURRENT_ROW_VISITOR.STAT = false;
@@ -10379,7 +10390,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     //DARSAD_AfterUpdate
-                    CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
+                    CURRENT_ROW_VISITOR.PURSANT = (double)((GetVisitorCommissionBaseAmount()) * CURRENT_ROW_VISITOR.DARSAD / 100);
                     if (Convert.ToBoolean(CURRENT_ROW_VISITOR.STAT))
                     {
                         CURRENT_ROW_VISITOR.STAT = false;
@@ -10402,9 +10413,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 if (!string.IsNullOrEmpty(VISITOR_DTL_SUB_ENTERED_VALUE))
                 {
                     //PURSANT_AfterUpdate
-                    if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
+                    var commissionBaseAmount = GetVisitorCommissionBaseAmount();
+                    if (commissionBaseAmount != 0)
                     {
-                        CURRENT_ROW_VISITOR.DARSAD = CURRENT_ROW_VISITOR.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+                        CURRENT_ROW_VISITOR.DARSAD = CURRENT_ROW_VISITOR.PURSANT / commissionBaseAmount * 100;
 
                         CURRENT_ROW_VISITOR.DARSAD = (double)CURRENT_ROW_VISITOR.DARSAD;
                     }
@@ -10566,7 +10578,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 long? _id_ = null;
 
-                FINAL_CROW_ITEM.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100));
+                FINAL_CROW_ITEM.PURSANT = Math.Round(GetVisitorCommissionBaseAmount() * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
 
                 try
                 {
@@ -10655,9 +10667,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 #endregion
 
                 //PURSANT
-                if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
+                var commissionBaseAmount = GetVisitorCommissionBaseAmount();
+                if (commissionBaseAmount != 0)
                 {
-                    FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+                    FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / commissionBaseAmount * 100;
                     FINAL_CROW_ITEM.DARSAD = (double)FINAL_CROW_ITEM.DARSAD;
                 }
                 else
@@ -10708,7 +10721,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 //        {
                 //            CurrentData.CUST_NO = opn.FirstOrDefault().CUST_NO;
                 //            CurrentData.DARSAD = opn.FirstOrDefault().DARSAD;
-                //            CurrentData.PURSANT = Math.Round((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(opn.FirstOrDefault().DARSAD) / 100);
+                //            CurrentData.PURSANT = Math.Round((GetVisitorCommissionBaseAmount()) * Convert.ToDouble(opn.FirstOrDefault().DARSAD) / 100);
                 //            CurrentData.STAT = false;
                 //            CurrentData.TOZIH = opn.FirstOrDefault().TOZIH;
                 //        }
@@ -10763,9 +10776,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 //        if (rst.Count > 0)
                 //        {
                 //            CurrentData.CUST_NO = rst.FirstOrDefault().CUST_NO;
-                //            if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) != 0)
+                //            if (GetVisitorCommissionBaseAmount() != 0)
                 //            {
-                //                CurrentData.DARSAD = rst.FirstOrDefault().PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+                //                CurrentData.DARSAD = rst.FirstOrDefault().PURSANT / (GetVisitorCommissionBaseAmount()) * 100;
                 //            }
                 //            else
                 //            {
