@@ -917,7 +917,7 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									                     sd.vra AS VatRate 
 									                 FROM dbo.INVO_LST il
 									                 JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									                 WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg
+									                 WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0
 									             ),
 									             AppliedDiscounts AS (
 									                 SELECT
@@ -950,41 +950,51 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									             )
 									             UPDATE il
 									             SET 
-									                 il.N_KOL = flv.TF1_Final,
-									                 il.TKHN = flv.TF2_Final,
-									                 il.N_MOIN = flv.TotalLineDiscount,
-									                 il.IMBAA = flv.LineVAT
+									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE flv.TF1_Final END,
+									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE flv.TF2_Final END,
+									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END,
+									                 il.IMBAA = CASE 
+									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END)) * sd.vra / 100.0)
+									                     ELSE 0 
+									                 END
 									             FROM dbo.INVO_LST il
-									             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id;
+									             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id
+									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+									             WHERE il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									         END
 									         ELSE 
 									         BEGIN
 									             UPDATE il
 									             SET 
-									                 il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
+									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
+									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
 									                 il.IMBAA = CASE 
 									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                         FLOOR(il.MABL_K * sd.vra / 100.0)
+									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
 									                     ELSE 0 
 									                 END
 									             FROM dbo.INVO_LST il
 									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg;
+									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									         END
 									     END
 									     ELSE 
 									     BEGIN
 									         UPDATE il
 									         SET 
-									             il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+									             il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
+									             il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
+									             il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
 									             il.IMBAA = CASE 
 									                 WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                     FLOOR(il.MABL_K * sd.vra / 100.0)
+									                     FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
 									                 ELSE 0 
 									             END
 									         FROM dbo.INVO_LST il
 									         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg;
+									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									     END
 									 
 									     SELECT 
@@ -1873,7 +1883,8 @@ BEGIN
 			ON IL.CODE = VPK.CODE
 			   AND VPK.PORID = @PORID
 	WHERE IL.NUMBER = @NUMBER
-		  AND IL.TAG = @TAG;
+		  AND IL.TAG = @TAG
+		  AND ISNULL(IL.JAY, 0) = 0;
 
 	-- ========== ۶. محاسبه درصد نهایی ==========
 	IF ISNULL(@TotalMablk, 0) > 0
