@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace Functions
 {
     public class FilterService<T>
     {
-        private readonly List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch)> cumulativeFilters =
-            new List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch)>();
+        private readonly List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch, bool NormalizePersianText)> cumulativeFilters =
+            new List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch, bool NormalizePersianText)>();
 
         /// <summary>
         /// اضافه کردن فیلتر جدید به لیست فیلترهای فعال
@@ -16,9 +17,10 @@ namespace Functions
         /// <param name="filterValue">مقدار فیلتر (می‌تواند string، numeric، یا null باشد)</param>
         /// <param name="isExclusion">آیا فیلتر exclusion است؟</param>
         /// <param name="isExactMatch">آیا باید دقیقاً برابر باشد؟ (در غیر این صورت Contains)</param>
-        public void AddFilter(string columnName, object filterValue, bool isExclusion = false, bool isExactMatch = false)
+        /// <param name="normalizePersianText">آیا تفاوت نویسه‌های فارسی و عربی و فاصله‌ها نادیده گرفته شود؟</param>
+        public void AddFilter(string columnName, object filterValue, bool isExclusion = false, bool isExactMatch = false, bool normalizePersianText = false)
         {
-            cumulativeFilters.Add((columnName, filterValue, isExclusion, isExactMatch));
+            cumulativeFilters.Add((columnName, filterValue, isExclusion, isExactMatch, normalizePersianText));
         }
 
         /// <summary>
@@ -36,13 +38,13 @@ namespace Functions
         {
             if (item == null) return false;
 
-            foreach (var (columnName, filterValue, isExclusion, isExactMatch) in cumulativeFilters)
+            foreach (var (columnName, filterValue, isExclusion, isExactMatch, normalizePersianText) in cumulativeFilters)
             {
                 // دریافت مقدار واقعی property (نه ToString آن)
                 var actualValue = GetPropValue(item, columnName);
 
                 // اعمال فیلتر
-                bool matchResult = EvaluateFilter(actualValue, filterValue, isExactMatch);
+                bool matchResult = EvaluateFilter(actualValue, filterValue, isExactMatch, normalizePersianText);
 
                 // اگر exclusion است، نتیجه را برعکس می‌کنیم
                 if (isExclusion)
@@ -65,7 +67,7 @@ namespace Functions
         /// <summary>
         /// ارزیابی یک فیلتر واحد
         /// </summary>
-        private bool EvaluateFilter(object actualValue, object filterValue, bool isExactMatch)
+        private bool EvaluateFilter(object actualValue, object filterValue, bool isExactMatch, bool normalizePersianText)
         {
             // Handle null cases
             if (filterValue == null)
@@ -92,6 +94,12 @@ namespace Functions
                 // تبدیل actualValue به string برای مقایسه متنی
                 string actualString = actualValue.ToString()?.Trim() ?? string.Empty;
 
+                if (normalizePersianText)
+                {
+                    filterString = NormalizePersianSearchText(filterString);
+                    actualString = NormalizePersianSearchText(actualString);
+                }
+
                 if (isExactMatch)
                 {
                     // مقایسه دقیق (case-insensitive)
@@ -112,6 +120,36 @@ namespace Functions
 
             // مقایسه معمولی برای سایر type ها
             return actualValue.Equals(filterValue);
+        }
+
+        /// <summary>
+        /// متن را برای جست‌وجوی فارسی یکسان می‌کند: ی و ک عربی به فارسی تبدیل
+        /// و فاصله، نیم‌فاصله، اعراب و کشیده نادیده گرفته می‌شوند.
+        /// </summary>
+        private static string NormalizePersianSearchText(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+
+            var normalized = value.Normalize(NormalizationForm.FormKC);
+            var result = new StringBuilder(normalized.Length);
+
+            foreach (var character in normalized)
+            {
+                char current = character;
+                if (current == '\u064A' || current == '\u0649') current = '\u06CC'; // ي، ى -> ی
+                if (current == '\u0643') current = '\u06A9'; // ك -> ک
+
+                var category = CharUnicodeInfo.GetUnicodeCategory(current);
+                if (char.IsWhiteSpace(current) || current == '\u200C' || current == '\u200D' ||
+                    current == '\u0640' || category == UnicodeCategory.NonSpacingMark)
+                {
+                    continue;
+                }
+
+                result.Append(current);
+            }
+
+            return result.ToString();
         }
 
         /// <summary>

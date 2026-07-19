@@ -335,6 +335,28 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ApplyCumulativeFilter();
             }
         }
+
+        private void FilterByCustomText_Click(object sender, RoutedEventArgs e)
+        {
+            var (columnName, _) = GetSelectedCellDetails();
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            var initialValue = GetSelectedText();
+            var searchText = Interaction.InputBox(
+                "متن مورد نظر را وارد کنید. فاصله، نیم‌فاصله و تفاوت ی و ک عربی نادیده گرفته می‌شود.",
+                "پالودن با متن سفارشی",
+                string.IsNullOrWhiteSpace(initialValue) ? string.Empty : initialValue).Trim();
+
+            if (string.IsNullOrWhiteSpace(searchText)) return;
+
+            filterService.AddFilter(columnName, searchText, isExclusion: false, isExactMatch: false, normalizePersianText: true);
+            ActiveFilters.Add($"{columnName} Persian Contains \"{searchText}\"");
+            ApplyCumulativeFilter();
+        }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
