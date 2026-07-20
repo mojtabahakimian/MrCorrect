@@ -77,6 +77,11 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_KOL_MOIN_TAFKIK, default); //حساب تفکیکی تفضیلی
         }
 
+        private void SmartCustomerStatement_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_DATE_AI, null);
+        }
+
         private void Image_PreviewMouseDown_11(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_DPDAY, default); //گزارش عملکرد روزانه خزانه

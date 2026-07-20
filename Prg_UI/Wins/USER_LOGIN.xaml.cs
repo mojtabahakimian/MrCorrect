@@ -371,19 +371,21 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr-pakzaban";
             //Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 179; Baseknow.UUSER = "واحد تولید یزدویزیتوری";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
             CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
             Baseknow.UGRP = "1";
-            //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
+            CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
             new WinBase().Show();
+            //new AZAE_WIN().Show();
             //new WIN_About().Show();
             //new WinConnectionChoose().Show();
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
 
             //new WIN_F_NEWYEAR().Show();

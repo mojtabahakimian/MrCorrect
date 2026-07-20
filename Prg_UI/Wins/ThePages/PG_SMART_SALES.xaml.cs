@@ -51,6 +51,41 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM, default);
         }
 
+        private void Image_PreviewMouseDown_6(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_SSM_TAKHIR_PAR, null);
+        }
+
+        private void Image_PreviewMouseDown_7(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_MOSHTARI, null);
+        }
+
+        private void Image_PreviewMouseDown_8(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH, null);
+        }
+
+        private void Image_PreviewMouseDown_9(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.GRADE_FORMAT_WIN, null);
+        }
+
+        private void Image_PreviewMouseDown_10(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_GSCALE, null);
+        }
+
+        private void Image_PreviewMouseDown_11(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.ENHESAR_WIN, null);
+        }
+
+        private void Image_PreviewMouseDown_12(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI, null);
+        }
+
         private void Image_PreviewMouseDown_5(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI, default);

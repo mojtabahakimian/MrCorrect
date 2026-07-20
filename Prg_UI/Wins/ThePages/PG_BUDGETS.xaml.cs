@@ -25,6 +25,11 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BUDGET0, null /*DEFAULT OWNER MAIN*/);
         }
 
+        private void BudgetAnalysis_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BUGET_MAIN_list2, null);
+        }
+
         private void Image_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BUGET_MAIN_list2, null /*DEFAULT OWNER MAIN*/);

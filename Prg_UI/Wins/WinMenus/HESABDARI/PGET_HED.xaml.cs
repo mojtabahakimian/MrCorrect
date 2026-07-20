@@ -721,7 +721,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     else
                     {
                         string currentUser = Baseknow.UUSER;
-                        WhereCondition += $"{GetAnd()} (USER_NAME = N'{currentUser}' OR USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(currentUser)}')";
+                        string persianUser = CL_LMethods.NormalizeArabicPersian(currentUser);
+                        string arabicUser = CL_LMethods.ReplacePerArab(currentUser, true);
+                        WhereCondition += $"{GetAnd()} (USER_NAME = N'{currentUser}' OR USER_NAME = N'{persianUser}' OR USER_NAME = N'{arabicUser}')";
                     }
                 }
             }
