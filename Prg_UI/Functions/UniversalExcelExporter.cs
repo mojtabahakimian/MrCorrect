@@ -657,46 +657,51 @@ namespace Functions
 
         private static async Task OpenExcelFile(string filePath)
         {
-            // Some Excel writers (and antivirus/indexing software) keep the newly-created
-            // file unavailable for a very short time after SaveAs returns.  Starting the
-            // shell immediately in that window intermittently results in Win32 error 2.
-            const int maxAttempts = 20;
+            // SaveAs normally makes the file visible immediately. This check therefore
+            // costs only one metadata lookup on the normal path and performs no file read.
+            const int maxAttempts = 10;
             const int retryDelayMilliseconds = 100;
+            bool fileIsReady = false;
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
                 try
                 {
-                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        if (stream.Length == 0)
-                            throw new IOException("The exported Excel file is empty.");
-                    }
-
-                    using (var process = new Process())
-                    {
-                        process.StartInfo = new ProcessStartInfo
-                        {
-                            FileName = filePath,
-                            WorkingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty,
-                            UseShellExecute = true
-                        };
-                        process.Start();
-                    }
-
-                    return;
+                    var fileInfo = new FileInfo(filePath);
+                    fileInfo.Refresh();
+                    fileIsReady = fileInfo.Exists && fileInfo.Length > 0;
                 }
-                catch (Exception ex) when (
-                    attempt < maxAttempts &&
-                    (ex is FileNotFoundException || ex is DirectoryNotFoundException || ex is IOException))
+                catch (IOException)
                 {
+                    // A writer, antivirus, or indexer can briefly hold the file.
+                }
+
+                if (fileIsReady)
+                    break;
+
+                if (attempt < maxAttempts)
                     await Task.Delay(retryDelayMilliseconds);
-                }
+            }
 
-                catch (Exception ex)
+            if (!fileIsReady)
+                throw new FileNotFoundException("The exported Excel file was not created or is empty.", filePath);
+
+            try
+            {
+                using (var process = new Process())
                 {
-                    throw new Exception($"Failed to open Excel file '{filePath}'", ex);
+                    process.StartInfo = new ProcessStartInfo
+                    {
+                        FileName = filePath,
+                        WorkingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty,
+                        UseShellExecute = true
+                    };
+                    process.Start();
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to open Excel file '{filePath}'", ex);
             }
         }
 
