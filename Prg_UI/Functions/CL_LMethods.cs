@@ -2377,11 +2377,16 @@ namespace Prg_UI.Functions
 
             if (!CanSeeAll) //به همه فاکتور ها دسترسی نداره!
             {
+                string originalUser = CL_HESABDARI.UCurrentUser().ToString();
+                string persianUser = CL_LMethods.NormalizeArabicPersian(originalUser);
+                string arabicUser = CL_LMethods.ReplacePerArab(originalUser, true);
+                string userRestrictSqlWithTable = $"((dbo.HEAD_LST.USER_NAME = N'{originalUser}') OR (dbo.HEAD_LST.USER_NAME = N'{persianUser}') OR (dbo.HEAD_LST.USER_NAME = N'{arabicUser}'))";
+
                 if (!isOthery && IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
                     //تاریخ محدود (تاریخ قابل برگشت) اعمال میشود ...↓
                     info.RestrictionMessages.Add("محدود به تاریخ برگشت");
-                    var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
+                    var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND {userRestrictSqlWithTable} GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
 
                     if (result.Count > 0 && Convert.ToDouble(Baseknow.CPI) > 0) //تعداد تاریخ قابل برگشت برای مشاهده
@@ -2398,7 +2403,7 @@ namespace Prg_UI.Functions
                         }
 
                         info.WhereClause += dateResult > 0
-                            ? $" {GetAndQreOrNo()} dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}' AND dbo.HEAD_LST.DATE_N >= {dateResult} "
+                            ? $" {GetAndQreOrNo()} {userRestrictSqlWithTable} AND dbo.HEAD_LST.DATE_N >= {dateResult} "
                             : string.Empty;
                     }
                 }
@@ -2435,8 +2440,7 @@ namespace Prg_UI.Functions
                     if (defaultUserRestriction)
                     {
                         //فقط فاکتور های کاربری خودش را ببیند
-                        //info.WhereClause += $" {GetAndQreOrNo()} ((USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
-                        info.WhereClause += $" {GetAndQreOrNo()} ((dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (dbo.HEAD_LST.USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
+                        info.WhereClause += $" {GetAndQreOrNo()} {userRestrictSqlWithTable} ";
                         info.RestrictionMessages.Add("فقط نمایش اطلاعات ثبت شده توسط شما");
                     }
                 }
