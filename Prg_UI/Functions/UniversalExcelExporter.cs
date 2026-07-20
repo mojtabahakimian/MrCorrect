@@ -684,7 +684,10 @@ namespace Functions
             }
 
             if (!fileIsReady)
-                throw new FileNotFoundException("The exported Excel file was not created or is empty.", filePath);
+            {
+                OpenExportDirectory(filePath);
+                return;
+            }
 
             try
             {
@@ -701,7 +704,35 @@ namespace Functions
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to open Excel file '{filePath}'", ex);
+                try
+                {
+                    OpenExportDirectory(filePath);
+                }
+                catch (Exception directoryException)
+                {
+                    throw new AggregateException(
+                        $"Failed to open Excel file '{filePath}' and its containing directory.",
+                        ex,
+                        directoryException);
+                }
+            }
+        }
+
+        private static void OpenExportDirectory(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath) ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+                throw new DirectoryNotFoundException($"Excel export directory was not found for '{filePath}'.");
+
+            using (var process = new Process())
+            {
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = directory,
+                    WorkingDirectory = directory,
+                    UseShellExecute = true
+                };
+                process.Start();
             }
         }
 
