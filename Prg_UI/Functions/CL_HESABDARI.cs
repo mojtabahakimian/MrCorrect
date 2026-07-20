@@ -2441,44 +2441,34 @@ namespace Prg_Proccessy.FUNCTIONS
             }
             .Where(name => !string.IsNullOrWhiteSpace(name))
             .Distinct(StringComparer.Ordinal)
-            .Select(name => "(USER_NAME = " + SqlUnicodeLiteral(name) + ")");
+            .Select(name => "USER_NAME = " + SqlUnicodeLiteral(name))
+            .ToList();
 
-            return "(" + string.Join(" or ", userNames) + ")";
+            return userNames.Count == 0
+                ? string.Empty
+                : "(" + string.Join(" OR ", userNames) + ")";
         }
 
         public static string UserOnChart(int USERCOD)
         {
-            string UserOnChartRet = "";
-            var vs = "";
             var RST = dbms.DoGetDataSQL<USERCHART_QRE>("SELECT SAL_NAME , CHARTSAZMANI.SUBUSERCO, CHARTSAZMANI.USERCO FROM CHARTSAZMANI LEFT OUTER JOIN  SALA_DTL ON CHARTSAZMANI.SUBUSERCO = SALA_DTL.IDD WHERE (((CHARTSAZMANI.USERCO)=" + USERCOD + "))").ToList();
-            if (RST.Count > 0)
-            {
-                //while (!RST.EOF)
-                foreach (var item in RST)
-                {
-                    if (item.SUBUSERCO == 0)
-                    {
-                        goto allu;
-                    }
 
-                    var userRestriction = BuildUserNameRestriction(DECODEUN(item.SAL_NAME));
-                    if (string.IsNullOrEmpty(vs))
-                    {
-                        vs = userRestriction + " ";
-                    }
-                    else
-                    {
-                        vs = vs + " or " + userRestriction + " ";
-                    }
-                    //RST.MoveNext();
-                }
-                vs = "(" + vs + ")";
+            // SUBUSERCO = 0 means that the chart owner is not restricted to named sub-users.
+            // Return no SQL fragment regardless of the database row order.
+            if (RST.Any(item => item.SUBUSERCO == 0))
+            {
+                return string.Empty;
             }
 
-        allu:
+            var userRestrictions = RST
+                .Select(item => BuildUserNameRestriction(DECODEUN(item.SAL_NAME)))
+                .Where(restriction => !string.IsNullOrWhiteSpace(restriction))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
 
-            UserOnChartRet = vs;
-            return UserOnChartRet;
+            return userRestrictions.Count == 0
+                ? string.Empty
+                : "(" + string.Join(" OR ", userRestrictions) + ")";
         }
 
         public static bool BLOCKEDCUST(string HES)

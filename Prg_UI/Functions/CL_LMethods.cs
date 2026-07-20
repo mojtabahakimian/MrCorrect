@@ -2329,6 +2329,37 @@ namespace Prg_UI.Functions
             }
             public List<string> RestrictionMessages { get; set; } = new List<string>();
         }
+
+        private static string SqlUnicodeLiteral(string value)
+        {
+            return "N'" + (value ?? string.Empty).Replace("'", "''") + "'";
+        }
+
+        private static string ToArabicKeYe(string value)
+        {
+            return (value ?? string.Empty)
+                .Replace('\u06CC', '\u064A') // ی -> ي
+                .Replace('\u06A9', '\u0643'); // ک -> ك
+        }
+
+        private static string BuildHeadListUserNameRestriction(string userName)
+        {
+            string normalizedUserName = NormalizeArabicPersian(userName);
+            string[] userNameVariants =
+            {
+                userName,
+                normalizedUserName,
+                ToArabicKeYe(userName),
+                ToArabicKeYe(normalizedUserName)
+            };
+
+            var restrictions = userNameVariants
+                .Distinct(StringComparer.Ordinal)
+                .Select(name => "(dbo.HEAD_LST.USER_NAME = " + SqlUnicodeLiteral(name) + ")");
+
+            return "(" + string.Join(" OR ", restrictions) + ")";
+        }
+
         private static RestrictionInfo GenerateRestrictedSqlQueryInfo(byte TAGCODE, string DEF_VALUE = " WHERE ", bool isOthery = false)
         {
             var info = new RestrictionInfo
@@ -2337,6 +2368,7 @@ namespace Prg_UI.Functions
             };
 
             CL_CCNNMANAGER? dbms = new CL_CCNNMANAGER();
+            string currentUserRestriction = BuildHeadListUserNameRestriction(CL_HESABDARI.UCurrentUser());
 
             string GetAndQreOrNo()
             {
@@ -2381,7 +2413,7 @@ namespace Prg_UI.Functions
                 {
                     //تاریخ محدود (تاریخ قابل برگشت) اعمال میشود ...↓
                     info.RestrictionMessages.Add("محدود به تاریخ برگشت");
-                    var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
+                    var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND {currentUserRestriction} GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
 
                     if (result.Count > 0 && Convert.ToDouble(Baseknow.CPI) > 0) //تعداد تاریخ قابل برگشت برای مشاهده
@@ -2398,7 +2430,7 @@ namespace Prg_UI.Functions
                         }
 
                         info.WhereClause += dateResult > 0
-                            ? $" {GetAndQreOrNo()} dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}' AND dbo.HEAD_LST.DATE_N >= {dateResult} "
+                            ? $" {GetAndQreOrNo()} {currentUserRestriction} AND dbo.HEAD_LST.DATE_N >= {dateResult} "
                             : string.Empty;
                     }
                 }
@@ -2434,9 +2466,8 @@ namespace Prg_UI.Functions
 
                     if (defaultUserRestriction)
                     {
-                        //فقط فاکتور های کاربری خودش را ببیند
-                        //info.WhereClause += $" {GetAndQreOrNo()} ((USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
-                        info.WhereClause += $" {GetAndQreOrNo()} ((dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (dbo.HEAD_LST.USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
+                        //فقط فاکتورهای ثبت‌شده با نام کاربری خودش (با حروف فارسی یا عربی) را ببیند
+                        info.WhereClause += $" {GetAndQreOrNo()} {currentUserRestriction} ";
                         info.RestrictionMessages.Add("فقط نمایش اطلاعات ثبت شده توسط شما");
                     }
                 }
