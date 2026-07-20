@@ -657,22 +657,47 @@ namespace Functions
 
         private static async Task OpenExcelFile(string filePath)
         {
-            await Task.Run(() =>
+            // Some Excel writers (and antivirus/indexing software) keep the newly-created
+            // file unavailable for a very short time after SaveAs returns.  Starting the
+            // shell immediately in that window intermittently results in Win32 error 2.
+            const int maxAttempts = 20;
+            const int retryDelayMilliseconds = 100;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
                 try
                 {
-                    var process = new System.Diagnostics.Process();
-                    process.StartInfo = new System.Diagnostics.ProcessStartInfo(filePath)
+                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
-                        UseShellExecute = true
-                    };
-                    process.Start();
+                        if (stream.Length == 0)
+                            throw new IOException("The exported Excel file is empty.");
+                    }
+
+                    using (var process = new Process())
+                    {
+                        process.StartInfo = new ProcessStartInfo
+                        {
+                            FileName = filePath,
+                            WorkingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty,
+                            UseShellExecute = true
+                        };
+                        process.Start();
+                    }
+
+                    return;
                 }
+                catch (Exception ex) when (
+                    attempt < maxAttempts &&
+                    (ex is FileNotFoundException || ex is DirectoryNotFoundException || ex is IOException))
+                {
+                    await Task.Delay(retryDelayMilliseconds);
+                }
+
                 catch (Exception ex)
                 {
-                    throw new Exception("Failed to open Excel file", ex);
+                    throw new Exception($"Failed to open Excel file '{filePath}'", ex);
                 }
-            });
+            }
         }
 
         private static string GetUniqueFilePath(string fileName)
