@@ -1,6 +1,5 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
-using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -334,6 +333,31 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ActiveFilters.Add($"{columnName} = NULL");
                 ApplyCumulativeFilter();
             }
+        }
+
+        private void FilterByCustomText_Click(object sender, RoutedEventArgs e)
+        {
+            var (columnName, _) = GetSelectedCellDetails();
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            var initialValue = GetSelectedText();
+            var inputDialog = new TextInputDialog(
+                string.IsNullOrWhiteSpace(initialValue) ? string.Empty : initialValue,
+                GENERAL_RANG.Background)
+            {
+                Owner = this
+            };
+
+            if (inputDialog.ShowDialog() != true) return;
+            var searchText = inputDialog.SearchText;
+
+            filterService.AddFilter(columnName, searchText, isExclusion: false, isExactMatch: false, normalizePersianText: true);
+            ActiveFilters.Add($"{columnName} Persian Contains \"{searchText}\"");
+            ApplyCumulativeFilter();
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
