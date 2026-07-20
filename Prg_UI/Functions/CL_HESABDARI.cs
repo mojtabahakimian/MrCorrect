@@ -1610,6 +1610,8 @@ namespace Prg_Proccessy.FUNCTIONS
                 case "TGUSER": WANTEDFORMRet = "TGUSER"; break;
                 case "DEPEMAL": WANTEDFORMRet = "DEPEMAL"; break;
                 case "USERS": WANTEDFORMRet = "USERS"; break;
+
+                case "IRAN_SALES_MAP": WANTEDFORMRet = "IRAN_SALES_MAP"; break;
             }
 
             try

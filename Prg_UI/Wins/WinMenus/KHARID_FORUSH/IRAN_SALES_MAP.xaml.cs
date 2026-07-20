@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -140,6 +141,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "IRAN_SALES_MAP", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            if (!this.IsLoaded)
+            {
+                this.Close();
+                return;
+            }
 
             CL_PRC_LOADER.ShowPreloader();
 

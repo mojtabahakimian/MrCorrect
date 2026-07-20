@@ -3815,7 +3815,15 @@ END
 "); } catch { }
                 }
 
-
+                if (isCustomCall)
+                {
+                    try
+                    {
+                        db.Execute(@"INSERT INTO TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+                                     VALUES ('IRAN_SALES_MAP', N'گزارش فروش روی نقشه ایران', 3, 5, 417, GETDATE());");
+                    }
+                    catch (Exception) { }
+                }
             }
         }
         private static void SalaryScript(bool isCustomCall, SqlConnection db)
