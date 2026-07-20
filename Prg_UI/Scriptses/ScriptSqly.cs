@@ -917,7 +917,7 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									                     sd.vra AS VatRate 
 									                 FROM dbo.INVO_LST il
 									                 JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									                 WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg
+									                 WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0
 									             ),
 									             AppliedDiscounts AS (
 									                 SELECT
@@ -950,41 +950,51 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 									             )
 									             UPDATE il
 									             SET 
-									                 il.N_KOL = flv.TF1_Final,
-									                 il.TKHN = flv.TF2_Final,
-									                 il.N_MOIN = flv.TotalLineDiscount,
-									                 il.IMBAA = flv.LineVAT
+									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE flv.TF1_Final END,
+									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE flv.TF2_Final END,
+									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END,
+									                 il.IMBAA = CASE 
+									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END)) * sd.vra / 100.0)
+									                     ELSE 0 
+									                 END
 									             FROM dbo.INVO_LST il
-									             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id;
+									             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id
+									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+									             WHERE il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									         END
 									         ELSE 
 									         BEGIN
 									             UPDATE il
 									             SET 
-									                 il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
+									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
+									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
 									                 il.IMBAA = CASE 
 									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                         FLOOR(il.MABL_K * sd.vra / 100.0)
+									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
 									                     ELSE 0 
 									                 END
 									             FROM dbo.INVO_LST il
 									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg;
+									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									         END
 									     END
 									     ELSE 
 									     BEGIN
 									         UPDATE il
 									         SET 
-									             il.N_KOL = 0, il.N_MOIN = 0, il.TKHN = 0,
+									             il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
+									             il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
+									             il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
 									             il.IMBAA = CASE 
 									                 WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                     FLOOR(il.MABL_K * sd.vra / 100.0)
+									                     FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
 									                 ELSE 0 
 									             END
 									         FROM dbo.INVO_LST il
 									         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg;
+									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									     END
 									 
 									     SELECT 
@@ -1873,7 +1883,8 @@ BEGIN
 			ON IL.CODE = VPK.CODE
 			   AND VPK.PORID = @PORID
 	WHERE IL.NUMBER = @NUMBER
-		  AND IL.TAG = @TAG;
+		  AND IL.TAG = @TAG
+		  AND ISNULL(IL.JAY, 0) = 0;
 
 	-- ========== ۶. محاسبه درصد نهایی ==========
 	IF ISNULL(@TotalMablk, 0) > 0
@@ -5905,6 +5916,12 @@ BEGIN
         RETURN;
     END;
 
+    -- گارد Idempotency: جلوگیری از برگشت دوباره مرخصی یا اقساط پس از حذف خروجی‌های RUN.
+    IF NOT EXISTS (SELECT 1 FROM PAY2_RUN_LINE WHERE RUN_ID = @RUN_ID)
+    BEGIN
+        RETURN;
+    END;
+
     -- 1. بازگرداندن دقیق تعداد اقساط کسر شده در این RUN (فقط وام‌های درگیر همین RUN)
     UPDATE L SET L.PAID_INST = L.PAID_INST - (
         SELECT COUNT(1) FROM PAY2_LOAN_SCHED LS
@@ -6089,7 +6106,13 @@ BEGIN
     BEGIN
         DECLARE @THIS_AMT BIGINT =
             CASE WHEN @I = @TOTAL_INST
-                 THEN (SELECT AMOUNT - @INSTALLMENT*(@TOTAL_INST-1) FROM PAY2_LOAN WHERE LOAN_ID=@LOAN_ID)
+                 THEN (
+                    SELECT CASE
+                             WHEN AMOUNT - (@INSTALLMENT * (@TOTAL_INST - 1)) < 0 THEN 0
+                             ELSE AMOUNT - (@INSTALLMENT * (@TOTAL_INST - 1))
+                           END
+                    FROM PAY2_LOAN WHERE LOAN_ID = @LOAN_ID
+                 )
                  ELSE @INSTALLMENT
             END;
 
@@ -6284,8 +6307,8 @@ BEGIN
             -- مانده خام از حسابداری
             ISNULL((
                 SELECT CAST(SUM(D.BED - D.BES) AS BIGINT)
-                FROM DEED_HED H WITH (NOLOCK)
-                INNER JOIN DEED_DTL D WITH (NOLOCK) ON H.N_S = D.N_S
+                FROM DEED_HED H
+                INNER JOIN DEED_DTL D ON H.N_S = D.N_S
                 WHERE
                     D.HES_K = @HES_K
                     AND D.HES_M = @HES_M
@@ -6505,7 +6528,8 @@ INCLUDE ([JOB_ID]);"); } catch { }
                     //-- ================================================================
                     //-- ۲. SP_PAY2_GEN_DEED — تولید سند حسابداری حقوق و بیمه
                     //-- ================================================================
-                    db.Execute(@"CREATE OR ALTER PROCEDURE [dbo].[SP_PAY2_GEN_DEED]
+                    db.Execute(@"
+CREATE OR ALTER PROCEDURE [dbo].[SP_PAY2_GEN_DEED]
     @RUN_ID  INT,
     @CALC_BY INT = NULL,
     @DEED_MODE TINYINT = NULL
@@ -6567,8 +6591,20 @@ BEGIN
     END
 
     -- ─────────────────────────────────────────────────────────────────
-    -- گاردهای امنیتی (جلوگیری از کمبود حساب‌ها)
+    -- گاردهای امنیتی (جلوگیری از منفی شدن خالص و کمبود حساب‌ها)
     -- ─────────────────────────────────────────────────────────────────
+    DECLARE @NegEmpId INT, @NegEmpName NVARCHAR(100), @NegAmount BIGINT;
+    SELECT TOP 1 @NegEmpId = RL.EMP_ID, @NegEmpName = E.LAST_NAME + N' ' + E.FIRST_NAME, @NegAmount = RL.NET_PAY
+    FROM PAY2_RUN_LINE RL INNER JOIN PAY2_EMPLOYEE E ON RL.EMP_ID = E.EMP_ID
+    WHERE RL.RUN_ID = @RUN_ID AND RL.NET_PAY < 0;
+
+    IF @NegEmpId IS NOT NULL
+    BEGIN
+        DECLARE @Err1 NVARCHAR(500) = N'صدور سند متوقف شد: خالص پرداختی پرسنل منفی است. کد: ' + CAST(@NegEmpId AS NVARCHAR) + N' | نام: ' + @NegEmpName + N' | مبلغ بدهی: ' + CAST(ABS(@NegAmount) AS NVARCHAR) + N' ریال.';
+        RAISERROR(@Err1, 16, 1);
+        RETURN;
+    END
+
     IF @ACC_SALARY_PAY IS NULL
     BEGIN
         RAISERROR(N'حساب پرداختنی حقوق (SALARY_PAYABLE) برای کارگاه تنظیم نشده است.', 16, 1);
@@ -6607,22 +6643,23 @@ BEGIN
       )
       AND (
            NULLIF(TRIM(E.ACC_T), '') IS NULL 
+           OR TRIM(E.ACC_T) = @ACC_SALARY_PAY 
       );
 
     IF @BadEmpName IS NOT NULL
     BEGIN
-        DECLARE @Err4 NVARCHAR(500) = N'صدور سند متوقف شد: کد تفصیلی (ACC_T) برای پرسنل نامعتبر است. حساب پرسنل نمی‌تواند خالی باشد. نام پرسنل: ' + @BadEmpName + N' (' + @BadAccT + N')';
+        DECLARE @Err4 NVARCHAR(500) = N'صدور سند متوقف شد: کد تفصیلی (ACC_T) برای پرسنل نامعتبر است. حساب پرسنل نمی‌تواند خالی یا برابر با ریشه کل باشد. نام پرسنل: ' + @BadEmpName + N' (' + @BadAccT + N')';
         RAISERROR(@Err4, 16, 1);
         RETURN;
     END
 
     -- ─────────────────────────────────────────────────────────────────
-    -- جدول موقت محاسبات و ایجاد ردیف‌های خام
+    -- جدول موقت محاسبات و ایجاد ردیف‌های خام (Summary vs Traceable)
     -- ─────────────────────────────────────────────────────────────────
     CREATE TABLE #SalarySplit (
         EMP_ID INT PRIMARY KEY,
         FULL_NAME NVARCHAR(150),
-        ACC_T NVARCHAR(50),
+        SUFFIX NVARCHAR(50),
         EXP_TOLID BIGINT,
         EXP_EDARI BIGINT,
         EXP_FOROSH BIGINT,
@@ -6636,7 +6673,19 @@ BEGIN
         OTHER_DED BIGINT
     );
 
-    ;WITH SplitBase AS (
+    ;WITH EmpAcc AS (
+        SELECT 
+            E.EMP_ID, E.LAST_NAME + N' ' + E.FIRST_NAME AS FULL_NAME,
+            CASE 
+                WHEN E.ACC_T LIKE @ACC_SALARY_PAY + '-%' 
+                     THEN NULLIF(TRIM(SUBSTRING(E.ACC_T, LEN(@ACC_SALARY_PAY) + 2, 100)), '')
+                ELSE NULLIF(TRIM(E.ACC_T), '')
+            END AS SUFFIX
+        FROM PAY2_EMPLOYEE E
+        INNER JOIN PAY2_RUN_LINE RL ON E.EMP_ID = RL.EMP_ID
+        WHERE RL.RUN_ID = @RUN_ID
+    ),
+    SplitBase AS (
         SELECT 
             RL.EMP_ID, RL.GROSS_PAY, A.DAYS_TOLID, A.DAYS_EDARI, A.DAYS_FOROSH, A.DAYS_KHADAMAT,
             CAST(CASE WHEN A.WORK_DAYS > 0 THEN ROUND((RL.GROSS_PAY * A.DAYS_TOLID) / A.WORK_DAYS, 0) ELSE 0 END AS BIGINT) AS R_T,
@@ -6649,21 +6698,21 @@ BEGIN
         WHERE RL.RUN_ID = @RUN_ID
     )
     INSERT INTO #SalarySplit (
-        EMP_ID, FULL_NAME, ACC_T, EXP_TOLID, EXP_EDARI, EXP_FOROSH, EXP_KHADAMAT, 
+        EMP_ID, FULL_NAME, SUFFIX, EXP_TOLID, EXP_EDARI, EXP_FOROSH, EXP_KHADAMAT, 
         NET_PAY, INS_WORKER, INS_EMPLOYER, TAX_AMOUNT, LOAN_DED, ADVANCE_DED, OTHER_DED
     )
     SELECT 
-        B.EMP_ID, E.LAST_NAME + N' ' + E.FIRST_NAME, NULLIF(TRIM(E.ACC_T), ''),
+        B.EMP_ID, E.FULL_NAME, E.SUFFIX,
         CASE WHEN B.DAYS_TOLID > 0 THEN B.R_T + (B.GROSS_PAY - (B.R_T + B.R_E + B.R_F + B.R_K)) ELSE B.R_T END,
         CASE WHEN B.DAYS_TOLID = 0 AND B.DAYS_EDARI > 0 THEN B.R_E + (B.GROSS_PAY - (B.R_T + B.R_E + B.R_F + B.R_K)) ELSE B.R_E END,
         CASE WHEN B.DAYS_TOLID = 0 AND B.DAYS_EDARI = 0 AND B.DAYS_FOROSH > 0 THEN B.R_F + (B.GROSS_PAY - (B.R_T + B.R_E + B.R_F + B.R_K)) ELSE B.R_F END,
         CASE WHEN B.DAYS_TOLID = 0 AND B.DAYS_EDARI = 0 AND B.DAYS_FOROSH = 0 THEN B.R_K + (B.GROSS_PAY - (B.R_T + B.R_E + B.R_F + B.R_K)) ELSE B.R_K END,
         B.NET_PAY, B.INS_WORKER, B.INS_EMPLOYER, B.TAX_AMOUNT, B.LOAN_DED, B.ADVANCE_DED, B.OTHER_DED
     FROM SplitBase B
-    INNER JOIN PAY2_EMPLOYEE E ON B.EMP_ID = E.EMP_ID;
+    INNER JOIN EmpAcc E ON B.EMP_ID = E.EMP_ID;
 
     -- ─────────────────────────────────────────────────────────────────
-    -- جمع‌آوری مقادیر نهایی در جدول
+    -- جمع‌آوری مقادیر نهایی در جدول برای ولیدیشن حساب‌ها
     -- ─────────────────────────────────────────────────────────────────
     CREATE TABLE #FinalArticles (
         HES_CODE NVARCHAR(100) COLLATE database_default,
@@ -6693,15 +6742,9 @@ BEGIN
         UNION ALL 
         SELECT CAST(@ACC_INS_EXP AS NVARCHAR(100)), CAST(N'هزینه بیمه کارفرما ' + @ML AS NVARCHAR(500)), CAST(SUM(INS_EMPLOYER) AS BIGINT), CAST(0 AS BIGINT), CAST('INS_EXP' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 5
         FROM #SalarySplit HAVING SUM(INS_EMPLOYER) > 0
-        
-        -- 🚀 فیکس تراز در حالت کلی: افزودن امکان بدهکار شدنِ حقوق در صورت خالص منفی
         UNION ALL 
         SELECT CAST(@ACC_SALARY_PAY AS NVARCHAR(100)), CAST(N'حقوق پرداختنی ' + @ML AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(SUM(NET_PAY) AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 6
         FROM #SalarySplit HAVING SUM(NET_PAY) > 0
-        UNION ALL 
-        SELECT CAST(@ACC_SALARY_PAY AS NVARCHAR(100)), CAST(N'بدهی حقوق (خالص منفی) ' + @ML AS NVARCHAR(500)), CAST(ABS(SUM(NET_PAY)) AS BIGINT), CAST(0 AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 6
-        FROM #SalarySplit HAVING SUM(NET_PAY) < 0
-        
         UNION ALL 
         SELECT CAST(@ACC_INS_PAYABLE AS NVARCHAR(100)), CAST(N'بیمه تأمین اجتماعی ' + @ML AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(SUM(INS_WORKER + INS_EMPLOYER) AS BIGINT), CAST('INS_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 7
         FROM #SalarySplit HAVING SUM(INS_WORKER + INS_EMPLOYER) > 0
@@ -6709,63 +6752,57 @@ BEGIN
         SELECT CAST(@ACC_TAX_PAYABLE AS NVARCHAR(100)), CAST(N'مالیات حقوق ' + @ML AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(SUM(TAX_AMOUNT) AS BIGINT), CAST('TAX_PAYABLE' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 8
         FROM #SalarySplit HAVING SUM(TAX_AMOUNT) > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'کسر اقساط وام: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(LOAN_DED AS BIGINT), CAST('LOAN_HES' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 9
+        SELECT CAST(CONCAT_WS('-', @ACC_LOAN_HES, SUFFIX) AS NVARCHAR(100)), CAST(N'کسر اقساط وام: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(LOAN_DED AS BIGINT), CAST('LOAN_HES' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 9
         FROM #SalarySplit WHERE LOAN_DED > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'تصفیه مساعده: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(ADVANCE_DED AS BIGINT), CAST('ADVANCE_SETTLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 10
+        SELECT CAST(CONCAT_WS('-', @ACC_ADV_HES, SUFFIX) AS NVARCHAR(100)), CAST(N'تصفیه مساعده: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(ADVANCE_DED AS BIGINT), CAST('ADVANCE_SETTLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 10
         FROM #SalarySplit WHERE ADVANCE_DED > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'سایر کسورات: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(OTHER_DED AS BIGINT), CAST('OTHER_DED' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 11
+        SELECT CAST(CONCAT_WS('-', @ACC_OTHER_DED_HES, SUFFIX) AS NVARCHAR(100)), CAST(N'سایر کسورات: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(OTHER_DED AS BIGINT), CAST('OTHER_DED' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 11
         FROM #SalarySplit WHERE OTHER_DED > 0;
     END
     ELSE IF @DEED_MODE = 2
     BEGIN
         INSERT INTO #FinalArticles
-        SELECT CAST(@ACC_SALARY_TOLID AS NVARCHAR(100)), CAST(N'هزینه حقوق تولید ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_TOLID AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_TOLID' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 1
+        SELECT CAST(CONCAT_WS('-', @ACC_SALARY_TOLID, SUFFIX) AS NVARCHAR(100)), CAST(N'هزینه حقوق تولید ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_TOLID AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_TOLID' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 1
         FROM #SalarySplit WHERE EXP_TOLID > 0
         UNION ALL 
-        SELECT CAST(@ACC_SALARY_EDARI AS NVARCHAR(100)), CAST(N'هزینه حقوق اداری ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_EDARI AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_EDARI' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 2
+        SELECT CAST(CONCAT_WS('-', @ACC_SALARY_EDARI, SUFFIX) AS NVARCHAR(100)), CAST(N'هزینه حقوق اداری ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_EDARI AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_EDARI' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 2
         FROM #SalarySplit WHERE EXP_EDARI > 0
         UNION ALL 
-        SELECT CAST(@ACC_SALARY_FOROSH AS NVARCHAR(100)), CAST(N'هزینه حقوق فروش ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_FOROSH AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_FOROSH' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 3
+        SELECT CAST(CONCAT_WS('-', @ACC_SALARY_FOROSH, SUFFIX) AS NVARCHAR(100)), CAST(N'هزینه حقوق فروش ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_FOROSH AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_FOROSH' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 3
         FROM #SalarySplit WHERE EXP_FOROSH > 0
         UNION ALL 
-        SELECT CAST(@ACC_SALARY_KHADAMAT AS NVARCHAR(100)), CAST(N'هزینه حقوق خدمات ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_KHADAMAT AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_KHADAMAT' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 4
+        SELECT CAST(CONCAT_WS('-', @ACC_SALARY_KHADAMAT, SUFFIX) AS NVARCHAR(100)), CAST(N'هزینه حقوق خدمات ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(EXP_KHADAMAT AS BIGINT), CAST(0 AS BIGINT), CAST('EXP_KHADAMAT' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 4
         FROM #SalarySplit WHERE EXP_KHADAMAT > 0
         UNION ALL 
         SELECT CAST(@ACC_INS_EXP AS NVARCHAR(100)), CAST(N'هزینه بیمه کارفرما ' + @ML AS NVARCHAR(500)), CAST(SUM(INS_EMPLOYER) AS BIGINT), CAST(0 AS BIGINT), CAST('INS_EXP' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 5
         FROM #SalarySplit HAVING SUM(INS_EMPLOYER) > 0
-        
-        -- 🚀 فیکس تراز در حالت تفصیلی: اگر خالص پرداختی منفی شود، شخص به شرکت بدهکار است (بدهکار ثبت می‌شود)
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'حقوق پرداختنی: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(NET_PAY AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 6
+        SELECT CAST(CONCAT_WS('-', @ACC_SALARY_PAY, SUFFIX) AS NVARCHAR(100)), CAST(N'حقوق پرداختنی: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(NET_PAY AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 6
         FROM #SalarySplit WHERE NET_PAY > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'بدهی حقوق (خالص منفی): ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(ABS(NET_PAY) AS BIGINT), CAST(0 AS BIGINT), CAST('SALARY_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 6
-        FROM #SalarySplit WHERE NET_PAY < 0
-        
-        UNION ALL 
-        SELECT CAST(@ACC_INS_PAYABLE AS NVARCHAR(100)), CAST(N'بیمه سهم کارگر ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(INS_WORKER AS BIGINT), CAST('INS_PAYABLE_W' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 7
+        SELECT CAST(CONCAT_WS('-', @ACC_INS_PAYABLE, SUFFIX) AS NVARCHAR(100)), CAST(N'بیمه سهم کارگر ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(INS_WORKER AS BIGINT), CAST('INS_PAYABLE_W' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 7
         FROM #SalarySplit WHERE INS_WORKER > 0
         UNION ALL 
         SELECT CAST(@ACC_INS_PAYABLE AS NVARCHAR(100)), CAST(N'بیمه سهم کارفرما ' + @ML AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(SUM(INS_EMPLOYER) AS BIGINT), CAST('INS_PAYABLE_E' AS NVARCHAR(50)), CAST(NULL AS INT), CAST(NULL AS NVARCHAR(150)), 8
         FROM #SalarySplit HAVING SUM(INS_EMPLOYER) > 0
         UNION ALL 
-        SELECT CAST(@ACC_TAX_PAYABLE AS NVARCHAR(100)), CAST(N'مالیات حقوق ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(TAX_AMOUNT AS BIGINT), CAST('TAX_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 9
+        SELECT CAST(CONCAT_WS('-', @ACC_TAX_PAYABLE, SUFFIX) AS NVARCHAR(100)), CAST(N'مالیات حقوق ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(TAX_AMOUNT AS BIGINT), CAST('TAX_PAYABLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 9
         FROM #SalarySplit WHERE TAX_AMOUNT > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'کسر اقساط وام: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(LOAN_DED AS BIGINT), CAST('LOAN_HES' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 10
+        SELECT CAST(CONCAT_WS('-', @ACC_LOAN_HES, SUFFIX) AS NVARCHAR(100)), CAST(N'کسر اقساط وام: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(LOAN_DED AS BIGINT), CAST('LOAN_HES' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 10
         FROM #SalarySplit WHERE LOAN_DED > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'تصفیه مساعده: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(ADVANCE_DED AS BIGINT), CAST('ADVANCE_SETTLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 11
+        SELECT CAST(CONCAT_WS('-', @ACC_ADV_HES, SUFFIX) AS NVARCHAR(100)), CAST(N'تصفیه مساعده: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(ADVANCE_DED AS BIGINT), CAST('ADVANCE_SETTLE' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 11
         FROM #SalarySplit WHERE ADVANCE_DED > 0
         UNION ALL 
-        SELECT CAST(ACC_T AS NVARCHAR(100)), CAST(N'سایر کسورات: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(OTHER_DED AS BIGINT), CAST('OTHER_DED' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 12
+        SELECT CAST(CONCAT_WS('-', @ACC_OTHER_DED_HES, SUFFIX) AS NVARCHAR(100)), CAST(N'سایر کسورات: ' + @ML + N' | ' + FULL_NAME AS NVARCHAR(500)), CAST(0 AS BIGINT), CAST(OTHER_DED AS BIGINT), CAST('OTHER_DED' AS NVARCHAR(50)), CAST(EMP_ID AS INT), CAST(FULL_NAME AS NVARCHAR(150)), 12
         FROM #SalarySplit WHERE OTHER_DED > 0;
     END
 
     -- ─────────────────────────────────────────────────────────────────
-    -- 🚨 اعتبارسنجی Set-Based سطح دیتابیس
+    -- 🚨 اعتبارسنجی Set-Based سطح دیتابیس (جلوگیری از ساخت دیتای یتیم)
     -- ─────────────────────────────────────────────────────────────────
     CREATE TABLE #UniqueAccounts (
         HES_CODE NVARCHAR(100) COLLATE database_default
@@ -6779,7 +6816,6 @@ BEGIN
     ;WITH Parsed AS (
         SELECT 
             HES_CODE,
-            -- 🚀 اصلاح کلیدی: جایگزین کردن """" با "" جهت ساخت JSON معتبر در T-SQL
             TRY_CAST(JSON_VALUE('[""' + REPLACE(HES_CODE, '-', '"",""') + '""]', '$[0]') AS INT) AS K,
             TRY_CAST(JSON_VALUE('[""' + REPLACE(HES_CODE, '-', '"",""') + '""]', '$[1]') AS INT) AS M,
             TRY_CAST(JSON_VALUE('[""' + REPLACE(HES_CODE, '-', '"",""') + '""]', '$[2]') AS INT) AS T1,
@@ -6816,11 +6852,11 @@ BEGIN
         (U.Lvl = 5 AND T3.TNUMBER3 IS NULL) OR
         (U.Lvl = 6 AND T4.TNUMBER4 IS NULL) OR
         U.Lvl > 6 OR 
-        U.T1 IS NULL;
+        U.T1 IS NULL; -- 🚀 تغییر حیاتی: U.M به U.T1 تغییر یافت تا حساب‌های کمتر از ۳ سطح بلوکه شوند
 
     IF LEN(@MissingAccounts) > 0
     BEGIN
-        DECLARE @ErrAcc NVARCHAR(MAX) = N'صدور سند متوقف شد. حساب‌های زیر در سیستم حسابداری نامعتبرند یا فاقد حداقل ۳ سطح (کل-معین-تفصیلی) می‌باشند: ' + SUBSTRING(@MissingAccounts, 1, LEN(@MissingAccounts)-2);
+        DECLARE @ErrAcc NVARCHAR(MAX) = N'صدور سند متوقف شد. حساب‌های زیر نامعتبرند یا فاقد حداقل ۳ سطح (کل-معین-تفصیلی) می‌باشند: ' + SUBSTRING(@MissingAccounts, 1, LEN(@MissingAccounts)-2);
         RAISERROR(@ErrAcc, 16, 1);
         RETURN;
     END

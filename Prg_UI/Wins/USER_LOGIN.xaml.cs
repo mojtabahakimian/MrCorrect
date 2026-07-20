@@ -364,6 +364,7 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
+            //Baseknow.USERCOD = 168; Baseknow.UUSER = "fatemeh Abotalebi";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 56; Baseknow.UUSER = "Mr-kazemi";
@@ -382,7 +383,7 @@ namespace Prg_UI.Wins
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
 
             //new WIN_F_NEWYEAR().Show();

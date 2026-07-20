@@ -46,6 +46,7 @@
 
 
         <!-- Context Menu defined in XAML -->
+        <!-- Context Menu defined in XAML -->
         <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
@@ -56,6 +57,12 @@
             <MenuItem Header="پالودن بدون این بخش" Click="FilterExcludingSelection_Click" >
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FilterRemove" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <!--Custom Text Search Filter - مقاوم در برابر نیم‌فاصله و اختلاف حروف عربی/فارسی-->
+            <MenuItem Header="پالودن با : سفارشی متنی" Click="FilterByCustomText_Click" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Magnify" FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
@@ -112,6 +119,17 @@
             <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
         </Button>
         <!--EndOfHeader ↑-->
+
+        <!-- نوار نمایش فیلترهای فعال (Chip قابل حذف تکی) -->
+        <Border x:Name="Border_ActiveFilters" Margin="10,49,10,0" Height="34" VerticalAlignment="Top"
+                Background="{DynamicResource MaterialDesign.Brush.Background}"
+                BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" BorderThickness="1" CornerRadius="6"
+                Visibility="Collapsed">
+            <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+                <WrapPanel x:Name="Panel_ActiveFilters" Orientation="Horizontal" Margin="4,2,4,2" FlowDirection="RightToLeft"/>
+            </ScrollViewer>
+        </Border>
+
         <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
             <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
                 <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
@@ -174,7 +192,7 @@
                 HeaderStyle="{StaticResource KDGHeader}"
                 PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
                 CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-                Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
+                Margin="10,88,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
 
             <syncfusion:SfDataGrid.Resources>
                 <ResourceDictionary>
