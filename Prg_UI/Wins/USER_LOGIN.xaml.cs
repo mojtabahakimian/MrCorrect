@@ -26,6 +26,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -43,13 +44,16 @@ namespace Prg_UI.Wins
 {
     public partial class USER_LOGIN : Window
     {
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-        System.Windows.Threading.DispatcherTimer MyTimer;
-        bool NowIsReady = false;
-        public bool Krbri_IsFocused { get; private set; } = false;
-        public List<SALA_DTL> USRLST { get; private set; }
+        private const string UserRegistryPath = @"SOFTWARE\DU";
+        private const string UserRegistryValueName = "DU";
+        private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        private readonly DispatcherTimer MyTimer;
+        private bool NowIsReady;
 
-        private Window GetWindowBasedOnSection(string sectionName)
+        public bool Krbri_IsFocused { get; private set; }
+        public List<SALA_DTL> USRLST { get; private set; } = new List<SALA_DTL>();
+
+        private Window? GetWindowBasedOnSection(string sectionName)
         {
             switch (sectionName)
             {
@@ -93,34 +97,53 @@ namespace Prg_UI.Wins
         {
             if (!string.IsNullOrEmpty(Rang_Back))
             {
-                var bc = new BrushConverter();
-                Pop_Border1.Background = (Brush)bc.ConvertFrom(Rang_Back);
+                try
+                {
+                    var bc = new BrushConverter();
+                    if (bc.ConvertFromString(Rang_Back) is Brush background)
+                    {
+                        Pop_Border1.Background = background;
+                    }
+                }
+                catch (FormatException) { }
+                catch (NotSupportedException) { }
             }
-            Pop1Text1.Text = Msgtext; Pop1.IsOpen = true;
-            MyTimer.Tick += MyTimer_Tick;
-            MyTimer.Interval = new TimeSpan(0, 0, 0, Secound_Wait, 0);
+
+            Pop1Text1.Text = Msgtext ?? string.Empty;
+            Pop1.IsOpen = true;
+            MyTimer.Stop();
+            MyTimer.Interval = TimeSpan.FromSeconds(Math.Max(1, Secound_Wait));
             MyTimer.Start();
         }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             CL_LMethods.GoExitTheApplication();
             Close();
         }
+
         private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }
+
         public void MyTimer_Tick(object sender, EventArgs e)
         {
             MyTimer.Stop();
-            MyTimer.IsEnabled = false;
             Pop1.IsOpen = false;
         }
 
         private async Task LoadThemeAsync()
         {
-            AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
-            AppThemeManager.ApplyTheme(themeSettings);
+            try
+            {
+                AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
+                AppThemeManager.ApplyTheme(themeSettings);
+            }
+            catch (Exception)
+            {
+                // ورود کاربر نباید به دلیل در دسترس نبودن تنظیمات ظاهری متوقف شود.
+            }
         }
 
         /// <summary>
@@ -129,68 +152,59 @@ namespace Prg_UI.Wins
         /// </summary>
         private async Task OpenMainWindowAsync()
         {
-            try
-            {
-                var themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
-                AppThemeManager.ApplyTheme(themeSettings);
-            }
-            catch { /* در صورت خطا با تم فعلی ادامه می‌دهیم */ }
+            await LoadThemeAsync();
 
             DEFAULT dEFAULT = new DEFAULT();
             Close();
             dEFAULT.ShowDialog();
         }
+
         private static void IncreaseMemoryDesktopHeapExhaustion()
         {
             try
             {
-                if (CL_LMethods.IsCurrentAdministrator())
+                if (!CL_LMethods.IsCurrentAdministrator())
                 {
+                    return;
+                }
 
-                    const string regPath = @"SYSTEM\CurrentControlSet\Control\Session Manager\SubSystems";
-                    const string valueName = "Windows";
-                    const string desiredSharedSection = "SharedSection=1024,20480,1024";
+                const string regPath = @"SYSTEM\CurrentControlSet\Control\Session Manager\SubSystems";
+                const string valueName = "Windows";
+                const string desiredSharedSection = "SharedSection=1024,20480,1024";
 
-                    using (RegistryKey key = Microsoft.Win32.Registry.LocalMachine?.OpenSubKey(regPath, true))
-                    {
-                        if (key != null)
-                        {
-                            string winValue = key.GetValue(valueName)?.ToString();
-                            if (!string.IsNullOrEmpty(winValue))
-                            {
-                                // مقدار SharedSection فعلی را پیدا کن
-                                var rx = new Regex(@"SharedSection=\d+,\d+,\d+");
-                                var match = rx.Match(winValue);
-                                if (match.Success)
-                                {
-                                    if (match.Value != desiredSharedSection)
-                                    {
-                                        // جایگزینی مقدار
-                                        string newWinValue = rx.Replace(winValue, desiredSharedSection);
-                                        key.SetValue(valueName, newWinValue, RegistryValueKind.String);
-                                    }
-                                }
-                                else
-                                {
-                                    // اگر نبود، اضافه کن
-                                    key.SetValue(valueName, winValue + " " + desiredSharedSection, RegistryValueKind.String);
-                                }
-                            }
-                        }
-                    }
+                using RegistryKey? key = Registry.LocalMachine?.OpenSubKey(regPath, writable: true);
+                string? winValue = key?.GetValue(valueName)?.ToString();
+                if (key is null || string.IsNullOrWhiteSpace(winValue))
+                {
+                    return;
+                }
+
+                var rx = new Regex(@"SharedSection=\d+,\d+,\d+");
+                Match match = rx.Match(winValue);
+                string newWinValue = match.Success
+                    ? rx.Replace(winValue, desiredSharedSection)
+                    : $"{winValue} {desiredSharedSection}";
+
+                if (!string.Equals(winValue, newWinValue, StringComparison.Ordinal))
+                {
+                    key.SetValue(valueName, newWinValue, RegistryValueKind.String);
                 }
             }
             catch { }
         }
+
         public USER_LOGIN()
         {
+            MyTimer = new DispatcherTimer();
+            MyTimer.Tick += MyTimer_Tick;
+
             if (CL_Generaly.IsCalledExternally)
             {
-                this.Hide();
+                Hide();
 
                 Baseknow.GetInitTheApp();
                 ScriptSqly.LetsGo();
-                App.splashScreen.LoadComplete();
+                App.splashScreen?.LoadComplete();
 
                 if (CL_Generaly.SectionName == "HEAD_LST_FROOSH22")
                 {
@@ -198,8 +212,8 @@ namespace Prg_UI.Wins
                 }
                 else
                 {
-                    Window window = GetWindowBasedOnSection(CL_Generaly.SectionName);
-                    if (window != null)
+                    Window? window = GetWindowBasedOnSection(CL_Generaly.SectionName);
+                    if (window is not null)
                     {
                         window.Show();
                         window.Activate();
@@ -210,128 +224,85 @@ namespace Prg_UI.Wins
                     }
                 }
 
-                this.Close();
+                Close();
                 return;
             }
 
             Baseknow.GetInitTheApp();
 
-            MyTimer = new System.Windows.Threading.DispatcherTimer();
-
             if (CL_CCNNMANAGER.ConnectedToSQLDB is false)
             {
                 WinConnectionChoose winConnectionChoose = new WinConnectionChoose();
-                this.Close();
+                Close();
                 winConnectionChoose.ShowDialog();
                 return;
             }
 
-            // Moved to Window_ContentRendered to allow UI to show progress
-            //if (!CL_VERSION.IsValidGreaterVersion())
-            //{
-            //    PerformAutoUpdate();
-            //    return;
-            //}
-
-            //
-            //Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ==");
-            //"ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ=="
-
             _ = LoadThemeAsync();
-
-            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
-            //Getting Sms Configuration
-            //if (false)
-            //{
-            //    //SMS.IR
-            //    SMSPINFO.SERVICE_TYPE = SmsServiceType.SmsIr;
-            //    SMSPINFO.API_KEY = @"0lMhIRkepW6McU2ZGxr1UnbxeABzI2aNku73nt66lAUcMbpKccpQgRO0nnCOHB0G";
-            //    SMSPINFO.LINE_NUMBER = 30007487127699;
-            //}
-            //else if (false)
-            //{
-            //    //T-SMS
-            //    SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
-            //    SMSPINFO.USERNAME = @"ghaem_arsh";
-            //    SMSPINFO.PASSWORD = @"Zenvo007";
-            //    SMSPINFO.LINE_NUMBER = 30007227002577;
-            //}
-
-#if DEBUG
-            return;//Should Remove this lone
-#endif
 
             ScriptSqly.LetsGo();
 
-            #region TinyLockCheck
             CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
-
-            //CL_LMethods.DoWriteMyLog($"Lockwatch.GoCheck()  : {Lockwatch.GoCheck()}");
-            if (Lockwatch.GoCheck() == false)
+            if (!Lockwatch.GoCheck())
             {
                 CL_LMethods.GoExitTheApplication();
+                return;
             }
-            #endregion
 
-            Baseknow.mrcorrect = true; //بله همین نرم افزار مسترکارکت خودش هست
+            Baseknow.mrcorrect = true;
 
             InitializeComponent();
-            this.Topmost = true;
+            Topmost = true;
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //async
-            //await
-            //CL_PRC_LOADER.StartPreloader();
             FILL_ALL_COMBOBOXES();
-
             WasUser();
-
             IncreaseMemoryDesktopHeapExhaustion();
+            LoadSmsConfiguration();
 
+            SD_Status.Content = $"SERVER : {CL_Generaly.General_Servername} | DATABASE : {CL_Generaly.General_DBname}";
+            LBL_VERSION.Content = CL_VERSION.MrCorrectFullVersion;
+            Title = $"{Baseknow.YEA} {Baseknow.WIDTH_D}";
+        }
+
+        private void LoadSmsConfiguration()
+        {
             try
             {
-
                 string sqlSms = @"IF COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NOT NULL 
                                       SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,SMSTYPE FROM dbo.SAZMAN 
                                   ELSE 
                                       SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,'TSMS' AS SMSTYPE FROM dbo.SAZMAN";
-                var RST = dbms.DoGetDataSQL<SAZMAN>(sqlSms).FirstOrDefault();
-                if (RST != null)
+                SAZMAN? RST = dbms.DoGetDataSQL<SAZMAN>(sqlSms).FirstOrDefault();
+                if (RST is null)
                 {
-                    SMSPINFO.USERNAME = RST?.SMS_USERNAME;
-                    SMSPINFO.PASSWORD = RST?.SMS_PASSWORD;
-                    if (!string.IsNullOrWhiteSpace(RST?.SMS_TSMSHOST))
-                    {
-                        SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
-                    }
-                    SMSPINFO.API_KEY = RST?.SMS_LIBKEY;
-
-                    switch (RST?.SMSTYPE)
-                    {
-                        case "TSMS": SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl; break;
-
-                        case "SMSIR": SMSPINFO.SERVICE_TYPE = SmsServiceType.SmsIr; break;
-
-                        default: break;
-                    }
+                    return;
                 }
+
+                SMSPINFO.USERNAME = RST.SMS_USERNAME;
+                SMSPINFO.PASSWORD = RST.SMS_PASSWORD;
+                SMSPINFO.API_KEY = RST.SMS_LIBKEY;
+
+                if (long.TryParse(RST.SMS_TSMSHOST, out long lineNumber))
+                {
+                    SMSPINFO.LINE_NUMBER = lineNumber;
+                }
+
+                SMSPINFO.SERVICE_TYPE = RST.SMSTYPE?.ToUpperInvariant() switch
+                {
+                    "SMSIR" => SmsServiceType.SmsIr,
+                    _ => SmsServiceType.TsmsUrl
+                };
             }
             catch (Exception)
             {
                 new Msgwin(false, "در بارگذاری یکسری تنظیمات مربوط به نرم افزار (SMS) خطایی رخ داده , از بروز بودن نرم افزار و اجرا بودن اسکریپت اطمینان حاصل فرمایید").Show();
             }
-
-            //string sname = dbms.Database.SqlQuery<string>("Select @@servername as [ServerName]").FirstOrDefault().ToString();
-            //string dname = dbms.Database.SqlQuery<string>("SELECT DB_NAME() AS [Current Database]").FirstOrDefault().ToString();
-
-            SD_Status.Content = $"SERVER : {CL_Generaly.General_Servername} | DATABASE : {CL_Generaly.General_DBname}";
-            LBL_VERSION.Content = CL_VERSION.MrCorrectFullVersion;
-
-            this.Title = Baseknow.YEA + " " + Baseknow.WIDTH_D;
         }
-        private async void Window_ContentRendered(object sender, EventArgs e) //-----------------------------------------------------------------------------------------
+
+        private async void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
 
@@ -345,128 +316,43 @@ namespace Prg_UI.Wins
             catch { }
 
 #if DEBUG
-            //Baseknow.tindata = "0000000000000000000CORRECT";
-            //CL_Generaly.IsMrCorrectLocky = true;
-
-            //Baseknow.USERCOD = 108;
-            //Baseknow.UUSER = "modir-mali";
-
             Baseknow.mrcorrect = true;
-
-            //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
-            //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
-            //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
-            //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
-            //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
-            //Baseknow.USERCOD = 86; Baseknow.UUSER = "آقاي سجاد راستي";
-            //Baseknow.USERCOD = 174; Baseknow.UUSER = "Miss yeganeh Karbakhsh";
-            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
-            //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
-            //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
-            //Baseknow.USERCOD = 168; Baseknow.UUSER = "fatemeh Abotalebi";
-            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
-            //Baseknow.USERCOD = 56; Baseknow.UUSER = "Mr-kazemi";
-            //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr-pakzaban";
-            //Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
-            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
-
-            CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
-            CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
+            Baseknow.USERCOD = 78;
+            Baseknow.UUSER = "Controller";
             Baseknow.UGRP = "1";
-            //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
+            CL_Generaly.SHIFT_OF_USER = 1;
+            CL_Generaly.VAHED_OF_USER = 1;
 
             new WinBase().Show();
-            //new WIN_About().Show();
-            //new WinConnectionChoose().Show();
-            //new WIN_SANAD_EFTETAHIYAH().Show();
-
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
-
-            //new WIN_F_NEWYEAR().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
-            //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
-
-            //new WIN_OPTIONS().Show();
-            //new WIN_GETFIRSTMOG().Show();
-            //new WIN_LASTPRICE().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "13774,13760");
-
-            //System.Windows.Forms.MessageBox.Show(CL_CCNNMANAGER.CONNECTION_STR);
-            //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
-            //new TR_ANBGRD_LST().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MOGUDI_SEARCH_MAIN, this);
-
-            //new F_MENU_GOZARESH_FROOSH("FR").ShowDialog();
-
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
-
-            //new WinEVENTS(37729).ShowDialog();
             return;
 #endif
-            // Check version logic (Assuming CL_VERSION is reliable)
             if (!CL_VERSION.IsValidGreaterVersion())
             {
-                // Disable UI interactions immediately
                 DisableLoginUI();
-
-                // مسیر موفق با Environment.Exit تمام می‌شود و مسیرهای خطا خروج برنامه را در صف می‌گذارند؛
-                // در هر دو حالت نباید ادامه دهیم و UI لاگینِ غیرفعال‌شده را نمایش بدهیم
                 await PerformAutoUpdateAsync();
                 return;
             }
 
-
             if (CL_Generaly.IsCalledExternally)
             {
-                CL_LMethods.GoExitTheApplication(); return;// for access
+                CL_LMethods.GoExitTheApplication();
+                return;
             }
 
-            this.Show(); //Here for debug comment
-            this.Activate();
-
+            Show();
+            Activate();
             CmbUsers.Focus();
-
             CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
-
-            #region VERY_IMPORTANT_IT_IS_TEMPRORY
-            //Yazdsepar
-            //Baseknow.tindata = "0000000000000000000CORRECT" + "moadian:A11X6O,14040101,A2HGPP,14040101";
-            //CL_Generaly.IsMrCorrectLocky = true;
-            if (false)
-            {
-                //T-SMS
-                SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
-                SMSPINFO.USERNAME = @"yazdseparsms";
-                SMSPINFO.PASSWORD = @"ABCabc123456";
-                SMSPINFO.LINE_NUMBER = 3000119981;
-            }
-            #endregion
-
         }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            UIElement uie = e.OriginalSource as UIElement;
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            if (e.Key == Key.Enter &&
+                Keyboard.Modifiers == ModifierKeys.None &&
+                (!Krbri_IsFocused || !Krbri.IsEnabled))
             {
-                if (Krbri_IsFocused && Krbri.IsEnabled)
-                {
-                    //Enter Key Continue
-                }
-                else
-                {
-                    e.Handled = true;
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
+                e.Handled = true;
+                CL_LMethods.SendKey_US(Key.Tab);
             }
         }
 
@@ -475,8 +361,8 @@ namespace Prg_UI.Wins
             USRLST = dbms.DoGetDataSQL<SALA_DTL>("SELECT IDD,SAL_NAME,PSAL_NAME,GRSAL FROM SALA_DTL WHERE ENABL = 0 ORDER BY SAL_NAME").ToList();
             foreach (var item in USRLST)
             {
-                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME.ToString()).FixPersianChars();
-                item.PSAL_NAME = CL_HESABDARI.DECODEPS(item.PSAL_NAME.ToString()).FixPersianChars();
+                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME ?? string.Empty).FixPersianChars();
+                item.PSAL_NAME = CL_HESABDARI.DECODEPS(item.PSAL_NAME ?? string.Empty).FixPersianChars();
             }
 
             CmbUsers.ItemsSource = USRLST;
@@ -486,19 +372,24 @@ namespace Prg_UI.Wins
         {
             Krbri_IsFocused = true;
         }
+
         private void Greet_LostFocus(object sender, RoutedEventArgs e)
         {
             Krbri_IsFocused = false;
         }
-        private void SetSelectionPassy(PasswordBox passwordBox, int length, int start)
+
+        private static void SetSelectionPassy(PasswordBox passwordBox, int length, int start)
         {
-            passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(passwordBox, new object[] { start, length });
+            MethodInfo selectMethod = passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic);
+            selectMethod?.Invoke(passwordBox, new object[] { start, length });
         }
+
         private void cnnparamlbl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             WinConnectionChoose chos3cnn = new WinConnectionChoose();
             chos3cnn.ShowDialog();
         }
+
         private void Rmzo_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             if (e.Command == ApplicationCommands.Copy || e.Command == ApplicationCommands.Cut)
@@ -506,153 +397,78 @@ namespace Prg_UI.Wins
                 e.Handled = true;
             }
         }
+
         private async void Btn_Goin(object sender, RoutedEventArgs e)
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); //Be Sure to Encod has a Provider to avoid error
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            if (!string.IsNullOrEmpty(Krbri.Text))
-            {
-                if (SecoRmzo.Visibility == Visibility.Visible)
-                {
-                    if (!string.IsNullOrEmpty(SecoRmzo.Text))
-                    {
-                    }
-                    else
-                    {
-                        PopNotifyShow("لطفا رمز عبور را وارد کنید.");
-                        return;
-                    }
-                }
-                if (Rmzo.Visibility == Visibility.Visible)
-                {
-                    if (!string.IsNullOrEmpty(Rmzo.Password))
-                    {
-                    }
-                    else
-                    {
-                        PopNotifyShow("لطفا رمز عبور را وارد کنید.");
-                        return;
-                    }
-                }
-            }
-            else
+            string? userName = Krbri.Text?.Trim();
+            string password = Rmzo.Visibility == Visibility.Visible ? Rmzo.Password : SecoRmzo.Text;
+            if (string.IsNullOrWhiteSpace(userName))
             {
                 PopNotifyShow("لطفا نام کاربری خود را وارد کنید.");
                 return;
             }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                PopNotifyShow("لطفا رمز عبور را وارد کنید.");
+                return;
+            }
+
             lbloader.Visibility = Visibility.Visible;
-
-
-            //await DeletiTemprorayUserFiles();
+            Greet.IsEnabled = false;
 
             try
             {
-                if (Rmzo.Visibility == Visibility.Visible)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        SecoRmzo.Clear();
-                    });
+                string normalizedUserName = userName.FixPersianChars();
+                SALA_DTL? USF = USRLST.FirstOrDefault(x =>
+                    string.Equals(x.SAL_NAME, normalizedUserName, StringComparison.Ordinal) ||
+                    string.Equals(x.SAL_NAME, userName, StringComparison.Ordinal));
 
-                }
-                if (SecoRmzo.Visibility == Visibility.Visible)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        Rmzo.Clear();
-                    });
-                }
-                byte incorPassEnt = 0;
-
-                var USF = USRLST.Where(x => x.SAL_NAME.Equals(Krbri.Text.FixPersianChars())).FirstOrDefault();
                 if (USF is null)
                 {
-                    USF = USRLST.Where(x => x.SAL_NAME.Equals(Krbri.Text)).FirstOrDefault();
-                }
-
-                if (USF != null)
-                {
-                    //if (USF.ENABL != 0)
-                    //{
-                    //    new Msgwin(false, "کاربری شما غیر فعال است , ورود به سیستم مقدور نیست").Show();
-                    //    return;
-                    //}
-
-                    if (Rmzo.Password == "442100200")
-                    {
-                        PSWORD_AfterUpdate();
-
-                        Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-                        Baseknow.USERCOD = USF.IDD;
-                        Baseknow.UGRP = USF.GRSAL.ToString();
-                        StoreInRegister();
-                        await OpenMainWindowAsync();
-                        return;
-
-                    }
-                    if (!string.IsNullOrEmpty(Rmzo.Password))
-                    {
-                        //Check User and Pass
-                        if (USF.PSAL_NAME.Equals(Rmzo.Password.Trim().Replace("ي", "ی").Replace("ك", "ک")))
-                        {
-                            PSWORD_AfterUpdate();
-
-                            Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-                            Baseknow.USERCOD = USF.IDD;
-                            Baseknow.UGRP = USF.GRSAL.ToString();
-                            StoreInRegister();
-                            await OpenMainWindowAsync();
-                        }
-                        else
-                        {
-                            //Pop1.IsOpen = true;
-                            PopNotifyShow("رمز عبور شما صحیح نیست !");
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(SecoRmzo.Text))
-                    {
-                        //Check User and Pass
-                        if (USF.PSAL_NAME.Equals(SecoRmzo.Text.Trim().Replace("ي", "ی").Replace("ك", "ک")))
-                        {
-                            PSWORD_AfterUpdate();
-
-                            Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-                            Baseknow.USERCOD = USF.IDD;
-                            Baseknow.UGRP = USF.GRSAL.ToString();
-                            StoreInRegister();
-                            await OpenMainWindowAsync();
-                        }
-                        else
-                        {
-                            PopNotifyShow("رمز عبور شما صحیح نیست !");
-                        }
-                    }
-                }
-                else
-                {
                     PopNotifyShow("نام کاربری صحیح نیست !");
+                    return;
                 }
-                lbloader.Visibility = Visibility.Hidden;
 
+                string normalizedPassword = password.Trim().Replace("ي", "ی").Replace("ك", "ک");
+                bool passwordIsValid = string.Equals(USF.PSAL_NAME, normalizedPassword, StringComparison.Ordinal);
+                if (!passwordIsValid)
+                {
+                    PopNotifyShow("رمز عبور شما صحیح نیست !");
+                    return;
+                }
+
+                PSWORD_AfterUpdate();
+                Baseknow.UUSER = CL_HESABDARI.Fixp(userName).ToString();
+                Baseknow.USERCOD = USF.IDD;
+                Baseknow.UGRP = USF.GRSAL.ToString();
+                StoreInRegister();
+                await OpenMainWindowAsync();
             }
-            catch (Exception er)
+            catch (Exception)
             {
-                Console.WriteLine(er.ToString());
-                throw;
+                PopNotifyShow("در ورود به سیستم خطایی رخ داد. لطفا دوباره تلاش کنید.");
+            }
+            finally
+            {
+                lbloader.Visibility = Visibility.Hidden;
+                CheckNullyTextes();
             }
         }
-        private void RemovedTick(object sender, RoutedEventArgs e) //وقتی تیک برداشته میشه Hide Pass
+
+        private void RemovedTick(object sender, RoutedEventArgs e)
         {
-            //Rmzo.PasswordChanged -= Rmzo_PasswordChanged;
             Rmzo.Password = SecoRmzo.Text;
             SetSelectionPassy(Rmzo, SecoRmzo.Text.Length, SecoRmzo.Text.Length);
-            //Rmzo.PasswordChar = '●';
 
             SecoRmzo.Visibility = Visibility.Hidden;
             Rmzo.Visibility = Visibility.Visible;
             Rmzo.Focus();
         }
-        private void PutedTick(object sender, RoutedEventArgs e) // وقتی تیک میخوره Show Pass
+
+        private void PutedTick(object sender, RoutedEventArgs e)
         {
             SecoRmzo.Text = Rmzo.Password;
             SecoRmzo.SelectionStart = SecoRmzo.Text.Length + 1;
@@ -661,74 +477,47 @@ namespace Prg_UI.Wins
             SecoRmzo.Visibility = Visibility.Visible;
             SecoRmzo.Focus();
         }
+
         private void StoreInRegister()
         {
-            using (RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("SOFTWARE\\DU"))
-            {
-                key.SetValue("DU", Krbri.Text);
-            }
+            using RegistryKey? key = Registry.CurrentUser.CreateSubKey(UserRegistryPath);
+            key?.SetValue(UserRegistryValueName, Krbri.Text ?? string.Empty);
         }
+
         private void WasUser()
         {
-            using (RegistryKey keyreg = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("SOFTWARE\\DU"))
+            using RegistryKey? keyreg = Registry.CurrentUser.OpenSubKey(UserRegistryPath);
+            if (keyreg?.GetValue(UserRegistryValueName) is string savedUser)
             {
-                if (keyreg != null)
+                Krbri.Text = savedUser;
+                if (CmbUsers.SelectedValue == null)
                 {
-                    if (!ReferenceEquals(keyreg.GetValue("DU"), null))
-                    {
-                        Krbri.Text = keyreg.GetValue("DU").ToString();
-
-                        if (CmbUsers.SelectedValue == null)
-                        {
-                            Krbri.Text = null;
-                        }
-                    }
+                    Krbri.Clear();
                 }
             }
         }
+
         private void Krbri_TextChanged(object sender, TextChangedEventArgs e)
         {
             CheckNullyTextes();
         }
+
         private void CheckNullyTextes()
         {
-            if (NowIsReady == true)
+            if (!NowIsReady)
             {
-                if (!string.IsNullOrEmpty(Krbri.Text))
-                {
-                    if (SecoRmzo.Visibility == Visibility.Visible)
-                    {
-                        if (!string.IsNullOrEmpty(SecoRmzo.Text))
-                        {
-                            Greet.IsEnabled = true;
-                        }
-                        else
-                        {
-                            Greet.IsEnabled = false;
-                        }
-                    }
-                    if (Rmzo.Visibility == Visibility.Visible)
-                    {
-                        if (!string.IsNullOrEmpty(Rmzo.Password))
-                        {
-                            Greet.IsEnabled = true;
-                        }
-                        else
-                        {
-                            Greet.IsEnabled = false;
-                        }
-                    }
-                }
-                else
-                {
-                    Greet.IsEnabled = false;
-                }
+                return;
             }
+
+            string password = Rmzo.Visibility == Visibility.Visible ? Rmzo.Password : SecoRmzo.Text;
+            Greet.IsEnabled = !string.IsNullOrWhiteSpace(Krbri.Text) && !string.IsNullOrEmpty(password);
         }
+
         private void SecoRmzo_TextChanged(object sender, TextChangedEventArgs e)
         {
             CheckNullyTextes();
         }
+
         private void SecoRmzo_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             if (e.Command == ApplicationCommands.Copy || e.Command == ApplicationCommands.Cut)
@@ -736,76 +525,71 @@ namespace Prg_UI.Wins
                 e.Handled = true;
             }
         }
+
         private void Rmzo_PasswordChanged(object sender, RoutedEventArgs e)
         {
             CheckNullyTextes();
         }
+
         private void PSWORD_AfterUpdate()
         {
             Baseknow.mrcorrect = true;
         }
+
         private void Lbl_usernam_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             WinConnectionChoose chos3cnn = new WinConnectionChoose();
             chos3cnn.ShowDialog();
         }
+
         private void Label_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             MaterialThemSettingy materialThemSettingy = new MaterialThemSettingy(); materialThemSettingy.Show();
         }
+
         private void VorudLabel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             WinConnectionChoose choosing_Connection = new WinConnectionChoose();
             choosing_Connection.ShowDialog();
         }
+
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             WinConnectionChoose choosing_Connection = new WinConnectionChoose();
             choosing_Connection.ShowDialog();
         }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            MyTimer?.Stop();
-            MyTimer = null;
+            MyTimer.Stop();
+            MyTimer.Tick -= MyTimer_Tick;
         }
 
         private void CmbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (CmbUsers.SelectedItem is SALA_DTL u)
-            //{
-            //    // مقداردهی TextBox نام کاربری
-            //    Krbri.Text = u.SAL_NAME;
-            //    // تمرکز روی رمز
-            //    if (Rmzo.Visibility == Visibility.Visible) Rmzo.Focus();
-            //    else if (SecoRmzo.Visibility == Visibility.Visible) SecoRmzo.Focus();
-            //}
+            CheckNullyTextes();
         }
 
         #region AutoUpdate
-        // Configuration Constants
         private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
         private const string UPDATE_LOCAL_FOLDER = "update";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
         private const string OLD_FILE_SUFFIX = ".old";
         private const string UPDATE_FAIL_FLAG = "update_failed.flag";
         private const string UPDATE_LOG_FILE = "update_log.txt";
-        private const int COPY_BUFFER_SIZE = 81920; // 80KB
-        private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
-        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15; // Timeout for UNC metadata operations (File.Exists / FileInfo)
+        private const int COPY_BUFFER_SIZE = 81920;
+        private const int READ_TIMEOUT_SECONDS = 20;
+        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15;
         private const int MAX_RETRIES = 10;
-        private const int MAX_SWAP_FAILURES = 2; // بعد از این تعداد شکست در جایگزینی، راهنمای دستی نمایش داده می‌شود
+        private const int MAX_SWAP_FAILURES = 2;
 
         private void DisableLoginUI()
         {
-            try
-            {
-                if (CmbUsers != null) CmbUsers.IsEnabled = false;
-                if (Rmzo != null) Rmzo.IsEnabled = false;
-                if (SecoRmzo != null) SecoRmzo.IsEnabled = false;
-                if (Greet != null) Greet.IsEnabled = false;
-                if (dispass != null) dispass.IsEnabled = false;
-            }
-            catch { /* Ignore UI state errors during shutdown */ }
+            CmbUsers.IsEnabled = false;
+            Rmzo.IsEnabled = false;
+            SecoRmzo.IsEnabled = false;
+            Greet.IsEnabled = false;
+            dispass.IsEnabled = false;
         }
 
         private async Task PerformAutoUpdateAsync()
@@ -960,75 +744,82 @@ namespace Prg_UI.Wins
 
         private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset)
         {
-            // Open source
-            using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, COPY_BUFFER_SIZE, true))
-            // Open destination (OpenOrCreate to support resume)
-            using (var destinationStream = new FileStream(destination, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
+            await using var sourceStream = new FileStream(
+                source,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                COPY_BUFFER_SIZE,
+                useAsync: true);
+            await using var destinationStream = new FileStream(
+                destination,
+                FileMode.OpenOrCreate,
+                FileAccess.Write,
+                FileShare.None,
+                COPY_BUFFER_SIZE,
+                useAsync: true);
+
+            long totalBytes = sourceStream.Length;
+            if (startOffset > totalBytes)
             {
-                long totalBytes = sourceStream.Length;
+                startOffset = 0;
+            }
 
-                // Seek to offset
-                if (startOffset > 0)
-                {
-                    if (startOffset > totalBytes) startOffset = 0; // Safety check
+            if (startOffset > 0)
+            {
+                sourceStream.Seek(startOffset, SeekOrigin.Begin);
+                destinationStream.Seek(startOffset, SeekOrigin.Begin);
+            }
+            else
+            {
+                destinationStream.SetLength(0);
+            }
 
-                    sourceStream.Seek(startOffset, SeekOrigin.Begin);
-                    destinationStream.Seek(startOffset, SeekOrigin.Begin);
-                }
-                else
-                {
-                    // Ensure we start from 0 if no offset (truncate if exists but we want fresh start)
-                    destinationStream.SetLength(0);
-                }
+            byte[] buffer = new byte[COPY_BUFFER_SIZE];
+            long totalRead = startOffset;
+            DateTime lastUpdate = DateTime.MinValue;
 
-                var buffer = new byte[COPY_BUFFER_SIZE];
-                long totalRead = startOffset;
+            while (totalRead < totalBytes)
+            {
                 int bytesRead;
-
-                var lastUpdate = DateTime.MinValue;
-
-                while (totalRead < totalBytes)
+                using (var readTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS)))
                 {
-                    // Read with timeout
-                    var readTask = sourceStream.ReadAsync(buffer, 0, buffer.Length);
-
                     try
                     {
-                        // Use WaitAsync for timeout logic
-                        // This prevents indefinite hanging on a dead connection
-                        bytesRead = await readTask.WaitAsync(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS));
+                        bytesRead = await sourceStream.ReadAsync(buffer.AsMemory(), readTimeout.Token);
                     }
-                    catch (TimeoutException)
+                    catch (OperationCanceledException) when (readTimeout.IsCancellationRequested)
                     {
-                        throw new IOException("Connection timed out (Read).");
-                    }
-
-                    if (bytesRead == 0) break; // End of stream
-
-                    // Write to local file
-                    await destinationStream.WriteAsync(buffer, 0, bytesRead);
-                    totalRead += bytesRead;
-
-                    if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
-                    {
-                        double progress = (double)totalRead / totalBytes * 100;
-                        lastUpdate = DateTime.Now;
-
-                        await this.Dispatcher.InvokeAsync(() =>
-                        {
-                            if (UpdatePrg != null) UpdatePrg.Value = progress;
-                            if (UpdateLbl != null) UpdateLbl.Content = $"در حال دانلود: {progress:F0}%";
-                        });
+                        throw new IOException("مهلت دریافت فایل بروزرسانی به پایان رسید.");
                     }
                 }
 
-                await destinationStream.FlushAsync();
-
-                // قطع شدن استریم قبل از پایان فایل نباید موفقیت حساب شود (باعث جایگزینی فایل خراب می‌شد)
-                if (totalRead < totalBytes)
+                if (bytesRead == 0)
                 {
-                    throw new IOException("اتصال به سرور قطع شد و فایل کامل دریافت نشد.");
+                    break;
                 }
+
+                await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+                totalRead += bytesRead;
+
+                if (totalBytes > 0 && (DateTime.UtcNow - lastUpdate).TotalMilliseconds > 100)
+                {
+                    double progress = (double)totalRead / totalBytes * 100;
+                    lastUpdate = DateTime.UtcNow;
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        UpdatePrg.Value = progress;
+                        UpdateLbl.Content = $"در حال دانلود: {progress:F0}%";
+                    });
+                }
+            }
+
+            await destinationStream.FlushAsync();
+
+            if (totalRead < totalBytes)
+            {
+                throw new IOException("اتصال به سرور قطع شد و فایل کامل دریافت نشد.");
             }
         }
 
