@@ -1054,6 +1054,10 @@ namespace Functions
             /// </summary>
             WIN_PRICE_GRP,
             /// <summary>
+            /// تعریف انحصار فروش
+            /// </summary>
+            ENHESAR_WIN,
+            /// <summary>
             /// بررسی وضعیت کارشناس
             /// </summary>
             NABZMOSH_KARSHENASH,
@@ -1138,6 +1142,8 @@ namespace Functions
                 case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZKAR"), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.NABZMOSH_MOSHTARI: /*بررسی وضعیت مشتری*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZMOSH"), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.ENHESAR_WIN: /*تعریف انحصار فروش*/ CL_LMethods.OpenWindow(OWNERWIN, new ENHESAR_WIN(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_PRICE_GRP: /*تعریف گروه قیمت گذاری*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_PRICE_GRP(), isModalDialog: false, allowMultipleInstances: false); break;
 
@@ -2387,7 +2393,7 @@ namespace Functions
                         break;
 
 
-                 
+
 
                     case 12:
                         CL_MenuManager.OpenWinMenu(
