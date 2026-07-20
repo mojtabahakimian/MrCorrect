@@ -578,7 +578,7 @@
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="حساب تفکیکی تفضیلی" Tag="{x:Static materialDesign:PackIconKind.AccountDetails}" Click="Button_Click_65"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست بدهکاران و بستانکاران F9" Tag="{x:Static materialDesign:PackIconKind.AccountMinus}" Click="Button_Click_31"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست بدهکاران و بستانکاران محدود شده" Tag="{x:Static materialDesign:PackIconKind.AccountMinus}" Click="Button_Click_32"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="صورت حساب هوشمند مشتریان جهت تسویه" Tag="{x:Static materialDesign:PackIconKind.SmartCard}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="صورت حساب هوشمند مشتریان جهت تسویه" Click="Button_Click_94" Tag="{x:Static materialDesign:PackIconKind.SmartCard}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="گزارش عملکرد روزانه خزانه" Tag="{x:Static materialDesign:PackIconKind.Finance}" Click="Button_Click_66"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="چاپ سرفصل حسابها" Tag="{x:Static materialDesign:PackIconKind.PrinterSettings}" Click="Button_Click_67"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست اسنادی که تراز نیستند" Tag="{x:Static materialDesign:PackIconKind.ScaleUnbalanced}" Click="Button_Click_68"/>
@@ -620,7 +620,7 @@
                                     </StackPanel>
                                 </Expander>
 
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="مرتب سازی اسناد" Tag="{x:Static materialDesign:PackIconKind.Sort}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="مرتب سازی اسناد" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.Sort}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="جمع داری اموال" Tag="{x:Static materialDesign:PackIconKind.ChairRolling}" Click="Button_Click_134"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="لیست تراز آزمایشی چهار ستونی کل" Tag="{x:Static materialDesign:PackIconKind.TableLarge}" Click="Button_Click_113"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="لیست تراز آزمایشی چهار ستونی معین" Tag="{x:Static materialDesign:PackIconKind.TableLarge}" Click="Button_Click_114"/>
@@ -639,17 +639,17 @@
                             <StackPanel>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف گرید برای مشتریان" Tag="{x:Static materialDesign:PackIconKind.Grade}" Click="Button_Click_34"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف شروط برای گرید" Tag="{x:Static materialDesign:PackIconKind.Gavel}" Click="Button_Click_131"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف فرمت گرید بندی مشتریان" Tag="{x:Static materialDesign:PackIconKind.FormatListChecks}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف پارامتر های کمی و کیفی" Tag="{x:Static materialDesign:PackIconKind.Tune}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف فرمت گرید بندی مشتریان" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.FormatListChecks}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف پارامتر های کمی و کیفی" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.Tune}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="اعلامیه تخفیف" Tag="{x:Static materialDesign:PackIconKind.TagTextOutline}" Click="Button_Click_166"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف گروه بندی قیمتی" Tag="{x:Static materialDesign:PackIconKind.FormatIndentIncrease}" Click="Button_Click_130"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف گروه و نحوه پرداخت" Tag="{x:Static materialDesign:PackIconKind.Group}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف گروه و نحوه پرداخت" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.Group}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="اعلامیه قیمت" Tag="{x:Static materialDesign:PackIconKind.TagPlus}" Click="Button_Click_89"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="بررسی وضعیت مشتری" Tag="{x:Static materialDesign:PackIconKind.AccountSearch}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="بررسی وضعیت مشتری" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.AccountSearch}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="بررسی وضعیت کارشناس" Tag="{x:Static materialDesign:PackIconKind.AccountTie}" Click="Button_Click_139"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="محاسبه تاخیر پرداختها" Tag="{x:Static materialDesign:PackIconKind.TimerSand}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تنظیمات تاخیرو تعجیل پرداختها" Tag="{x:Static materialDesign:PackIconKind.ClockFast}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف انحصار" Tag="{x:Static materialDesign:PackIconKind.Lock}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="محاسبه تاخیر پرداختها" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.TimerSand}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تنظیمات تاخیرو تعجیل پرداختها" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ClockFast}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف انحصار" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.Lock}"/>
                             </StackPanel>
                         </Expander>
 
@@ -688,7 +688,7 @@
                             <StackPanel>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="نبض فروش" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Nabzeforoosh_Click" x:Name="Nabzeforoosh"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="نبض مالی" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="NabzeMali_Click" x:Name="NabzeMali"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="نبض خرید" Tag="{x:Static materialDesign:PackIconKind.ListBox}" x:Name="NabzeKharid"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="نبض خرید" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}" x:Name="NabzeKharid"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="نبض فعالیت های سازمان" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="NabzeFaliat_Click" x:Name="NabzeFaliat"/>
                             </StackPanel>
                         </Expander>
@@ -700,14 +700,14 @@
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="صدور برگه خروج مواد اولیه از انبار" Tag="{x:Static materialDesign:PackIconKind.ExitToApp}" Click="Button_Click_61"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="صدور برگه ورود کالای ساخته شده به انبار" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_60"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="صدور برگه خروج سایر مواد اولیه از انبار" Tag="{x:Static materialDesign:PackIconKind.ExitToApp}" Click="Button_Click_142"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="ثبت کاربرگ کارکرد پرسنل تولید" Tag="{x:Static materialDesign:PackIconKind.ClockOutline}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="جذب دستمزد تولید و صدور سند" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="ثبت کاربرگ کارکرد پرسنل تولید" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ClockOutline}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="جذب دستمزد تولید و صدور سند" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="لیست آمار تولید" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_117"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="لیست آمار مصرف مواد" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_122"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="مقایسه قیمت تمام شده و فروش" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند عملکرد پایان دوره روش دوم" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند عملکرد کالاها پایان دوره روش اول" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند تعدیلات قیمت تمام شده" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="مقایسه قیمت تمام شده و فروش" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند عملکرد پایان دوره روش دوم" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند عملکرد کالاها پایان دوره روش اول" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند تعدیلات قیمت تمام شده" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                             </StackPanel>
                         </Expander>
 
@@ -721,14 +721,14 @@
                         <!-- مدیریت کارخانه -->
                         <Expander Style="{StaticResource FluentExpander}" FlowDirection="RightToLeft" Header="مدیریت کارخانه" x:Name="ModiriyateKharkhaneh_Expan">
                             <StackPanel>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="محاسبه مواد اولیه مورد نیاز و برنامه ریزی تولید" Tag="{x:Static materialDesign:PackIconKind.ChartTimeline}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="محاسبه مواد اولیه مورد نیاز و برنامه ریزی تولید" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ChartTimeline}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="نمواد فروش کلی" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="نمواد فروش-کلی ریالی بارگیری نشده" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="نمواد فروش نمواد حسابهای کل" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="نموادر حسابهای کل" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="نموادر میزان تولید هر محصول در ماه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="نمودار میزان تولیدات به تفکیک ماه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="نمودار میزان فروش به تفکیک ماه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="نموادر حسابهای کل" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="نموادر میزان تولید هر محصول در ماه" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="نمودار میزان تولیدات به تفکیک ماه" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="نمودار میزان فروش به تفکیک ماه" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="پذیرش و مشاهده تعمیرگاه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف نوع پذیرش" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                             </StackPanel>
@@ -739,7 +739,7 @@
                             <StackPanel>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="بودجه" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_2"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="لیست بودجه" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_7"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تحلیل بودجه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تحلیل بودجه" Click="Button_Click_7" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                             </StackPanel>
                         </Expander>
 
@@ -755,7 +755,7 @@
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="فاکتور خرید" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="FactoreKharid_Click" x:Name="FactoreKharid"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="فاکتور برگشت خرید" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_23"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="فاکتور خرید صادراتی" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_143"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="فاکتور خرید کالای مصرف مستقیم" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="فاکتور خرید کالای مصرف مستقیم" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="راس گیری" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_103"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="ثبت سفارشات" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_151"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="فاکتور فروش صادراتی" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_144"/>
@@ -776,7 +776,7 @@
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_82"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_83"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_84"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="مشاهده مسیر حرکت ویزیتور روی نقشه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="مشاهده مسیر حرکت ویزیتور روی نقشه" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_85"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="تنظیم لیست دستی توزیع" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_86"/>
                                     </StackPanel>
@@ -825,10 +825,10 @@
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست محدود شده مشتریانی که خرید نکرده اندشخص" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_147"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست خرید به تفکیک کالا و قبض باسکول" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_148"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست فروش به تفکیک کالا و قبض باسکول" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_149"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="گزارش خلاصه فروش روزانه" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="گزارش خلاصه فروش روزانه" Click="Button_Click_150" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="گزارش خلاصه فروش روزانه به تفکیک فاکتور" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_150"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست مشخصات کلیه کالاها" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف فرمت چاپی فاکتور فروش" Tag="{x:Static materialDesign:PackIconKind.FormatPaint}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف فرمت چاپی فاکتور فروش" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.FormatPaint}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست فروش کالا به تفکیک اشخاص" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
                                     </StackPanel>
                                 </Expander>
@@ -859,7 +859,7 @@
                                 <!-- زیر منو سایر گزارشات چک ها -->
                                 <Expander Style="{StaticResource FluentExpander}" Header="سایر گزارشات" Margin="10,0,0,0">
                                     <StackPanel>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="به حساب گذاشتن سریالی چک" Tag="{x:Static materialDesign:PackIconKind.BankTransfer}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="به حساب گذاشتن سریالی چک" Click="Button_Click_136" Tag="{x:Static materialDesign:PackIconKind.BankTransfer}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست چکهای برگشتی" Tag="{x:Static materialDesign:PackIconKind.Checkbook}" Click="Button_Click_104"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="چاپ سریع چک Ctrl + V" Tag="{x:Static materialDesign:PackIconKind.Printer}" Click="Button_Click_165"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="لیست چکهای موجود در صندوق" Tag="{x:Static materialDesign:PackIconKind.Checkbook}" Click="Button_Click_111"/>
@@ -870,11 +870,11 @@
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="گزارش به حساب گذاشتن چکها" Tag="{x:Static materialDesign:PackIconKind.BankTransfer}" Click="Button_Click_108"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="چکهای واگذار - برگشت - وصول شده" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_133"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="چکهای پرداختی اعلام وصول یا برگشت شده" Tag="{x:Static materialDesign:PackIconKind.ListBox}" Click="Button_Click_132"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="دفتر روزانه چک جهت چاپ" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف دسته چک و حساب" Tag="{x:Static materialDesign:PackIconKind.BookPlus}"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="فرمت چاپی چکها Ctrl + F6" Tag="{x:Static materialDesign:PackIconKind.FormatPaint}"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="لیست چکهای به حساب گذاشته شده" Tag="{x:Static materialDesign:PackIconKind.Checkbook}"/>
-                                        <Button Style="{StaticResource FluentSidebarItem}" Content="فرمت چاپی برگه به حساب گذاشتن Shift + F6" Tag="{x:Static materialDesign:PackIconKind.BankTransfer}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="دفتر روزانه چک جهت چاپ" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.ListBox}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف دسته چک و حساب" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.BookPlus}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="فرمت چاپی چکها Ctrl + F6" Click="Button_Click_165" Tag="{x:Static materialDesign:PackIconKind.FormatPaint}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="لیست چکهای به حساب گذاشته شده" Click="Button_Click_159" Tag="{x:Static materialDesign:PackIconKind.Checkbook}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="فرمت چاپی برگه به حساب گذاشتن Shift + F6" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.BankTransfer}"/>
                                     </StackPanel>
                                 </Expander>
                             </StackPanel>
@@ -927,14 +927,14 @@
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعیین سطح دسترسی" Tag="{x:Static materialDesign:PackIconKind.Security}" Click="Button_Click_74"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تغییر رمز عبور" Tag="{x:Static materialDesign:PackIconKind.KeyChange}" Click="Button_Click_123"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تغییر نام کاربری یا حذف" Tag="{x:Static materialDesign:PackIconKind.AccountConvert}" Click="Button_Click_124"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="ارسال اطلاعات" Tag="{x:Static materialDesign:PackIconKind.Upload}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="دریافت اطلاعات" Tag="{x:Static materialDesign:PackIconKind.Download}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="ارسال اطلاعات" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.Upload}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="دریافت اطلاعات" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.Download}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="پیش فرض واحد و شیفت" Tag="{x:Static materialDesign:PackIconKind.Factory}" Click="Button_Click_125"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="درباره تهیه کنندگان" Tag="{x:Static materialDesign:PackIconKind.Information}" Click="Button_Click_128"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="مشخصات سیستم" Tag="{x:Static materialDesign:PackIconKind.MonitorDashboard}" Click="Button_Click_59"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="سوابق" Tag="{x:Static materialDesign:PackIconKind.History}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="تنظیمات گروه کاربران" Tag="{x:Static materialDesign:PackIconKind.Cog}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="بلک لیست" Tag="{x:Static materialDesign:PackIconKind.AccountCancel}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="تنظیمات گروه کاربران" Click="Button_Click_74" Tag="{x:Static materialDesign:PackIconKind.Cog}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="بلک لیست" Click="MissingMenuButton_Click" Tag="{x:Static materialDesign:PackIconKind.AccountCancel}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="اتصال به دیتابیس" Tag="{x:Static materialDesign:PackIconKind.DatabaseSettings}" Click="CNNSettingBtn_Click" x:Name="CNNSettingBtn"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تنظیم قالب و رنگ" Tag="{x:Static materialDesign:PackIconKind.Palette}" Click="SettingThemeBtn_Click" x:Name="SettingThemeBtn"/>
                             </StackPanel>

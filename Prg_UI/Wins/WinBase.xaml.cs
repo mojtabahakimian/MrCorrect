@@ -1663,6 +1663,34 @@ namespace Prg_UI.Wins
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_NEWYEAR_SALEMALI, default);
         }
 
+        /// <summary>
+        /// Opens forms that were previously rendered in the sidebar without a click event.
+        /// Keeping this mapping in one place prevents visual menu items from silently becoming inert.
+        /// </summary>
+        private void MissingMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Content is not string caption)
+                return;
+
+            CL_MenuManager.WinNameType? menu = caption switch
+            {
+                "تعریف فرمت گرید بندی مشتریان" => CL_MenuManager.WinNameType.GRADE_FORMAT_WIN,
+                "تعریف پارامتر های کمی و کیفی" => CL_MenuManager.WinNameType.WIN_GSCALE,
+                "بررسی وضعیت مشتری" => CL_MenuManager.WinNameType.NABZMOSH_MOSHTARI,
+                "محاسبه تاخیر پرداختها" => CL_MenuManager.WinNameType.F_MENU_SSM_TAKHIR_PAR,
+                "فاکتور خرید کالای مصرف مستقیم" => CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_DIRECT,
+                "نموادر حسابهای کل" => CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN,
+                "ثبت کاربرگ کارکرد پرسنل تولید" => CL_MenuManager.WinNameType.AMAR_TOLID,
+                "محاسبه مواد اولیه مورد نیاز و برنامه ریزی تولید" => CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT,
+                _ => null
+            };
+
+            if (menu.HasValue)
+                CL_MenuManager.OpenWinMenu(menu.Value, this);
+            else
+                App.SEARCHMENIU_WIN_ST_Show();
+        }
+
         private void Button_Click_168(object sender, RoutedEventArgs e)
         {
             string password = Interaction.InputBox("Enter Administrative Password", "Security Check", "");
