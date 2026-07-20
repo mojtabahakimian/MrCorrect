@@ -338,25 +338,25 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void FilterByCustomText_Click(object sender, RoutedEventArgs e)
         {
             var (columnName, _) = GetSelectedCellDetails();
+
             if (string.IsNullOrEmpty(columnName))
             {
                 universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return;
             }
 
-            var initialValue = GetSelectedText();
-            var inputDialog = new TextInputDialog(
-                string.IsNullOrWhiteSpace(initialValue) ? string.Empty : initialValue,
-                GENERAL_RANG.Background)
-            {
-                Owner = this
-            };
+            string columnHeader = SYNCFUSION_DG.SelectionController?.CurrentCellManager?.CurrentCell?.GridColumn?.HeaderText;
+            if (string.IsNullOrWhiteSpace(columnHeader))
+                columnHeader = columnName;
 
-            if (inputDialog.ShowDialog() != true) return;
-            var searchText = inputDialog.SearchText;
+            string searchText = Win_CustomTextSearch.Show(this, columnHeader);
 
-            filterService.AddFilter(columnName, searchText, isExclusion: false, isExactMatch: false, normalizePersianText: true);
-            ActiveFilters.Add($"{columnName} Persian Contains \"{searchText}\"");
+            // کاربر روی «انصراف» کلیک کرده یا متنی وارد نکرده است
+            if (string.IsNullOrWhiteSpace(searchText))
+                return;
+
+            filterService.AddCustomTextFilter(columnName, searchText, isExclusion: false);
+            ActiveFilters.Add($"{columnHeader} :: جستجوی سفارشی «{searchText}»");
             ApplyCumulativeFilter();
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
@@ -546,13 +546,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!string.IsNullOrEmpty(GetSelectedText()))
+            var element = e.OriginalSource as FrameworkElement;
+            if (element == null) return;
+
+            bool hasSelectedText = !string.IsNullOrEmpty(GetSelectedText());
+            bool hasActiveCell = SYNCFUSION_DG.SelectionController?.CurrentCellManager?.CurrentCell != null;
+
+            if (hasSelectedText || hasActiveCell)
             {
-                var element = e.OriginalSource as FrameworkElement;
-                if (element != null)
-                {
-                    element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
-                }
+                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
         }
 

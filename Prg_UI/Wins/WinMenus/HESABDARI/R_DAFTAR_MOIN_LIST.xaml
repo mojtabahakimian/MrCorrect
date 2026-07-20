@@ -46,22 +46,23 @@
 
 
         <!-- Context Menu defined in XAML -->
+        <!-- Context Menu defined in XAML -->
         <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Filter"  FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="پالودن با: متن سفارشی" Click="FilterByCustomText_Click"
-                      ToolTip="جست‌وجو بدون حساسیت به نیم‌فاصله و ی و ک عربی">
-                <MenuItem.Icon>
-                    <materialDesign:PackIcon Kind="TextSearch" FontSize="14" />
-                </MenuItem.Icon>
-            </MenuItem>
             <!--Filter Excluding Selection-->
             <MenuItem Header="پالودن بدون این بخش" Click="FilterExcludingSelection_Click" >
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FilterRemove" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <!--Custom Text Search Filter - مقاوم در برابر نیم‌فاصله و اختلاف حروف عربی/فارسی-->
+            <MenuItem Header="پالودن با : سفارشی متنی" Click="FilterByCustomText_Click" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Magnify" FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
             <Separator/>
