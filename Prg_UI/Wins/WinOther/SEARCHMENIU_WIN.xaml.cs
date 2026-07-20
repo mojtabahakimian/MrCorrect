@@ -582,7 +582,9 @@ namespace Wins.WinOther
             var normalizedCaption = NormalizeSearchText(item.CAPTION);
             if (normalizedCaption.Contains(normalizedSearchText)) return 0;
 
-            return GetBestTokenWindowDistance(normalizedCaption, normalizedSearchText);
+            return Math.Min(
+                GetBestTokenWindowDistance(normalizedCaption, normalizedSearchText),
+                GetTokenMatchDistance(normalizedCaption, normalizedSearchText));
         }
 
         private static string NormalizeSearchText(string text)
@@ -642,7 +644,32 @@ namespace Wins.WinOther
         private static bool IsFuzzyMatch(string normalizedCaption, string normalizedSearchText)
         {
             var distance = GetBestTokenWindowDistance(normalizedCaption, normalizedSearchText);
-            return distance <= GetAllowedFuzzyDistance(normalizedSearchText.Length);
+            return distance <= GetAllowedFuzzyDistance(normalizedSearchText.Length)
+                || GetTokenMatchDistance(normalizedCaption, normalizedSearchText) != int.MaxValue;
+        }
+
+        private static int GetTokenMatchDistance(string normalizedCaption, string normalizedSearchText)
+        {
+            var captionWords = normalizedCaption.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var searchWords = normalizedSearchText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (captionWords.Length == 0 || searchWords.Length == 0) return int.MaxValue;
+
+            var totalDistance = 0;
+            foreach (var searchWord in searchWords)
+            {
+                var bestWordDistance = captionWords
+                    .Select(captionWord => CalculateDamerauLevenshteinDistance(captionWord, searchWord))
+                    .Min();
+
+                if (bestWordDistance > GetAllowedFuzzyDistance(searchWord.Length))
+                {
+                    return int.MaxValue;
+                }
+
+                totalDistance += bestWordDistance;
+            }
+
+            return totalDistance;
         }
 
         private static int GetBestTokenWindowDistance(string normalizedCaption, string normalizedSearchText)
