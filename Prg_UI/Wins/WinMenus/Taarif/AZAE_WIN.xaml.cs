@@ -96,7 +96,7 @@ namespace Wins.WinMenus.Taarif
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         public CollectionViewSource RecordsData { get; set; } = new CollectionViewSource();
-        public string? NUMBER_TO_OPEN { get; set; } = "115-1-1003";
+        public string? NUMBER_TO_OPEN { get; set; }// = "115-1-1003";
         public bool NowIsReady { get; private set; }
 
         private bool _newrecord = false;
@@ -109,6 +109,162 @@ namespace Wins.WinMenus.Taarif
             set { _newrecord = value; }
         }
         public long? HEADER_ID { get; set; }
+        private bool IsElementWithinAnyDataGrid(DependencyObject element)
+        {
+            while (element != null)
+            {
+                if (element is DataGrid)
+                {
+                    return true; // Found a DataGrid in the ancestry of the focused element
+                }
+                // Move up the visual tree
+                element = VisualTreeHelper.GetParent(element);
+            }
+            return false; // No DataGrid found in the ancestry of the focused element
+        }
+        private void Window_ContentRendered(object sender, System.EventArgs e)
+        {
+            NowIsReady = true;
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            //if (!GRADE_CUST_TAB_SUB_IsInside_Focused && !GRADE_GRP_SUB_IsInside_Focused) { }
+
+            var focusedElement = Keyboard.FocusedElement as DependencyObject;
+            if (!IsElementWithinAnyDataGrid(focusedElement))
+            {
+                UIElement uie = e.OriginalSource as UIElement;
+
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
+            }
+
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
+            {
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
+            }
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            #region SecuritCheck
+            try
+            {
+                
+                string Formname = "AZAE";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                //// 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                //// 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            I_AM_AZAE = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+            FILL_ALL_COMBOBOXES();
+
+            ReGetMasterData();
+
+            ////#region Form_Open
+            ////if (Strings.Mid(Baseknow.tindata, 20, 7) == "CORRECT")
+            ////{
+            ////    //this.GRADE_CUST_TAB_SUB.Visible = true;
+            ////    GRADE_CUST_TAB_SUB.Visibility = Visibility.Visible;
+            ////}
+            ////else
+            ////{
+            ////    GRADE_CUST_TAB_SUB.Visibility = Visibility.Hidden;
+            ////}
+            ////#endregion
+
+            Form_Current();
+
+
+            #region TMP_TEST_SHOULD_REMOVE
+            //HES.SelectedValue = "115-1-1003"; HES.Items.Refresh();
+            //GRADE_CUST_TAB_SUB.IsEnabled = true;
+            //AllowEdits = true;
+            #endregion
+
+            HES.Focus();
+        }
+        private bool HeaderIsValid(bool _DisplayErrors = true)
+        {
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+            if (!long.TryParse(TOPETEB.Text, out _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار سقف اعتباری ریالی مجاز نیست" });
+            }
+            if (!long.TryParse(TOPMEGH.Text, out _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار سقف اعتبار مقداری مجاز نیست" });
+            }
+            if (!Single.TryParse(EMTIAZ.Text, out _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار امتیاز مجاز نیست" });
+            }
+
+            if (string.IsNullOrEmpty(HES.SelectedValue.ToStringNullSafe()))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مشتری نمیتواند خالی باشد!" });
+            }
+
+
+            if (ErrosMessages.Count > 0)
+            {
+                if (_DisplayErrors)
+                {
+                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
+                    new MsgListwin(false, ErrosMessages).ShowDialog();
+                }
+                return false;
+            }
+            return true;
+        }
+        public void Form_Current()
+        {
+            if (!string.IsNullOrEmpty(HES.SelectedValue.ToStringNullSafe()))
+            {
+                this.AllowDeletions = false;
+                this.AllowEdits = false;
+            }
+            else
+            {
+                this.AllowDeletions = true;
+                this.AllowEdits = true;
+            }
+        }
         public void ReGetMasterData()
         {
             // Load master records
@@ -383,7 +539,8 @@ namespace Wins.WinMenus.Taarif
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -468,168 +625,7 @@ namespace Wins.WinMenus.Taarif
                 return _GCNAME_index;
             }
         }
-        private bool IsElementWithinAnyDataGrid(DependencyObject element)
-        {
-            while (element != null)
-            {
-                if (element is DataGrid)
-                {
-                    return true; // Found a DataGrid in the ancestry of the focused element
-                }
-                // Move up the visual tree
-                element = VisualTreeHelper.GetParent(element);
-            }
-            return false; // No DataGrid found in the ancestry of the focused element
-        }
-        private void Window_ContentRendered(object sender, System.EventArgs e)
-        {
-            NowIsReady = true;
-        }
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            //if (!GRADE_CUST_TAB_SUB_IsInside_Focused && !GRADE_GRP_SUB_IsInside_Focused) { }
 
-            var focusedElement = Keyboard.FocusedElement as DependencyObject;
-            if (!IsElementWithinAnyDataGrid(focusedElement))
-            {
-                UIElement uie = e.OriginalSource as UIElement;
-
-                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    e.Handled = true;
-
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
-            }
-
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
-                    {
-                        ChangeIsHappend = true;
-                    }
-                }
-            }
-        }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            #region SecuritCheck
-            try
-            {
-                //
-                string Formname = "AZAE";
-                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
-                // 2. Run Security:
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
-                // 3. Final State Check:
-                if (!this.IsLoaded) { this.Close(); return; }
-            }
-            catch { try { this.Close(); } catch { } }
-            if (!this.IsLoaded) { this.Close(); return; }
-            #endregion
-
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            I_AM_AZAE = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
-            if (!CL_HESABDARI.LETSGO("TARIF"))
-            {
-                this.Close();
-                return;
-            }
-
-            FILL_ALL_COMBOBOXES();
-
-            ReGetMasterData();
-
-            #region Form_Open
-            if (Strings.Mid(Baseknow.tindata, 20, 7) == "CORRECT")
-            {
-                //this.GRADE_CUST_TAB_SUB.Visible = true;
-                GRADE_CUST_TAB_SUB.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                GRADE_CUST_TAB_SUB.Visibility = Visibility.Hidden;
-            }
-            #endregion
-
-            Form_Current();
-
-
-            #region TMP_TEST_SHOULD_REMOVE
-            //HES.SelectedValue = "115-1-1003"; HES.Items.Refresh();
-            //GRADE_CUST_TAB_SUB.IsEnabled = true;
-            //AllowEdits = true;
-            #endregion
-
-            HES.Focus();
-        }
-        private bool HeaderIsValid(bool _DisplayErrors = true)
-        {
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            if (!long.TryParse(TOPETEB.Text, out _))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار سقف اعتباری ریالی مجاز نیست" });
-            }
-            if (!long.TryParse(TOPMEGH.Text, out _))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار سقف اعتبار مقداری مجاز نیست" });
-            }
-            if (!Single.TryParse(EMTIAZ.Text, out _))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار امتیاز مجاز نیست" });
-            }
-
-            if (string.IsNullOrEmpty(HES.SelectedValue.ToStringNullSafe()))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "مشتری نمیتواند خالی باشد!" });
-            }
-
-
-            if (ErrosMessages.Count > 0)
-            {
-                if (_DisplayErrors)
-                {
-                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, ErrosMessages).ShowDialog();
-                }
-                return false;
-            }
-            return true;
-        }
-        public void Form_Current()
-        {
-            if (!string.IsNullOrEmpty(HES.SelectedValue.ToStringNullSafe()))
-            {
-                this.AllowDeletions = false;
-                this.AllowEdits = false;
-            }
-            else
-            {
-                this.AllowDeletions = true;
-                this.AllowEdits = true;
-            }
-        }
         public ObservableCollection<GSCALE> GSCALE_DATA { get; set; } = new ObservableCollection<GSCALE>();
         public List<GSCADTL> GSCADTL_DATA { get; set; } = new List<GSCADTL>(); //Bind
         public bool ChangeIsHappend { get; private set; } = false;
