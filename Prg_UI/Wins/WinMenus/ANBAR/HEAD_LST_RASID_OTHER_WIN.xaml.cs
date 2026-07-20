@@ -734,7 +734,10 @@ namespace Wins.WinMenus.ANBAR
                 hTAG.SelectedValue = HEADER_FAC.TAG.ToStringNullSafe();
 
                 TAH.SelectedValue = HEADER_FAC.TAH.ToStringNullSafe();
-                MOLAH.SelectedValue = HEADER_FAC.MOLAH.ToStringNullSafe();
+                // MOLAH is editable, so its saved value is not necessarily one of the
+                // current ItemsSource entries.  Setting SelectedValue would leave the
+                // editor blank in that case (for example on another user's client).
+                MOLAH.Text = HEADER_FAC.MOLAH.ToStringNullSafe();
 
                 CUST_NO.SelectedValue = HEADER_FAC.CUST_NO.ToStringNullSafe();
                 CUST_NO2.SelectedValue = HEADER_FAC.CUST_NO.ToStringNullSafe();
@@ -1062,6 +1065,10 @@ namespace Wins.WinMenus.ANBAR
 
         private void SAVE_BTN_Click(object sender, RoutedEventArgs e)
         {
+            // For an editable ComboBox, a value typed by the user is exposed through
+            // Text; SelectedValue is null until it matches an item in ItemsSource.
+            string molahText = MOLAH.Text?.Trim() ?? string.Empty;
+
             if (IsNull(this.CUST_NO.SelectedValue))
             {
                 Msgwin msgwin = new Msgwin(false, " مشتري مشخص نشده است ....!");
@@ -1125,7 +1132,7 @@ namespace Wins.WinMenus.ANBAR
                             }
                             // INSERT رکورد
                             db.Execute($@"INSERT INTO HEAD_LST (NUMBER, TAG, DATE_N,MAS,VAS, CUST_NO, M_NAGHD,MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND, USER_NAME, SGN1, SGN2,MBAA,TICMBAA,TKHF, OKF,SADER,ARZD,ARZKIND,JAY, TAH, MOLAH, FNUMCO)
-                                                   VALUES ({NUMBER.Text}, 24,{DATE_N.Text.ToRawTarikh()}, 0, 0, N'{CUST_NO.SelectedValue}', 0, 0, 0, 0, 0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER}, NULL,N'{USER_NAME.Text}', {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, 0, 0, 1, {Convert.ToByte(OKF.IsChecked)}, 0, 1, 1, 0, N'{TAH.SelectedValue}', N'{MOLAH.SelectedValue}', {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)})", null, transaction);
+                                                   VALUES ({NUMBER.Text}, 24,{DATE_N.Text.ToRawTarikh()}, 0, 0, N'{CUST_NO.SelectedValue}', 0, 0, 0, 0, 0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER}, NULL,N'{USER_NAME.Text}', {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, 0, 0, 1, {Convert.ToByte(OKF.IsChecked)}, 0, 1, 1, 0, N'{TAH.SelectedValue}', @Molah, {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)})", new { Molah = molahText }, transaction);
 
                             transaction.Commit();
                         }
@@ -1180,9 +1187,9 @@ namespace Wins.WinMenus.ANBAR
                                         ARZKIND = 1,
                                         JAY = 0 ,
                                         TAH = N'{TAH.SelectedValue}' ,
-                                        MOLAH = N'{MOLAH.SelectedValue}'
+                                        MOLAH = @Molah
                                     WHERE NUMBER = {NUMBER.Text} AND TAG = 24
-                                    ");
+                                    ", new { Molah = molahText });
             }
 
             if (NUMBER.Text is not null && NUMBER.Text != "")
