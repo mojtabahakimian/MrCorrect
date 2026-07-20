@@ -2329,6 +2329,42 @@ namespace Prg_UI.Functions
             }
             public List<string> RestrictionMessages { get; set; } = new List<string>();
         }
+
+        private static string SqlUnicodeLiteral(string value)
+        {
+            return "N'" + (value ?? string.Empty).Replace("'", "''") + "'";
+        }
+
+        private static string NormalizeArabicPersianKeYe(string value)
+        {
+            return (value ?? string.Empty)
+                .Replace('\u064A', '\u06CC') // ي -> ی
+                .Replace('\u0649', '\u06CC') // ى -> ی
+                .Replace('\u0643', '\u06A9'); // ك -> ک
+        }
+
+        internal static string BuildUserNameSqlRestriction(string userName, bool qualifyWithHeadList = false)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return "(1 = 0)";
+            }
+
+            string columnName = qualifyWithHeadList ? "dbo.HEAD_LST.USER_NAME" : "USER_NAME";
+            string normalizedColumn = $"REPLACE(REPLACE(REPLACE({columnName}, NCHAR(1610), NCHAR(1740)), NCHAR(1609), NCHAR(1740)), NCHAR(1603), NCHAR(1705))";
+            string[] normalizedUserNames =
+            {
+                NormalizeArabicPersianKeYe(userName),
+                NormalizeArabicPersianKeYe(NormalizeArabicPersian(userName))
+            };
+
+            var normalizedRestrictions = normalizedUserNames
+                .Distinct(StringComparer.Ordinal)
+                .Select(name => $"{normalizedColumn} = {SqlUnicodeLiteral(name)}");
+
+            return $"({columnName} = {SqlUnicodeLiteral(userName)} OR {string.Join(" OR ", normalizedRestrictions)})";
+        }
+
         private static RestrictionInfo GenerateRestrictedSqlQueryInfo(byte TAGCODE, string DEF_VALUE = " WHERE ", bool isOthery = false)
         {
             var info = new RestrictionInfo
@@ -2337,24 +2373,21 @@ namespace Prg_UI.Functions
             };
 
             CL_CCNNMANAGER? dbms = new CL_CCNNMANAGER();
+            string currentUser = Convert.ToString(CL_HESABDARI.UCurrentUser(), CultureInfo.InvariantCulture) ?? string.Empty;
+            string currentUserRestriction = BuildUserNameSqlRestriction(currentUser, qualifyWithHeadList: true);
 
             string GetAndQreOrNo()
             {
-                if (info.WhereClause.ToUpper().Contains("WHERE"))
+                string whereClause = info.WhereClause ?? string.Empty;
+                Match whereKeyword = Regex.Match(whereClause, @"^\s*WHERE\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+                if (whereKeyword.Success)
                 {
-                    if (string.IsNullOrEmpty(info.WhereClause.Replace("WHERE", "").Trim()) || string.IsNullOrWhiteSpace(info.WhereClause.Replace("WHERE", "").Trim()))
-                    {
-                        return "";
-                    }
-                    else
-                    {
-                        return " AND ";
-                    }
+                    string conditionAfterWhere = whereClause.Substring(whereKeyword.Index + whereKeyword.Length);
+                    return string.IsNullOrWhiteSpace(conditionAfterWhere) ? string.Empty : " AND ";
                 }
-                else
-                {
-                    return " WHERE ";
-                }
+
+                return " WHERE ";
             }
 
             bool CanSeeAll = false;
@@ -2380,26 +2413,21 @@ namespace Prg_UI.Functions
                 if (!isOthery && IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
                     //تاریخ محدود (تاریخ قابل برگشت) اعمال میشود ...↓
-                    info.RestrictionMessages.Add("محدود به تاریخ برگشت");
-                    var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
+                    var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND {currentUserRestriction} GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
+                    info.WhereClause += $" {GetAndQreOrNo()} {currentUserRestriction} ";
 
                     if (result.Count > 0 && Convert.ToDouble(Baseknow.CPI) > 0) //تعداد تاریخ قابل برگشت برای مشاهده
                     {
-                        long? dateResult = null;
-                        int index = Convert.ToInt32(Baseknow.CPI);
-                        if (index >= 0 && index < result.Count)
-                        {
-                            dateResult = result[index]; // Safely access the index
-                        }
-                        else
-                        {
-                            dateResult = result.FirstOrDefault(); // Fallback to first item
-                        }
+                        int allowedDateCount = Convert.ToInt32(Baseknow.CPI);
+                        int safeIndex = Math.Min(Math.Max(allowedDateCount - 1, 0), result.Count - 1);
+                        long dateResult = result[safeIndex];
 
-                        info.WhereClause += dateResult > 0
-                            ? $" {GetAndQreOrNo()} dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}' AND dbo.HEAD_LST.DATE_N >= {dateResult} "
-                            : string.Empty;
+                        if (dateResult > 0)
+                        {
+                            info.WhereClause += $" AND dbo.HEAD_LST.DATE_N >= {dateResult} ";
+                            info.RestrictionMessages.Add("محدود به تاریخ برگشت");
+                        }
                     }
                 }
                 else
@@ -2434,15 +2462,15 @@ namespace Prg_UI.Functions
 
                     if (defaultUserRestriction)
                     {
-                        //فقط فاکتور های کاربری خودش را ببیند
-                        //info.WhereClause += $" {GetAndQreOrNo()} ((USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
-                        info.WhereClause += $" {GetAndQreOrNo()} ((dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (dbo.HEAD_LST.USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
+                        //فقط فاکتورهای ثبت‌شده با نام کاربری خودش (با حروف فارسی یا عربی) را ببیند
+                        info.WhereClause += $" {GetAndQreOrNo()} {currentUserRestriction} ";
                         info.RestrictionMessages.Add("فقط نمایش اطلاعات ثبت شده توسط شما");
                     }
                 }
             }
 
-            if (string.IsNullOrEmpty(info.WhereClause) || string.IsNullOrWhiteSpace(info.WhereClause) || info.WhereClause.Trim() == "WHERE")
+            if (string.IsNullOrWhiteSpace(info.WhereClause) ||
+                string.Equals(info.WhereClause.Trim(), "WHERE", StringComparison.OrdinalIgnoreCase))
             {
                 info.WhereClause = string.Empty;
             }
