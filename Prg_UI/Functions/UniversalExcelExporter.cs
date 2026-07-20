@@ -23,6 +23,15 @@ namespace Functions
     public static class UniversalExcelExporter
     {
         private static readonly object _lockObject = new object();
+        private static readonly HashSet<char> _invalidFileNameCharacters =
+            new HashSet<char>(Path.GetInvalidFileNameChars().Concat("<>:\"/\\|?*"));
+        private static readonly HashSet<string> _reservedWindowsFileNames =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "CON", "PRN", "AUX", "NUL",
+                "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+            };
 
         // Cache PropertyInfo lookups to avoid repeated reflection per cell
         private static readonly ConcurrentDictionary<(Type type, string propName), PropertyInfo> _propCache =
@@ -58,31 +67,35 @@ namespace Functions
                 if (grid == null)
                     throw new ArgumentNullException(nameof(grid));
 
-                string filePath = GetUniqueFilePath(fileName);
-
-                await Task.Run(() =>
+                string filePath = await Task.Run(() =>
                 {
                     lock (_lockObject)
                     {
+                        // Generate the name while holding the export lock so two concurrent
+                        // exports cannot both choose the same not-yet-created path.
+                        string exportPath = GetUniqueFilePath(fileName);
+
                         if (grid is DataGrid wpfDataGrid)
                         {
                             if (KeepTypeFormat)
                             {
-                                ExportWpfDataGrid(wpfDataGrid, filePath);
+                                ExportWpfDataGrid(wpfDataGrid, exportPath);
                             }
                             else
                             {
-                                ExportWpfDataGridDisformated(wpfDataGrid, filePath);
+                                ExportWpfDataGridDisformated(wpfDataGrid, exportPath);
                             }
                         }
                         else if (grid is SfDataGrid syncfusionGrid)
                         {
-                            ExportSyncfusionDataGrid(syncfusionGrid, filePath, KeepTypeFormat);
+                            ExportSyncfusionDataGrid(syncfusionGrid, exportPath, KeepTypeFormat);
                         }
                         else
                         {
                             throw new ArgumentException("Unsupported grid type", nameof(grid));
                         }
+
+                        return exportPath;
                     }
                 });
 
@@ -657,27 +670,88 @@ namespace Functions
 
         private static async Task OpenExcelFile(string filePath)
         {
-            await Task.Run(() =>
+            // SaveAs normally makes the file visible immediately. This check therefore
+            // costs only one metadata lookup on the normal path and performs no file read.
+            const int maxAttempts = 10;
+            const int retryDelayMilliseconds = 100;
+            bool fileIsReady = false;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
                 try
                 {
-                    var process = new System.Diagnostics.Process();
-                    process.StartInfo = new System.Diagnostics.ProcessStartInfo(filePath)
+                    var fileInfo = new FileInfo(filePath);
+                    fileInfo.Refresh();
+                    fileIsReady = fileInfo.Exists && fileInfo.Length > 0;
+                }
+                catch (IOException)
+                {
+                    // A writer, antivirus, or indexer can briefly hold the file.
+                }
+
+                if (fileIsReady)
+                    break;
+
+                if (attempt < maxAttempts)
+                    await Task.Delay(retryDelayMilliseconds);
+            }
+
+            if (!fileIsReady)
+            {
+                OpenExportDirectory(filePath);
+                return;
+            }
+
+            try
+            {
+                using (var process = new Process())
+                {
+                    process.StartInfo = new ProcessStartInfo
                     {
+                        FileName = filePath,
+                        WorkingDirectory = Path.GetDirectoryName(filePath) ?? string.Empty,
                         UseShellExecute = true
                     };
                     process.Start();
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                try
                 {
-                    throw new Exception("Failed to open Excel file", ex);
+                    OpenExportDirectory(filePath);
                 }
-            });
+                catch (Exception directoryException)
+                {
+                    throw new AggregateException(
+                        $"Failed to open Excel file '{filePath}' and its containing directory.",
+                        ex,
+                        directoryException);
+                }
+            }
+        }
+
+        private static void OpenExportDirectory(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath) ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+                throw new DirectoryNotFoundException($"Excel export directory was not found for '{filePath}'.");
+
+            using (var process = new Process())
+            {
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = directory,
+                    WorkingDirectory = directory,
+                    UseShellExecute = true
+                };
+                process.Start();
+            }
         }
 
         private static string GetUniqueFilePath(string fileName)
         {
-            string baseFileName = fileName ?? $"Export_{DateTime.Now:yyyyMMdd_HHmmss}";
+            string baseFileName = SanitizeFileName(fileName);
             string directory = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 "Excel Exports"
@@ -695,6 +769,30 @@ namespace Functions
             }
 
             return filePath;
+        }
+
+        private static string SanitizeFileName(string fileName)
+        {
+            string fallbackName = $"Export_{DateTime.Now:yyyyMMdd_HHmmss}";
+            if (string.IsNullOrWhiteSpace(fileName))
+                return fallbackName;
+
+            // Keep caller input as a name only; never allow it to change the export directory.
+            string name = Path.GetFileName(fileName.Trim()) ?? string.Empty;
+            name = new string(name
+                .Select(character => _invalidFileNameCharacters.Contains(character) || char.IsControl(character) ? '_' : character)
+                .ToArray())
+                .Trim()
+                .TrimEnd('.', ' ');
+
+            if (name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+                name = name.Substring(0, name.Length - ".xlsx".Length).TrimEnd('.', ' ');
+
+            string deviceName = name.Split('.')[0];
+            if (_reservedWindowsFileNames.Contains(deviceName))
+                name = $"_{name}";
+
+            return string.IsNullOrWhiteSpace(name) ? fallbackName : name;
         }
 
         private static void CleanupExcelObjects(Excel.Application excel, Excel.Workbook workbook, Excel.Worksheet worksheet)

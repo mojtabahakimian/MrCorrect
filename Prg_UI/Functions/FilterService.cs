@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace Functions
 {
     public class FilterService<T>
     {
-        private readonly List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch, bool IsCustomTextSearch)> cumulativeFilters =
-            new List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch, bool IsCustomTextSearch)>();
+        private readonly List<(string[] ColumnNames, object FilterValue, bool IsExclusion, bool IsExactMatch, bool IsCustomTextSearch)> cumulativeFilters =
+            new List<(string[] ColumnNames, object FilterValue, bool IsExclusion, bool IsExactMatch, bool IsCustomTextSearch)>();
 
         /// <summary>
-        /// اضافه کردن فیلتر جدید به لیست فیلترهای فعال
+        /// تعداد فیلترهای فعال
+        /// </summary>
+        public int FilterCount => cumulativeFilters.Count;
+
+        /// <summary>
+        /// اضافه کردن فیلتر جدید به لیست فیلترهای فعال (تک‌ستونی)
         /// </summary>
         /// <param name="columnName">نام ستون</param>
         /// <param name="filterValue">مقدار فیلتر (می‌تواند string، numeric، یا null باشد)</param>
@@ -24,11 +30,11 @@ namespace Functions
         /// </param>
         public void AddFilter(string columnName, object filterValue, bool isExclusion = false, bool isExactMatch = false, bool isCustomTextSearch = false)
         {
-            cumulativeFilters.Add((columnName, filterValue, isExclusion, isExactMatch, isCustomTextSearch));
+            cumulativeFilters.Add((new[] { columnName }, filterValue, isExclusion, isExactMatch, isCustomTextSearch));
         }
 
         /// <summary>
-        /// اضافه کردن فیلتر «پالودن با : سفارشی متنی» — نسخه‌ی مقاوم در برابر نیم‌فاصله
+        /// اضافه کردن فیلتر «پالودن با : سفارشی متنی» روی یک ستون — نسخه‌ی مقاوم در برابر نیم‌فاصله
         /// و اختلاف حروف عربی/فارسی (ی و ک) که مشکل جستجوهای ناموفق را حل می‌کند.
         /// </summary>
         /// <param name="columnName">نام ستون (MappingName)</param>
@@ -36,7 +42,37 @@ namespace Functions
         /// <param name="isExclusion">آیا فیلتر باید معکوس (Does Not Contain) باشد؟</param>
         public void AddCustomTextFilter(string columnName, string searchText, bool isExclusion = false)
         {
-            AddFilter(columnName, searchText, isExclusion: isExclusion, isExactMatch: false, isCustomTextSearch: true);
+            AddCustomTextFilterMultiColumn(new[] { columnName }, searchText, isExclusion);
+        }
+
+        /// <summary>
+        /// اضافه کردن فیلتر «پالودن با : سفارشی متنی» روی چند ستون هم‌زمان.
+        /// یک ردیف در صورتی match می‌شود که متن جستجو در حداقل یکی از ستون‌های داده‌شده پیدا شود (OR بین ستون‌ها).
+        /// اگر isExclusion=true باشد، ردیف‌هایی که در هر یک از این ستون‌ها match می‌شوند حذف می‌شوند.
+        /// </summary>
+        /// <param name="columnNames">لیست نام ستون‌ها (MappingName) برای جستجوی هم‌زمان</param>
+        /// <param name="searchText">متن آزاد وارد شده توسط کاربر (می‌تواند شامل چند کلمه باشد)</param>
+        /// <param name="isExclusion">آیا فیلتر باید معکوس (Does Not Contain) باشد؟</param>
+        public void AddCustomTextFilterMultiColumn(IEnumerable<string> columnNames, string searchText, bool isExclusion = false)
+        {
+            var columns = (columnNames ?? Enumerable.Empty<string>())
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .ToArray();
+
+            if (columns.Length == 0) return;
+
+            cumulativeFilters.Add((columns, searchText, isExclusion, false, true));
+        }
+
+        /// <summary>
+        /// حذف یک فیلتر مشخص از لیست فیلترهای تجمیعی بر اساس اندیس آن
+        /// (اندیس باید متناظر با ترتیب افزوده‌شدن فیلترها باشد)
+        /// </summary>
+        public void RemoveFilterAt(int index)
+        {
+            if (index >= 0 && index < cumulativeFilters.Count)
+                cumulativeFilters.RemoveAt(index);
         }
 
         /// <summary>
@@ -54,15 +90,31 @@ namespace Functions
         {
             if (item == null) return false;
 
-            foreach (var (columnName, filterValue, isExclusion, isExactMatch, isCustomTextSearch) in cumulativeFilters)
+            foreach (var (columnNames, filterValue, isExclusion, isExactMatch, isCustomTextSearch) in cumulativeFilters)
             {
-                // دریافت مقدار واقعی property (نه ToString آن)
-                var actualValue = GetPropValue(item, columnName);
+                bool matchResult;
 
-                // اعمال فیلتر — برای جستجوی سفارشی متنی از منطق اختصاصی چندکلمه‌ای استفاده می‌شود
-                bool matchResult = isCustomTextSearch
-                    ? EvaluateCustomTextSearch(actualValue, filterValue as string)
-                    : EvaluateFilter(actualValue, filterValue, isExactMatch);
+                if (isCustomTextSearch)
+                {
+                    // OR بین تمام ستون‌های مشخص‌شده: کافی است متن جستجو در یکی از آن‌ها پیدا شود
+                    matchResult = false;
+                    foreach (var columnName in columnNames)
+                    {
+                        var actualValueForColumn = GetPropValue(item, columnName);
+                        if (EvaluateCustomTextSearch(actualValueForColumn, filterValue as string))
+                        {
+                            matchResult = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // فیلترهای عادی همیشه تک‌ستونی هستند (اولین و تنها عضو آرایه)
+                    var columnName = columnNames != null && columnNames.Length > 0 ? columnNames[0] : null;
+                    var actualValue = GetPropValue(item, columnName);
+                    matchResult = EvaluateFilter(actualValue, filterValue, isExactMatch);
+                }
 
                 // اگر exclusion است، نتیجه را برعکس می‌کنیم
                 if (isExclusion)
@@ -232,7 +284,6 @@ namespace Functions
         {
             try
             {
-                // تبدیل هر دو به decimal برای مقایسه دقیق
                 decimal decimal1 = Convert.ToDecimal(value1, CultureInfo.InvariantCulture);
                 decimal decimal2 = Convert.ToDecimal(value2, CultureInfo.InvariantCulture);
 
@@ -240,7 +291,6 @@ namespace Functions
             }
             catch
             {
-                // اگر تبدیل ناموفق بود، از ToString استفاده می‌کنیم
                 return value1.ToString() == value2.ToString();
             }
         }
@@ -252,13 +302,11 @@ namespace Functions
         {
             if (type == null) return false;
 
-            // Handle Nullable types
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 type = Nullable.GetUnderlyingType(type);
             }
 
-            // Handle object type
             if (type == typeof(object))
             {
                 return false;

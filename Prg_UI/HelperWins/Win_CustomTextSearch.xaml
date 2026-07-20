@@ -6,7 +6,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="پالودن با : سفارشی متنی"
-        Height="240" Width="440"
+        Height="420" Width="460"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -43,12 +43,27 @@
 
             <!-- بدنه -->
             <StackPanel Grid.Row="1" Margin="16,16,16,8">
-                <TextBlock x:Name="Txt_ColumnLabel" TextWrapping="Wrap" Margin="0,0,0,10"
-                           Foreground="{DynamicResource MaterialDesignBody}"/>
-                <TextBox x:Name="Txt_SearchInput" materialDesign:HintAssist.Hint="متن جستجو"
+
+                <TextBlock Text="جستجو در ستون‌های زیر (حداقل یکی را انتخاب کنید):" Margin="0,0,0,6"
+                           Foreground="{DynamicResource MaterialDesignBody}" FontWeight="Bold" FontSize="12"/>
+
+                <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="4" Padding="6">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="110">
+                        <WrapPanel x:Name="Panel_Columns"/>
+                    </ScrollViewer>
+                </Border>
+
+                <TextBox x:Name="Txt_SearchInput" materialDesign:HintAssist.Hint="متن جستجو" Margin="0,12,0,0"
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          FontSize="14" Padding="8" AcceptsReturn="False"
                          PreviewKeyDown="Txt_SearchInput_PreviewKeyDown"/>
+
+                <CheckBox x:Name="Chk_Exclude" Content="نتایجی که شامل این متن هستند حذف شوند (فیلتر منفی)"
+                          Margin="0,10,0,0" Foreground="{DynamicResource MaterialDesignBody}"/>
+
+                <TextBlock x:Name="Txt_ValidationError" TextWrapping="Wrap" FontSize="11" Margin="0,8,0,0"
+                           Foreground="#FFD32F2F" Visibility="Collapsed"/>
+
                 <TextBlock TextWrapping="Wrap" FontSize="11" Opacity="0.7" Margin="0,10,0,0"
                            Foreground="{DynamicResource MaterialDesignBody}"
                            Text="نکته: این جستجو تفاوت نیم‌فاصله و حروف عربی/فارسی (ی، ک) را نادیده می‌گیرد و کلمات به‌صورت مستقل جستجو می‌شوند."/>
@@ -57,9 +72,9 @@
             <!-- دکمه‌ها -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="16,0,16,16">
                 <Button x:Name="Btn_Cancel" Content="انصراف" Click="Btn_Cancel_Click" Width="90" Margin="8,0,0,0"
-                        Style="{StaticResource MaterialDesignOutlinedButton}" FontSize="12"/>
+                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
                 <Button x:Name="Btn_Ok" Content="جستجو" Click="Btn_Ok_Click" Width="90" IsDefault="True"
-                        Style="{StaticResource MaterialDesignRaisedButton}" Foreground="#DDFFFFFF" FontSize="12"/>
+                        Style="{StaticResource MaterialDesignRaisedButton}"/>
             </StackPanel>
         </Grid>
     </Border>

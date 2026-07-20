@@ -345,18 +345,85 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
 
-            string columnHeader = SYNCFUSION_DG.SelectionController?.CurrentCellManager?.CurrentCell?.GridColumn?.HeaderText;
-            if (string.IsNullOrWhiteSpace(columnHeader))
-                columnHeader = columnName;
+            var availableColumns = SYNCFUSION_DG.Columns
+                .Where(c => !string.IsNullOrWhiteSpace(c.MappingName))
+                .Select(c => (MappingName: c.MappingName, HeaderText: string.IsNullOrWhiteSpace(c.HeaderText) ? c.MappingName : c.HeaderText))
+                .ToList();
 
-            string searchText = Win_CustomTextSearch.Show(this, columnHeader);
+            var dialogResult = Win_CustomTextSearch.Show(this, availableColumns, defaultSelectedColumn: columnName);
 
-            // کاربر روی «انصراف» کلیک کرده یا متنی وارد نکرده است
-            if (string.IsNullOrWhiteSpace(searchText))
+            // کاربر روی «انصراف» کلیک کرده است
+            if (dialogResult == null)
                 return;
 
-            filterService.AddCustomTextFilter(columnName, searchText, isExclusion: false);
-            ActiveFilters.Add($"{columnHeader} :: جستجوی سفارشی «{searchText}»");
+            var (searchText, selectedColumns, isExclusion) = dialogResult.Value;
+
+            filterService.AddCustomTextFilterMultiColumn(selectedColumns, searchText, isExclusion: isExclusion);
+
+            string columnsLabel = string.Join("، ", selectedColumns.Select(mn =>
+                SYNCFUSION_DG.Columns.FirstOrDefault(c => c.MappingName == mn)?.HeaderText ?? mn));
+
+            string operatorLabel = isExclusion ? "شامل نشود" : "شامل باشد";
+            ActiveFilters.Add($"[{columnsLabel}] {operatorLabel}: «{searchText}»");
+            RefreshActiveFiltersDisplay();
+            ApplyCumulativeFilter();
+        }
+        private void RefreshActiveFiltersDisplay()
+        {
+            Panel_ActiveFilters.Children.Clear();
+
+            for (int i = 0; i < ActiveFilters.Count; i++)
+            {
+                int capturedIndex = i; // برای جلوگیری از closure bug در حلقه
+                string filterText = ActiveFilters[i];
+
+                var chip = new Border
+                {
+                    Background = (TryFindResource("MaterialDesign.Brush.Primary") as Brush) ?? new SolidColorBrush(Color.FromRgb(0x20, 0x96, 0xF3)),
+                    CornerRadius = new CornerRadius(12),
+                    Margin = new Thickness(3, 2, 3, 2),
+                    Padding = new Thickness(8, 2, 4, 2)
+                };
+
+                var sp = new StackPanel { Orientation = Orientation.Horizontal };
+
+                sp.Children.Add(new TextBlock
+                {
+                    Text = filterText,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.White,
+                    FontSize = 11,
+                    Margin = new Thickness(0, 0, 4, 0)
+                });
+
+                var removeBtn = new Button
+                {
+                    Width = 18,
+                    Height = 18,
+                    Padding = new Thickness(0),
+                    Background = Brushes.Transparent,
+                    BorderBrush = null,
+                    Cursor = Cursors.Hand,
+                    IsTabStop = false,
+                    Content = new PackIcon { Kind = PackIconKind.Close, Width = 12, Height = 12, Foreground = Brushes.White }
+                };
+                removeBtn.Click += (s, e) => RemoveActiveFilterAt(capturedIndex);
+
+                sp.Children.Add(removeBtn);
+                chip.Child = sp;
+                Panel_ActiveFilters.Children.Add(chip);
+            }
+
+            Border_ActiveFilters.Visibility = ActiveFilters.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void RemoveActiveFilterAt(int index)
+        {
+            if (index < 0 || index >= ActiveFilters.Count) return;
+
+            filterService.RemoveFilterAt(index);
+            ActiveFilters.RemoveAt(index);
+            RefreshActiveFiltersDisplay();
             ApplyCumulativeFilter();
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
@@ -517,13 +584,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
         }
 
-        private void RemoveFilterSort_Click(object sender, RoutedEventArgs e) // Event handler to remove all filters and sorting
+        private void RemoveFilterSort_Click(object sender, RoutedEventArgs e)
         {
-            // Clear all filters in the filter service
             filterService.ClearFilters();
-            // Clear the list of active filters
             ActiveFilters.Clear();
-            // Apply the cumulative filter to the data grid
+            RefreshActiveFiltersDisplay();
             ApplyCumulativeFilter();
         }
         private (string ColumnName, object FilterValue) GetSelectedCellDetails() // Method to get the details of the selected cell
