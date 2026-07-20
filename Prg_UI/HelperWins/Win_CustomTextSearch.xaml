@@ -57,9 +57,9 @@
             <!-- دکمه‌ها -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="16,0,16,16">
                 <Button x:Name="Btn_Cancel" Content="انصراف" Click="Btn_Cancel_Click" Width="90" Margin="8,0,0,0"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                        Style="{StaticResource MaterialDesignOutlinedButton}" FontSize="12"/>
                 <Button x:Name="Btn_Ok" Content="جستجو" Click="Btn_Ok_Click" Width="90" IsDefault="True"
-                        Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        Style="{StaticResource MaterialDesignRaisedButton}" Foreground="#DDFFFFFF" FontSize="12"/>
             </StackPanel>
         </Grid>
     </Border>
