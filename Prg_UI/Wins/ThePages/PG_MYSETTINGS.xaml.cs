@@ -34,6 +34,11 @@ namespace Wins.ThePages
             PageManagement.OpenPage(new PG_SAVABEGH());
         }
 
+        private void DefaultShift_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEFAULT, null);
+        }
+
         private void Image_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEFAULT, null);

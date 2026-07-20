@@ -639,6 +639,10 @@ namespace Functions
             /// </summary>
             F_MENU_KOL_MOIN_DATE,
             /// <summary>
+            /// صورت حساب هوشمند مشتریان جهت تسویه
+            /// </summary>
+            F_MENU_KOL_MOIN_DATE_AI,
+            /// <summary>
             /// حساب تفکیکی تفضیلی
             /// </summary>
             F_MENU_DATE_KOL_MOIN_TAFKIK,
@@ -1494,6 +1498,8 @@ namespace Functions
                     break;
 
 
+
+                case WinNameType.F_MENU_KOL_MOIN_DATE_AI: /*صورت حساب هوشمند مشتریان جهت تسویه*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_DATE_AI(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.F_MENU_KOL_MOIN_DATE: //دفتر معین
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_DATE(), isModalDialog: false, allowMultipleInstances: false);
