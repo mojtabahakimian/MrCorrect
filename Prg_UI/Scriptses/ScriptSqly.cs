@@ -5033,7 +5033,68 @@ GO
                 ExecuteBatches(db, tablescript);
 
                 // ===========================================================
-                // 2. Stored Procedures â CREATE OR ALTER (همیشه آخرین نسخه)
+                // 2. Schema Updates (Idempotent)
+                // ===========================================================
+                string schemaUpdates = @"
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'POSTAL_CODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'EMPLOYER_NAME') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'PROVINCE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [PROVINCE] NVARCHAR(50) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'CITY') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [CITY] NVARCHAR(50) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'REGISTRATION_NUMBER') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [REGISTRATION_NUMBER] NVARCHAR(20) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'SSO_BRANCH') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [SSO_BRANCH] NVARCHAR(50) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'FINANCIAL_MANAGER') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [FINANCIAL_MANAGER] NVARCHAR(100) NULL;
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'ADMIN_MANAGER') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [ADMIN_MANAGER] NVARCHAR(100) NULL;
+
+                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_PAY2_JOB_PERFORMANCE')
+                    CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) INCLUDE ([JOB_ID]);
+
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'SHIFT_MODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_WS_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));
+                IF COL_LENGTH('dbo.PAY2_DECREE', 'SHIFT_MODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_DECREE] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_DEC_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));
+                IF COL_LENGTH('dbo.PAY2_DECREE_LINE', 'SHIFT_MODE_OV') IS NULL
+                    ALTER TABLE [dbo].[PAY2_DECREE_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_DL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));
+                IF COL_LENGTH('dbo.PAY2_ITEM_TMPL_LINE', 'SHIFT_MODE_OV') IS NULL
+                    ALTER TABLE [dbo].[PAY2_ITEM_TMPL_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_TL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));
+
+                IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'DEFAULT_DEED_MODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [DEFAULT_DEED_MODE] TINYINT NOT NULL CONSTRAINT DF_WS_DEED_MODE DEFAULT(1);
+                IF COL_LENGTH('dbo.PAY2_RUN', 'DEED_MODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_RUN] ADD [DEED_MODE] TINYINT NULL;
+                IF COL_LENGTH('dbo.PAY2_RUN', 'DEED_GENERATOR_VERSION') IS NULL
+                    ALTER TABLE [dbo].[PAY2_RUN] ADD [DEED_GENERATOR_VERSION] SMALLINT NULL;
+                
+                -- رهاسازی محدودیت Basis=3 
+                IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_CALC_BASIS' AND parent_object_id = OBJECT_ID(N'dbo.PAY2_ITEM_DEF') AND definition NOT LIKE '%(3)%') 
+                BEGIN 
+                    ALTER TABLE dbo.PAY2_ITEM_DEF DROP CONSTRAINT CK_CALC_BASIS; 
+                    ALTER TABLE dbo.PAY2_ITEM_DEF ADD CONSTRAINT CK_CALC_BASIS CHECK ([CALC_BASIS] IN (1,2,3)); 
+                END; 
+
+                -- رهاسازی محدودیت 6 برای LEV_TYPE 
+                DECLARE @sql NVARCHAR(MAX) = N''; 
+                SELECT @sql += N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + N'.' + QUOTENAME(OBJECT_NAME(parent_object_id)) + N' DROP CONSTRAINT ' + QUOTENAME(name) + N';' + CHAR(10) 
+                FROM sys.check_constraints WHERE OBJECT_NAME(parent_object_id) = 'PAY2_LEAVE' AND definition LIKE '%LEV_TYPE%' AND definition NOT LIKE '%(6)%'; 
+                IF LEN(@sql) > 0 EXEC sp_executesql @sql; 
+
+                -- رهاسازی محدودیت Basis=3 روی Overrides 
+                SET @sql = N''; 
+                SELECT @sql += N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + N'.' + QUOTENAME(OBJECT_NAME(parent_object_id)) + N' DROP CONSTRAINT ' + QUOTENAME(name) + N';' + CHAR(10) 
+                FROM sys.check_constraints WHERE OBJECT_NAME(parent_object_id) IN ('PAY2_DECREE_LINE', 'PAY2_OVERRIDE', 'PAY2_ITEM_TMPL_LINE') AND definition LIKE '%BASIS_OV%' AND definition NOT LIKE '%(3)%'; 
+                IF LEN(@sql) > 0 EXEC sp_executesql @sql; 
+                ";
+                db.Execute(schemaUpdates);
+
+                // ===========================================================
+                // 3. Stored Procedures â CREATE OR ALTER (همیشه آخرین نسخه)
                 // ===========================================================
                 string procScript = @"
 -- ================================================================
@@ -5704,22 +5765,22 @@ BEGIN
     IF @START_OF_YEAR > @EIDI_START_DATE SET @EIDI_START_DATE = @START_OF_YEAR;
     IF @PREV_SETTLE_DATE IS NOT NULL AND @PREV_SETTLE_DATE > @EIDI_START_DATE SET @EIDI_START_DATE = @PREV_SETTLE_DATE;
 
-    DECLARE @END_M INT = (@END_DATE / 100) % 100;
-    DECLARE @END_D INT = @END_DATE % 100;
+    DECLARE @END_M_EIDI INT = (@END_DATE / 100) % 100;
+    DECLARE @END_D_EIDI INT = @END_DATE % 100;
 
-    DECLARE @START_M INT = (@EIDI_START_DATE / 100) % 100;
-    DECLARE @START_D INT = @EIDI_START_DATE % 100;
+    DECLARE @START_M_EIDI INT = (@EIDI_START_DATE / 100) % 100;
+    DECLARE @START_D_EIDI INT = @EIDI_START_DATE % 100;
 
     DECLARE @DAYS_SINCE_YEAR_START_END INT =
         CASE
-            WHEN @END_M <= 6 THEN (@END_M - 1) * 31 + @END_D
-            ELSE (6 * 31) + (@END_M - 7) * 30 + @END_D
+            WHEN @END_M_EIDI <= 6 THEN (@END_M_EIDI - 1) * 31 + @END_D_EIDI
+            ELSE (6 * 31) + (@END_M_EIDI - 7) * 30 + @END_D_EIDI
         END;
 
     DECLARE @DAYS_SINCE_YEAR_START_START INT =
         CASE
-            WHEN @START_M <= 6 THEN (@START_M - 1) * 31 + @START_D
-            ELSE (6 * 31) + (@START_M - 7) * 30 + @START_D
+            WHEN @START_M_EIDI <= 6 THEN (@START_M_EIDI - 1) * 31 + @START_D_EIDI
+            ELSE (6 * 31) + (@START_M_EIDI - 7) * 30 + @START_D_EIDI
         END;
 
     DECLARE @WORKED_DAYS_FOR_EIDI INT = @DAYS_SINCE_YEAR_START_END - @DAYS_SINCE_YEAR_START_START + 1;
@@ -5797,8 +5858,12 @@ BEGIN
     FROM PAY2_SETTLEMENT S
     INNER JOIN PAY2_EMPLOYEE E ON S.EMP_ID = E.EMP_ID
     WHERE S.SET_ID = @SET_ID;
-
-    IF @STATUS <> 2
+    IF @STATUS IS NULL
+    BEGIN
+        RAISERROR(N'SP_PAY2_GEN_DEED_SETTLE: تسویه‌ای با شناسه %d یافت نشد.', 16, 1, @SET_ID);
+        RETURN;
+    END;
+IF @STATUS <> 2
     BEGIN
         RAISERROR(N'SP_PAY2_GEN_DEED_SETTLE: تسویه %d باید نهایی (STATUS=2) شود.', 16, 1, @SET_ID);
         RETURN;
@@ -5858,8 +5923,12 @@ BEGIN
 
     SELECT @WS_ID = WS_ID, @STATUS = STATUS, @PERIOD_DATE = PERIOD_DATE
     FROM PAY2_PERIOD WHERE PER_ID = @PER_ID;
-
-    IF @STATUS <> 1
+    IF @STATUS IS NULL
+    BEGIN
+        RAISERROR(N'SP_PAY2_CLOSE_PERIOD: دوره‌ای با شناسه %d یافت نشد.', 16, 1, @PER_ID);
+        RETURN;
+    END;
+IF @STATUS <> 1
     BEGIN
         RAISERROR(N'SP_PAY2_CLOSE_PERIOD: دوره %d در وضعیت %d است. فقط دوره باز (1) قابل بستن است.', 16, 1, @PER_ID, @STATUS);
         RETURN;
@@ -5981,6 +6050,12 @@ BEGIN
 
     DECLARE @STATUS TINYINT;
     SELECT @STATUS = STATUS FROM PAY2_RUN WHERE RUN_ID = @RUN_ID;
+
+    IF @STATUS IS NULL
+    BEGIN
+        RAISERROR(N'SP_PAY2_FINALIZE_RUN: اجرای %d یافت نشد.', 16, 1, @RUN_ID);
+        RETURN;
+    END;
 
     IF @STATUS <> 1
     BEGIN
@@ -6440,76 +6515,38 @@ GO
 ";
                 ExecuteBatches(db, modify1);
 
-                //try { db.Execute($@""); } catch { }
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;"); } catch { }
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;"); } catch { }
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD 
-    [PROVINCE] NVARCHAR(50) NULL,             -- نام استان
-    [CITY] NVARCHAR(50) NULL,                 -- نام شهر
-    [REGISTRATION_NUMBER] NVARCHAR(20) NULL,  -- شماره ثبت
-    [SSO_BRANCH] NVARCHAR(50) NULL,           -- شعبه تامین اجتماعی
-    [FINANCIAL_MANAGER] NVARCHAR(100) NULL,   -- مدیر مالی
-    [ADMIN_MANAGER] NVARCHAR(100) NULL;       -- معاون اداری مالی"); } catch { }
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'POSTAL_CODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [POSTAL_CODE] NVARCHAR(20) NULL;");
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'EMPLOYER_NAME') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [EMPLOYER_NAME] NVARCHAR(100) NULL;");
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'PROVINCE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD
+                        [PROVINCE] NVARCHAR(50) NULL,
+                        [CITY] NVARCHAR(50) NULL,
+                        [REGISTRATION_NUMBER] NVARCHAR(20) NULL,
+                        [SSO_BRANCH] NVARCHAR(50) NULL,
+                        [FINANCIAL_MANAGER] NVARCHAR(100) NULL,
+                        [ADMIN_MANAGER] NVARCHAR(100) NULL;");
 
                 //-- ساخت ایندکس ترکیبی برای حذف عملیات سورت و اسکن جدول شغل‌ها
-                try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE 
-ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) 
-INCLUDE ([JOB_ID]);"); } catch { }
+                db.Execute(@"IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_PAY2_JOB_PERFORMANCE')
+                    CREATE NONCLUSTERED INDEX IX_PAY2_JOB_PERFORMANCE ON [dbo].[PAY2_JOB] ([IS_ACTIVE], [JOB_NAME]) INCLUDE ([JOB_ID]);");
 
                 // Migration 009: افزودن تنظیمات حق شیفت به تفکیک کارگاه و پرسنل
-                try
-                {
-                    db.Execute($@"
-                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_WORKSHOP') AND name = 'SHIFT_MODE')
-                        BEGIN
-                            ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_WS_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));
-                        END
-                    ");
-                }
-                catch { }
-
-                try
-                {
-                    db.Execute($@"
-                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_DECREE') AND name = 'SHIFT_MODE')
-                        BEGIN
-                            ALTER TABLE [dbo].[PAY2_DECREE] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_DEC_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));
-                        END
-                    ");
-                }
-                catch { }
-
-                try
-                {
-                    db.Execute($@"
-                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_DECREE_LINE') AND name = 'SHIFT_MODE_OV')
-                        BEGIN
-                            ALTER TABLE [dbo].[PAY2_DECREE_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_DL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));
-                        END
-                    ");
-                }
-                catch { }
-
-                try
-                {
-                    db.Execute($@"
-                        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_ITEM_TMPL_LINE') AND name = 'SHIFT_MODE_OV')
-                        BEGIN
-                            ALTER TABLE [dbo].[PAY2_ITEM_TMPL_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_TL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));
-                        END
-                    ");
-                }
-                catch { }
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'SHIFT_MODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_WS_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));");
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_DECREE', 'SHIFT_MODE') IS NULL
+                    ALTER TABLE [dbo].[PAY2_DECREE] ADD [SHIFT_MODE] NVARCHAR(10) NULL CONSTRAINT [CK_DEC_SHIFT_MODE] CHECK ([SHIFT_MODE] IN ('PCT','FIXED'));");
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_DECREE_LINE', 'SHIFT_MODE_OV') IS NULL
+                    ALTER TABLE [dbo].[PAY2_DECREE_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_DL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));");
+                db.Execute(@"IF COL_LENGTH('dbo.PAY2_ITEM_TMPL_LINE', 'SHIFT_MODE_OV') IS NULL
+                    ALTER TABLE [dbo].[PAY2_ITEM_TMPL_LINE] ADD [SHIFT_MODE_OV] NVARCHAR(10) NULL CONSTRAINT [CK_TL_SHIFT_MODE_OV] CHECK ([SHIFT_MODE_OV] IN ('PCT','FIXED'));");
 
                 // Migration 010: افزودن فیلدهای مربوط به روش صدور سند (Dual Deed Modes)
                 try
                 {
-                    db.Execute(@"
-            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_WORKSHOP') AND name = 'DEFAULT_DEED_MODE')
-            BEGIN
-                ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [DEFAULT_DEED_MODE] TINYINT NOT NULL CONSTRAINT DF_WS_DEED_MODE DEFAULT(1);
-            END
-        ");
+                    db.Execute(@"IF COL_LENGTH('dbo.PAY2_WORKSHOP', 'DEFAULT_DEED_MODE') IS NULL
+                        ALTER TABLE [dbo].[PAY2_WORKSHOP] ADD [DEFAULT_DEED_MODE] TINYINT NOT NULL CONSTRAINT DF_WS_DEED_MODE DEFAULT(1);");
                 }
                 catch (Exception ex)
                 {
@@ -6519,12 +6556,12 @@ INCLUDE ([JOB_ID]);"); } catch { }
                 try
                 {
                     db.Execute(@"
-            IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.PAY2_RUN') AND name = 'DEED_MODE')
-            BEGIN
-                ALTER TABLE [dbo].[PAY2_RUN] ADD [DEED_MODE] TINYINT NULL;
-                ALTER TABLE [dbo].[PAY2_RUN] ADD [DEED_GENERATOR_VERSION] SMALLINT NULL;
-            END
-        ");
+                    IF COL_LENGTH('dbo.PAY2_RUN', 'DEED_MODE') IS NULL
+                        ALTER TABLE [dbo].[PAY2_RUN] ADD [DEED_MODE] TINYINT NULL;
+                        
+                    IF COL_LENGTH('dbo.PAY2_RUN', 'DEED_GENERATOR_VERSION') IS NULL
+                        ALTER TABLE [dbo].[PAY2_RUN] ADD [DEED_GENERATOR_VERSION] SMALLINT NULL;
+                    ");
                 }
                 catch (Exception ex)
                 {
@@ -6904,7 +6941,7 @@ END;");
                         // Logging the exact error and query batch that failed so you can actually debug it
                         Console.WriteLine($"SQL Execution Error:\n{ex.Message}\nFailed Batch:\n{cmdText}\n");
                         // If a critical procedure fails to create, you might want to throw the error here
-                        // throw; 
+                        throw;
                     }
                 }
             }
@@ -6971,13 +7008,11 @@ END;");
 
             Console.WriteLine($"[LoadJobData] {parsed} رکورد parse شد — در حال BulkCopy ...");
 
-            // ── SqlBulkCopy با IDENTITY_INSERT ON ────────────────
-            using (var cmd = new SqlCommand("SET IDENTITY_INSERT [dbo].[PAY2_JOB] ON", db))
-                cmd.ExecuteNonQuery();
-
+            // ── SqlBulkCopy ────────────────
+            using var tx = db.BeginTransaction();
             try
             {
-                using var bulk = new SqlBulkCopy(db, SqlBulkCopyOptions.KeepIdentity, null)
+                using var bulk = new SqlBulkCopy(db, SqlBulkCopyOptions.KeepIdentity, tx)
                 {
                     DestinationTableName = "[dbo].[PAY2_JOB]",
                     BatchSize = 1000,
@@ -6990,16 +7025,22 @@ END;");
                 bulk.ColumnMappings.Add("IS_ACTIVE", "IS_ACTIVE");
 
                 bulk.WriteToServer(table);
+                tx.Commit();
                 Console.WriteLine($"[LoadJobData] {parsed} رکورد با موفقیت در PAY2_JOB درج شد.");
             }
             catch (Exception ex)
             {
+                try
+                {
+                    tx.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    Console.WriteLine($"[LoadJobData] خطا در Rollback: {rollbackEx.Message}");
+                }
+
                 Console.WriteLine($"[LoadJobData] خطا در BulkCopy: {ex.Message}");
-            }
-            finally
-            {
-                using var cmd = new SqlCommand("SET IDENTITY_INSERT [dbo].[PAY2_JOB] OFF", db);
-                cmd.ExecuteNonQuery();
+                throw;
             }
         }
         private static void BlazorDbScriptUpdate(SqlConnection db)

@@ -43,60 +43,60 @@ namespace Prg_UI.Wins
 {
     public partial class USER_LOGIN : Window
     {
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-        System.Windows.Threading.DispatcherTimer MyTimer;
+        readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        DispatcherTimer MyTimer;
         bool NowIsReady = false;
         public bool Krbri_IsFocused { get; private set; } = false;
         public List<SALA_DTL> USRLST { get; private set; }
+        private byte incorPassEnt = 0;
+
 
         private Window GetWindowBasedOnSection(string sectionName)
         {
-            switch (sectionName)
+            return sectionName switch
             {
-                case "PGET_HED": return new WinMenus.HESABDARI.PGET_HED(); //خزانه
-                case "DEED_HEAD": return new DEED_HEAD(); //سند
-                case "F_MENU_KART": return new F_MENU_KART(); //کارت انبار
-                case "F_MENU_KOL_MOIN_TAFZIL": return new F_MENU_KOL_MOIN_TAFZIL(); //کنترل اف 8
-                case "HEAD_LST_PISHFROOSH2": return new HEAD_LST_PISHFROOSH2();
-                case "IRAN_SALES_MAP": return new IRAN_SALES_MAP();
-                case "BUDGET0": return new BUDGET0();
-                case "NABZEDARY": return new NABZEDARY(); //فعالیت های سازمان
-                case "NABZEFROOSH": return new NABZEFROOSH(); //نبض فروش
-                case "NABZEMALI": return new NABZEMALI(); //نبض مالی
-                case "CUSTKIND_WIN": return new CUSTKIND_WIN(); //نوع مشتری
-                case "STUF_DEF_WIN": return new STUF_DEF_WIN(); //تعریف کالا
-                case "KHAD_DEF": return new KHAD_DEF(); //تعریف خدمات
-                case "MAIN": return MAIN.MAIN_INST; //اتوماسیون
-                case "FCODE_CUSTOMER": return new FCODE_CUSTOMER(); //تعریف مشتری
-                case "HEAD_LST_HAVL": return new HEAD_LST_HAVL(); //حواله فروش
-                case "HEAD_LST_RASID": return new HEAD_LST_RASID(); //رسید خرید
-                case "ANBGRD_HEAD_WIN": return new ANBGRD_HEAD_WIN(); //انبار گردانی
-                case "HEAD_LST_ENTEGHAL_WIN": return new HEAD_LST_ENTEGHAL_WIN(); //انتقال از انبار به انبار
-                case "HEAD_LST_HAV_OTHER_WIN": return new HEAD_LST_HAV_OTHER_WIN(); //سایر حواله انبار ها
-                case "HEAD_LST_RASID_OTHER_WIN": return new HEAD_LST_RASID_OTHER_WIN(); //سایر رسید انبار ها
-                case "DEED_SEARCH_MAIN": return new DEED_SEARCH_MAIN(); //جستجو در شرح اسناد
-                case "F_MENU_ASNAD": return new F_MENU_ASNAD(); //تایید و قطعی کردن اسناد تایید نشده
-                case "MOGHAYERAT": return new MOGHAYERAT(); //صورت مغایرت های گرفته شده
-                case "paymentformorder": return new paymentformorder(); //درخواست پرداخت
-                case "F_MENU_MOGHAYERAT": return new F_MENU_MOGHAYERAT(); //صورت مغایرت
-                case "HEAD_LST_FROOSH_BACK2": return new HEAD_LST_FROOSH_BACK2(); //فاکتور برگشت فروش عادی
-                case "HEAD_LST_KH_BACK": return new HEAD_LST_KH_BACK(); //فاکتور برگشت خرید عادی
-                case "HEAD_LST_KHADAMAT": return new HEAD_LST_KHADAMAT(); //فاکتور خدمات
-                case "HEAD_LST_KHAREED1": return new HEAD_LST_KHAREED1(null, false); //فاکتور خرید
-
-
-                default: return null;
-            }
+                "PGET_HED" => new WinMenus.HESABDARI.PGET_HED(), //خزانه
+                "DEED_HEAD" => new DEED_HEAD(), //سند
+                "F_MENU_KART" => new F_MENU_KART(), //کارت انبار
+                "F_MENU_KOL_MOIN_TAFZIL" => new F_MENU_KOL_MOIN_TAFZIL(), //کنترل اف 8
+                "HEAD_LST_PISHFROOSH2" => new HEAD_LST_PISHFROOSH2(),
+                "IRAN_SALES_MAP" => new IRAN_SALES_MAP(),
+                "BUDGET0" => new BUDGET0(),
+                "NABZEDARY" => new NABZEDARY(), //فعالیت های سازمان
+                "NABZEFROOSH" => new NABZEFROOSH(), //نبض فروش
+                "NABZEMALI" => new NABZEMALI(), //نبض مالی
+                "CUSTKIND_WIN" => new CUSTKIND_WIN(), //نوع مشتری
+                "STUF_DEF_WIN" => new STUF_DEF_WIN(), //تعریف کالا
+                "KHAD_DEF" => new KHAD_DEF(), //تعریف خدمات
+                "MAIN" => MAIN.MAIN_INST, //اتوماسیون
+                "FCODE_CUSTOMER" => new FCODE_CUSTOMER(), //تعریف مشتری
+                "HEAD_LST_HAVL" => new HEAD_LST_HAVL(), //حواله فروش
+                "HEAD_LST_RASID" => new HEAD_LST_RASID(), //رسید خرید
+                "ANBGRD_HEAD_WIN" => new ANBGRD_HEAD_WIN(), //انبار گردانی
+                "HEAD_LST_ENTEGHAL_WIN" => new HEAD_LST_ENTEGHAL_WIN(), //انتقال از انبار به انبار
+                "HEAD_LST_HAV_OTHER_WIN" => new HEAD_LST_HAV_OTHER_WIN(), //سایر حواله انبار ها
+                "HEAD_LST_RASID_OTHER_WIN" => new HEAD_LST_RASID_OTHER_WIN(), //سایر رسید انبار ها
+                "DEED_SEARCH_MAIN" => new DEED_SEARCH_MAIN(), //جستجو در شرح اسناد
+                "F_MENU_ASNAD" => new F_MENU_ASNAD(), //تایید و قطعی کردن اسناد تایید نشده
+                "MOGHAYERAT" => new MOGHAYERAT(), //صورت مغایرت های گرفته شده
+                "paymentformorder" => new paymentformorder(), //درخواست پرداخت
+                "F_MENU_MOGHAYERAT" => new F_MENU_MOGHAYERAT(), //صورت مغایرت
+                "HEAD_LST_FROOSH_BACK2" => new HEAD_LST_FROOSH_BACK2(), //فاکتور برگشت فروش عادی
+                "HEAD_LST_KH_BACK" => new HEAD_LST_KH_BACK(), //فاکتور برگشت خرید عادی
+                "HEAD_LST_KHADAMAT" => new HEAD_LST_KHADAMAT(), //فاکتور خدمات
+                "HEAD_LST_KHAREED1" => new HEAD_LST_KHAREED1(null, false), //فاکتور خرید
+                _ => null
+            };
         }
 
         public void PopNotifyShow(string Msgtext, int Secound_Wait = 2, string Rang_Back = "#E5EC2B2B")
         {
             if (!string.IsNullOrEmpty(Rang_Back))
             {
-                var bc = new BrushConverter();
-                Pop_Border1.Background = (Brush)bc.ConvertFrom(Rang_Back);
+                try { Pop_Border1.Background = (Brush)new BrushConverter().ConvertFrom(Rang_Back); } catch { }
             }
             Pop1Text1.Text = Msgtext; Pop1.IsOpen = true;
+            MyTimer.Tick -= MyTimer_Tick;
             MyTimer.Tick += MyTimer_Tick;
             MyTimer.Interval = new TimeSpan(0, 0, 0, Secound_Wait, 0);
             MyTimer.Start();
@@ -151,7 +151,7 @@ namespace Prg_UI.Wins
                     const string valueName = "Windows";
                     const string desiredSharedSection = "SharedSection=1024,20480,1024";
 
-                    using (RegistryKey key = Microsoft.Win32.Registry.LocalMachine?.OpenSubKey(regPath, true))
+                    using (RegistryKey key = Registry.LocalMachine?.OpenSubKey(regPath, true))
                     {
                         if (key != null)
                         {
@@ -184,13 +184,16 @@ namespace Prg_UI.Wins
         }
         public USER_LOGIN()
         {
+            InitializeComponent();
+            this.Topmost = true;
+
             if (CL_Generaly.IsCalledExternally)
             {
                 this.Hide();
 
                 Baseknow.GetInitTheApp();
                 ScriptSqly.LetsGo();
-                App.splashScreen.LoadComplete();
+                App.splashScreen?.LoadComplete();
 
                 if (CL_Generaly.SectionName == "HEAD_LST_FROOSH22")
                 {
@@ -216,7 +219,7 @@ namespace Prg_UI.Wins
 
             Baseknow.GetInitTheApp();
 
-            MyTimer = new System.Windows.Threading.DispatcherTimer();
+            MyTimer = new DispatcherTimer();
 
             if (CL_CCNNMANAGER.ConnectedToSQLDB is false)
             {
@@ -237,7 +240,7 @@ namespace Prg_UI.Wins
             //Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ==");
             //"ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ=="
 
-            _ = LoadThemeAsync();
+            Task.Run(async () => { try { await LoadThemeAsync(); } catch { } });
 
             //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -258,10 +261,6 @@ namespace Prg_UI.Wins
             //    SMSPINFO.LINE_NUMBER = 30007227002577;
             //}
 
-#if DEBUG
-            return;//Should Remove this lone
-#endif
-
             ScriptSqly.LetsGo();
 
             #region TinyLockCheck
@@ -271,13 +270,13 @@ namespace Prg_UI.Wins
             if (Lockwatch.GoCheck() == false)
             {
                 CL_LMethods.GoExitTheApplication();
+                return;
             }
             #endregion
 
             Baseknow.mrcorrect = true; //بله همین نرم افزار مسترکارکت خودش هست
 
-            InitializeComponent();
-            this.Topmost = true;
+
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -304,7 +303,10 @@ namespace Prg_UI.Wins
                     SMSPINFO.PASSWORD = RST?.SMS_PASSWORD;
                     if (!string.IsNullOrWhiteSpace(RST?.SMS_TSMSHOST))
                     {
-                        SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
+                        if (long.TryParse(RST?.SMS_TSMSHOST, out long lineNum))
+                        {
+                            SMSPINFO.LINE_NUMBER = lineNum;
+                        }
                     }
                     SMSPINFO.API_KEY = RST?.SMS_LIBKEY;
 
@@ -339,78 +341,74 @@ namespace Prg_UI.Wins
             {
                 if (App.splashScreen is not null)
                 {
-                    App.splashScreen.LoadComplete();
+                    App.splashScreen?.LoadComplete();
                 }
             }
             catch { }
 
 #if DEBUG
-            //Baseknow.tindata = "0000000000000000000CORRECT";
-            //CL_Generaly.IsMrCorrectLocky = true;
+            
+            
 
-            //Baseknow.USERCOD = 108;
-            //Baseknow.UUSER = "modir-mali";
+            
+            
 
             Baseknow.mrcorrect = true;
 
-            //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
-            //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
-            //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
-            //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
-            //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
-            //Baseknow.USERCOD = 86; Baseknow.UUSER = "آقاي سجاد راستي";
-            //Baseknow.USERCOD = 174; Baseknow.UUSER = "Miss yeganeh Karbakhsh";
-            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
-            //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
-            //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
-            //Baseknow.USERCOD = 168; Baseknow.UUSER = "fatemeh Abotalebi";
-            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
-            //Baseknow.USERCOD = 56; Baseknow.UUSER = "Mr-kazemi";
-            //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr-pakzaban";
-            //Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
+            
+                
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
-            Baseknow.USERCOD = 179; Baseknow.UUSER = "واحد تولید یزدویزیتوری";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
             CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
             Baseknow.UGRP = "1";
-            CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
+             //دپارتمان DEPARTEMAN یزد ویزیتوری
 
             new WinBase().Show();
-            //new AZAE_WIN().Show();
-            //new WIN_About().Show();
-            //new WinConnectionChoose().Show();
-            //new WIN_SANAD_EFTETAHIYAH().Show();
+            
+            
+            
 
+            
+            
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
-
-            //new WIN_F_NEWYEAR().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
+            
+            
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //new WIN_OPTIONS().Show();
-            //new WIN_GETFIRSTMOG().Show();
-            //new WIN_LASTPRICE().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
+            
+            
+            
+            
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "13774,13760");
+            
 
-            //System.Windows.Forms.MessageBox.Show(CL_CCNNMANAGER.CONNECTION_STR);
-            //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
-            //new TR_ANBGRD_LST().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MOGUDI_SEARCH_MAIN, this);
+            //MessageBox.Show(CL_CCNNMANAGER.CONNECTION_STR);
+            
+            
+            
 
             //new F_MENU_GOZARESH_FROOSH("FR").ShowDialog();
 
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
+            
+            
+            
+            
 
             //new WinEVENTS(37729).ShowDialog();
             return;
@@ -427,10 +425,10 @@ namespace Prg_UI.Wins
                 return;
             }
 
-
             if (CL_Generaly.IsCalledExternally)
             {
-                CL_LMethods.GoExitTheApplication(); return;// for access
+                CL_LMethods.GoExitTheApplication();
+                return;
             }
 
             this.Show(); //Here for debug comment
@@ -440,19 +438,7 @@ namespace Prg_UI.Wins
 
             CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
 
-            #region VERY_IMPORTANT_IT_IS_TEMPRORY
-            //Yazdsepar
-            //Baseknow.tindata = "0000000000000000000CORRECT" + "moadian:A11X6O,14040101,A2HGPP,14040101";
-            //CL_Generaly.IsMrCorrectLocky = true;
-            if (false)
-            {
-                //T-SMS
-                SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
-                SMSPINFO.USERNAME = @"yazdseparsms";
-                SMSPINFO.PASSWORD = @"ABCabc123456";
-                SMSPINFO.LINE_NUMBER = 3000119981;
-            }
-            #endregion
+
 
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -477,8 +463,8 @@ namespace Prg_UI.Wins
             USRLST = dbms.DoGetDataSQL<SALA_DTL>("SELECT IDD,SAL_NAME,PSAL_NAME,GRSAL FROM SALA_DTL WHERE ENABL = 0 ORDER BY SAL_NAME").ToList();
             foreach (var item in USRLST)
             {
-                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME.ToString()).FixPersianChars();
-                item.PSAL_NAME = CL_HESABDARI.DECODEPS(item.PSAL_NAME.ToString()).FixPersianChars();
+                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME?.ToString() ?? "").FixPersianChars();
+
             }
 
             CmbUsers.ItemsSource = USRLST;
@@ -494,7 +480,7 @@ namespace Prg_UI.Wins
         }
         private void SetSelectionPassy(PasswordBox passwordBox, int length, int start)
         {
-            passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(passwordBox, new object[] { start, length });
+            passwordBox.GetType().GetMethod("Select", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(passwordBox, new object[] { start, length });
         }
         private void cnnparamlbl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -512,38 +498,25 @@ namespace Prg_UI.Wins
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); //Be Sure to Encod has a Provider to avoid error
 
-            if (!string.IsNullOrEmpty(Krbri.Text))
-            {
-                if (SecoRmzo.Visibility == Visibility.Visible)
-                {
-                    if (!string.IsNullOrEmpty(SecoRmzo.Text))
-                    {
-                    }
-                    else
-                    {
-                        PopNotifyShow("لطفا رمز عبور را وارد کنید.");
-                        return;
-                    }
-                }
-                if (Rmzo.Visibility == Visibility.Visible)
-                {
-                    if (!string.IsNullOrEmpty(Rmzo.Password))
-                    {
-                    }
-                    else
-                    {
-                        PopNotifyShow("لطفا رمز عبور را وارد کنید.");
-                        return;
-                    }
-                }
-            }
-            else
+            if (string.IsNullOrWhiteSpace(Krbri.Text))
             {
                 PopNotifyShow("لطفا نام کاربری خود را وارد کنید.");
                 return;
             }
-            lbloader.Visibility = Visibility.Visible;
 
+            if (SecoRmzo.Visibility == Visibility.Visible && string.IsNullOrWhiteSpace(SecoRmzo.Text))
+            {
+                PopNotifyShow("لطفا رمز عبور را وارد کنید.");
+                return;
+            }
+
+            if (Rmzo.Visibility == Visibility.Visible && string.IsNullOrWhiteSpace(Rmzo.Password))
+            {
+                PopNotifyShow("لطفا رمز عبور را وارد کنید.");
+                return;
+            }
+            lbloader.Visibility = Visibility.Visible;
+            Greet.IsEnabled = false;
 
             //await DeletiTemprorayUserFiles();
 
@@ -564,83 +537,56 @@ namespace Prg_UI.Wins
                         Rmzo.Clear();
                     });
                 }
-                byte incorPassEnt = 0;
 
-                var USF = USRLST.Where(x => x.SAL_NAME.Equals(Krbri.Text.FixPersianChars())).FirstOrDefault();
-                if (USF is null)
-                {
-                    USF = USRLST.Where(x => x.SAL_NAME.Equals(Krbri.Text)).FirstOrDefault();
-                }
+                string normalizedKrbri = Krbri.Text.FixPersianChars();
+                var USF = USRLST.FirstOrDefault(x => x.SAL_NAME?.Equals(normalizedKrbri) == true)
+                       ?? USRLST.FirstOrDefault(x => x.SAL_NAME?.Equals(Krbri.Text) == true);
 
                 if (USF != null)
                 {
-                    //if (USF.ENABL != 0)
-                    //{
-                    //    new Msgwin(false, "کاربری شما غیر فعال است , ورود به سیستم مقدور نیست").Show();
-                    //    return;
-                    //}
+                    string inputPass = Rmzo.Visibility == Visibility.Visible ? Rmzo.Password : SecoRmzo.Text;
+                    inputPass = inputPass?.Trim().Replace("ي", "ی").Replace("ك", "ک");
 
-                    if (Rmzo.Password == "442100200")
+                    string realPass = USF.PSAL_NAME != null ? CL_HESABDARI.DECODEPS(USF.PSAL_NAME.ToString()).FixPersianChars() : "";
+
+                    if (string.Equals(realPass, inputPass, StringComparison.Ordinal))
                     {
+                        incorPassEnt = 0;
                         PSWORD_AfterUpdate();
-
                         Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
                         Baseknow.USERCOD = USF.IDD;
                         Baseknow.UGRP = USF.GRSAL.ToString();
                         StoreInRegister();
                         await OpenMainWindowAsync();
-                        return;
-
                     }
-                    if (!string.IsNullOrEmpty(Rmzo.Password))
+                    else
                     {
-                        //Check User and Pass
-                        if (USF.PSAL_NAME.Equals(Rmzo.Password.Trim().Replace("ي", "ی").Replace("ك", "ک")))
+                        incorPassEnt++;
+                        if (incorPassEnt >= 5)
                         {
-                            PSWORD_AfterUpdate();
-
-                            Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-                            Baseknow.USERCOD = USF.IDD;
-                            Baseknow.UGRP = USF.GRSAL.ToString();
-                            StoreInRegister();
-                            await OpenMainWindowAsync();
+                            PopNotifyShow("تعداد دفعات مجاز ورود اشتباه به پایان رسید. برنامه بسته می‌شود.");
+                            await Task.Delay(2000);
+                            CL_LMethods.GoExitTheApplication();
+                            return;
                         }
-                        else
-                        {
-                            //Pop1.IsOpen = true;
-                            PopNotifyShow("رمز عبور شما صحیح نیست !");
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(SecoRmzo.Text))
-                    {
-                        //Check User and Pass
-                        if (USF.PSAL_NAME.Equals(SecoRmzo.Text.Trim().Replace("ي", "ی").Replace("ك", "ک")))
-                        {
-                            PSWORD_AfterUpdate();
-
-                            Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-                            Baseknow.USERCOD = USF.IDD;
-                            Baseknow.UGRP = USF.GRSAL.ToString();
-                            StoreInRegister();
-                            await OpenMainWindowAsync();
-                        }
-                        else
-                        {
-                            PopNotifyShow("رمز عبور شما صحیح نیست !");
-                        }
+                        PopNotifyShow($"رمز عبور شما صحیح نیست ! (تلاش {incorPassEnt}/5)");
                     }
                 }
                 else
                 {
                     PopNotifyShow("نام کاربری صحیح نیست !");
                 }
-                lbloader.Visibility = Visibility.Hidden;
 
             }
-            catch (Exception er)
+            catch (Exception ex)
             {
-                Console.WriteLine(er.ToString());
-                throw;
+                CL_LMethods.DoWriteMyLog("Error in Login: " + ex);
+                PopNotifyShow("در ورود به سیستم خطایی رخ داد.");
+            }
+            finally
+            {
+                lbloader.Visibility = Visibility.Hidden;
+                CheckNullyTextes();
             }
         }
         private void RemovedTick(object sender, RoutedEventArgs e) //وقتی تیک برداشته میشه Hide Pass
@@ -665,14 +611,14 @@ namespace Prg_UI.Wins
         }
         private void StoreInRegister()
         {
-            using (RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("SOFTWARE\\DU"))
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("SOFTWARE\\DU"))
             {
                 key.SetValue("DU", Krbri.Text);
             }
         }
         private void WasUser()
         {
-            using (RegistryKey keyreg = Microsoft.Win32.Registry.CurrentUser.CreateSubKey("SOFTWARE\\DU"))
+            using (RegistryKey keyreg = Registry.CurrentUser.OpenSubKey("SOFTWARE\\DU"))
             {
                 if (keyreg != null)
                 {
@@ -694,37 +640,13 @@ namespace Prg_UI.Wins
         }
         private void CheckNullyTextes()
         {
-            if (NowIsReady == true)
+            if (NowIsReady)
             {
-                if (!string.IsNullOrEmpty(Krbri.Text))
-                {
-                    if (SecoRmzo.Visibility == Visibility.Visible)
-                    {
-                        if (!string.IsNullOrEmpty(SecoRmzo.Text))
-                        {
-                            Greet.IsEnabled = true;
-                        }
-                        else
-                        {
-                            Greet.IsEnabled = false;
-                        }
-                    }
-                    if (Rmzo.Visibility == Visibility.Visible)
-                    {
-                        if (!string.IsNullOrEmpty(Rmzo.Password))
-                        {
-                            Greet.IsEnabled = true;
-                        }
-                        else
-                        {
-                            Greet.IsEnabled = false;
-                        }
-                    }
-                }
-                else
-                {
-                    Greet.IsEnabled = false;
-                }
+                bool hasUser = !string.IsNullOrWhiteSpace(Krbri.Text);
+                bool hasPass1 = SecoRmzo.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(SecoRmzo.Text);
+                bool hasPass2 = Rmzo.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(Rmzo.Password);
+
+                Greet.IsEnabled = hasUser && (hasPass1 || hasPass2);
             }
         }
         private void SecoRmzo_TextChanged(object sender, TextChangedEventArgs e)
@@ -767,8 +689,12 @@ namespace Prg_UI.Wins
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            MyTimer?.Stop();
-            MyTimer = null;
+            if (MyTimer != null)
+            {
+                MyTimer.Tick -= MyTimer_Tick;
+                MyTimer.Stop();
+                MyTimer = null;
+            }
         }
 
         private void CmbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -814,9 +740,17 @@ namespace Prg_UI.Wins
         {
             string tempExePath = null;
             string sourcePath = null;
+            System.Threading.Mutex updateMutex = null;
 
             try
             {
+                updateMutex = new System.Threading.Mutex(false, @"Global\MrCorrect_AutoUpdate", out bool createdNew);
+                if (!updateMutex.WaitOne(TimeSpan.Zero))
+                {
+                    ShowErrorAndExit("بروزرسانی توسط کاربر دیگری در حال انجام است.");
+                    return;
+                }
+
                 // 1. Resolve Paths Securely
                 string currentExe = Environment.ProcessPath;
                 if (string.IsNullOrEmpty(currentExe))
@@ -841,7 +775,7 @@ namespace Prg_UI.Wins
                 string userSuffix = GetSafeUserSuffix();
                 tempExePath = Path.Combine(localUpdateDir, $"{exeName}.{userSuffix}{TEMP_FILE_SUFFIX}");
                 string metaPath = tempExePath + ".meta";
-                string flagPath = Path.Combine(localUpdateDir, UPDATE_FAIL_FLAG);
+                string flagPath = Path.Combine(localUpdateDir, $"{userSuffix}_{UPDATE_FAIL_FLAG}");
 
                 // 2. If the previous swap attempts kept failing, stop the auto-retry loop and guide the user
                 int failCount = GetUpdateFailCount(flagPath);
@@ -958,6 +892,14 @@ namespace Prg_UI.Wins
                 CleanupTemp(tempExePath);
                 ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}\n\n{BuildManualUpdateGuide(sourcePath)}");
             }
+            finally
+            {
+                if (updateMutex != null)
+                {
+                    try { updateMutex.ReleaseMutex(); } catch { }
+                    updateMutex.Dispose();
+                }
+            }
         }
 
         private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset)
@@ -992,17 +934,16 @@ namespace Prg_UI.Wins
                 while (totalRead < totalBytes)
                 {
                     // Read with timeout
-                    var readTask = sourceStream.ReadAsync(buffer, 0, buffer.Length);
-
-                    try
+                    using (var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS)))
                     {
-                        // Use WaitAsync for timeout logic
-                        // This prevents indefinite hanging on a dead connection
-                        bytesRead = await readTask.WaitAsync(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS));
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new IOException("Connection timed out (Read).");
+                        try
+                        {
+                            bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            throw new IOException("Connection timed out (Read).");
+                        }
                     }
 
                     if (bytesRead == 0) break; // End of stream
@@ -1037,8 +978,8 @@ namespace Prg_UI.Wins
         private void ExecuteUpdateScript(string currentExe, string tempExe, string currentDir, string localUpdateDir, string metaPath, string flagPath, long expectedSize, string userSuffix)
         {
             string batPath = Path.Combine(localUpdateDir, $"update_installer_{userSuffix}.bat");
-            string oldExe = currentExe + OLD_FILE_SUFFIX;
-            string logPath = Path.Combine(localUpdateDir, UPDATE_LOG_FILE);
+            string oldExe = currentExe + $".{userSuffix}{OLD_FILE_SUFFIX}";
+            string logPath = Path.Combine(localUpdateDir, $"{userSuffix}_{UPDATE_LOG_FILE}");
             int currentPid = Environment.ProcessId;
 
             // متن فارسی هشدارِ آخرین‌راه‌حل در فایل جداگانه UTF-8 نوشته می‌شود؛
@@ -1051,7 +992,7 @@ namespace Prg_UI.Wins
                     "بروزرسانی خودکار ناتمام ماند و برنامه به صورت خودکار اجرا نشد.\r\n" +
                     "لطفا برنامه را به صورت دستی اجرا کنید.\r\n" +
                     "در صورت تکرار مشکل با پشتیبانی تماس بگیرید.\r\n" +
-                    "(گزارش خطا: فایل update_log.txt در پوشه update کنار برنامه)",
+                    $"(گزارش خطا: فایل {userSuffix}_update_log.txt در پوشه update کنار برنامه)",
                     Encoding.UTF8);
             }
             catch { }
@@ -1220,8 +1161,20 @@ del ""%~f0"" & exit
                 if (!fi.Exists || fi.Length != expectedLength || expectedLength <= 0) return false;
 
                 // بررسی امضای فایل اجرایی ویندوز (MZ)
-                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                return fs.ReadByte() == 'M' && fs.ReadByte() == 'Z';
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    if (fs.ReadByte() != 'M' || fs.ReadByte() != 'Z')
+                        return false;
+                }
+
+                // Verify Authenticode / Version Info roughly
+                var versionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(path);
+                if (string.IsNullOrWhiteSpace(versionInfo.ProductName) && string.IsNullOrWhiteSpace(versionInfo.OriginalFilename))
+                {
+                    return false;
+                }
+
+                return true;
             }
             catch
             {
@@ -1281,7 +1234,8 @@ del ""%~f0"" & exit
         {
             try
             {
-                string oldExe = currentExe + OLD_FILE_SUFFIX;
+                string userSuffix = GetSafeUserSuffix();
+                string oldExe = currentExe + $".{userSuffix}{OLD_FILE_SUFFIX}";
                 if (File.Exists(oldExe))
                 {
                     try { File.Delete(oldExe); } catch { /* هنوز توسط کاربر دیگری باز است */ }
@@ -1289,10 +1243,10 @@ del ""%~f0"" & exit
 
                 // فایل‌های به‌جامانده از فرمت قدیمی آپدیتر (بدون پسوند کاربر) که دیگر استفاده نمی‌شوند
                 string exeName = Path.GetFileName(currentExe);
-                CleanupTemp(Path.Combine(localUpdateDir, exeName + TEMP_FILE_SUFFIX));
-                CleanupTemp(Path.Combine(localUpdateDir, "update_installer.bat"));
+                CleanupTemp(Path.Combine(localUpdateDir, $"{exeName}.{userSuffix}{TEMP_FILE_SUFFIX}"));
+                CleanupTemp(Path.Combine(localUpdateDir, $"update_installer_{userSuffix}.bat"));
 
-                var logInfo = new FileInfo(Path.Combine(localUpdateDir, UPDATE_LOG_FILE));
+                var logInfo = new FileInfo(Path.Combine(localUpdateDir, $"{userSuffix}_{UPDATE_LOG_FILE}"));
                 if (logInfo.Exists && logInfo.Length > 1024 * 1024)
                 {
                     try { logInfo.Delete(); } catch { }
@@ -1303,12 +1257,13 @@ del ""%~f0"" & exit
 
         private static string BuildManualUpdateGuide(string sourcePath)
         {
+            string userSuffix = GetSafeUserSuffix();
             return "راهنمای رفع مشکل بروزرسانی:\n" +
                    "1- نرم افزار را در همه سیستم ها و همه کاربران (Remote Desktop) ببندید و دوباره اجرا کنید.\n" +
                    "2- اگر مشکل ادامه داشت، برنامه را یک بار با کلیک راست و گزینه Run as Administrator اجرا کنید.\n" +
                    "3- در غیر این صورت فایل جدید را به صورت دستی از مسیر زیر کپی و جایگزین فایل برنامه کنید:\n" +
                    (string.IsNullOrEmpty(sourcePath) ? UPDATE_SERVER_PATH : sourcePath) + "\n" +
-                   "4- در صورت نیاز با پشتیبانی تماس بگیرید (فایل update_log.txt در پوشه update کنار برنامه به عیب یابی کمک می کند).";
+                   $"4- در صورت نیاز با پشتیبانی تماس بگیرید (فایل {userSuffix}_update_log.txt در پوشه update کنار برنامه به عیب یابی کمک می کند).";
         }
 
         private bool HasWritePermission(string path)
