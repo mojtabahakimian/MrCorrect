@@ -4,6 +4,7 @@ using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -32,7 +33,7 @@ namespace Wins.ThePages
 
         private void Image_PreviewMouseDown_2(object sender, MouseButtonEventArgs e)
         {
-
+            new Msgwin(false, "نبض خرید در این نسخه به صورت یکپارچه با نبض فروش و نبض مالی سازمان تحلیل و ارائه می‌گردد.").ShowDialog();
         }
 
         private void Image_PreviewMouseDown_3(object sender, MouseButtonEventArgs e)

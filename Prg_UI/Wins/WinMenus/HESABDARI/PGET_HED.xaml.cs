@@ -2615,7 +2615,17 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         private DataGridCellInfo? _editingCellInfo;
         bool JustnowforcheckOpnned = false; //متغیری که برای جلوگیری از باز شدن مجددا پنجره مشخصات چک در ثبت واگذاری چک , چون بعد از حساب پنجره خودکار باز میشه و لازم نیست توی مبلغ که فوکوس میکنه دوباره باز بشه !
-        private void PGET_LST_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+
+        private async Task ShowDialogAfterCurrentDispatcherOperationAsync(Window dialog)
+        {
+            // CellEditEnding can run while WPF has dispatcher processing disabled
+            // (for example, when focus changes because another window is closing).
+            // ShowDialog pushes a nested dispatcher frame, so defer it until WPF
+            // has completed the current input/edit operation.
+            await Dispatcher.InvokeAsync(dialog.ShowDialog, DispatcherPriority.Background);
+        }
+
+        private async void PGET_LST_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (!NowIsReady || PGET_LST_SUB == null || PGET_LST_SUB.Items.Count == 0) return;
 
@@ -3287,7 +3297,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 if (ENTERED_VALUE_ROW.ToString() == "+" || ENTERED_VALUE_ROW.ToString() == "++")
                 {
                     ComboSearch CMBSearch = new ComboSearch("PGET_HED", I_AM_KHAZANEH);//Search Plusy Form Specialy for Customers
-                    CMBSearch.ShowDialog();
+                    await ShowDialogAfterCurrentDispatcherOperationAsync(CMBSearch);
 
                     //string?[] HESAB_SPLITED = null;
                     if (FROM_SEARCH.HES is not null)
@@ -3403,7 +3413,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     if (CURRENT_ITMES_ROW.FHES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
                         BAKCHEKP bAKCHEKP = new BAKCHEKP(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
-                        bAKCHEKP.ShowDialog();
+                        await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEKP);
                     }
                 }
                 #region IS_TAB_STOPS
@@ -3444,7 +3454,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 if (ENTERED_VALUE_ROW.ToString() == "+" || ENTERED_VALUE_ROW.ToString() == "++")
                 {
                     ComboSearch CMBSearch = new ComboSearch("PGET_HED", I_AM_KHAZANEH);//Search Plusy Form Specialy for Customers
-                    CMBSearch.ShowDialog();
+                    await ShowDialogAfterCurrentDispatcherOperationAsync(CMBSearch);
 
                     if (FROM_SEARCH.HES is not null)
                     {
@@ -3559,7 +3569,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     if (CURRENT_ITMES_ROW.THES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
                         BAKCHEK bAKCHEK = new BAKCHEK(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
-                        bAKCHEK.ShowDialog();
+                        await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEK);
                     }
                 }
 
@@ -3579,7 +3589,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     {
 
                         FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
-                        fORCHEK.ShowDialog();
+                        await ShowDialogAfterCurrentDispatcherOperationAsync(fORCHEK);
 
                         JustnowforcheckOpnned = true;
                     }
@@ -3664,7 +3674,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 }
                                             }
                                             GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
-                                            gETCHEK.ShowDialog();
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(gETCHEK);
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3689,7 +3699,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 CURRENT_ITMES_ROW.BANK = 0;
                                             }
                                             GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
-                                            gETCHEK.ShowDialog();
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(gETCHEK);
 
                                             if (CURRENT_CELL_ROW != null)
                                             {
@@ -3760,7 +3770,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
-                                            pAYCHEK.ShowDialog();
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(pAYCHEK);
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3816,7 +3826,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
                                             FORCHEK fORCHEK4 = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
-                                            fORCHEK4.ShowDialog();
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(fORCHEK4);
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;

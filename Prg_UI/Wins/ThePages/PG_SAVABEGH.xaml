@@ -255,7 +255,7 @@
                         <Label Content="سوابق تعریف کالا" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghSystem_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/SystemChangeH.png" CacheOption="OnLoad"/>
@@ -264,7 +264,7 @@
                         <Label Content="سوابق تنظیمات سیستم" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghKargozini_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/Kargozini.png" CacheOption="OnLoad"/>
@@ -273,7 +273,7 @@
                         <Label Content="سوابق احکام کارگزینی" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" MouseLeftButtonUp="SavabeghMorakhas_MouseLeftButtonUp" Cursor="Hand">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAVABEGH/DayOffH.png" CacheOption="OnLoad"/>

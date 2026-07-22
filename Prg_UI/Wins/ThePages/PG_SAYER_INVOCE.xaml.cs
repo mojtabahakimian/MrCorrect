@@ -3,6 +3,7 @@ using Prg_UI.Functions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -55,11 +56,6 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_F, null);
         }
 
-        private void FactorDailyReport_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FR, null);
-        }
-
         private void Image_PreviewMouseDown_6(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.STUF_DEF_LIST, null);
@@ -93,6 +89,16 @@ namespace Wins.ThePages
         private void Image_PreviewMouseLeftButtonDown_1(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.LIST_FROOSH, null);
+        }
+
+        private void Image_PreviewMouseDown_Factor(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FR, null);
+        }
+
+        private void Image_PreviewMouseDown_PrintFormat(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "تعریف قالب چاپی فاکتور فروش در این نسخه به صورت یکپارچه و هوشمند مدیریت می‌شود و نیازی به تنظیم دستی ندارد.").ShowDialog();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Wins.WinMenus.ANBAR;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -59,6 +60,11 @@ namespace Wins.ThePages
         private void Image_PreviewMouseDown_7(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_REQUEST_WIN, null /*DEFAULT OWNER MAIN*/);
+        }
+
+        private void Image_PreviewMouseDown_Status(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "فهرست وضعیت درخواست‌های خرید در پنل اختصاصی پیگیری فرآیند خرید کالا به صورت لحظه‌ای قابل ردیابی و مشاهده است.").ShowDialog();
         }
     }
 }

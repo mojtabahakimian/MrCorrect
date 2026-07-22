@@ -171,7 +171,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_Personnel" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SANATI/User_Karkard.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -180,7 +180,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_Dastmozd" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SANATI/Dastmozd_Tolid.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -211,7 +211,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_Compare" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SANATI/Price_Sell.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -220,7 +220,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_Amalkard1" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SANATI/Amalkard_End_kala.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -229,16 +229,16 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_Tadil" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SANATI/Price_End.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
                         <Label Content="صدور سند تعدیلات قیمت تمام شده" Foreground="#DDFFFFFF" Height="27"/>
-                    </WrapPanel> 
-                    
+                    </WrapPanel>
+
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_Amalkard2" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SANATI/Amalkard_Ens2.png" CacheOption="OnLoad"/>
                             </Image.Source>

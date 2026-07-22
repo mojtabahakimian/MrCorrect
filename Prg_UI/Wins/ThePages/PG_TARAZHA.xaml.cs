@@ -50,7 +50,7 @@ namespace Wins.ThePages
 
         private void Image_PreviewMouseDown_4(object sender, MouseButtonEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4, default); 
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4, default);
         }
 
         private void Image_PreviewMouseDown_5(object sender, MouseButtonEventArgs e)
@@ -81,6 +81,11 @@ namespace Wins.ThePages
         private void Image_PreviewMouseDown_10(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TARAZHES_WIN, default);
+        }
+
+        private void Image_PreviewMouseDown_Tafzili(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_RFT4T, default);
         }
     }
 }

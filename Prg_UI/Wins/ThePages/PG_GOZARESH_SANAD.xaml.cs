@@ -4,6 +4,7 @@ using Prg_UI.Wins.WinMenus.HESABDARI;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -77,11 +78,6 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_KOL_MOIN_TAFKIK, default); //حساب تفکیکی تفضیلی
         }
 
-        private void SmartCustomerStatement_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_DATE_AI, null);
-        }
-
         private void Image_PreviewMouseDown_11(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_DPDAY, default); //گزارش عملکرد روزانه خزانه
@@ -100,6 +96,16 @@ namespace Wins.ThePages
         private void Image_PreviewMouseDown_14(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ASNAD_PRINT, default);
+        }
+
+        private void Image_PreviewMouseDown_Kholase(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "سند خلاصه عملیات در این نسخه از سیستم به صورت کاملاً خودکار تجمیع و در دفاتر معین و ترازها انعکاس می‌یابد.").ShowDialog();
+        }
+
+        private void Image_PreviewMouseDown_SmartBill(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_DATE_AI, null);
         }
     }
 }

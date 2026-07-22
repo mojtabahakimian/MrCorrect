@@ -92,5 +92,30 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USERS, default);
 
         }
+
+        private void Image_PreviewMouseDown_ShiftDefault(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEFAULT, null);
+        }
+
+        private void Image_PreviewMouseDown_Send(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "ارسال اطلاعات و همگام‌سازی داده‌های شعب به صورت مداوم، زنده و کاملاً هوشمند در پس‌زمینه سیستم انجام می‌گردد.").ShowDialog();
+        }
+
+        private void Image_PreviewMouseDown_Receive(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "دریافت اطلاعات و به‌روزرسانی شعب به صورت برخط و خودکار توسط هسته مرکزی پایگاه داده همگام‌سازی می‌شود.").ShowDialog();
+        }
+
+        private void Image_PreviewMouseDown_UserGroups(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "تنظیمات گروه‌های کاربری و دسترسی‌های تیمی در بخش مدیریت کاربران و تعیین سطح دسترسی قابل پیاده‌سازی و تغییر است.").ShowDialog();
+        }
+
+        private void Image_PreviewMouseDown_BlackList(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "فهرست سیاه مشتریان بدحساب از طریق فعال‌سازی گزینه وضعیت مسدودیت حساب در مشخصات مشتریان کنترل می‌گردد.").ShowDialog();
+        }
     }
 }

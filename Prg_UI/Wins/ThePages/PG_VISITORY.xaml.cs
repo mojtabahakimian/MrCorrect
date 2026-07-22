@@ -104,5 +104,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITONE, default);
         }
+
+        private void Image_PreviewMouseDown_Map(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.IRAN_SALES_MAP, null);
+        }
     }
 }
