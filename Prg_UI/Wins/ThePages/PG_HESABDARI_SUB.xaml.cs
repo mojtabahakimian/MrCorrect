@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -95,6 +96,11 @@ namespace Wins.ThePages
         private void WrapPanel_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
         {
             PageManagement.OpenPage(new PG_SALEND());
+        }
+
+        private void Image_PreviewMouseDown_Sort(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "مرتب‌سازی اسناد بر اساس الگوریتم توالی شماره اسناد به صورت سیستماتیک و هوشمند در زمان ثبت و قطعی کردن اسناد تایید نشده انجام می‌گیرد.").ShowDialog();
         }
     }
 }

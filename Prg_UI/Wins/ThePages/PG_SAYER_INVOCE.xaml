@@ -193,7 +193,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewKeyDown="Image_PreviewKeyDown" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="FactorDailyReport_PreviewMouseDown">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_Factor" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAYER_INVOCE/SellReportByFactor.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -211,7 +211,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_PrintFormat" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SAYER_INVOCE/PrintFormat.png" CacheOption="OnLoad"/>
                             </Image.Source>

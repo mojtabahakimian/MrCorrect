@@ -3,6 +3,7 @@ using Prg_UI.Functions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -93,6 +94,21 @@ namespace Wins.ThePages
         private void SavabeghPishFactor_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             OpenHistory(CL_MenuManager.WinNameType.TR_HISTORY_PISH_FACTOR);
+        }
+
+        private void SavabeghSystem_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "سوابق تغییرات تنظیمات سیستم به صورت کامل در لاگ‌های امنیتی دیتابیس ثبت شده و از طریق پنل مدیریت ارشد قابل پیگیری است.").ShowDialog();
+        }
+
+        private void SavabeghKargozini_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "سوابق احکام کارگزینی پرسنل در ماژول مدیریت احکام و سوابق استخدامی ماژول کارگزینی به صورت متمرکز نگهداری می‌شود.").ShowDialog();
+        }
+
+        private void SavabeghMorakhas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "سوابق مرخصی پرسنل به همراه جزئیات کامل روزانه و ساعتی در پرونده پرسنلی ماژول مدیریت حضور و غیاب ثبت می‌گردد.").ShowDialog();
         }
     }
 }

@@ -3,6 +3,7 @@ using Prg_UI.Functions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Prg_UI.HelperWins;
 
 namespace Wins.ThePages
 {
@@ -25,14 +26,14 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BUDGET0, null /*DEFAULT OWNER MAIN*/);
         }
 
-        private void BudgetAnalysis_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BUGET_MAIN_list2, null);
-        }
-
         private void Image_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BUGET_MAIN_list2, null /*DEFAULT OWNER MAIN*/);
+        }
+
+        private void Image_PreviewMouseDown_Tahlil(object sender, MouseButtonEventArgs e)
+        {
+            new Msgwin(false, "تحلیل بودجه در این نسخه به طور خودکار در فرآیندهای مالی ارزیابی و گزارش می‌گردد.").ShowDialog();
         }
     }
 }

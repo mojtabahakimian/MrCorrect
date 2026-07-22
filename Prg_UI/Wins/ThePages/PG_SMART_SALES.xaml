@@ -170,7 +170,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_6">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_Takhir" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Mohasebe_Pardakht.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -179,7 +179,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_11">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_Enhesar" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Enhesar.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -188,7 +188,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_7">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_StatusMosh" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Customer_Status.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -197,7 +197,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_8">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_StatusKar" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Status.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -215,7 +215,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_12">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_Msg" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Nahve_Pardakht.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -224,7 +224,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_4">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_Msg" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Grade_Shart.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -242,7 +242,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewKeyDown="Image_PreviewKeyDown" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_9">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_GradeFormat" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/GradBandi_Customer.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -251,7 +251,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_Msg" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Takgir_Pardakht.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -260,7 +260,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0" PreviewMouseDown="Image_PreviewMouseDown_10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_GScale" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SMART_SALES/Parameter.png" CacheOption="OnLoad"/>
                         </Image.Source>

@@ -1054,10 +1054,6 @@ namespace Functions
             /// </summary>
             WIN_PRICE_GRP,
             /// <summary>
-            /// تعریف انحصار فروش
-            /// </summary>
-            ENHESAR_WIN,
-            /// <summary>
             /// بررسی وضعیت کارشناس
             /// </summary>
             NABZMOSH_KARSHENASH,
@@ -1102,6 +1098,13 @@ namespace Functions
             /// </summary>
             WIN_SANAD_AMALKARD,
             /// <summary>
+            /// تعریف انحصار
+            /// </summary>
+            WIN_ENHESAR,
+            /// <summary>
+            /// صورت‌حساب هوشمند مشتریان
+            /// </summary>
+            F_MENU_KOL_MOIN_DATE_AI,
         }
         #endregion
 
@@ -1123,6 +1126,10 @@ namespace Functions
 
                 case WinNameType.WIN_SANAD_AMALKARD: /*سند عملکرد از Ctrl + F1*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_AMALKARD(), isModalDialog: false, allowMultipleInstances: false); break;
 
+                case WinNameType.WIN_ENHESAR: /*تعریف انحصار*/ CL_LMethods.OpenWindow(OWNERWIN, new ENHESAR_WIN(_PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null, _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.F_MENU_KOL_MOIN_DATE_AI: /*صورت‌حساب هوشمند مشتریان*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_DATE_AI(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.WIN_SANAD_EKHTETAMIYAH: /*سند اختتـامیه*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_EKHTETAMIYAH(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_SANAD_EFTETAHIYAH: /*سند افتتاحیه*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_EFTETAHIYAH(), isModalDialog: false, allowMultipleInstances: false); break;
@@ -1142,8 +1149,6 @@ namespace Functions
                 case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZKAR"), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.NABZMOSH_MOSHTARI: /*بررسی وضعیت مشتری*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZMOSH"), isModalDialog: false, allowMultipleInstances: false); break;
-
-                case WinNameType.ENHESAR_WIN: /*تعریف انحصار فروش*/ CL_LMethods.OpenWindow(OWNERWIN, new ENHESAR_WIN(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_PRICE_GRP: /*تعریف گروه قیمت گذاری*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_PRICE_GRP(), isModalDialog: false, allowMultipleInstances: false); break;
 
