@@ -590,6 +590,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     }
                 }
+                else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.T)
+                {
+                    e.Handled = true;
+                    if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0" && AllowEdits)
+                    {
+                        TAKHFIF takhfif = new TAKHFIF(I_AM_PISHFACTOR);
+                        if (takhfif.CanOpen)
+                            takhfif.Show();
+                    }
+                }
                 else
                 {
                     //if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && (e.Key == Key.F8 || e.SystemKey == Key.F8))

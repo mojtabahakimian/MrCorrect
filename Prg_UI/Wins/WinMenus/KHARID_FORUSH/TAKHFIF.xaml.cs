@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualBasic;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
@@ -73,7 +73,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
 
             bool _cango = true;
-            if ((THEWIN as HEAD_LST_FROOSH22).AllowEdits is true)
+            bool _allowEdits = false;
+            if (THEWIN is HEAD_LST_FROOSH22)
+                _allowEdits = (THEWIN as HEAD_LST_FROOSH22).AllowEdits is true;
+            else if (THEWIN is HEAD_LST_PISHFROOSH2)
+                _allowEdits = (THEWIN as HEAD_LST_PISHFROOSH2).AllowEdits is true;
+
+            if (_allowEdits)
             { }
             else
             {
