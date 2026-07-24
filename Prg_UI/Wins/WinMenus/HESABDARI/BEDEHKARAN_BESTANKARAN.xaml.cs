@@ -6,7 +6,6 @@ using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
@@ -75,8 +74,6 @@ namespace Wins.WinMenus.HESABDARI
         public BEDEHKARAN_BESTANKARAN()
         {
             InitializeComponent();
-
-            SYNCFUSION_DG.SelectionController = new SafeGridSelectionController(SYNCFUSION_DG);
 
             this.DataContext = this;
 
