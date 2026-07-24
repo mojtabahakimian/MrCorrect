@@ -1,4 +1,4 @@
-﻿<Window x:Class="Wins.WinMenus.HESABDARI.BEDEHKARAN_BESTANKARAN"
+<Window x:Class="Wins.WinMenus.HESABDARI.BEDEHKARAN_BESTANKARAN"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -528,7 +528,7 @@
             ItemsSource="{Binding FACTOR_DATA}" FilterRowPosition="Top" SelectedIndex="0"
             AutoGenerateColumns="False"     
             EnableDataVirtualization="True"
-            SelectionUnit="Row"
+            SelectionUnit="Cell"
             IsReadOnly="True"
             
             AllowDraggingColumns="True"
@@ -543,6 +543,7 @@
             Style="{StaticResource KDG}"
             HeaderStyle="{StaticResource KDGHeader}"
             CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
+            PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
             Margin="10,49,10,50" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
 
             <syncfusion:SfDataGrid.Resources>

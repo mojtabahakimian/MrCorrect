@@ -1,4 +1,4 @@
-﻿using Functions;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
@@ -379,6 +379,85 @@ OPTION (FORCE ORDER, QUERYTRACEON 2312);";
 
         private readonly FilterService<Q_BEDEHBESTANH_MAIN> filterService = new FilterService<Q_BEDEHBESTANH_MAIN>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
+
+        private GridColumn _contextMenuTargetColumn = null;
+
+        private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Walk up the visual tree to detect a right-click on a column header
+            var element = e.OriginalSource as DependencyObject;
+            GridHeaderCellControl headerCell = null;
+
+            while (element != null)
+            {
+                if (element is GridHeaderCellControl ghcc)
+                {
+                    headerCell = ghcc;
+                    break;
+                }
+                element = System.Windows.Media.VisualTreeHelper.GetParent(element);
+            }
+
+            if (headerCell == null || headerCell.Column == null)
+                return; // Not a header click — let the default DataGridContextMenu handle it
+
+            e.Handled = true; // Suppress the row/cell context menu
+
+            _contextMenuTargetColumn = headerCell.Column;
+
+            var menu = new ContextMenu
+            {
+                FlowDirection = FlowDirection.RightToLeft,
+                FontFamily = this.FontFamily,
+                FontSize = 12
+            };
+
+            // ── مخفی کردن این ستون ──────────────────────────────────────
+            var hideItem = new MenuItem { Header = "مخفی کردن این ستون" };
+            hideItem.Icon = new PackIcon { Kind = PackIconKind.EyeOffOutline };
+            hideItem.Click += (s, args) =>
+            {
+                if (_contextMenuTargetColumn != null)
+                    _contextMenuTargetColumn.IsHidden = true;
+            };
+            menu.Items.Add(hideItem);
+
+            // ── نمایش ستون‌های مخفی (اگر وجود داشت) ───────────────────
+            var hiddenCols = SYNCFUSION_DG.Columns
+                .Where(c => c.IsHidden && !string.IsNullOrEmpty(c.HeaderText))
+                .ToList();
+
+            if (hiddenCols.Any())
+            {
+                menu.Items.Add(new Separator());
+
+                var showParent = new MenuItem { Header = "نمایش ستون‌های مخفی" };
+                showParent.Icon = new PackIcon { Kind = PackIconKind.EyeOutline };
+
+                foreach (var col in hiddenCols)
+                {
+                    var captured = col;
+                    var showItem = new MenuItem { Header = captured.HeaderText };
+                    showItem.Click += (s, args) => captured.IsHidden = false;
+                    showParent.Items.Add(showItem);
+                }
+
+                // نمایش همه یکجا
+                var showAll = new MenuItem { Header = "نمایش همه ستون‌ها" };
+                showAll.Icon = new PackIcon { Kind = PackIconKind.CheckAll };
+                showAll.Click += (s, args) =>
+                {
+                    foreach (var col in SYNCFUSION_DG.Columns)
+                        col.IsHidden = false;
+                };
+                showParent.Items.Add(new Separator());
+                showParent.Items.Add(showAll);
+
+                menu.Items.Add(showParent);
+            }
+
+            menu.IsOpen = true;
+        }
 
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
