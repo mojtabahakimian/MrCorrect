@@ -559,23 +559,7 @@ namespace Functions
                     colMeta.Add((col, col.MappingName, comboLookup));
                 }
 
-                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
-
-                // In cell-selection mode Syncfusion does not populate SelectedItems.
-                // Convert the selected cells back to their data records so exporting
-                // keeps the same row-oriented result it has in row-selection mode.
-                if (dataGrid.SelectionUnit == GridSelectionUnit.Cell &&
-                    dataGrid.SelectionController is GridCellSelectionController cellSelectionController)
-                {
-                    foreach (var selectedCell in cellSelectionController.SelectedCells)
-                    {
-                        int recordIndex = dataGrid.ResolveToRecordIndex(selectedCell.RowIndex);
-                        if (recordIndex >= 0 && recordIndex < dataGrid.View.Records.Count)
-                        {
-                            selectedSet.Add(dataGrid.View.Records[recordIndex].Data);
-                        }
-                    }
-                }
+                var selectedSet = GetSelectedSyncfusionRecords(dataGrid);
 
                 var orderedRecords = dataGrid.View.Records
                     .Select(r => r.Data)
@@ -683,6 +667,35 @@ namespace Functions
                 worksheet.UsedRange.AutofitRows();
                 workbook.SaveAs(filePath);
             }
+        }
+
+        private static HashSet<object> GetSelectedSyncfusionRecords(SfDataGrid dataGrid)
+        {
+            var selectedRecords = new HashSet<object>();
+
+            if (dataGrid.SelectionUnit == GridSelectionUnit.Cell &&
+                dataGrid.SelectionController is GridCellSelectionController cellController)
+            {
+                // A row may contain several selected cells. HashSet keeps that row once.
+                foreach (var cell in cellController.SelectedCells)
+                {
+                    int recordIndex = dataGrid.ResolveToRecordIndex(cell.RowIndex);
+                    if (recordIndex >= 0 && recordIndex < dataGrid.View.Records.Count)
+                    {
+                        selectedRecords.Add(dataGrid.View.Records[recordIndex].Data);
+                    }
+                }
+            }
+
+            // SelectedItems is the authoritative source for SelectionUnit="Row".
+            // Keeping it as a fallback also supports custom Syncfusion controllers
+            // that populate row selections while the grid is configured for cells.
+            foreach (var item in dataGrid.SelectedItems.Cast<object>())
+            {
+                selectedRecords.Add(item);
+            }
+
+            return selectedRecords;
         }
 
         private static async Task OpenExcelFile(string filePath)
