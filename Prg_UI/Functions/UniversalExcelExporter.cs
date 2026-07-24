@@ -560,6 +560,23 @@ namespace Functions
                 }
 
                 var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
+
+                // In cell-selection mode Syncfusion does not populate SelectedItems.
+                // Convert the selected cells back to their data records so exporting
+                // keeps the same row-oriented result it has in row-selection mode.
+                if (dataGrid.SelectionUnit == GridSelectionUnit.Cell &&
+                    dataGrid.SelectionController is GridCellSelectionController cellSelectionController)
+                {
+                    foreach (var selectedCell in cellSelectionController.SelectedCells)
+                    {
+                        int recordIndex = dataGrid.ResolveToRecordIndex(selectedCell.RowIndex);
+                        if (recordIndex >= 0 && recordIndex < dataGrid.View.Records.Count)
+                        {
+                            selectedSet.Add(dataGrid.View.Records[recordIndex].Data);
+                        }
+                    }
+                }
+
                 var orderedRecords = dataGrid.View.Records
                     .Select(r => r.Data)
                     .Where(d => selectedSet.Contains(d))
