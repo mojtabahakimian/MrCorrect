@@ -609,6 +609,23 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         searchWindow.ShowDialog();
                     }
                 }
+
+                if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.T)
+                {
+                    e.Handled = true;
+
+                    if (!NewRecord && !string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
+                    {
+                        var takhfif = new TAKHFIF(this);
+                        if (takhfif.CanOpen)
+                        {
+                            takhfif.Owner = this;
+                            takhfif.ShowDialog();
+                        }
+                    }
+
+                    return;
+                }
             }
             catch { }
 
@@ -3423,14 +3440,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 TAMIR.SelectionChanged += TAMIR_SelectionChanged;
 
 
-                if (HEADER?.PEPID != null)
-                {
-                    PEPID.SelectedValue = HEADER.PEPID; PEPID.Items.Refresh();
-                }
-                if (HEADER?.PEID != null)
-                {
-                    PEID.SelectedValue = HEADER.PEID; PEID.Items.Refresh();
-                }
+                // Always apply the header values, including null. Otherwise, navigating
+                // from a record with an announcement to one whose announcement was
+                // cleared leaves the previous record's selection visible in the UI.
+                PEPID.SelectedValue = HEADER?.PEPID;
+                PEPID.Items.Refresh();
+                PEID.SelectedValue = HEADER?.PEID;
+                PEID.Items.Refresh();
 
                 MODAT_PPID_Enter(); //بروز رسانی داده های نحوه پرداخت بر اساس داده ها وارد شده
 
@@ -3585,8 +3601,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //2.
             if (Baseknow.GHAYM == 7)
             {
-                //نحوه پرداخت آزاد انتخاب شده
-                if (MODAT_PPID.SelectedIndex == 0)
+                // نحوه پرداخت آزاد با شناسه صفر مشخص می‌شود. ترتیب آیتم‌ها بعد از
+                // بازخوانی ComboBox تضمین‌شده نیست، پس SelectedIndex معیار پایداری نیست.
+                bool isFreePaymentMethod = int.TryParse(
+                    MODAT_PPID.SelectedValue?.ToString(), out int selectedPaymentMethodId)
+                    && selectedPaymentMethodId == 0;
+
+                if (isFreePaymentMethod)
                 {
                     MABL_COL.IsReadOnly = false;
                     MABL_K_COL.IsReadOnly = false;

@@ -681,6 +681,35 @@ OPTION (FORCE ORDER, QUERYTRACEON 2312);";
             // Apply the cumulative filter to the data grid
             ApplyCumulativeFilter();
         }
+
+        private void HideCurrentColumn_Click(object sender, RoutedEventArgs e)
+        {
+            var currentColumn = SYNCFUSION_DG.SelectionController?
+                .CurrentCellManager?.CurrentCell?.GridColumn;
+
+            if (currentColumn == null)
+            {
+                universControl.PopNotifyShow("ابتدا یک سلول از ستون مورد نظر را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            if (SYNCFUSION_DG.Columns.Count(column => !column.IsHidden) <= 1)
+            {
+                universControl.PopNotifyShow("آخرین ستون قابل نمایش را نمی‌توان مخفی کرد.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            currentColumn.IsHidden = true;
+        }
+
+        private void ShowAllColumns_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var column in SYNCFUSION_DG.Columns.Where(column => column.IsHidden))
+            {
+                column.IsHidden = false;
+            }
+        }
+
         private (string ColumnName, object FilterValue) GetSelectedCellDetails() // Method to get the details of the selected cell
         {
             // Check if there is a current cell selected in the data grid

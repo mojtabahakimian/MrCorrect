@@ -72,12 +72,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
-            bool _cango = true;
-            if ((THEWIN as HEAD_LST_FROOSH22).AllowEdits is true)
+            bool _cango = THEWIN switch
+            {
+                HEAD_LST_FROOSH22 factor => factor.AllowEdits,
+                HEAD_LST_PISHFROOSH2 proforma => proforma.AllowEdits,
+                _ => false
+            };
+
+            if (_cango)
             { }
             else
             {
-                _cango = false;
                 new Msgwin(false, "كليد اصلاح را بزنيد تا فاكتور قابل اصلاح باشد").ShowDialog();
             }
 
