@@ -695,6 +695,20 @@ namespace Functions
                 selectedRecords.Add(item);
             }
 
+            // Export buttons are also used without making an explicit selection.
+            // In that case export the current (filtered/sorted) view instead of
+            // returning without creating a file.
+            if (selectedRecords.Count == 0 && dataGrid.View?.Records != null)
+            {
+                foreach (var record in dataGrid.View.Records)
+                {
+                    if (record?.Data != null)
+                    {
+                        selectedRecords.Add(record.Data);
+                    }
+                }
+            }
+
             return selectedRecords;
         }
 
