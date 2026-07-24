@@ -1,4 +1,4 @@
-﻿using Interfaces;
+using Interfaces;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
@@ -3423,14 +3423,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 TAMIR.SelectionChanged += TAMIR_SelectionChanged;
 
 
-                if (HEADER?.PEPID != null)
-                {
-                    PEPID.SelectedValue = HEADER.PEPID; PEPID.Items.Refresh();
-                }
-                if (HEADER?.PEID != null)
-                {
-                    PEID.SelectedValue = HEADER.PEID; PEID.Items.Refresh();
-                }
+                // Always assign (even null) so that a previously-set value is cleared
+                // when the current record has no اعلامیه قیمت / اعلامیه تخفیف.
+                PEPID.SelectedValue = HEADER?.PEPID; PEPID.Items.Refresh();
+                PEID.SelectedValue = HEADER?.PEID; PEID.Items.Refresh();
 
                 MODAT_PPID_Enter(); //بروز رسانی داده های نحوه پرداخت بر اساس داده ها وارد شده
 
@@ -3567,6 +3563,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void IF_NOT_IS_AZAD_Then_Lock()
         {
+            // Reset TKHN to unlocked by default; the GHAYM==7 block below will re-lock if needed.
+            TKHN_COL.IsReadOnly = false;
+
             //1.
             if (CL_HESABDARI.LETSGO("TFTMLOCK")) //ستون تخفیفات در فاکتور فروش قفل شود
             {
