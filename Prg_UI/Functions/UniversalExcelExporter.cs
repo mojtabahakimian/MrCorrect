@@ -673,17 +673,26 @@ namespace Functions
         {
             var selectedRecords = new HashSet<object>();
 
+            void AddRecordByRowIndex(int rowIndex)
+            {
+                int recordIndex = dataGrid.ResolveToRecordIndex(rowIndex);
+                if (recordIndex >= 0 && recordIndex < dataGrid.View.Records.Count)
+                {
+                    var record = dataGrid.View.Records[recordIndex]?.Data;
+                    if (record != null)
+                    {
+                        selectedRecords.Add(record);
+                    }
+                }
+            }
+
             if (dataGrid.SelectionUnit == GridSelectionUnit.Cell &&
                 dataGrid.SelectionController is GridCellSelectionController cellController)
             {
                 // A row may contain several selected cells. HashSet keeps that row once.
                 foreach (var cell in cellController.SelectedCells)
                 {
-                    int recordIndex = dataGrid.ResolveToRecordIndex(cell.RowIndex);
-                    if (recordIndex >= 0 && recordIndex < dataGrid.View.Records.Count)
-                    {
-                        selectedRecords.Add(dataGrid.View.Records[recordIndex].Data);
-                    }
+                    AddRecordByRowIndex(cell.RowIndex);
                 }
             }
 
@@ -693,6 +702,18 @@ namespace Functions
             foreach (var item in dataGrid.SelectedItems.Cast<object>())
             {
                 selectedRecords.Add(item);
+            }
+
+            // Opening a context menu does not always add the cell to SelectedCells.
+            // Use the current cell row before falling back to the full view so the
+            // Excel export follows the row the user clicked/right-clicked.
+            if (selectedRecords.Count == 0)
+            {
+                var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
+                if (currentCell != null)
+                {
+                    AddRecordByRowIndex(currentCell.RowIndex);
+                }
             }
 
             // Export buttons are also used without making an explicit selection.
