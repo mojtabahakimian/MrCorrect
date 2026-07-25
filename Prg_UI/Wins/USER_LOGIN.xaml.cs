@@ -1,4 +1,4 @@
-﻿using Functions;
+using Functions;
 using Functions.SMSService;
 using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -785,7 +786,6 @@ namespace Prg_UI.Wins
 
         #region AutoUpdate
         // Configuration Constants
-        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
         private const string UPDATE_LOCAL_FOLDER = "update";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
         private const string OLD_FILE_SUFFIX = ".old";
@@ -793,7 +793,7 @@ namespace Prg_UI.Wins
         private const string UPDATE_LOG_FILE = "update_log.txt";
         private const int COPY_BUFFER_SIZE = 81920; // 80KB
         private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
-        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15; // Timeout for UNC metadata operations (File.Exists / FileInfo)
+        private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15; // Timeout for UNC/FTP metadata operations
         private const int MAX_RETRIES = 10;
         private const int MAX_SWAP_FAILURES = 2; // بعد از این تعداد شکست در جایگزینی، راهنمای دستی نمایش داده می‌شود
 
@@ -813,11 +813,11 @@ namespace Prg_UI.Wins
         private async Task PerformAutoUpdateAsync()
         {
             string tempExePath = null;
-            string sourcePath = null;
+            string sourcePath = null; // برای پیام‌های خطا
 
             try
             {
-                // 1. Resolve Paths Securely
+                // 1. مسیر EXE جاری
                 string currentExe = Environment.ProcessPath;
                 if (string.IsNullOrEmpty(currentExe))
                 {
@@ -826,16 +826,16 @@ namespace Prg_UI.Wins
                 }
 
                 if (string.IsNullOrEmpty(currentExe) || !File.Exists(currentExe))
-                {
                     throw new FileNotFoundException("Critical Error: Cannot resolve current executable path.");
-                }
 
                 string currentDir = Path.GetDirectoryName(currentExe);
                 string exeName = Path.GetFileName(currentExe);
-                sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
 
-                // Local update subfolder for temp download and batch script.
-                // نام فایل‌ها per-user است تا روی Remote Desktop (چند کاربر همزمان روی یک پوشه) تداخل پیش نیاید
+                // 2. بارگذاری تنظیمات آپدیت از update.config.json کنار EXE
+                UpdateConfig cfg = UpdateConfig.Load(currentDir);
+                sourcePath = cfg.GetDisplayPath(exeName);
+
+                // 3. مسیرهای محلی (per-user تا چند کاربر RDP با هم تداخل نداشته باشند)
                 string localUpdateDir = Path.Combine(currentDir, UPDATE_LOCAL_FOLDER);
                 Directory.CreateDirectory(localUpdateDir);
                 string userSuffix = GetSafeUserSuffix();
@@ -843,7 +843,7 @@ namespace Prg_UI.Wins
                 string metaPath = tempExePath + ".meta";
                 string flagPath = Path.Combine(localUpdateDir, UPDATE_FAIL_FLAG);
 
-                // 2. If the previous swap attempts kept failing, stop the auto-retry loop and guide the user
+                // 4. بررسی شکست‌های قبلی — اگر بیش از حد مجاز بود، راهنمای دستی نمایش داده می‌شود
                 int failCount = GetUpdateFailCount(flagPath);
                 if (failCount >= MAX_SWAP_FAILURES)
                 {
@@ -854,8 +854,11 @@ namespace Prg_UI.Wins
 
                 CleanupLeftoverUpdateFiles(currentExe, localUpdateDir);
 
-                // 3. Pre-Flight Checks (UNC ops with timeout so a dead share cannot freeze the UI)
-                bool sourceExists = await RunNetworkCheckAsync(() => File.Exists(sourcePath), "بررسی فایل روی سرور");
+                // 5. پیش‌بررسی: آیا فایل روی سرور وجود دارد؟
+                bool sourceExists = cfg.Type == UpdateSourceType.Share
+                    ? await RunNetworkCheckAsync(() => File.Exists(cfg.GetShareFilePath(exeName)), "بررسی فایل روی سرور")
+                    : await FtpFileExistsAsync(cfg, exeName);
+
                 if (!sourceExists)
                 {
                     ShowErrorAndExit("نسخه جدید در سرور یافت نشد. مسیر:\n" + sourcePath);
@@ -868,14 +871,14 @@ namespace Prg_UI.Wins
                     return;
                 }
 
-                // 4. Prepare UI
+                // 6. آماده‌سازی UI
                 if (UpdatePanel != null)
                 {
                     UpdatePanel.Visibility = Visibility.Visible;
                     if (UpdateLbl != null) UpdateLbl.Content = "در حال اتصال به سرور...";
                 }
 
-                // 5. Download Loop with Retry and Resume
+                // 7. حلقه دانلود با تلاش مجدد و قابلیت ادامه (Resume)
                 bool downloadSuccess = false;
                 Exception lastException = null;
                 long expectedSize = 0;
@@ -884,28 +887,34 @@ namespace Prg_UI.Wins
                 {
                     try
                     {
-                        // اطلاعات فایل سرور در هر تلاش دوباره خوانده می‌شود تا تعویض شدن فایل وسط دانلود تشخیص داده شود
-                        // خود خواندن Length و LastWriteTime باید داخل لامبدا باشد؛ سازنده FileInfo هیچ I/O انجام نمی‌دهد
-                        // و دسترسی به Property بیرون از لامبدا، عملا Timeout را بی‌اثر می‌کرد
-                        var (sourceLength, sourceTicks) = await RunNetworkCheckAsync(() =>
+                        // اطلاعات فایل سرور در هر تلاش مجدداً خوانده می‌شود تا تعویض فایل وسط دانلود تشخیص داده شود
+                        long sourceLength, sourceTicks;
+
+                        if (cfg.Type == UpdateSourceType.Share)
                         {
-                            var fi = new FileInfo(sourcePath);
-                            return (fi.Length, fi.LastWriteTimeUtc.Ticks);
-                        }, "خواندن اطلاعات فایل سرور");
+                            // خواندن Length و LastWriteTime باید داخل لامبدا باشد؛
+                            // دسترسی به Property بیرون از آن، Timeout را بی‌اثر می‌کرد
+                            (sourceLength, sourceTicks) = await RunNetworkCheckAsync(() =>
+                            {
+                                var fi = new FileInfo(cfg.GetShareFilePath(exeName));
+                                return (fi.Length, fi.LastWriteTimeUtc.Ticks);
+                            }, "خواندن اطلاعات فایل سرور");
+                        }
+                        else
+                        {
+                            (sourceLength, sourceTicks) = await FtpGetFileSizeAndTimestampAsync(cfg, exeName);
+                        }
+
                         expectedSize = sourceLength;
+                        // امضای فایل سرور: اگر اندازه یا زمان تغییر کرد، فایل ناقص قبلی دور انداخته می‌شود
                         string sourceSignature = $"{sourceLength}|{sourceTicks}";
 
-                        // Resume only if the partial file belongs to the SAME server file (size + timestamp signature)
                         long startOffset = ComputeResumeOffset(tempExePath, metaPath, sourceSignature, sourceLength);
 
                         if (startOffset == sourceLength && sourceLength > 0)
                         {
                             // دانلود قبلی کامل بوده؛ فقط صحت فایل بررسی می‌شود
-                            if (VerifyDownloadedFile(tempExePath, sourceLength))
-                            {
-                                downloadSuccess = true;
-                                break;
-                            }
+                            if (VerifyDownloadedFile(tempExePath, sourceLength)) { downloadSuccess = true; break; }
                             CleanupTemp(tempExePath);
                             startOffset = 0;
                         }
@@ -913,16 +922,19 @@ namespace Prg_UI.Wins
                         try { File.WriteAllText(metaPath, sourceSignature); } catch { }
 
                         if (attempt > 1 && UpdateLbl != null)
-                        {
                             await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = $"تلاش مجدد {attempt}/{MAX_RETRIES}...");
+
+                        if (cfg.Type == UpdateSourceType.Share)
+                        {
+                            // کل عملیات کپی در Thread پس‌زمینه اجرا می‌شود؛
+                            // باز کردن FileStream روی مسیر شبکه همگام است و روی UI-Thread باعث فریز می‌شود
+                            await Task.Run(() => CopyFileWithProgressAsync(cfg.GetShareFilePath(exeName), tempExePath, startOffset));
+                        }
+                        else
+                        {
+                            await FtpDownloadWithProgressAsync(cfg, exeName, tempExePath, startOffset, sourceLength);
                         }
 
-                        // کل عملیات کپی در Thread پس‌زمینه اجرا می‌شود؛ باز کردن FileStream روی مسیر شبکه
-                        // همگام (Sync) است و اگر روی Thread رابط کاربری انجام شود، Share کند یا قطع
-                        // می‌تواند فرم لاگین را فریز کند (آپدیت‌های UI از داخل متد با Dispatcher انجام می‌شود)
-                        await Task.Run(() => CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset));
-
-                        // Verify the result (size + executable header) before swapping anything
                         if (!VerifyDownloadedFile(tempExePath, sourceLength))
                         {
                             CleanupTemp(tempExePath);
@@ -930,27 +942,22 @@ namespace Prg_UI.Wins
                         }
 
                         downloadSuccess = true;
-                        break; // Success
+                        break;
                     }
                     catch (Exception ex)
                     {
                         lastException = ex;
-                        // Wait before retry
                         await Task.Delay(2000);
                     }
                 }
 
                 if (!downloadSuccess)
-                {
                     throw lastException ?? new Exception("Download failed after multiple attempts.");
-                }
 
                 if (UpdateLbl != null)
-                {
                     await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = "در حال نصب بروزرسانی...");
-                }
 
-                // 6. Execute Atomic Swap Script
+                // 8. اجرای اسکریپت جایگزینی اتمیک
                 ExecuteUpdateScript(currentExe, tempExePath, currentDir, localUpdateDir, metaPath, flagPath, expectedSize, userSuffix);
             }
             catch (Exception ex)
@@ -959,6 +966,126 @@ namespace Prg_UI.Wins
                 ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}\n\n{BuildManualUpdateGuide(sourcePath)}");
             }
         }
+
+        // ─── FTP helpers ──────────────────────────────────────────────────────
+
+        /// <summary>بررسی وجود فایل روی FTP با timeout</summary>
+#pragma warning disable SYSLIB0014 // FtpWebRequest — deprecated in .NET 6+ but still functional; replace with FluentFTP if needed
+        private static async Task<bool> FtpFileExistsAsync(UpdateConfig cfg, string exeName)
+        {
+            try
+            {
+                var req = CreateFtpRequest(cfg, exeName, WebRequestMethods.Ftp.GetFileSize);
+                using var resp = (FtpWebResponse)await ((Task<WebResponse>)req.GetResponseAsync())
+                    .WaitAsync(TimeSpan.FromSeconds(NETWORK_CHECK_TIMEOUT_SECONDS));
+                return true;
+            }
+            catch (WebException ex) when (ex.Response is FtpWebResponse r
+                && r.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
+            {
+                return false;
+            }
+            catch (TimeoutException)
+            {
+                throw new IOException("عدم پاسخ از FTP سرور. لطفا اتصال شبکه را بررسی کنید.");
+            }
+        }
+
+        /// <summary>دریافت اندازه و زمان آخرین تغییر فایل از FTP</summary>
+        private static async Task<(long size, long ticks)> FtpGetFileSizeAndTimestampAsync(UpdateConfig cfg, string exeName)
+        {
+            // دریافت اندازه
+            long size;
+            var sizeReq = CreateFtpRequest(cfg, exeName, WebRequestMethods.Ftp.GetFileSize);
+            using (var sizeResp = (FtpWebResponse)await ((Task<WebResponse>)sizeReq.GetResponseAsync())
+                       .WaitAsync(TimeSpan.FromSeconds(NETWORK_CHECK_TIMEOUT_SECONDS)))
+            {
+                size = sizeResp.ContentLength;
+            }
+
+            // دریافت زمان (MDTM) — همه سرورها پشتیبانی نمی‌کنند؛ در صورت خطا ticks=0 برمی‌گردد
+            long ticks = 0;
+            try
+            {
+                var tsReq = CreateFtpRequest(cfg, exeName, WebRequestMethods.Ftp.GetDateTimestamp);
+                using var tsResp = (FtpWebResponse)await ((Task<WebResponse>)tsReq.GetResponseAsync())
+                    .WaitAsync(TimeSpan.FromSeconds(NETWORK_CHECK_TIMEOUT_SECONDS));
+                ticks = tsResp.LastModified.Ticks;
+            }
+            catch { /* سرور MDTM را پشتیبانی نمی‌کند — بدون timestamp ادامه می‌دهیم */ }
+
+            return (size, ticks);
+        }
+
+        /// <summary>دانلود فایل از FTP با پشتیبانی از Resume و نمایش پیشرفت</summary>
+        private async Task FtpDownloadWithProgressAsync(UpdateConfig cfg, string exeName,
+            string destPath, long startOffset, long totalBytes)
+        {
+            var req = CreateFtpRequest(cfg, exeName, WebRequestMethods.Ftp.DownloadFile);
+            req.ContentOffset = startOffset; // Resume: سرور از این بایت شروع به ارسال می‌کند
+
+            using var resp = (FtpWebResponse)await req.GetResponseAsync();
+            using var src = resp.GetResponseStream();
+            using var dst = new FileStream(destPath, FileMode.OpenOrCreate, FileAccess.Write,
+                FileShare.None, COPY_BUFFER_SIZE, true);
+
+            if (startOffset > 0)
+                dst.Seek(startOffset, SeekOrigin.Begin);
+            else
+                dst.SetLength(0);
+
+            var buffer = new byte[COPY_BUFFER_SIZE];
+            long totalRead = startOffset;
+            int bytesRead;
+            var lastUpdate = DateTime.MinValue;
+
+            while (true)
+            {
+                var readTask = src.ReadAsync(buffer, 0, buffer.Length);
+                try
+                {
+                    bytesRead = await readTask.WaitAsync(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS));
+                }
+                catch (TimeoutException)
+                {
+                    throw new IOException("اتصال FTP قطع شد (بدون پاسخ).");
+                }
+
+                if (bytesRead == 0) break;
+
+                await dst.WriteAsync(buffer, 0, bytesRead);
+                totalRead += bytesRead;
+
+                if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
+                {
+                    double progress = (double)totalRead / totalBytes * 100;
+                    lastUpdate = DateTime.Now;
+                    await this.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (UpdatePrg != null) UpdatePrg.Value = progress;
+                        if (UpdateLbl != null) UpdateLbl.Content = $"در حال دانلود: {progress:F0}%";
+                    });
+                }
+            }
+
+            await dst.FlushAsync();
+
+            if (totalRead < totalBytes)
+                throw new IOException("اتصال FTP قطع شد و فایل کامل دریافت نشد.");
+        }
+
+        /// <summary>ساخت FtpWebRequest با تنظیمات مشترک</summary>
+        private static FtpWebRequest CreateFtpRequest(UpdateConfig cfg, string exeName, string method)
+        {
+            var req = (FtpWebRequest)WebRequest.Create(new Uri(cfg.GetFtpUri(exeName)));
+            req.Method = method;
+            req.Credentials = new NetworkCredential(cfg.FtpUsername, cfg.FtpPassword);
+            req.UsePassive = cfg.FtpPassive;
+            req.UseBinary = true;
+            req.KeepAlive = false;
+            return req;
+        }
+#pragma warning restore SYSLIB0014
 
         private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset)
         {
@@ -1307,7 +1434,7 @@ del ""%~f0"" & exit
                    "1- نرم افزار را در همه سیستم ها و همه کاربران (Remote Desktop) ببندید و دوباره اجرا کنید.\n" +
                    "2- اگر مشکل ادامه داشت، برنامه را یک بار با کلیک راست و گزینه Run as Administrator اجرا کنید.\n" +
                    "3- در غیر این صورت فایل جدید را به صورت دستی از مسیر زیر کپی و جایگزین فایل برنامه کنید:\n" +
-                   (string.IsNullOrEmpty(sourcePath) ? UPDATE_SERVER_PATH : sourcePath) + "\n" +
+                   (string.IsNullOrEmpty(sourcePath) ? "[مسیر سرور نامشخص]" : sourcePath) + "\n" +
                    "4- در صورت نیاز با پشتیبانی تماس بگیرید (فایل update_log.txt در پوشه update کنار برنامه به عیب یابی کمک می کند).";
         }
 
