@@ -87,8 +87,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             public string? NAMES { get; set; }
         }
 
-        public BAKCHEKP(Visual thewin, string _severfilter, int _current_index = -1)
+        public bool IsReadOnlyMode { get; set; } = false;
+
+        public BAKCHEKP(Visual thewin, string _severfilter, int _current_index = -1, bool isreadonly = false)
         {
+            IsReadOnlyMode = isreadonly;
             THE_WIN = thewin;
             ServerFilter = _severfilter;
             INDEX_DG = _current_index;

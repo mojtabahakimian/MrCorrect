@@ -3414,6 +3414,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     {
                         BAKCHEKP bAKCHEKP = new BAKCHEKP(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
                         await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEKP);
+                        JustnowforcheckOpnned = true;
                     }
                 }
                 #region IS_TAB_STOPS
@@ -3570,6 +3571,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     {
                         BAKCHEK bAKCHEK = new BAKCHEK(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
                         await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEK);
+                        JustnowforcheckOpnned = true;
                     }
                 }
 
@@ -3715,15 +3717,31 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                     }
                                 case 5:
                                     {
-                                        if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                        if (JustnowforcheckOpnned)
                                         {
-                                            CURRENT_ITMES_ROW.N_SERI = 0;
-                                            CURRENT_ITMES_ROW.BANK = 0;
+                                            JustnowforcheckOpnned = false;
                                         }
-                                        if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                        else
                                         {
-                                            CURRENT_ITMES_ROW.N_SERI = null;
-                                            CURRENT_ITMES_ROW.BANK = null;
+                                            if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = 0;
+                                                CURRENT_ITMES_ROW.BANK = 0;
+                                            }
+                                            if (Convert.ToString(CURRENT_ITMES_ROW.N_SERI) == "" || Convert.ToString(CURRENT_ITMES_ROW.BANK) == "" || Convert.ToString(CURRENT_ITMES_ROW.MABL) == "")
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                                CURRENT_ITMES_ROW.MABL = null;
+                                            }
+                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                            BAKCHEKP bAKCHEKP5 = new BAKCHEKP(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEKP5);
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                            }
                                         }
 
                                         break;
@@ -3837,16 +3855,32 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                     }
                                 case 5:
                                     {
-                                        if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                        if (JustnowforcheckOpnned)
                                         {
-                                            CURRENT_ITMES_ROW.N_SERI = 0;
-                                            CURRENT_ITMES_ROW.BANK = 0;
+                                            JustnowforcheckOpnned = false;
                                         }
-                                        if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                        else
                                         {
-                                            CURRENT_ITMES_ROW.N_SERI = null;
-                                            CURRENT_ITMES_ROW.BANK = null;
-                                            PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                            if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = 0;
+                                                CURRENT_ITMES_ROW.BANK = 0;
+                                            }
+                                            if (Convert.ToString(CURRENT_ITMES_ROW.N_SERI) == "" || Convert.ToString(CURRENT_ITMES_ROW.BANK) == "" || Convert.ToString(CURRENT_ITMES_ROW.MABL) == "")
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                                CURRENT_ITMES_ROW.MABL = null;
+                                            }
+                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                            BAKCHEK bAKCHEK5 = new BAKCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEK5);
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                                PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                            }
                                         }
                                         break;
                                     }
@@ -5503,29 +5537,44 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 var grid = sender as DataGrid;
                 if (grid != null && grid?.CurrentCell != null && grid.CurrentCell.Column != null && PGET_LST_SUB.SelectedIndex > -1)
                 {
-                    if (PGET_LST_SUB.IsReadOnly == true)
+                    var CurrentData = PGET_LST_SUB.Items[PGET_LST_SUB.SelectedIndex] as PGET_LST;
+                    if (CurrentData != null && grid?.CurrentCell.Column?.SortMemberPath == "MABL")
                     {
-                        var CurrentData = PGET_LST_SUB.Items[PGET_LST_SUB.SelectedIndex] as PGET_LST;
-                        if (CurrentData != null && grid?.CurrentCell.Column?.SortMemberPath == "MABL")
+                        CURRENT_ROW_INDEX = PGET_LST_SUB.SelectedIndex;
+                        bool isReadOnly = PGET_LST_SUB.IsReadOnly;
+                        if (CurrentData.NO_AM == 1 && (CurrentData.NAHVA == 2 || CurrentData.NAHVA == 6))
                         {
-                            CURRENT_ROW_INDEX = PGET_LST_SUB.SelectedIndex;
-                            if (CurrentData.NO_AM == 1 && CurrentData.NAHVA == 2)
-                            {
-                                GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, true);
-                                gETCHEK.ShowDialog();
-                            }
-                            if (CurrentData.NO_AM == 2 && (CurrentData.NAHVA == 2 || CurrentData.NAHVA == 1))
-                            {
-                                var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
-                                PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, true);
-                                pAYCHEK.ShowDialog();
-                            }
-                            if (CurrentData.NO_AM == 2 && CurrentData.NAHVA == 4)
-                            {
-                                var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
-                                FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, true);
-                                fORCHEK.ShowDialog();
-                            }
+                            e.Handled = true;
+                            GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, isReadOnly);
+                            gETCHEK.ShowDialog();
+                        }
+                        if (CurrentData.NO_AM == 2 && (CurrentData.NAHVA == 2 || CurrentData.NAHVA == 1 || CurrentData.NAHVA == 6))
+                        {
+                            e.Handled = true;
+                            var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                            PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, isReadOnly);
+                            pAYCHEK.ShowDialog();
+                        }
+                        if ((CurrentData.NO_AM == 2 || CurrentData.NO_AM == 1) && CurrentData.NAHVA == 4)
+                        {
+                            e.Handled = true;
+                            var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                            FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, isReadOnly);
+                            fORCHEK.ShowDialog();
+                        }
+                        if (CurrentData.NO_AM == 1 && CurrentData.NAHVA == 5)
+                        {
+                            e.Handled = true;
+                            var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                            BAKCHEKP bAKCHEKP = new BAKCHEKP(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, isReadOnly);
+                            bAKCHEKP.ShowDialog();
+                        }
+                        if (CurrentData.NO_AM == 2 && CurrentData.NAHVA == 5)
+                        {
+                            e.Handled = true;
+                            var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                            BAKCHEK bAKCHEK = new BAKCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, isReadOnly);
+                            bAKCHEK.ShowDialog();
                         }
                     }
                 }
