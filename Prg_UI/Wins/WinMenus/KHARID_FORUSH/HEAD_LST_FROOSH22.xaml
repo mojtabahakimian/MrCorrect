@@ -246,7 +246,7 @@
                             </DataGridTextColumn>
                             <DataGridTextColumn 	x:Name="RADIF_COLUMN" 	      Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}"            Header="RADIF"      MinWidth="50"  Visibility="Hidden" />
                             <!--<DataGridTextColumn 	x:Name="CODEh_COLUMN"          Binding="{Binding CODE,UpdateSourceTrigger=LostFocus}"            Header="کد کالا"      MinWidth="50" IsReadOnly="True"  Visibility="Hidden" />-->
-                            <DataGridTextColumn 	x:Name="NAME_CODE_COLUMN"	  Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}"        Header="نام کالا"   Width="300" MinWidth="250" >
+                            <DataGridTextColumn 	x:Name="NAME_CODE_COLUMN"	  Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}"        Header="نام کالا"   Width="650" MinWidth="250" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                                     </Style>
