@@ -535,33 +535,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             try
             {
                 DataGrid DG = PGET_LST_SUB;
+
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
                     e.Handled = true;
 
-                    if (DG?.CurrentColumn != null && DG.CurrentColumn.SortMemberPath == "SHARH")
-                    {
-                        if (e.OriginalSource is System.Windows.Controls.TextBox tb && tb.Text.EndsWith("+"))
-                        {
-                            var sharhListWin = new SHARH_LIST();
-                            if (sharhListWin.ShowDialog() == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
-                            {
-                                tb.Text = tb.Text.Substring(0, tb.Text.Length - 1) + sharhListWin.SelectedSharh;
-                                tb.SelectionStart = tb.Text.Length;
-                            }
-                            return; // Stop further Enter processing
-                        }
-                        else if (DG.SelectedItem is PGET_LST currentRow && currentRow.SHARH != null && currentRow.SHARH.EndsWith("+"))
-                        {
-                            var sharhListWin = new SHARH_LIST();
-                            if (sharhListWin.ShowDialog() == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
-                            {
-                                currentRow.SHARH = currentRow.SHARH.Substring(0, currentRow.SHARH.Length - 1) + sharhListWin.SelectedSharh;
-                                DG.Items.Refresh(); // Only refresh if not in edit mode
-                            }
-                            return; // Stop further Enter processing
-                        }
-                    }
                     if (IsDataGrid_IsFocused && DG != null)
                     {
                         if (DG?.CurrentColumn != null && DG.SelectedItem != null)
