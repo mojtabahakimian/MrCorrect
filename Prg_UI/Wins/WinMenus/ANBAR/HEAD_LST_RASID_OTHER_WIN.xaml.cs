@@ -46,7 +46,7 @@ namespace Wins.WinMenus.ANBAR
     /// <summary>
     /// Interaction logic for HEAD_LST_RASID_OTHER_WIN.xaml
     /// </summary>
-    public partial class HEAD_LST_RASID_OTHER_WIN : Window, ISearchableWindow
+    public partial class HEAD_LST_RASID_OTHER_WIN : Window, ISearchableWindow, IComboLookupProvider
     {
         public HEAD_LST_RASID_OTHER_WIN(double? _NUMBER_ = null, bool _isAutomasion_ = false)
         {
@@ -60,6 +60,11 @@ namespace Wins.WinMenus.ANBAR
                 OpenArgs = _NUMBER_.ToStringNullSafe();
                 IsOpenedFromAutomation = _isAutomasion_;
             }
+        }
+
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "فروشنده", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
         }
         public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
