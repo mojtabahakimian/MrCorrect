@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -369,8 +370,8 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 56; Baseknow.UUSER = "Mr-kazemi";
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr-pakzaban";
-            //Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
-            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
+            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
             //Baseknow.USERCOD = 179; Baseknow.UUSER = "واحد تولید یزدویزیتوری";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
@@ -384,9 +385,8 @@ namespace Prg_UI.Wins
             //new WinConnectionChoose().Show();
             //new WIN_SANAD_EFTETAHIYAH().Show();
 
-            //new BEDEHKARAN_BESTANKARAN().Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
 
             //new WIN_F_NEWYEAR().Show();
@@ -796,6 +796,52 @@ namespace Prg_UI.Wins
         private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
         private const int NETWORK_CHECK_TIMEOUT_SECONDS = 15; // Timeout for UNC metadata operations (File.Exists / FileInfo)
         private const int MAX_RETRIES = 10;
+
+        private string GetMaskedPath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return path;
+
+            // First attempt Uri parsing
+            try
+            {
+                var uri = new Uri(path);
+                if (uri.Scheme == Uri.UriSchemeFtp && !string.IsNullOrEmpty(uri.UserInfo))
+                {
+                    return uri.GetComponents(UriComponents.AbsoluteUri & ~UriComponents.UserInfo, UriFormat.UriEscaped);
+                }
+            }
+            catch { }
+
+            // Fallback fail-safe regex if Uri parsing fails
+            return System.Text.RegularExpressions.Regex.Replace(path, @"(?<=ftp://)[^@]+@", "***:***@");
+        }
+
+        private FtpWebRequest CreateFtpRequest(string url, string method)
+        {
+            var uri = new Uri(url);
+            var req = (FtpWebRequest)WebRequest.Create(uri);
+            req.Method = method;
+            req.Timeout = NETWORK_CHECK_TIMEOUT_SECONDS * 1000;
+            req.ReadWriteTimeout = READ_TIMEOUT_SECONDS * 1000;
+            req.UsePassive = true;
+            req.KeepAlive = false;
+
+            if (!string.IsNullOrEmpty(uri.UserInfo))
+            {
+                int colonIndex = uri.UserInfo.IndexOf(':');
+                if (colonIndex >= 0)
+                {
+                    string user = Uri.UnescapeDataString(uri.UserInfo.Substring(0, colonIndex));
+                    string pass = Uri.UnescapeDataString(uri.UserInfo.Substring(colonIndex + 1));
+                    req.Credentials = new NetworkCredential(user, pass);
+                }
+                else
+                {
+                    req.Credentials = new NetworkCredential(Uri.UnescapeDataString(uri.UserInfo), "");
+                }
+            }
+            return req;
+        }
         private const int MAX_SWAP_FAILURES = 2; // بعد از این تعداد شکست در جایگزینی، راهنمای دستی نمایش داده می‌شود
 
         private void DisableLoginUI()
@@ -815,6 +861,7 @@ namespace Prg_UI.Wins
         {
             string tempExePath = null;
             string sourcePath = null;
+            bool isFtp = false;
 
             try
             {
@@ -833,7 +880,38 @@ namespace Prg_UI.Wins
 
                 string currentDir = Path.GetDirectoryName(currentExe);
                 string exeName = Path.GetFileName(currentExe);
-                sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
+
+                string basePath = UPDATE_SERVER_PATH;
+                try
+                {
+                    var options = dbms.DoGetDataSQL<string>("SELECT OptionValue FROM dbo.GENERAL_OPTIONS WHERE OptionName = 'UPDATE_SERVER_PATH'").ToList();
+                    if (options.Count == 0)
+                    {
+                        ShowErrorAndExit("مسیر بروزرسانی برای این شرکت تنظیم نشده است. لطفا با پشتیبانی تماس بگیرید.");
+                        return;
+                    }
+                    string optionValue = options.FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(optionValue))
+                    {
+                        basePath = optionValue.Trim();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowErrorAndExit("خطا در خواندن مسیر آپدیت از دیتابیس:\n" + ex.Message);
+                    return;
+                }
+
+                isFtp = basePath.StartsWith("ftp://", StringComparison.OrdinalIgnoreCase);
+                if (isFtp)
+                {
+                    basePath = basePath.Replace('\\', '/');
+                    sourcePath = basePath.EndsWith("/") ? basePath + exeName : basePath + "/" + exeName;
+                }
+                else
+                {
+                    sourcePath = Path.Combine(basePath, exeName);
+                }
 
                 // Local update subfolder for temp download and batch script.
                 // نام فایل‌ها per-user است تا روی Remote Desktop (چند کاربر همزمان روی یک پوشه) تداخل پیش نیاید
@@ -849,17 +927,32 @@ namespace Prg_UI.Wins
                 if (failCount >= MAX_SWAP_FAILURES)
                 {
                     try { File.Delete(flagPath); } catch { }
-                    ShowErrorAndExit("بروزرسانی خودکار چند بار ناموفق بود.\n\n" + BuildManualUpdateGuide(sourcePath));
+                    ShowErrorAndExit("بروزرسانی خودکار چند بار ناموفق بود.\n\n" + BuildManualUpdateGuide(GetMaskedPath(sourcePath)));
                     return;
                 }
 
                 CleanupLeftoverUpdateFiles(currentExe, localUpdateDir);
 
                 // 3. Pre-Flight Checks (UNC ops with timeout so a dead share cannot freeze the UI)
-                bool sourceExists = await RunNetworkCheckAsync(() => File.Exists(sourcePath), "بررسی فایل روی سرور");
+                bool sourceExists = await RunNetworkCheckAsync(() =>
+                {
+                    if (isFtp)
+                    {
+                        try
+                        {
+                            var req = CreateFtpRequest(sourcePath, WebRequestMethods.Ftp.GetFileSize);
+                            using (var resp = (FtpWebResponse)req.GetResponse())
+                            {
+                                return true;
+                            }
+                        }
+                        catch { return false; }
+                    }
+                    return File.Exists(sourcePath);
+                }, "بررسی فایل روی سرور");
                 if (!sourceExists)
                 {
-                    ShowErrorAndExit("نسخه جدید در سرور یافت نشد. مسیر:\n" + sourcePath);
+                    ShowErrorAndExit("نسخه جدید در سرور یافت نشد. مسیر:\n" + GetMaskedPath(sourcePath));
                     return;
                 }
 
@@ -890,8 +983,40 @@ namespace Prg_UI.Wins
                         // و دسترسی به Property بیرون از لامبدا، عملا Timeout را بی‌اثر می‌کرد
                         var (sourceLength, sourceTicks) = await RunNetworkCheckAsync(() =>
                         {
-                            var fi = new FileInfo(sourcePath);
-                            return (fi.Length, fi.LastWriteTimeUtc.Ticks);
+                            if (isFtp)
+                            {
+                                long size = 0;
+                                long ticks = 0;
+                                try
+                                {
+                                    var reqSize = CreateFtpRequest(sourcePath, WebRequestMethods.Ftp.GetFileSize);
+                                    using (var respSize = (FtpWebResponse)reqSize.GetResponse())
+                                    {
+                                        size = respSize.ContentLength;
+                                    }
+
+                                    var reqDate = CreateFtpRequest(sourcePath, WebRequestMethods.Ftp.GetDateTimestamp);
+                                    using (var respDate = (FtpWebResponse)reqDate.GetResponse())
+                                    {
+                                        ticks = respDate.LastModified.ToUniversalTime().Ticks;
+                                    }
+
+                                    if (size <= 0 && ticks <= 0)
+                                    {
+                                        throw new Exception("سرور FTP از دستورات SIZE/MDTM پشتیبانی نمی‌کند.");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception("خطا در دریافت اطلاعات فایل از سرور FTP:\n" + ex.Message);
+                                }
+                                return (size, ticks);
+                            }
+                            else
+                            {
+                                var fi = new FileInfo(sourcePath);
+                                return (fi.Length, fi.LastWriteTimeUtc.Ticks);
+                            }
                         }, "خواندن اطلاعات فایل سرور");
                         expectedSize = sourceLength;
                         string sourceSignature = $"{sourceLength}|{sourceTicks}";
@@ -921,7 +1046,7 @@ namespace Prg_UI.Wins
                         // کل عملیات کپی در Thread پس‌زمینه اجرا می‌شود؛ باز کردن FileStream روی مسیر شبکه
                         // همگام (Sync) است و اگر روی Thread رابط کاربری انجام شود، Share کند یا قطع
                         // می‌تواند فرم لاگین را فریز کند (آپدیت‌های UI از داخل متد با Dispatcher انجام می‌شود)
-                        await Task.Run(() => CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset));
+                        await Task.Run(() => CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset, sourceLength, isFtp));
 
                         // Verify the result (size + executable header) before swapping anything
                         if (!VerifyDownloadedFile(tempExePath, sourceLength))
@@ -957,80 +1082,102 @@ namespace Prg_UI.Wins
             catch (Exception ex)
             {
                 CleanupTemp(tempExePath);
-                ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}\n\n{BuildManualUpdateGuide(sourcePath)}");
+                ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}\n\n{BuildManualUpdateGuide(GetMaskedPath(sourcePath))}");
             }
         }
 
-        private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset)
+        private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset, long totalBytes, bool isFtp)
         {
-            // Open source
-            using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, COPY_BUFFER_SIZE, true))
-            // Open destination (OpenOrCreate to support resume)
-            using (var destinationStream = new FileStream(destination, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
-            {
-                long totalBytes = sourceStream.Length;
+            Stream sourceStream = null;
+            WebResponse ftpResponse = null;
 
-                // Seek to offset
+            if (isFtp)
+            {
+                var req = CreateFtpRequest(source, WebRequestMethods.Ftp.DownloadFile);
                 if (startOffset > 0)
                 {
                     if (startOffset > totalBytes) startOffset = 0; // Safety check
-
-                    sourceStream.Seek(startOffset, SeekOrigin.Begin);
-                    destinationStream.Seek(startOffset, SeekOrigin.Begin);
-                }
-                else
-                {
-                    // Ensure we start from 0 if no offset (truncate if exists but we want fresh start)
-                    destinationStream.SetLength(0);
+                    req.ContentOffset = startOffset;
                 }
 
-                var buffer = new byte[COPY_BUFFER_SIZE];
-                long totalRead = startOffset;
-                int bytesRead;
-
-                var lastUpdate = DateTime.MinValue;
-
-                while (totalRead < totalBytes)
+                ftpResponse = req.GetResponse();
+                sourceStream = ftpResponse.GetResponseStream();
+            }
+            else
+            {
+                var fs = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, COPY_BUFFER_SIZE, true);
+                totalBytes = fs.Length;
+                if (startOffset > 0)
                 {
-                    // Read with timeout
-                    var readTask = sourceStream.ReadAsync(buffer, 0, buffer.Length);
+                    if (startOffset > totalBytes) startOffset = 0;
+                    fs.Seek(startOffset, SeekOrigin.Begin);
+                }
+                sourceStream = fs;
+            }
 
-                    try
+            await using (sourceStream)
+            {
+                using (ftpResponse)
+                {
+                    // Open destination (OpenOrCreate to support resume)
+                    await using (var destinationStream = new FileStream(destination, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
                     {
-                        // Use WaitAsync for timeout logic
-                        // This prevents indefinite hanging on a dead connection
-                        bytesRead = await readTask.WaitAsync(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS));
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw new IOException("Connection timed out (Read).");
-                    }
-
-                    if (bytesRead == 0) break; // End of stream
-
-                    // Write to local file
-                    await destinationStream.WriteAsync(buffer, 0, bytesRead);
-                    totalRead += bytesRead;
-
-                    if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
-                    {
-                        double progress = (double)totalRead / totalBytes * 100;
-                        lastUpdate = DateTime.Now;
-
-                        await this.Dispatcher.InvokeAsync(() =>
+                        if (startOffset > 0)
                         {
-                            if (UpdatePrg != null) UpdatePrg.Value = progress;
-                            if (UpdateLbl != null) UpdateLbl.Content = $"در حال دانلود: {progress:F0}%";
-                        });
+                            destinationStream.Seek(startOffset, SeekOrigin.Begin);
+                        }
+                        else
+                        {
+                            destinationStream.SetLength(0);
+                        }
+
+                        var buffer = new byte[COPY_BUFFER_SIZE];
+                        long totalRead = startOffset;
+                        int bytesRead;
+
+                        var lastUpdate = DateTime.MinValue;
+
+                        while (totalRead < totalBytes)
+                        {
+                            using (var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS)))
+                            {
+                                try
+                                {
+                                    bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length, cts.Token);
+                                }
+                                catch (OperationCanceledException)
+                                {
+                                    throw new IOException("Connection timed out (Read).");
+                                }
+                            }
+
+                            if (bytesRead == 0) break; // End of stream
+
+                            // Write to local file
+                            await destinationStream.WriteAsync(buffer, 0, bytesRead);
+                            totalRead += bytesRead;
+
+                            if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
+                            {
+                                double progress = (double)totalRead / totalBytes * 100;
+                                lastUpdate = DateTime.Now;
+
+                                await this.Dispatcher.InvokeAsync(() =>
+                                {
+                                    if (UpdatePrg != null) UpdatePrg.Value = progress;
+                                    if (UpdateLbl != null) UpdateLbl.Content = $"در حال دانلود: {progress:F0}%";
+                                });
+                            }
+                        }
+
+                        await destinationStream.FlushAsync();
+
+                        // قطع شدن استریم قبل از پایان فایل نباید موفقیت حساب شود (باعث جایگزینی فایل خراب می‌شد)
+                        if (totalRead < totalBytes)
+                        {
+                            throw new IOException("اتصال به سرور قطع شد و فایل کامل دریافت نشد.");
+                        }
                     }
-                }
-
-                await destinationStream.FlushAsync();
-
-                // قطع شدن استریم قبل از پایان فایل نباید موفقیت حساب شود (باعث جایگزینی فایل خراب می‌شد)
-                if (totalRead < totalBytes)
-                {
-                    throw new IOException("اتصال به سرور قطع شد و فایل کامل دریافت نشد.");
                 }
             }
         }
@@ -1336,6 +1483,7 @@ del ""%~f0"" & exit
 
         private void ShowErrorAndExit(string message)
         {
+            message = GetMaskedPath(message);
             // حالت متن بزرگ + پنجره بلندتر؛ پیام‌های چندخطی راهنما در حالت عادی بریده می‌شدند
             var msgwin = new Msgwin(false, message, "", true) { Height = 420 };
             msgwin.ShowDialog();
