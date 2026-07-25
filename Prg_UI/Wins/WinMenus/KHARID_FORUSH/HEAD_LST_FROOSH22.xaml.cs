@@ -4535,6 +4535,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             CURRENT_COLUMN_INDEX = INVO_LST_sub.CurrentCell.Column.DisplayIndex;
 
                         CURRENT_ROW_INDEX = INVO_LST_sub.SelectedIndex;
+
+                        if (INVO_LST_sub.SelectedItem is INVO_LST_FACTOR22 selectedFactor && !string.IsNullOrWhiteSpace(selectedFactor.NAME_CODE))
+                        {
+                            //LBL_SELECTED_KALA.Text = "نام کالا : " + selectedFactor.NAME_CODE;
+                        }
+                        else
+                        {
+                            //LBL_SELECTED_KALA.Text = "";
+                        }
                     }
                 }
             }
@@ -11043,7 +11052,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             report["NUMBER_PARAM"] = NUMBER1.Text;
             ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
-        
+
 
             #region PageHeader_Format
             string FRF;
