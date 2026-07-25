@@ -494,6 +494,18 @@
                             <Label Grid.Column="1" Content="47" Style="{StaticResource SettingNumberLabel}"/>
                         </Grid>
 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                <Label Content="مسیر سرور آپدیت (UNC/FTP/SHARE): " VerticalAlignment="Center" FontSize="11"/>
+                                <TextBox x:Name="TXB_UPDATE_SERVER_PATH" Width="300" VerticalAlignment="Center" Margin="5,0"/>
+                            </StackPanel>
+                            <Label Grid.Column="1" Content="48" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+
                     </StackPanel>
                 </Grid>
             </ScrollViewer>
