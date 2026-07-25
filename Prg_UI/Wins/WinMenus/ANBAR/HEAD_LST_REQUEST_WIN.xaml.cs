@@ -394,6 +394,14 @@ namespace Wins.WinMenus.ANBAR
             catch { /*ignore*/ }
 
 
+            if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                var searchWindow = new EnhancedSearchWindow(this);
+                searchWindow.Owner = this;
+                searchWindow.ShowDialog();
+            }
+
             if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
             {
                 if (IsDataGridCellFocused)
