@@ -131,8 +131,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public Visual THE_WIN { get; set; }
         public Visual THE_WIN_2 { get; set; }
         public string ServerFilter { get; set; }
-        public BAKCHEK(Visual thewin, string _severfilter, int _current_index = -1)
+        public bool IsReadOnlyMode { get; set; } = false;
+
+        public BAKCHEK(Visual thewin, string _severfilter, int _current_index = -1, bool isreadonly = false)
         {
+            IsReadOnlyMode = isreadonly;
             THE_WIN = thewin;
             INDEX_DG = _current_index;
             ServerFilter = _severfilter;
@@ -180,7 +183,31 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             }
             Fill_ComboBoxes();
-            N_SERI.Focus();
+
+            if (IsReadOnlyMode)
+            {
+                RADIF.IsEnabled = false;
+                N_SERI.IsEnabled = false;
+                BANK.IsEnabled = false;
+                SANDUGH.IsEnabled = false;
+                SHOBEH.IsEnabled = false;
+                DATE_S.IsEnabled = false;
+                DATE.IsEnabled = false;
+                NAME_TAH.IsEnabled = false;
+                N_HESAB.IsEnabled = false;
+                MABL.IsEnabled = false;
+                HES1.IsEnabled = false;
+                VAZ.IsEnabled = false;
+
+                _SaveExit.IsEnabled = false;
+                _SaveExit.Visibility = Visibility.Collapsed;
+
+                this.Title += " (فقط خواندنی)";
+            }
+            else
+            {
+                N_SERI.Focus();
+            }
 
             CL_LMethods.SetTabIndexes(
                 N_SERI,
@@ -191,6 +218,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (IsReadOnlyMode) return;
+
             isClosing = true;
 
             var parentWindow = THE_WIN as PGET_HED;

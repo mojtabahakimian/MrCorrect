@@ -43,7 +43,7 @@ using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_KH_BACK : Window, ISearchableWindow
+    public partial class HEAD_LST_KH_BACK : Window, ISearchableWindow, IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -165,6 +165,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 NUMBER.UpdateLayout();
                 IsOpenedFromAutomation = _isAutomasion_;
             }
+        }
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "فروشنده", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
         }
         public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();

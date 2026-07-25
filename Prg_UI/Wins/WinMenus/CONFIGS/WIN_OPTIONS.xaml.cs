@@ -435,7 +435,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 {
                     new GENERAL_OPTIONS { OptionName = "ShiryBasketCode", OptionValue = TXB_SHIRI.Text },
                     new GENERAL_OPTIONS { OptionName = "MastyBasketCode", OptionValue = TXB_MASTI.Text },
-                    new GENERAL_OPTIONS { OptionName = "MadreseBasketCode", OptionValue = TXB_MADRESE.Text }
+                    new GENERAL_OPTIONS { OptionName = "MadreseBasketCode", OptionValue = TXB_MADRESE.Text },
+                    new GENERAL_OPTIONS { OptionName = "UPDATE_SERVER_PATH", OptionValue = TXB_UPDATE_SERVER_PATH.Text }
                 };
                 var saveTasks = new List<Task<bool>>();
                 foreach (var option in optionsToSave)
@@ -497,7 +498,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             {
                 "ShiryBasketCode",
                 "MastyBasketCode",
-                "MadreseBasketCode"
+                "MadreseBasketCode",
+                "UPDATE_SERVER_PATH"
             };
             try
             {
@@ -510,6 +512,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 TXB_SHIRI.Text = options.FirstOrDefault(o => o.OptionName == "ShiryBasketCode")?.OptionValue;
                 TXB_MASTI.Text = options.FirstOrDefault(o => o.OptionName == "MastyBasketCode")?.OptionValue;
                 TXB_MADRESE.Text = options.FirstOrDefault(o => o.OptionName == "MadreseBasketCode")?.OptionValue;
+                TXB_UPDATE_SERVER_PATH.Text = options.FirstOrDefault(o => o.OptionName == "UPDATE_SERVER_PATH")?.OptionValue;
             }
             catch (Exception ex)
             {

@@ -46,7 +46,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_KH_BACK_AZAD : Window, ISearchableWindow
+    public partial class HEAD_LST_KH_BACK_AZAD : Window, ISearchableWindow, IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -186,6 +186,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 NUMBER.Text = number_to_open.ToString(); //شماره  حواله
                 IsOpenedFromAutomation = _isAutomasion_;
             }
+        }
+
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "فروشنده", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 

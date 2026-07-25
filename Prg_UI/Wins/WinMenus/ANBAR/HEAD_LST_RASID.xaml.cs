@@ -44,7 +44,7 @@ using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
-    public partial class HEAD_LST_RASID : Window, ISearchableWindow
+    public partial class HEAD_LST_RASID : Window, ISearchableWindow, IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -121,7 +121,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         InventoryManager IVM = new InventoryManager();
-
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "فروشنده", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
+        }
         UniversControl universControl = new UniversControl();
         List<Custom_VAHEDK> RST_KALAVAHED_LST = null;
 

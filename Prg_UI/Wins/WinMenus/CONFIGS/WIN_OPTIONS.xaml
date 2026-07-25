@@ -8,8 +8,9 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="800" Width="1024" d:Height="1024"
+        Height="800" Width="1024" d:Height="2000" d:MaxHeight="2000"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        
         MinHeight="400"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
@@ -492,6 +493,18 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox x:Name="Check68" Grid.Column="0" Content="پارامترهاي بيشتر در خريد نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
                             <Label Grid.Column="1" Content="47" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                <Label Content="مسیر سرور آپدیت (UNC/FTP/SHARE): " VerticalAlignment="Center" FontSize="11"/>
+                                <TextBox x:Name="TXB_UPDATE_SERVER_PATH" Width="300" VerticalAlignment="Center" Margin="5,0"/>
+                            </StackPanel>
+                            <Label Grid.Column="1" Content="48" Style="{StaticResource SettingNumberLabel}"/>
                         </Grid>
 
                     </StackPanel>

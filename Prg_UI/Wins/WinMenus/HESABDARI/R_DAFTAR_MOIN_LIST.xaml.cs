@@ -33,10 +33,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
     public partial class R_DAFTAR_MOIN_LIST : Window
     {
-        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null)
+        private int? _fromDate;
+        private int? _toDate;
+        private string _tafzilCode;
+        private string _sortExpr;
+
+        public R_DAFTAR_MOIN_LIST(object acFormDS = null, string _fullhesabname = null, int? fromDate = null, int? toDate = null, string tafzilCode = null, string sortExpr = null)
         {
             OPEN_ARG = acFormDS;
             FULLHESAB_NAME = _fullhesabname;
+            _fromDate = fromDate;
+            _toDate = toDate;
+            _tafzilCode = tafzilCode;
+            _sortExpr = sortExpr;
             InitializeComponent();
 
             this.DataContext = this;
@@ -89,6 +98,33 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
+        }
+        private void Btn_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (_fromDate.HasValue && _toDate.HasValue && !string.IsNullOrWhiteSpace(_tafzilCode))
+            {
+                try
+                {
+                    var sortPass = string.IsNullOrWhiteSpace(_sortExpr) ? "DATE_S, BED DESC" : _sortExpr;
+                    var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = _fromDate.Value, ToDate = _toDate.Value, TafzilCode = _tafzilCode, SortExpr = sortPass }).ToList();
+
+                    DAFTAR_DATA.Clear();
+                    foreach (var item in rst)
+                    {
+                        DAFTAR_DATA.Add(item);
+                    }
+
+                    universControl.PopNotifyShowUp("لیست با موفقیت بروزرسانی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 2);
+                }
+                catch (Exception ex)
+                {
+                    universControl.PopNotifyShow("خطا در بروزرسانی: " + ex.Message, Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                }
+            }
+            else
+            {
+                universControl.PopNotifyShow("پارامترهای لازم برای بروزرسانی دریافت نشده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
         }
         private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

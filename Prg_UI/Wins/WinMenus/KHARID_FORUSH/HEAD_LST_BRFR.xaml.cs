@@ -47,7 +47,7 @@ using System.Windows.Threading;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_BRFR : Window, ISearchableWindow
+    public partial class HEAD_LST_BRFR : Window, ISearchableWindow, IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -141,7 +141,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
             public double MBAA { get; set; }
         }
         #endregion
-
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "فروشنده", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
+        }
         public HEAD_LST_BRFR(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();

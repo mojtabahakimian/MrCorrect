@@ -590,6 +590,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     }
                 }
+                else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.T)
+                {
+                    e.Handled = true;
+                    if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0" && AllowEdits)
+                    {
+                        TAKHFIF takhfif = new TAKHFIF(I_AM_PISHFACTOR);
+                        if (takhfif.CanOpen)
+                            takhfif.Show();
+                    }
+                }
                 else
                 {
                     //if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && (e.Key == Key.F8 || e.SystemKey == Key.F8))
@@ -3423,14 +3433,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 TAMIR.SelectionChanged += TAMIR_SelectionChanged;
 
 
-                if (HEADER?.PEPID != null)
-                {
-                    PEPID.SelectedValue = HEADER.PEPID; PEPID.Items.Refresh();
-                }
-                if (HEADER?.PEID != null)
-                {
-                    PEID.SelectedValue = HEADER.PEID; PEID.Items.Refresh();
-                }
+                // Always assign (even null) so that a previously-set value is cleared
+                // when the current record has no اعلامیه قیمت / اعلامیه تخفیف.
+                PEPID.SelectedValue = HEADER?.PEPID; PEPID.Items.Refresh();
+                PEID.SelectedValue = HEADER?.PEID; PEID.Items.Refresh();
 
                 MODAT_PPID_Enter(); //بروز رسانی داده های نحوه پرداخت بر اساس داده ها وارد شده
 
@@ -3567,6 +3573,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void IF_NOT_IS_AZAD_Then_Lock()
         {
+            // Reset TKHN to unlocked by default; the GHAYM==7 block below will re-lock if needed.
+            TKHN_COL.IsReadOnly = false;
+
             //1.
             if (CL_HESABDARI.LETSGO("TFTMLOCK")) //ستون تخفیفات در فاکتور فروش قفل شود
             {
@@ -3585,8 +3594,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //2.
             if (Baseknow.GHAYM == 7)
             {
-                //نحوه پرداخت آزاد انتخاب شده
-                if (MODAT_PPID.SelectedIndex == 0)
+                // نحوه پرداخت آزاد با شناسه صفر مشخص می‌شود. ترتیب آیتم‌ها بعد از
+                // بازخوانی ComboBox تضمین‌شده نیست، پس SelectedIndex معیار پایداری نیست.
+                bool isFreePaymentMethod = int.TryParse(
+                    MODAT_PPID.SelectedValue?.ToString(), out int selectedPaymentMethodId)
+                    && selectedPaymentMethodId == 0;
+
+                if (isFreePaymentMethod)
                 {
                     MABL_COL.IsReadOnly = false;
                     MABL_K_COL.IsReadOnly = false;
@@ -3603,7 +3617,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     N_MOIN_COL.IsReadOnly = true;
                 }
             }
-
         }
 
         private void DisplaySumPrices()

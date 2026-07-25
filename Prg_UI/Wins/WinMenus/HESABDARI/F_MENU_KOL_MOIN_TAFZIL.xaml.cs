@@ -471,7 +471,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                         var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = fromDate, ToDate = toDate, TafzilCode = this.Combo34.SelectedValue.ToString(), SortExpr = SortPass }).ToList();
 
-                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST(rst, Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
+                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST(rst, Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ", fromDate, toDate, this.Combo34.SelectedValue.ToString(), SortPass);
                         ProcLoader.Stop(Prc);
 
                         if (OPEN_ARG is not null)

@@ -2198,6 +2198,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 new SearchableProperty { DisplayName = "شرح سند", PropertyPath = "SHARH_S", PropertyType = typeof(string) },
                 new SearchableProperty { DisplayName = "شماره بایگانی", PropertyPath = "BAYEG", PropertyType = typeof(double) },
                 new SearchableProperty { DisplayName = "نوع سند", PropertyPath = "NO_S", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "شماره مبنا", PropertyPath = "BASE", PropertyType = typeof(double) },
                 // Add other searchable properties
             };
         }
@@ -2211,6 +2212,31 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 UIElement uie = e.OriginalSource as UIElement;
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
+                    if (Child14.CurrentColumn is not null && Child14.CurrentColumn.SortMemberPath == "SHARH")
+                    {
+                        if (uie is System.Windows.Controls.TextBox tb && tb.Text.EndsWith("+"))
+                        {
+                            e.Handled = true;
+                            var sharhListWin = new SHARH_LIST();
+                            if (sharhListWin.ShowDialog() == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
+                            {
+                                tb.Text = tb.Text.Substring(0, tb.Text.Length - 1) + sharhListWin.SelectedSharh;
+                                tb.SelectionStart = tb.Text.Length;
+                            }
+                            return; // Stop further Enter processing
+                        }
+                        else if (Child14.SelectedItem is Prg_Proccessy.SQLMODELS.DEED_DTL currentRow && currentRow.SHARH != null && currentRow.SHARH.EndsWith("+"))
+                        {
+                            e.Handled = true;
+                            var sharhListWin = new SHARH_LIST();
+                            if (sharhListWin.ShowDialog() == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
+                            {
+                                currentRow.SHARH = currentRow.SHARH.Substring(0, currentRow.SHARH.Length - 1) + sharhListWin.SelectedSharh;
+                                Child14.Items.Refresh(); // Only refresh if not in edit mode
+                            }
+                            return; // Stop further Enter processing
+                        }
+                    }
                     if (uie is DataGridCell || (uie as FrameworkElement)?.Parent is DataGridCell)
                     {
                         if (Child14.CurrentColumn is not null)

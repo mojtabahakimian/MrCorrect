@@ -524,7 +524,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = 1, ToDate = 99999999, TafzilCode = item.CUST_NO, SortExpr = "DATE_S, BED DESC" }).ToList();
 
-                    new R_DAFTAR_MOIN_LIST(rst, item.CUST_NO).ShowDialog();
+                    new R_DAFTAR_MOIN_LIST(rst, item.CUST_NO, 1, 99999999, item.CUST_NO, "DATE_S, BED DESC").ShowDialog();
                 }
                 catch (Exception ex)
                 {

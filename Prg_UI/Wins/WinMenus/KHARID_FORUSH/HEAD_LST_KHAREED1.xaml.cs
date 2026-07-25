@@ -43,7 +43,7 @@ using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_KHAREED1 : Window, ISearchableWindow
+    public partial class HEAD_LST_KHAREED1 : Window, ISearchableWindow, IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -146,6 +146,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             IsDirectFactor = _IsDirectFactor_;
 
             IsExporty = _IsExporty_;
+        }
+
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "فروشنده", KeyPropertyPath = "CUST_NO", Combo = CUST_NO };
         }
         public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
