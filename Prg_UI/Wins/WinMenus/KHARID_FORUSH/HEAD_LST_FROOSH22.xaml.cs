@@ -6230,13 +6230,47 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             if (!IsRowValid(ROW))
             {
-                INVO_LST_SUB_CANCEL_EDIT(INVO_LST_sub, default);
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_sub;
+                e.Cancel = true;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_sub_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_sub_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_sub_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_sub_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 
             if (!RowValuesCheck(ROW))
             {
-                INVO_LST_SUB_CANCEL_EDIT(INVO_LST_sub, default);
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_sub;
+                e.Cancel = true;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_sub_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_sub_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_sub_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_sub_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 

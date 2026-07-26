@@ -1717,14 +1717,48 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
             if (ROW.HES_K == null)
             {
                 universControl.PopNotifyShow("حساب کل نمی‌تواند خالی باشد.", Pop1, Pop1Text1, Pop_Border1);
-                Child14_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = Child14;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= Child14_CellEditEnding;
+                    DG.RowEditEnding -= Child14_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += Child14_RowEditEnding;
+                    DG.CellEditEnding += Child14_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
             if (ROW?.SHARH?.Length > 250)
             {
                 universControl.PopNotifyShow("طول شرح حداکثر میتواند 250 کاراکتر باشد.", Pop1, Pop1Text1, Pop_Border1);
 
-                Child14_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = Child14;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= Child14_CellEditEnding;
+                    DG.RowEditEnding -= Child14_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += Child14_RowEditEnding;
+                    DG.CellEditEnding += Child14_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 
@@ -1732,7 +1766,24 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
             {
                 universControl.PopNotifyShow("حساب به درستی انتخاب نشده.", Pop1, Pop1Text1, Pop_Border1);
 
-                Child14_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = Child14;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= Child14_CellEditEnding;
+                    DG.RowEditEnding -= Child14_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += Child14_RowEditEnding;
+                    DG.CellEditEnding += Child14_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 
@@ -1740,7 +1791,24 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
             {
                 universControl.PopNotifyShow("بدهکار یا بستانکار نمیتواند خالی باشد !.", Pop1, Pop1Text1, Pop_Border1);
 
-                Child14_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = Child14;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= Child14_CellEditEnding;
+                    DG.RowEditEnding -= Child14_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += Child14_RowEditEnding;
+                    DG.CellEditEnding += Child14_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
             #endregion
@@ -1753,7 +1821,24 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 {
                     if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0 || CURRENT_ITMES_ROW.BES <= 0 && CURRENT_ITMES_ROW.BED <= 0)
                     {
-                        Child14_CANCEL_EDIT();
+                        e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = Child14;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= Child14_CellEditEnding;
+                    DG.RowEditEnding -= Child14_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += Child14_RowEditEnding;
+                    DG.CellEditEnding += Child14_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                         universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد!", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
@@ -1771,7 +1856,24 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
             #region HES_Before_Update
             if (CL_HESABDARI.ISTAF(CURRENT_ITMES_ROW.HES))
             {
-                Child14_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = Child14;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= Child14_CellEditEnding;
+                    DG.RowEditEnding -= Child14_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += Child14_RowEditEnding;
+                    DG.CellEditEnding += Child14_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
                 msgwin.ShowDialog();
                 return;

@@ -2060,7 +2060,24 @@ namespace Wins.WinMenus.ANBAR
 
             if (!CmdSaveRecord(e.Row.Item as INVO_LST_FACTOR22))
             {
-                INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_ENTEGHAL_SUB;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_ENTEGHAL_SUB_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_ENTEGHAL_SUB_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_ENTEGHAL_SUB_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_ENTEGHAL_SUB_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
             }
 
             Text59.Text = SUM_OF_MABLK.ToString();

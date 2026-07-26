@@ -3090,7 +3090,24 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (!BodyIsValid(ROW))
             {
-                INVO_LST_SUB_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_HAVL_SUB;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_HAVL_SUB_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_HAVL_SUB_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_HAVL_SUB_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_HAVL_SUB_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 

@@ -2113,7 +2113,24 @@ namespace Wins.WinMenus.ANBAR
 
             if (!CmdSaveRecord(ROW))
             {
-                INVO_LST_HAV_SUB_OTHER_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_HAV_SUB_OTHER;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_HAV_SUB_OTHER_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_HAV_SUB_OTHER_RowEditEnding;
+
+                    DG.SelectedItem = ROW;
+                    DG.ScrollIntoView(ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(ROW, DG.Columns[2]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_HAV_SUB_OTHER_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_HAV_SUB_OTHER_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
             }
         }
 

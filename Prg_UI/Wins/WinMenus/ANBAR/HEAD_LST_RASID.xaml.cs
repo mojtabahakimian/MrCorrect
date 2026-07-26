@@ -1249,7 +1249,24 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (!BodyIsValid(REND_ROW))
             {
-                INVO_LST_RASID_SUB_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_RASID_SUB;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_RASID_SUB_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_RASID_SUB_RowEditEnding;
+
+                    DG.SelectedItem = REND_ROW;
+                    DG.ScrollIntoView(REND_ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(REND_ROW, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_RASID_SUB_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_RASID_SUB_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 
@@ -1333,7 +1350,24 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     REND_ROW.id = null; //Bring Back to null (New State because of Rollback Transaction)
                 }
                 IVM.RollbackTransaction();
-                INVO_LST_RASID_SUB_CANCEL_EDIT();
+                e.Cancel = true;
+                #region NEWWAY
+                System.Windows.Controls.DataGrid DG = INVO_LST_RASID_SUB;
+                DG.Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    DG.CellEditEnding -= INVO_LST_RASID_SUB_CellEditEnding;
+                    DG.RowEditEnding -= INVO_LST_RASID_SUB_RowEditEnding;
+
+                    DG.SelectedItem = REND_ROW;
+                    DG.ScrollIntoView(REND_ROW);
+                    DG.CurrentCell = new System.Windows.Controls.DataGridCellInfo(REND_ROW, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+                    DG.BeginEdit();
+
+                    DG.RowEditEnding += INVO_LST_RASID_SUB_RowEditEnding;
+                    DG.CellEditEnding += INVO_LST_RASID_SUB_CellEditEnding;
+
+                }), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 IVM.ShowErrorMessages(ErrosMessages);
                 return;
             }

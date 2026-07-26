@@ -1827,7 +1827,7 @@ namespace Wins.WinMenus.ANBAR
 
             if (!CmdSaveRecord(e.Row.Item as INVO_LST_FACTOR22))
             {
-                INVO_LST_RASIDA_SUB_CANCEL_EDIT();
+                e.Cancel = true;
             }
         }
 
