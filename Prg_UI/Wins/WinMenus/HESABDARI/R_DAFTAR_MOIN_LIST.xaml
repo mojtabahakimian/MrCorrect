@@ -95,6 +95,12 @@
                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
+            <Separator/>
+            <MenuItem Header="مانده ارزی (تسعیر شده)" Click="Menu_ArziBalance_Click" ToolTip="نمایش مانده تسعیر شده بر مبنای نرخ ارز هر سطر (BED/ARZD ، BES/ARZD)">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="BankTransfer" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
     </Window.Resources>
     <WindowChrome.WindowChrome>
@@ -195,6 +201,7 @@
                 HeaderStyle="{StaticResource KDGHeader}"
                 PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
                 CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
+                CellDoubleTapped="SYNCFUSION_DG_CellDoubleTapped"
                 Margin="10,88,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
 
             <syncfusion:SfDataGrid.Resources>

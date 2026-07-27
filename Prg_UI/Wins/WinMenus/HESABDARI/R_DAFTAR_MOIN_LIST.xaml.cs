@@ -878,6 +878,93 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         #endregion
 
+        #region Currency (ARZI) Revaluation
+        // پیاده‌سازی جدید معادل MAND11_DblClick در فرم قدیمی اکسس:
+        // مانده هر سطر بر نرخ ارز همان سطر (ARZD) تقسیم و به صورت تجمعی مانده تسعیر شده محاسبه می‌شود.
+        private void SYNCFUSION_DG_CellDoubleTapped(object sender, GridCellDoubleTappedEventArgs e)
+        {
+            var currentCell = SYNCFUSION_DG.SelectionController?.CurrentCellManager?.CurrentCell;
+            if (currentCell?.GridColumn?.MappingName != "MAND") return;
+
+            ShowArziBalance();
+        }
+
+        private void Menu_ArziBalance_Click(object sender, RoutedEventArgs e)
+        {
+            ShowArziBalance();
+        }
+
+        private void ShowArziBalance()
+        {
+            try
+            {
+                if (SYNCFUSION_DG.View?.Records == null || SYNCFUSION_DG.View.Records.Count == 0)
+                {
+                    universControl.PopNotifyShow("هیچ رکوردی برای محاسبه مانده ارزی وجود ندارد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
+
+                var arziList = new List<MOIN_CUSTOM>();
+                double runningTotal = 0;
+
+                // به همان ترتیبی که در حال حاضر روی گرید نمایش داده می‌شود (با پالایش/سورت جاری)
+                for (int i = 0; i < SYNCFUSION_DG.View.Records.Count; i++)
+                {
+                    var src = SYNCFUSION_DG.View.Records.GetItemAt(i) as MOIN_CUSTOM;
+                    if (src == null) continue;
+
+                    // VBA: BED / ARZD, BES / ARZD, (BED-BES)/ARZD AS MAND
+                    double rate = (src.ARZD.HasValue && src.ARZD.Value != 0) ? src.ARZD.Value : 1;
+                    double newBed = (src.BED ?? 0) / rate;
+                    double newBes = (src.BES ?? 0) / rate;
+
+                    // VBA: MAN = MAN + rst.Fields("MAND") : rst.Fields("MAND") = MAN
+                    runningTotal += newBed - newBes;
+
+                    arziList.Add(new MOIN_CUSTOM
+                    {
+                        N_S = src.N_S,
+                        @base = src.@base,
+                        DATE_S = src.DATE_S,
+                        HES_K = src.HES_K,
+                        HES_M = src.HES_M,
+                        HES_T = src.HES_T,
+                        HES_T2 = src.HES_T2,
+                        SHARH = src.SHARH,
+                        BED = newBed,
+                        BES = newBes,
+                        MAND = Math.Abs(runningTotal),
+                        id = src.id,
+                        NO_S = src.NO_S,
+                        N_SERI = src.N_SERI,
+                        BANK = src.BANK,
+                        NUMBER = src.NUMBER,
+                        TAG = src.TAG,
+                        ARZD = src.ARZD,
+                        HES_T3 = src.HES_T3,
+                        HES_T4 = src.HES_T4,
+                        TAFZILN = src.TAFZILN,
+                        HES = src.HES,
+                        TASH = runningTotal > 0 ? "بد" : (runningTotal < 0 ? "بس" : "--"),
+                        TSH = runningTotal > 0 ? "بد" : (runningTotal < 0 ? "بس" : "--"),
+                        MONTH_S = src.MONTH_S
+                    });
+                }
+
+                // VBA: Me.CAPTION = "(" & Me.HES & "-" & Me.TAFZILN & ")  با مانده تسعير شده"
+                string arziCaption = string.IsNullOrWhiteSpace(FULLHESAB_NAME)
+                    ? "با مانده تسعیر شده"
+                    : $"{FULLHESAB_NAME} - با مانده تسعیر شده";
+
+                new R_DAFTAR_MOIN_LIST(arziList, arziCaption).ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                universControl.PopNotifyShow("خطا در محاسبه مانده ارزی: " + ex.Message, Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
+        }
+        #endregion
+
         #region Balance Navigation Methods
         /// <summary>
         /// Handle navigation to balance when '1' key is pressed
