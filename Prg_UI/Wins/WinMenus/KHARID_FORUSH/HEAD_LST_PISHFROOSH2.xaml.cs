@@ -900,14 +900,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
                           select c).Any();
             if (errors)
             {
-                INVO_LST_SUB_CANCEL_EDIT();
+                //INVO_LST_SUB_CANCEL_EDIT();
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return false;
             }
 
             if (_row == null)
             {
-                INVO_LST_SUB_CANCEL_EDIT();
+                //INVO_LST_SUB_CANCEL_EDIT();
                 universControl.PopNotifyShow("سطر خالی مجاز نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return false;
             }
@@ -2362,27 +2362,54 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
-
             if (!BodyIsValid(ROW))
             {
-                INVO_LST_SUB_CANCEL_EDIT();
                 #region NEWWAY
-                //var DG = INVO_LST_SUB;
-                //e.Cancel = true;
-                //DG.Dispatcher.BeginInvoke(new Action(() =>
-                //{
-                //    DG.CellEditEnding -= INVO_LST_SUB_CellEditEnding;
-                //    DG.RowEditEnding -= INVO_LST_SUB_RowEditEnding;
+                var DG = INVO_LST_SUB;
+                e.Cancel = true;
 
-                //    DG.SelectedItem = ROW;
-                //    DG.ScrollIntoView(ROW);
-                //    DG.CurrentCell = new DataGridCellInfo(ROW, DG.Columns[2]);
-                //    DG.BeginEdit();
+                // جلوگیری از re-entrancy: اگر یک BeginInvoke قبلی هنوز صف Dispatcher هست، دوباره صف نکن
+                if (_isReenteringEdit) { return; }
+                _isReenteringEdit = true;
 
-                //    DG.RowEditEnding += INVO_LST_SUB_RowEditEnding;
-                //    DG.CellEditEnding += INVO_LST_SUB_CellEditEnding;
+                DG.CellEditEnding -= INVO_LST_SUB_CellEditEnding;
+                DG.RowEditEnding -= INVO_LST_SUB_RowEditEnding;
 
-                //}), System.Windows.Threading.DispatcherPriority.Background);
+                DG.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // Edge Case: ردیف ممکنه بین این فاصله از ItemsSource حذف شده باشه
+                        if (ROW == null || !DG.Items.Contains(ROW))
+                        {
+                            return;
+                        }
+
+                        // Edge Case: ایندکس ستون هارد‌کد شده -> بررسی وجود ستون قبل از دسترسی
+                        int targetColumnIndex = 2;
+                        if (DG.Columns == null || DG.Columns.Count <= targetColumnIndex)
+                        {
+                            targetColumnIndex = DG.Columns?.Count > 0 ? 0 : -1; // اگر ستون مورد نظر وجود نداره، به جای کرش کردن، اولین ستون قابل ادیت رو انتخاب کن
+                        }
+
+                        DG.SelectedItem = ROW;
+                        DG.ScrollIntoView(ROW);
+
+                        if (targetColumnIndex >= 0)
+                        {
+                            DG.CurrentCell = new DataGridCellInfo(ROW, DG.Columns[targetColumnIndex]);
+                        }
+
+                        DG.BeginEdit();
+                    }
+                    catch { }
+                    finally
+                    {
+                        DG.RowEditEnding += INVO_LST_SUB_RowEditEnding;
+                        DG.CellEditEnding += INVO_LST_SUB_CellEditEnding;
+                        _isReenteringEdit = false;
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
                 #endregion
                 return;
             }
@@ -2395,59 +2422,58 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (ROW?.id == null) //INSERT
             {
                 Qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
-                                                  OUTPUT INSERTED.id
-                                                  VALUES({NUMBER.Text}, {TAG},
-                                                  {ROW.ANBAR},
-                                                  N'{ROW.CODE}',
-                                                  {ROW.MEGH},
-                                                  {ROW.MEGHk},
-                                                  {ROW.MEGH_MAR},
-                                                  N'{ROW.MANDAH}',
-                                                  {ROW.MABL},
-                                                  {ROW.MABL_K},
-                                                  {Convert.ToByte(ROW.FROM_A)},
-                                                  N'{ROW.N_RASID}',
-                                                  {ROW.MEGH_R},
-                                                  {ROW.SANAD_NO},
-                                                  {ROW.ANBARF},
-                                                  {ROW.VAHED_K},
-                                                  {ROW.N_KOL},
-                                                  {ROW.N_MOIN},
-                                                  {ROW.N_TAF},
-                                                  {ROW.AVRAGE},
-                                                  {ROW.AVRAGE2},
-                                                  {ROW.IMBAA},
-                                                  {ROW.TOTALARZ},
-                                                  N'{ROW.VISITOR}',
-                                                  {ROW.TKHN},
-                                                  {(ROW.JAY is null ? "NULL" : ROW.JAY)},
-                                                  {(ROW.JAYO is null ? "NULL" : ROW.JAYO)})";
+                                          OUTPUT INSERTED.id
+                                          VALUES({NUMBER.Text}, {TAG},
+                                          {ROW.ANBAR},
+                                          N'{ROW.CODE}',
+                                          {ROW.MEGH},
+                                          {ROW.MEGHk},
+                                          {ROW.MEGH_MAR},
+                                          N'{ROW.MANDAH}',
+                                          {ROW.MABL},
+                                          {ROW.MABL_K},
+                                          {Convert.ToByte(ROW.FROM_A)},
+                                          N'{ROW.N_RASID}',
+                                          {ROW.MEGH_R},
+                                          {ROW.SANAD_NO},
+                                          {ROW.ANBARF},
+                                          {ROW.VAHED_K},
+                                          {ROW.N_KOL},
+                                          {ROW.N_MOIN},
+                                          {ROW.N_TAF},
+                                          {ROW.AVRAGE},
+                                          {ROW.AVRAGE2},
+                                          {ROW.IMBAA},
+                                          {ROW.TOTALARZ},
+                                          N'{ROW.VISITOR}',
+                                          {ROW.TKHN},
+                                          {(ROW.JAY is null ? "NULL" : ROW.JAY)},
+                                          {(ROW.JAYO is null ? "NULL" : ROW.JAYO)})";
             }
             else //UPDATE
             {
                 Qre = $@"UPDATE dbo.INVO_LST SET 
-                                                 ANBAR = {ROW.ANBAR} ,
-                                                 CODE = {ROW.CODE} ,
-                                                 VAHED_K = {ROW.VAHED_K} ,
-                                                 MEGH = {ROW.MEGH} ,
-                                                 MEGHk = {ROW.MEGHk} ,
-                                                 MABL = {ROW.MABL} ,
-                                                 MABL_K = {ROW.MABL_K} ,
-                                                 N_KOL = {ROW.N_KOL} ,
-                                                 TKHN = {ROW.TKHN} ,
-                                                 N_MOIN = {ROW.N_MOIN} ,
-                                                 IMBAA = {ROW.IMBAA} ,
-                                                 MANDAH = N'{ROW.MANDAH}' ,
-                                                 JAY = {(ROW.JAY is null ? "NULL" : ROW.JAY)},
-                                                 JAYO = {(ROW.JAYO is null ? "NULL" : ROW.JAYO)}
-                                                 WHERE id = {ROW.id} AND NUMBER = {NUMBER.Text} AND TAG = {TAG}";
+                                         ANBAR = {ROW.ANBAR} ,
+                                         CODE = {ROW.CODE} ,
+                                         VAHED_K = {ROW.VAHED_K} ,
+                                         MEGH = {ROW.MEGH} ,
+                                         MEGHk = {ROW.MEGHk} ,
+                                         MABL = {ROW.MABL} ,
+                                         MABL_K = {ROW.MABL_K} ,
+                                         N_KOL = {ROW.N_KOL} ,
+                                         TKHN = {ROW.TKHN} ,
+                                         N_MOIN = {ROW.N_MOIN} ,
+                                         IMBAA = {ROW.IMBAA} ,
+                                         MANDAH = N'{ROW.MANDAH}' ,
+                                         JAY = {(ROW.JAY is null ? "NULL" : ROW.JAY)},
+                                         JAYO = {(ROW.JAYO is null ? "NULL" : ROW.JAYO)}
+                                         WHERE id = {ROW.id} AND NUMBER = {NUMBER.Text} AND TAG = {TAG}";
             }
 
             //اگر رزرو یا رزور قطعی داره موجودی رو کنترل کن و نذار ذخیره کنه
             var _tamir = Convert.ToDouble(((FrameworkElement)TAMIR.SelectedValue).Tag);
             if (_tamir == 1 || _tamir == 4)
             {
-                //بررسی موجودی در صورت داشتن موجودی اعمال تغییرات
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { ROW }, Qre, null, false);
                 ErrosMessages.AddRange(errorMsgs);
 
@@ -2460,7 +2486,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     IVM.ShowErrorMessages(ErrosMessages);
                     IVM.RollbackTransaction();
-                    INVO_LST_SUB_CANCEL_EDIT();
+                    e.Cancel = true;
                     return;
                 }
                 else
@@ -2485,14 +2511,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             JAYEZAH(); //جایزه
-
-            //بررسی قیمیت ها توسط مستر کاکرت
-            GoGheymateUpdator();
-
+            GoGheymateUpdator(); //بررسی قیمیت ها توسط مستر کاکرت
             INVO_LST_SUB_ReGetData(); //Reload from database
-
             DisplayMandah();
         }
+
+        // فیلد سطح کلاس - باید در بالای فایل .xaml.cs اضافه بشه
+        private bool _isReenteringEdit = false;
 
         bool isSavedSuccess = false;
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)

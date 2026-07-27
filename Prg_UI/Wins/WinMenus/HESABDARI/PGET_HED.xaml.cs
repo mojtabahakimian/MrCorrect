@@ -2130,6 +2130,15 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     PERSONEL.IsEnabled = true;
                     DELETE_FACTOR22.IsEnabled = true;
                     SAVEBTN.IsEnabled = true;
+
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (PGET_LST_SUB.Items.Count > 0)
+                        {
+                            var targetIndex = PGET_LST_SUB.Items.Count - 1;
+                            CL_LMethods.FocusCellReadyToEdit(PGET_LST_SUB, "NO_AM", targetIndex, true);
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Background);
                 }
                 // If UCurrentUser() <> "َAdminister" And UCurrentUser() <> Me.USER_NAME Then
                 // Me.USER_NAME = UCurrentUser()
