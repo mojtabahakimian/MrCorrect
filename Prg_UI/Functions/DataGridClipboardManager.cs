@@ -370,9 +370,6 @@ namespace Functions
                             dataGrid.SelectedItems.Add(item);
                             dataGrid.ScrollIntoView(item);
                         }
-                        
-                        try { dataGrid.Items.Refresh(); } catch { }
-
                     }
 
                 }, DispatcherPriority.Background);
