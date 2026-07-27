@@ -900,14 +900,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
                           select c).Any();
             if (errors)
             {
-                INVO_LST_SUB_CANCEL_EDIT();
+                //INVO_LST_SUB_CANCEL_EDIT();
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return false;
             }
 
             if (_row == null)
             {
-                INVO_LST_SUB_CANCEL_EDIT();
+                //INVO_LST_SUB_CANCEL_EDIT();
                 universControl.PopNotifyShow("سطر خالی مجاز نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return false;
             }
@@ -2365,24 +2365,27 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (!BodyIsValid(ROW))
             {
-                INVO_LST_SUB_CANCEL_EDIT();
                 #region NEWWAY
-                //var DG = INVO_LST_SUB;
-                //e.Cancel = true;
-                //DG.Dispatcher.BeginInvoke(new Action(() =>
-                //{
-                //    DG.CellEditEnding -= INVO_LST_SUB_CellEditEnding;
-                //    DG.RowEditEnding -= INVO_LST_SUB_RowEditEnding;
+                var DG = INVO_LST_SUB;
+                e.Cancel = true;
+                try
+                {
+                    DG.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        DG.CellEditEnding -= INVO_LST_SUB_CellEditEnding;
+                        DG.RowEditEnding -= INVO_LST_SUB_RowEditEnding;
 
-                //    DG.SelectedItem = ROW;
-                //    DG.ScrollIntoView(ROW);
-                //    DG.CurrentCell = new DataGridCellInfo(ROW, DG.Columns[2]);
-                //    DG.BeginEdit();
+                        DG.SelectedItem = ROW;
+                        DG.ScrollIntoView(ROW);
+                        DG.CurrentCell = new DataGridCellInfo(ROW, DG.Columns[2]);
+                        DG.BeginEdit();
 
-                //    DG.RowEditEnding += INVO_LST_SUB_RowEditEnding;
-                //    DG.CellEditEnding += INVO_LST_SUB_CellEditEnding;
+                        DG.RowEditEnding += INVO_LST_SUB_RowEditEnding;
+                        DG.CellEditEnding += INVO_LST_SUB_CellEditEnding;
 
-                //}), System.Windows.Threading.DispatcherPriority.Background);
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+                catch { }
                 #endregion
                 return;
             }
@@ -2460,7 +2463,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     IVM.ShowErrorMessages(ErrosMessages);
                     IVM.RollbackTransaction();
-                    INVO_LST_SUB_CANCEL_EDIT();
+                    e.Cancel = true;
                     return;
                 }
                 else
