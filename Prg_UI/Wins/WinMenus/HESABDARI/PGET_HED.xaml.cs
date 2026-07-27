@@ -4215,6 +4215,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     IsPastingRows = true;
                     DataGridClipboardManager.PasteItems<PGET_LST>(PGET_LST_SUB, ValidateDataGridRow, AddItemToDataSource);
                     IsPastingRows = false;
+                    RefreshTreasuryGridAfterPaste();
                 }
             }
             #endregion
@@ -6502,7 +6503,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     DataGridClipboardManager.PasteItems<PGET_LST>(PGET_LST_SUB, ValidateDataGridRow, AddItemToDataSource);
                     IsPastingRows = false;
 
-                    PGET_LST_SUB.CommitEdit();
+                    RefreshTreasuryGridAfterPaste();
                 }
                 else
                 {
@@ -6519,6 +6520,30 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             {
                 universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
             }
+        }
+
+        private void RefreshTreasuryGridAfterPaste()
+        {
+            try
+            {
+                // Finish any placeholder-row transaction before refreshing. Refreshing an
+                // ICollectionView during AddNew/EditItem throws InvalidOperationException.
+                PGET_LST_SUB.CommitEdit(DataGridEditingUnit.Cell, true);
+                PGET_LST_SUB.CommitEdit(DataGridEditingUnit.Row, true);
+
+                var editableView = PGET_LST_SUB.Items as IEditableCollectionView;
+                var collectionView = CollectionViewSource.GetDefaultView(KHAZANEH_DATA);
+                if (collectionView != null &&
+                    editableView?.IsAddingNew != true &&
+                    editableView?.IsEditingItem != true)
+                {
+                    collectionView.Refresh();
+                }
+
+                PGET_LST_SUB.UpdateLayout();
+                OnPropertyChanged(nameof(SUM_OF_MABL));
+            }
+            catch { }
         }
 
         private void PGET_LST_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
