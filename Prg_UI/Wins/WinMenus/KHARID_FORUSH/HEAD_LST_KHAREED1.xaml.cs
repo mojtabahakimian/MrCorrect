@@ -3287,6 +3287,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             string _qre = null;
 
+            // NumericTextBox can temporarily expose an empty value after the user clears it.
+            // Persist that state as no discount instead of producing an invalid `TAKHFIF = ` SQL fragment.
+            string takhfifSqlValue = string.IsNullOrWhiteSpace(TAKHFIF.Text) ? "0" : TAKHFIF.Text;
+
             string _n_s = "NULL";
             if (double.TryParse(N_S.Text, out var n_sVal) && n_sVal > 0)
             {
@@ -3310,7 +3314,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text} {_DATEUPDATE_} , 
                     TAH = N'{TAH.Text}', MAS = {MAS.Text}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
-                    MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', 
+                    MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
                     SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
@@ -3331,7 +3335,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text},
                     TAH = N'{HEADER_FAC.TAH}', N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{HEADER_FAC.MOLAH}',
-                    MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}' , 
+                    MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
                     SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
@@ -3368,7 +3372,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 
                     TAH = N'{TAH.Text}', MAS = {MAS.Text}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
-                    MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}',
+                    MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     MABL_VAR = {MABL_VAR.Text}, MOIN_VAR = N'{CMB_MOIN_VAR.SelectedValue}',
                     MABL_HAV = {MABL_HAV.Text}, MOIN_HAV = N'{CMB_MOIN_HAV.SelectedValue}',
                     FNUMCO = {FNUMCO.Text},
