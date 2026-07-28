@@ -23,6 +23,7 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -283,12 +284,38 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void CurrencyStatement_Click(object sender, RoutedEventArgs e)
         {
-            bool showCurrencyColumns = sender is MenuItem menuItem && menuItem.IsChecked;
+            bool showCurrencyColumns = sender switch
+            {
+                MenuItem menuItem => menuItem.IsChecked,
+                ToggleButton toggleButton => toggleButton.IsChecked == true,
+                _ => false
+            };
 
+            CurrencyStatementMenuItem.IsChecked = showCurrencyColumns;
+            CurrencyStatementToggle.IsChecked = showCurrencyColumns;
+            CurrencyStatementToggle.Content = showCurrencyColumns
+                ? "صورت حساب ارزی: فعال"
+                : "نمایش صورت حساب ارزی";
+            aRZDColumn.IsHidden = !showCurrencyColumns;
             arzBedColumn.IsHidden = !showCurrencyColumns;
             arzBesColumn.IsHidden = !showCurrencyColumns;
             arzTashColumn.IsHidden = !showCurrencyColumns;
             arzMandColumn.IsHidden = !showCurrencyColumns;
+
+            if (showCurrencyColumns)
+            {
+                int unresolvedRates = DAFTAR_DATA.Count(row =>
+                    ((row.BED ?? 0d) != 0d || (row.BES ?? 0d) != 0d) &&
+                    (!row.ARZD.HasValue || row.ARZD.Value <= 0d ||
+                     double.IsNaN(row.ARZD.Value) || double.IsInfinity(row.ARZD.Value)));
+
+                if (unresolvedRates > 0)
+                {
+                    universControl.PopNotifyShow(
+                        $"نرخ ارز {unresolvedRates} ردیف معتبر نیست؛ مانده ارزی از اولین ردیف نامعتبر به بعد نمایش داده نمی‌شود.",
+                        Pop1, Pop1Text1, Pop_Border1, "#E59A6A00");
+                }
+            }
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -880,7 +907,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if (propertyInfo == null)
                     continue;
 
-                if (column.MappingName == "BED" || column.MappingName == "BES")
+                if (column.MappingName == "BED" || column.MappingName == "BES" ||
+                    column.MappingName == "ARZ_BED" || column.MappingName == "ARZ_BES")
                 {
                     if (IsNumericType(propertyInfo.PropertyType))
                     {
@@ -889,8 +917,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             Name = column.MappingName + "Sum",
                             MappingName = column.MappingName,
                             SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
-                            //Format = "{Sum:N0}"
-                            Format = "{Sum:N0}"
+                            Format = column.MappingName.StartsWith("ARZ_", StringComparison.Ordinal)
+                                ? "{Sum:N2}"
+                                : "{Sum:N0}"
                         };
                         summaryColumns.Add(summaryColumn);
                     }
