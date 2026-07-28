@@ -1,4 +1,4 @@
-﻿using Functions;
+﻿﻿using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
@@ -290,13 +290,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ToggleButton toggleButton => toggleButton.IsChecked == true,
                 _ => false
             };
-
-
-
-            CurrencyStatementToggle.IsChecked = showCurrencyColumns;
-            CurrencyStatementToggle.Content = showCurrencyColumns
-                ? "صورت حساب ارزی: فعال"
-                : "نمایش صورت حساب ارزی";
 
             bEDColumn.IsHidden = showCurrencyColumns;
             bESColumn.IsHidden = showCurrencyColumns;
