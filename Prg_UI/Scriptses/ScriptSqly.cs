@@ -5509,6 +5509,9 @@ BEGIN
     DECLARE @PER_START BIGINT, @PER_END BIGINT;
     DECLARE @WS_SHIFT_MODE NVARCHAR(10);
     DECLARE @EMP_ID INT, @IS_MANAGER BIT, @INS_TYPE TINYINT, @TAX_EXEMPT_FLAG BIT, @REGION_DEP TINYINT, @ACC_T NVARCHAR(50);
+    -- برچسب خوانا برای پیام‌های خطا (کد پرسنلی و نام) و تشخیص دلیل نبود حکم معتبر
+    DECLARE @EMP_LABEL NVARCHAR(300), @DEC_REASON NVARCHAR(400);
+    DECLARE @DEC_ANY_COUNT INT, @DEC_UNCONFIRMED_COUNT INT, @DEC_CONFIRMED_NO_LINE_COUNT INT;
 
     DECLARE @WORK_DAYS DECIMAL(5,2), @DAYS DECIMAL(5,2), @DAYSB DECIMAL(5,2),
             @FRID_COUNT TINYINT, @TDAYS DECIMAL(5,2), @OT_NORMAL_H DECIMAL(6,2),
@@ -5676,6 +5679,11 @@ BEGIN
         SET @PER_START = @PERIOD_DATE + 1;
         SET @PER_END   = @PERIOD_DATE + @MONTH_DAYS;
 
+        SET @EMP_LABEL = NULL;
+        SELECT @EMP_LABEL = N'کد پرسنلی ' + ISNULL(E.EMP_CODE, N'-') + N' (' + LTRIM(RTRIM(ISNULL(E.FIRST_NAME, N'') + N' ' + ISNULL(E.LAST_NAME, N''))) + N')'
+        FROM #EmployeeSource E WHERE E.EMP_ID = @EMP_ID;
+        SET @EMP_LABEL = ISNULL(@EMP_LABEL, N'EMP_ID=' + CAST(@EMP_ID AS NVARCHAR(20)));
+
         -- وضعیت مدیر از آخرین حکم تأییدشده و مؤثر همین ماه خوانده می‌شود؛ همان مقدار برای بیمه بیکاری و Snapshot استفاده می‌شود.
         SET @IS_MANAGER = 0;
         SELECT TOP 1 @IS_MANAGER=ISNULL(D.IS_MANAGER,0)
@@ -5719,7 +5727,7 @@ BEGIN
 
                 IF @DAILY_NOMINAL <= 0 OR @DAILY_OFFICIAL <= 0
                 BEGIN
-                    DECLARE @MissingDecreeRailMsg NVARCHAR(500)=N'ریل حقوق حکم ناقص است؛ EMP_ID='+CAST(@EMP_ID AS NVARCHAR(20))+N'، DEC_ID='+CAST(@DEC_ID AS NVARCHAR(20))+N'، بازه محاسباتی='+CAST(@DEC_ACTUAL_START AS NVARCHAR(20))+N' تا '+CAST(@DEC_ACTUAL_END AS NVARCHAR(20))+N'، BASE_SAL='+CAST(@DAILY_NOMINAL AS NVARCHAR(40))+N'، BASE_SAL_B='+CAST(@DAILY_OFFICIAL AS NVARCHAR(40))+N'.';
+                    DECLARE @MissingDecreeRailMsg NVARCHAR(1000)=N'حکم پرسنل '+@EMP_LABEL+N' ناقص است: مبلغ حقوق پایه در حکم ثبت نشده. لطفاً آیتم‌های «حقوق پایه اسمی (BASE_SAL)» و «حقوق پایه رسمی (BASE_SAL_B)» را در حکم پر و حکم را تأیید کنید. (DEC_ID='+CAST(@DEC_ID AS NVARCHAR(20))+N'، بازه محاسباتی='+CAST(@DEC_ACTUAL_START AS NVARCHAR(20))+N' تا '+CAST(@DEC_ACTUAL_END AS NVARCHAR(20))+N'، BASE_SAL='+CAST(@DAILY_NOMINAL AS NVARCHAR(40))+N'، BASE_SAL_B='+CAST(@DAILY_OFFICIAL AS NVARCHAR(40))+N')';
                     RAISERROR(@MissingDecreeRailMsg,16,1);
                     RETURN;
                 END;
@@ -5845,13 +5853,25 @@ BEGIN
 
         IF @HAS_NOMINAL_RATE=0
         BEGIN
-            DECLARE @MissingNominalMsg NVARCHAR(300) = N'ریل اسمی BASE_SAL برای پرسنل ' + CAST(@EMP_ID AS NVARCHAR(20)) + N' موجود نیست؛ محاسبه قانونی بیمه/مالیات متوقف شد.';
+            SET @DEC_ANY_COUNT = (SELECT COUNT(*) FROM PAY2_DECREE WHERE EMP_ID=@EMP_ID AND EFF_FROM<=@PER_END AND (EFF_TO IS NULL OR EFF_TO>=@PER_START));
+            SET @DEC_UNCONFIRMED_COUNT = (SELECT COUNT(*) FROM PAY2_DECREE WHERE EMP_ID=@EMP_ID AND ISNULL(IS_CONFIRMED,0)=0 AND EFF_FROM<=@PER_END AND (EFF_TO IS NULL OR EFF_TO>=@PER_START));
+            SET @DEC_CONFIRMED_NO_LINE_COUNT = (SELECT COUNT(*) FROM PAY2_DECREE D WHERE D.EMP_ID=@EMP_ID AND D.IS_CONFIRMED=1 AND D.EFF_FROM<=@PER_END AND (D.EFF_TO IS NULL OR D.EFF_TO>=@PER_START) AND NOT EXISTS(SELECT 1 FROM PAY2_DECREE_LINE DL WHERE DL.DEC_ID=D.DEC_ID));
+
+            SET @DEC_REASON =
+                CASE
+                    WHEN @DEC_UNCONFIRMED_COUNT > 0 THEN N'حکم این ماه ثبت شده ولی «تأیید» نشده است؛ حکم را تأیید کنید.'
+                    WHEN @DEC_CONFIRMED_NO_LINE_COUNT > 0 THEN N'حکم این ماه هیچ آیتم حقوقی ندارد؛ آیتم‌های حکم (مثلاً از قالب حکم) را ثبت کنید.'
+                    WHEN @DEC_ANY_COUNT = 0 THEN N'هیچ حکمی برای این ماه وجود ندارد (حکم قبلی تمام شده است)؛ حکم جدید ثبت و تأیید کنید.'
+                    ELSE N'حکم تأییدشده‌ای با بازه معتبر در این ماه یافت نشد؛ تاریخ شروع/پایان حکم را بررسی کنید.'
+                END;
+
+            DECLARE @MissingNominalMsg NVARCHAR(1000) = N'محاسبه انجام نشد: برای پرسنل ' + @EMP_LABEL + N' حکم تأییدشده با حقوق پایه اسمی (BASE_SAL) در این ماه وجود ندارد. ' + @DEC_REASON;
             RAISERROR(@MissingNominalMsg,16,1);
             RETURN;
         END;
         IF @HAS_OFFICIAL_RATE=0
         BEGIN
-            DECLARE @MissingOfficialMsg NVARCHAR(300)=N'ریل رسمی BASE_SAL_B برای پرسنل '+CAST(@EMP_ID AS NVARCHAR(20))+N' موجود یا غیرصفر نیست؛ محاسبه پرداخت متوقف شد.';
+            DECLARE @MissingOfficialMsg NVARCHAR(1000)=N'محاسبه انجام نشد: برای پرسنل '+@EMP_LABEL+N' حقوق پایه رسمی (BASE_SAL_B) در حکم این ماه ثبت نشده یا صفر است؛ حکم را کامل و تأیید کنید.';
             RAISERROR(@MissingOfficialMsg,16,1);
             RETURN;
         END;

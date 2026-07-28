@@ -371,7 +371,7 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 56; Baseknow.UUSER = "Mr-kazemi";
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr-pakzaban";
             Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
-            Baseknow.USERCOD = 5; Baseknow.UUSER = "كنترل";
+            //Baseknow.USERCOD = 5; Baseknow.UUSER = "كنترل";
             //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
             //Baseknow.USERCOD = 179; Baseknow.UUSER = "واحد تولید یزدویزیتوری";
 
