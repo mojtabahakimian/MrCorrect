@@ -371,7 +371,7 @@ namespace Functions
                             dataGrid.ScrollIntoView(item);
                         }
                     }
-              
+
                 }, DispatcherPriority.Background);
             }
             catch (Exception ex)

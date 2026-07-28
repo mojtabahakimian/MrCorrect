@@ -2198,7 +2198,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 new SearchableProperty { DisplayName = "شرح سند", PropertyPath = "SHARH_S", PropertyType = typeof(string) },
                 new SearchableProperty { DisplayName = "شماره بایگانی", PropertyPath = "BAYEG", PropertyType = typeof(double) },
                 new SearchableProperty { DisplayName = "نوع سند", PropertyPath = "NO_S", PropertyType = typeof(double) },
-                new SearchableProperty { DisplayName = "شماره مبنا", PropertyPath = "BASE", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "شماره مبنا", PropertyPath = "base", PropertyType = typeof(int) },
                 // Add other searchable properties
             };
         }

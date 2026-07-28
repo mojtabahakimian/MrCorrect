@@ -84,6 +84,12 @@
             </MenuItem>
 
             <Separator/>
+            <MenuItem Header="صورت حساب ارزی"
+                      Tag="CurrencyStatement"
+                      IsCheckable="True"
+                      IsChecked="False"
+                      Click="CurrencyStatement_Click" />
+            <Separator/>
             <!--<MenuItem Header="ریشه مانده نهایی" InputGestureText="1" Click="MenuItem_Click_2">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" FontSize="14" />
@@ -104,7 +110,7 @@
         <Border  	  Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
             <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
-                    <Label x:Name="Label_hesab" Content="نتیجه لیست دفتر تفضیلی" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Label x:Name="Label_hesab" Content="نتیجه لیست دفتر تفضیلی" Padding="21,10,10,10" Foreground="White" Margin="0,0,270,0"/>
                     <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
                         <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
                     </Button>
@@ -214,28 +220,45 @@
                         <Binding Path="DATE_S" StringFormat="####/##/##" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
+                <syncfusion:GridTextColumn x:Name="mAHDisplayColumn" HeaderText="ماه" MappingName="MONTH_S_DISPLAY" Width="120" />
                 <syncfusion:GridTextColumn x:Name="nUMBERColumn" HeaderText="حواله" MappingName="NUMBER" Width="100"  />
-                <syncfusion:GridTextColumn x:Name="sHARHColumn" HeaderText="شرح" MappingName="SHARH" Width="550" ColumnSizer="AutoLastColumnFill"/>
-                <syncfusion:GridTextColumn x:Name="bEDColumn" HeaderText="بدهکار" MappingName="BED" Width="150" >
+                <syncfusion:GridTextColumn x:Name="sHARHColumn" HeaderText="شرح" MappingName="SHARH" Width="450" MinimumWidth="280" ColumnSizer="AutoLastColumnFill"/>
+                <syncfusion:GridTextColumn x:Name="bEDColumn" HeaderText="بدهکار" MappingName="BED" Width="130" >
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="BED"  StringFormat="{}{0:#,0;#,0}" />
+                        <Binding Path="BED"  StringFormat="{}{0:#,0;#,0;}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-                <syncfusion:GridTextColumn x:Name="bESColumn" HeaderText="بستانکار" MappingName="BES" Width="150"  >
+                <syncfusion:GridTextColumn x:Name="bESColumn" HeaderText="بستانکار" MappingName="BES" Width="130"  >
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="BES"  StringFormat="{}{0:#,0;#,0}" />
+                        <Binding Path="BES"  StringFormat="{}{0:#,0;#,0;}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn x:Name="tshColumn" HeaderText="تش" MappingName="TASH" Width="60" TextAlignment="Center"/>
-                <syncfusion:GridTextColumn x:Name="mANDColumn" HeaderText="مانده" MappingName="MAND"  Width="150" >
+                <syncfusion:GridTextColumn x:Name="mANDColumn" HeaderText="مانده" MappingName="MAND"  Width="135" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MAND"  StringFormat="{}{0:#,0;#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn x:Name="aRZDColumn" HeaderText="نرخ ارز" MappingName="ARZD">
+                <syncfusion:GridTextColumn x:Name="aRZDColumn" HeaderText="نرخ ارز" MappingName="ARZD" Width="90" IsHidden="True">
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="ARZD"  StringFormat="{}{0:#,0;#,0}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+                <syncfusion:GridTextColumn x:Name="arzBedColumn" HeaderText="بدهکار ارزی" MappingName="ARZ_BED" Width="125" IsHidden="True">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="ARZ_BED" StringFormat="{}{0:#,0.##;#,0.##;}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+                <syncfusion:GridTextColumn x:Name="arzBesColumn" HeaderText="بستانکار ارزی" MappingName="ARZ_BES" Width="125" IsHidden="True">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="ARZ_BES" StringFormat="{}{0:#,0.##;#,0.##;}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+                <syncfusion:GridTextColumn x:Name="arzTashColumn" HeaderText="وضعیت ارزی" MappingName="ARZ_TASH" Width="80" TextAlignment="Center" IsHidden="True"/>
+                <syncfusion:GridTextColumn x:Name="arzMandColumn" HeaderText="مانده ارزی" MappingName="ARZ_MAND" Width="135" IsHidden="True">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="ARZ_MAND" StringFormat="{}{0:#,0.##;#,0.##}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn x:Name="hES_KColumn" HeaderText="حساب کل" MappingName="HES_K" IsHidden="True"  />
@@ -251,7 +274,6 @@
                 <syncfusion:GridTextColumn x:Name="hES_T4Column" HeaderText="تفضیلی 4" MappingName="HES_T4" IsHidden="True"  />
                 <syncfusion:GridTextColumn x:Name="tAFZILNColumn" HeaderText="نام حساب تفضیلی 2" MappingName="TAFZILN" IsHidden="True"  />
                 <syncfusion:GridTextColumn x:Name="hESColumn" HeaderText="حساب" MappingName="HES" IsHidden="True"  />
-                <syncfusion:GridTextColumn x:Name="mAHDisplayColumn" HeaderText="ماه" MappingName="MONTH_S_DISPLAY" Width="140" />
             </syncfusion:SfDataGrid.Columns>
 
 
