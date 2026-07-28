@@ -3860,6 +3860,12 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             {
                                                 _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
                                             }
+
+                                            bool mablechanged = false;
+                                            if (ENTERED_VALUE_ROW != null && double.TryParse(ENTERED_VALUE_ROW.ToString(), out double parsedValue))
+                                            {
+                                                mablechanged = WAS_ROW_ITEM?.MABL == parsedValue;
+                                            }
                                             FORCHEK fORCHEK4 = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(fORCHEK4);
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
@@ -4682,50 +4688,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
         //#سیو کردن بخش بالایی فرم
         //Used_SAVEBTN_Click
 
-        private void _____Out____CmdSaveHeader()
-        {
-            // جلوگیری از اجرا شدن مجدد در لحظه این رویداد:
-            //PGET_LST_SUB.PreviewGotKeyboardFocus -= PGET_LST_SUB_PreviewGotKeyboardFocus;
-            if (string.IsNullOrEmpty(ID.Text) || Convert.ToInt32(ID.Text) == 0)
-            {
-                //_newrecord = true;
-            }
-            else
-            {
-                //_newrecord = false;
-            }
-            if (NewRecord) //INSERT HEAD
-            {
-                var _id = CL_HESABDARI.GetNewIDD("ID", "PGET_HED", "MOLAH");
-                ID.Text = _id.ToString();
-                IDK.Text = _id.ToString();
-                dbms.DoExecuteSQL($@"INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, IDK)
-                                         VALUES({_id},
-                                         {DATE.Text.ToRawTarikh()}   ,
-                                         N'{MOLAH.Text.Trim()}' ,
-                                         {DEPATMAN.SelectedValue}   ,
-                                         {SHIFT.SelectedValue}   ,
-                                         N'{USER_NAME.Text}' ,
-                                         {KIND.SelectedValue}   ,
-                                         {IDK.Text})
-                                         ");
-
-            }
-            else //UPDATE HEAD
-            {
-                byte _SGN1_ = Convert.ToByte(SGN1.IsChecked);
-                byte _SGN2_ = Convert.ToByte(SGN2.IsChecked);
-                byte _SGN3_ = Convert.ToByte(SGN3.IsChecked);
-
-                dbms.DoExecuteSQL($@"UPDATE dbo.PGET_HED
-                                        SET DATE = {DATE.Text.ToRawTarikh()}, MOLAH = N'{MOLAH.Text.Trim()}', 
-                                        DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue},
-                                        KIND = {KIND.SelectedValue}, IDK = {IDK.Text}, SGN1 = {_SGN1_}, SGN2 = {_SGN2_}, SGN3 = {_SGN3_}
-                                        WHERE ID = {ID.Text}");
-            }
-            //PGET_LST_SUB.PreviewGotKeyboardFocus += PGET_LST_SUB_PreviewGotKeyboardFocus;
-        }
-
         private void NO_AM_AfterUpdate(int row_index)
         {
             switch (CURRENT_ITMES_ROW.NO_AM)
@@ -5072,39 +5034,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         public string DefaultReFocusColumn { get; set; } = "NO_AM";
         public bool IsDataGrid_IsFocused { get; private set; }
-
-        void ResotreLastFocusOnRow()
-        {
-            if (PGET_LST_SUB.Items.Count > 0)
-            {
-                PGET_LST_SUB.Focus();
-                DataGridRow row = PGET_LST_SUB.ItemContainerGenerator.ContainerFromIndex(CURRENT_ROW_INDEX) as DataGridRow;
-                if (row is null)
-                {
-                    object item = PGET_LST_SUB.Items[CURRENT_ROW_INDEX];
-                    PGET_LST_SUB.ScrollIntoView(PGET_LST_SUB.Items[CURRENT_ROW_INDEX]);
-                    row = (DataGridRow)PGET_LST_SUB.ItemContainerGenerator.ContainerFromIndex(CURRENT_ROW_INDEX);
-                    PGET_LST_SUB.SelectedItem = item;
-
-                    //ستون که میخوای باتوجه به ردیفی که خودم میدونم روش فوکوس کنم
-                    var col_index = PGET_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == DefaultReFocusColumn).DisplayIndex;
-                    DataGridCell cell = CL_LMethods.GetCell(PGET_LST_SUB, row, Convert.ToInt32(col_index));
-                    if (cell != null)
-                        cell.Focus();
-                }
-                else
-                {
-                    object item = PGET_LST_SUB.Items[CURRENT_ROW_INDEX];
-                    PGET_LST_SUB.SelectedItem = item;
-                    PGET_LST_SUB.ScrollIntoView(item);
-                    //ستون که میخوای باتوجه به ردیفی که خودم میدونم روش فوکوس کنم
-                    var col_index = PGET_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == DefaultReFocusColumn).DisplayIndex;
-                    DataGridCell cell = CL_LMethods.GetCell(PGET_LST_SUB, row, Convert.ToInt32(col_index));
-                    if (cell != null)
-                        cell.Focus();
-                }
-            }
-        }
 
         private void DELETE_FACTOR22_Click(object sender, RoutedEventArgs e)
         {
@@ -5538,10 +5467,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
         {
 
         }
-
-        int escapePressedCount = 0;
-
-
 
 
         private void MOLAH_TextChanged(object sender, TextChangedEventArgs e)
@@ -6179,92 +6104,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             ReGetMasterData();
         }
 
-        /// <summary>
-        /// 0 = First  |
-        /// 1 = Back ↑ |
-        /// 2 = Next ↓ |
-        /// 3 = Last   |
-        /// </summary>
-        /// <param name="dtg"></param>
-        /// <param name="wich"></param>
-        /// 
-        private void MovingDG(DataGrid DTG, byte? ArrowDirect, int? CustomRow = null)
-        {
-            if (DTG == null || DTG.Items.Count == 0) return;
-
-            int targetIndex = 0;
-
-            // Adjust for the extra empty row at the end
-            int adjustedItemCount = DTG.Items.Count - 1;
-
-            switch (ArrowDirect)
-            {
-                case 0: // First record.
-                    targetIndex = 0;
-                    break;
-                case 1: // Previous record.
-                    targetIndex = Math.Max(0, DTG.SelectedIndex - 1);
-                    break;
-                case 2: // Next record.
-                    targetIndex = Math.Min(adjustedItemCount - 1, DTG.SelectedIndex + 1);
-                    break;
-                case 3: // Last record.
-                    targetIndex = adjustedItemCount - 1;
-                    break;
-            }
-
-            if (CustomRow is not null) //Custom Row Index Called
-            {
-                if (CustomRow > 0)
-                {
-                    targetIndex = Convert.ToInt32(CustomRow - 1);
-                }
-            }
-
-            // Check if the targetIndex is within the valid range
-            if (targetIndex >= 0 && targetIndex < DTG.Items.Count)
-            {
-                try
-                {
-                    // Scroll the item into view and select it.
-                    DTG.SelectedIndex = targetIndex;
-                    DTG.ScrollIntoView(DTG.Items[targetIndex]);
-
-                    // Ensure selection and focus are appropriately set.
-                    DTG.Dispatcher.InvokeAsync(() =>
-                    {
-                        DTG.Focus();
-                        if ((DataGridRow)DTG.ItemContainerGenerator.ContainerFromIndex(targetIndex) is null)
-                        {
-                            DTG.UpdateLayout(); // Force layout update
-                        }
-                        DTG.SelectedItem = DTG.Items[targetIndex];
-
-                        var ColumnIndexy = 0;
-                        if (DTG.CurrentColumn is not null)
-                        {
-                            ColumnIndexy = DTG.CurrentColumn.DisplayIndex;
-                        }
-                        else
-                        {
-                            int? defaultcolumnindex = DTG.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible && !c.IsReadOnly)?.DisplayIndex;
-                            ColumnIndexy = Convert.ToInt32(defaultcolumnindex);
-                        }
-                        DTG.CurrentCell = new DataGridCellInfo(DTG.SelectedItem, DTG.Columns[ColumnIndexy]);
-
-                        // It may not be always necessary, or even desired, to force the DataGrid row to focus.
-                        // This logic attempts to focus the row only if the DataGrid is supposed to have focus.
-                        //if (DTG.IsKeyboardFocusWithin)
-                        //{
-                        //}
-                        DataGridRow dgRow = (DataGridRow)DTG.ItemContainerGenerator.ContainerFromIndex(targetIndex);
-                        dgRow?.Focus();
-                    }, System.Windows.Threading.DispatcherPriority.Background);
-                }
-                catch { }
-            }
-        }
-
         private void Clear_PGET_HED()
         {
             DATE.Text = null;
@@ -6431,8 +6270,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
             }
         }
-
-
 
         private void PGET_LST_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
