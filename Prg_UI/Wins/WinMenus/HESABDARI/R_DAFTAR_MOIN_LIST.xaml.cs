@@ -291,7 +291,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 _ => false
             };
 
-            CurrencyStatementMenuItem.IsChecked = showCurrencyColumns;
+            var contextMenu = TryFindResource("DataGridContextMenu") as ContextMenu;
+            var currencyMenuItem = contextMenu?.Items
+                .OfType<MenuItem>()
+                .FirstOrDefault(item => item.Tag?.ToString() == "CurrencyStatement");
+
+            if (currencyMenuItem != null)
+            {
+                currencyMenuItem.IsChecked = showCurrencyColumns;
+            }
+
             CurrencyStatementToggle.IsChecked = showCurrencyColumns;
             CurrencyStatementToggle.Content = showCurrencyColumns
                 ? "صورت حساب ارزی: فعال"

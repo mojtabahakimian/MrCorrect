@@ -84,8 +84,8 @@
             </MenuItem>
 
             <Separator/>
-            <MenuItem x:Name="CurrencyStatementMenuItem"
-                      Header="صورت حساب ارزی"
+            <MenuItem Header="صورت حساب ارزی"
+                      Tag="CurrencyStatement"
                       IsCheckable="True"
                       IsChecked="False"
                       Click="CurrencyStatement_Click" />
