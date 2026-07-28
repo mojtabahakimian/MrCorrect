@@ -285,6 +285,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             bool showCurrencyColumns = sender is MenuItem menuItem && menuItem.IsChecked;
 
+            
+
+            CurrencyStatementToggle.IsChecked = showCurrencyColumns;
+            CurrencyStatementToggle.Content = showCurrencyColumns
+                ? "صورت حساب ارزی: فعال"
+                : "نمایش صورت حساب ارزی";
+            aRZDColumn.IsHidden = !showCurrencyColumns;
             arzBedColumn.IsHidden = !showCurrencyColumns;
             arzBesColumn.IsHidden = !showCurrencyColumns;
             arzTashColumn.IsHidden = !showCurrencyColumns;

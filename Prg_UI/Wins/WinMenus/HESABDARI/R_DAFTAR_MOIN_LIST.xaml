@@ -119,6 +119,20 @@
                     <Button x:Name="Btn_Refresh" Click="Btn_Refresh_Click" Margin="0,10,100,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" ToolTip="بروزرسانی">
                         <materialDesign:PackIcon Kind="Refresh" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
                     </Button>
+                    <ToggleButton x:Name="CurrencyStatementToggle"
+                                  Content="نمایش صورت حساب ارزی"
+                                  Click="CurrencyStatement_Click"
+                                  IsChecked="False"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Margin="0,4,132,4"
+                                  Padding="10,2"
+                                  MinWidth="132"
+                                  Foreground="White"
+                                  Background="#26000000"
+                                  BorderBrush="#BFFFFFFF"
+                                  Cursor="Hand"
+                                  ToolTip="نمایش یا پنهان‌کردن نرخ و مبالغ ارزی" />
                 </Grid>
             </Border>
         </Border>
