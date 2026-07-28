@@ -264,6 +264,17 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 row.ARZ_TASH = runningBalance > 0d ? "بد" : runningBalance < 0d ? "بس" : "--";
             }
         }
+
+        private void CurrencyStatement_Click(object sender, RoutedEventArgs e)
+        {
+            bool showCurrencyColumns = sender is MenuItem menuItem && menuItem.IsChecked;
+
+            arzBedColumn.IsHidden = !showCurrencyColumns;
+            arzBesColumn.IsHidden = !showCurrencyColumns;
+            arzTashColumn.IsHidden = !showCurrencyColumns;
+            arzMandColumn.IsHidden = !showCurrencyColumns;
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
