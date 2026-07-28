@@ -237,12 +237,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         /// <summary>
         /// Calculates the foreign-currency columns in the same row order as the ledger.
         /// The legacy Access form divided each row's debit and credit by ARZD and then
-        /// accumulated their difference; invalid or zero rates are left blank so they
-        /// cannot corrupt the running foreign-currency balance.
+        /// accumulated their difference. Once a posting has no usable positive rate,
+        /// all following running balances remain blank because the cumulative balance
+        /// can no longer be determined reliably.
         /// </summary>
         private static void ApplyCurrencyBalances(IEnumerable<MOIN_CUSTOM> rows)
         {
             double runningBalance = 0d;
+            bool runningBalanceIsUnknown = false;
 
             foreach (var row in rows ?? Enumerable.Empty<MOIN_CUSTOM>())
             {
@@ -251,14 +253,28 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 row.ARZ_MAND = null;
                 row.ARZ_TASH = string.Empty;
 
-                if (!row.ARZD.HasValue || row.ARZD.Value == 0d ||
-                    double.IsNaN(row.ARZD.Value) || double.IsInfinity(row.ARZD.Value))
+                bool hasPosting = (row.BED ?? 0d) != 0d || (row.BES ?? 0d) != 0d;
+                bool hasInvalidRate = !row.ARZD.HasValue || row.ARZD.Value <= 0d ||
+                    double.IsNaN(row.ARZD.Value) || double.IsInfinity(row.ARZD.Value);
+
+                if (hasInvalidRate)
                 {
+                    if (hasPosting)
+                    {
+                        runningBalanceIsUnknown = true;
+                    }
+
                     continue;
                 }
 
                 row.ARZ_BED = (row.BED ?? 0d) / row.ARZD.Value;
                 row.ARZ_BES = (row.BES ?? 0d) / row.ARZD.Value;
+
+                if (runningBalanceIsUnknown)
+                {
+                    continue;
+                }
+
                 runningBalance += row.ARZ_BED.Value - row.ARZ_BES.Value;
                 row.ARZ_MAND = Math.Abs(runningBalance);
                 row.ARZ_TASH = runningBalance > 0d ? "بد" : runningBalance < 0d ? "بس" : "--";
