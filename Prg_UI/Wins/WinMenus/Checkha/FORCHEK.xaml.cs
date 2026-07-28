@@ -90,6 +90,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public string ServerFilter { get; set; }
         public int INDEX_DG { get; set; }
         public bool IsReadOnlyMode { get; set; } = false;
+        private string? _lastSelectedSerial;
 
         public FORCHEK(Visual thewin, string _filter, int _current_index = -1, bool isreadonly = false)
         {
@@ -219,6 +220,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 N_SERI.Focus();
             }
+
+            _lastSelectedSerial = N_SERI.SelectedValue?.ToString();
         }
 
         private bool CanShowModalMessage()
@@ -252,10 +255,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            if (!IsNull(N_SERI.SelectedValue?.ToString()))
+            var selectedSerial = N_SERI.SelectedValue.ToStringNullSafe();
+            if (string.Equals(selectedSerial, _lastSelectedSerial, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _lastSelectedSerial = selectedSerial;
+            if (!string.IsNullOrEmpty(selectedSerial))
             {
                 if (!CanShowModalMessage()) { return; }
-                FOR_CHK_SERCH fOR_CHK_SERCH = new FOR_CHK_SERCH("1", "N_SERI = " + N_SERI.SelectedValue.ToStringNullSafe(), I_AM_FORCHECK);
+                FOR_CHK_SERCH fOR_CHK_SERCH = new FOR_CHK_SERCH("1", "N_SERI = " + selectedSerial, I_AM_FORCHECK);
                 fOR_CHK_SERCH.ShowDialog();
             }
 
