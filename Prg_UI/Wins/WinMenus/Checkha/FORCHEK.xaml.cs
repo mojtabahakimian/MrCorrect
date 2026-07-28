@@ -139,6 +139,24 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
         }
 
+        private void SelectSerial(PAY_GETD check)
+        {
+            if (check?.N_SERI == null)
+            {
+                return;
+            }
+
+            var serialItems = (N_SERI.ItemsSource as IEnumerable<PAY_GETD>)?.ToList() ?? new List<PAY_GETD>();
+            if (!serialItems.Any(item => item?.N_SERI == check.N_SERI))
+            {
+                serialItems.Add(new PAY_GETD { N_SERI = check.N_SERI });
+                N_SERI.ItemsSource = serialItems;
+            }
+
+            N_SERI.SelectedValue = check.N_SERI;
+            N_SERI.Text = check.N_SERI.ToString();
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -165,23 +183,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                this.RADIF.Text = rst.FirstOrDefault().RADIF.ToString();
-                this.N_SERI.SelectedValue = rst.FirstOrDefault().N_SERI;
-                N_SERI.Items.Refresh();
+                var selectedCheck = rst.First();
+                this.RADIF.Text = selectedCheck.RADIF.ToString();
+                SelectSerial(selectedCheck);
 
-                if (N_SERI.SelectedValue == null)
-                {
-                    var Nseri = rst.FirstOrDefault().N_SERI;
-
-                    if (!((List<PAY_GETD>)N_SERI.ItemsSource).Any(item => item?.N_SERI == Nseri))
-                    {
-                        ((List<PAY_GETD>)N_SERI.ItemsSource).Add(new PAY_GETD { N_SERI = Nseri });
-                    }
-                    N_SERI.SelectedValue = Nseri; //مشتری
-                    N_SERI.Items.Refresh();
-                }
-
-                this.DATE_S.Text = rst.FirstOrDefault().DATE_S.ToString();
+                this.DATE_S.Text = selectedCheck.DATE_S.ToString();
                 this.SANDUGH.SelectedValue = rst.FirstOrDefault().SANDUGH;
                 this.SHOBEH.Text = rst.FirstOrDefault().SHOBEH;
                 this.DATE.Text = rst.FirstOrDefault().DATE.ToString();
