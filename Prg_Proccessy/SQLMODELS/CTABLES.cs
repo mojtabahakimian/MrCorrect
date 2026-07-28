@@ -1381,6 +1381,10 @@ namespace Prg_Proccessy.SQLMODELS
             public Nullable<double> NUMBER { get; set; }
             public Nullable<double> TAG { get; set; }
             public Nullable<double> ARZD { get; set; }
+            public Nullable<double> ARZ_BED { get; set; }
+            public Nullable<double> ARZ_BES { get; set; }
+            public Nullable<double> ARZ_MAND { get; set; }
+            public string ARZ_TASH { get; set; }
             public Nullable<int> HES_T3 { get; set; }
             public Nullable<int> HES_T4 { get; set; }
             public string TAFZILN { get; set; }

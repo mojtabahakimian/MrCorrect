@@ -108,6 +108,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     var sortPass = string.IsNullOrWhiteSpace(_sortExpr) ? "DATE_S, BED DESC" : _sortExpr;
                     var rst = dbms.DoGetStoreProcedureSQL<MOIN_CUSTOM>("usp_TafzilLedger", new { FromDate = _fromDate.Value, ToDate = _toDate.Value, TafzilCode = _tafzilCode, SortExpr = sortPass }).ToList();
 
+                    ApplyCurrencyBalances(rst);
+
                     DAFTAR_DATA.Clear();
                     foreach (var item in rst)
                     {
@@ -179,7 +181,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             if (masterHead != null)
             {
-                foreach (var item in masterHead)
+                var ledgerRows = masterHead.ToList();
+                ApplyCurrencyBalances(ledgerRows);
+
+                foreach (var item in ledgerRows)
                 {
                     DAFTAR_DATA.Add(item);
                 }
@@ -228,6 +233,48 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             ProcLoader.Stop(Prc);
         }
+
+        /// <summary>
+        /// Calculates the foreign-currency columns in the same row order as the ledger.
+        /// The legacy Access form divided each row's debit and credit by ARZD and then
+        /// accumulated their difference; invalid or zero rates are left blank so they
+        /// cannot corrupt the running foreign-currency balance.
+        /// </summary>
+        private static void ApplyCurrencyBalances(IEnumerable<MOIN_CUSTOM> rows)
+        {
+            double runningBalance = 0d;
+
+            foreach (var row in rows ?? Enumerable.Empty<MOIN_CUSTOM>())
+            {
+                row.ARZ_BED = null;
+                row.ARZ_BES = null;
+                row.ARZ_MAND = null;
+                row.ARZ_TASH = string.Empty;
+
+                if (!row.ARZD.HasValue || row.ARZD.Value == 0d ||
+                    double.IsNaN(row.ARZD.Value) || double.IsInfinity(row.ARZD.Value))
+                {
+                    continue;
+                }
+
+                row.ARZ_BED = (row.BED ?? 0d) / row.ARZD.Value;
+                row.ARZ_BES = (row.BES ?? 0d) / row.ARZD.Value;
+                runningBalance += row.ARZ_BED.Value - row.ARZ_BES.Value;
+                row.ARZ_MAND = Math.Abs(runningBalance);
+                row.ARZ_TASH = runningBalance > 0d ? "بد" : runningBalance < 0d ? "بس" : "--";
+            }
+        }
+
+        private void CurrencyStatement_Click(object sender, RoutedEventArgs e)
+        {
+            bool showCurrencyColumns = sender is MenuItem menuItem && menuItem.IsChecked;
+
+            arzBedColumn.IsHidden = !showCurrencyColumns;
+            arzBesColumn.IsHidden = !showCurrencyColumns;
+            arzTashColumn.IsHidden = !showCurrencyColumns;
+            arzMandColumn.IsHidden = !showCurrencyColumns;
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
