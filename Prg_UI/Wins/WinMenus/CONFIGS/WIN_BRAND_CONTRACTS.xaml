@@ -260,11 +260,10 @@
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
 
-                                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                                            <Button Content="اتصال رسید تولید جدید (TAG = 9)" Click="Btn_LinkProduction_Click" Background="#10B981" Foreground="White" BorderBrush="{x:Null}" Margin="0,0,10,0"/>
-                                            <Button Content="اتصال حواله فروش جدید (TAG = 2)" Click="Btn_LinkSales_Click" Background="#3B82F6" Foreground="White" BorderBrush="{x:Null}" Margin="0,0,10,0"/>
-                                            <Button Content="قطع اتصال سند" Click="Btn_UnlinkDocument_Click" Background="Transparent" Foreground="#EF4444" BorderBrush="#EF4444"/>
-                                        </StackPanel>
+                                        <!-- Informative Label about inheritance (No more manual buttons!) -->
+                                        <Border Grid.Row="0" Background="#EFF6FF" CornerRadius="5" Padding="10" Margin="0,0,0,10" BorderBrush="#BFDBFE" BorderThickness="1">
+                                            <TextBlock Text="💡 توجه: کلیه اسناد رسید تولید (TAG = 9) و حواله‌های فروش (TAG = 2) بر اساس قانون وراثت داده‌ها (تطابق خودکار مشتری و کالا در حین ثبت و تبدیل اسناد) به صورت کاملاً اتوماتیک و هوشمند به این قرارداد متصل می‌گردند." FontSize="11.5" Foreground="#1E40AF" FontWeight="Bold"/>
+                                        </Border>
 
                                         <!-- Linked Docs DataGrid styled exactly like Pre-invoice Grid -->
                                         <DataGrid x:Name="DG_LinkedDocs" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"

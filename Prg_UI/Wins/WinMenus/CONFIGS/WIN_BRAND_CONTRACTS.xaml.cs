@@ -155,8 +155,9 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 var progressItems = dbms.DoGetDataSQL<BrandContractProgressModel>(progressQuery, new { ContractID = contract.ContractID }).ToList();
 
                 // Compute dependent UI variables per pattern row
-                foreach (var pi in progressItems)
+                for (int i = 0; i < progressItems.Count; i++)
                 {
+                    var pi = progressItems[i];
                     pi.NotProducedQty = Math.Max(0, pi.ContractedQty - pi.ProducedQty);
                     pi.InWarehouseQty = Math.Max(0, pi.ProducedQty - pi.SoldQty);
                 }
@@ -266,95 +267,9 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             }
         }
 
-        private void Btn_LinkProduction_Click(object sender, RoutedEventArgs e)
-        {
-            LinkDocuments(9);
-        }
-
-        private void Btn_LinkSales_Click(object sender, RoutedEventArgs e)
-        {
-            LinkDocuments(2);
-        }
-
-        private void Btn_UnlinkDocument_Click(object sender, RoutedEventArgs e)
-        {
-            if (DG_Contracts.SelectedItem is BrandContractModel selectedContract)
-            {
-                if (DG_LinkedDocs.SelectedItem is LinkedDocLineModel selectedDoc)
-                {
-                    if (MessageBox.Show($"آیا از قطع اتصال سند شماره {selectedDoc.NUMBER} به این قرارداد مطمئن هستید؟", "قطع اتصال سند", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                    {
-                        try
-                        {
-                            // Unlink all lines of this document that were linked to this contract
-                            dbms.DoExecuteSQL(@"
-                                UPDATE dbo.INVO_LST
-                                SET ContractID = NULL
-                                WHERE NUMBER = @Number AND TAG = @Tag AND ContractID = @ContractID",
-                                new { Number = selectedDoc.NUMBER, Tag = selectedDoc.TAG, ContractID = selectedContract.ContractID });
-
-                            LoadContractDetails(selectedContract);
-                            ShowNotification("اتصال سند انتخاب شده به قرارداد قطع شد.", false);
-                        }
-                        catch (Exception ex)
-                        {
-                            ShowNotification("خطا در قطع اتصال سند: " + ex.Message, true);
-                        }
-                    }
-                }
-                else
-                {
-                    ShowNotification("لطفاً ابتدا سند مورد نظر را جهت قطع اتصال انتخاب کنید.", true);
-                }
-            }
-            else
-            {
-                ShowNotification("لطفاً ابتدا قرارداد هدف را انتخاب کنید.", true);
-            }
-        }
-
         private void Btn_PrintReport_Click(object sender, RoutedEventArgs e)
         {
             ShowNotification("چاپ گزارش برای قراردادهای آرمان سرام آماده سازی شد.", false);
-        }
-
-        private void LinkDocuments(int tag)
-        {
-            if (DG_Contracts.SelectedItem is BrandContractModel selected)
-            {
-                var selectWin = new WIN_SELECT_DOCUMENT(selected.CustomerCode, tag);
-                if (selectWin.ShowDialog() == true && selectWin.SelectedLineIds.Count > 0)
-                {
-                    try
-                    {
-                        // Perform the updates atomically. Add safety check: "AND ContractID IS NULL" to guarantee unlinked status in real-time
-                        foreach (var id in selectWin.SelectedLineIds)
-                        {
-                            int affected = dbms.DoExecuteSQL(@"
-                                UPDATE dbo.INVO_LST
-                                SET ContractID = @ContractID
-                                WHERE id = @Id AND ContractID IS NULL",
-                                new { ContractID = selected.ContractID, Id = id }) ?? 0;
-
-                            if (affected == 0)
-                            {
-                                throw new InvalidOperationException("خطای همزمانی: یکی از اقلام کالا قبلاً توسط کاربر دیگری به قرارداد دیگری متصل شده است!");
-                            }
-                        }
-
-                        LoadContractDetails(selected);
-                        ShowNotification("اقلام سند انتخاب شده با موفقیت به قرارداد متصل شدند.", false);
-                    }
-                    catch (Exception ex)
-                    {
-                        ShowNotification(ex.Message, true);
-                    }
-                }
-            }
-            else
-            {
-                ShowNotification("لطفاً ابتدا قرارداد هدف را از جدول بالا انتخاب کنید.", true);
-            }
         }
 
         private void ShowNotification(string message, bool isError)

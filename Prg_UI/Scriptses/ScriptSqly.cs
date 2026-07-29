@@ -66,6 +66,37 @@ namespace Prg_UI.Scriptses
                         BEGIN
                             ALTER TABLE dbo.INVO_LST ADD ContractID INT NULL;
                         END");
+
+                    db.Execute(@"
+                        IF OBJECT_ID('dbo.TRG_INVO_LST_AutoContractID', 'TR') IS NOT NULL
+                        BEGIN
+                            DROP TRIGGER dbo.TRG_INVO_LST_AutoContractID;
+                        END");
+
+                    db.Execute(@"
+                        CREATE TRIGGER dbo.TRG_INVO_LST_AutoContractID
+                        ON dbo.INVO_LST
+                        AFTER INSERT, UPDATE
+                        AS
+                        BEGIN
+                            SET NOCOUNT ON;
+
+                            IF UPDATE(CODE) OR UPDATE(ContractID)
+                            BEGIN
+                                UPDATE il
+                                SET il.ContractID = (
+                                    SELECT TOP 1 bc.ContractID
+                                    FROM dbo.BrandContracts bc
+                                    INNER JOIN dbo.BrandContractItems bci ON bc.ContractID = bci.ContractID
+                                    INNER JOIN dbo.HEAD_LST hl ON il.NUMBER = hl.NUMBER AND il.TAG = hl.TAG
+                                    WHERE bc.CustomerCode = hl.CUST_NO AND bci.ProductCode = il.CODE
+                                    ORDER BY bc.ContractID DESC
+                                )
+                                FROM dbo.INVO_LST il
+                                INNER JOIN inserted i ON il.id = i.id
+                                WHERE il.ContractID IS NULL;
+                            END
+                        END");
                 }
                 catch (Exception ex)
                 {
