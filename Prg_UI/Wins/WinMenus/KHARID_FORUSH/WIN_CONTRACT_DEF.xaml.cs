@@ -1,6 +1,7 @@
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Wins.WinOther;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 {
@@ -32,10 +34,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             try
             {
                 ContractDate.Text = FormatDate(Tarikh.FullCurrentDate);
-                CUST_NO.ItemsSource = dbms.DoGetDataSQL<CustomerLookup>(
-                    "SELECT hes, DisplayName = CONCAT(hes, N' - ', COALESCE(NAME, N'')) FROM dbo.CUST_HESAB ORDER BY NAME, hes").ToList();
-                Col_Kala.ItemsSource = dbms.DoGetDataSQL<ProductLookup>(
-                    "SELECT CODE, DisplayName = CONCAT(CODE, N' - ', COALESCE(NAME, N'')) FROM dbo.STUF_DEF ORDER BY NAME, CODE").ToList();
+                CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
                 LoadContracts();
                 BeginNewContract();
             }
@@ -88,17 +87,91 @@ ORDER BY ContractDate DESC, ContractID DESC").ToList();
                 ContractDate.Text = FormatDate(header.ContractDate.ToString(CultureInfo.InvariantCulture));
                 BrandName.Text = header.BrandName;
                 MOLAH.Text = header.MOLAH ?? string.Empty;
-                CUST_NO.SelectedValue = header.CUST_NO;
+                SelectCustomer(header.CUST_NO);
                 IsClosed.IsChecked = header.IsClosed;
                 ContractDetails.Clear();
                 foreach (var detail in dbms.DoGetDataSQL<ContractDtlModel>(
-                    "SELECT ID, CODE, Qty FROM dbo.CONTRACT_DTL WHERE ContractID = @ContractID ORDER BY ID",
+                    @"SELECT D.ID, D.CODE, D.Qty, NAME_CODE = COALESCE(S.NAME, N'')
+FROM dbo.CONTRACT_DTL AS D
+LEFT JOIN dbo.STUF_DEF AS S ON S.CODE = D.CODE
+WHERE D.ContractID = @ContractID
+ORDER BY D.ID",
                     new { header.ContractID }))
                     ContractDetails.Add(detail);
                 CalculateTotal();
                 LBL_STATUS.Text = $"ویرایش قرارداد {header.ContractNo}";
             }
             finally { isLoading = false; }
+        }
+
+        private void SelectCustomer(string customerCode)
+        {
+            if (string.IsNullOrWhiteSpace(customerCode)) return;
+            var customer = dbms.DoGetDataSQL<Custom_CUST_HESAB>(
+                "SELECT TOP (1) hes, NAME = COALESCE(NAME, N'') FROM dbo.CUST_HESAB WHERE hes = @hes",
+                new { hes = customerCode }).FirstOrDefault();
+            if (customer is null) return;
+            AddCustomerToLookup(customer);
+            CUST_NO.SelectedValue = customer.hes;
+            CUST_NO.Items.Refresh();
+        }
+
+        private void AddCustomerToLookup(Custom_CUST_HESAB customer)
+        {
+            if (CUST_NO.ItemsSource is not List<Custom_CUST_HESAB> customers)
+            {
+                customers = new List<Custom_CUST_HESAB>();
+                CUST_NO.ItemsSource = customers;
+            }
+            if (!customers.Any(x => string.Equals(x.hes, customer.hes, StringComparison.OrdinalIgnoreCase)))
+                customers.Add(customer);
+        }
+
+        private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (CUST_NO.IsEditable && e.OriginalSource is not TextBox) return;
+            if (CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO) is not TextBox editor) return;
+            string enteredValue = editor.Text.Trim();
+            if (CUST_NO.SelectedItem is Custom_CUST_HESAB selected && selected.NAME == enteredValue) return;
+
+            try
+            {
+                Custom_CUST_HESAB? customer = null;
+                if (enteredValue is "+" or "++")
+                {
+                    var search = new ComboSearch("HEAD_LST_PISHFROOSH2", this);
+                    search.ShowDialog();
+                    customer = search.SELECTED_HESAB;
+                }
+                else if (int.TryParse(new string(enteredValue.Select(ToEnglishDigit).ToArray()), out int detailNumber))
+                {
+                    customer = dbms.DoGetDataSQL<Custom_CUST_HESAB>(@"
+SELECT TOP (1) C.hes, NAME = COALESCE(C.NAME, N'')
+FROM dbo.TDETA_HES AS T
+INNER JOIN dbo.CUST_HESAB AS C
+    ON C.hes = CONCAT(T.N_KOL, N'-', T.NUMBER, N'-', T.TNUMBER)
+WHERE T.N_KOL = @N_KOL AND T.NUMBER = 1 AND T.TNUMBER = @TNUMBER",
+                        new { N_KOL = Baseknow.BEDEHKAR, TNUMBER = detailNumber }).FirstOrDefault();
+                }
+                else if (!string.IsNullOrWhiteSpace(enteredValue))
+                {
+                    customer = dbms.DoGetDataSQL<Custom_CUST_HESAB>(
+                        "SELECT TOP (1) hes, NAME = COALESCE(NAME, N'') FROM dbo.CUST_HESAB WHERE hes = @hes",
+                        new { hes = enteredValue }).FirstOrDefault();
+                }
+
+                if (customer is null || string.IsNullOrWhiteSpace(customer.hes))
+                {
+                    CUST_NO.SelectedValue = null;
+                    CUST_NO.Text = string.Empty;
+                    return;
+                }
+
+                AddCustomerToLookup(customer);
+                CUST_NO.SelectedValue = customer.hes;
+                CUST_NO.Items.Refresh();
+            }
+            catch (Exception ex) { ShowError("انتخاب مشتری انجام نشد.", ex); }
         }
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
@@ -285,7 +358,51 @@ COMMIT TRANSACTION;";
         }
 
         private void CalculateTotal() => LBL_TotalQty.Text = $"جمع متراژ: {ContractDetails.Sum(x => x.Qty):N4} متر مربع";
-        private void DG_DTL_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e) => Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
+        private void DG_DTL_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.Column.SortMemberPath == nameof(ContractDtlModel.NAME_CODE) &&
+                e.Row.Item is ContractDtlModel detail && e.EditingElement is TextBox editor)
+            {
+                string enteredValue = editor.Text.Trim();
+                try
+                {
+                    ProductLookup? product = null;
+                    if (enteredValue is "+" or "++")
+                    {
+                        var search = new SERCHK(this);
+                        search.ShowDialog();
+                        if (search.SELECTED_KALA is not null)
+                            product = new ProductLookup { CODE = search.SELECTED_KALA.CODE ?? string.Empty, NAME = search.SELECTED_KALA.NAME_CODE ?? string.Empty };
+                    }
+                    else if (!string.IsNullOrWhiteSpace(enteredValue))
+                    {
+                        product = dbms.DoGetDataSQL<ProductLookup>(@"
+SELECT TOP (1) CODE, NAME = COALESCE(NAME, N'')
+FROM dbo.STUF_DEF
+WHERE CODE = @Value OR NAME = @Value
+ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
+                            new { Value = enteredValue }).FirstOrDefault();
+                    }
+
+                    if (product is null || string.IsNullOrWhiteSpace(product.CODE))
+                    {
+                        detail.CODE = string.Empty;
+                        detail.NAME_CODE = string.Empty;
+                        editor.Text = string.Empty;
+                        if (!string.IsNullOrWhiteSpace(enteredValue))
+                            ValidationError("کالای واردشده پیدا نشد؛ برای جست‌وجوی کالا علامت + را وارد کنید.");
+                    }
+                    else
+                    {
+                        detail.CODE = product.CODE;
+                        detail.NAME_CODE = product.NAME;
+                        editor.Text = product.NAME;
+                    }
+                }
+                catch (Exception ex) { ShowError("انتخاب کالا انجام نشد.", ex); }
+            }
+            Dispatcher.BeginInvoke(new Action(() => { DG_DTL.Items.Refresh(); CalculateTotal(); }), DispatcherPriority.Background);
+        }
         private void DG_DTL_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e) => Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
         private void DG_CONTRACTS_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (!isLoading && DG_CONTRACTS.SelectedItem is ContractHeaderModel h) LoadContract(h); }
         private void BTN_NEW_Click(object sender, RoutedEventArgs e) => BeginNewContract();
@@ -302,9 +419,8 @@ COMMIT TRANSACTION;";
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
         private void ShowError(string message, Exception ex) { LBL_STATUS.Text = message; MessageBox.Show($"{message}\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-        public sealed class ContractDtlModel { public long ID { get; set; } public string CODE { get; set; } = string.Empty; public decimal Qty { get; set; } }
+        public sealed class ContractDtlModel { public long ID { get; set; } public string CODE { get; set; } = string.Empty; public string NAME_CODE { get; set; } = string.Empty; public decimal Qty { get; set; } }
         private sealed class ContractHeaderModel { public int ContractID { get; set; } public string ContractNo { get; set; } = string.Empty; public long ContractDate { get; set; } public string CUST_NO { get; set; } = string.Empty; public string BrandName { get; set; } = string.Empty; public decimal TotalQty { get; set; } public string? MOLAH { get; set; } public bool IsClosed { get; set; } }
-        private sealed class CustomerLookup { public string hes { get; set; } = string.Empty; public string DisplayName { get; set; } = string.Empty; }
-        private sealed class ProductLookup { public string CODE { get; set; } = string.Empty; public string DisplayName { get; set; } = string.Empty; }
+        private sealed class ProductLookup { public string CODE { get; set; } = string.Empty; public string NAME { get; set; } = string.Empty; }
     }
 }

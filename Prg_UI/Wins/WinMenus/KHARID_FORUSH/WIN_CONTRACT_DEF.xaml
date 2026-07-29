@@ -102,8 +102,17 @@
 
                                 <Label Grid.Row="1" Content="مشتری:" VerticalAlignment="Center"/>
                                 <ComboBox x:Name="CUST_NO" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Height="30"
-                                          Style="{StaticResource FuzzyOutComboBox}" IsEditable="True" IsTextSearchEnabled="True"
-                                          DisplayMemberPath="DisplayName" SelectedValuePath="hes"/>
+                                          Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"
+                                          IsSynchronizedWithCurrentItem="True" IsEditable="True" IsTextSearchEnabled="True"
+                                          Background="{x:Null}" BorderThickness="1" DisplayMemberPath="NAME" SelectedValuePath="hes"
+                                          PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus">
+                                    <ComboBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True"
+                                                                    VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                        </ItemsPanelTemplate>
+                                    </ComboBox.ItemsPanel>
+                                </ComboBox>
                                 <Label Grid.Row="1" Grid.Column="3" Content="ملاحظات:" VerticalAlignment="Center"/>
                                 <TextBox x:Name="MOLAH" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2" Margin="5" Height="30" MaxLength="500" Style="{StaticResource FuzzyOut}"/>
                                 <CheckBox x:Name="IsClosed" Grid.Row="1" Grid.Column="6" Content="مختومه" Margin="10,5" VerticalAlignment="Center"/>
@@ -122,9 +131,26 @@
                                           HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                                           GridLinesVisibility="All" Style="{StaticResource MaterialDesignDataGrid}">
                                     <DataGrid.Columns>
-                                        <DataGridComboBoxColumn x:Name="Col_Kala" Header="طرح / کالا" Width="*"
-                                            SelectedValueBinding="{Binding CODE, UpdateSourceTrigger=PropertyChanged}"
-                                            SelectedValuePath="CODE" DisplayMemberPath="DisplayName"/>
+                                        <DataGridTextColumn x:Name="CODE_COLUMN" Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}"
+                                                            Header="کد کالا" Width="Auto" MinWidth="50" IsReadOnly="True" Visibility="Hidden"/>
+                                        <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
+                                            <DataGridTextColumn.CellStyle>
+                                                <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                                    <Setter Property="Focusable" Value="False"/>
+                                                    <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                                    <Setter Property="IsTabStop" Value="False"/>
+                                                </Style>
+                                            </DataGridTextColumn.CellStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn x:Name="NAME_CODE_COLUMN" Binding="{Binding NAME_CODE, UpdateSourceTrigger=LostFocus}"
+                                                            Header="نام کالا" Visibility="Visible" Width="*" MinWidth="180">
+                                            <DataGridTextColumn.EditingElementStyle>
+                                                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                                            </DataGridTextColumn.EditingElementStyle>
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="{x:Type TextBlock}"/>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
                                         <DataGridTextColumn Header="متراژ (متر مربع)" Width="180"
                                             Binding="{Binding Qty, UpdateSourceTrigger=LostFocus, StringFormat=N4}"/>
                                     </DataGrid.Columns>
