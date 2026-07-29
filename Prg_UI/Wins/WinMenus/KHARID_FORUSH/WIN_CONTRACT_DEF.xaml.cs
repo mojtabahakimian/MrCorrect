@@ -5,8 +5,10 @@ using Prg_UI.Wins.WinOther;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -401,7 +403,7 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
                 }
                 catch (Exception ex) { ShowError("انتخاب کالا انجام نشد.", ex); }
             }
-            Dispatcher.BeginInvoke(new Action(() => { DG_DTL.Items.Refresh(); CalculateTotal(); }), DispatcherPriority.Background);
+            Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
         }
         private void DG_DTL_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e) => Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
         private void DG_CONTRACTS_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (!isLoading && DG_CONTRACTS.SelectedItem is ContractHeaderModel h) LoadContract(h); }
@@ -419,7 +421,27 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
         private void ShowError(string message, Exception ex) { LBL_STATUS.Text = message; MessageBox.Show($"{message}\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error); }
 
-        public sealed class ContractDtlModel { public long ID { get; set; } public string CODE { get; set; } = string.Empty; public string NAME_CODE { get; set; } = string.Empty; public decimal Qty { get; set; } }
+        public sealed class ContractDtlModel : INotifyPropertyChanged
+        {
+            private long id;
+            private string code = string.Empty;
+            private string nameCode = string.Empty;
+            private decimal qty;
+
+            public long ID { get => id; set => SetField(ref id, value); }
+            public string CODE { get => code; set => SetField(ref code, value ?? string.Empty); }
+            public string NAME_CODE { get => nameCode; set => SetField(ref nameCode, value ?? string.Empty); }
+            public decimal Qty { get => qty; set => SetField(ref qty, value); }
+
+            public event PropertyChangedEventHandler? PropertyChanged;
+
+            private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+            {
+                if (EqualityComparer<T>.Default.Equals(field, value)) return;
+                field = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
         private sealed class ContractHeaderModel { public int ContractID { get; set; } public string ContractNo { get; set; } = string.Empty; public long ContractDate { get; set; } public string CUST_NO { get; set; } = string.Empty; public string BrandName { get; set; } = string.Empty; public decimal TotalQty { get; set; } public string? MOLAH { get; set; } public bool IsClosed { get; set; } }
         private sealed class ProductLookup { public string CODE { get; set; } = string.Empty; public string NAME { get; set; } = string.Empty; }
     }
