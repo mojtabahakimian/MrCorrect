@@ -141,8 +141,11 @@ WITH Movements AS
     SELECT
         I.ContractID,
         I.CODE,
-        ProducedQty = SUM(CASE WHEN F.FlowType = 1 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(NULLIF(I.MEGHk, 0), I.MEGH, 0)) ELSE 0 END),
-        SoldQty = SUM(CASE WHEN F.FlowType = 2 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(NULLIF(I.MEGHk, 0), I.MEGH, 0)) ELSE 0 END)
+        -- MEGHk is the canonical stock quantity used by InventoryManager.  Only
+        -- legacy rows where it is NULL fall back to MEGH; an explicit zero must
+        -- stay zero and must not accidentally become MEGH.
+        ProducedQty = SUM(CASE WHEN F.FlowType = 1 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(I.MEGHk, I.MEGH, 0)) ELSE 0 END),
+        SoldQty = SUM(CASE WHEN F.FlowType = 2 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(I.MEGHk, I.MEGH, 0)) ELSE 0 END)
     FROM dbo.INVO_LST AS I
     INNER JOIN dbo.CONTRACT_FLOW_TAG AS F ON F.TAG = I.TAG
     WHERE I.ContractID IS NOT NULL

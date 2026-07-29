@@ -1,7 +1,9 @@
+using Functions;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -13,6 +15,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
     public partial class WIN_RPT_CONTRACT_STATUS : Window
     {
         private readonly CL_CCNNMANAGER dbms = new();
+        private readonly InventoryManager inventoryManager = new();
 
         public WIN_RPT_CONTRACT_STATUS() => InitializeComponent();
 
@@ -60,12 +63,82 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
                 OpenOnly = CHK_OPEN_ONLY.IsChecked == true
             }).ToList();
 
+            bool inventoryComplete = LoadActualInventory(contractID, data);
             DG_REPORT.ItemsSource = data;
-            TXT_CONTRACTED.Text = $"قرارداد: {data.Sum(x => x.ContractedQty):N4}";
-            TXT_PRODUCED.Text = $"تولید: {data.Sum(x => x.ProducedQty):N4}";
-            TXT_REMAIN.Text = $"مانده تولید: {data.Sum(x => x.RemainToProduce):N4}";
-            TXT_SOLD.Text = $"فروش خالص: {data.Sum(x => x.SoldQty):N4}";
-            TXT_STOCK.Text = $"مانده تولید قرارداد: {data.Sum(x => x.RemainInWarehouse):N4}";
+            UpdateSummary(data, contractID, inventoryComplete);
+        }
+
+        private bool LoadActualInventory(int? contractID, List<ContractStatusModel> data)
+        {
+            foreach (var row in data) row.ActualInventoryQty = null;
+            if (!contractID.HasValue || data.Count == 0) return false;
+
+            var inventoryItems = dbms.DoGetDataSQL<ContractInventoryItem>(@"
+SELECT DISTINCT D.CODE, F.ANBAR
+FROM dbo.CONTRACT_DTL AS D
+INNER JOIN dbo.STUF_FSK AS F ON F.CODE = D.CODE
+WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
+                new { ContractID = contractID.Value }).ToList();
+            if (inventoryItems.Count == 0) return false;
+
+            var (_, _, inventoryDetails) = inventoryManager.GetKalaMogudi(
+                dbms, inventoryItems.Cast<object>());
+            var inventoryByProduct = inventoryDetails
+                .GroupBy(x => x.CODE, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(x => x.Key, x => Convert.ToDecimal(x.Sum(y => y.CURRENT_MOGUDI)), StringComparer.OrdinalIgnoreCase);
+
+            foreach (var row in data)
+                if (inventoryByProduct.TryGetValue(row.CODE, out decimal inventory))
+                    row.ActualInventoryQty = inventory;
+
+            return inventoryDetails.Count == inventoryItems.Count && data.All(x => x.ActualInventoryQty.HasValue);
+        }
+
+        private void UpdateSummary(List<ContractStatusModel> data, int? contractID, bool inventoryComplete)
+        {
+            decimal contracted = data.Sum(x => x.ContractedQty);
+            decimal produced = data.Sum(x => x.ProducedQty);
+            decimal remainToProduce = data.Sum(x => x.RemainToProduce);
+            decimal sold = data.Sum(x => x.SoldQty);
+            decimal contractBalance = data.Sum(x => x.RemainInWarehouse);
+            decimal progress = contracted <= 0 ? 0 : produced * 100 / contracted;
+
+            ContractStatusModel? first = data.FirstOrDefault();
+            TXT_SELECTED_TITLE.Text = contractID.HasValue && first is not null
+                ? $"قرارداد: {first.ContractNo}     |     برند: {first.BrandName}"
+                : "نمایش تجمیعی قراردادها";
+            TXT_SELECTED_META.Text = contractID.HasValue && first is not null
+                ? $"مشتری: {first.CustName}     تاریخ ثبت: {FormatPersianDate(first.ContractDate)}     وضعیت: {(first.IsClosed ? "مختومه" : "باز")}"
+                : "برای مشاهده موجودی واقعی و مشخصات کامل، یک قرارداد را انتخاب کنید.";
+
+            TXT_CONTRACTED.Text = $"{contracted:N4} متر";
+            TXT_PRODUCED.Text = $"{produced:N4} متر";
+            TXT_REMAIN.Text = $"{remainToProduce:N4} متر";
+            TXT_PROGRESS.Text = $"{progress:N2}٪";
+            TXT_SOLD.Text = $"{sold:N4} متر";
+            TXT_CONTRACT_BALANCE.Text = $"{contractBalance:N4} متر";
+
+            if (contractID.HasValue && inventoryComplete)
+            {
+                decimal actualInventory = data
+                    .GroupBy(x => x.CODE, StringComparer.OrdinalIgnoreCase)
+                    .Sum(x => x.First().ActualInventoryQty ?? 0);
+                TXT_ACTUAL_INVENTORY.Text = $"{actualInventory:N4} متر";
+                TXT_INVENTORY_NOTE.Text = "موجودی واقعی از InventoryManager و مجموع انبارهای تعریف‌شده برای کالا محاسبه شده است؛ مانده قراردادی = تولید منتسب − فروش خالص منتسب.";
+            }
+            else
+            {
+                TXT_ACTUAL_INVENTORY.Text = "—";
+                TXT_INVENTORY_NOTE.Text = contractID.HasValue
+                    ? "اطلاعات موجودی واقعی برای همه کالاها/انبارها کامل نیست؛ مانده قراردادی مستقل و بر اساس اسناد متصل محاسبه شده است."
+                    : "موجودی واقعی در حالت همه قراردادها جمع نمی‌شود تا کالای مشترک بین چند قرارداد چندبار محاسبه نشود.";
+            }
+        }
+
+        private static string FormatPersianDate(long value)
+        {
+            string digits = value.ToString(CultureInfo.InvariantCulture).PadLeft(8, '0');
+            return digits.Length == 8 ? $"{digits[..4]}/{digits.Substring(4, 2)}/{digits.Substring(6, 2)}" : value.ToString(CultureInfo.InvariantCulture);
         }
 
         private void BTN_REFRESH_Click(object sender, RoutedEventArgs e)
@@ -123,6 +196,13 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
         }
 
         private sealed class ContractLookup { public int ContractID { get; set; } public string DisplayName { get; set; } = string.Empty; }
+        private sealed class ContractInventoryItem
+        {
+            public string CODE { get; set; } = string.Empty;
+            public int ANBAR { get; set; }
+            public double MEGHk { get; set; }
+            public double MEGH_MAR { get; set; }
+        }
         private sealed class ContractStatusModel
         {
             public int ContractID { get; set; }
@@ -140,6 +220,7 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
             public decimal OverProducedQty { get; set; }
             public decimal SoldQty { get; set; }
             public decimal RemainInWarehouse { get; set; }
+            public decimal? ActualInventoryQty { get; set; }
         }
     }
 }
