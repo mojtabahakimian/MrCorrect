@@ -421,7 +421,17 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
             }
             Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
         }
-        private void DG_DTL_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e) => Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
+        private void DG_DTL_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            if (e.EditAction == DataGridEditAction.Cancel || e.Row.Item is not ContractDtlModel detail) return;
+            if (!ValidateContractDetailBeforeLeaving(detail))
+            {
+                e.Cancel = true;
+                FocusInvalidContractDetail(detail);
+                return;
+            }
+            Dispatcher.BeginInvoke(new Action(CalculateTotal), DispatcherPriority.Background);
+        }
         private void DG_CONTRACTS_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (!isLoading && DG_CONTRACTS.SelectedItem is ContractHeaderModel h) LoadContract(h); }
         private void BTN_NEW_Click(object sender, RoutedEventArgs e) => BeginNewContract();
         private void BTN_REFRESH_Click(object sender, RoutedEventArgs e) { LoadContracts(CurrentContractID); LBL_STATUS.Text = "اطلاعات به‌روز شد."; }
@@ -475,6 +485,12 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
             }
 
             if (!DG_DTL.CommitEdit(DataGridEditingUnit.Cell, true)) return;
+            if (DG_DTL.CurrentCell.Item is ContractDtlModel currentDetail &&
+                !ValidateContractDetailBeforeLeaving(currentDetail))
+            {
+                FocusInvalidContractDetail(currentDetail);
+                return;
+            }
             int currentRowIndex = DG_DTL.Items.IndexOf(DG_DTL.CurrentCell.Item);
             int nextRowIndex = currentRowIndex + 1;
             if (nextRowIndex < 0 || nextRowIndex >= DG_DTL.Items.Count) return;
@@ -486,6 +502,33 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
                 if (nextItem is null) return;
                 DG_DTL.ScrollIntoView(nextItem);
                 DG_DTL.CurrentCell = new DataGridCellInfo(nextItem, editableColumns[0]);
+                DG_DTL.BeginEdit();
+            }), DispatcherPriority.Background);
+        }
+
+        private bool ValidateContractDetailBeforeLeaving(ContractDtlModel detail)
+        {
+            if (string.IsNullOrWhiteSpace(detail.CODE) || string.IsNullOrWhiteSpace(detail.NAME_CODE))
+                return ValidationError("انتخاب کالای معتبر برای ردیف جاری الزامی است؛ برای جست‌وجو علامت + را وارد کنید.");
+            if (detail.Qty <= 0 || detail.Qty > 999999999999999m)
+                return ValidationError("متراژ ردیف جاری باید عددی بزرگ‌تر از صفر باشد.");
+            return true;
+        }
+
+        private void FocusInvalidContractDetail(ContractDtlModel detail)
+        {
+            string targetProperty = string.IsNullOrWhiteSpace(detail.CODE) || string.IsNullOrWhiteSpace(detail.NAME_CODE)
+                ? nameof(ContractDtlModel.NAME_CODE)
+                : nameof(ContractDtlModel.Qty);
+            DataGridColumn? targetColumn = DG_DTL.Columns.FirstOrDefault(x => x.SortMemberPath == targetProperty);
+            if (targetColumn is null) return;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (!DG_DTL.Items.Contains(detail)) return;
+                DG_DTL.SelectedItem = detail;
+                DG_DTL.ScrollIntoView(detail, targetColumn);
+                DG_DTL.CurrentCell = new DataGridCellInfo(detail, targetColumn);
                 DG_DTL.BeginEdit();
             }), DispatcherPriority.Background);
         }
