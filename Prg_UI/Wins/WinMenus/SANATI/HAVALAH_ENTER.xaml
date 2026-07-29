@@ -152,17 +152,6 @@
                         </DataGridTextColumn.CellStyle>
                     </DataGridTextColumn>
 
-                    <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150"
-                                            SelectedValueBinding="{Binding ContractID, UpdateSourceTrigger=PropertyChanged}"
-                                            DisplayMemberPath="DisplayName" SelectedValuePath="ContractID">
-                        <DataGridComboBoxColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
-                                <Setter Property="IsEditable" Value="True"/>
-                                <Setter Property="IsTextSearchEnabled" Value="True"/>
-                                <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
-                            </Style>
-                        </DataGridComboBoxColumn.EditingElementStyle>
-                    </DataGridComboBoxColumn>
 
                     <DataGridTextColumn x:Name="NAME_CODE_COLUMN" Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}" Header="نام کالا" Width="auto" MinWidth="200">
                         <DataGridTextColumn.EditingElementStyle>
@@ -248,6 +237,17 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
+                    <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150"
+                                            SelectedValueBinding="{Binding ContractID, UpdateSourceTrigger=PropertyChanged}"
+                                            DisplayMemberPath="DisplayName" SelectedValuePath="ContractID">
+                        <DataGridComboBoxColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                <Setter Property="IsEditable" Value="True"/>
+                                <Setter Property="IsTextSearchEnabled" Value="True"/>
+                                <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            </Style>
+                        </DataGridComboBoxColumn.EditingElementStyle>
+                    </DataGridComboBoxColumn>
                 </DataGrid.Columns>
 
             </DataGrid>
