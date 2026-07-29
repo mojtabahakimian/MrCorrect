@@ -145,9 +145,9 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                         {
                             rowItem.ProductName = "خطا در استعلام کالا";
                         }
-                        // Refresh the DataGrid so the name populates immediately
+
+                        // INotifyPropertyChanged handles UI update automatically now. No DG_Patterns.Items.Refresh() needed.
                         Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-                            DG_Patterns.Items.Refresh();
                             RecalculateTotalQuantity();
                         }), System.Windows.Threading.DispatcherPriority.Background);
                     }

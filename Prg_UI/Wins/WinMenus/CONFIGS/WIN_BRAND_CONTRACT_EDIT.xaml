@@ -32,7 +32,7 @@
                 <Border x:Name="TitleDrawBar" Grid.Row="0" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" Height="45" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                     <Grid>
                         <Label x:Name="LblTitle" Content="ثبت / ویرایش اطلاعات قرارداد برند" Padding="21,10,10,10" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,110,0" FlowDirection="RightToLeft"/>
-                        <Button x:Name="Btn_Close" Margin="0,10,13,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Cancel_Click" Foreground="White" Width="30" Padding="1" IsTabStop="False">
+                        <Button x:Name="Btn_Close" Margin="0,10,13,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Cancel_Click" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
                             <materialDesign:PackIcon Kind="WindowClose" Height="17" Width="21" Foreground="White"/>
                         </Button>
                     </Grid>
@@ -45,7 +45,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Fields Section -->
+                    <!-- Fields Section (Styled with Pre-invoice FuzzyOut TextBoxes) -->
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -59,25 +59,32 @@
                         </Grid.RowDefinitions>
 
                         <!-- Contract Number -->
-                        <TextBox x:Name="TxtContractNumber" Grid.Row="0" Grid.Column="0" materialDesign:HintAssist.Hint="شماره قرارداد *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+                        <Label Grid.Row="0" Grid.Column="0" Content="شماره قرارداد *:" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtContractNumber" Grid.Row="0" Grid.Column="0" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Margin="5,20,5,15"/>
 
                         <!-- Brand Name -->
-                        <TextBox x:Name="TxtBrandName" Grid.Row="0" Grid.Column="1" materialDesign:HintAssist.Hint="نام برند *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+                        <Label Grid.Row="0" Grid.Column="1" Content="نام برند *:" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtBrandName" Grid.Row="0" Grid.Column="1" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Margin="5,20,5,15"/>
 
                         <!-- Contract Date -->
-                        <TextBox x:Name="TxtContractDate" Grid.Row="0" Grid.Column="2" materialDesign:HintAssist.Hint="تاریخ قرارداد (مثلاً 14030101) *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+                        <Label Grid.Row="0" Grid.Column="2" Content="تاریخ قرارداد (yyyyMMdd) *:" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtContractDate" Grid.Row="0" Grid.Column="2" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Margin="5,20,5,15"/>
 
                         <!-- Customer Code -->
-                        <TextBox x:Name="TxtCustomerCode" Grid.Row="1" Grid.Column="0" materialDesign:HintAssist.Hint="کد حسابداری مشتری *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" LostFocus="TxtCustomerCode_LostFocus" Margin="5,5,5,15"/>
+                        <Label Grid.Row="1" Grid.Column="0" Content="کد حسابداری مشتری *:" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtCustomerCode" Grid.Row="1" Grid.Column="0" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" LostFocus="TxtCustomerCode_LostFocus" Margin="5,20,5,15"/>
 
                         <!-- Customer Name -->
-                        <TextBox x:Name="TxtCustomerName" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" materialDesign:HintAssist.Hint="نام مشتری (سیستمی)" Style="{StaticResource MaterialDesignFloatingHintTextBox}" IsReadOnly="True" Focusable="False" Margin="5,5,5,15" Foreground="#047857"/>
+                        <Label Grid.Row="1" Grid.Column="1" Content="نام مشتری (سیستمی):" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtCustomerName" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" IsReadOnly="True" Focusable="False" Margin="5,20,5,15" Foreground="#047857" FontWeight="Bold"/>
 
-                        <!-- Total Quantity (Automatically computed or manually entered) -->
-                        <TextBox x:Name="TxtTotalQuantity" Grid.Row="2" Grid.Column="0" materialDesign:HintAssist.Hint="متراژ کل قرارداد (متر)" Style="{StaticResource MaterialDesignFloatingHintTextBox}" IsReadOnly="True" Background="#F9FAFB" Margin="5,5,5,15" FontWeight="Bold"/>
+                        <!-- Total Quantity -->
+                        <Label Grid.Row="2" Grid.Column="0" Content="متراژ کل قرارداد (متر):" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtTotalQuantity" Grid.Row="2" Grid.Column="0" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" IsReadOnly="True" Background="#F9FAFB" Margin="5,20,5,15" FontWeight="Bold"/>
 
                         <!-- Description -->
-                        <TextBox x:Name="TxtDescription" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" materialDesign:HintAssist.Hint="توضیحات کلی قرارداد" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+                        <Label Grid.Row="2" Grid.Column="1" Content="توضیحات کلی قرارداد:" Margin="5,0,5,0" VerticalAlignment="Top" FontSize="11" Foreground="#4B5563"/>
+                        <TextBox x:Name="TxtDescription" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Margin="5,20,5,15"/>
                     </Grid>
 
                     <!-- Items / Patterns Grid Section -->
@@ -91,21 +98,33 @@
                             <Grid Grid.Row="0" Margin="0,0,0,10">
                                 <TextBlock Text="اقلام و طرح‌های شامل قرارداد" FontSize="12" FontWeight="Bold" Foreground="{Binding Background, ElementName=GENERAL_RANG}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button x:Name="Btn_AddItem" Style="{StaticResource MaterialDesignOutlinedButton}" Content="+ افزودن طرح" Click="Btn_AddItem_Click" Height="28" Padding="10,0" Margin="0,0,10,0"/>
-                                    <Button x:Name="Btn_RemoveItem" Style="{StaticResource MaterialDesignOutlinedButton}" Content="- حذف طرح" Click="Btn_RemoveItem_Click" Foreground="#EF4444" BorderBrush="#EF4444" Height="28" Padding="10,0"/>
+                                    <Button x:Name="Btn_AddItem" Content="+ افزودن طرح" Click="Btn_AddItem_Click" Height="28" Padding="10,0" Margin="0,0,10,0"/>
+                                    <Button x:Name="Btn_RemoveItem" Content="- حذف طرح" Click="Btn_RemoveItem_Click" Foreground="White" Background="#EF4444" BorderBrush="{x:Null}" Height="28" Padding="10,0"/>
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Patterns DataGrid -->
-                            <DataGrid x:Name="DG_Patterns" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" CellEditEnding="DG_Patterns_CellEditEnding">
+                            <!-- Patterns DataGrid (Fuzzy/Pre-invoice styled grid layout) -->
+                            <DataGrid x:Name="DG_Patterns" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" CellEditEnding="DG_Patterns_CellEditEnding"
+                                      ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                                      CellStyle="{StaticResource CellFocusyBorder}"
+                                      HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                      VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                      GridLinesVisibility="All">
+                                <DataGrid.Style>
+                                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                        <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                        <Setter Property="GridLinesVisibility" Value="All"/>
+                                    </Style>
+                                </DataGrid.Style>
                                 <DataGrid.Columns>
                                     <!-- Product Code -->
-                                    <DataGridTextColumn Header="کد کالا / طرح" Binding="{Binding ProductCode}" Width="2*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
+                                    <DataGridTextColumn Header="کد کالا / طرح" Binding="{Binding ProductCode, UpdateSourceTrigger=PropertyChanged}" Width="2*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
                                     <!-- Resolved Product Name -->
                                     <DataGridTextColumn Header="نام طرح / محصول (سیستمی)" Binding="{Binding ProductName}" Width="4*" IsReadOnly="True" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}">
                                         <DataGridTextColumn.CellStyle>
-                                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                            <Style TargetType="DataGridCell" BasedOn="{StaticResource CellFocusyBorder}">
                                                 <Setter Property="Foreground" Value="#059669"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
                                             </Style>
                                         </DataGridTextColumn.CellStyle>
                                     </DataGridTextColumn>
@@ -120,8 +139,8 @@
                 <!--FOOTER ACTIONS-->
                 <Border Grid.Row="2" Background="#F9FAFB" Margin="-9,0,-9,-9" Padding="10" CornerRadius="0,0,10,10" BorderThickness="0,1,0,0" BorderBrush="#E5E7EB">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" FlowDirection="RightToLeft">
-                        <Button x:Name="Btn_Save" Content="ذخیره اطلاعات" Style="{StaticResource MaterialDesignRaisedButton}" Background="#059669" BorderBrush="{x:Null}" Width="120" Click="Btn_Save_Click" Margin="0,0,10,0"/>
-                        <Button x:Name="Btn_Cancel" Content="انصراف" Style="{StaticResource MaterialDesignOutlinedButton}" BorderBrush="#9CA3AF" Foreground="#4B5563" Width="100" Click="Btn_Cancel_Click"/>
+                        <Button x:Name="Btn_Save" Content="ذخیره اطلاعات" Background="#059669" Foreground="White" BorderBrush="{x:Null}" Width="120" Click="Btn_Save_Click" Margin="0,0,10,0"/>
+                        <Button x:Name="Btn_Cancel" Content="انصراف" Background="Transparent" BorderBrush="#9CA3AF" Foreground="#4B5563" Width="100" Click="Btn_Cancel_Click"/>
                     </StackPanel>
                 </Border>
             </Grid>

@@ -6,7 +6,9 @@ using Prg_UI.HelperWins;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -381,13 +383,45 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         public string? Description { get; set; }
     }
 
-    public class BrandContractItemModel
+    public class BrandContractItemModel : INotifyPropertyChanged
     {
-        public int ItemID { get; set; }
-        public int ContractID { get; set; }
-        public string ProductCode { get; set; } = string.Empty;
-        public string ProductName { get; set; } = string.Empty;
-        public double Quantity { get; set; }
+        private int _itemId;
+        private int _contractId;
+        private string _productCode = string.Empty;
+        private string _productName = string.Empty;
+        private double _quantity;
+
+        public int ItemID
+        {
+            get => _itemId;
+            set { _itemId = value; OnPropertyChanged(); }
+        }
+        public int ContractID
+        {
+            get => _contractId;
+            set { _contractId = value; OnPropertyChanged(); }
+        }
+        public string ProductCode
+        {
+            get => _productCode;
+            set { _productCode = value; OnPropertyChanged(); }
+        }
+        public string ProductName
+        {
+            get => _productName;
+            set { _productName = value; OnPropertyChanged(); }
+        }
+        public double Quantity
+        {
+            get => _quantity;
+            set { _quantity = value; OnPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
     }
 
     public class BrandContractProgressModel
