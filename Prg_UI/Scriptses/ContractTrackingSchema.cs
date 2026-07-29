@@ -63,12 +63,26 @@ BEGIN
            (2, 2, 1, N'حواله فروش'), (4, 2, -1, N'برگشت فروش');
 END;
 
+COMMIT TRANSACTION;";
+
+            // SQL Server resolves column names while compiling an entire batch.  The
+            // ALTER statements must complete before any FK/index/view references the
+            // new columns, otherwise a fresh database fails with error 207.
+            const string orderColumnSql = @"
 IF COL_LENGTH(N'dbo.ORDR_HED', N'ContractID') IS NULL
-    ALTER TABLE dbo.ORDR_HED ADD ContractID INT NULL;
+    ALTER TABLE dbo.ORDR_HED ADD ContractID INT NULL;";
+
+            const string invoiceColumnSql = @"
 IF COL_LENGTH(N'dbo.INVO_LST', N'ContractID') IS NULL
-    ALTER TABLE dbo.INVO_LST ADD ContractID INT NULL;
+    ALTER TABLE dbo.INVO_LST ADD ContractID INT NULL;";
+
+            const string documentColumnSql = @"
 IF COL_LENGTH(N'dbo.HEAD_LST', N'ContractID') IS NULL
-    ALTER TABLE dbo.HEAD_LST ADD ContractID INT NULL;
+    ALTER TABLE dbo.HEAD_LST ADD ContractID INT NULL;";
+
+            const string constraintsAndIndexesSql = @"
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
 
 IF OBJECT_ID(N'dbo.FK_ORDR_HED_CONTRACT_HED', N'F') IS NULL
     ALTER TABLE dbo.ORDR_HED WITH CHECK ADD CONSTRAINT FK_ORDR_HED_CONTRACT_HED
@@ -92,6 +106,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'dbo.HEAD_
 COMMIT TRANSACTION;";
 
             dbms.DoExecuteSQL(schemaSql);
+            dbms.DoExecuteSQL(orderColumnSql);
+            dbms.DoExecuteSQL(invoiceColumnSql);
+            dbms.DoExecuteSQL(documentColumnSql);
+            dbms.DoExecuteSQL(constraintsAndIndexesSql);
 
             const string viewSql = @"
 CREATE OR ALTER VIEW dbo.VW_CONTRACT_STATUS
