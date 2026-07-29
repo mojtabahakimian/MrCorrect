@@ -27,6 +27,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private readonly ObservableCollection<ContractDtlModel> ContractDetails = new();
         private int? CurrentContractID;
         private bool isLoading;
+        private bool isEditing;
         private NavigationManager<ContractHeaderModel>? navigationManager;
 
         public WIN_CONTRACT_DEF()
@@ -130,7 +131,8 @@ ORDER BY BrandName").ToList();
                 CUST_NO.Text = string.Empty;
                 IsClosed.IsChecked = false;
                 ContractDetails.Clear();
-                DG_DTL.IsReadOnly = true;
+                isEditing = true;
+                ApplyEditingState();
                 CalculateTotal();
                 LBL_STATUS.Text = "ابتدا سربرگ قرارداد را ذخیره کنید؛ سپس امکان ثبت طرح‌ها فعال می‌شود.";
                 ContractNo.Focus();
@@ -159,9 +161,10 @@ WHERE D.ContractID = @ContractID
 ORDER BY D.ID",
                     new { header.ContractID }))
                     ContractDetails.Add(detail);
-                DG_DTL.IsReadOnly = header.IsClosed;
+                isEditing = false;
+                ApplyEditingState();
                 CalculateTotal();
-                LBL_STATUS.Text = $"ویرایش قرارداد {header.ContractNo}";
+                LBL_STATUS.Text = $"مشاهده قرارداد {header.ContractNo}؛ برای تغییر اطلاعات دکمه اصلاح را انتخاب کنید.";
             }
             finally { isLoading = false; }
         }
@@ -238,6 +241,7 @@ WHERE T.N_KOL = @N_KOL AND T.NUMBER = 1 AND T.TNUMBER = @TNUMBER",
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
+            if (!isEditing) return;
             if (!TryValidateHeader(out long contractDate, out string customerCode))
                 return;
 
@@ -283,7 +287,8 @@ SELECT @SavedContractID;";
                 }).Single();
                 RefreshNavigation(CurrentContractID);
                 LoadBrands(BrandName.Text.Trim());
-                DG_DTL.IsReadOnly = IsClosed.IsChecked == true;
+                isEditing = true;
+                ApplyEditingState();
                 LBL_STATUS.Text = DG_DTL.IsReadOnly
                     ? "سربرگ قرارداد ذخیره شد؛ قرارداد مختومه است و ردیف‌ها قابل ویرایش نیستند."
                     : "سربرگ قرارداد ذخیره شد؛ اکنون طرح‌ها را سطربه‌سطر ثبت کنید.";
@@ -291,6 +296,34 @@ SELECT @SavedContractID;";
                     FocusFirstDetailRow();
             }
             catch (Exception ex) { ShowError("ذخیره سربرگ قرارداد انجام نشد.", ex); }
+        }
+
+        private void ESLAH_Click(object sender, RoutedEventArgs e)
+        {
+            if (!CurrentContractID.HasValue || isEditing) return;
+            isEditing = true;
+            ApplyEditingState();
+            LBL_STATUS.Text = IsClosed.IsChecked == true
+                ? "اصلاح سربرگ قرارداد فعال شد؛ برای بازکردن ردیف‌ها ابتدا وضعیت مختومه را بردارید و سربرگ را ذخیره کنید."
+                : "حالت اصلاح فعال است؛ تغییرات سربرگ را ذخیره کنید و ردیف‌ها را سطربه‌سطر ویرایش کنید.";
+            ContractNo.Focus();
+            ContractNo.SelectAll();
+        }
+
+        private void ApplyEditingState()
+        {
+            bool canEditHeader = isEditing;
+            ContractNo.IsReadOnly = !canEditHeader;
+            ContractDate.IsReadOnly = !canEditHeader;
+            BrandName.IsEnabled = canEditHeader;
+            CUST_NO.IsEnabled = canEditHeader;
+            MOLAH.IsReadOnly = !canEditHeader;
+            IsClosed.IsEnabled = canEditHeader && CurrentContractID.HasValue;
+
+            BTN_SAVE.IsEnabled = canEditHeader;
+            ESLAH.IsEnabled = CurrentContractID.HasValue && !isEditing;
+            BTN_DELETE.IsEnabled = CurrentContractID.HasValue && isEditing;
+            DG_DTL.IsReadOnly = !CurrentContractID.HasValue || !isEditing || IsClosed.IsChecked == true;
         }
 
         private bool TryValidateHeader(out long contractDate, out string customerCode)

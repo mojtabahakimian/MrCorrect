@@ -80,10 +80,13 @@
                                             HorizontalAlignment="Left" VerticalAlignment="Center"
                                             Margin="8,0,0,0">
                                     <Button x:Name="BTN_SAVE" Content="ذخیره سربرگ" Click="BTN_SAVE_Click"
-                                            Style="{StaticResource GerdC}" Width="120" Height="34"
+                                            Style="{StaticResource GerdC}" Width="105" Height="34"
+                                            Margin="4,0" Foreground="White"/>
+                                    <Button x:Name="ESLAH" Content="اصلاح" Click="ESLAH_Click"
+                                            Style="{StaticResource GerdC}" Width="75" Height="34"
                                             Margin="4,0" Foreground="White"/>
                                     <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click"
-                                            Style="{StaticResource GerdC}" Width="105" Height="34"
+                                            Style="{StaticResource GerdC}" Width="95" Height="34"
                                             Margin="4,0" Foreground="White"/>
                                 </StackPanel>
 
