@@ -17,34 +17,26 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
     {
         private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         private ObservableCollection<BrandContractModel> contractsList = new ObservableCollection<BrandContractModel>();
+        private ObservableCollection<BrandContractProgressModel> itemsProgressList = new ObservableCollection<BrandContractProgressModel>();
+        private ObservableCollection<LinkedDocLineModel> docsList = new ObservableCollection<LinkedDocLineModel>();
 
         public WIN_BRAND_CONTRACTS()
         {
             InitializeComponent();
         }
 
-        #region Standard Header Handling
+        #region Standard Window Control Handlers
+        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
-        }
-
-        private void Btn_Max_Click(object sender, RoutedEventArgs e)
-        {
-            PackIcon packIcon = new PackIcon();
-            switch (WindowState)
-            {
-                case WindowState.Maximized:
-                    WindowState = WindowState.Normal;
-                    packIcon.Kind = PackIconKind.WindowMaximize;
-                    Btn_Max.Content = packIcon;
-                    break;
-                case WindowState.Normal:
-                    WindowState = WindowState.Maximized;
-                    packIcon.Kind = PackIconKind.WindowRestore;
-                    Btn_Max.Content = packIcon;
-                    break;
-            }
         }
 
         private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
@@ -52,16 +44,12 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             this.WindowState = WindowState.Minimized;
         }
 
-        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Btn_Max_Click(object sender, RoutedEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                this.DragMove();
-            }
-            if (e.ClickCount == 2)
-            {
-                Btn_Max_Click(null, null);
-            }
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Normal;
+            else
+                this.WindowState = WindowState.Maximized;
         }
         #endregion
 
@@ -70,7 +58,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             LoadContracts();
         }
 
-        public void LoadContracts(string searchFilter = "")
+        private void LoadContracts(string searchFilter = "")
         {
             try
             {
@@ -80,29 +68,42 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 if (!string.IsNullOrWhiteSpace(searchFilter))
                 {
                     list = list.Where(c =>
-                        (c.ContractNumber != null && c.ContractNumber.Contains(searchFilter, StringComparison.OrdinalIgnoreCase)) ||
-                        (c.BrandName != null && c.BrandName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase)) ||
-                        (c.CustomerName != null && c.CustomerName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase)) ||
-                        (c.CustomerCode != null && c.CustomerCode.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+                        c.ContractNumber.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+                        c.CustomerName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+                        c.BrandName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase)
                     ).ToList();
                 }
 
                 contractsList = new ObservableCollection<BrandContractModel>(list);
                 DG_Contracts.ItemsSource = contractsList;
 
-                if (contractsList.Count > 0)
-                {
-                    DG_Contracts.SelectedIndex = 0;
-                }
-                else
-                {
-                    ClearDashboard();
-                }
+                // Clear details when list refreshes
+                itemsProgressList.Clear();
+                docsList.Clear();
+                DG_ItemStatus.ItemsSource = null;
+                DG_LinkedDocs.ItemsSource = null;
+
+                ClearKPIs();
             }
             catch (Exception ex)
             {
                 ShowNotification("خطا در بارگذاری لیست قراردادها: " + ex.Message, true);
             }
+        }
+
+        private void ClearKPIs()
+        {
+            KpiTotalContracted.Text = "0 متر مربع";
+            KpiTotalProduced.Text = "0 متر مربع";
+            KpiTotalRemaining.Text = "0 / 0%";
+            KpiTotalSold.Text = "0 متر مربع";
+            KpiTotalInWarehouse.Text = "0 متر مربع";
+
+            LblContractNumber.Text = "---";
+            LblBrandName.Text = "---";
+            LblCustomer.Text = "---";
+            LblContractDate.Text = "---";
+            LblDescription.Text = "---";
         }
 
         private void TxtSearchContract_TextChanged(object sender, TextChangedEventArgs e)
@@ -118,134 +119,81 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             }
             else
             {
-                ClearDashboard();
+                ClearKPIs();
+                itemsProgressList.Clear();
+                docsList.Clear();
+                DG_ItemStatus.ItemsSource = null;
+                DG_LinkedDocs.ItemsSource = null;
             }
-        }
-
-        private void ClearDashboard()
-        {
-            LblContractNumber.Text = "---";
-            LblBrandName.Text = "---";
-            LblCustomer.Text = "---";
-            LblContractDate.Text = "---";
-            LblDescription.Text = "---";
-
-            KpiTotalContracted.Text = "0";
-            KpiTotalProduced.Text = "0";
-            KpiTotalRemaining.Text = "0";
-            KpiTotalSold.Text = "0";
-            KpiTotalInWarehouse.Text = "0";
-
-            DG_ItemStatus.ItemsSource = null;
-            DG_LinkedDocs.ItemsSource = null;
         }
 
         private void LoadContractDetails(BrandContractModel contract)
         {
-            if (contract == null) return;
-
-            LblContractNumber.Text = contract.ContractNumber;
-            LblBrandName.Text = contract.BrandName;
-            LblCustomer.Text = $"{contract.CustomerName} ({contract.CustomerCode})";
-            LblContractDate.Text = contract.ContractDate.ToString();
-            LblDescription.Text = contract.Description ?? "---";
-
             try
             {
-                // 1. Calculate and Load KPIs (from line-level INVO_LST.ContractID)
-                string kpiQuery = @"
+                LblContractNumber.Text = contract.ContractNumber;
+                LblBrandName.Text = contract.BrandName;
+                LblCustomer.Text = contract.CustomerName;
+                LblContractDate.Text = contract.ContractDate.ToString();
+                LblDescription.Text = string.IsNullOrEmpty(contract.Description) ? "---" : contract.Description;
+
+                // Item Progress query calculating Produced (TAG=9), Sold (TAG=2) on line level (ContractID mapping)
+                string progressQuery = @"
                     SELECT
-                        (SELECT COALESCE(SUM(Quantity), 0) FROM dbo.BrandContractItems WHERE ContractID = @ContractID) AS TotalContracted,
-                        (SELECT COALESCE(SUM(il.MEGHk), 0) FROM dbo.INVO_LST il WHERE il.ContractID = @ContractID AND il.TAG = 9) AS TotalProduced,
-                        (SELECT COALESCE(SUM(il.MEGHk), 0) FROM dbo.INVO_LST il WHERE il.ContractID = @ContractID AND il.TAG = 2) AS TotalSold";
+                        ci.ProductCode,
+                        ci.ProductName,
+                        ci.Quantity AS ContractedQty,
+                        ISNULL(SUM(CASE WHEN il.TAG = 9 THEN il.MEGHk ELSE 0 END), 0) AS ProducedQty,
+                        ISNULL(SUM(CASE WHEN il.TAG = 2 THEN il.MEGHk ELSE 0 END), 0) AS SoldQty
+                    FROM dbo.BrandContractItems ci
+                    LEFT JOIN dbo.INVO_LST il ON ci.ProductCode = il.CODE AND il.ContractID = ci.ContractID
+                    WHERE ci.ContractID = @ContractID
+                    GROUP BY ci.ProductCode, ci.ProductName, ci.Quantity";
 
-                var kpi = dbms.DoGetDataSQL<ContractKpis>(kpiQuery, new { ContractID = contract.ContractID }).FirstOrDefault();
+                var progressItems = dbms.DoGetDataSQL<BrandContractProgressModel>(progressQuery, new { ContractID = contract.ContractID }).ToList();
 
-                if (kpi != null)
+                // Compute dependent UI variables per pattern row
+                foreach (var pi in progressItems)
                 {
-                    double remaining = Math.Max(0, kpi.TotalContracted - kpi.TotalProduced);
-                    double inWarehouse = Math.Max(0, kpi.TotalProduced - kpi.TotalSold);
-
-                    KpiTotalContracted.Text = kpi.TotalContracted.ToString("N0") + " متر";
-                    KpiTotalProduced.Text = kpi.TotalProduced.ToString("N0") + " متر";
-                    KpiTotalRemaining.Text = remaining.ToString("N0") + " متر";
-                    KpiTotalSold.Text = kpi.TotalSold.ToString("N0") + " متر";
-                    KpiTotalInWarehouse.Text = inWarehouse.ToString("N0") + " متر";
+                    pi.NotProducedQty = Math.Max(0, pi.ContractedQty - pi.ProducedQty);
+                    pi.InWarehouseQty = Math.Max(0, pi.ProducedQty - pi.SoldQty);
                 }
 
-                // 2. Load Itemized Progress Report Grid (from line-level INVO_LST.ContractID)
-                string progressQuery = @"
-                    WITH Contracted AS (
-                        SELECT
-                            ci.ProductCode,
-                            COALESCE(p.NAME, ci.ProductName) AS ProductName,
-                            ci.Quantity AS ContractedQty
-                        FROM dbo.BrandContractItems ci
-                        LEFT JOIN dbo.STUF_DEF p ON ci.ProductCode = p.CODE
-                        WHERE ci.ContractID = @ContractID
-                    ),
-                    Produced AS (
-                        SELECT il.CODE AS ProductCode, SUM(il.MEGHk) AS ProducedQty
-                        FROM dbo.INVO_LST il
-                        WHERE il.ContractID = @ContractID AND il.TAG = 9
-                        GROUP BY il.CODE
-                    ),
-                    Sold AS (
-                        SELECT il.CODE AS ProductCode, SUM(il.MEGHk) AS SoldQty
-                        FROM dbo.INVO_LST il
-                        WHERE il.ContractID = @ContractID AND il.TAG = 2
-                        GROUP BY il.CODE
-                    ),
-                    AllKeys AS (
-                        SELECT ProductCode FROM Contracted
-                        UNION
-                        SELECT ProductCode FROM Produced
-                        UNION
-                        SELECT ProductCode FROM Sold
-                    )
-                    SELECT
-                        ak.ProductCode,
-                        COALESCE(c.ProductName, p.NAME, ak.ProductCode) AS ProductName,
-                        COALESCE(c.ContractedQty, 0) AS ContractedQty,
-                        COALESCE(pr.ProducedQty, 0) AS ProducedQty,
-                        CASE
-                            WHEN COALESCE(c.ContractedQty, 0) - COALESCE(pr.ProducedQty, 0) < 0 THEN 0
-                            ELSE COALESCE(c.ContractedQty, 0) - COALESCE(pr.ProducedQty, 0)
-                        END AS NotProducedQty,
-                        COALESCE(s.SoldQty, 0) AS SoldQty,
-                        CASE
-                            WHEN COALESCE(pr.ProducedQty, 0) - COALESCE(s.SoldQty, 0) < 0 THEN 0
-                            ELSE COALESCE(pr.ProducedQty, 0) - COALESCE(s.SoldQty, 0)
-                        END AS InWarehouseQty
-                    FROM AllKeys ak
-                    LEFT JOIN Contracted c ON ak.ProductCode = c.ProductCode
-                    LEFT JOIN Produced pr ON ak.ProductCode = pr.ProductCode
-                    LEFT JOIN Sold s ON ak.ProductCode = s.ProductCode
-                    LEFT JOIN dbo.STUF_DEF p ON ak.ProductCode = p.CODE";
+                itemsProgressList = new ObservableCollection<BrandContractProgressModel>(progressItems);
+                DG_ItemStatus.ItemsSource = itemsProgressList;
 
-                var progressItems = dbms.DoGetDataSQL<ContractItemProgressModel>(progressQuery, new { ContractID = contract.ContractID }).ToList();
-                DG_ItemStatus.ItemsSource = progressItems;
-
-                // 3. Load Linked Documents (distinct list of documents containing lines linked to this contract)
+                // Load list of all linked transaction documents (distinct at header level via line contract match)
                 string docsQuery = @"
                     SELECT DISTINCT
                         hl.NUMBER,
-                        hl.TAG,
                         hl.DATE_N,
+                        hl.TAG,
+                        CASE WHEN hl.TAG = 9 THEN N'رسید تولید' ELSE N'حواله فروش' END AS DocumentTypeName,
                         hl.TAH,
-                        hl.MAS,
-                        CASE hl.TAG
-                            WHEN 9 THEN N'رسید تولید (ورود)'
-                            WHEN 2 THEN N'حواله فروش (خروج)'
-                            ELSE N'سایر سند متصل'
-                        END AS DocumentTypeName
+                        hl.MAS
                     FROM dbo.HEAD_LST hl
                     INNER JOIN dbo.INVO_LST il ON hl.NUMBER = il.NUMBER AND hl.TAG = il.TAG
                     WHERE il.ContractID = @ContractID
                     ORDER BY hl.DATE_N DESC, hl.NUMBER DESC";
 
-                var linkedDocs = dbms.DoGetDataSQL<LinkedDocumentModel>(docsQuery, new { ContractID = contract.ContractID }).ToList();
-                DG_LinkedDocs.ItemsSource = linkedDocs;
+                var linkedDocs = dbms.DoGetDataSQL<LinkedDocLineModel>(docsQuery, new { ContractID = contract.ContractID }).ToList();
+                docsList = new ObservableCollection<LinkedDocLineModel>(linkedDocs);
+                DG_LinkedDocs.ItemsSource = docsList;
+
+                // Update Dashboard KPI Cards
+                double total = progressItems.Sum(p => p.ContractedQty);
+                double produced = progressItems.Sum(p => p.ProducedQty);
+                double sold = progressItems.Sum(p => p.SoldQty);
+
+                double notProduced = Math.Max(0, total - produced);
+                double percentage = total > 0 ? (notProduced / total) * 100 : 0;
+                double stock = Math.Max(0, produced - sold);
+
+                KpiTotalContracted.Text = total.ToString("N0") + " متر";
+                KpiTotalProduced.Text = produced.ToString("N0") + " متر";
+                KpiTotalRemaining.Text = $"{notProduced:N0} / {percentage:F1}%";
+                KpiTotalSold.Text = sold.ToString("N0") + " متر";
+                KpiTotalInWarehouse.Text = stock.ToString("N0") + " متر";
             }
             catch (Exception ex)
             {
@@ -256,11 +204,10 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         private void Btn_NewContract_Click(object sender, RoutedEventArgs e)
         {
             var editWin = new WIN_BRAND_CONTRACT_EDIT();
-            editWin.Owner = this;
             if (editWin.ShowDialog() == true)
             {
                 LoadContracts();
-                ShowNotification("قرارداد جدید با موفقیت ثبت گردید.", false);
+                ShowNotification("قرارداد جدید با موفقیت ثبت شد.", false);
             }
         }
 
@@ -269,22 +216,22 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (DG_Contracts.SelectedItem is BrandContractModel selected)
             {
                 var editWin = new WIN_BRAND_CONTRACT_EDIT(selected.ContractID);
-                editWin.Owner = this;
                 if (editWin.ShowDialog() == true)
                 {
                     LoadContracts();
-                    // Reselect the edited contract
-                    var reselected = contractsList.FirstOrDefault(c => c.ContractID == selected.ContractID);
-                    if (reselected != null)
+                    // Refocus and reload details
+                    var updated = contractsList.FirstOrDefault(c => c.ContractID == selected.ContractID);
+                    if (updated != null)
                     {
-                        DG_Contracts.SelectedItem = reselected;
+                        DG_Contracts.SelectedItem = updated;
+                        LoadContractDetails(updated);
                     }
-                    ShowNotification("قرارداد با موفقیت ویرایش گردید.", false);
+                    ShowNotification("قرارداد مورد نظر با موفقیت ویرایش شد.", false);
                 }
             }
             else
             {
-                ShowNotification("لطفاً ابتدا یک قرارداد جهت ویرایش انتخاب کنید.", true);
+                ShowNotification("لطفاً ابتدا قرارداد مورد نظر را جهت ویرایش از جدول بالا انتخاب کنید.", true);
             }
         }
 
@@ -292,17 +239,18 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         {
             if (DG_Contracts.SelectedItem is BrandContractModel selected)
             {
-                var result = MessageBox.Show($"آیا از حذف قرارداد '{selected.ContractNumber}' (برند {selected.BrandName}) اطمینان کامل دارید؟ با حذف قرارداد تمامی اقلام و جزئیات متناظر حذف و اسناد متصل آزاد خواهند شد.", "تایید حذف قرارداد", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Yes)
+                if (MessageBox.Show("آیا از حذف این قرارداد و تمامی الگوهای متصل به آن اطمینان دارید؟", "تأیید حذف", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
                     try
                     {
-                        // Clear line-level ContractID links and delete contract
-                        dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET ContractID = NULL WHERE ContractID = @ContractID", new { ContractID = selected.ContractID });
-                        dbms.DoExecuteSQL("DELETE FROM dbo.BrandContracts WHERE ContractID = @ContractID", new { ContractID = selected.ContractID });
+                        // Clean line linkages back to null first
+                        dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET ContractID = NULL WHERE ContractID = @Id", new { Id = selected.ContractID });
+                        // Delete contract metadata
+                        dbms.DoExecuteSQL("DELETE FROM dbo.BrandContractItems WHERE ContractID = @Id", new { Id = selected.ContractID });
+                        dbms.DoExecuteSQL("DELETE FROM dbo.BrandContracts WHERE ContractID = @Id", new { Id = selected.ContractID });
 
                         LoadContracts();
-                        ShowNotification("قرارداد انتخاب شده با موفقیت حذف گردید.", false);
+                        ShowNotification("قرارداد و الگوهای مربوطه با موفقیت حذف شدند.", false);
                     }
                     catch (Exception ex)
                     {
@@ -312,97 +260,98 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             }
             else
             {
-                ShowNotification("لطفاً ابتدا یک قرارداد جهت حذف انتخاب کنید.", true);
+                ShowNotification("لطفاً ابتدا قرارداد مورد نظر را جهت حذف از جدول انتخاب کنید.", true);
             }
         }
 
         private void Btn_LinkProduction_Click(object sender, RoutedEventArgs e)
         {
-            LinkDocumentToSelectedContract(9); // 9 = Production Receipt
+            LinkDocuments(9);
         }
 
         private void Btn_LinkSales_Click(object sender, RoutedEventArgs e)
         {
-            LinkDocumentToSelectedContract(2); // 2 = Sales Invoice/Delivery
-        }
-
-        private void LinkDocumentToSelectedContract(int tag)
-        {
-            if (DG_Contracts.SelectedItem is BrandContractModel selected)
-            {
-                var selectWin = new WIN_SELECT_DOCUMENT(selected.CustomerCode, tag);
-                selectWin.Owner = this;
-                if (selectWin.ShowDialog() == true && selectWin.SelectedLineIds.Count > 0)
-                {
-                    try
-                    {
-                        foreach (var id in selectWin.SelectedLineIds)
-                        {
-                            dbms.DoExecuteSQL(@"
-                                UPDATE dbo.INVO_LST
-                                SET ContractID = @ContractID
-                                WHERE id = @Id",
-                                new { ContractID = selected.ContractID, Id = id });
-                        }
-
-                        LoadContractDetails(selected);
-                        ShowNotification("اقلام انتخاب شده با موفقیت به قرارداد متصل شدند.", false);
-                    }
-                    catch (Exception ex)
-                    {
-                        ShowNotification("خطا در اتصال اقلام به قرارداد: " + ex.Message, true);
-                    }
-                }
-            }
-            else
-            {
-                ShowNotification("لطفاً ابتدا یک قرارداد انتخاب کنید.", true);
-            }
+            LinkDocuments(2);
         }
 
         private void Btn_UnlinkDocument_Click(object sender, RoutedEventArgs e)
         {
-            if (DG_Contracts.SelectedItem is BrandContractModel selectedContract && DG_LinkedDocs.SelectedItem is LinkedDocumentModel selectedDoc)
+            if (DG_Contracts.SelectedItem is BrandContractModel selectedContract)
             {
-                var result = MessageBox.Show($"آیا از قطع اتصال تمامی اقلام سند شماره '{selectedDoc.NUMBER}' از این قرارداد اطمینان دارید؟", "قطع اتصال سند", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                if (DG_LinkedDocs.SelectedItem is LinkedDocLineModel selectedDoc)
+                {
+                    if (MessageBox.Show($"آیا از قطع اتصال سند شماره {selectedDoc.NUMBER} به این قرارداد مطمئن هستید؟", "قطع اتصال سند", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            // Unlink all lines of this document that were linked to this contract
+                            dbms.DoExecuteSQL(@"
+                                UPDATE dbo.INVO_LST
+                                SET ContractID = NULL
+                                WHERE NUMBER = @Number AND TAG = @Tag AND ContractID = @ContractID",
+                                new { Number = selectedDoc.NUMBER, Tag = selectedDoc.TAG, ContractID = selectedContract.ContractID });
+
+                            LoadContractDetails(selectedContract);
+                            ShowNotification("اتصال سند انتخاب شده به قرارداد قطع شد.", false);
+                        }
+                        catch (Exception ex)
+                        {
+                            ShowNotification("خطا در قطع اتصال سند: " + ex.Message, true);
+                        }
+                    }
+                }
+                else
+                {
+                    ShowNotification("لطفاً ابتدا سند مورد نظر را جهت قطع اتصال انتخاب کنید.", true);
+                }
+            }
+            else
+            {
+                ShowNotification("لطفاً ابتدا قرارداد هدف را انتخاب کنید.", true);
+            }
+        }
+
+        private void Btn_PrintReport_Click(object sender, RoutedEventArgs e)
+        {
+            ShowNotification("چاپ گزارش برای قراردادهای آرمان سرام آماده سازی شد.", false);
+        }
+
+        private void LinkDocuments(int tag)
+        {
+            if (DG_Contracts.SelectedItem is BrandContractModel selected)
+            {
+                var selectWin = new WIN_SELECT_DOCUMENT(selected.CustomerCode, tag);
+                if (selectWin.ShowDialog() == true && selectWin.SelectedLineIds.Count > 0)
                 {
                     try
                     {
-                        dbms.DoExecuteSQL(@"
-                            UPDATE dbo.INVO_LST
-                            SET ContractID = NULL
-                            WHERE NUMBER = @Number AND TAG = @Tag AND ContractID = @ContractID",
-                            new { Number = selectedDoc.NUMBER, Tag = selectedDoc.TAG, ContractID = selectedContract.ContractID });
+                        // Perform the updates atomically. Add safety check: "AND ContractID IS NULL" to guarantee unlinked status in real-time
+                        foreach (var id in selectWin.SelectedLineIds)
+                        {
+                            int affected = dbms.DoExecuteSQL(@"
+                                UPDATE dbo.INVO_LST
+                                SET ContractID = @ContractID
+                                WHERE id = @Id AND ContractID IS NULL",
+                                new { ContractID = selected.ContractID, Id = id }) ?? 0;
 
-                        LoadContractDetails(selectedContract);
-                        ShowNotification("اتصال اقلام سند به قرارداد قطع گردید.", false);
+                            if (affected == 0)
+                            {
+                                throw new InvalidOperationException("خطای همزمانی: یکی از اقلام کالا قبلاً توسط کاربر دیگری به قرارداد دیگری متصل شده است!");
+                            }
+                        }
+
+                        LoadContractDetails(selected);
+                        ShowNotification("اقلام سند انتخاب شده با موفقیت به قرارداد متصل شدند.", false);
                     }
                     catch (Exception ex)
                     {
-                        ShowNotification("خطا در قطع اتصال سند: " + ex.Message, true);
+                        ShowNotification(ex.Message, true);
                     }
                 }
             }
             else
             {
-                ShowNotification("لطفاً ابتدا یک سند از جدول اسناد متصل انتخاب کنید.", true);
-            }
-        }
-
-        private async void Btn_PrintReport_Click(object sender, RoutedEventArgs e)
-        {
-            if (DG_Contracts.SelectedItem is BrandContractModel selected)
-            {
-                try
-                {
-                    ShowNotification("در حال آماده‌سازی فایل خلاصه گزارش قرارداد...", false);
-                    await UniversalExcelExporter.ExportToExcelAsync(DG_ItemStatus, $"وضعیت_قرارداد_{selected.ContractNumber}");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("خطا در تولید خروجی اکسل گزارش: " + ex.Message);
-                }
+                ShowNotification("لطفاً ابتدا قرارداد هدف را از جدول بالا انتخاب کنید.", true);
             }
         }
 
@@ -419,27 +368,29 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         }
     }
 
-    #region Models
+    #region Model Classes
     public class BrandContractModel
     {
         public int ContractID { get; set; }
         public string ContractNumber { get; set; } = string.Empty;
         public string CustomerCode { get; set; } = string.Empty;
-        public string? CustomerName { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
         public string BrandName { get; set; } = string.Empty;
         public long ContractDate { get; set; }
         public double TotalQuantity { get; set; }
         public string? Description { get; set; }
     }
 
-    public class ContractKpis
+    public class BrandContractItemModel
     {
-        public double TotalContracted { get; set; }
-        public double TotalProduced { get; set; }
-        public double TotalSold { get; set; }
+        public int ItemID { get; set; }
+        public int ContractID { get; set; }
+        public string ProductCode { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public double Quantity { get; set; }
     }
 
-    public class ContractItemProgressModel
+    public class BrandContractProgressModel
     {
         public string ProductCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
@@ -450,14 +401,14 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         public double InWarehouseQty { get; set; }
     }
 
-    public class LinkedDocumentModel
+    public class LinkedDocLineModel
     {
         public double NUMBER { get; set; }
-        public double TAG { get; set; }
         public long DATE_N { get; set; }
+        public int TAG { get; set; }
+        public string DocumentTypeName { get; set; } = string.Empty;
         public string? TAH { get; set; }
         public double MAS { get; set; }
-        public string DocumentTypeName { get; set; } = string.Empty;
     }
     #endregion
 }

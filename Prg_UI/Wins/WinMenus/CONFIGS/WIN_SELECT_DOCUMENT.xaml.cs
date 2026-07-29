@@ -58,13 +58,13 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         {
             try
             {
-                // Retrieve all documents of the specified TAG that contain at least one unlinked line
+                // Retrieve all documents of the specified TAG that contain at least one unlinked line for the EXACT resolved composite customer code
                 string query = @"
                     SELECT DISTINCT hl.NUMBER, hl.DATE_N, hl.TAH, hl.MAS
                     FROM dbo.HEAD_LST hl
                     INNER JOIN dbo.INVO_LST il ON hl.NUMBER = il.NUMBER AND hl.TAG = il.TAG
                     WHERE hl.TAG = @Tag
-                      AND (hl.CUST_NO = @CustCode OR hl.CUST_NO LIKE '%' + @CustCode)
+                      AND hl.CUST_NO = @CustCode
                       AND (il.ContractID IS NULL)
                     ORDER BY hl.DATE_N DESC, hl.NUMBER DESC";
 
@@ -137,7 +137,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
 
         private void DG_Docs_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            // Do nothing on doc double click now; they must select lines from the bottom grid!
+            // Handled via DG_Docs_SelectionChanged
         }
 
         private void ExecuteSelection()

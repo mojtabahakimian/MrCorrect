@@ -1,8 +1,5 @@
-using Functions;
-using MaterialDesignThemes.Wpf;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
-using Prg_UI.HelperWins;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,7 +12,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
     public partial class WIN_BRAND_CONTRACT_EDIT : Window
     {
         private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-        private int? contractId = null;
+        private int? contractId;
         private ObservableCollection<BrandContractItemModel> patternsList = new ObservableCollection<BrandContractItemModel>();
 
         public WIN_BRAND_CONTRACT_EDIT(int? id = null)
@@ -24,7 +21,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             contractId = id;
         }
 
-        #region Standard Header Handling
+        #region Standard Header Bar Handling
         private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -34,121 +31,46 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         }
         #endregion
 
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            try
-            {
-                if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    if (Btn_Save.IsFocused)
-                    {
-                        Btn_Save_Click(null, null);
-                        return;
-                    }
-
-                    if (DG_Patterns.IsKeyboardFocusWithin)
-                    {
-                        e.Handled = true;
-
-                        var currentCell = DG_Patterns.CurrentCell;
-                        if (currentCell.Column != null)
-                        {
-                            int currentColumnIndex = DG_Patterns.Columns.IndexOf(currentCell.Column);
-                            bool isLastColumn = currentColumnIndex == DG_Patterns.Columns.Count - 1;
-                            int selectedIndex = DG_Patterns.SelectedIndex;
-                            bool isLastRow = selectedIndex == DG_Patterns.Items.Count - 1;
-
-                            if (isLastColumn)
-                            {
-                                if (isLastRow)
-                                {
-                                    // Automatically append a new empty row when pressing Enter on the last cell of the last row!
-                                    patternsList.Add(new BrandContractItemModel
-                                    {
-                                        ProductCode = string.Empty,
-                                        ProductName = "در انتظار وارد کردن کد...",
-                                        Quantity = 0
-                                    });
-
-                                    Dispatcher.BeginInvoke(new Action(() => {
-                                        DG_Patterns.SelectedIndex = DG_Patterns.Items.Count - 1;
-                                        DG_Patterns.CurrentCell = new DataGridCellInfo(DG_Patterns.SelectedItem, DG_Patterns.Columns[0]);
-                                        DG_Patterns.BeginEdit();
-                                    }), System.Windows.Threading.DispatcherPriority.Background);
-
-                                    return;
-                                }
-                                else
-                                {
-                                    // Move to the first column of the next row
-                                    Dispatcher.BeginInvoke(new Action(() => {
-                                        DG_Patterns.SelectedIndex = selectedIndex + 1;
-                                        DG_Patterns.CurrentCell = new DataGridCellInfo(DG_Patterns.SelectedItem, DG_Patterns.Columns[0]);
-                                        DG_Patterns.BeginEdit();
-                                    }), System.Windows.Threading.DispatcherPriority.Background);
-
-                                    return;
-                                }
-                            }
-                        }
-
-                        CL_LMethods.SendKey_US(Key.Tab);
-                    }
-                    else
-                    {
-                        e.Handled = true;
-                        CL_LMethods.SendKey_US(Key.Tab);
-                    }
-                }
-            }
-            catch { }
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             if (contractId.HasValue)
             {
-                LoadContractForEdit(contractId.Value);
+                LblTitle.Content = "ویرایش قرارداد و تعهدات برند";
+                LoadContractData(contractId.Value);
             }
             else
             {
-                // New contract setup
-                patternsList = new ObservableCollection<BrandContractItemModel>();
-                DG_Patterns.ItemsSource = patternsList;
+                // Generate and set the current Persian date: yyyyMMdd
+                var pc = new System.Globalization.PersianCalendar();
+                var now = DateTime.Now;
+                string persianDateStr = $"{pc.GetYear(now)}{pc.GetMonth(now):D2}{pc.GetDayOfMonth(now):D2}";
+                TxtContractDate.Text = persianDateStr;
 
-                // Set default Persian date
-                try
-                {
-                    // Query current Persian date if function is available or use numeric format of today
-                    long today = dbms.DoGetDataSQL<long>("SELECT CAST(CONVERT(NVARCHAR(8), GETDATE(), 112) AS BIGINT)").FirstOrDefault();
-                    // Let's format it in standard Persian date format roughly if we don't have conversion function, or just default to 14030101
-                    TxtContractDate.Text = "14030101";
-                }
-                catch
-                {
-                    TxtContractDate.Text = "14030101";
-                }
+                // Add initial empty pattern row to start with
+                patternsList.Add(new BrandContractItemModel());
+                DG_Patterns.ItemsSource = patternsList;
             }
-            UpdateTotalQuantity();
         }
 
-        private void LoadContractForEdit(int id)
+        private void LoadContractData(int id)
         {
             try
             {
-                var contract = dbms.DoGetDataSQL<BrandContractModel>("SELECT * FROM dbo.BrandContracts WHERE ContractID = @Id", new { Id = id }).FirstOrDefault();
-                if (contract != null)
-                {
-                    TxtContractNumber.Text = contract.ContractNumber;
-                    TxtBrandName.Text = contract.BrandName;
-                    TxtContractDate.Text = contract.ContractDate.ToString();
-                    TxtCustomerCode.Text = contract.CustomerCode;
-                    TxtCustomerName.Text = contract.CustomerName;
-                    TxtDescription.Text = contract.Description;
-                    TxtTotalQuantity.Text = contract.TotalQuantity.ToString("N0");
+                string headerQuery = "SELECT * FROM dbo.BrandContracts WHERE ContractID = @Id";
+                var header = dbms.DoGetDataSQL<BrandContractModel>(headerQuery, new { Id = id }).FirstOrDefault();
 
-                    // Load items
-                    var items = dbms.DoGetDataSQL<BrandContractItemModel>("SELECT * FROM dbo.BrandContractItems WHERE ContractID = @Id ORDER BY ItemID", new { Id = id }).ToList();
+                if (header != null)
+                {
+                    TxtContractNumber.Text = header.ContractNumber;
+                    TxtCustomerCode.Text = header.CustomerCode;
+                    TxtCustomerName.Text = header.CustomerName;
+                    TxtBrandName.Text = header.BrandName;
+                    TxtContractDate.Text = header.ContractDate.ToString();
+                    TxtTotalQuantity.Text = header.TotalQuantity.ToString("G");
+                    TxtDescription.Text = header.Description;
+
+                    string itemsQuery = "SELECT * FROM dbo.BrandContractItems WHERE ContractID = @Id ORDER BY ItemID";
+                    var items = dbms.DoGetDataSQL<BrandContractItemModel>(itemsQuery, new { Id = id }).ToList();
                     patternsList = new ObservableCollection<BrandContractItemModel>(items);
                     DG_Patterns.ItemsSource = patternsList;
                 }
@@ -168,24 +90,24 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         {
             string code = TxtCustomerCode.Text.Trim();
             if (string.IsNullOrEmpty(code))
-            {
-                TxtCustomerName.Text = string.Empty;
                 return false;
-            }
 
             try
             {
-                // Supports both single TNUMBER (e.g. 25) and composite account code (e.g. 115-1-25)
+                // Query TDETA_HES supporting both absolute match and the composite format N_KOL-NUMBER-TNUMBER
                 string query = @"
-                    SELECT TOP 1 NAME
+                    SELECT TOP 1
+                        NAME,
+                        REPLACE(CAST(N_KOL AS NVARCHAR) + '-' + CAST(NUMBER AS NVARCHAR) + '-' + CAST(TNUMBER AS NVARCHAR), ' ', '') AS FullCode
                     FROM dbo.TDETA_HES
                     WHERE CAST(TNUMBER AS NVARCHAR(50)) = @Code
                        OR REPLACE(CAST(N_KOL AS NVARCHAR) + '-' + CAST(NUMBER AS NVARCHAR) + '-' + CAST(TNUMBER AS NVARCHAR), ' ', '') = @Code";
 
-                var name = dbms.DoGetDataSQL<string>(query, new { Code = code }).FirstOrDefault();
-                if (!string.IsNullOrEmpty(name))
+                var resolved = dbms.DoGetDataSQL<dynamic>(query, new { Code = code }).FirstOrDefault();
+                if (resolved != null)
                 {
-                    TxtCustomerName.Text = name;
+                    TxtCustomerName.Text = resolved.NAME;
+                    TxtCustomerCode.Text = resolved.FullCode; // Fill the textbox with the full standard code
                     return true;
                 }
                 else
@@ -194,21 +116,66 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     return false;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 TxtCustomerName.Text = "خطا در استعلام مشتری";
                 return false;
             }
         }
 
+        private void DG_Patterns_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.Row.Item is BrandContractItemModel rowItem)
+            {
+                // Real-time product name resolving upon code modifications
+                if (e.Column.Header.ToString() == "کد کالا / طرح")
+                {
+                    var textbox = e.EditingElement as TextBox;
+                    string code = textbox?.Text?.Trim() ?? string.Empty;
+
+                    if (!string.IsNullOrEmpty(code))
+                    {
+                        try
+                        {
+                            string query = "SELECT TOP 1 NAME FROM dbo.STUF_DEF WHERE CODE = @Code";
+                            string name = dbms.DoGetDataSQL<string>(query, new { Code = code }).FirstOrDefault() ?? "کالا یافت نشد!";
+                            rowItem.ProductName = name;
+                        }
+                        catch
+                        {
+                            rowItem.ProductName = "خطا در استعلام کالا";
+                        }
+                        // Refresh the DataGrid so the name populates immediately
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                            DG_Patterns.Items.Refresh();
+                            RecalculateTotalQuantity();
+                        }), System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                }
+                else if (e.Column.Header.ToString() == "متراژ تعهد شده (متر)")
+                {
+                    var textbox = e.EditingElement as TextBox;
+                    if (double.TryParse(textbox?.Text, out double qty))
+                    {
+                        rowItem.Quantity = qty;
+                    }
+                    // Recalculate contract total automatically on row quantity updates
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                        RecalculateTotalQuantity();
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+            }
+        }
+
+        private void RecalculateTotalQuantity()
+        {
+            double sum = patternsList.Sum(p => p.Quantity);
+            TxtTotalQuantity.Text = sum.ToString("G");
+        }
+
         private void Btn_AddItem_Click(object sender, RoutedEventArgs e)
         {
-            patternsList.Add(new BrandContractItemModel
-            {
-                ProductCode = string.Empty,
-                ProductName = "در انتظار وارد کردن کد...",
-                Quantity = 0
-            });
+            patternsList.Add(new BrandContractItemModel());
         }
 
         private void Btn_RemoveItem_Click(object sender, RoutedEventArgs e)
@@ -216,120 +183,92 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (DG_Patterns.SelectedItem is BrandContractItemModel selected)
             {
                 patternsList.Remove(selected);
-                UpdateTotalQuantity();
+                RecalculateTotalQuantity();
             }
             else
             {
-                ShowNotification("لطفاً یک ردیف از جدول طرح‌ها جهت حذف انتخاب کنید.", true);
+                ShowNotification("لطفاً ابتدا ردیف الگوی مورد نظر را انتخاب کنید.", true);
             }
         }
 
-        private void DG_Patterns_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // Triggered when editing of a cell is complete
-            if (e.Column.Header.ToString().Contains("کد کالا"))
+            // Enter key emulates Tab key navigation
+            if (e.Key == Key.Enter)
             {
-                var textBox = e.EditingElement as TextBox;
-                if (textBox != null)
+                var focusedElement = Keyboard.FocusedElement as UIElement;
+                if (focusedElement != null)
                 {
-                    string productCode = textBox.Text.Trim();
-                    var editedItem = e.Row.Item as BrandContractItemModel;
-                    if (editedItem != null)
+                    // Check if focus is inside the Patterns DataGrid and on the last column (Quantity) of the last row
+                    if (DG_Patterns.IsKeyboardFocusWithin)
                     {
-                        ResolveProductName(editedItem, productCode);
+                        var cell = focusedElement as DataGridCell ?? CL_LMethods.FindVisualParent<DataGridCell>(focusedElement);
+                        if (cell != null && cell.Column.Header.ToString() == "متراژ تعهد شده (متر)")
+                        {
+                            var lastRowItem = patternsList.LastOrDefault();
+                            if (DG_Patterns.SelectedItem == lastRowItem)
+                            {
+                                // Append a new row, focus its ProductCode cell, and trigger edit mode automatically
+                                e.Handled = true;
+                                var newRow = new BrandContractItemModel();
+                                patternsList.Add(newRow);
+
+                                Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                                    DG_Patterns.SelectedItem = newRow;
+                                    CL_LMethods.FocusCellReadyToEdit(DG_Patterns, "ProductCode", DG_Patterns.Items.Count - 1, true);
+                                }), System.Windows.Threading.DispatcherPriority.Background);
+                                return;
+                            }
+                        }
                     }
+
+                    // Standard Enter-to-Tab key movement
+                    e.Handled = true;
+                    focusedElement.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 }
             }
-
-            // Wait slightly and update total quantity
-            Dispatcher.BeginInvoke(new Action(() => {
-                UpdateTotalQuantity();
-                DG_Patterns.Items.Refresh(); // Forces immediate redraw of the resolved product name on the grid
-            }), System.Windows.Threading.DispatcherPriority.Background);
-        }
-
-        private void ResolveProductName(BrandContractItemModel item, string productCode)
-        {
-            if (string.IsNullOrEmpty(productCode)) return;
-
-            try
-            {
-                var name = dbms.DoGetDataSQL<string>("SELECT NAME FROM dbo.STUF_DEF WHERE CODE = @Code", new { Code = productCode }).FirstOrDefault();
-                if (!string.IsNullOrEmpty(name))
-                {
-                    item.ProductCode = productCode;
-                    item.ProductName = name;
-                }
-                else
-                {
-                    item.ProductName = "کالا یافت نشد!";
-                }
-            }
-            catch
-            {
-                item.ProductName = "خطا در استعلام کالا";
-            }
-        }
-
-        private void UpdateTotalQuantity()
-        {
-            double total = patternsList.Sum(p => p.Quantity);
-            TxtTotalQuantity.Text = total.ToString("N0");
         }
 
         private void Btn_Save_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Validation
             string contractNum = TxtContractNumber.Text.Trim();
-            string brandName = TxtBrandName.Text.Trim();
-            string dateStr = TxtContractDate.Text.Trim();
             string custCode = TxtCustomerCode.Text.Trim();
             string custName = TxtCustomerName.Text.Trim();
+            string brandName = TxtBrandName.Text.Trim();
+            string dateStr = TxtContractDate.Text.Trim();
+            string totalQtyStr = TxtTotalQuantity.Text.Trim();
             string desc = TxtDescription.Text.Trim();
 
             if (string.IsNullOrEmpty(contractNum))
             {
-                ShowNotification("لطفاً شماره قرارداد را وارد کنید.", true);
+                ShowNotification("وارد کردن شماره قرارداد الزامی است.", true);
                 return;
             }
 
-            if (string.IsNullOrEmpty(brandName))
+            if (string.IsNullOrEmpty(custCode) || custName.Contains("یافت نشد"))
             {
-                ShowNotification("لطفاً نام برند را وارد کنید.", true);
+                ShowNotification("کد مشتری نامعتبر است.", true);
                 return;
             }
 
-            if (!long.TryParse(dateStr, out long dateVal) || dateStr.Length != 8)
+            if (!long.TryParse(dateStr, out long dateVal))
             {
-                ShowNotification("لطفاً تاریخ قرارداد را با فرمت صحیح وارد کنید (مانند 14030101).", true);
+                ShowNotification("تاریخ قرارداد نامعتبر است.", true);
                 return;
             }
 
-            if (!ResolveCustomerName())
+            if (!double.TryParse(totalQtyStr, out double totalQty))
             {
-                ShowNotification("لطفاً کد حسابداری مشتری معتبر را وارد کنید.", true);
-                return;
+                totalQty = 0;
             }
 
-            if (patternsList.Count == 0)
+            // Clean list from blank rows before validation
+            var validItems = patternsList.Where(p => !string.IsNullOrEmpty(p.ProductCode) && p.Quantity > 0).ToList();
+            if (validItems.Count == 0)
             {
-                ShowNotification("لطفاً حداقل یک طرح/کالا برای این قرارداد تعریف کنید.", true);
+                ShowNotification("حداقل یک الگوی کالا با مقدار بزرگتر از صفر الزامی است.", true);
                 return;
             }
-
-            if (patternsList.Any(p => string.IsNullOrEmpty(p.ProductCode) || p.ProductName == "کالا یافت نشد!"))
-            {
-                ShowNotification("لطفاً تمامی کدهای کالاها را اصلاح و تایید کنید.", true);
-                return;
-            }
-
-            if (patternsList.Any(p => p.Quantity <= 0))
-            {
-                ShowNotification("متراژ تعهد شده برای تمامی طرح‌ها باید بزرگتر از صفر باشد.", true);
-                return;
-            }
-
-            double totalQty = patternsList.Sum(p => p.Quantity);
 
             try
             {
@@ -342,10 +281,24 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     return;
                 }
 
-                // Save or Update Contract Header
+                // Build the single atomic parameterized transaction batch
+                var sbBatch = new System.Text.StringBuilder();
+                sbBatch.AppendLine("BEGIN TRANSACTION;");
+                sbBatch.AppendLine("BEGIN TRY");
+
+                var parameters = new Dapper.DynamicParameters();
+                parameters.Add("@ContractNumber", contractNum);
+                parameters.Add("@CustomerCode", custCode);
+                parameters.Add("@CustomerName", custName);
+                parameters.Add("@BrandName", brandName);
+                parameters.Add("@ContractDate", dateVal);
+                parameters.Add("@TotalQuantity", totalQty);
+                parameters.Add("@Description", desc);
+
                 if (contractId.HasValue)
                 {
-                    string updateQuery = @"
+                    parameters.Add("@ContractID", contractId.Value);
+                    sbBatch.AppendLine(@"
                         UPDATE dbo.BrandContracts
                         SET ContractNumber = @ContractNumber,
                             CustomerCode = @CustomerCode,
@@ -354,58 +307,44 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                             ContractDate = @ContractDate,
                             TotalQuantity = @TotalQuantity,
                             Description = @Description
-                        WHERE ContractID = @ContractID";
+                        WHERE ContractID = @ContractID;
 
-                    dbms.DoExecuteSQL(updateQuery, new {
-                        ContractNumber = contractNum,
-                        CustomerCode = custCode,
-                        CustomerName = custName,
-                        BrandName = brandName,
-                        ContractDate = dateVal,
-                        TotalQuantity = totalQty,
-                        Description = desc,
-                        ContractID = contractId.Value
-                    });
-
-                    // Overwrite items
-                    dbms.DoExecuteSQL("DELETE FROM dbo.BrandContractItems WHERE ContractID = @ContractID", new { ContractID = contractId.Value });
-
-                    foreach (var item in patternsList)
-                    {
-                        dbms.DoExecuteSQL(@"
-                            INSERT INTO dbo.BrandContractItems (ContractID, ProductCode, ProductName, Quantity)
-                            VALUES (@ContractID, @ProductCode, @ProductName, @Quantity)",
-                            new { ContractID = contractId.Value, ProductCode = item.ProductCode, ProductName = item.ProductName, Quantity = item.Quantity });
-                    }
+                        DELETE FROM dbo.BrandContractItems WHERE ContractID = @ContractID;");
                 }
                 else
                 {
-                    // Create Contract
-                    string insertQuery = @"
+                    sbBatch.AppendLine(@"
                         INSERT INTO dbo.BrandContracts (ContractNumber, CustomerCode, CustomerName, BrandName, ContractDate, TotalQuantity, Description)
-                        VALUES (@ContractNumber, @CustomerCode, @CustomerName, @BrandName, @ContractDate, @TotalQuantity, @Description)";
+                        VALUES (@ContractNumber, @CustomerCode, @CustomerName, @BrandName, @ContractDate, @TotalQuantity, @Description);
 
-                    dbms.DoExecuteSQL(insertQuery, new {
-                        ContractNumber = contractNum,
-                        CustomerCode = custCode,
-                        CustomerName = custName,
-                        BrandName = brandName,
-                        ContractDate = dateVal,
-                        TotalQuantity = totalQty,
-                        Description = desc
-                    });
-
-                    // Get Identity of new Contract
-                    int newId = dbms.DoGetDataSQL<int>("SELECT TOP 1 ContractID FROM dbo.BrandContracts WHERE ContractNumber = @Num", new { Num = contractNum }).FirstOrDefault();
-
-                    foreach (var item in patternsList)
-                    {
-                        dbms.DoExecuteSQL(@"
-                            INSERT INTO dbo.BrandContractItems (ContractID, ProductCode, ProductName, Quantity)
-                            VALUES (@ContractID, @ProductCode, @ProductName, @Quantity)",
-                            new { ContractID = newId, ProductCode = item.ProductCode, ProductName = item.ProductName, Quantity = item.Quantity });
-                    }
+                        DECLARE @ContractID INT = SCOPE_IDENTITY();");
                 }
+
+                // Append items inserts to execute atomically inside SQL Server transaction
+                for (int i = 0; i < validItems.Count; i++)
+                {
+                    var item = validItems[i];
+                    string pCodeKey = $"@PCode_{i}";
+                    string pNameKey = $"@PName_{i}";
+                    string pQtyKey = $"@PQty_{i}";
+
+                    parameters.Add(pCodeKey, item.ProductCode);
+                    parameters.Add(pNameKey, item.ProductName);
+                    parameters.Add(pQtyKey, item.Quantity);
+
+                    sbBatch.AppendLine($@"
+                        INSERT INTO dbo.BrandContractItems (ContractID, ProductCode, ProductName, Quantity)
+                        VALUES (@ContractID, {pCodeKey}, {pNameKey}, {pQtyKey});");
+                }
+
+                sbBatch.AppendLine("COMMIT TRANSACTION;");
+                sbBatch.AppendLine("END TRY");
+                sbBatch.AppendLine("BEGIN CATCH");
+                sbBatch.AppendLine("IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;");
+                sbBatch.AppendLine("THROW;");
+                sbBatch.AppendLine("END CATCH;");
+
+                dbms.DoExecuteSQL(sbBatch.ToString(), parameters);
 
                 this.DialogResult = true;
                 this.Close();
@@ -434,15 +373,4 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             timer.Start();
         }
     }
-
-    #region Inner Model
-    public class BrandContractItemModel
-    {
-        public int ItemID { get; set; }
-        public int ContractID { get; set; }
-        public string ProductCode { get; set; } = string.Empty;
-        public string? ProductName { get; set; }
-        public double Quantity { get; set; }
-    }
-    #endregion
 }
