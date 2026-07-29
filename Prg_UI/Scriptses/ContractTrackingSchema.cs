@@ -92,16 +92,14 @@ AS
 WITH Movements AS
 (
     SELECT
-        ContractID = COALESCE(I.ContractID, O.ContractID),
+        I.ContractID,
         I.CODE,
         ProducedQty = SUM(CASE WHEN F.FlowType = 1 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(NULLIF(I.MEGHk, 0), I.MEGH, 0)) ELSE 0 END),
         SoldQty = SUM(CASE WHEN F.FlowType = 2 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(NULLIF(I.MEGHk, 0), I.MEGH, 0)) ELSE 0 END)
     FROM dbo.INVO_LST AS I
     INNER JOIN dbo.CONTRACT_FLOW_TAG AS F ON F.TAG = I.TAG
-    LEFT JOIN dbo.HEAD_LST AS H ON H.NUMBER = I.NUMBER AND H.TAG = I.TAG
-    LEFT JOIN dbo.ORDR_HED AS O ON O.id = TRY_CONVERT(INT, H.NUMBER1)
-    WHERE COALESCE(I.ContractID, O.ContractID) IS NOT NULL
-    GROUP BY COALESCE(I.ContractID, O.ContractID), I.CODE
+    WHERE I.ContractID IS NOT NULL
+    GROUP BY I.ContractID, I.CODE
 )
 SELECT
     H.ContractID,

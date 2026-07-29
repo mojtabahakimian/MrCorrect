@@ -23,6 +23,10 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
                 contracts.Insert(0, new ContractLookup { ContractID = 0, DisplayName = "همه قراردادها" });
                 CMB_CONTRACT.ItemsSource = contracts;
                 CMB_CONTRACT.SelectedIndex = 0;
+                CMB_FLOW_TAG.ItemsSource = dbms.DoGetDataSQL<FlowTagLookup>(@"
+SELECT TAG, DisplayName = CONCAT(CONVERT(NVARCHAR(20), TAG), N' - ', Description)
+FROM dbo.CONTRACT_FLOW_TAG ORDER BY FlowType, TAG").ToList();
+                CMB_FLOW_TAG.SelectedIndex = 0;
                 LoadReport();
             }
             catch (Exception ex) { ShowError(ex); }
@@ -71,6 +75,97 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
             catch (Exception ex) { ShowError(ex); }
         }
 
+        private void BTN_ASSIGN_DOCUMENT_Click(object sender, RoutedEventArgs e)
+        {
+            if (!TryGetAllocationKeys(out int contractID, out double documentNumber, out double tag)) return;
+            const string sql = @"
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+IF NOT EXISTS (SELECT 1 FROM dbo.CONTRACT_HED WITH (UPDLOCK, HOLDLOCK) WHERE ContractID=@ContractID AND IsClosed=0)
+    THROW 51010, N'قرارداد انتخاب‌شده وجود ندارد یا مختومه است.', 1;
+IF NOT EXISTS (SELECT 1 FROM dbo.HEAD_LST WHERE NUMBER=@Number AND TAG=@Tag)
+    THROW 51011, N'سند مورد نظر پیدا نشد.', 1;
+IF NOT EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE NUMBER=@Number AND TAG=@Tag)
+    THROW 51012, N'سند مورد نظر فاقد ردیف کالا است.', 1;
+IF EXISTS
+(
+    SELECT 1 FROM dbo.INVO_LST AS I
+    WHERE I.NUMBER=@Number AND I.TAG=@Tag
+      AND NOT EXISTS
+      (
+          SELECT 1 FROM dbo.CONTRACT_DTL AS D
+          WHERE D.ContractID=@ContractID AND D.CODE=I.CODE
+      )
+)
+    THROW 51013, N'حداقل یکی از کالاهای سند در ریز قرارداد تعریف نشده است.', 1;
+IF EXISTS
+(
+    SELECT 1 FROM dbo.INVO_LST
+    WHERE NUMBER=@Number AND TAG=@Tag
+      AND ContractID IS NOT NULL AND ContractID<>@ContractID
+)
+    THROW 51014, N'این سند قبلاً به قرارداد دیگری تخصیص یافته است.', 1;
+UPDATE dbo.INVO_LST SET ContractID=@ContractID
+WHERE NUMBER=@Number AND TAG=@Tag;
+COMMIT TRANSACTION;";
+            try
+            {
+                dbms.DoExecuteSQL(sql, new { ContractID = contractID, Number = documentNumber, Tag = tag });
+                MessageBox.Show("تمام ردیف‌های سند به قرارداد متصل شدند.", "تخصیص سند", MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadReport();
+            }
+            catch (Exception ex) { ShowError(ex); }
+        }
+
+        private void BTN_UNASSIGN_DOCUMENT_Click(object sender, RoutedEventArgs e)
+        {
+            if (!TryGetAllocationKeys(out int contractID, out double documentNumber, out double tag)) return;
+            if (MessageBox.Show("اتصال این سند از قرارداد قطع شود؟", "تأیید", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            try
+            {
+                int affected = dbms.DoExecuteSQL(@"
+UPDATE dbo.INVO_LST SET ContractID=NULL
+WHERE NUMBER=@Number AND TAG=@Tag AND ContractID=@ContractID", new
+                {
+                    ContractID = contractID,
+                    Number = documentNumber,
+                    Tag = tag
+                }) ?? 0;
+                if (affected == 0)
+                {
+                    MessageBox.Show("هیچ ردیف متصلی برای سند و قرارداد انتخاب‌شده پیدا نشد.", "قطع اتصال", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                MessageBox.Show("اتصال سند از قرارداد قطع شد.", "قطع اتصال", MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadReport();
+            }
+            catch (Exception ex) { ShowError(ex); }
+        }
+
+        private bool TryGetAllocationKeys(out int contractID, out double documentNumber, out double tag)
+        {
+            contractID = CMB_CONTRACT.SelectedValue is int selected ? selected : 0;
+            tag = CMB_FLOW_TAG.SelectedValue is double selectedTag ? selectedTag : 0;
+            string numberText = new(TXT_DOCUMENT_NUMBER.Text.Where(char.IsDigit).Select(ToEnglishDigit).ToArray());
+            if (contractID <= 0)
+            {
+                MessageBox.Show("ابتدا یک قرارداد مشخص را انتخاب کنید.", "کنترل تخصیص", MessageBoxButton.OK, MessageBoxImage.Warning);
+                documentNumber = 0;
+                return false;
+            }
+            if (!double.TryParse(numberText, NumberStyles.None, CultureInfo.InvariantCulture, out documentNumber) || documentNumber <= 0)
+            {
+                MessageBox.Show("شماره سند معتبر وارد کنید.", "کنترل تخصیص", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (tag <= 0)
+            {
+                MessageBox.Show("نوع گردش سند را انتخاب کنید.", "کنترل تخصیص", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            return true;
+        }
+
         private static bool TryParsePersianDate(string digits, out long rawDate)
         {
             rawDate = 0;
@@ -96,6 +191,7 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
         private static void ShowError(Exception ex) => MessageBox.Show($"گزارش وضعیت قراردادها بارگذاری نشد.\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
 
+        private sealed class FlowTagLookup { public double TAG { get; set; } public string DisplayName { get; set; } = string.Empty; }
         private sealed class ContractLookup { public int ContractID { get; set; } public string DisplayName { get; set; } = string.Empty; }
         private sealed class ContractStatusModel
         {

@@ -133,9 +133,7 @@ BEGIN
     (
         SELECT 1
         FROM dbo.INVO_LST AS I
-        LEFT JOIN dbo.HEAD_LST AS H ON H.NUMBER = I.NUMBER AND H.TAG = I.TAG
-        LEFT JOIN dbo.ORDR_HED AS O ON O.id = TRY_CONVERT(INT, H.NUMBER1)
-        WHERE COALESCE(I.ContractID, O.ContractID) = @SavedContractID
+        WHERE I.ContractID = @SavedContractID
           AND NOT EXISTS
           (
               SELECT 1 FROM OPENJSON(@DetailsJson)
@@ -245,9 +243,7 @@ IF EXISTS
 (
     SELECT 1
     FROM dbo.INVO_LST AS I
-    LEFT JOIN dbo.HEAD_LST AS H ON H.NUMBER = I.NUMBER AND H.TAG = I.TAG
-    LEFT JOIN dbo.ORDR_HED AS O ON O.id = TRY_CONVERT(INT, H.NUMBER1)
-    WHERE COALESCE(I.ContractID, O.ContractID)=@ContractID
+    WHERE I.ContractID=@ContractID
 )
     THROW 51004, N'این قرارداد دارای گردش تولید یا فروش است و قابل حذف نیست؛ آن را مختومه کنید.', 1;
 DELETE dbo.CONTRACT_DTL WHERE ContractID=@ContractID;
