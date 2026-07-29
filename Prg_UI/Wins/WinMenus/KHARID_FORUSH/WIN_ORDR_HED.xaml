@@ -89,11 +89,8 @@
 
             <TextBox x:Name="MOLAH" Text="" Height="30" Margin="125,52,400,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="255" TabIndex="2" />
 
-            <Label Content="قرارداد پیش‌فرض:" Margin="0,99,650,0" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="85" Height="27" VerticalAlignment="Top"/>
-            <ComboBox x:Name="ContractID" Margin="0,94,738,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="240"
-                      Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="DisplayName" SelectedValuePath="ContractID"
-                      IsTextSearchEnabled="True" IsEditable="False" ToolTip="فقط مقدار پیش‌فرض ردیف‌های جدید است؛ قرارداد قطعی در ستون قرارداد ردیف تعیین می‌شود."/>
-
+<!-- Contract selection is intentionally line-based; this hidden control only preserves legacy header compatibility. -->
+<ComboBox x:Name="ContractID" Visibility="Collapsed" IsHitTestVisible="False" Focusable="False"/>
             <Button x:Name="ESLAH" Content="اصلاح" Margin="0,92,158,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Right" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
 
             <DataGrid   

@@ -1013,9 +1013,6 @@ SELECT @NewID;";
                 if (ORDER_LST_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                 {
                     WAS_ROW_ITEM = ((ORDR_LST)ORDER_LST_SUB.SelectedItem).Clone() as ORDR_LST;
-                    if (ORDER_LST_SUB.SelectedItem is ORDR_LST row && row.idd <= 0 &&
-                        row.ContractID is null && ContractID.SelectedValue is int defaultContractID)
-                        row.ContractID = defaultContractID;
                 }
             }
         }

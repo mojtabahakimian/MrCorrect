@@ -2079,9 +2079,6 @@ COMMIT TRANSACTION;";
                 if (INVO_LST_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                 {
                     WAS_ROW_ITEM = ((INVO_LST_FACTOR22)INVO_LST_SUB.SelectedItem).Clone() as INVO_LST_FACTOR22;
-                    if (INVO_LST_SUB.SelectedItem is INVO_LST_FACTOR22 row && (row.id is null || row.id <= 0) &&
-                        row.ContractID is null && ContractID.SelectedValue is int defaultContractID)
-                        row.ContractID = defaultContractID;
                 }
             }
         }

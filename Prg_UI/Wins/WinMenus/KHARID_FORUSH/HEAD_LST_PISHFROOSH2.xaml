@@ -378,11 +378,8 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <TextBox x:Name="USER_NAME" IsReadOnly="True"   Text="UserNameEmpty" Height="30" Margin="449,16,536,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" Grid.Row="1" />
-        <Label Content="قرارداد پیش‌فرض:" Margin="35,128,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1"/>
-        <ComboBox x:Name="ContractID" Width="300" Height="30" Margin="130,126,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1"
-                  Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="DisplayName" SelectedValuePath="ContractID" IsTextSearchEnabled="True"
-                  ToolTip="فقط مقدار پیش‌فرض ردیف‌های جدید است؛ قرارداد قطعی در ستون قرارداد ردیف تعیین می‌شود."/>
-
+<!-- Contract selection is intentionally line-based; this hidden control only preserves legacy header compatibility. -->
+<ComboBox x:Name="ContractID" Visibility="Collapsed" IsHitTestVisible="False" Focusable="False"/>
         <TextBox x:Name="MOLAH"   Text="" Height="29" Margin="449,92,71,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="199" TabIndex="2" Grid.Row="1" />
         <ComboBox x:Name="DEPATMAN" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" PreviewLostKeyboardFocus="DEPATMAN_PreviewLostKeyboardFocus" Margin="815,128,71,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" SelectedIndex="0" Grid.Row="1" SelectionChanged="DEPATMAN_SelectionChanged">
             <ComboBox.ItemsPanel>
