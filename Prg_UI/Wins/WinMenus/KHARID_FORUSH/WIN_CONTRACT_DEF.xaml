@@ -76,6 +76,16 @@
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                 </ComboBox>
+                                <StackPanel Grid.Column="6" Orientation="Horizontal"
+                                            HorizontalAlignment="Left" VerticalAlignment="Center"
+                                            Margin="8,0,0,0">
+                                    <Button x:Name="BTN_SAVE" Content="ذخیره سربرگ" Click="BTN_SAVE_Click"
+                                            Style="{StaticResource GerdC}" Width="120" Height="34"
+                                            Margin="4,0" Foreground="White"/>
+                                    <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click"
+                                            Style="{StaticResource GerdC}" Width="105" Height="34"
+                                            Margin="4,0" Foreground="White"/>
+                                </StackPanel>
 
                                 <Label Grid.Row="1" Content="مشتری:" VerticalAlignment="Center"/>
                                 <ComboBox x:Name="CUST_NO" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Height="30"
@@ -157,13 +167,6 @@
                                                     HorizontalAlignment="Center" VerticalAlignment="Center"
                                                     FlowDirection="LeftToRight"/>
 
-                        <StackPanel Grid.Column="2" Orientation="Horizontal"
-                                    HorizontalAlignment="Left" VerticalAlignment="Center">
-                            <Button x:Name="BTN_SAVE" Content="ذخیره سربرگ" Click="BTN_SAVE_Click"
-                                    Style="{StaticResource GerdC}" Width="120" Height="34" Margin="4,0" Foreground="White"/>
-                            <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click"
-                                    Style="{StaticResource GerdC}" Width="105" Height="34" Margin="4,0" Foreground="White"/>
-                        </StackPanel>
                     </Grid>
                 </Border>
 
