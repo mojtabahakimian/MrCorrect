@@ -3,6 +3,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -187,10 +188,21 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
                 throw new InvalidOperationException("قالب چاپی CONTRACT_STATUS.mrt در منابع برنامه پیدا نشد.");
 
             report.Load(template);
+            SetReportCompanyName(report);
             report.Dictionary.DataSources.Clear();
             report.RegData("DataSource1", table);
             report.Dictionary.Synchronize();
             return report;
+        }
+
+        private void SetReportCompanyName(StiReport report)
+        {
+            string? companyNameValue = dbms.DoGetDataSQL<string>(@"
+SELECT TOP (1) NULLIF(LTRIM(RTRIM([NAME])), N'')
+FROM dbo.SAZMAN").FirstOrDefault();
+
+            if (report.GetComponentByName("COMPANY_NAME") is StiText companyName)
+                companyName.Text = companyNameValue ?? string.Empty;
         }
 
         private static DataTable CreatePrintDataTable(IEnumerable<ContractStatusModel> data)

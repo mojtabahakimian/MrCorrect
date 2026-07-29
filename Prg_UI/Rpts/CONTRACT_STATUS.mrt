@@ -120,23 +120,23 @@
             </Text16>
             <COMPANY_NAME Ref="10" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,19,1</ClientRectangle>
+              <ClientRectangle>4.5,0,18.7,0.65</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,12</Font>
+              <Font>IRANYekanFN,11,Bold</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>COMPANY_NAME</Name>
               <Page isRef="4" />
               <Parent isRef="5" />
-              <Text>نام شرکت</Text>
+              <Text></Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </COMPANY_NAME>
             <CAPTION1 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,27.7,0.9</ClientRectangle>
+              <ClientRectangle>0,0.75,27.7,0.9</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,15,Bold</Font>
@@ -149,6 +149,7 @@
               <Type>Expression</Type>
               <Text>گزارش وضعیت قراردادهای تولید و فروش</Text>
               <HorAlignment>Center</HorAlignment>
+              <VertAlignment>Center</VertAlignment>
             </CAPTION1>
           </Components>
           <Conditions isList="true" count="0" />

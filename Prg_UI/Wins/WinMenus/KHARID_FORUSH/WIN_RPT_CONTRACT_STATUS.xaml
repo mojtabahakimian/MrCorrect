@@ -15,12 +15,16 @@
         <Style x:Key="KpiTitleStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,3,0,0"/>
         </Style>
         <Style x:Key="KpiValueStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
     </Window.Resources>
@@ -81,9 +85,11 @@
                         <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Left">
                             <Button Content="نمایش گزارش" Click="BTN_REFRESH_Click"
                                     Style="{StaticResource GerdC}" Width="110" Height="34" FontSize="10" Margin="4"
+                                    Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                     BorderBrush="{x:Null}" Foreground="#DDFFFFFF"/>
                             <Button Content="چاپ گزارش کامل" Click="BTN_PRINT_Click"
                                     Style="{StaticResource GerdC}" Width="125" Height="34" FontSize="10" Margin="4"
+                                    Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                     BorderBrush="{x:Null}" Foreground="#DDFFFFFF"/>
                         </StackPanel>
                     </Grid>
@@ -102,43 +108,44 @@
 
                 <UniformGrid Grid.Row="3" Columns="6" Margin="4,4,4,3">
                     <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFEAF2FF" BorderBrush="#FFB8D3FF" BorderThickness="1">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="FileDocument" Width="22" Height="22" Foreground="#FF2864DC" HorizontalAlignment="Center"/>
                             <TextBlock Text="متراژ قرارداد" Style="{StaticResource KpiTitleStyle}" Foreground="#FF2255B8"/>
                             <TextBlock x:Name="TXT_CONTRACTED" Style="{StaticResource KpiValueStyle}" Foreground="#FF163F91"/>
                         </StackPanel>
                     </Border>
                     <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFE9FBF4" BorderBrush="#FFAAE8CF" BorderThickness="1">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="Factory" Width="22" Height="22" Foreground="#FF00A878" HorizontalAlignment="Center"/>
                             <TextBlock Text="مقدار تولید شده" Style="{StaticResource KpiTitleStyle}" Foreground="#FF087A5B"/>
                             <TextBlock x:Name="TXT_PRODUCED" Style="{StaticResource KpiValueStyle}" Foreground="#FF006B50"/>
                         </StackPanel>
                     </Border>
                     <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFFFF7E2" BorderBrush="#FFF1D891" BorderThickness="1">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="ClockOutline" Width="22" Height="22" Foreground="#FFF39A00" HorizontalAlignment="Center"/>
                             <TextBlock Text="مانده تولید / پیشرفت" Style="{StaticResource KpiTitleStyle}" Foreground="#FF8B6500"/>
                             <TextBlock x:Name="TXT_REMAIN" Style="{StaticResource KpiValueStyle}" Foreground="#FF765500"/>
-                            <TextBlock x:Name="TXT_PROGRESS" FontSize="9" HorizontalAlignment="Center" Foreground="#FF9B7000"/>
+                            <TextBlock x:Name="TXT_PROGRESS" FontSize="9" HorizontalAlignment="Center"
+                                       TextAlignment="Center" Foreground="#FF9B7000"/>
                         </StackPanel>
                     </Border>
                     <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFFFEDF5" BorderBrush="#FFF5BDD7" BorderThickness="1">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="Cart" Width="22" Height="22" Foreground="#FFEB3E8A" HorizontalAlignment="Center"/>
                             <TextBlock Text="فروش خالص" Style="{StaticResource KpiTitleStyle}" Foreground="#FF9B285C"/>
                             <TextBlock x:Name="TXT_SOLD" Style="{StaticResource KpiValueStyle}" Foreground="#FF7B1948"/>
                         </StackPanel>
                     </Border>
                     <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFF0ECFF" BorderBrush="#FFD3C7FF" BorderThickness="1">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="PackageVariantClosed" Width="22" Height="22" Foreground="#FF7454D6" HorizontalAlignment="Center"/>
                             <TextBlock Text="مانده قراردادی" Style="{StaticResource KpiTitleStyle}" Foreground="#FF6043B2"/>
                             <TextBlock x:Name="TXT_CONTRACT_BALANCE" Style="{StaticResource KpiValueStyle}" Foreground="#FF4C3298"/>
                         </StackPanel>
                     </Border>
                     <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFEFF9FF" BorderBrush="#FFB9DEEF" BorderThickness="1">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="Warehouse" Width="22" Height="22" Foreground="#FF1787B3" HorizontalAlignment="Center"/>
                             <TextBlock Text="موجودی واقعی انبار" Style="{StaticResource KpiTitleStyle}" Foreground="#FF146D8E"/>
                             <TextBlock x:Name="TXT_ACTUAL_INVENTORY" Style="{StaticResource KpiValueStyle}" Foreground="#FF0F5875"/>
