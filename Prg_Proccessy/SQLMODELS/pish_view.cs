@@ -117,6 +117,8 @@ namespace Prg_Proccessy.SQLMODELS
         public int? sgn3usid { get => _sgn3usid; set { if (_sgn3usid == value) return; _sgn3usid = value; OnPropertyChanged("sgn3usid"); } }
         private DateTime? _crt;
         public DateTime? CRT { get => _crt; set { if (_crt == value) return; _crt = value; OnPropertyChanged("CRT"); } }
+        private int? _contractID;
+        public int? ContractID { get => _contractID; set { if (_contractID == value) return; _contractID = value; OnPropertyChanged("ContractID"); } }
         private int? _uid;
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
 
