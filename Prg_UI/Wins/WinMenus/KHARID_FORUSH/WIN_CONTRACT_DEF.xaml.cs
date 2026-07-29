@@ -2,6 +2,7 @@ using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
 using Prg_UI.Wins.WinOther;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,17 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Wins.WinOther;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class WIN_CONTRACT_DEF : Window
+    public partial class WIN_CONTRACT_DEF : Window, ISearchableWindow
     {
         private readonly CL_CCNNMANAGER dbms = new();
         private readonly ObservableCollection<ContractDtlModel> ContractDetails = new();
         private int? CurrentContractID;
         private bool isLoading;
+        private List<ContractHeaderModel> ContractHeaders = new();
 
         public WIN_CONTRACT_DEF()
         {
@@ -38,6 +41,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 ContractDate.Text = FormatDate(Tarikh.FullCurrentDate);
                 CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                LoadBrands();
                 LoadContracts();
                 BeginNewContract();
             }
@@ -49,13 +53,51 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void LoadContracts(int? selectContractID = null)
         {
-            var contracts = dbms.DoGetDataSQL<ContractHeaderModel>(@"
+            ContractHeaders = dbms.DoGetDataSQL<ContractHeaderModel>(@"
 SELECT ContractID, ContractNo, ContractDate, CUST_NO, BrandName, TotalQty, MOLAH, IsClosed
 FROM dbo.CONTRACT_HED
 ORDER BY ContractDate DESC, ContractID DESC").ToList();
-            DG_CONTRACTS.ItemsSource = contracts;
+            DG_CONTRACTS.ItemsSource = ContractHeaders;
             if (selectContractID.HasValue)
-                DG_CONTRACTS.SelectedItem = contracts.FirstOrDefault(x => x.ContractID == selectContractID.Value);
+                DG_CONTRACTS.SelectedItem = ContractHeaders.FirstOrDefault(x => x.ContractID == selectContractID.Value);
+        }
+
+        object ISearchableWindow.GetSearchSource() => ContractHeaders;
+
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            if (selectedItem is not ContractHeaderModel selected) return;
+            var contract = ContractHeaders.FirstOrDefault(x => x.ContractID == selected.ContractID);
+            if (contract is null) return;
+            DG_CONTRACTS.SelectedItem = contract;
+            DG_CONTRACTS.ScrollIntoView(contract);
+            LoadContract(contract);
+        }
+
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره قرارداد", PropertyPath = nameof(ContractHeaderModel.ContractNo), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تاریخ قرارداد", PropertyPath = nameof(ContractHeaderModel.ContractDate), PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = nameof(ContractHeaderModel.CUST_NO), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "برند", PropertyPath = nameof(ContractHeaderModel.BrandName), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "متراژ", PropertyPath = nameof(ContractHeaderModel.TotalQty), PropertyType = typeof(decimal) },
+                new SearchableProperty { DisplayName = "مختومه", PropertyPath = nameof(ContractHeaderModel.IsClosed), PropertyType = typeof(bool) }
+            };
+        }
+
+        private void LoadBrands(string? selectedBrand = null)
+        {
+            var brands = dbms.DoGetDataSQL<BrandLookup>(@"
+SELECT NAMES = BrandName
+FROM dbo.CONTRACT_HED
+WHERE NULLIF(LTRIM(RTRIM(BrandName)), N'') IS NOT NULL
+GROUP BY BrandName
+ORDER BY BrandName").ToList();
+            BrandName.ItemsSource = brands;
+            if (!string.IsNullOrWhiteSpace(selectedBrand))
+                BrandName.Text = selectedBrand;
         }
 
         private void BeginNewContract()
@@ -67,7 +109,8 @@ ORDER BY ContractDate DESC, ContractID DESC").ToList();
                 DG_CONTRACTS.SelectedItem = null;
                 ContractNo.Clear();
                 ContractDate.Text = FormatDate(Tarikh.FullCurrentDate);
-                BrandName.Clear();
+                BrandName.SelectedValue = null;
+                BrandName.Text = string.Empty;
                 MOLAH.Clear();
                 CUST_NO.SelectedIndex = -1;
                 CUST_NO.Text = string.Empty;
@@ -88,7 +131,7 @@ ORDER BY ContractDate DESC, ContractID DESC").ToList();
                 CurrentContractID = header.ContractID;
                 ContractNo.Text = header.ContractNo;
                 ContractDate.Text = FormatDate(header.ContractDate.ToString(CultureInfo.InvariantCulture));
-                BrandName.Text = header.BrandName;
+                LoadBrands(header.BrandName);
                 MOLAH.Text = header.MOLAH ?? string.Empty;
                 SelectCustomer(header.CUST_NO);
                 IsClosed.IsChecked = header.IsClosed;
@@ -284,8 +327,9 @@ SELECT @SavedContractID;";
                     DetailsJson = detailJson
                 }).Single();
                 LoadContracts(CurrentContractID);
+                LoadBrands(BrandName.Text.Trim());
                 LBL_STATUS.Text = "قرارداد با موفقیت و به‌صورت یک تراکنش کامل ذخیره شد.";
-                MessageBox.Show(LBL_STATUS.Text, "ثبت قرارداد", MessageBoxButton.OK, MessageBoxImage.Information);
+                new Msgwin(false, LBL_STATUS.Text).ShowDialog();
             }
             catch (Exception ex) { ShowError("ذخیره قرارداد انجام نشد.", ex); }
         }
@@ -314,14 +358,16 @@ SELECT @SavedContractID;";
 
         private bool ValidationError(string message)
         {
-            MessageBox.Show(message, "کنترل قرارداد", MessageBoxButton.OK, MessageBoxImage.Warning);
+            new Msgwin(false, message).ShowDialog();
             return false;
         }
 
         private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
         {
             if (!CurrentContractID.HasValue) { ValidationError("ابتدا یک قرارداد ثبت‌شده را انتخاب کنید."); return; }
-            if (MessageBox.Show("قرارداد انتخاب‌شده حذف شود؟", "تأیید حذف", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            var confirmation = new Msgwin(true, "قرارداد انتخاب‌شده حذف شود؟");
+            confirmation.ShowDialog();
+            if (confirmation.DialogResult != true) return;
             try
             {
                 const string sql = @"
@@ -345,6 +391,7 @@ IF @@ROWCOUNT = 0 THROW 51005, N'قرارداد پیدا نشد.', 1;
 COMMIT TRANSACTION;";
                 dbms.DoExecuteSQL(sql, new { ContractID = CurrentContractID.Value });
                 LoadContracts();
+                LoadBrands();
                 BeginNewContract();
                 LBL_STATUS.Text = "قرارداد حذف شد.";
             }
@@ -446,6 +493,13 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                var searchWindow = new EnhancedSearchWindow(this) { Owner = this };
+                searchWindow.ShowDialog();
+                return;
+            }
             if (e.Key == Key.Escape)
             {
                 Close();
@@ -543,7 +597,11 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
                 DG_DTL.BeginEdit();
             }), DispatcherPriority.Background);
         }
-        private void ShowError(string message, Exception ex) { LBL_STATUS.Text = message; MessageBox.Show($"{message}\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error); }
+        private void ShowError(string message, Exception ex)
+        {
+            LBL_STATUS.Text = message;
+            new Msgwin(false, $"{message}\n{ex.Message}").ShowDialog();
+        }
 
         public sealed class ContractDtlModel : INotifyPropertyChanged
         {
@@ -568,5 +626,6 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
         }
         private sealed class ContractHeaderModel { public int ContractID { get; set; } public string ContractNo { get; set; } = string.Empty; public long ContractDate { get; set; } public string CUST_NO { get; set; } = string.Empty; public string BrandName { get; set; } = string.Empty; public decimal TotalQty { get; set; } public string? MOLAH { get; set; } public bool IsClosed { get; set; } }
         private sealed class ProductLookup { public string CODE { get; set; } = string.Empty; public string NAME { get; set; } = string.Empty; }
+        private sealed class BrandLookup { public string NAMES { get; set; } = string.Empty; }
     }
 }

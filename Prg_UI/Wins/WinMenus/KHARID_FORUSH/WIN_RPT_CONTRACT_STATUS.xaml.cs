@@ -1,5 +1,6 @@
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -38,7 +39,7 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
             {
                 if (!TryParsePersianDate(digits, out long parsed))
                 {
-                    MessageBox.Show("تاریخ شروع معتبر نیست و باید به صورت 1405/05/07 وارد شود.", "کنترل گزارش", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    new Msgwin(false, "تاریخ شروع معتبر نیست و باید به صورت 1405/05/07 وارد شود.").ShowDialog();
                     return;
                 }
                 fromDate = parsed;
@@ -95,7 +96,7 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
             '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9', _ => value
         };
 
-        private static void ShowError(Exception ex) => MessageBox.Show($"گزارش وضعیت قراردادها بارگذاری نشد.\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+        private static void ShowError(Exception ex) => new Msgwin(false, $"گزارش وضعیت قراردادها بارگذاری نشد.\n{ex.Message}").ShowDialog();
         private void Btn_Close_Click(object sender, RoutedEventArgs e) => Close();
         private void Btn_Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void Btn_Max_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
