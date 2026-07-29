@@ -25,7 +25,7 @@ BEGIN
         CRT DATETIME2(0) NOT NULL CONSTRAINT DF_CONTRACT_HED_CRT DEFAULT (SYSDATETIME()),
         UID INT NULL,
         CONSTRAINT UQ_CONTRACT_HED_ContractNo UNIQUE (ContractNo),
-        CONSTRAINT CK_CONTRACT_HED_TotalQty CHECK (TotalQty > 0),
+        CONSTRAINT CK_CONTRACT_HED_TotalQty CHECK (TotalQty >= 0),
         CONSTRAINT CK_CONTRACT_HED_ContractDate CHECK (ContractDate BETWEEN 10101 AND 99991231)
     );
 END;
@@ -46,6 +46,21 @@ BEGIN
         CONSTRAINT CK_CONTRACT_DTL_Qty CHECK (Qty > 0)
     );
 END;
+
+-- A master record is saved before its detail rows.  During that short-lived
+-- state the derived total is zero; every detail save recalculates it.
+IF EXISTS
+(
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE parent_object_id = OBJECT_ID(N'dbo.CONTRACT_HED')
+      AND name = N'CK_CONTRACT_HED_TotalQty'
+      AND definition NOT LIKE N'%>=(0)%'
+      AND definition NOT LIKE N'%>= (0)%'
+)
+    ALTER TABLE dbo.CONTRACT_HED DROP CONSTRAINT CK_CONTRACT_HED_TotalQty;
+IF OBJECT_ID(N'dbo.CK_CONTRACT_HED_TotalQty', N'C') IS NULL
+    ALTER TABLE dbo.CONTRACT_HED WITH CHECK ADD CONSTRAINT CK_CONTRACT_HED_TotalQty CHECK (TotalQty >= 0);
 
 IF OBJECT_ID(N'dbo.CONTRACT_FLOW_TAG', N'U') IS NULL
 BEGIN

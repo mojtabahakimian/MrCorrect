@@ -110,7 +110,7 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
         {
             if (e.Key == Key.Escape)
             {
-                Close();
+                e.Handled = true;
                 return;
             }
             if (e.Key != Key.Enter || Keyboard.Modifiers != ModifierKeys.None) return;

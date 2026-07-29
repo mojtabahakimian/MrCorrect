@@ -136,6 +136,7 @@
                                     <TextBlock Text="طرح‌ها و متراژ قرارداد" Foreground="White" FontWeight="Bold" Margin="12,0" VerticalAlignment="Center"/>
                                 </Border>
                                 <DataGrid Grid.Row="1" x:Name="DG_DTL" Margin="8" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
+                                          IsReadOnly="True" BeginningEdit="DG_DTL_BeginningEdit" PreviewKeyDown="DG_DTL_PreviewKeyDown"
                                           CellEditEnding="DG_DTL_CellEditEnding" RowEditEnding="DG_DTL_RowEditEnding"
                                           ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}"
                                           HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
@@ -171,7 +172,7 @@
                         <Grid Grid.Row="2">
                             <TextBlock x:Name="LBL_TotalQty" Text="جمع متراژ: 0" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <Button x:Name="BTN_SAVE" Content="ذخیره قرارداد" Click="BTN_SAVE_Click" Style="{StaticResource GerdC}" Width="120" Height="34" Margin="4" Foreground="White"/>
+                                <Button x:Name="BTN_SAVE" Content="ذخیره سربرگ" Click="BTN_SAVE_Click" Style="{StaticResource GerdC}" Width="120" Height="34" Margin="4" Foreground="White"/>
                                 <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click" Style="{StaticResource GerdC}" Width="105" Height="34" Margin="4" Foreground="White"/>
                             </StackPanel>
                         </Grid>
