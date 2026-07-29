@@ -532,6 +532,7 @@ SELECT ContractID, IsClosed,
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
             contracts.Insert(0, new ContractOrderLookup { ContractID = null, DisplayName = "بدون قرارداد" });
             ContractID.ItemsSource = contracts;
+            ContractID_COLUMN.ItemsSource = contracts;
 
             string sql = @"
                SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD
@@ -1012,6 +1013,9 @@ SELECT @NewID;";
                 if (ORDER_LST_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                 {
                     WAS_ROW_ITEM = ((ORDR_LST)ORDER_LST_SUB.SelectedItem).Clone() as ORDR_LST;
+                    if (ORDER_LST_SUB.SelectedItem is ORDR_LST row && row.idd <= 0 &&
+                        row.ContractID is null && ContractID.SelectedValue is int defaultContractID)
+                        row.ContractID = defaultContractID;
                 }
             }
         }
@@ -1115,6 +1119,39 @@ SELECT @NewID;";
 
         }
 
+        private bool ValidateRowContract(ORDR_LST row, int? originalContractID)
+        {
+            if (!row.ContractID.HasValue) return true;
+
+            var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
+SELECT TOP (1) H.IsClosed,
+       ProductExists = CONVERT(BIT, CASE WHEN EXISTS
+       (
+           SELECT 1 FROM dbo.CONTRACT_DTL AS D
+           WHERE D.ContractID = H.ContractID AND D.CODE = @Code
+       ) THEN 1 ELSE 0 END)
+FROM dbo.CONTRACT_HED AS H
+WHERE H.ContractID = @ContractID",
+                new { ContractID = row.ContractID.Value, Code = row.CODE }).FirstOrDefault();
+
+            if (contract is null)
+            {
+                new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
+                return false;
+            }
+            if (contract.IsClosed && row.ContractID != originalContractID)
+            {
+                new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
+                return false;
+            }
+            if (!contract.ProductExists)
+            {
+                new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            return true;
+        }
+
         private void ORDER_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) return;
@@ -1129,11 +1166,17 @@ SELECT @NewID;";
                 return;
             }
 
+            if (!ValidateRowContract(row, WAS_ROW_ITEM?.ContractID))
+            {
+                e.Cancel = true;
+                return;
+            }
+
             if (row?.ID == null || row.ID == 0)
             {
                 // INSERT
-                string sql = @"INSERT INTO ORDR_LST (ID, CODE, VAHED_K, MEGH, MEGHk, CUST_NO, DATE) 
-                               VALUES (@ID, @CODE, @VAHED_K, @MEGH, @MEGHk, @CUST_NO, @DATE)";
+                string sql = @"INSERT INTO ORDR_LST (ID, CODE, VAHED_K, MEGH, MEGHk, CUST_NO, DATE, ContractID)
+                               VALUES (@ID, @CODE, @VAHED_K, @MEGH, @MEGHk, @CUST_NO, @DATE, @ContractID)";
 
                 dbms.DoExecuteSQL(sql, new
                 {
@@ -1143,14 +1186,16 @@ SELECT @NewID;";
                     row.MEGH,
                     row.MEGHK,
                     CUST_NO = row.CUST_NO ?? "",
-                    DATE = DATE_N.Text.ToRawTarikh()
+                    DATE = DATE_N.Text.ToRawTarikh(),
+                    row.ContractID
                 });
             }
             else
             {
                 // UPDATE
-                string sql = @"UPDATE ORDR_LST SET CODE=@CODE, VAHED_K=@VAHED_K, MEGH=@MEGH, MEGHk=@MEGHk, CUST_NO=@CUST_NO 
-                               WHERE ID = @ID";
+                string sql = @"UPDATE ORDR_LST SET CODE=@CODE, VAHED_K=@VAHED_K, MEGH=@MEGH, MEGHk=@MEGHk,
+                                      CUST_NO=@CUST_NO, ContractID=@ContractID
+                               WHERE idd = @idd";
 
                 dbms.DoExecuteSQL(sql, new
                 {
@@ -1159,7 +1204,8 @@ SELECT @NewID;";
                     row.MEGH,
                     row.MEGHK,
                     CUST_NO = row.CUST_NO ?? "",
-                    row.ID
+                    row.ContractID,
+                    row.idd
                 });
             }
         }
@@ -1486,6 +1532,11 @@ SELECT @NewID;";
             public int? ContractID { get; set; }
             public bool IsClosed { get; set; }
             public string DisplayName { get; set; } = string.Empty;
+        }
+        private sealed class ContractRowValidation
+        {
+            public bool IsClosed { get; set; }
+            public bool ProductExists { get; set; }
         }
 
     }

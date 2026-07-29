@@ -802,6 +802,7 @@ SELECT ContractID, IsClosed,
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
             contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
             ContractID.ItemsSource = contracts;
+            ContractID_COLUMN.ItemsSource = contracts;
 
             //فرمول ساخت
             N_KOL_ALL = dbms.DoGetDataSQL<FSAKHT_COMBO>("SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + N' - ' + CAST(HEAD_MANF.DATE_ACTIV AS nvarchar) + N' :-' + ISNULL(HEAD_MANF.TOZIH, N' ') + CAST(HEAD_MANF.FNUMB AS char) AS Expr1 FROM HEAD_MANF INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE").ToList();
@@ -1766,9 +1767,6 @@ SET DATE_N=@Date, NUMBER1=@Number1, N_S=@SanadNumber, DEPATMAN=@Department,
     CUST_NO=@Customer, MOLAH=@Description, FNUMCO=@InternalNumber, OKF=@IsApproved,
     USER_NAME=@UserName, ContractID=@ContractID
 WHERE NUMBER=@Number AND TAG=@Tag;
-UPDATE dbo.INVO_LST
-SET ContractID=@ContractID
-WHERE NUMBER=@Number AND TAG=@Tag;
 COMMIT TRANSACTION;";
             dbms.DoExecuteSQL(sql, new
             {
@@ -1796,7 +1794,7 @@ COMMIT TRANSACTION;";
                 var QRE_LST = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($@"SELECT        dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.STUF_DEF.NAME AS NAME_CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, 
 																				 dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, 
 																			   	 dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.id, dbo.INVO_LST.AVRAGE2, 
-																			 	 dbo.INVO_LST.IMBAA, dbo.INVO_LST.TOTALARZ, dbo.INVO_LST.VISITOR, dbo.INVO_LST.TKHN, dbo.INVO_LST.JAY, dbo.INVO_LST.JAYO, dbo.INVO_LST.CRT, dbo.INVO_LST.UID
+															 dbo.INVO_LST.IMBAA, dbo.INVO_LST.TOTALARZ, dbo.INVO_LST.VISITOR, dbo.INVO_LST.TKHN, dbo.INVO_LST.JAY, dbo.INVO_LST.JAYO, dbo.INVO_LST.CRT, dbo.INVO_LST.UID, dbo.INVO_LST.ContractID
 															FROM            dbo.INVO_LST LEFT OUTER JOIN
 																				 dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE LEFT OUTER JOIN
 																				 dbo.TCOD_ANBAR ON dbo.INVO_LST.ANBAR = dbo.TCOD_ANBAR.CODE LEFT OUTER JOIN
@@ -2081,6 +2079,9 @@ COMMIT TRANSACTION;";
                 if (INVO_LST_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                 {
                     WAS_ROW_ITEM = ((INVO_LST_FACTOR22)INVO_LST_SUB.SelectedItem).Clone() as INVO_LST_FACTOR22;
+                    if (INVO_LST_SUB.SelectedItem is INVO_LST_FACTOR22 row && (row.id is null || row.id <= 0) &&
+                        row.ContractID is null && ContractID.SelectedValue is int defaultContractID)
+                        row.ContractID = defaultContractID;
                 }
             }
         }
@@ -2470,6 +2471,39 @@ COMMIT TRANSACTION;";
             #endregion
 
         }
+        private bool ValidateRowContract(INVO_LST_FACTOR22 row, int? originalContractID)
+        {
+            if (!row.ContractID.HasValue) return true;
+
+            var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
+SELECT TOP (1) H.IsClosed,
+       ProductExists = CONVERT(BIT, CASE WHEN EXISTS
+       (
+           SELECT 1 FROM dbo.CONTRACT_DTL AS D
+           WHERE D.ContractID = H.ContractID AND D.CODE = @Code
+       ) THEN 1 ELSE 0 END)
+FROM dbo.CONTRACT_HED AS H
+WHERE H.ContractID = @ContractID",
+                new { ContractID = row.ContractID.Value, Code = row.CODE }).FirstOrDefault();
+
+            if (contract is null)
+            {
+                new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
+                return false;
+            }
+            if (contract.IsClosed && row.ContractID != originalContractID)
+            {
+                new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
+                return false;
+            }
+            if (!contract.ProductExists)
+            {
+                new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            return true;
+        }
+
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -2486,6 +2520,12 @@ COMMIT TRANSACTION;";
             if (!BodyIsValid(TheRow))
             {
                 INVO_LST_SUB_CANCEL_EDIT();
+                return;
+            }
+
+            if (!ValidateRowContract(TheRow, WAS_ROW_ITEM?.ContractID))
+            {
+                e.Cancel = true;
                 return;
             }
 
@@ -2533,7 +2573,7 @@ COMMIT TRANSACTION;";
                               {TheRow.TKHN} ,
                               {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}   ,
                               {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())},
-                              (SELECT ContractID FROM dbo.HEAD_LST WHERE NUMBER={NUMBER.Text} AND TAG={FTAG}) )";
+                              {TheRow.ContractID?.ToString() ?? "NULL"} )";
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
                 ErrosMessages.AddRange(errorMsgs);
@@ -2561,7 +2601,8 @@ COMMIT TRANSACTION;";
                    AVRAGE = {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},
                    AVRAGE2 = {(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)}, IMBAA = {TheRow.IMBAA}, 
                    TOTALARZ = {(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)}, VISITOR = N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}',
-                   TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())}
+                   TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())},
+                   ContractID = {TheRow.ContractID?.ToString() ?? "NULL"}
                    WHERE id = {TheRow.id}";
 
                 var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { TheRow }, _qre, null, false);
@@ -3323,6 +3364,11 @@ COMMIT TRANSACTION;";
             public int? ContractID { get; set; }
             public bool IsClosed { get; set; }
             public string DisplayName { get; set; } = string.Empty;
+        }
+        private sealed class ContractRowValidation
+        {
+            public bool IsClosed { get; set; }
+            public bool ProductExists { get; set; }
         }
 
     }
