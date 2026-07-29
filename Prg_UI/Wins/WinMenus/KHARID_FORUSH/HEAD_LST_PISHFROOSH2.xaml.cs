@@ -2355,9 +2355,14 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
             }
         }
 
-        private bool ValidateRowContract(INVO_LST_FACTOR22 row, int? originalContractID)
+        private bool ValidateRowContract(INVO_LST_FACTOR22 row)
         {
             if (!row.ContractID.HasValue) return true;
+
+            PersistedContractLink? persisted = row.id > 0
+                ? dbms.DoGetDataSQL<PersistedContractLink>(
+                    "SELECT TOP (1) ContractID, CODE FROM dbo.INVO_LST WHERE id = @id", new { row.id }).FirstOrDefault()
+                : null;
 
             var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
 SELECT TOP (1) H.IsClosed,
@@ -2375,7 +2380,9 @@ WHERE H.ContractID = @ContractID",
                 new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
                 return false;
             }
-            if (contract.IsClosed && row.ContractID != originalContractID)
+            if (contract.IsClosed &&
+                (persisted?.ContractID != row.ContractID ||
+                 !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase)))
             {
                 new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
                 return false;
@@ -2458,7 +2465,7 @@ WHERE H.ContractID = @ContractID",
                 return;
             }
 
-            if (!ValidateRowContract(ROW, WAS_ROW_ITEM?.ContractID))
+            if (!ValidateRowContract(ROW))
             {
                 e.Cancel = true;
                 return;
@@ -2574,9 +2581,16 @@ WHERE H.ContractID = @ContractID",
         bool isSavedSuccess = false;
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
-            if (ContractID.SelectedItem is ContractLookup selectedContract && selectedContract.IsClosed)
+            int? selectedContractID = ContractID.SelectedValue is int contractID ? contractID : null;
+            int? originalContractID = !NewRecord && double.TryParse(NUMBER.Text, out double documentNumber)
+                ? dbms.DoGetDataSQL<int?>(
+                    "SELECT TOP (1) ContractID FROM dbo.HEAD_LST WHERE NUMBER = @Number AND TAG = 20",
+                    new { Number = documentNumber }).FirstOrDefault()
+                : null;
+            if (ContractID.SelectedItem is ContractLookup selectedContract && selectedContract.IsClosed &&
+                selectedContractID != originalContractID)
             {
-                new Msgwin(false, "ثبت یا ویرایش پیش‌فاکتور برای قرارداد مختومه مجاز نیست.").ShowDialog();
+                new Msgwin(false, "نمی‌توان قرارداد پیش‌فرض جدیدی از میان قراردادهای مختومه انتخاب کرد.").ShowDialog();
                 return;
             }
             isSavedSuccess = false;
@@ -6467,6 +6481,11 @@ WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
         {
             public bool IsClosed { get; set; }
             public bool ProductExists { get; set; }
+        }
+        private sealed class PersistedContractLink
+        {
+            public int? ContractID { get; set; }
+            public string CODE { get; set; } = string.Empty;
         }
 
     }

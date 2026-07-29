@@ -1119,9 +1119,14 @@ SELECT @NewID;";
 
         }
 
-        private bool ValidateRowContract(ORDR_LST row, int? originalContractID)
+        private bool ValidateRowContract(ORDR_LST row)
         {
             if (!row.ContractID.HasValue) return true;
+
+            PersistedContractLink? persisted = row.idd > 0
+                ? dbms.DoGetDataSQL<PersistedContractLink>(
+                    "SELECT TOP (1) ContractID, CODE FROM dbo.ORDR_LST WHERE idd = @idd", new { row.idd }).FirstOrDefault()
+                : null;
 
             var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
 SELECT TOP (1) H.IsClosed,
@@ -1139,7 +1144,9 @@ WHERE H.ContractID = @ContractID",
                 new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
                 return false;
             }
-            if (contract.IsClosed && row.ContractID != originalContractID)
+            if (contract.IsClosed &&
+                (persisted?.ContractID != row.ContractID ||
+                 !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase)))
             {
                 new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
                 return false;
@@ -1166,7 +1173,7 @@ WHERE H.ContractID = @ContractID",
                 return;
             }
 
-            if (!ValidateRowContract(row, WAS_ROW_ITEM?.ContractID))
+            if (!ValidateRowContract(row))
             {
                 e.Cancel = true;
                 return;
@@ -1176,9 +1183,10 @@ WHERE H.ContractID = @ContractID",
             {
                 // INSERT
                 string sql = @"INSERT INTO ORDR_LST (ID, CODE, VAHED_K, MEGH, MEGHk, CUST_NO, DATE, ContractID)
+                               OUTPUT INSERTED.idd
                                VALUES (@ID, @CODE, @VAHED_K, @MEGH, @MEGHk, @CUST_NO, @DATE, @ContractID)";
 
-                dbms.DoExecuteSQL(sql, new
+                int newRowID = dbms.DoGetDataSQL<int>(sql, new
                 {
                     ID = headerId,
                     row.CODE,
@@ -1188,7 +1196,11 @@ WHERE H.ContractID = @ContractID",
                     CUST_NO = row.CUST_NO ?? "",
                     DATE = DATE_N.Text.ToRawTarikh(),
                     row.ContractID
-                });
+                }).FirstOrDefault();
+                if (newRowID <= 0)
+                    throw new InvalidOperationException("شناسه ردیف سفارش پس از ثبت برگردانده نشد.");
+                row.ID = headerId;
+                row.idd = newRowID;
             }
             else
             {
@@ -1537,6 +1549,11 @@ WHERE H.ContractID = @ContractID",
         {
             public bool IsClosed { get; set; }
             public bool ProductExists { get; set; }
+        }
+        private sealed class PersistedContractLink
+        {
+            public int? ContractID { get; set; }
+            public string CODE { get; set; } = string.Empty;
         }
 
     }

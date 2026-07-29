@@ -281,10 +281,10 @@
                 </ComboBox.ItemsPanel>
             </ComboBox>
 
-            <Label Content="قرارداد مرتبط:" Margin="0,166,4,0" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="76" Height="26" VerticalAlignment="Top"/>
+            <Label Content="قرارداد پیش‌فرض:" Margin="0,166,4,0" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="82" Height="26" VerticalAlignment="Top"/>
             <ComboBox x:Name="ContractID" Margin="0,164,84,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="300"
                       Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="DisplayName" SelectedValuePath="ContractID"
-                      IsTextSearchEnabled="True" IsEditable="False" ToolTip="قرارداد تولید مرتبط با این رسید را انتخاب کنید"/>
+                      IsTextSearchEnabled="True" IsEditable="False" ToolTip="فقط مقدار پیش‌فرض ردیف‌های جدید است؛ قرارداد قطعی در ستون قرارداد ردیف تعیین می‌شود."/>
 
             <Button x:Name="BTN_FACTORHA" Content="لیست برگه ورود کالای ساخته شده ها" Margin="98,129,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
             <Button x:Name="BTN_NEW_FACTOR" Content="برگه ورود جدید" Margin="307,129,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="129" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4" Visibility="Collapsed"/>

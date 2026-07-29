@@ -2471,9 +2471,14 @@ COMMIT TRANSACTION;";
             #endregion
 
         }
-        private bool ValidateRowContract(INVO_LST_FACTOR22 row, int? originalContractID)
+        private bool ValidateRowContract(INVO_LST_FACTOR22 row)
         {
             if (!row.ContractID.HasValue) return true;
+
+            PersistedContractLink? persisted = row.id > 0
+                ? dbms.DoGetDataSQL<PersistedContractLink>(
+                    "SELECT TOP (1) ContractID, CODE FROM dbo.INVO_LST WHERE id = @id", new { row.id }).FirstOrDefault()
+                : null;
 
             var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
 SELECT TOP (1) H.IsClosed,
@@ -2491,7 +2496,9 @@ WHERE H.ContractID = @ContractID",
                 new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
                 return false;
             }
-            if (contract.IsClosed && row.ContractID != originalContractID)
+            if (contract.IsClosed &&
+                (persisted?.ContractID != row.ContractID ||
+                 !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase)))
             {
                 new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
                 return false;
@@ -2523,7 +2530,7 @@ WHERE H.ContractID = @ContractID",
                 return;
             }
 
-            if (!ValidateRowContract(TheRow, WAS_ROW_ITEM?.ContractID))
+            if (!ValidateRowContract(TheRow))
             {
                 e.Cancel = true;
                 return;
@@ -3369,6 +3376,11 @@ WHERE H.ContractID = @ContractID",
         {
             public bool IsClosed { get; set; }
             public bool ProductExists { get; set; }
+        }
+        private sealed class PersistedContractLink
+        {
+            public int? ContractID { get; set; }
+            public string CODE { get; set; } = string.Empty;
         }
 
     }
