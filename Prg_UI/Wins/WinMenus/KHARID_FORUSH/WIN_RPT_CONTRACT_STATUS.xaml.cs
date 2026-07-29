@@ -94,6 +94,15 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
         };
 
         private static void ShowError(Exception ex) => MessageBox.Show($"گزارش وضعیت قراردادها بارگذاری نشد.\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+        private void Btn_Close_Click(object sender, RoutedEventArgs e) => Close();
+        private void Btn_Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+        private void Btn_Max_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left) return;
+            if (e.ClickCount == 2) Btn_Max_Click(sender, e);
+            else DragMove();
+        }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
 
         private sealed class ContractLookup { public int ContractID { get; set; } public string DisplayName { get; set; } = string.Empty; }

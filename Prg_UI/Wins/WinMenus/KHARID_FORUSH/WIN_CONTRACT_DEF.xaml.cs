@@ -290,6 +290,15 @@ COMMIT TRANSACTION;";
         private void DG_CONTRACTS_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (!isLoading && DG_CONTRACTS.SelectedItem is ContractHeaderModel h) LoadContract(h); }
         private void BTN_NEW_Click(object sender, RoutedEventArgs e) => BeginNewContract();
         private void BTN_REFRESH_Click(object sender, RoutedEventArgs e) { LoadContracts(CurrentContractID); LBL_STATUS.Text = "اطلاعات به‌روز شد."; }
+        private void Btn_Close_Click(object sender, RoutedEventArgs e) => Close();
+        private void Btn_Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+        private void Btn_Max_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left) return;
+            if (e.ClickCount == 2) Btn_Max_Click(sender, e);
+            else DragMove();
+        }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
         private void ShowError(string message, Exception ex) { LBL_STATUS.Text = message; MessageBox.Show($"{message}\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error); }
 
