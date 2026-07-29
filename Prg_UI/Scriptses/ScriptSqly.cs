@@ -21,6 +21,58 @@ namespace Prg_UI.Scriptses
             {
                 db.Open();
 
+                #region Brand Contracts Schema Update
+                try
+                {
+                    db.Execute(@"
+                        IF OBJECT_ID('dbo.BrandContracts', 'U') IS NULL
+                        BEGIN
+                            CREATE TABLE dbo.BrandContracts (
+                                ContractID INT IDENTITY(1,1) PRIMARY KEY,
+                                ContractNumber NVARCHAR(100) NOT NULL UNIQUE,
+                                CustomerCode NVARCHAR(50) NOT NULL,
+                                CustomerName NVARCHAR(250) NULL,
+                                BrandName NVARCHAR(150) NOT NULL,
+                                ContractDate BIGINT NOT NULL,
+                                TotalQuantity FLOAT NOT NULL DEFAULT 0,
+                                Description NVARCHAR(500) NULL,
+                                CRT DATETIME DEFAULT GETDATE(),
+                                UID INT NULL
+                            );
+                        END");
+
+                    db.Execute(@"
+                        IF OBJECT_ID('dbo.BrandContractItems', 'U') IS NULL
+                        BEGIN
+                            CREATE TABLE dbo.BrandContractItems (
+                                ItemID INT IDENTITY(1,1) PRIMARY KEY,
+                                ContractID INT NOT NULL FOREIGN KEY REFERENCES dbo.BrandContracts(ContractID) ON DELETE CASCADE,
+                                ProductCode NVARCHAR(50) NOT NULL,
+                                ProductName NVARCHAR(250) NULL,
+                                Quantity FLOAT NOT NULL DEFAULT 0,
+                                CRT DATETIME DEFAULT GETDATE(),
+                                UID INT NULL
+                            );
+                        END");
+
+                    db.Execute(@"
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.HEAD_LST') AND name = 'ContractID')
+                        BEGIN
+                            ALTER TABLE dbo.HEAD_LST ADD ContractID INT NULL;
+                        END");
+
+                    db.Execute(@"
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.INVO_LST') AND name = 'ContractID')
+                        BEGIN
+                            ALTER TABLE dbo.INVO_LST ADD ContractID INT NULL;
+                        END");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error upgrading database schema for Brand Contracts: " + ex.Message);
+                }
+                #endregion
+
                 #region SALARY
                 if (_type_ == 2) //مخصوص حقوق
                 {

@@ -1,0 +1,140 @@
+<Window x:Class="Prg_UI.Wins.WinMenus.CONFIGS.WIN_BRAND_CONTRACT_EDIT"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.CONFIGS"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        FontFamily="{StaticResource IRANYEKAN}"
+        WindowStartupLocation="CenterOwner"
+        Title="ثبت / ویرایش قرارداد" Height="650" Width="800" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Background="#FF014547"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="10" Padding="8" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!--HEADER-->
+                <Border x:Name="TitleDrawBar" Grid.Row="0" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" Height="45" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                    <Grid>
+                        <Label Content="ثبت / ویرایش اطلاعات قرارداد برند" Padding="21,10,10,10" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,110,0" FlowDirection="RightToLeft"/>
+                        <Button x:Name="Btn_Close" Margin="0,10,13,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Cancel_Click" Foreground="White" Width="30" Padding="1" IsTabStop="False">
+                            <materialDesign:PackIcon Kind="WindowClose" Height="17" Width="21" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!--FORM BODY-->
+                <Grid Grid.Row="1" Margin="10,20,10,10" FlowDirection="RightToLeft">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Fields Section -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Contract Number -->
+                        <TextBox x:Name="TxtContractNumber" Grid.Row="0" Grid.Column="0" materialDesign:HintAssist.Hint="شماره قرارداد *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+
+                        <!-- Brand Name -->
+                        <TextBox x:Name="TxtBrandName" Grid.Row="0" Grid.Column="1" materialDesign:HintAssist.Hint="نام برند *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+
+                        <!-- Contract Date -->
+                        <TextBox x:Name="TxtContractDate" Grid.Row="0" Grid.Column="2" materialDesign:HintAssist.Hint="تاریخ قرارداد (مثلاً 14030101) *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+
+                        <!-- Customer Code -->
+                        <TextBox x:Name="TxtCustomerCode" Grid.Row="1" Grid.Column="0" materialDesign:HintAssist.Hint="کد حسابداری مشتری *" Style="{StaticResource MaterialDesignFloatingHintTextBox}" LostFocus="TxtCustomerCode_LostFocus" Margin="5,5,5,15"/>
+
+                        <!-- Customer Name -->
+                        <TextBox x:Name="TxtCustomerName" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" materialDesign:HintAssist.Hint="نام مشتری (سیستمی)" Style="{StaticResource MaterialDesignFloatingHintTextBox}" IsReadOnly="True" Focusable="False" Margin="5,5,5,15" Foreground="#047857"/>
+
+                        <!-- Total Quantity (Automatically computed or manually entered) -->
+                        <TextBox x:Name="TxtTotalQuantity" Grid.Row="2" Grid.Column="0" materialDesign:HintAssist.Hint="متراژ کل قرارداد (متر)" Style="{StaticResource MaterialDesignFloatingHintTextBox}" IsReadOnly="True" Background="#F9FAFB" Margin="5,5,5,15" FontWeight="Bold"/>
+
+                        <!-- Description -->
+                        <TextBox x:Name="TxtDescription" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" materialDesign:HintAssist.Hint="توضیحات کلی قرارداد" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="5,5,5,15"/>
+                    </Grid>
+
+                    <!-- Items / Patterns Grid Section -->
+                    <Border Grid.Row="1" Background="{StaticResource MaterialDesign.Brush.Card.Background}" BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="5" Padding="10" Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="اقلام و طرح‌های شامل قرارداد" FontSize="12" FontWeight="Bold" Foreground="{Binding Background, ElementName=GENERAL_RANG}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="Btn_AddItem" Style="{StaticResource MaterialDesignOutlinedButton}" Content="+ افزودن طرح" Click="Btn_AddItem_Click" Height="28" Padding="10,0" Margin="0,0,10,0"/>
+                                    <Button x:Name="Btn_RemoveItem" Style="{StaticResource MaterialDesignOutlinedButton}" Content="- حذف طرح" Click="Btn_RemoveItem_Click" Foreground="#EF4444" BorderBrush="#EF4444" Height="28" Padding="10,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Patterns DataGrid -->
+                            <DataGrid x:Name="DG_Patterns" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" CellEditEnding="DG_Patterns_CellEditEnding">
+                                <DataGrid.Columns>
+                                    <!-- Product Code -->
+                                    <DataGridTextColumn Header="کد کالا / طرح" Binding="{Binding ProductCode}" Width="2*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
+                                    <!-- Resolved Product Name -->
+                                    <DataGridTextColumn Header="نام طرح / محصول (سیستمی)" Binding="{Binding ProductName}" Width="4*" IsReadOnly="True" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                                        <DataGridTextColumn.CellStyle>
+                                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                                <Setter Property="Foreground" Value="#059669"/>
+                                            </Style>
+                                        </DataGridTextColumn.CellStyle>
+                                    </DataGridTextColumn>
+                                    <!-- Quantity (Sqm) -->
+                                    <DataGridTextColumn Header="متراژ تعهد شده (متر)" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" Width="2*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!--FOOTER ACTIONS-->
+                <Border Grid.Row="2" Background="#F9FAFB" Margin="-9,0,-9,-9" Padding="10" CornerRadius="0,0,10,10" BorderThickness="0,1,0,0" BorderBrush="#E5E7EB">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" FlowDirection="RightToLeft">
+                        <Button x:Name="Btn_Save" Content="ذخیره اطلاعات" Style="{StaticResource MaterialDesignRaisedButton}" Background="#059669" BorderBrush="{x:Null}" Width="120" Click="Btn_Save_Click" Margin="0,0,10,0"/>
+                        <Button x:Name="Btn_Cancel" Content="انصراف" Style="{StaticResource MaterialDesignOutlinedButton}" BorderBrush="#9CA3AF" Foreground="#4B5563" Width="100" Click="Btn_Cancel_Click"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Toast Notifications Pop -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1" VerticalAlignment="Center" Background="{x:Null}"
+                             Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+    </Grid>
+</Window>
