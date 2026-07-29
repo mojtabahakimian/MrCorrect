@@ -61,6 +61,7 @@ namespace Prg_Proccessy.SQLMODELS
         public Nullable<int> PEPID { get; set; }
         public Nullable<int> PEID { get; set; }
 
+        public int? ContractID { get; set; }
         public int? UID { get; set; }
     }
 }

@@ -239,6 +239,8 @@ SELECT @SavedContractID;";
 SET XACT_ABORT ON; BEGIN TRANSACTION;
 IF EXISTS (SELECT 1 FROM dbo.ORDR_HED WHERE ContractID=@ContractID)
     THROW 51004, N'این قرارداد در سفارش استفاده شده و قابل حذف نیست؛ آن را مختومه کنید.', 1;
+IF EXISTS (SELECT 1 FROM dbo.HEAD_LST WHERE ContractID=@ContractID)
+    THROW 51004, N'این قرارداد در اسناد انبار یا فروش استفاده شده و قابل حذف نیست؛ آن را مختومه کنید.', 1;
 IF EXISTS
 (
     SELECT 1
