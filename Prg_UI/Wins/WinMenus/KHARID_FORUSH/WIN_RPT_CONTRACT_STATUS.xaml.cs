@@ -2,8 +2,15 @@ using Functions;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
+using Prg_UI.Rpts;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -16,6 +23,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
     {
         private readonly CL_CCNNMANAGER dbms = new();
         private readonly InventoryManager inventoryManager = new();
+        private List<ContractStatusModel> currentReportData = new();
 
         public WIN_RPT_CONTRACT_STATUS() => InitializeComponent();
 
@@ -64,6 +72,7 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
             }).ToList();
 
             bool inventoryComplete = LoadActualInventory(contractID, data);
+            currentReportData = data;
             DG_REPORT.ItemsSource = data;
             UpdateSummary(data, contractID, inventoryComplete);
         }
@@ -145,6 +154,144 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
         {
             try { LoadReport(); }
             catch (Exception ex) { ShowError(ex); }
+        }
+
+        private void BTN_PRINT_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentReportData.Count == 0)
+            {
+                new Msgwin(false, "اطلاعاتی برای چاپ گزارش وجود ندارد.").ShowDialog();
+                return;
+            }
+
+            Process? loader = null;
+            try
+            {
+                loader = CL_LMethods.ProcLoader.Start();
+                StiReport report = BuildPrintableReport(currentReportData);
+                new WINRPT(report, "گزارش وضعیت قراردادهای تولید و فروش").Show();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, $"ساخت گزارش چاپی انجام نشد.\n{ex.Message}").ShowDialog();
+            }
+            finally
+            {
+                CL_LMethods.ProcLoader.Stop(loader);
+            }
+        }
+
+        private StiReport BuildPrintableReport(IReadOnlyCollection<ContractStatusModel> data)
+        {
+            DataTable table = CreatePrintDataTable(data);
+            decimal contracted = data.Sum(x => x.ContractedQty);
+            decimal produced = data.Sum(x => x.ProducedQty);
+            decimal remain = data.Sum(x => x.RemainToProduce);
+            decimal sold = data.Sum(x => x.SoldQty);
+            decimal balance = data.Sum(x => x.RemainInWarehouse);
+
+            var report = new StiReport
+            {
+                ReportName = "ContractStatusReport",
+                ReportAlias = "گزارش وضعیت قراردادهای تولید و فروش",
+                ReportUnit = StiReportUnitType.Centimeters
+            };
+            report.RegData("ContractRows", table);
+            report.Dictionary.Synchronize();
+
+            var page = new StiPage
+            {
+                Name = "ContractStatusPage",
+                Orientation = StiPageOrientation.Landscape,
+                PageWidth = 29.7,
+                PageHeight = 21,
+                Margins = new StiMargins(0.7, 0.7, 0.7, 0.7)
+            };
+
+            var titleBand = new StiReportTitleBand { Name = "TitleBand", Height = 2.15 };
+            AddReportText(titleBand, 0, 0, 28.3, 0.75, "گزارش وضعیت قراردادهای تولید و فروش", 15, true, StiTextHorAlignment.Center, Color.FromArgb(20, 93, 123), Color.Transparent, false);
+            AddReportText(titleBand, 0, 0.82, 28.3, 0.55, TXT_SELECTED_TITLE.Text, 10, true, StiTextHorAlignment.Center, Color.Black, Color.Transparent, false);
+            AddReportText(titleBand, 0, 1.38, 28.3, 0.5, TXT_SELECTED_META.Text, 9, false, StiTextHorAlignment.Center, Color.DimGray, Color.Transparent, false);
+
+            var summaryBand = new StiHeaderBand { Name = "SummaryBand", Height = 1.25 };
+            string[] summaryTexts =
+            {
+                $"متراژ قرارداد: {contracted:N4}", $"تولید شده: {produced:N4}",
+                $"مانده تولید: {remain:N4}", $"فروش خالص: {sold:N4}",
+                $"مانده قراردادی: {balance:N4}"
+            };
+            double summaryWidth = 28.3 / summaryTexts.Length;
+            for (int index = 0; index < summaryTexts.Length; index++)
+                AddReportText(summaryBand, index * summaryWidth, 0.18, summaryWidth - 0.08, 0.75,
+                    summaryTexts[index], 9, true, StiTextHorAlignment.Center, Color.FromArgb(45, 55, 72),
+                    index % 2 == 0 ? Color.FromArgb(238, 246, 255) : Color.FromArgb(239, 251, 246), true);
+
+            string[] headers = { "شماره قرارداد", "مشتری", "برند", "کد طرح", "نام طرح / کالا", "متراژ تعهد", "تولید", "مانده تولید", "مازاد تولید", "فروش خالص", "مانده قراردادی", "موجودی واقعی" };
+            string[] fields = { "ContractNo", "CustName", "BrandName", "CODE", "ProductName", "ContractedQtyText", "ProducedQtyText", "RemainToProduceText", "OverProducedQtyText", "SoldQtyText", "ContractBalanceText", "ActualInventoryText" };
+            double[] widths = { 2.0, 3.7, 2.3, 1.35, 5.0, 2.0, 1.8, 2.0, 1.8, 1.8, 2.1, 2.45 };
+
+            var headerBand = new StiHeaderBand { Name = "ColumnHeaderBand", Height = 0.85 };
+            var dataBand = new StiDataBand { Name = "ContractDataBand", Height = 0.72, DataSourceName = "ContractRows" };
+            double x = 0;
+            for (int index = 0; index < headers.Length; index++)
+            {
+                AddReportText(headerBand, x, 0, widths[index], 0.85, headers[index], 8, true,
+                    StiTextHorAlignment.Center, Color.White, Color.FromArgb(27, 153, 198), true);
+                AddReportText(dataBand, x, 0, widths[index], 0.72, $"{{ContractRows.{fields[index]}}}", 8, false,
+                    index is 1 or 4 ? StiTextHorAlignment.Right : StiTextHorAlignment.Center,
+                    Color.Black, Color.White, true);
+                x += widths[index];
+            }
+
+            var footerBand = new StiFooterBand { Name = "FooterBand", Height = 0.85 };
+            AddReportText(footerBand, 0, 0.08, 28.3, 0.6, TXT_INVENTORY_NOTE.Text, 8, false,
+                StiTextHorAlignment.Right, Color.DimGray, Color.FromArgb(248, 248, 248), true);
+
+            page.Components.AddRange(new StiComponent[] { titleBand, summaryBand, headerBand, dataBand, footerBand });
+            report.Pages.Add(page);
+            return report;
+        }
+
+        private static DataTable CreatePrintDataTable(IEnumerable<ContractStatusModel> data)
+        {
+            var table = new DataTable("ContractRows");
+            foreach (string column in new[]
+            {
+                "ContractNo", "CustName", "BrandName", "CODE", "ProductName", "ContractedQtyText",
+                "ProducedQtyText", "RemainToProduceText", "OverProducedQtyText", "SoldQtyText",
+                "ContractBalanceText", "ActualInventoryText"
+            }) table.Columns.Add(column, typeof(string));
+
+            foreach (ContractStatusModel row in data)
+                table.Rows.Add(row.ContractNo, row.CustName, row.BrandName, row.CODE, row.ProductName,
+                    row.ContractedQty.ToString("N4"), row.ProducedQty.ToString("N4"), row.RemainToProduce.ToString("N4"),
+                    row.OverProducedQty.ToString("N4"), row.SoldQty.ToString("N4"), row.RemainInWarehouse.ToString("N4"),
+                    row.ActualInventoryQty?.ToString("N4") ?? "—");
+            return table;
+        }
+
+        private static void AddReportText(StiBand band, double x, double y, double width, double height,
+            string text, float fontSize, bool bold, StiTextHorAlignment horizontalAlignment,
+            Color textColor, Color backgroundColor, bool showBorder)
+        {
+            var component = new StiText
+            {
+                ClientRectangle = new RectangleD(x, y, width, height),
+                Text = text,
+                Font = new Font("IRANYekanFN", fontSize,
+                    bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular),
+                HorAlignment = horizontalAlignment,
+                VertAlignment = StiVertAlignment.Center,
+                TextBrush = new StiSolidBrush(textColor),
+                Brush = new StiSolidBrush(backgroundColor),
+                TextOptions = new StiTextOptions(true, false, false, 0F, System.Drawing.Text.HotkeyPrefix.None, StringTrimming.EllipsisCharacter),
+                Border = showBorder
+                    ? new StiBorder(StiBorderSides.All, Color.FromArgb(205, 214, 223), 1, StiPenStyle.Solid,
+                        false, 4, new StiSolidBrush(Color.FromArgb(205, 214, 223)), false)
+                    : new StiBorder(StiBorderSides.None, Color.Black, 1, StiPenStyle.Solid,
+                        false, 4, new StiSolidBrush(Color.Black), false)
+            };
+            band.Components.Add(component);
         }
 
         private static bool TryParsePersianDate(string digits, out long rawDate)

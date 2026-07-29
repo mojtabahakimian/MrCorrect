@@ -34,8 +34,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="38"/>
                     <RowDefinition Height="72"/>
-                    <RowDefinition Height="64"/>
-                    <RowDefinition Height="116"/>
+                    <RowDefinition Height="58"/>
+                    <RowDefinition Height="110"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="42"/>
                 </Grid.RowDefinitions>
@@ -67,7 +67,7 @@
                             <ColumnDefinition Width="Auto"/><ColumnDefinition Width="300"/>
                             <ColumnDefinition Width="Auto"/><ColumnDefinition Width="140"/>
                             <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="125"/>
+                            <ColumnDefinition Width="245"/>
                         </Grid.ColumnDefinitions>
                         <Label Content="قرارداد:" VerticalAlignment="Center"/>
                         <ComboBox x:Name="CMB_CONTRACT" Grid.Column="1" Margin="5" Height="30"
@@ -78,14 +78,19 @@
                                  Style="{StaticResource FuzzyOut}" TextAlignment="Center" ToolTip="خالی یعنی بدون محدودیت"/>
                         <CheckBox x:Name="CHK_OPEN_ONLY" Grid.Column="4" Content="فقط قراردادهای باز"
                                   Margin="12,5" VerticalAlignment="Center" IsChecked="True"/>
-                        <Button Grid.Column="6" Content="نمایش گزارش" Click="BTN_REFRESH_Click"
-                                Style="{StaticResource GerdC}" Height="34" FontSize="10" Margin="4"
-                                BorderBrush="{x:Null}" Foreground="#DDFFFFFF"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button Content="نمایش گزارش" Click="BTN_REFRESH_Click"
+                                    Style="{StaticResource GerdC}" Width="110" Height="34" FontSize="10" Margin="4"
+                                    BorderBrush="{x:Null}" Foreground="#DDFFFFFF"/>
+                            <Button Content="چاپ گزارش کامل" Click="BTN_PRINT_Click"
+                                    Style="{StaticResource GerdC}" Width="125" Height="34" FontSize="10" Margin="4"
+                                    BorderBrush="{x:Null}" Foreground="#DDFFFFFF"/>
+                        </StackPanel>
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Margin="4,5,4,2" Padding="14,7" CornerRadius="6"
-                        BorderBrush="#18000000" BorderThickness="1" Background="#08FFFFFF">
+                <Border Grid.Row="2" Margin="4,4,4,2" Padding="14,5" CornerRadius="6"
+                        BorderBrush="#18000000" BorderThickness="1" Background="#FFFFFFFF">
                     <Grid>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock x:Name="TXT_SELECTED_TITLE" Text="نمایش تجمیعی قراردادها"
@@ -143,6 +148,8 @@
 
                 <Border Grid.Row="4" Margin="4" Padding="7" CornerRadius="6" Background="#07000000">
                     <DataGrid x:Name="DG_REPORT" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                              CanUserResizeRows="False" HeadersVisibility="Column" RowHeaderWidth="0" RowHeight="34"
+                              AlternatingRowBackground="#06000000"
                               EnableRowVirtualization="True" EnableColumnVirtualization="True" FrozenColumnCount="3"
                               ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}"
                               HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
