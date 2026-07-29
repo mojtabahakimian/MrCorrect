@@ -189,6 +189,7 @@ namespace Wins.WinMenus.SANATI
 
         public long? CURRENT_ROW_INDEX { get; set; } = 0;
         public bool ChangeIsHappend { get; private set; } = false;
+        private int? OriginalContractID { get; set; }
 
         private int datagridname_tbox_def_index_col;
         public int INVO_LST_SUB_DEF_INDEX_COL
@@ -613,6 +614,7 @@ namespace Wins.WinMenus.SANATI
              FNUMCO,
              CUST_NO,
              MOLAH,
+             ContractID,
              BTN_SAVE,
              INVO_LST_SUB
              );
@@ -684,6 +686,8 @@ namespace Wins.WinMenus.SANATI
 
                 OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
                 MOLAH.Text = HEADER_FAC.MOLAH; //ملاحظات
+                OriginalContractID = HEADER_FAC.ContractID;
+                ContractID.SelectedValue = HEADER_FAC.ContractID;
                 BTN_SAVE.IsEnabled = false;
                 ItwasNewFirstTime = false; //Reset for Sanad Concurrency at first insert
                 INVO_LST_SUB_ReGetData();
@@ -791,6 +795,14 @@ namespace Wins.WinMenus.SANATI
             DEPATMAN.SelectedIndex = 0;
             DEPATMAN.SelectedItem = 0;
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
+
+            var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
+SELECT ContractID, IsClosed,
+       DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
+FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
+            contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
+            ContractID.ItemsSource = contracts;
+            ContractID_COLUMN.ItemsSource = contracts;
 
             //فرمول ساخت
             N_KOL_ALL = dbms.DoGetDataSQL<FSAKHT_COMBO>("SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + N' - ' + CAST(HEAD_MANF.DATE_ACTIV AS nvarchar) + N' :-' + ISNULL(HEAD_MANF.TOZIH, N' ') + CAST(HEAD_MANF.FNUMB AS char) AS Expr1 FROM HEAD_MANF INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE").ToList();
@@ -966,6 +978,12 @@ namespace Wins.WinMenus.SANATI
         public bool ItwasNewFirstTime { get; set; } = false;
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e) //**********************************************************************************************
         {
+            int? selectedContractID = ContractID.SelectedValue is int contractID ? contractID : null;
+            if (ContractID.SelectedItem is ContractLookup selectedContract && selectedContract.IsClosed && selectedContractID != OriginalContractID)
+            {
+                new Msgwin(false, "ثبت رسید تولید برای قرارداد مختومه مجاز نیست.").ShowDialog();
+                return;
+            }
             if (!BTN_SAVE.IsEnabled || BTN_SAVE.Visibility != Visibility.Visible || !BTN_SAVE.IsHitTestVisible) { return; }
 
             var errors = (from object i in INVO_LST_SUB.ItemsSource
@@ -1013,8 +1031,10 @@ namespace Wins.WinMenus.SANATI
                             NUMBER.UpdateLayout();
                         }
 
-                        db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
-                                               VALUES ({NUMBER.Text}, NULL    ,{FTAG},        0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
+                        db.Execute(@"INSERT INTO dbo.HEAD_LST
+                            (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, ContractID)
+                            VALUES (@Number, NULL, @Tag, 0, 0, 0, 0, 0, 0, 0, 0, @ContractID)",
+                            new { Number = Convert.ToDouble(NUMBER.Text), Tag = FTAG, ContractID = selectedContractID }, transaction);
 
                         transaction.Commit();
                         db?.Close();
@@ -1733,27 +1753,37 @@ namespace Wins.WinMenus.SANATI
         }
         private bool DoCmdHeaderSave()
         {
-            string _qre = null;
+            int? selectedContractID = ContractID.SelectedValue is int contractID ? contractID : null;
+            double? sanadNumber = double.TryParse(N_S.Text, out double parsedSanad) && parsedSanad > 0 ? parsedSanad : null;
+            double? relatedExitNumber = double.TryParse(NUMBER1.Text, out double parsedExit) && parsedExit > 0 ? parsedExit : null;
+            int? department = DEPATMAN.SelectedValue is int selectedDepartment ? selectedDepartment : null;
+            double internalNumber = double.TryParse(FNUMCO.Text, out double parsedInternal) ? parsedInternal : 0;
 
-            string _n_s = "NULL";
-            if (double.TryParse(N_S.Text, out var n_sVal) && n_sVal > 0)
+            const string sql = @"
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+UPDATE dbo.HEAD_LST
+SET DATE_N=@Date, NUMBER1=@Number1, N_S=@SanadNumber, DEPATMAN=@Department,
+    CUST_NO=@Customer, MOLAH=@Description, FNUMCO=@InternalNumber, OKF=@IsApproved,
+    USER_NAME=@UserName, ContractID=@ContractID
+WHERE NUMBER=@Number AND TAG=@Tag;
+COMMIT TRANSACTION;";
+            dbms.DoExecuteSQL(sql, new
             {
-                _n_s = n_sVal.ToString();
-            }
-
-            _qre = $@"UPDATE dbo.HEAD_LST
-                    SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()},
-                    NUMBER1 = {(string.IsNullOrEmpty(NUMBER1.Text) ? "NULL" : NUMBER1.Text)},
-                    N_S = {_n_s},   DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"}, 
-                    CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
-                    FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "0" : FNUMCO.Text)},
-                    OKF = {Convert.ToByte(OKF.IsChecked)},
-                    USER_NAME = N'{USER_NAME.Text}'
-                    WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
-
-            _ = dbms.DoExecuteSQL(_qre);
-
-
+                Date = DATE_N.Text.ToRawTarikh(),
+                Number1 = relatedExitNumber,
+                SanadNumber = sanadNumber,
+                Department = department,
+                Customer = CUST_NO.SelectedValue?.ToString(),
+                Description = MOLAH.Text,
+                InternalNumber = internalNumber,
+                IsApproved = OKF.IsChecked == true,
+                UserName = USER_NAME.Text,
+                ContractID = selectedContractID,
+                Number = Convert.ToDouble(NUMBER.Text),
+                Tag = FTAG
+            });
+            OriginalContractID = selectedContractID;
             return true;
         }
 
@@ -1764,7 +1794,7 @@ namespace Wins.WinMenus.SANATI
                 var QRE_LST = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($@"SELECT        dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.STUF_DEF.NAME AS NAME_CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, 
 																				 dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, 
 																			   	 dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.id, dbo.INVO_LST.AVRAGE2, 
-																			 	 dbo.INVO_LST.IMBAA, dbo.INVO_LST.TOTALARZ, dbo.INVO_LST.VISITOR, dbo.INVO_LST.TKHN, dbo.INVO_LST.JAY, dbo.INVO_LST.JAYO, dbo.INVO_LST.CRT, dbo.INVO_LST.UID
+															 dbo.INVO_LST.IMBAA, dbo.INVO_LST.TOTALARZ, dbo.INVO_LST.VISITOR, dbo.INVO_LST.TKHN, dbo.INVO_LST.JAY, dbo.INVO_LST.JAYO, dbo.INVO_LST.CRT, dbo.INVO_LST.UID, dbo.INVO_LST.ContractID
 															FROM            dbo.INVO_LST LEFT OUTER JOIN
 																				 dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE LEFT OUTER JOIN
 																				 dbo.TCOD_ANBAR ON dbo.INVO_LST.ANBAR = dbo.TCOD_ANBAR.CODE LEFT OUTER JOIN
@@ -2438,6 +2468,46 @@ namespace Wins.WinMenus.SANATI
             #endregion
 
         }
+        private bool ValidateRowContract(INVO_LST_FACTOR22 row)
+        {
+            if (!row.ContractID.HasValue) return true;
+
+            PersistedContractLink? persisted = row.id > 0
+                ? dbms.DoGetDataSQL<PersistedContractLink>(
+                    "SELECT TOP (1) ContractID, CODE FROM dbo.INVO_LST WHERE id = @id", new { row.id }).FirstOrDefault()
+                : null;
+
+            var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
+SELECT TOP (1) H.IsClosed,
+       ProductExists = CONVERT(BIT, CASE WHEN EXISTS
+       (
+           SELECT 1 FROM dbo.CONTRACT_DTL AS D
+           WHERE D.ContractID = H.ContractID AND D.CODE = @Code
+       ) THEN 1 ELSE 0 END)
+FROM dbo.CONTRACT_HED AS H
+WHERE H.ContractID = @ContractID",
+                new { ContractID = row.ContractID.Value, Code = row.CODE }).FirstOrDefault();
+
+            if (contract is null)
+            {
+                new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
+                return false;
+            }
+            if (contract.IsClosed &&
+                (persisted?.ContractID != row.ContractID ||
+                 !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase)))
+            {
+                new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
+                return false;
+            }
+            if (!contract.ProductExists)
+            {
+                new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            return true;
+        }
+
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -2457,6 +2527,12 @@ namespace Wins.WinMenus.SANATI
                 return;
             }
 
+            if (!ValidateRowContract(TheRow))
+            {
+                e.Cancel = true;
+                return;
+            }
+
             ChangeIsHappend = true;
 
             string _qre = null;
@@ -2471,7 +2547,7 @@ namespace Wins.WinMenus.SANATI
                 _qre = $@"DECLARE @NewRADIF INT;
                               SELECT @NewRADIF = ISNULL(MAX(RADIF) + 1, 1) FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER={NUMBER.Text} AND TAG={FTAG};
 
-                              INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                              INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO, ContractID)
                               OUTPUT INSERTED.id
                               VALUES({NUMBER.Text},
                               {FTAG} ,
@@ -2500,7 +2576,8 @@ namespace Wins.WinMenus.SANATI
                               N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}' ,
                               {TheRow.TKHN} ,
                               {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}   ,
-                              {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())} )";
+                              {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())},
+                              {TheRow.ContractID?.ToString() ?? "NULL"} )";
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
                 ErrosMessages.AddRange(errorMsgs);
@@ -2528,7 +2605,8 @@ namespace Wins.WinMenus.SANATI
                    AVRAGE = {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},
                    AVRAGE2 = {(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)}, IMBAA = {TheRow.IMBAA}, 
                    TOTALARZ = {(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)}, VISITOR = N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}',
-                   TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())}
+                   TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())},
+                   ContractID = {TheRow.ContractID?.ToString() ?? "NULL"}
                    WHERE id = {TheRow.id}";
 
                 var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { TheRow }, _qre, null, false);
@@ -2882,6 +2960,8 @@ namespace Wins.WinMenus.SANATI
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
             MOLAH.Text = null;
+            OriginalContractID = null;
+            ContractID.SelectedValue = null;
 
             FNUMCO.Text = "0"; //شماره داخلی
 
@@ -3283,5 +3363,22 @@ namespace Wins.WinMenus.SANATI
                 e.Handled = true;
             }
         }
+        private sealed class ContractLookup
+        {
+            public int? ContractID { get; set; }
+            public bool IsClosed { get; set; }
+            public string DisplayName { get; set; } = string.Empty;
+        }
+        private sealed class ContractRowValidation
+        {
+            public bool IsClosed { get; set; }
+            public bool ProductExists { get; set; }
+        }
+        private sealed class PersistedContractLink
+        {
+            public int? ContractID { get; set; }
+            public string CODE { get; set; } = string.Empty;
+        }
+
     }
 }

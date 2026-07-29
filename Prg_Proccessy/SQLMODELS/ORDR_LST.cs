@@ -56,6 +56,7 @@ namespace Prg_Proccessy.SQLMODELS
             UID = _backupCopy.UID;
             NAME_VAHED_K = _backupCopy.NAME_VAHED_K;
             MEGH_MAR = _backupCopy.MEGH_MAR;
+            ContractID = _backupCopy.ContractID;
 
             _inEdit = false;
         }
@@ -225,6 +226,18 @@ namespace Prg_Proccessy.SQLMODELS
             {
                 if (_uid == value) return;
                 _uid = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int? _contractID;
+        public int? ContractID
+        {
+            get => _contractID;
+            set
+            {
+                if (_contractID == value) return;
+                _contractID = value;
                 OnPropertyChanged();
             }
         }

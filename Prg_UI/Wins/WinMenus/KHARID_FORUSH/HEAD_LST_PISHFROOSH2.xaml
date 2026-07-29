@@ -152,6 +152,18 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
+                <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150"
+                                        SelectedValueBinding="{Binding ContractID, UpdateSourceTrigger=PropertyChanged}"
+                                        DisplayMemberPath="DisplayName" SelectedValuePath="ContractID">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="IsTextSearchEnabled" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+
                 <DataGridComboBoxColumn x:Name="VAHED_K_COLUMN"  
                                     Width="auto"   MinWidth="90" Header=" واحد کالا " Visibility="Visible" 
                     SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
@@ -366,6 +378,8 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <TextBox x:Name="USER_NAME" IsReadOnly="True"   Text="UserNameEmpty" Height="30" Margin="449,16,536,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" Grid.Row="1" />
+<!-- Contract selection is intentionally line-based; this hidden control only preserves legacy header compatibility. -->
+<ComboBox x:Name="ContractID" Visibility="Collapsed" IsHitTestVisible="False" Focusable="False"/>
         <TextBox x:Name="MOLAH"   Text="" Height="29" Margin="449,92,71,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="199" TabIndex="2" Grid.Row="1" />
         <ComboBox x:Name="DEPATMAN" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" PreviewLostKeyboardFocus="DEPATMAN_PreviewLostKeyboardFocus" Margin="815,128,71,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" SelectedIndex="0" Grid.Row="1" SelectionChanged="DEPATMAN_SelectionChanged">
             <ComboBox.ItemsPanel>
