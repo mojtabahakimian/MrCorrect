@@ -117,7 +117,8 @@
                                           CellEditEnding="DG_DTL_CellEditEnding" RowEditEnding="DG_DTL_RowEditEnding"
                                           ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}"
                                           HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                                          GridLinesVisibility="All" Style="{StaticResource MaterialDesignDataGrid}">
+                                          GridLinesVisibility="All" Style="{StaticResource MaterialDesignDataGrid}"
+                                          materialDesign:DataGridAssist.EnableEditBoxAssist="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn x:Name="CODE_COLUMN" Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}"
                                                             Header="کد کالا" Width="Auto" MinWidth="50" IsReadOnly="True" Visibility="Hidden"/>
