@@ -4,6 +4,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Wins.WinOther;
+using Functions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,7 +27,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private readonly ObservableCollection<ContractDtlModel> ContractDetails = new();
         private int? CurrentContractID;
         private bool isLoading;
-        private List<ContractHeaderModel> ContractHeaders = new();
+        private NavigationManager<ContractHeaderModel>? navigationManager;
 
         public WIN_CONTRACT_DEF()
         {
@@ -41,8 +42,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 ContractDate.Text = FormatDate(Tarikh.FullCurrentDate);
                 CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
                 LoadBrands();
-                LoadContracts();
-                BeginNewContract();
+                InitializeNavigation();
             }
             catch (Exception ex)
             {
@@ -50,27 +50,43 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
-        private void LoadContracts(int? selectContractID = null)
+        private void InitializeNavigation()
         {
-            ContractHeaders = dbms.DoGetDataSQL<ContractHeaderModel>(@"
-SELECT ContractID, ContractNo, ContractDate, CUST_NO, BrandName, TotalQty, MOLAH, IsClosed
-FROM dbo.CONTRACT_HED
-ORDER BY ContractDate DESC, ContractID DESC").ToList();
-            DG_CONTRACTS.ItemsSource = ContractHeaders;
-            if (selectContractID.HasValue)
-                DG_CONTRACTS.SelectedItem = ContractHeaders.FirstOrDefault(x => x.ContractID == selectContractID.Value);
+            navigationManager = new NavigationManager<ContractHeaderModel>(
+                dbms,
+                x => x.ContractID.ToString(CultureInfo.InvariantCulture),
+                @"SELECT ContractID, ContractNo, ContractDate, CUST_NO, BrandName, TotalQty, MOLAH, IsClosed
+FROM dbo.CONTRACT_HED ORDER BY ContractDate, ContractID",
+                x => $@"SELECT TOP (1) ContractID, ContractNo, ContractDate, CUST_NO, BrandName, TotalQty, MOLAH, IsClosed
+FROM dbo.CONTRACT_HED WHERE ContractID={x.ContractID}");
+            navigationManager.CurrentRecordChanged += OnCurrentContractChanged;
+            navigatorControl.NavigationManager = navigationManager;
+            navigationManager.RaiseInitializationEvents();
         }
 
-        object ISearchableWindow.GetSearchSource() => ContractHeaders;
+        private void OnCurrentContractChanged(ContractHeaderModel? header)
+        {
+            if (header is null) BeginNewContract();
+            else LoadContract(header);
+        }
+
+        private void RefreshNavigation(int? selectContractID = null)
+        {
+            if (navigationManager is null) return;
+            navigationManager.ReloadData();
+            if (!selectContractID.HasValue) return;
+            int index = navigationManager.RecordsData.ToList().FindIndex(x => x.ContractID == selectContractID.Value);
+            if (index >= 0) navigationManager.MoveReGetData(Interfaces.INavigator.Jahat.CustomPosition, index);
+        }
+
+        object ISearchableWindow.GetSearchSource() => navigationManager?.RecordsData ?? Enumerable.Empty<ContractHeaderModel>();
 
         public void OnSearchResultSelected(object selectedItem)
         {
             if (selectedItem is not ContractHeaderModel selected) return;
-            var contract = ContractHeaders.FirstOrDefault(x => x.ContractID == selected.ContractID);
-            if (contract is null) return;
-            DG_CONTRACTS.SelectedItem = contract;
-            DG_CONTRACTS.ScrollIntoView(contract);
-            LoadContract(contract);
+            if (navigationManager is null) return;
+            int index = navigationManager.RecordsData.ToList().FindIndex(x => x.ContractID == selected.ContractID);
+            if (index >= 0) navigationManager.MoveReGetData(Interfaces.INavigator.Jahat.CustomPosition, index);
         }
 
         public IEnumerable<SearchableProperty> GetSearchableProperties()
@@ -105,7 +121,6 @@ ORDER BY BrandName").ToList();
             try
             {
                 CurrentContractID = null;
-                DG_CONTRACTS.SelectedItem = null;
                 ContractNo.Clear();
                 ContractDate.Text = FormatDate(Tarikh.FullCurrentDate);
                 BrandName.SelectedValue = null;
@@ -266,7 +281,7 @@ SELECT @SavedContractID;";
                     IsClosed = IsClosed.IsChecked == true,
                     UID = Baseknow.USERCOD
                 }).Single();
-                LoadContracts(CurrentContractID);
+                RefreshNavigation(CurrentContractID);
                 LoadBrands(BrandName.Text.Trim());
                 DG_DTL.IsReadOnly = IsClosed.IsChecked == true;
                 LBL_STATUS.Text = DG_DTL.IsReadOnly
@@ -327,9 +342,8 @@ DELETE dbo.CONTRACT_HED WHERE ContractID=@ContractID;
 IF @@ROWCOUNT = 0 THROW 51005, N'قرارداد پیدا نشد.', 1;
 COMMIT TRANSACTION;";
                 dbms.DoExecuteSQL(sql, new { ContractID = CurrentContractID.Value });
-                LoadContracts();
                 LoadBrands();
-                BeginNewContract();
+                RefreshNavigation();
                 LBL_STATUS.Text = "قرارداد حذف شد.";
             }
             catch (Exception ex) { ShowError("حذف قرارداد انجام نشد.", ex); }
@@ -499,9 +513,8 @@ SELECT @ID;";
             decimal total = dbms.DoGetDataSQL<decimal>(
                 "SELECT TotalQty FROM dbo.CONTRACT_HED WHERE ContractID=@ContractID",
                 new { ContractID = CurrentContractID.Value }).Single();
-            ContractHeaderModel? header = ContractHeaders.FirstOrDefault(x => x.ContractID == CurrentContractID.Value);
+            ContractHeaderModel? header = navigationManager?.RecordsData.FirstOrDefault(x => x.ContractID == CurrentContractID.Value);
             if (header is not null) header.TotalQty = total;
-            DG_CONTRACTS.Items.Refresh();
             CalculateTotal();
         }
 
@@ -553,9 +566,6 @@ COMMIT TRANSACTION;";
             }
             catch (Exception ex) { ShowError("حذف ردیف قرارداد انجام نشد.", ex); }
         }
-        private void DG_CONTRACTS_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (!isLoading && DG_CONTRACTS.SelectedItem is ContractHeaderModel h) LoadContract(h); }
-        private void BTN_NEW_Click(object sender, RoutedEventArgs e) => BeginNewContract();
-        private void BTN_REFRESH_Click(object sender, RoutedEventArgs e) { LoadContracts(CurrentContractID); LBL_STATUS.Text = "اطلاعات به‌روز شد."; }
         private void Btn_Close_Click(object sender, RoutedEventArgs e) => Close();
         private void Btn_Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void Btn_Max_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
