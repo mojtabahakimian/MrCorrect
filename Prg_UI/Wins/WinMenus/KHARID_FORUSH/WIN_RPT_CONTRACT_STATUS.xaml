@@ -1,0 +1,43 @@
+<Window x:Class="Prg_UI.Wins.WinMenus.KHARID_FORUSH.WIN_RPT_CONTRACT_STATUS"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="گزارش وضعیت قراردادهای تولید" Height="720" Width="1280" MinHeight="560" MinWidth="1050"
+        WindowStartupLocation="CenterScreen" FontFamily="{StaticResource IRANYEKAN}" FlowDirection="RightToLeft"
+        Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Grid Margin="16">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="گزارش فورس وضعیت قراردادها" FontSize="24" FontWeight="Bold"/>
+        <Grid Grid.Row="1" Margin="0,12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="220"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="180"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Label Content="قرارداد" VerticalAlignment="Center"/>
+            <ComboBox x:Name="CMB_CONTRACT" Grid.Column="1" Margin="5" DisplayMemberPath="DisplayName" SelectedValuePath="ContractID"/>
+            <Label Grid.Column="2" Content="از تاریخ" VerticalAlignment="Center"/>
+            <TextBox x:Name="TXT_FROM_DATE" Grid.Column="3" Margin="5" MaxLength="10" ToolTip="خالی یعنی بدون محدودیت"/>
+            <CheckBox x:Name="CHK_OPEN_ONLY" Grid.Column="4" Content="فقط قراردادهای باز" Margin="10" VerticalAlignment="Center" IsChecked="True"/>
+            <Button Grid.Column="6" Content="نمایش گزارش" Click="BTN_REFRESH_Click" Padding="22,8"/>
+        </Grid>
+        <DataGrid Grid.Row="2" x:Name="DG_REPORT" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                  EnableRowVirtualization="True" EnableColumnVirtualization="True" FrozenColumnCount="3">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="شماره قرارداد" Binding="{Binding ContractNo}" Width="110"/>
+                <DataGridTextColumn Header="مشتری" Binding="{Binding CustName}" Width="180"/>
+                <DataGridTextColumn Header="برند" Binding="{Binding BrandName}" Width="140"/>
+                <DataGridTextColumn Header="طرح / کالا" Binding="{Binding ProductName}" Width="200"/>
+                <DataGridTextColumn Header="مقدار قرارداد" Binding="{Binding ContractedQty, StringFormat=N4}" Width="115"/>
+                <DataGridTextColumn Header="تولید شده" Binding="{Binding ProducedQty, StringFormat=N4}" Width="110"/>
+                <DataGridTextColumn Header="مانده تولید" Binding="{Binding RemainToProduce, StringFormat=N4}" Width="110"/>
+                <DataGridTextColumn Header="مازاد تولید" Binding="{Binding OverProducedQty, StringFormat=N4}" Width="105"/>
+                <DataGridTextColumn Header="فروش خالص" Binding="{Binding SoldQty, StringFormat=N4}" Width="110"/>
+                <DataGridTextColumn Header="مانده تولید قرارداد" Binding="{Binding RemainInWarehouse, StringFormat=N4}" Width="145"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <TextBlock x:Name="TXT_CONTRACTED" FontWeight="Bold"/>
+            <TextBlock x:Name="TXT_PRODUCED" Grid.Column="1" FontWeight="Bold"/>
+            <TextBlock x:Name="TXT_REMAIN" Grid.Column="2" FontWeight="Bold"/>
+            <TextBlock x:Name="TXT_SOLD" Grid.Column="3" FontWeight="Bold"/>
+            <TextBlock x:Name="TXT_STOCK" Grid.Column="4" FontWeight="Bold"/>
+        </Grid>
+    </Grid>
+</Window>

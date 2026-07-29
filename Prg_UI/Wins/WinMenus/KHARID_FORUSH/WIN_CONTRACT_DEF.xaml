@@ -1,0 +1,105 @@
+<Window x:Class="Prg_UI.Wins.WinMenus.KHARID_FORUSH.WIN_CONTRACT_DEF"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="مدیریت قراردادهای تولید" Height="720" Width="1180" MinHeight="600" MinWidth="980"
+        WindowStartupLocation="CenterScreen" FontFamily="{StaticResource IRANYEKAN}"
+        FlowDirection="RightToLeft" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="مدیریت قراردادهای تولید آرمان سرام" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="قرارداد جدید" Click="BTN_NEW_Click" Margin="4" Padding="18,7"/>
+                <Button Content="بارگذاری مجدد" Click="BTN_REFRESH_Click" Margin="4" Padding="18,7"/>
+            </StackPanel>
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="330"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="قراردادها" Grid.Column="0">
+                <DataGrid x:Name="DG_CONTRACTS" AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single" SelectionChanged="DG_CONTRACTS_SelectionChanged"
+                          EnableRowVirtualization="True" CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="شماره" Binding="{Binding ContractNo}" Width="90"/>
+                        <DataGridTextColumn Header="برند" Binding="{Binding BrandName}" Width="*"/>
+                        <DataGridTextColumn Header="متراژ" Binding="{Binding TotalQty, StringFormat=N2}" Width="90"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center"/>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/><ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="Auto"/><ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="شماره قرارداد" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="ContractNo" Grid.Column="1" Margin="5" MaxLength="50"/>
+                    <Label Content="تاریخ شمسی" Grid.Column="2" VerticalAlignment="Center"/>
+                    <TextBox x:Name="ContractDate" Grid.Column="3" Margin="5" MaxLength="10" ToolTip="نمونه: 1405/05/07"/>
+                    <Label Content="برند" Grid.Column="4" VerticalAlignment="Center"/>
+                    <TextBox x:Name="BrandName" Grid.Column="5" Margin="5" MaxLength="100"/>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,5,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/><ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto"/><ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="مشتری" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="CUST_NO" Grid.Column="1" Margin="5" IsEditable="True" IsTextSearchEnabled="True"
+                              DisplayMemberPath="DisplayName" SelectedValuePath="hes"/>
+                    <Label Content="ملاحظات" Grid.Column="2" VerticalAlignment="Center"/>
+                    <TextBox x:Name="MOLAH" Grid.Column="3" Margin="5" MaxLength="500"/>
+                    <CheckBox x:Name="IsClosed" Grid.Column="4" Content="مختومه" Margin="12,5" VerticalAlignment="Center"/>
+                </Grid>
+
+                <GroupBox Grid.Row="2" Header="طرح‌ها و متراژ قرارداد">
+                    <DataGrid x:Name="DG_DTL" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
+                              CellEditEnding="DG_DTL_CellEditEnding" RowEditEnding="DG_DTL_RowEditEnding">
+                        <DataGrid.Columns>
+                            <DataGridComboBoxColumn x:Name="Col_Kala" Header="طرح / کالا" Width="*"
+                                SelectedValueBinding="{Binding CODE, UpdateSourceTrigger=PropertyChanged}"
+                                SelectedValuePath="CODE" DisplayMemberPath="DisplayName"/>
+                            <DataGridTextColumn Header="متراژ (متر مربع)" Width="180"
+                                Binding="{Binding Qty, UpdateSourceTrigger=LostFocus, StringFormat=N4}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
+                <DockPanel Grid.Row="3" Margin="0,10,0,0">
+                    <TextBlock x:Name="LBL_TotalQty" Text="جمع متراژ: 0" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button x:Name="BTN_SAVE" Content="ذخیره قرارداد" Click="BTN_SAVE_Click" Margin="4" Padding="20,8"/>
+                        <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click" Margin="4" Padding="20,8"/>
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
+        </Grid>
+
+        <TextBlock x:Name="LBL_STATUS" Grid.Row="2" Margin="0,10,0,0" Foreground="DarkSlateGray"/>
+    </Grid>
+</Window>

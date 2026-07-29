@@ -1061,6 +1061,8 @@ namespace Functions
             /// ثبت سفارشات کالا
             /// </summary>
             WIN_ORDR_HED_SEFARESH,
+            WIN_CONTRACT_DEF,
+            WIN_RPT_CONTRACT_STATUS,
             /// <summary>
             /// تعریف اهداف برای ویزیتور
             /// </summary>
@@ -1145,6 +1147,10 @@ namespace Functions
                 case WinNameType.WIN_VISITGOL_HEAD_AHDAF: /*تعریف اهداف برای ویزیتور*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISITGOL_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_ORDR_HED_SEFARESH: /*ثبت سفارشات کالا*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ORDR_HED(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.WIN_CONTRACT_DEF: /*تعریف قرارداد تولید*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_CONTRACT_DEF(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.WIN_RPT_CONTRACT_STATUS: /*گزارش وضعیت قرارداد تولید*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_RPT_CONTRACT_STATUS(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZKAR"), isModalDialog: false, allowMultipleInstances: false); break;
 

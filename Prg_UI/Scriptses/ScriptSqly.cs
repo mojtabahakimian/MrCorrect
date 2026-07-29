@@ -39,6 +39,8 @@ namespace Prg_UI.Scriptses
 
                 if (isCustomCall)
                 {
+                    // Contract production/sales tracking schema. The helper is idempotent and uses CL_CCNNMANAGER.
+                    ContractTrackingSchema.EnsureCreated(dbms);
 
                     try
                     {
