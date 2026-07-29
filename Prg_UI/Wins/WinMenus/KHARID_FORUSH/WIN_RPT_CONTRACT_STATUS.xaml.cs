@@ -2,7 +2,6 @@ using Functions;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Prg_UI.Rpts;
 using Stimulsoft.Report;
 using System;
 using System.Collections.Generic;
@@ -167,7 +166,7 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
             {
                 loader = CL_LMethods.ProcLoader.Start();
                 StiReport report = BuildPrintableReport(currentReportData);
-                new WINRPT(report, "گزارش وضعیت قراردادهای تولید و فروش").Show();
+                new global::Rpts.WINRPT(report, "گزارش وضعیت قراردادهای تولید و فروش").Show();
             }
             catch (Exception ex)
             {

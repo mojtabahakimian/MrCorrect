@@ -13,15 +13,15 @@
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
         <Style x:Key="KpiTitleStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="10"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,6,0,0"/>
+            <Setter Property="Margin" Value="0,3,0,0"/>
         </Style>
         <Style x:Key="KpiValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,7,0,0"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
     </Window.Resources>
 
@@ -33,11 +33,11 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="38"/>
-                    <RowDefinition Height="72"/>
-                    <RowDefinition Height="58"/>
-                    <RowDefinition Height="110"/>
+                    <RowDefinition Height="64"/>
+                    <RowDefinition Height="52"/>
+                    <RowDefinition Height="120"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="42"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Border x:Name="TitleDrawBar" Grid.Row="0" Style="{StaticResource BordG}"
@@ -60,8 +60,8 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="1" Margin="4,10,4,2" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}"
-                        BorderThickness="1" CornerRadius="6" Padding="8" Background="#04FFFFFF">
+                <Border Grid.Row="1" Margin="4,7,4,2" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}"
+                        BorderThickness="1" CornerRadius="6" Padding="6" Background="#04FFFFFF">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/><ColumnDefinition Width="300"/>
@@ -89,66 +89,66 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Margin="4,4,4,2" Padding="14,5" CornerRadius="6"
+                <Border Grid.Row="2" Margin="4,3,4,2" Padding="12,3" CornerRadius="6"
                         BorderBrush="#18000000" BorderThickness="1" Background="#FFFFFFFF">
                     <Grid>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock x:Name="TXT_SELECTED_TITLE" Text="نمایش تجمیعی قراردادها"
-                                       FontSize="15" FontWeight="Bold" Foreground="#FF165A72"/>
-                            <TextBlock x:Name="TXT_SELECTED_META" Margin="0,5,0,0" Foreground="#FF666666"/>
+                                       FontSize="14" FontWeight="Bold" Foreground="#FF165A72"/>
+                            <TextBlock x:Name="TXT_SELECTED_META" Margin="0,2,0,0" Foreground="#FF666666"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <UniformGrid Grid.Row="3" Columns="6" Margin="4,7,4,4">
-                    <Border Margin="4" Padding="8" CornerRadius="8" Background="#FFEAF2FF" BorderBrush="#FFB8D3FF" BorderThickness="1">
+                <UniformGrid Grid.Row="3" Columns="6" Margin="4,4,4,3">
+                    <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFEAF2FF" BorderBrush="#FFB8D3FF" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="FileDocument" Width="25" Height="25" Foreground="#FF2864DC" HorizontalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="FileDocument" Width="22" Height="22" Foreground="#FF2864DC" HorizontalAlignment="Center"/>
                             <TextBlock Text="متراژ قرارداد" Style="{StaticResource KpiTitleStyle}" Foreground="#FF2255B8"/>
                             <TextBlock x:Name="TXT_CONTRACTED" Style="{StaticResource KpiValueStyle}" Foreground="#FF163F91"/>
                         </StackPanel>
                     </Border>
-                    <Border Margin="4" Padding="8" CornerRadius="8" Background="#FFE9FBF4" BorderBrush="#FFAAE8CF" BorderThickness="1">
+                    <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFE9FBF4" BorderBrush="#FFAAE8CF" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="Factory" Width="25" Height="25" Foreground="#FF00A878" HorizontalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="Factory" Width="22" Height="22" Foreground="#FF00A878" HorizontalAlignment="Center"/>
                             <TextBlock Text="مقدار تولید شده" Style="{StaticResource KpiTitleStyle}" Foreground="#FF087A5B"/>
                             <TextBlock x:Name="TXT_PRODUCED" Style="{StaticResource KpiValueStyle}" Foreground="#FF006B50"/>
                         </StackPanel>
                     </Border>
-                    <Border Margin="4" Padding="8" CornerRadius="8" Background="#FFFFF7E2" BorderBrush="#FFF1D891" BorderThickness="1">
+                    <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFFFF7E2" BorderBrush="#FFF1D891" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="ClockOutline" Width="25" Height="25" Foreground="#FFF39A00" HorizontalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="ClockOutline" Width="22" Height="22" Foreground="#FFF39A00" HorizontalAlignment="Center"/>
                             <TextBlock Text="مانده تولید / پیشرفت" Style="{StaticResource KpiTitleStyle}" Foreground="#FF8B6500"/>
                             <TextBlock x:Name="TXT_REMAIN" Style="{StaticResource KpiValueStyle}" Foreground="#FF765500"/>
-                            <TextBlock x:Name="TXT_PROGRESS" FontSize="10" HorizontalAlignment="Center" Foreground="#FF9B7000"/>
+                            <TextBlock x:Name="TXT_PROGRESS" FontSize="9" HorizontalAlignment="Center" Foreground="#FF9B7000"/>
                         </StackPanel>
                     </Border>
-                    <Border Margin="4" Padding="8" CornerRadius="8" Background="#FFFFEDF5" BorderBrush="#FFF5BDD7" BorderThickness="1">
+                    <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFFFEDF5" BorderBrush="#FFF5BDD7" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="Cart" Width="25" Height="25" Foreground="#FFEB3E8A" HorizontalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="Cart" Width="22" Height="22" Foreground="#FFEB3E8A" HorizontalAlignment="Center"/>
                             <TextBlock Text="فروش خالص" Style="{StaticResource KpiTitleStyle}" Foreground="#FF9B285C"/>
                             <TextBlock x:Name="TXT_SOLD" Style="{StaticResource KpiValueStyle}" Foreground="#FF7B1948"/>
                         </StackPanel>
                     </Border>
-                    <Border Margin="4" Padding="8" CornerRadius="8" Background="#FFF0ECFF" BorderBrush="#FFD3C7FF" BorderThickness="1">
+                    <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFF0ECFF" BorderBrush="#FFD3C7FF" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="PackageVariantClosed" Width="25" Height="25" Foreground="#FF7454D6" HorizontalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="PackageVariantClosed" Width="22" Height="22" Foreground="#FF7454D6" HorizontalAlignment="Center"/>
                             <TextBlock Text="مانده قراردادی" Style="{StaticResource KpiTitleStyle}" Foreground="#FF6043B2"/>
                             <TextBlock x:Name="TXT_CONTRACT_BALANCE" Style="{StaticResource KpiValueStyle}" Foreground="#FF4C3298"/>
                         </StackPanel>
                     </Border>
-                    <Border Margin="4" Padding="8" CornerRadius="8" Background="#FFEFF9FF" BorderBrush="#FFB9DEEF" BorderThickness="1">
+                    <Border Margin="3" Padding="5" CornerRadius="8" Background="#FFEFF9FF" BorderBrush="#FFB9DEEF" BorderThickness="1">
                         <StackPanel HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="Warehouse" Width="25" Height="25" Foreground="#FF1787B3" HorizontalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="Warehouse" Width="22" Height="22" Foreground="#FF1787B3" HorizontalAlignment="Center"/>
                             <TextBlock Text="موجودی واقعی انبار" Style="{StaticResource KpiTitleStyle}" Foreground="#FF146D8E"/>
                             <TextBlock x:Name="TXT_ACTUAL_INVENTORY" Style="{StaticResource KpiValueStyle}" Foreground="#FF0F5875"/>
                         </StackPanel>
                     </Border>
                 </UniformGrid>
 
-                <Border Grid.Row="4" Margin="4" Padding="7" CornerRadius="6" Background="#07000000">
+                <Border Grid.Row="4" Margin="4" Padding="4" CornerRadius="6" Background="#07000000">
                     <DataGrid x:Name="DG_REPORT" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
-                              CanUserResizeRows="False" HeadersVisibility="Column" RowHeaderWidth="0" RowHeight="34"
+                              CanUserResizeRows="False" HeadersVisibility="Column" RowHeaderWidth="0"
                               AlternatingRowBackground="#06000000"
                               EnableRowVirtualization="True" EnableColumnVirtualization="True" FrozenColumnCount="3"
                               ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}"
@@ -172,7 +172,7 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="5" Margin="4,3,4,0" Padding="10,5" CornerRadius="5"
+                <Border Grid.Row="5" Margin="4,3,4,0" Padding="9,4" CornerRadius="5"
                         Background="#0B000000" BorderBrush="#14000000" BorderThickness="1">
                     <TextBlock x:Name="TXT_INVENTORY_NOTE" VerticalAlignment="Center" Foreground="#FF666666"
                                TextWrapping="Wrap" FontSize="10"/>
