@@ -24,7 +24,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="38"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="48"/>
+                    <RowDefinition Height="56"/>
                     <RowDefinition Height="42"/>
                 </Grid.RowDefinitions>
 
@@ -50,7 +50,7 @@
 
                 <Grid Grid.Row="1" Margin="4,10,4,4" FlowDirection="RightToLeft">
                     <Grid>
-                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="48"/></Grid.RowDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                         <Border BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="5" Padding="10">
                             <Grid>
                                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -136,17 +136,36 @@
                             </Grid>
                         </Border>
 
-                        <Grid Grid.Row="2">
-                            <TextBlock x:Name="LBL_TotalQty" Text="جمع متراژ: 0" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <Button x:Name="BTN_SAVE" Content="ذخیره سربرگ" Click="BTN_SAVE_Click" Style="{StaticResource GerdC}" Width="120" Height="34" Margin="4" Foreground="White"/>
-                                <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click" Style="{StaticResource GerdC}" Width="105" Height="34" Margin="4" Foreground="White"/>
-                            </StackPanel>
-                        </Grid>
                     </Grid>
                 </Grid>
 
-                <CNC:RecordNavigatorControl x:Name="navigatorControl" Grid.Row="2" VerticalAlignment="Bottom" Margin="10,0,10,18"/>
+                <Border Grid.Row="2" Margin="4,5,4,3" Padding="8,4"
+                        Background="#08000000" CornerRadius="5">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock x:Name="LBL_TotalQty" Grid.Column="0" Text="جمع متراژ: 0"
+                                   FontSize="14" FontWeight="Bold" VerticalAlignment="Center"
+                                   HorizontalAlignment="Right" Margin="8,0"/>
+
+                        <CNC:RecordNavigatorControl x:Name="navigatorControl" Grid.Column="1"
+                                                    Width="350" Height="40"
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    FlowDirection="LeftToRight"/>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Button x:Name="BTN_SAVE" Content="ذخیره سربرگ" Click="BTN_SAVE_Click"
+                                    Style="{StaticResource GerdC}" Width="120" Height="34" Margin="4,0" Foreground="White"/>
+                            <Button x:Name="BTN_DELETE" Content="حذف قرارداد" Click="BTN_DELETE_Click"
+                                    Style="{StaticResource GerdC}" Width="105" Height="34" Margin="4,0" Foreground="White"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
                 <Border Grid.Row="3" Background="#0F000000" CornerRadius="4" Margin="4,4,4,0">
                     <TextBlock x:Name="LBL_STATUS" Margin="10,0" VerticalAlignment="Center" Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}"/>

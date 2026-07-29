@@ -76,7 +76,7 @@ FROM dbo.CONTRACT_HED WHERE ContractID={x.ContractID}");
             navigationManager.ReloadData();
             if (!selectContractID.HasValue) return;
             int index = navigationManager.RecordsData.ToList().FindIndex(x => x.ContractID == selectContractID.Value);
-            if (index >= 0) navigationManager.MoveReGetData(Interfaces.INavigator.Jahat.CustomPosition, index);
+            if (index >= 0) navigationManager.MoveReGetData(global::Interfaces.INavigator.Jahat.CustomPosition, index);
         }
 
         object ISearchableWindow.GetSearchSource() => navigationManager?.RecordsData ?? Enumerable.Empty<ContractHeaderModel>();
@@ -86,7 +86,7 @@ FROM dbo.CONTRACT_HED WHERE ContractID={x.ContractID}");
             if (selectedItem is not ContractHeaderModel selected) return;
             if (navigationManager is null) return;
             int index = navigationManager.RecordsData.ToList().FindIndex(x => x.ContractID == selected.ContractID);
-            if (index >= 0) navigationManager.MoveReGetData(Interfaces.INavigator.Jahat.CustomPosition, index);
+            if (index >= 0) navigationManager.MoveReGetData(global::Interfaces.INavigator.Jahat.CustomPosition, index);
         }
 
         public IEnumerable<SearchableProperty> GetSearchableProperties()
