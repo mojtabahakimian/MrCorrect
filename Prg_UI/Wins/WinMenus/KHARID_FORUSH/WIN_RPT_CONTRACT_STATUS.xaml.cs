@@ -1,8 +1,10 @@
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
@@ -103,7 +105,21 @@ ORDER BY ContractDate DESC, ContractID DESC, ProductName, CODE", new
             if (e.ClickCount == 2) Btn_Max_Click(sender, e);
             else DragMove();
         }
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+                return;
+            }
+            if (e.Key != Key.Enter || Keyboard.Modifiers != ModifierKeys.None) return;
+
+            e.Handled = true;
+            if (Keyboard.FocusedElement is Button button)
+                button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            else
+                CL_LMethods.SendKey_US(Key.Tab);
+        }
 
         private sealed class ContractLookup { public int ContractID { get; set; } public string DisplayName { get; set; } = string.Empty; }
         private sealed class ContractStatusModel

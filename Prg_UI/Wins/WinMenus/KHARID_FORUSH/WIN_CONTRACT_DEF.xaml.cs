@@ -1,6 +1,7 @@
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using Prg_UI.Wins.WinOther;
 using System;
 using System.Collections.Generic;
@@ -433,7 +434,72 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
             if (e.ClickCount == 2) Btn_Max_Click(sender, e);
             else DragMove();
         }
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+                return;
+            }
+            if (e.Key != Key.Enter || Keyboard.Modifiers != ModifierKeys.None) return;
+
+            e.Handled = true;
+            if (DG_DTL.IsKeyboardFocusWithin)
+            {
+                MoveContractGridWithEnter();
+                return;
+            }
+            if (BTN_SAVE.IsKeyboardFocusWithin)
+            {
+                BTN_SAVE_Click(BTN_SAVE, new RoutedEventArgs(Button.ClickEvent));
+                return;
+            }
+            CL_LMethods.SendKey_US(Key.Tab);
+        }
+
+        private void MoveContractGridWithEnter()
+        {
+            var editableColumns = DG_DTL.Columns
+                .Where(x => x.Visibility == Visibility.Visible && !x.IsReadOnly)
+                .OrderBy(x => x.DisplayIndex)
+                .ToList();
+            if (editableColumns.Count == 0 || DG_DTL.CurrentCell.Item is null) return;
+
+            int currentDisplayIndex = DG_DTL.CurrentColumn?.DisplayIndex ?? -1;
+            DataGridColumn? nextColumn = editableColumns.FirstOrDefault(x => x.DisplayIndex > currentDisplayIndex);
+            if (nextColumn is not null)
+            {
+                if (!DG_DTL.CommitEdit(DataGridEditingUnit.Cell, true)) return;
+                MoveToContractCell(DG_DTL.CurrentCell.Item, nextColumn);
+                return;
+            }
+
+            if (!DG_DTL.CommitEdit(DataGridEditingUnit.Cell, true)) return;
+            int currentRowIndex = DG_DTL.Items.IndexOf(DG_DTL.CurrentCell.Item);
+            int nextRowIndex = currentRowIndex + 1;
+            if (nextRowIndex < 0 || nextRowIndex >= DG_DTL.Items.Count) return;
+
+            DG_DTL.SelectedIndex = nextRowIndex;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                object nextItem = DG_DTL.SelectedItem;
+                if (nextItem is null) return;
+                DG_DTL.ScrollIntoView(nextItem);
+                DG_DTL.CurrentCell = new DataGridCellInfo(nextItem, editableColumns[0]);
+                DG_DTL.BeginEdit();
+            }), DispatcherPriority.Background);
+        }
+
+        private void MoveToContractCell(object item, DataGridColumn column)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DG_DTL.SelectedItem = item;
+                DG_DTL.ScrollIntoView(item, column);
+                DG_DTL.CurrentCell = new DataGridCellInfo(item, column);
+                DG_DTL.BeginEdit();
+            }), DispatcherPriority.Background);
+        }
         private void ShowError(string message, Exception ex) { LBL_STATUS.Text = message; MessageBox.Show($"{message}\n{ex.Message}", "خطا", MessageBoxButton.OK, MessageBoxImage.Error); }
 
         public sealed class ContractDtlModel : INotifyPropertyChanged
