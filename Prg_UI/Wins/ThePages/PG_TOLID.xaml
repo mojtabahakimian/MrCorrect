@@ -143,16 +143,6 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Border Width="78" Height="77" Background="#0284C7" CornerRadius="12" Cursor="Hand" PreviewMouseDown="Border_PreviewMouseDown_Contracts" Margin="5,0,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="4"/>
-                        </Border.Effect>
-                        <materialDesign:PackIcon Kind="Handshake" Width="42" Height="42" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <TextBlock Text="قراردادها و تعهدات برند" TextAlignment="Center" TextWrapping="Wrap" Foreground="#DDFFFFFF" Height="40" Width="120"/>
-                </WrapPanel>
-
-                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
                     <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_1" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/TOLID/Sell_Chart.png" CacheOption="OnLoad"/>

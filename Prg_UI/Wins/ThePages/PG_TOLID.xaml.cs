@@ -37,12 +37,6 @@ namespace Wins.ThePages
             new Msgwin(false, "محاسبه مواد اولیه موردنیاز و برنامه‌ریزی تولید بر اساس فرمول‌های ساخت ثبت‌شده به صورت هوشمند و تجمیعی گزارش می‌شود.").ShowDialog();
         }
 
-        private void Border_PreviewMouseDown_Contracts(object sender, MouseButtonEventArgs e)
-        {
-            var win = new Prg_UI.Wins.WinMenus.CONFIGS.WIN_BRAND_CONTRACTS();
-            win.ShowDialog();
-        }
-
         private void Image_PreviewMouseDown_Hesab(object sender, MouseButtonEventArgs e)
         {
             new Msgwin(false, "نمودار حساب‌های کل در بخش گزارش‌های پیشرفته تحلیلی تراز آزمایشی قابل مشاهده است.").ShowDialog();
