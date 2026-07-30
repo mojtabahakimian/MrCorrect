@@ -707,13 +707,13 @@
           <RowCount>2</RowCount>
           <Sort isList="true" count="0" />
         </Table1>
-        <FooterBand1 Ref="37" type="FooterBand" isKey="true">
+        <PageFooterBand1 Ref="37" type="PageFooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,5.4,27.7,0.8</ClientRectangle>
+          <ClientRectangle>0,18.2,27.7,0.8</ClientRectangle>
           <Components isList="true" count="1">
             <Text9 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.2,27.7,0.6</ClientRectangle>
+              <ClientRectangle>21.7,0.1,6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -721,18 +721,20 @@
               <Name>Text9</Name>
               <Page isRef="4" />
               <Parent isRef="37" />
-              <Text>{Today} {Time.ToString("HH:mm")}</Text>
+              <Text>تاریخ چاپ: {Today} - {Time.ToString("HH:mm")}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
-              <HorAlignment>Center</HorAlignment>
+              <HorAlignment>Right</HorAlignment>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
             </Text9>
           </Components>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
-          <Name>FooterBand1</Name>
+          <Name>PageFooterBand1</Name>
           <Page isRef="4" />
           <Parent isRef="4" />
-        </FooterBand1>
+        </PageFooterBand1>
       </Components>
       <Conditions isList="true" count="0" />
       <Expressions isList="true" count="0" />

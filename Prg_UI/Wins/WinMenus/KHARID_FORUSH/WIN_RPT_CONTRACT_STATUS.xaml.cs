@@ -35,6 +35,7 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
                 contracts.Insert(0, new ContractLookup { ContractID = 0, DisplayName = "همه قراردادها" });
                 CMB_CONTRACT.ItemsSource = contracts;
                 CMB_CONTRACT.SelectedIndex = 0;
+                TXT_FROM_DATE.CurrentDate = GetFirstDayOfCurrentPersianMonth();
                 LoadReport();
             }
             catch (Exception ex) { ShowError(ex); }
@@ -146,6 +147,13 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
         {
             string digits = value.ToString(CultureInfo.InvariantCulture).PadLeft(8, '0');
             return digits.Length == 8 ? $"{digits[..4]}/{digits.Substring(4, 2)}/{digits.Substring(6, 2)}" : value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private static string GetFirstDayOfCurrentPersianMonth()
+        {
+            var calendar = new PersianCalendar();
+            DateTime today = DateTime.Today;
+            return $"{calendar.GetYear(today):0000}/{calendar.GetMonth(today):00}/01";
         }
 
         private void BTN_REFRESH_Click(object sender, RoutedEventArgs e)
