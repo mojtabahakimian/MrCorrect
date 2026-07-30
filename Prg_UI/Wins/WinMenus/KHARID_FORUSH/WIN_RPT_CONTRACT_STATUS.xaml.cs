@@ -109,7 +109,11 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
             decimal remainToProduce = data.Sum(x => x.RemainToProduce);
             decimal sold = data.Sum(x => x.SoldQty);
             decimal contractBalance = data.Sum(x => x.RemainInWarehouse);
-            decimal progress = contracted <= 0 ? 0 : produced * 100 / contracted;
+            // Fulfilment is calculated per product.  Overproduction of one design
+            // must not hide the unproduced commitment of another design.
+            decimal fulfilledContractQty = data.Sum(x =>
+                Math.Min(x.ContractedQty, Math.Max(0m, x.ProducedQty)));
+            decimal progress = contracted <= 0 ? 0 : fulfilledContractQty * 100 / contracted;
 
             ContractStatusModel? first = data.FirstOrDefault();
             TXT_SELECTED_TITLE.Text = contractID.HasValue && first is not null
