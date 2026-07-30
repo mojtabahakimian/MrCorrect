@@ -799,13 +799,16 @@ namespace Wins.WinMenus.SANATI
             DEPATMAN.SelectedItem = 0;
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
 
-            var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
+            if (CL_MenuManager.IsContractTrackingEnabled)
+            {
+                var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
 SELECT ContractID, IsClosed,
        DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
-            contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
-            ContractID.ItemsSource = contracts;
-            ContractID_COLUMN.ItemsSource = contracts;
+                contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
+                ContractID.ItemsSource = contracts;
+                ContractID_COLUMN.ItemsSource = contracts;
+            }
 
             //فرمول ساخت
             N_KOL_ALL = dbms.DoGetDataSQL<FSAKHT_COMBO>("SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + N' - ' + CAST(HEAD_MANF.DATE_ACTIV AS nvarchar) + N' :-' + ISNULL(HEAD_MANF.TOZIH, N' ') + CAST(HEAD_MANF.FNUMB AS char) AS Expr1 FROM HEAD_MANF INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE").ToList();
@@ -1100,6 +1103,7 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
 
         private bool ValidatePersistedRowContractsForHeader()
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!double.TryParse(NUMBER.Text, out double number) || number <= 0) return true;
             if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate)) return false;
 
@@ -2493,6 +2497,7 @@ COMMIT TRANSACTION;";
         }
         private bool ValidateRowContract(INVO_LST_FACTOR22 row)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!row.ContractID.HasValue) return true;
 
             PersistedContractLink? persisted = row.id > 0

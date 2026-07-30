@@ -726,13 +726,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_NO2.DisplayMemberPath = "hes";
             CUST_NO2.SelectedValuePath = "hes";
 
-            var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
+            if (CL_MenuManager.IsContractTrackingEnabled)
+            {
+                var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
 SELECT ContractID, IsClosed,
        DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
-            contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
-            ContractID.ItemsSource = contracts;
-            ContractID_COLUMN.ItemsSource = contracts;
+                contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
+                ContractID.ItemsSource = contracts;
+                ContractID_COLUMN.ItemsSource = contracts;
+            }
 
             //VAHEDJARI
             var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
@@ -2357,6 +2360,7 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
 
         private bool ValidateRowContract(INVO_LST_FACTOR22 row)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!row.ContractID.HasValue) return true;
 
             PersistedContractLink? persisted = row.id > 0
@@ -2659,6 +2663,7 @@ WHERE H.ContractID = @ContractID",
 
         private bool ValidatePersistedRowContractsForHeader()
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!double.TryParse(NUMBER.Text, out double number) || number <= 0) return true;
             string customerCode = CUST_NO.SelectedValue?.ToString() ?? string.Empty;
             if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate)) return false;
@@ -4987,7 +4992,9 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
 
                                 // بروزرسانی وضعیت پیش فاکتور
                                 db.Execute("UPDATE HEAD_LST SET TAMIR = 2, OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
-                                bool hasInvalidContractRow = db.Query<bool>(@"
+                                if (CL_MenuManager.IsContractTrackingEnabled)
+                                {
+                                    bool hasInvalidContractRow = db.Query<bool>(@"
 SELECT CONVERT(BIT, CASE WHEN EXISTS
 (
     SELECT 1
@@ -5004,10 +5011,10 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
       ))
 ) THEN 1 ELSE 0 END)",
                                     new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
-                                if (hasInvalidContractRow)
-                                    throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
+                                    if (hasInvalidContractRow)
+                                        throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
 
-                                int? singleContractID = db.Query<int?>(@"
+                                    int? singleContractID = db.Query<int?>(@"
 SELECT CASE
          WHEN COUNT(DISTINCT ContractID) = 1 AND COUNT(*) = COUNT(ContractID) THEN MAX(ContractID)
          ELSE NULL
@@ -5015,8 +5022,9 @@ SELECT CASE
 FROM dbo.INVO_LST
 WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
                                     new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
-                                db.Execute("UPDATE dbo.HEAD_LST SET ContractID=@ContractID WHERE NUMBER=@TargetNumber AND TAG IN (2,13)",
-                                    new { ContractID = singleContractID, TargetNumber = num }, transaction);
+                                    db.Execute("UPDATE dbo.HEAD_LST SET ContractID=@ContractID WHERE NUMBER=@TargetNumber AND TAG IN (2,13)",
+                                        new { ContractID = singleContractID, TargetNumber = num }, transaction);
+                                }
                                 // کپی اقلام فاکتور
                                 string copyInvoiceQuery = @"
                                     INSERT INTO dbo.INVO_LST 
@@ -5026,11 +5034,12 @@ WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
                                     SELECT 
                                         " + num + @" AS NUMBER, 2 AS TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,
                                         MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO,
-                                        ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay, ContractID
+                                        ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay,
+                                        CASE WHEN @ContractTrackingEnabled=1 THEN ContractID ELSE NULL END
                                     FROM dbo.INVO_LST 
                                     WHERE NUMBER = " + NUMBER.Text + " AND TAG = 20 AND (jay = 0 OR jay IS NULL)";
 
-                                db.Execute(copyInvoiceQuery, null, transaction);
+                                db.Execute(copyInvoiceQuery, new { ContractTrackingEnabled = CL_MenuManager.IsContractTrackingEnabled }, transaction);
 
                                 // کپی سایر جداول مرتبط
                                 db.Execute($@"
@@ -5642,7 +5651,9 @@ WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
 
                                 // بروزرسانی وضعیت پیش فاکتور
                                 db.Execute("UPDATE HEAD_LST SET TAMIR = 2, OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
-                                bool hasInvalidContractRow = db.Query<bool>(@"
+                                if (CL_MenuManager.IsContractTrackingEnabled)
+                                {
+                                    bool hasInvalidContractRow = db.Query<bool>(@"
 SELECT CONVERT(BIT, CASE WHEN EXISTS
 (
     SELECT 1
@@ -5659,10 +5670,10 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
       ))
 ) THEN 1 ELSE 0 END)",
                                     new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
-                                if (hasInvalidContractRow)
-                                    throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
+                                    if (hasInvalidContractRow)
+                                        throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
 
-                                int? singleContractID = db.Query<int?>(@"
+                                    int? singleContractID = db.Query<int?>(@"
 SELECT CASE
          WHEN COUNT(DISTINCT ContractID) = 1 AND COUNT(*) = COUNT(ContractID) THEN MAX(ContractID)
          ELSE NULL
@@ -5670,8 +5681,9 @@ SELECT CASE
 FROM dbo.INVO_LST
 WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
                                     new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
-                                db.Execute("UPDATE dbo.HEAD_LST SET ContractID=@ContractID WHERE NUMBER=@TargetNumber AND TAG IN (2,13)",
-                                    new { ContractID = singleContractID, TargetNumber = num }, transaction);
+                                    db.Execute("UPDATE dbo.HEAD_LST SET ContractID=@ContractID WHERE NUMBER=@TargetNumber AND TAG IN (2,13)",
+                                        new { ContractID = singleContractID, TargetNumber = num }, transaction);
+                                }
                                 // کپی اقلام فاکتور
                                 string copyInvoiceQuery = @"
                             INSERT INTO dbo.INVO_LST 
@@ -5681,11 +5693,12 @@ WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
                             SELECT 
                                 " + num + @" AS NUMBER, 2 AS TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,
                                 MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO,
-                                ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay, ContractID
+                                ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay,
+                                CASE WHEN @ContractTrackingEnabled=1 THEN ContractID ELSE NULL END
                             FROM dbo.INVO_LST 
                             WHERE NUMBER = " + NUMBER.Text + " AND TAG = 20 AND (jay = 0 OR jay IS NULL)";
 
-                                db.Execute(copyInvoiceQuery, null, transaction);
+                                db.Execute(copyInvoiceQuery, new { ContractTrackingEnabled = CL_MenuManager.IsContractTrackingEnabled }, transaction);
 
                                 // کپی سایر جداول مرتبط
                                 db.Execute($@"

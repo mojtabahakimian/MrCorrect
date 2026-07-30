@@ -529,13 +529,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
 
-            var contracts = dbms.DoGetDataSQL<ContractOrderLookup>(@"
+            if (CL_MenuManager.IsContractTrackingEnabled)
+            {
+                var contracts = dbms.DoGetDataSQL<ContractOrderLookup>(@"
 SELECT ContractID, IsClosed,
        DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
-            contracts.Insert(0, new ContractOrderLookup { ContractID = null, DisplayName = "بدون قرارداد" });
-            ContractID.ItemsSource = contracts;
-            ContractID_COLUMN.ItemsSource = contracts;
+                contracts.Insert(0, new ContractOrderLookup { ContractID = null, DisplayName = "بدون قرارداد" });
+                ContractID.ItemsSource = contracts;
+                ContractID_COLUMN.ItemsSource = contracts;
+            }
 
             string sql = @"
                SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD
@@ -708,6 +711,7 @@ SELECT @NewID;";
 
         private bool ValidatePersistedRowContractsForHeader()
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!int.TryParse(NUMBER.Text, out int orderID) || orderID <= 0) return true;
             string customerCode = CUST_NO.SelectedValue?.ToString() ?? CUST_NO.Text;
             if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long orderDate)) return false;
@@ -1142,6 +1146,7 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
 
         private bool ValidateRowContract(ORDR_LST row)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!row.ContractID.HasValue) return true;
 
             PersistedContractLink? persisted = row.idd > 0

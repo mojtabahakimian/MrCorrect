@@ -51,6 +51,9 @@ namespace Functions
 {
     public static class CL_MenuManager
     {
+        // Add another company's special-print code here when contract tracking is enabled for it.
+        private static readonly string[] ContractTrackingSpecialPrintCodes = { "19" };
+
         /// <summary>
         /// Contract tracking is a company-specific feature. Characters 11-12
         /// contain the configured special-print code; code 19 enables it.
@@ -60,7 +63,8 @@ namespace Functions
             get
             {
                 string options = Baseknow.OPTIONSS ?? string.Empty;
-                return options.Length >= 12 && options.Substring(10, 2) == "19";
+                if (options.Length < 12) return false;
+                return Array.IndexOf(ContractTrackingSpecialPrintCodes, options.Substring(10, 2)) >= 0;
             }
         }
 
