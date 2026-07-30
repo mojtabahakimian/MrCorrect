@@ -153,7 +153,7 @@ namespace Prg_UI.Wins.WinOther
                 }
             }
 
-            if (Baseknow.KALA.ToString() == "2" && CallerWindowName != "ORDR_HED" && CallerWindowName != "VISITORS_PORSANT_HEAD")
+            if (Baseknow.KALA.ToString() == "2" && CallerWindowName != "ORDR_HED" && CallerWindowName != "VISITORS_PORSANT_HEAD" && CallerWindowName != "WIN_CONTRACT_DEF")
             {
                 if (string.IsNullOrEmpty(MainRawText))
                 {

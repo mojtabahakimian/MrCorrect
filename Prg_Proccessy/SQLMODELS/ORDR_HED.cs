@@ -190,6 +190,18 @@ namespace Prg_Proccessy.SQLMODELS
             }
         }
 
+        private int? _contractID;
+        public int? ContractID
+        {
+            get => _contractID;
+            set
+            {
+                if (_contractID == value) return;
+                _contractID = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

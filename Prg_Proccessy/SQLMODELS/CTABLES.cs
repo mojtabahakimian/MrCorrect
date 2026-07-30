@@ -2218,6 +2218,7 @@ namespace Prg_Proccessy.SQLMODELS
                 CRT = _backupCopy.CRT;
                 UID = _backupCopy.UID;
                 CODEO = _backupCopy.CODEO;
+                ContractID = _backupCopy.ContractID;
 
                 _inEdit = false;
             }
@@ -2330,6 +2331,9 @@ namespace Prg_Proccessy.SQLMODELS
 
             private int? _uid;
             public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
+
+            private int? _contractID;
+            public int? ContractID { get => _contractID; set { if (_contractID == value) return; _contractID = value; OnPropertyChanged("ContractID"); } }
 
             #region CUSTOM_UnBOUND_FIELDS
             private string _codeo;

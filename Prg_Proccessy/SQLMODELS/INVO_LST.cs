@@ -39,5 +39,6 @@ namespace Prg_Proccessy.SQLMODELS
         public Nullable<double> TKHN { get; set; }
         public Nullable<long> JAY { get; set; }
         public Nullable<int> JAYO { get; set; }
+        public int? ContractID { get; set; }
     }
 }
