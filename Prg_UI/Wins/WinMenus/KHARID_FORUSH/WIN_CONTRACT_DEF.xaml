@@ -138,7 +138,7 @@
                             <Grid>
                                 <Grid.RowDefinitions><RowDefinition Height="38"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                                 <Border Background="{Binding ElementName=GENERAL_RANG, Path=Background}" CornerRadius="4,4,0,0">
-                                    <TextBlock Text="طرح‌ها و متراژ قرارداد" Foreground="White" FontWeight="Bold" Margin="12,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="کالاها و مقدار تعهد قرارداد" Foreground="White" FontWeight="Bold" Margin="12,0" VerticalAlignment="Center"/>
                                 </Border>
                                 <DataGrid Grid.Row="1" x:Name="DG_DTL" Margin="8" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                           IsReadOnly="True" BeginningEdit="DG_DTL_BeginningEdit" PreviewKeyDown="DG_DTL_PreviewKeyDown"
@@ -168,7 +168,9 @@
                                                 <Style TargetType="{x:Type TextBlock}"/>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
-                                        <DataGridTextColumn Header="متراژ (متر مربع)" Width="180"
+                                        <DataGridTextColumn Header="واحد پایه" Width="100" IsReadOnly="True"
+                                                            Binding="{Binding UnitName}"/>
+                                        <DataGridTextColumn Header="مقدار تعهد" Width="150"
                                             Binding="{Binding Qty, UpdateSourceTrigger=LostFocus, StringFormat=N4}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
@@ -187,7 +189,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock x:Name="LBL_TotalQty" Grid.Column="0" Text="جمع متراژ: 0"
+                        <TextBlock x:Name="LBL_TotalQty" Grid.Column="0" Text="جمع مقدار تعهد: 0"
                                    FontSize="14" FontWeight="Bold" VerticalAlignment="Center"
                                    HorizontalAlignment="Right" Margin="8,0"/>
 

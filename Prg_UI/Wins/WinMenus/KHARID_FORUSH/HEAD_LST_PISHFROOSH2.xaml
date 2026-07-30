@@ -271,7 +271,7 @@
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="الگوی جایزه" x:Name="JAYO_COL" Binding="{Binding JAYO,UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto" IsReadOnly="True"  MinWidth="80"/>
-                <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150"
+                <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150" Visibility="Collapsed"
                                         SelectedValueBinding="{Binding ContractID, UpdateSourceTrigger=PropertyChanged}"
                                         DisplayMemberPath="DisplayName" SelectedValuePath="ContractID">
                     <DataGridComboBoxColumn.EditingElementStyle>

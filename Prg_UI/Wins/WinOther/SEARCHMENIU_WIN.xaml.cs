@@ -220,8 +220,11 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "فاکتور برگشت فروش آزاد (رسید شده)", WIN_NAME = CL_MenuManager.WinNameType.HEAD_LST_BRFR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "فاکتور برگشت خرید آزاد", WIN_NAME = CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "ثبت سفارشات کالا", WIN_NAME = CL_MenuManager.WinNameType.WIN_ORDR_HED_SEFARESH });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف و مدیریت قراردادهای تولید", WIN_NAME = CL_MenuManager.WinNameType.WIN_CONTRACT_DEF, ShortName = "CONTRACT" });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فورس وضعیت قراردادهای تولید و فروش", WIN_NAME = CL_MenuManager.WinNameType.WIN_RPT_CONTRACT_STATUS, ShortName = "CONTRACT_REPORT" });
+            if (CL_MenuManager.IsContractTrackingEnabled)
+            {
+                MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف و مدیریت قراردادهای تولید", WIN_NAME = CL_MenuManager.WinNameType.WIN_CONTRACT_DEF, ShortName = "CONTRACT" });
+                MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فورس وضعیت قراردادهای تولید و فروش", WIN_NAME = CL_MenuManager.WinNameType.WIN_RPT_CONTRACT_STATUS, ShortName = "CONTRACT_REPORT" });
+            }
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف اهداف برای ویزیتور ها بر اساس کالا", WIN_NAME = CL_MenuManager.WinNameType.WIN_VISITGOL_HEAD_AHDAF });
 
 

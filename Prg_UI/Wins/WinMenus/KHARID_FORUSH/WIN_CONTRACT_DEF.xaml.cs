@@ -47,6 +47,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled)
+            {
+                new Msgwin(false, "قابلیت قراردادها برای این شرکت فعال نیست.").ShowDialog();
+                Close();
+                return;
+            }
+
             try
             {
                 ContractDate.Text = FormatDate(Tarikh.FullCurrentDate);
@@ -109,7 +116,7 @@ FROM dbo.CONTRACT_HED WHERE ContractID={x.ContractID}");
                 new SearchableProperty { DisplayName = "تاریخ قرارداد", PropertyPath = nameof(ContractHeaderModel.ContractDate), PropertyType = typeof(long) },
                 new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = nameof(ContractHeaderModel.CUST_NO), PropertyType = typeof(string) },
                 new SearchableProperty { DisplayName = "برند", PropertyPath = nameof(ContractHeaderModel.BrandName), PropertyType = typeof(string) },
-                new SearchableProperty { DisplayName = "متراژ", PropertyPath = nameof(ContractHeaderModel.TotalQty), PropertyType = typeof(decimal) },
+                new SearchableProperty { DisplayName = "مقدار تعهد", PropertyPath = nameof(ContractHeaderModel.TotalQty), PropertyType = typeof(decimal) },
                 new SearchableProperty { DisplayName = "مختومه", PropertyPath = nameof(ContractHeaderModel.IsClosed), PropertyType = typeof(bool) }
             };
         }
@@ -166,9 +173,10 @@ ORDER BY BrandName").ToList();
                 IsClosed.IsChecked = header.IsClosed;
                 ContractDetails.Clear();
                 foreach (var detail in dbms.DoGetDataSQL<ContractDtlModel>(
-                    @"SELECT D.ID, D.CODE, D.Qty, NAME_CODE = COALESCE(S.NAME, N'')
+                    @"SELECT D.ID, D.CODE, D.Qty, NAME_CODE = COALESCE(S.NAME, N''), UnitName = COALESCE(U.NAMES, N'واحد پایه')
 FROM dbo.CONTRACT_DTL AS D
 LEFT JOIN dbo.STUF_DEF AS S ON S.CODE = D.CODE
+LEFT JOIN dbo.TCOD_VAHEDS AS U ON U.CODE = S.VAHED
 WHERE D.ContractID = @ContractID
 ORDER BY D.ID",
                     new { header.ContractID }))
@@ -328,6 +336,50 @@ ELSE
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM dbo.CONTRACT_HED WITH (UPDLOCK, HOLDLOCK) WHERE ContractID = @SavedContractID)
         THROW 51002, N'قرارداد مورد نظر دیگر وجود ندارد.', 1;
+    DECLARE @OldContractDate BIGINT, @OldCustomerCode NVARCHAR(40);
+    SELECT @OldContractDate=ContractDate, @OldCustomerCode=CUST_NO
+    FROM dbo.CONTRACT_HED WITH (UPDLOCK, HOLDLOCK)
+    WHERE ContractID=@SavedContractID;
+
+    IF @ContractDate<>@OldContractDate AND
+    (
+        EXISTS
+        (
+            SELECT 1
+            FROM dbo.INVO_LST AS I
+            INNER JOIN dbo.HEAD_LST AS H ON H.NUMBER=I.NUMBER AND H.TAG=I.TAG
+            WHERE I.ContractID=@SavedContractID AND H.DATE_N<@ContractDate
+        )
+        OR EXISTS
+        (
+            SELECT 1
+            FROM dbo.ORDR_LST AS O
+            INNER JOIN dbo.ORDR_HED AS OH ON OH.id=O.ID
+            WHERE O.ContractID=@SavedContractID AND OH.DATE<@ContractDate
+        )
+    )
+        THROW 51011, N'تاریخ قرارداد نمی‌تواند بعد از تاریخ اسناد متصل به آن قرار گیرد.', 1;
+
+    IF @CUST_NO<>@OldCustomerCode AND
+    (
+        EXISTS
+        (
+            SELECT 1
+            FROM dbo.INVO_LST AS I
+            INNER JOIN dbo.CONTRACT_FLOW_TAG AS F ON F.TAG=I.TAG AND F.FlowType=2
+            INNER JOIN dbo.HEAD_LST AS H ON H.NUMBER=I.NUMBER AND H.TAG=I.TAG
+            WHERE I.ContractID=@SavedContractID AND H.CUST_NO<>@CUST_NO
+        )
+        OR EXISTS
+        (
+            SELECT 1
+            FROM dbo.ORDR_LST AS O
+            INNER JOIN dbo.ORDR_HED AS OH ON OH.id=O.ID
+            WHERE O.ContractID=@SavedContractID AND OH.CUST_NO<>@CUST_NO
+        )
+    )
+        THROW 51012, N'مشتری قرارداد با مشتری اسناد فروش یا سفارش‌های متصل یکسان نیست.', 1;
+
     UPDATE dbo.CONTRACT_HED
        SET ContractNo=@ContractNo, ContractDate=@ContractDate, CUST_NO=@CUST_NO, BrandName=@BrandName,
            MOLAH=NULLIF(@MOLAH, N''), IsClosed=@IsClosed, UID=@UID
@@ -355,21 +407,26 @@ SELECT @SavedContractID;";
                 LBL_STATUS.Text = DG_DTL.IsReadOnly
                     ? "سربرگ قرارداد ذخیره شد؛ قرارداد مختومه است و ردیف‌ها قابل ویرایش نیستند."
                     : "سربرگ قرارداد ذخیره شد؛ اکنون طرح‌ها را سطربه‌سطر ثبت کنید.";
-                if (!DG_DTL.IsReadOnly)
-                    FocusFirstDetailRow();
+                if (!DG_DTL.IsReadOnly && ContractDetails.Count == 0)
+                    FocusNewDetailRow();
             }
             catch (Exception ex) { ShowError("ذخیره سربرگ قرارداد انجام نشد.", ex); }
         }
 
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
-            if (!CurrentContractID.HasValue || AllowEdits) return;
+            if (!CurrentContractID.HasValue) return;
             AllowEdits = true;
             LBL_STATUS.Text = IsClosed.IsChecked == true
                 ? "اصلاح سربرگ قرارداد فعال شد؛ برای بازکردن ردیف‌ها ابتدا وضعیت مختومه را بردارید و سربرگ را ذخیره کنید."
                 : "حالت اصلاح فعال است؛ تغییرات سربرگ را ذخیره کنید و ردیف‌ها را سطربه‌سطر ویرایش کنید.";
-            ContractNo.Focus();
-            ContractNo.SelectAll();
+            if (!DG_DTL.IsReadOnly)
+                FocusNewDetailRow();
+            else
+            {
+                ContractNo.Focus();
+                ContractNo.SelectAll();
+            }
         }
 
         private void ApplyEditingState()
@@ -469,7 +526,14 @@ COMMIT TRANSACTION;";
             return digits.Length == 8 ? $"{digits[..4]}/{digits.Substring(4, 2)}/{digits.Substring(6, 2)}" : raw;
         }
 
-        private void CalculateTotal() => LBL_TotalQty.Text = $"جمع متراژ: {ContractDetails.Sum(x => x.Qty):N4} متر مربع";
+        private void CalculateTotal()
+        {
+            var totals = ContractDetails
+                .Where(x => !string.IsNullOrWhiteSpace(x.CODE))
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.UnitName) ? "واحد پایه" : x.UnitName)
+                .Select(x => $"{x.Sum(y => y.Qty):N4} {x.Key}");
+            LBL_TotalQty.Text = $"جمع مقدار تعهد: {string.Join(" + ", totals)}";
+        }
         private void DG_DTL_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.Column.SortMemberPath == nameof(ContractDtlModel.NAME_CODE) &&
@@ -500,6 +564,7 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
                     {
                         detail.CODE = string.Empty;
                         detail.NAME_CODE = string.Empty;
+                        detail.UnitName = string.Empty;
                         editor.Text = string.Empty;
                         if (!string.IsNullOrWhiteSpace(enteredValue))
                             ValidationError("کالای واردشده پیدا نشد؛ برای جست‌وجوی کالا علامت + را وارد کنید.");
@@ -508,6 +573,11 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
                     {
                         detail.CODE = product.CODE;
                         detail.NAME_CODE = product.NAME;
+                        detail.UnitName = dbms.DoGetDataSQL<string>(@"
+SELECT TOP (1) COALESCE(U.NAMES, N'واحد پایه')
+FROM dbo.STUF_DEF AS S
+LEFT JOIN dbo.TCOD_VAHEDS AS U ON U.CODE = S.VAHED
+WHERE S.CODE = @Code", new { Code = product.CODE }).FirstOrDefault() ?? "واحد پایه";
                         editor.Text = product.NAME;
                     }
                 }
@@ -518,6 +588,12 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
         private void DG_DTL_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel || e.Row.Item is not ContractDtlModel detail) return;
+            if (IsCompletelyEmptyDetail(detail))
+            {
+                e.Cancel = true;
+                CancelEmptyDetailRow(detail);
+                return;
+            }
             if (!CurrentContractID.HasValue)
             {
                 e.Cancel = true;
@@ -564,6 +640,16 @@ IF EXISTS (SELECT 1 FROM dbo.CONTRACT_HED WHERE ContractID=@ContractID AND IsClo
     THROW 51007, N'قرارداد مختومه است و ردیف جدید قابل ثبت نیست.', 1;
 IF EXISTS (SELECT 1 FROM dbo.CONTRACT_DTL WHERE ContractID=@ContractID AND CODE=@CODE AND ID<>@ID)
     THROW 51008, N'این کالا قبلاً در قرارداد ثبت شده است.', 1;
+IF EXISTS
+(
+    SELECT 1
+    FROM dbo.CONTRACT_DTL AS D
+    INNER JOIN dbo.STUF_DEF AS ExistingProduct ON ExistingProduct.CODE=D.CODE
+    INNER JOIN dbo.STUF_DEF AS NewProduct ON NewProduct.CODE=@CODE
+    WHERE D.ContractID=@ContractID AND D.ID<>@ID
+      AND ISNULL(ExistingProduct.VAHED, 0)<>ISNULL(NewProduct.VAHED, 0)
+)
+    THROW 51010, N'واحد پایه همه کالاهای یک قرارداد باید یکسان باشد.', 1;
 
 IF @ID = 0
 BEGIN
@@ -724,11 +810,18 @@ COMMIT TRANSACTION;";
             }
 
             if (!DG_DTL.CommitEdit(DataGridEditingUnit.Cell, true)) return;
-            if (DG_DTL.CurrentCell.Item is ContractDtlModel currentDetail &&
-                !ValidateContractDetailBeforeLeaving(currentDetail))
+            if (DG_DTL.CurrentCell.Item is ContractDtlModel currentDetail)
             {
-                FocusInvalidContractDetail(currentDetail);
-                return;
+                if (IsCompletelyEmptyDetail(currentDetail))
+                {
+                    CancelEmptyDetailRow(currentDetail);
+                    return;
+                }
+                if (!ValidateContractDetailBeforeLeaving(currentDetail))
+                {
+                    FocusInvalidContractDetail(currentDetail);
+                    return;
+                }
             }
             int currentRowIndex = DG_DTL.Items.IndexOf(DG_DTL.CurrentCell.Item);
             int nextRowIndex = currentRowIndex + 1;
@@ -750,8 +843,26 @@ COMMIT TRANSACTION;";
             if (string.IsNullOrWhiteSpace(detail.CODE) || string.IsNullOrWhiteSpace(detail.NAME_CODE))
                 return ValidationError("انتخاب کالای معتبر برای ردیف جاری الزامی است؛ برای جست‌وجو علامت + را وارد کنید.");
             if (detail.Qty <= 0 || detail.Qty > 999999999999999m)
-                return ValidationError("متراژ ردیف جاری باید عددی بزرگ‌تر از صفر باشد.");
+                return ValidationError("مقدار تعهد ردیف جاری باید عددی بزرگ‌تر از صفر باشد.");
             return true;
+        }
+
+        private static bool IsCompletelyEmptyDetail(ContractDtlModel detail) =>
+            detail.ID == 0 &&
+            string.IsNullOrWhiteSpace(detail.CODE) &&
+            string.IsNullOrWhiteSpace(detail.NAME_CODE) &&
+            detail.Qty == 0;
+
+        private void CancelEmptyDetailRow(ContractDtlModel detail)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DG_DTL.CancelEdit(DataGridEditingUnit.Cell);
+                DG_DTL.CancelEdit(DataGridEditingUnit.Row);
+                if (detail.ID == 0)
+                    ContractDetails.Remove(detail);
+                CalculateTotal();
+            }), DispatcherPriority.Background);
         }
 
         private void FocusInvalidContractDetail(ContractDtlModel detail)
@@ -782,20 +893,21 @@ COMMIT TRANSACTION;";
                 DG_DTL.BeginEdit();
             }), DispatcherPriority.Background);
         }
-        private void FocusFirstDetailRow()
+        private void FocusNewDetailRow()
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                ContractDtlModel detail = ContractDetails.FirstOrDefault() ?? new ContractDtlModel();
-                if (!ContractDetails.Contains(detail)) ContractDetails.Add(detail);
                 DataGridColumn? firstEditable = DG_DTL.Columns
                     .Where(x => x.Visibility == Visibility.Visible && !x.IsReadOnly)
                     .OrderBy(x => x.DisplayIndex)
                     .FirstOrDefault();
-                if (firstEditable is null) return;
-                DG_DTL.SelectedItem = detail;
-                DG_DTL.ScrollIntoView(detail, firstEditable);
-                DG_DTL.CurrentCell = new DataGridCellInfo(detail, firstEditable);
+                if (firstEditable is null || DG_DTL.Items.Count == 0) return;
+
+                ContractDtlModel? emptyDetail = ContractDetails.LastOrDefault(IsCompletelyEmptyDetail);
+                object targetItem = emptyDetail ?? DG_DTL.Items[DG_DTL.Items.Count - 1];
+                DG_DTL.SelectedItem = targetItem;
+                DG_DTL.ScrollIntoView(targetItem, firstEditable);
+                DG_DTL.CurrentCell = new DataGridCellInfo(targetItem, firstEditable);
                 DG_DTL.Focus();
                 DG_DTL.BeginEdit();
             }), DispatcherPriority.Background);
@@ -812,11 +924,13 @@ COMMIT TRANSACTION;";
             private string code = string.Empty;
             private string nameCode = string.Empty;
             private decimal qty;
+            private string unitName = string.Empty;
 
             public long ID { get => id; set => SetField(ref id, value); }
             public string CODE { get => code; set => SetField(ref code, value ?? string.Empty); }
             public string NAME_CODE { get => nameCode; set => SetField(ref nameCode, value ?? string.Empty); }
             public decimal Qty { get => qty; set => SetField(ref qty, value); }
+            public string UnitName { get => unitName; set => SetField(ref unitName, value ?? string.Empty); }
 
             public event PropertyChangedEventHandler? PropertyChanged;
 

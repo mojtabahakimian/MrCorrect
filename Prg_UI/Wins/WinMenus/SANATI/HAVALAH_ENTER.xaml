@@ -237,7 +237,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150"
+                    <DataGridComboBoxColumn x:Name="ContractID_COLUMN" Header="قرارداد ردیف" Width="180" MinWidth="150" Visibility="Collapsed"
                                             SelectedValueBinding="{Binding ContractID, UpdateSourceTrigger=PropertyChanged}"
                                             DisplayMemberPath="DisplayName" SelectedValuePath="ContractID">
                         <DataGridComboBoxColumn.EditingElementStyle>

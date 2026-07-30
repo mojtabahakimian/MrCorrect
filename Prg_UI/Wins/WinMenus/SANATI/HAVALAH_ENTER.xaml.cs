@@ -97,6 +97,9 @@ namespace Wins.WinMenus.SANATI
             InitializeComponent();
 
             this.DataContext = this;
+            ContractID_COLUMN.Visibility = CL_MenuManager.IsContractTrackingEnabled
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             if (number_to_open != null)
             {
@@ -796,13 +799,16 @@ namespace Wins.WinMenus.SANATI
             DEPATMAN.SelectedItem = 0;
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
 
-            var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
+            if (CL_MenuManager.IsContractTrackingEnabled)
+            {
+                var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
 SELECT ContractID, IsClosed,
        DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
-            contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
-            ContractID.ItemsSource = contracts;
-            ContractID_COLUMN.ItemsSource = contracts;
+                contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
+                ContractID.ItemsSource = contracts;
+                ContractID_COLUMN.ItemsSource = contracts;
+            }
 
             //فرمول ساخت
             N_KOL_ALL = dbms.DoGetDataSQL<FSAKHT_COMBO>("SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + N' - ' + CAST(HEAD_MANF.DATE_ACTIV AS nvarchar) + N' :-' + ISNULL(HEAD_MANF.TOZIH, N' ') + CAST(HEAD_MANF.FNUMB AS char) AS Expr1 FROM HEAD_MANF INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE").ToList();
@@ -998,6 +1004,7 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
             }
 
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
+            if (!ValidatePersistedRowContractsForHeader()) return;
 
             if (INVO_LST_SUB.IsEnabled && !INVO_LST_SUB.IsReadOnly)
             {
@@ -1092,6 +1099,26 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
             }
 
             ChangeIsHappend = false;
+        }
+
+        private bool ValidatePersistedRowContractsForHeader()
+        {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
+            if (!double.TryParse(NUMBER.Text, out double number) || number <= 0) return true;
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate)) return false;
+
+            bool invalid = dbms.DoGetDataSQL<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.INVO_LST AS I
+    INNER JOIN dbo.CONTRACT_HED AS H ON H.ContractID=I.ContractID
+    WHERE I.NUMBER=@Number AND I.TAG=@Tag AND I.ContractID IS NOT NULL
+      AND @DocumentDate<H.ContractDate
+) THEN 1 ELSE 0 END)", new { Number = number, Tag = FTAG, DocumentDate = documentDate }).FirstOrDefault();
+            if (!invalid) return true;
+            new Msgwin(false, "تاریخ سربرگ نمی‌تواند قبل از تاریخ قرارداد یکی از ردیف‌ها باشد.").ShowDialog();
+            return false;
         }
 
         private void SANAD()
@@ -2470,6 +2497,7 @@ COMMIT TRANSACTION;";
         }
         private bool ValidateRowContract(INVO_LST_FACTOR22 row)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!row.ContractID.HasValue) return true;
 
             PersistedContractLink? persisted = row.id > 0
@@ -2478,7 +2506,7 @@ COMMIT TRANSACTION;";
                 : null;
 
             var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
-SELECT TOP (1) H.IsClosed,
+SELECT TOP (1) H.IsClosed, H.ContractDate,
        ProductExists = CONVERT(BIT, CASE WHEN EXISTS
        (
            SELECT 1 FROM dbo.CONTRACT_DTL AS D
@@ -2503,6 +2531,13 @@ WHERE H.ContractID = @ContractID",
             if (!contract.ProductExists)
             {
                 new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            bool linkChanged = persisted?.ContractID != row.ContractID ||
+                               !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase);
+            if (linkChanged && long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate) && documentDate < contract.ContractDate)
+            {
+                new Msgwin(false, "تاریخ سند تولید نمی‌تواند قبل از تاریخ قرارداد انتخاب‌شده باشد.").ShowDialog();
                 return false;
             }
             return true;
@@ -3373,6 +3408,7 @@ WHERE H.ContractID = @ContractID",
         {
             public bool IsClosed { get; set; }
             public bool ProductExists { get; set; }
+            public long ContractDate { get; set; }
         }
         private sealed class PersistedContractLink
         {

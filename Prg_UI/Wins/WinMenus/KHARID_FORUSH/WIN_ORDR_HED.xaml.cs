@@ -45,6 +45,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             InitializeComponent();
 
             this.DataContext = this;
+            ContractID_COLUMN.Visibility = CL_MenuManager.IsContractTrackingEnabled
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             if (number_to_open != null)
             {
@@ -526,13 +529,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
 
-            var contracts = dbms.DoGetDataSQL<ContractOrderLookup>(@"
+            if (CL_MenuManager.IsContractTrackingEnabled)
+            {
+                var contracts = dbms.DoGetDataSQL<ContractOrderLookup>(@"
 SELECT ContractID, IsClosed,
        DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
 FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
-            contracts.Insert(0, new ContractOrderLookup { ContractID = null, DisplayName = "بدون قرارداد" });
-            ContractID.ItemsSource = contracts;
-            ContractID_COLUMN.ItemsSource = contracts;
+                contracts.Insert(0, new ContractOrderLookup { ContractID = null, DisplayName = "بدون قرارداد" });
+                ContractID.ItemsSource = contracts;
+                ContractID_COLUMN.ItemsSource = contracts;
+            }
 
             string sql = @"
                SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD
@@ -643,6 +649,7 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
                 new Msgwin(false, "حساب مشتری مسدود است").ShowDialog();
                 return;
             }
+            if (!ValidatePersistedRowContractsForHeader()) return;
 
 
             if (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0")
@@ -700,6 +707,27 @@ SELECT @NewID;";
 
             universControl.PopNotifyShow("اطلاعات ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
 
+        }
+
+        private bool ValidatePersistedRowContractsForHeader()
+        {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
+            if (!int.TryParse(NUMBER.Text, out int orderID) || orderID <= 0) return true;
+            string customerCode = CUST_NO.SelectedValue?.ToString() ?? CUST_NO.Text;
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long orderDate)) return false;
+
+            bool invalid = dbms.DoGetDataSQL<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.ORDR_LST AS O
+    INNER JOIN dbo.CONTRACT_HED AS H ON H.ContractID=O.ContractID
+    WHERE O.ID=@OrderID AND O.ContractID IS NOT NULL
+      AND (H.CUST_NO<>@CustomerCode OR @OrderDate<H.ContractDate)
+) THEN 1 ELSE 0 END)", new { OrderID = orderID, CustomerCode = customerCode, OrderDate = orderDate }).FirstOrDefault();
+            if (!invalid) return true;
+            new Msgwin(false, "سفارش‌دهنده یا تاریخ سربرگ با قرارداد یکی از ردیف‌ها سازگار نیست.").ShowDialog();
+            return false;
         }
 
         private void RefreshAfterUpdate()
@@ -1118,6 +1146,7 @@ SELECT @NewID;";
 
         private bool ValidateRowContract(ORDR_LST row)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled) return true;
             if (!row.ContractID.HasValue) return true;
 
             PersistedContractLink? persisted = row.idd > 0
@@ -1126,7 +1155,7 @@ SELECT @NewID;";
                 : null;
 
             var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
-SELECT TOP (1) H.IsClosed,
+SELECT TOP (1) H.IsClosed, H.CUST_NO, H.ContractDate,
        ProductExists = CONVERT(BIT, CASE WHEN EXISTS
        (
            SELECT 1 FROM dbo.CONTRACT_DTL AS D
@@ -1151,6 +1180,18 @@ WHERE H.ContractID = @ContractID",
             if (!contract.ProductExists)
             {
                 new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            bool linkChanged = persisted?.ContractID != row.ContractID ||
+                               !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase);
+            if (linkChanged && !string.Equals(contract.CUST_NO, CUST_NO.SelectedValue?.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                new Msgwin(false, "سفارش‌دهنده با مشتری قرارداد انتخاب‌شده یکسان نیست.").ShowDialog();
+                return false;
+            }
+            if (linkChanged && long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate) && documentDate < contract.ContractDate)
+            {
+                new Msgwin(false, "تاریخ سفارش نمی‌تواند قبل از تاریخ قرارداد انتخاب‌شده باشد.").ShowDialog();
                 return false;
             }
             return true;
@@ -1546,6 +1587,8 @@ WHERE H.ContractID = @ContractID",
         {
             public bool IsClosed { get; set; }
             public bool ProductExists { get; set; }
+            public string CUST_NO { get; set; } = string.Empty;
+            public long ContractDate { get; set; }
         }
         private sealed class PersistedContractLink
         {

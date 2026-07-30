@@ -27,6 +27,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!CL_MenuManager.IsContractTrackingEnabled)
+            {
+                new Msgwin(false, "قابلیت قراردادها برای این شرکت فعال نیست.").ShowDialog();
+                Close();
+                return;
+            }
+
             try
             {
                 var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
@@ -35,6 +42,7 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
                 contracts.Insert(0, new ContractLookup { ContractID = 0, DisplayName = "همه قراردادها" });
                 CMB_CONTRACT.ItemsSource = contracts;
                 CMB_CONTRACT.SelectedIndex = 0;
+                TXT_FROM_DATE.CurrentDate = GetFirstDayOfCurrentPersianMonth();
                 LoadReport();
             }
             catch (Exception ex) { ShowError(ex); }
@@ -43,7 +51,7 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
         private void LoadReport()
         {
             long? fromDate = null;
-            string digits = new(TXT_FROM_DATE.Text.Where(char.IsDigit).Select(ToEnglishDigit).ToArray());
+            string digits = new(TXT_FROM_DATE.CurrentDate.Where(char.IsDigit).Select(ToEnglishDigit).ToArray());
             if (digits.Length > 0)
             {
                 if (!TryParsePersianDate(digits, out long parsed))
@@ -56,7 +64,7 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
 
             int? contractID = CMB_CONTRACT.SelectedValue is int selected && selected > 0 ? selected : null;
             var data = dbms.DoGetDataSQL<ContractStatusModel>(@"
-SELECT ContractID, ContractNo, ContractDate, CUST_NO, CustName, BrandName, IsClosed, CODE, ProductName,
+SELECT ContractID, ContractNo, ContractDate, CUST_NO, CustName, BrandName, IsClosed, CODE, ProductName, UnitName,
        ContractedQty, ProducedQty, RemainToProduce, OverProducedQty, SoldQty, RemainInWarehouse
 FROM dbo.VW_CONTRACT_STATUS
 WHERE (@ContractID IS NULL OR ContractID=@ContractID)
@@ -104,11 +112,16 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
         private void UpdateSummary(List<ContractStatusModel> data, int? contractID, bool inventoryComplete)
         {
             decimal contracted = data.Sum(x => x.ContractedQty);
-            decimal produced = data.Sum(x => x.ProducedQty);
-            decimal remainToProduce = data.Sum(x => x.RemainToProduce);
-            decimal sold = data.Sum(x => x.SoldQty);
-            decimal contractBalance = data.Sum(x => x.RemainInWarehouse);
-            decimal progress = contracted <= 0 ? 0 : produced * 100 / contracted;
+            // Fulfilment is calculated per product.  Overproduction of one design
+            // must not hide the unproduced commitment of another design.
+            decimal fulfilledContractQty = data.Sum(x =>
+                Math.Min(x.ContractedQty, Math.Max(0m, x.ProducedQty)));
+            int unitCount = data.Select(x => x.UnitName).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+            decimal progress = unitCount <= 1
+                ? contracted <= 0 ? 0 : fulfilledContractQty * 100 / contracted
+                : data.Count == 0 ? 0 : data.Average(x => x.ContractedQty <= 0
+                    ? 0
+                    : Math.Min(x.ContractedQty, Math.Max(0m, x.ProducedQty)) * 100 / x.ContractedQty);
 
             ContractStatusModel? first = data.FirstOrDefault();
             TXT_SELECTED_TITLE.Text = contractID.HasValue && first is not null
@@ -118,20 +131,18 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
                 ? $"مشتری: {first.CustName}     تاریخ ثبت: {FormatPersianDate(first.ContractDate)}     وضعیت: {(first.IsClosed ? "مختومه" : "باز")}"
                 : "برای مشاهده موجودی واقعی و مشخصات کامل، یک قرارداد را انتخاب کنید.";
 
-            TXT_CONTRACTED.Text = $"{contracted:N4} متر";
-            TXT_PRODUCED.Text = $"{produced:N4} متر";
-            TXT_REMAIN.Text = $"{remainToProduce:N4} متر";
+            TXT_CONTRACTED.Text = FormatQuantityByUnit(data, x => x.ContractedQty);
+            TXT_PRODUCED.Text = FormatQuantityByUnit(data, x => x.ProducedQty);
+            TXT_REMAIN.Text = FormatQuantityByUnit(data, x => x.RemainToProduce);
             TXT_PROGRESS.Text = $"{progress:N2}٪";
-            TXT_SOLD.Text = $"{sold:N4} متر";
-            TXT_CONTRACT_BALANCE.Text = $"{contractBalance:N4} متر";
+            TXT_SOLD.Text = FormatQuantityByUnit(data, x => x.SoldQty);
+            TXT_CONTRACT_BALANCE.Text = FormatQuantityByUnit(data, x => x.RemainInWarehouse);
 
             if (contractID.HasValue && inventoryComplete)
             {
-                decimal actualInventory = data
-                    .GroupBy(x => x.CODE, StringComparer.OrdinalIgnoreCase)
-                    .Sum(x => x.First().ActualInventoryQty ?? 0);
-                TXT_ACTUAL_INVENTORY.Text = $"{actualInventory:N4} متر";
-                TXT_INVENTORY_NOTE.Text = "موجودی واقعی از InventoryManager و مجموع انبارهای تعریف‌شده برای کالا محاسبه شده است؛ مانده قراردادی = تولید منتسب − فروش خالص منتسب.";
+                var inventoryRows = data.GroupBy(x => x.CODE, StringComparer.OrdinalIgnoreCase).Select(x => x.First()).ToList();
+                TXT_ACTUAL_INVENTORY.Text = FormatQuantityByUnit(inventoryRows, x => x.ActualInventoryQty ?? 0);
+                TXT_INVENTORY_NOTE.Text = "موجودی واقعی از InventoryManager محاسبه شده است؛ گردش قرارداد فقط از تاریخ قرارداد به بعد و فروش فقط برای مشتری همان قرارداد منظور می‌شود.";
             }
             else
             {
@@ -142,10 +153,26 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
             }
         }
 
+        private static string FormatQuantityByUnit(IEnumerable<ContractStatusModel> rows, Func<ContractStatusModel, decimal> selector)
+        {
+            var totals = rows
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.UnitName) ? "واحد پایه" : x.UnitName)
+                .Select(x => $"{x.Sum(selector):N4} {x.Key}")
+                .ToList();
+            return totals.Count == 0 ? "—" : string.Join(" + ", totals);
+        }
+
         private static string FormatPersianDate(long value)
         {
             string digits = value.ToString(CultureInfo.InvariantCulture).PadLeft(8, '0');
             return digits.Length == 8 ? $"{digits[..4]}/{digits.Substring(4, 2)}/{digits.Substring(6, 2)}" : value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private static string GetFirstDayOfCurrentPersianMonth()
+        {
+            var calendar = new PersianCalendar();
+            DateTime today = DateTime.Today;
+            return $"{calendar.GetYear(today):0000}/{calendar.GetMonth(today):00}/01";
         }
 
         private void BTN_REFRESH_Click(object sender, RoutedEventArgs e)
@@ -217,11 +244,15 @@ FROM dbo.SAZMAN").FirstOrDefault();
 
             foreach (ContractStatusModel row in data)
                 table.Rows.Add(row.ContractNo, row.CustName, row.BrandName, row.CODE, row.ProductName,
-                    row.ContractedQty.ToString("N4"), row.ProducedQty.ToString("N4"), row.RemainToProduce.ToString("N4"),
-                    row.OverProducedQty.ToString("N4"), row.SoldQty.ToString("N4"), row.RemainInWarehouse.ToString("N4"),
-                    row.ActualInventoryQty?.ToString("N4") ?? "—");
+                    FormatQuantity(row.ContractedQty, row.UnitName), FormatQuantity(row.ProducedQty, row.UnitName),
+                    FormatQuantity(row.RemainToProduce, row.UnitName), FormatQuantity(row.OverProducedQty, row.UnitName),
+                    FormatQuantity(row.SoldQty, row.UnitName), FormatQuantity(row.RemainInWarehouse, row.UnitName),
+                    row.ActualInventoryQty.HasValue ? FormatQuantity(row.ActualInventoryQty.Value, row.UnitName) : "—");
             return table;
         }
+
+        private static string FormatQuantity(decimal value, string unitName) =>
+            $"{value:N4} {(string.IsNullOrWhiteSpace(unitName) ? "واحد پایه" : unitName)}";
 
         private static bool TryParsePersianDate(string digits, out long rawDate)
         {
@@ -290,6 +321,7 @@ FROM dbo.SAZMAN").FirstOrDefault();
             public bool IsClosed { get; set; }
             public string CODE { get; set; } = string.Empty;
             public string ProductName { get; set; } = string.Empty;
+            public string UnitName { get; set; } = string.Empty;
             public decimal ContractedQty { get; set; }
             public decimal ProducedQty { get; set; }
             public decimal RemainToProduce { get; set; }
