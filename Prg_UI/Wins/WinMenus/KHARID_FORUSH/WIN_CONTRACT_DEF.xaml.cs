@@ -401,6 +401,7 @@ SELECT @SavedContractID;";
                     IsClosed = IsClosed.IsChecked == true,
                     UID = Baseknow.USERCOD
                 }).Single();
+                navigationManager!.IsNewRecord = false;
                 RefreshNavigation(CurrentContractID);
                 LoadBrands(BrandName.Text.Trim());
                 AllowEdits = true;
