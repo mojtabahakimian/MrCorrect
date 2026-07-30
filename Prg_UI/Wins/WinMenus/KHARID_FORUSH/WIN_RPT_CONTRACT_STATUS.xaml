@@ -37,7 +37,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="38"/>
-                    <RowDefinition Height="64"/>
+                    <RowDefinition Height="72"/>
                     <RowDefinition Height="52"/>
                     <RowDefinition Height="120"/>
                     <RowDefinition Height="*"/>
@@ -82,7 +82,8 @@
                                  Style="{StaticResource FuzzyOut}" TextAlignment="Center" ToolTip="خالی یعنی بدون محدودیت"/>
                         <CheckBox x:Name="CHK_OPEN_ONLY" Grid.Column="4" Content="فقط قراردادهای باز"
                                   Margin="12,5" VerticalAlignment="Center" IsChecked="True"/>
-                        <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
                             <Button Content="نمایش گزارش" Click="BTN_REFRESH_Click"
                                     Style="{StaticResource GerdC}" Width="110" Height="34" FontSize="10" Margin="4"
                                     Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
