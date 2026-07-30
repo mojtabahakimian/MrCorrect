@@ -43,7 +43,7 @@ FROM dbo.CONTRACT_HED ORDER BY ContractDate DESC, ContractID DESC").ToList();
         private void LoadReport()
         {
             long? fromDate = null;
-            string digits = new(TXT_FROM_DATE.Text.Where(char.IsDigit).Select(ToEnglishDigit).ToArray());
+            string digits = new(TXT_FROM_DATE.CurrentDate.Where(char.IsDigit).Select(ToEnglishDigit).ToArray());
             if (digits.Length > 0)
             {
                 if (!TryParsePersianDate(digits, out long parsed))

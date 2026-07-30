@@ -1,6 +1,7 @@
 <Window x:Class="Prg_UI.Wins.WinMenus.KHARID_FORUSH.WIN_RPT_CONTRACT_STATUS"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="گزارش وضعیت قراردادهای تولید" Height="780" Width="1360" MinHeight="680" MinWidth="1120"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
@@ -69,7 +70,7 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/><ColumnDefinition Width="300"/>
-                            <ColumnDefinition Width="Auto"/><ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="Auto"/><ColumnDefinition Width="350"/>
                             <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="245"/>
                         </Grid.ColumnDefinitions>
@@ -78,8 +79,8 @@
                                   Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="DisplayName"
                                   SelectedValuePath="ContractID" IsTextSearchEnabled="True"/>
                         <Label Grid.Column="2" Content="از تاریخ:" VerticalAlignment="Center"/>
-                        <TextBox x:Name="TXT_FROM_DATE" Grid.Column="3" Margin="5" Height="30" MaxLength="10"
-                                 Style="{StaticResource FuzzyOut}" TextAlignment="Center" ToolTip="خالی یعنی بدون محدودیت"/>
+                        <CNC:DateNavigator x:Name="TXT_FROM_DATE" Grid.Column="3" Margin="2"
+                                           VerticalAlignment="Center" ToolTip="خالی یعنی بدون محدودیت"/>
                         <CheckBox x:Name="CHK_OPEN_ONLY" Grid.Column="4" Content="فقط قراردادهای باز"
                                   Margin="12,5" VerticalAlignment="Center" IsChecked="True"/>
                         <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Left"
