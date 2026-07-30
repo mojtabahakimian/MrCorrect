@@ -105,6 +105,7 @@
 		<None Remove="Rpts\ANBAR\TODAYBARGIRI.mrt" />
 		<None Remove="Rpts\BUGETRP.mrt" />
 		<None Remove="Rpts\BUGETRP_tahlil.mrt" />
+		<None Remove="Rpts\CONTRACT_STATUS.mrt" />
 		<None Remove="Rpts\Checkha\CHAPCHEK.mrt" />
 		<None Remove="Rpts\Checkha\CHAPCHEK_FIT.mrt" />
 		<None Remove="Rpts\Checkha\CHEK_DLISTS.mrt" />
@@ -525,6 +526,7 @@
 		<EmbeddedResource Include="Rpts\ANBAR\TODAYBARGIRI.mrt" />
 		<EmbeddedResource Include="Rpts\BUGETRP.mrt" />
 		<EmbeddedResource Include="Rpts\BUGETRP_tahlil.mrt" />
+		<EmbeddedResource Include="Rpts\CONTRACT_STATUS.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK_FIT.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHEK_DLISTS.mrt" />

@@ -1,5 +1,4 @@
-﻿using Dapper;
-using DocumentFormat.OpenXml.Bibliography;
+﻿using DocumentFormat.OpenXml.Bibliography;
 using Functions;
 using Interfaces;
 using MaterialDesignThemes.Wpf;
@@ -111,6 +110,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         public bool ORDER_LST_SUB_IsFocused { get; private set; }
 
         public double? NUMBER_TO_OPEN { get; set; }
+        private int? OriginalContractID { get; set; }
         public bool ChangeIsHappend { get; private set; }
 
         private SGN_IMODEL _sgn1_info = new SGN_IMODEL();
@@ -259,7 +259,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             Form_Current();
 
-            CL_LMethods.SetTabIndexes(DATE_N, CUST_NO, MOLAH, BTN_SAVE, ORDER_LST_SUB);
+            CL_LMethods.SetTabIndexes(DATE_N, CUST_NO, MOLAH, ContractID, BTN_SAVE, ORDER_LST_SUB);
 
             MakeDefaultFocuseReady();
         }
@@ -301,7 +301,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 USER_NAME.Text = HEADER.USER_NAME.ToStringNullSafe();
 
                 string thevalue = HEADER.CUST_NO;
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
+                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = @hes", new { hes = thevalue }).FirstOrDefault();
                 if (data != null)
                 {
                     if (CUST_NO.ItemsSource == null) CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
@@ -319,6 +319,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
 
                 MOLAH.Text = HEADER.MOLAH;
+                OriginalContractID = HEADER.ContractID;
+                ContractID.SelectedValue = HEADER.ContractID;
 
                 SGN1.IsChecked = HEADER.SGN1;
                 SGN2.IsChecked = HEADER.SGN2;
@@ -356,6 +358,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             CUST_NO.SelectedIndex = -1;
             CUST_NO.Items.Refresh();
             MOLAH.Text = null;
+            OriginalContractID = null;
+            ContractID.SelectedValue = null;
 
             ORDR_LST_DATA?.Clear();
 
@@ -522,6 +526,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
 
+            var contracts = dbms.DoGetDataSQL<ContractOrderLookup>(@"
+SELECT ContractID, IsClosed,
+       DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
+FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
+            contracts.Insert(0, new ContractOrderLookup { ContractID = null, DisplayName = "بدون قرارداد" });
+            ContractID.ItemsSource = contracts;
+            ContractID_COLUMN.ItemsSource = contracts;
+
             string sql = @"
                SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD
                FROM SALA_DTL sd
@@ -588,7 +600,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         public bool ItwasNewFirstTime { get; set; } = false;
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
+            int? selectedContractID = ContractID.SelectedValue is int value ? value : null;
             if (!BTN_SAVE.IsEnabled) return;
+            if (ContractID.SelectedItem is ContractOrderLookup selectedContract &&
+                selectedContract.IsClosed && selectedContractID != OriginalContractID)
+            {
+                new Msgwin(false, "نمی‌توان سفارش جدیدی به قرارداد مختومه متصل کرد.").ShowDialog();
+                return;
+            }
 
             var errors = (from object i in ORDER_LST_SUB.ItemsSource
                           let c = ORDER_LST_SUB.ItemContainerGenerator.ContainerFromItem(i)
@@ -628,34 +647,43 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             if (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0")
             {
-                using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                try
                 {
-                    db.Open();
-                    using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                    const string insertHeaderSql = @"
+SET XACT_ABORT ON;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN TRANSACTION;
+DECLARE @NewID INT;
+SELECT @NewID = ISNULL(MAX(id), 0) + 1 FROM dbo.ORDR_HED WITH (TABLOCKX, HOLDLOCK);
+INSERT dbo.ORDR_HED (id, DATE, MOLAH, CUST_NO, USER_NAME, SGN1, SGN2, SGN3, ContractID)
+VALUES (@NewID, @date, @molah, @custNo, @user, 0, 0, 0, @contractID);
+COMMIT TRANSACTION;
+SELECT @NewID;";
+                    int newId = dbms.DoGetDataSQL<int>(insertHeaderSql, new
                     {
-                        // Lock table dummy query
-                        db.Execute("SELECT TOP 1 id FROM dbo.ORDR_HED WITH (TABLOCKX, HOLDLOCK)", null, transaction);
-
-                        var maxId = db.Query<int?>("SELECT MAX(id) FROM ORDR_HED", null, transaction).FirstOrDefault();
-                        int newId = (maxId ?? 0) + 1;
-                        NUMBER.Text = newId.ToString();
-
-                        db.Execute("INSERT INTO ORDR_HED (id, DATE, MOLAH, CUST_NO, USER_NAME, SGN1, SGN2, SGN3) VALUES (@id, @date, @molah, @custNo, @user, 0, 0, 0)",
-                           new { id = newId, date = DATE_N.Text.ToRawTarikh(), molah = MOLAH.Text, custNo = CUST_NO.SelectedValue ?? CUST_NO.Text, user = USER_NAME.Text }, transaction);
-
-                        transaction.Commit();
-                        ItwasNewFirstTime = true;
-                        _navigationManager.IsNewRecord = false;
-                    }
+                        date = DATE_N.Text.ToRawTarikh(),
+                        molah = MOLAH.Text,
+                        custNo = CUST_NO.SelectedValue ?? CUST_NO.Text,
+                        user = USER_NAME.Text,
+                        contractID = selectedContractID
+                    }).Single();
+                    NUMBER.Text = newId.ToString();
+                    ItwasNewFirstTime = true;
+                    _navigationManager.IsNewRecord = false;
+                    RefreshAfterUpdate();
                 }
-                RefreshAfterUpdate();
+                catch (Exception ex)
+                {
+                    new Msgwin(false, "خطا در ایجاد سفارش: " + ex.Message).ShowDialog();
+                    return;
+                }
             }
 
             // Save Header Update
             try
             {
-                string qry = "UPDATE ORDR_HED SET DATE = @date, MOLAH = @molah, CUST_NO = @custNo, USER_NAME = @user WHERE id = @id";
-                dbms.DoExecuteSQL(qry, new { id = NUMBER.Text, date = DATE_N.Text.ToRawTarikh(), molah = MOLAH.Text, custNo = CUST_NO.SelectedValue ?? CUST_NO.Text, user = USER_NAME.Text });
+                string qry = "UPDATE ORDR_HED SET DATE = @date, MOLAH = @molah, CUST_NO = @custNo, USER_NAME = @user, ContractID = @contractID WHERE id = @id";
+                dbms.DoExecuteSQL(qry, new { id = NUMBER.Text, date = DATE_N.Text.ToRawTarikh(), molah = MOLAH.Text, custNo = CUST_NO.SelectedValue ?? CUST_NO.Text, user = USER_NAME.Text, contractID = selectedContractID });
             }
             catch (Exception ex)
             {
@@ -1088,6 +1116,58 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         }
 
+        private bool ValidateRowContract(ORDR_LST row)
+        {
+            if (!row.ContractID.HasValue) return true;
+
+            PersistedContractLink? persisted = row.idd > 0
+                ? dbms.DoGetDataSQL<PersistedContractLink>(
+                    "SELECT TOP (1) ContractID, CODE FROM dbo.ORDR_LST WHERE idd = @idd", new { row.idd }).FirstOrDefault()
+                : null;
+
+            var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
+SELECT TOP (1) H.IsClosed, H.CUST_NO, H.ContractDate,
+       ProductExists = CONVERT(BIT, CASE WHEN EXISTS
+       (
+           SELECT 1 FROM dbo.CONTRACT_DTL AS D
+           WHERE D.ContractID = H.ContractID AND D.CODE = @Code
+       ) THEN 1 ELSE 0 END)
+FROM dbo.CONTRACT_HED AS H
+WHERE H.ContractID = @ContractID",
+                new { ContractID = row.ContractID.Value, Code = row.CODE }).FirstOrDefault();
+
+            if (contract is null)
+            {
+                new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
+                return false;
+            }
+            if (contract.IsClosed &&
+                (persisted?.ContractID != row.ContractID ||
+                 !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase)))
+            {
+                new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
+                return false;
+            }
+            if (!contract.ProductExists)
+            {
+                new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            bool linkChanged = persisted?.ContractID != row.ContractID ||
+                               !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase);
+            if (linkChanged && !string.Equals(contract.CUST_NO, CUST_NO.SelectedValue?.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                new Msgwin(false, "سفارش‌دهنده با مشتری قرارداد انتخاب‌شده یکسان نیست.").ShowDialog();
+                return false;
+            }
+            if (linkChanged && long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate) && documentDate < contract.ContractDate)
+            {
+                new Msgwin(false, "تاریخ سفارش نمی‌تواند قبل از تاریخ قرارداد انتخاب‌شده باشد.").ShowDialog();
+                return false;
+            }
+            return true;
+        }
+
         private void ORDER_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) return;
@@ -1102,13 +1182,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            if (!ValidateRowContract(row))
+            {
+                e.Cancel = true;
+                return;
+            }
+
             if (row?.ID == null || row.ID == 0)
             {
                 // INSERT
-                string sql = @"INSERT INTO ORDR_LST (ID, CODE, VAHED_K, MEGH, MEGHk, CUST_NO, DATE) 
-                               VALUES (@ID, @CODE, @VAHED_K, @MEGH, @MEGHk, @CUST_NO, @DATE)";
+                string sql = @"INSERT INTO ORDR_LST (ID, CODE, VAHED_K, MEGH, MEGHk, CUST_NO, DATE, ContractID)
+                               OUTPUT INSERTED.idd
+                               VALUES (@ID, @CODE, @VAHED_K, @MEGH, @MEGHk, @CUST_NO, @DATE, @ContractID)";
 
-                dbms.DoExecuteSQL(sql, new
+                int newRowID = dbms.DoGetDataSQL<int>(sql, new
                 {
                     ID = headerId,
                     row.CODE,
@@ -1116,14 +1203,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     row.MEGH,
                     row.MEGHK,
                     CUST_NO = row.CUST_NO ?? "",
-                    DATE = DATE_N.Text.ToRawTarikh()
-                });
+                    DATE = DATE_N.Text.ToRawTarikh(),
+                    row.ContractID
+                }).FirstOrDefault();
+                if (newRowID <= 0)
+                    throw new InvalidOperationException("شناسه ردیف سفارش پس از ثبت برگردانده نشد.");
+                row.ID = headerId;
+                row.idd = newRowID;
             }
             else
             {
                 // UPDATE
-                string sql = @"UPDATE ORDR_LST SET CODE=@CODE, VAHED_K=@VAHED_K, MEGH=@MEGH, MEGHk=@MEGHk, CUST_NO=@CUST_NO 
-                               WHERE ID = @ID";
+                string sql = @"UPDATE ORDR_LST SET CODE=@CODE, VAHED_K=@VAHED_K, MEGH=@MEGH, MEGHk=@MEGHk,
+                                      CUST_NO=@CUST_NO, ContractID=@ContractID
+                               WHERE idd = @idd";
 
                 dbms.DoExecuteSQL(sql, new
                 {
@@ -1132,7 +1225,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     row.MEGH,
                     row.MEGHK,
                     CUST_NO = row.CUST_NO ?? "",
-                    row.ID
+                    row.ContractID,
+                    row.idd
                 });
             }
         }
@@ -1452,6 +1546,25 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
 
             return true;
+        }
+
+        private sealed class ContractOrderLookup
+        {
+            public int? ContractID { get; set; }
+            public bool IsClosed { get; set; }
+            public string DisplayName { get; set; } = string.Empty;
+        }
+        private sealed class ContractRowValidation
+        {
+            public bool IsClosed { get; set; }
+            public bool ProductExists { get; set; }
+            public string CUST_NO { get; set; } = string.Empty;
+            public long ContractDate { get; set; }
+        }
+        private sealed class PersistedContractLink
+        {
+            public int? ContractID { get; set; }
+            public string CODE { get; set; } = string.Empty;
         }
 
     }
