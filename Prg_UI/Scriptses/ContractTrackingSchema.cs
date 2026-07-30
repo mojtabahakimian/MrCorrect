@@ -144,12 +144,24 @@ WITH Movements AS
         -- MEGHk is the canonical stock quantity used by InventoryManager.  Only
         -- legacy rows where it is NULL fall back to MEGH; an explicit zero must
         -- stay zero and must not accidentally become MEGH.
-        ProducedQty = SUM(CASE WHEN F.FlowType = 1 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(I.MEGHk, I.MEGH, 0)) ELSE 0 END),
-        SoldQty = SUM(CASE WHEN F.FlowType = 2 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(I.MEGHk, I.MEGH, 0)) ELSE 0 END)
+        ProducedQty = SUM(CASE WHEN F.FlowType = 1 THEN F.Direction * Q.BaseQty ELSE 0 END),
+        -- The normal sales-return form stores the returned base quantity on the
+        -- original tag-2 row in MEGH_MAR.  Net that amount from positive sales;
+        -- explicit negative-direction return rows are still handled by Direction.
+        SoldQty = SUM(CASE WHEN F.FlowType = 2 THEN F.Direction *
+            CASE WHEN F.Direction = 1
+                 THEN CASE WHEN Q.BaseQty > Q.ReturnedQty THEN Q.BaseQty - Q.ReturnedQty ELSE 0 END
+                 ELSE Q.BaseQty
+            END ELSE 0 END)
     FROM dbo.INVO_LST AS I
     INNER JOIN dbo.CONTRACT_FLOW_TAG AS F ON F.TAG = I.TAG
     INNER JOIN dbo.CONTRACT_HED AS CH ON CH.ContractID = I.ContractID
     INNER JOIN dbo.HEAD_LST AS DH ON DH.NUMBER = I.NUMBER AND DH.TAG = I.TAG
+    CROSS APPLY (VALUES
+    (
+        CONVERT(DECIMAL(19,4), COALESCE(I.MEGHk, I.MEGH, 0)),
+        CONVERT(DECIMAL(19,4), COALESCE(I.MEGH_MAR, 0))
+    )) AS Q(BaseQty, ReturnedQty)
     WHERE I.ContractID IS NOT NULL
       -- A movement cannot fulfil a contract before that contract exists.  Sales
       -- movements must also belong to the contract customer; production documents
