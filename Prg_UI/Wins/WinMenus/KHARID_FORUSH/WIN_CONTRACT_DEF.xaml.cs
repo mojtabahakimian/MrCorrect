@@ -355,21 +355,26 @@ SELECT @SavedContractID;";
                 LBL_STATUS.Text = DG_DTL.IsReadOnly
                     ? "سربرگ قرارداد ذخیره شد؛ قرارداد مختومه است و ردیف‌ها قابل ویرایش نیستند."
                     : "سربرگ قرارداد ذخیره شد؛ اکنون طرح‌ها را سطربه‌سطر ثبت کنید.";
-                if (!DG_DTL.IsReadOnly)
-                    FocusFirstDetailRow();
+                if (!DG_DTL.IsReadOnly && ContractDetails.Count == 0)
+                    FocusNewDetailRow();
             }
             catch (Exception ex) { ShowError("ذخیره سربرگ قرارداد انجام نشد.", ex); }
         }
 
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
-            if (!CurrentContractID.HasValue || AllowEdits) return;
+            if (!CurrentContractID.HasValue) return;
             AllowEdits = true;
             LBL_STATUS.Text = IsClosed.IsChecked == true
                 ? "اصلاح سربرگ قرارداد فعال شد؛ برای بازکردن ردیف‌ها ابتدا وضعیت مختومه را بردارید و سربرگ را ذخیره کنید."
                 : "حالت اصلاح فعال است؛ تغییرات سربرگ را ذخیره کنید و ردیف‌ها را سطربه‌سطر ویرایش کنید.";
-            ContractNo.Focus();
-            ContractNo.SelectAll();
+            if (!DG_DTL.IsReadOnly)
+                FocusNewDetailRow();
+            else
+            {
+                ContractNo.Focus();
+                ContractNo.SelectAll();
+            }
         }
 
         private void ApplyEditingState()
@@ -518,6 +523,12 @@ ORDER BY CASE WHEN CODE = @Value THEN 0 ELSE 1 END, CODE",
         private void DG_DTL_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel || e.Row.Item is not ContractDtlModel detail) return;
+            if (IsCompletelyEmptyDetail(detail))
+            {
+                e.Cancel = true;
+                CancelEmptyDetailRow(detail);
+                return;
+            }
             if (!CurrentContractID.HasValue)
             {
                 e.Cancel = true;
@@ -724,11 +735,18 @@ COMMIT TRANSACTION;";
             }
 
             if (!DG_DTL.CommitEdit(DataGridEditingUnit.Cell, true)) return;
-            if (DG_DTL.CurrentCell.Item is ContractDtlModel currentDetail &&
-                !ValidateContractDetailBeforeLeaving(currentDetail))
+            if (DG_DTL.CurrentCell.Item is ContractDtlModel currentDetail)
             {
-                FocusInvalidContractDetail(currentDetail);
-                return;
+                if (IsCompletelyEmptyDetail(currentDetail))
+                {
+                    CancelEmptyDetailRow(currentDetail);
+                    return;
+                }
+                if (!ValidateContractDetailBeforeLeaving(currentDetail))
+                {
+                    FocusInvalidContractDetail(currentDetail);
+                    return;
+                }
             }
             int currentRowIndex = DG_DTL.Items.IndexOf(DG_DTL.CurrentCell.Item);
             int nextRowIndex = currentRowIndex + 1;
@@ -752,6 +770,24 @@ COMMIT TRANSACTION;";
             if (detail.Qty <= 0 || detail.Qty > 999999999999999m)
                 return ValidationError("متراژ ردیف جاری باید عددی بزرگ‌تر از صفر باشد.");
             return true;
+        }
+
+        private static bool IsCompletelyEmptyDetail(ContractDtlModel detail) =>
+            detail.ID == 0 &&
+            string.IsNullOrWhiteSpace(detail.CODE) &&
+            string.IsNullOrWhiteSpace(detail.NAME_CODE) &&
+            detail.Qty == 0;
+
+        private void CancelEmptyDetailRow(ContractDtlModel detail)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DG_DTL.CancelEdit(DataGridEditingUnit.Cell);
+                DG_DTL.CancelEdit(DataGridEditingUnit.Row);
+                if (detail.ID == 0)
+                    ContractDetails.Remove(detail);
+                CalculateTotal();
+            }), DispatcherPriority.Background);
         }
 
         private void FocusInvalidContractDetail(ContractDtlModel detail)
@@ -782,20 +818,21 @@ COMMIT TRANSACTION;";
                 DG_DTL.BeginEdit();
             }), DispatcherPriority.Background);
         }
-        private void FocusFirstDetailRow()
+        private void FocusNewDetailRow()
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                ContractDtlModel detail = ContractDetails.FirstOrDefault() ?? new ContractDtlModel();
-                if (!ContractDetails.Contains(detail)) ContractDetails.Add(detail);
                 DataGridColumn? firstEditable = DG_DTL.Columns
                     .Where(x => x.Visibility == Visibility.Visible && !x.IsReadOnly)
                     .OrderBy(x => x.DisplayIndex)
                     .FirstOrDefault();
-                if (firstEditable is null) return;
-                DG_DTL.SelectedItem = detail;
-                DG_DTL.ScrollIntoView(detail, firstEditable);
-                DG_DTL.CurrentCell = new DataGridCellInfo(detail, firstEditable);
+                if (firstEditable is null || DG_DTL.Items.Count == 0) return;
+
+                ContractDtlModel? emptyDetail = ContractDetails.LastOrDefault(IsCompletelyEmptyDetail);
+                object targetItem = emptyDetail ?? DG_DTL.Items[DG_DTL.Items.Count - 1];
+                DG_DTL.SelectedItem = targetItem;
+                DG_DTL.ScrollIntoView(targetItem, firstEditable);
+                DG_DTL.CurrentCell = new DataGridCellInfo(targetItem, firstEditable);
                 DG_DTL.Focus();
                 DG_DTL.BeginEdit();
             }), DispatcherPriority.Background);
