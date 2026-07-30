@@ -2610,6 +2610,7 @@ WHERE H.ContractID = @ContractID",
             {
                 return;
             }
+            if (!ValidatePersistedRowContractsForHeader()) return;
 
             DoCmdSaveHeader();
 
@@ -2651,6 +2652,26 @@ WHERE H.ContractID = @ContractID",
             }
 
             isSavedSuccess = true;
+        }
+
+        private bool ValidatePersistedRowContractsForHeader()
+        {
+            if (!double.TryParse(NUMBER.Text, out double number) || number <= 0) return true;
+            string customerCode = CUST_NO.SelectedValue?.ToString() ?? string.Empty;
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate)) return false;
+
+            bool invalid = dbms.DoGetDataSQL<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.INVO_LST AS I
+    INNER JOIN dbo.CONTRACT_HED AS H ON H.ContractID=I.ContractID
+    WHERE I.NUMBER=@Number AND I.TAG=20 AND I.ContractID IS NOT NULL
+      AND (H.CUST_NO<>@CustomerCode OR @DocumentDate<H.ContractDate)
+) THEN 1 ELSE 0 END)", new { Number = number, CustomerCode = customerCode, DocumentDate = documentDate }).FirstOrDefault();
+            if (!invalid) return true;
+            new Msgwin(false, "مشتری یا تاریخ سربرگ با قرارداد یکی از ردیف‌ها سازگار نیست.").ShowDialog();
+            return false;
         }
 
         private void DoCmdSaveHeader()

@@ -998,6 +998,7 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
             }
 
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
+            if (!ValidatePersistedRowContractsForHeader()) return;
 
             if (INVO_LST_SUB.IsEnabled && !INVO_LST_SUB.IsReadOnly)
             {
@@ -1092,6 +1093,25 @@ FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").To
             }
 
             ChangeIsHappend = false;
+        }
+
+        private bool ValidatePersistedRowContractsForHeader()
+        {
+            if (!double.TryParse(NUMBER.Text, out double number) || number <= 0) return true;
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate)) return false;
+
+            bool invalid = dbms.DoGetDataSQL<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.INVO_LST AS I
+    INNER JOIN dbo.CONTRACT_HED AS H ON H.ContractID=I.ContractID
+    WHERE I.NUMBER=@Number AND I.TAG=@Tag AND I.ContractID IS NOT NULL
+      AND @DocumentDate<H.ContractDate
+) THEN 1 ELSE 0 END)", new { Number = number, Tag = FTAG, DocumentDate = documentDate }).FirstOrDefault();
+            if (!invalid) return true;
+            new Msgwin(false, "تاریخ سربرگ نمی‌تواند قبل از تاریخ قرارداد یکی از ردیف‌ها باشد.").ShowDialog();
+            return false;
         }
 
         private void SANAD()
