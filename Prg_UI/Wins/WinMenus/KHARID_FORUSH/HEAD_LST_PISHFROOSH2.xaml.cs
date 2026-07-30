@@ -4969,8 +4969,11 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
     SELECT 1
     FROM dbo.INVO_LST AS I
     LEFT JOIN dbo.CONTRACT_HED AS H ON H.ContractID = I.ContractID
+    LEFT JOIN dbo.HEAD_LST AS SourceHeader ON SourceHeader.NUMBER = I.NUMBER AND SourceHeader.TAG = I.TAG
     WHERE I.NUMBER = @SourceNumber AND I.TAG = 20 AND I.ContractID IS NOT NULL
-      AND (H.ContractID IS NULL OR H.IsClosed = 1 OR NOT EXISTS
+      AND (H.ContractID IS NULL OR H.IsClosed = 1
+           OR SourceHeader.NUMBER IS NULL OR SourceHeader.CUST_NO <> H.CUST_NO OR SourceHeader.DATE_N < H.ContractDate
+           OR NOT EXISTS
       (
           SELECT 1 FROM dbo.CONTRACT_DTL AS D
           WHERE D.ContractID = I.ContractID AND D.CODE = I.CODE
@@ -4978,7 +4981,7 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
 ) THEN 1 ELSE 0 END)",
                                     new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
                                 if (hasInvalidContractRow)
-                                    throw new InvalidOperationException("حداقل یک ردیف به قرارداد نامعتبر/مختومه متصل است یا کالای آن در ریز قرارداد وجود ندارد.");
+                                    throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
 
                                 int? singleContractID = db.Query<int?>(@"
 SELECT CASE
@@ -5621,8 +5624,11 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
     SELECT 1
     FROM dbo.INVO_LST AS I
     LEFT JOIN dbo.CONTRACT_HED AS H ON H.ContractID = I.ContractID
+    LEFT JOIN dbo.HEAD_LST AS SourceHeader ON SourceHeader.NUMBER = I.NUMBER AND SourceHeader.TAG = I.TAG
     WHERE I.NUMBER = @SourceNumber AND I.TAG = 20 AND I.ContractID IS NOT NULL
-      AND (H.ContractID IS NULL OR H.IsClosed = 1 OR NOT EXISTS
+      AND (H.ContractID IS NULL OR H.IsClosed = 1
+           OR SourceHeader.NUMBER IS NULL OR SourceHeader.CUST_NO <> H.CUST_NO OR SourceHeader.DATE_N < H.ContractDate
+           OR NOT EXISTS
       (
           SELECT 1 FROM dbo.CONTRACT_DTL AS D
           WHERE D.ContractID = I.ContractID AND D.CODE = I.CODE
@@ -5630,7 +5636,7 @@ SELECT CONVERT(BIT, CASE WHEN EXISTS
 ) THEN 1 ELSE 0 END)",
                                     new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
                                 if (hasInvalidContractRow)
-                                    throw new InvalidOperationException("حداقل یک ردیف به قرارداد نامعتبر/مختومه متصل است یا کالای آن در ریز قرارداد وجود ندارد.");
+                                    throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
 
                                 int? singleContractID = db.Query<int?>(@"
 SELECT CASE

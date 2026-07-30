@@ -135,7 +135,7 @@ WHERE D.ContractID = @ContractID AND F.ANBAR <> 0",
             {
                 var inventoryRows = data.GroupBy(x => x.CODE, StringComparer.OrdinalIgnoreCase).Select(x => x.First()).ToList();
                 TXT_ACTUAL_INVENTORY.Text = FormatQuantityByUnit(inventoryRows, x => x.ActualInventoryQty ?? 0);
-                TXT_INVENTORY_NOTE.Text = "موجودی واقعی از InventoryManager و مجموع انبارهای تعریف‌شده برای کالا محاسبه شده است؛ مانده قراردادی = تولید منتسب − فروش خالص منتسب.";
+                TXT_INVENTORY_NOTE.Text = "موجودی واقعی از InventoryManager محاسبه شده است؛ گردش قرارداد فقط از تاریخ قرارداد به بعد و فروش فقط برای مشتری همان قرارداد منظور می‌شود.";
             }
             else
             {

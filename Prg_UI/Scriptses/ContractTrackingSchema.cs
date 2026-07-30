@@ -148,7 +148,14 @@ WITH Movements AS
         SoldQty = SUM(CASE WHEN F.FlowType = 2 THEN F.Direction * CONVERT(DECIMAL(19,4), COALESCE(I.MEGHk, I.MEGH, 0)) ELSE 0 END)
     FROM dbo.INVO_LST AS I
     INNER JOIN dbo.CONTRACT_FLOW_TAG AS F ON F.TAG = I.TAG
+    INNER JOIN dbo.CONTRACT_HED AS CH ON CH.ContractID = I.ContractID
+    INNER JOIN dbo.HEAD_LST AS DH ON DH.NUMBER = I.NUMBER AND DH.TAG = I.TAG
     WHERE I.ContractID IS NOT NULL
+      -- A movement cannot fulfil a contract before that contract exists.  Sales
+      -- movements must also belong to the contract customer; production documents
+      -- intentionally remain customer-independent.
+      AND DH.DATE_N >= CH.ContractDate
+      AND (F.FlowType <> 2 OR DH.CUST_NO = CH.CUST_NO)
     GROUP BY I.ContractID, I.CODE
 )
 SELECT
