@@ -37,11 +37,12 @@ namespace Prg_UI.Scriptses
                     isCustomCall = true;
                 }
 
+                // This feature is used by normal sales/order/production windows, so
+                // upgraded databases must receive its idempotent schema at login too.
+                ContractTrackingSchema.EnsureCreated(dbms);
+
                 if (isCustomCall)
                 {
-                    // Contract production/sales tracking schema. The helper is idempotent and uses CL_CCNNMANAGER.
-                    ContractTrackingSchema.EnsureCreated(dbms);
-
                     try
                     {
                         db.Execute(@"IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OSTAN_RPT]') AND type in (N'U'))

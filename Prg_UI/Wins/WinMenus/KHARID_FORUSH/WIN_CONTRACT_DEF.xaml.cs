@@ -329,6 +329,46 @@ ELSE
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM dbo.CONTRACT_HED WITH (UPDLOCK, HOLDLOCK) WHERE ContractID = @SavedContractID)
         THROW 51002, N'قرارداد مورد نظر دیگر وجود ندارد.', 1;
+    DECLARE @OldContractDate BIGINT, @OldCustomerCode NVARCHAR(40);
+    SELECT @OldContractDate=ContractDate, @OldCustomerCode=CUST_NO
+    FROM dbo.CONTRACT_HED WITH (UPDLOCK, HOLDLOCK)
+    WHERE ContractID=@SavedContractID;
+
+    IF @ContractDate<>@OldContractDate AND
+    (
+        EXISTS
+        (
+            SELECT 1
+            FROM dbo.INVO_LST AS I
+            INNER JOIN dbo.HEAD_LST AS H ON H.NUMBER=I.NUMBER AND H.TAG=I.TAG
+            WHERE I.ContractID=@SavedContractID AND H.DATE_N<@ContractDate
+        )
+        OR EXISTS
+        (
+            SELECT 1 FROM dbo.ORDR_LST AS O
+            WHERE O.ContractID=@SavedContractID AND O.DATE<@ContractDate
+        )
+    )
+        THROW 51011, N'تاریخ قرارداد نمی‌تواند بعد از تاریخ اسناد متصل به آن قرار گیرد.', 1;
+
+    IF @CUST_NO<>@OldCustomerCode AND
+    (
+        EXISTS
+        (
+            SELECT 1
+            FROM dbo.INVO_LST AS I
+            INNER JOIN dbo.CONTRACT_FLOW_TAG AS F ON F.TAG=I.TAG AND F.FlowType=2
+            INNER JOIN dbo.HEAD_LST AS H ON H.NUMBER=I.NUMBER AND H.TAG=I.TAG
+            WHERE I.ContractID=@SavedContractID AND H.CUST_NO<>@CUST_NO
+        )
+        OR EXISTS
+        (
+            SELECT 1 FROM dbo.ORDR_LST AS O
+            WHERE O.ContractID=@SavedContractID AND O.CUST_NO<>@CUST_NO
+        )
+    )
+        THROW 51012, N'مشتری قرارداد با مشتری اسناد فروش یا سفارش‌های متصل یکسان نیست.', 1;
+
     UPDATE dbo.CONTRACT_HED
        SET ContractNo=@ContractNo, ContractDate=@ContractDate, CUST_NO=@CUST_NO, BrandName=@BrandName,
            MOLAH=NULLIF(@MOLAH, N''), IsClosed=@IsClosed, UID=@UID
