@@ -352,8 +352,10 @@ BEGIN
         )
         OR EXISTS
         (
-            SELECT 1 FROM dbo.ORDR_LST AS O
-            WHERE O.ContractID=@SavedContractID AND O.DATE<@ContractDate
+            SELECT 1
+            FROM dbo.ORDR_LST AS O
+            INNER JOIN dbo.ORDR_HED AS OH ON OH.id=O.ID
+            WHERE O.ContractID=@SavedContractID AND OH.DATE<@ContractDate
         )
     )
         THROW 51011, N'تاریخ قرارداد نمی‌تواند بعد از تاریخ اسناد متصل به آن قرار گیرد.', 1;
@@ -370,8 +372,10 @@ BEGIN
         )
         OR EXISTS
         (
-            SELECT 1 FROM dbo.ORDR_LST AS O
-            WHERE O.ContractID=@SavedContractID AND O.CUST_NO<>@CUST_NO
+            SELECT 1
+            FROM dbo.ORDR_LST AS O
+            INNER JOIN dbo.ORDR_HED AS OH ON OH.id=O.ID
+            WHERE O.ContractID=@SavedContractID AND OH.CUST_NO<>@CUST_NO
         )
     )
         THROW 51012, N'مشتری قرارداد با مشتری اسناد فروش یا سفارش‌های متصل یکسان نیست.', 1;
