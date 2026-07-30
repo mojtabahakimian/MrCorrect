@@ -165,19 +165,18 @@
                               GridLinesVisibility="All" Style="{StaticResource MaterialDesignDataGrid}"
                               materialDesign:DataGridAssist.EnableEditBoxAssist="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="شماره قرارداد" Binding="{Binding ContractNo}" Width="90" MinWidth="80"/>
-                            <DataGridTextColumn Header="مشتری" Binding="{Binding CustName}" Width="165" MinWidth="130"/>
-                            <DataGridTextColumn Header="برند" Binding="{Binding BrandName}" Width="95" MinWidth="80"/>
-                            <DataGridTextColumn Header="کد طرح" Binding="{Binding CODE}" Width="70" MinWidth="60"/>
-                            <DataGridTextColumn Header="نام طرح / کالا" Binding="{Binding ProductName}" Width="190" MinWidth="150"/>
-                            <DataGridTextColumn Header="واحد پایه" Binding="{Binding UnitName}" Width="80" MinWidth="70"/>
-                            <DataGridTextColumn Header="مقدار تعهد" Binding="{Binding ContractedQty, StringFormat=N4}" Width="95" MinWidth="85"/>
-                            <DataGridTextColumn Header="تولید شده" Binding="{Binding ProducedQty, StringFormat=N4}" Width="90" MinWidth="80"/>
-                            <DataGridTextColumn Header="مانده تولید" Binding="{Binding RemainToProduce, StringFormat=N4}" Width="95" MinWidth="85"/>
-                            <DataGridTextColumn Header="مازاد تولید" Binding="{Binding OverProducedQty, StringFormat=N4}" Width="90" MinWidth="80"/>
-                            <DataGridTextColumn Header="فروش خالص" Binding="{Binding SoldQty, StringFormat=N4}" Width="90" MinWidth="80"/>
-                            <DataGridTextColumn Header="مانده قراردادی" Binding="{Binding RemainInWarehouse, StringFormat=N4}" Width="100" MinWidth="90"/>
-                            <DataGridTextColumn Header="موجودی واقعی" Binding="{Binding ActualInventoryQty, StringFormat=N4}" Width="100" MinWidth="90"/>
+                            <DataGridTextColumn Header="شماره قرارداد" Binding="{Binding ContractNo}" Width="100" MinWidth="110"/>
+                            <DataGridTextColumn Header="مشتری" Binding="{Binding CustName}" Width="180" MinWidth="150"/>
+                            <DataGridTextColumn Header="برند" Binding="{Binding BrandName}" Width="110" MinWidth="90"/>
+                            <DataGridTextColumn Header="کد طرح" Binding="{Binding CODE}" Width="80" MinWidth="70"/>
+                            <DataGridTextColumn Header="نام طرح / کالا" Binding="{Binding ProductName}" Width="350" MinWidth="180"/>
+                            <DataGridTextColumn Header="متراژ تعهد" Binding="{Binding ContractedQty, StringFormat=N4}" Width="105" MinWidth="95"/>
+                            <DataGridTextColumn Header="تولید شده" Binding="{Binding ProducedQty, StringFormat=N4}" Width="100" MinWidth="90"/>
+                            <DataGridTextColumn Header="مانده تولید" Binding="{Binding RemainToProduce, StringFormat=N4}" Width="105" MinWidth="95"/>
+                            <DataGridTextColumn Header="مازاد تولید" Binding="{Binding OverProducedQty, StringFormat=N4}" Width="100" MinWidth="90"/>
+                            <DataGridTextColumn Header="فروش خالص" Binding="{Binding SoldQty, StringFormat=N4}" Width="110" MinWidth="110"/>
+                            <DataGridTextColumn Header="مانده قراردادی" Binding="{Binding RemainInWarehouse, StringFormat=N4}" Width="115" MinWidth="100"/>
+                            <DataGridTextColumn Header="موجودی واقعی" Binding="{Binding ActualInventoryQty, StringFormat=N4}" Width="115" MinWidth="100"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
