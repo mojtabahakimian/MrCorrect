@@ -51,6 +51,19 @@ namespace Functions
 {
     public static class CL_MenuManager
     {
+        /// <summary>
+        /// Contract tracking is a company-specific feature. Characters 11-12
+        /// contain the configured special-print code; code 19 enables it.
+        /// </summary>
+        public static bool IsContractTrackingEnabled
+        {
+            get
+            {
+                string options = Baseknow.OPTIONSS ?? string.Empty;
+                return options.Length >= 12 && options.Substring(10, 2) == "19";
+            }
+        }
+
         #region TYPES
         public enum WinNameType
         {
@@ -1061,6 +1074,8 @@ namespace Functions
             /// ثبت سفارشات کالا
             /// </summary>
             WIN_ORDR_HED_SEFARESH,
+            WIN_CONTRACT_DEF,
+            WIN_RPT_CONTRACT_STATUS,
             /// <summary>
             /// تعریف اهداف برای ویزیتور
             /// </summary>
@@ -1145,6 +1160,24 @@ namespace Functions
                 case WinNameType.WIN_VISITGOL_HEAD_AHDAF: /*تعریف اهداف برای ویزیتور*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISITGOL_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_ORDR_HED_SEFARESH: /*ثبت سفارشات کالا*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ORDR_HED(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.WIN_CONTRACT_DEF: /*تعریف قرارداد تولید*/
+                    if (!IsContractTrackingEnabled)
+                    {
+                        new Msgwin(false, "قابلیت قراردادها برای این شرکت فعال نیست.").ShowDialog();
+                        break;
+                    }
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_CONTRACT_DEF(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.WIN_RPT_CONTRACT_STATUS: /*گزارش وضعیت قرارداد تولید*/
+                    if (!IsContractTrackingEnabled)
+                    {
+                        new Msgwin(false, "قابلیت قراردادها برای این شرکت فعال نیست.").ShowDialog();
+                        break;
+                    }
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_RPT_CONTRACT_STATUS(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
 
                 case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZKAR"), isModalDialog: false, allowMultipleInstances: false); break;
 

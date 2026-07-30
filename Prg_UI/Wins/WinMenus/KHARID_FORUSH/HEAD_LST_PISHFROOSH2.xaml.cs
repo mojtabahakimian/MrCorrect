@@ -188,6 +188,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             InitializeComponent();
 
             this.DataContext = this;
+            ContractID_COLUMN.Visibility = CL_MenuManager.IsContractTrackingEnabled
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             if (number_to_open != null)
             {
@@ -722,6 +725,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_NO2.ItemsSource = CUST_NO.ItemsSource;
             CUST_NO2.DisplayMemberPath = "hes";
             CUST_NO2.SelectedValuePath = "hes";
+
+            var contracts = dbms.DoGetDataSQL<ContractLookup>(@"
+SELECT ContractID, IsClosed,
+       DisplayName = CONCAT(ContractNo, N' - ', BrandName, CASE WHEN IsClosed=1 THEN N' (مختومه)' ELSE N'' END)
+FROM dbo.CONTRACT_HED ORDER BY IsClosed, ContractDate DESC, ContractID DESC").ToList();
+            contracts.Insert(0, new ContractLookup { DisplayName = "بدون قرارداد" });
+            ContractID.ItemsSource = contracts;
+            ContractID_COLUMN.ItemsSource = contracts;
 
             //VAHEDJARI
             var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
@@ -2344,6 +2355,58 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
         }
 
+        private bool ValidateRowContract(INVO_LST_FACTOR22 row)
+        {
+            if (!row.ContractID.HasValue) return true;
+
+            PersistedContractLink? persisted = row.id > 0
+                ? dbms.DoGetDataSQL<PersistedContractLink>(
+                    "SELECT TOP (1) ContractID, CODE FROM dbo.INVO_LST WHERE id = @id", new { row.id }).FirstOrDefault()
+                : null;
+
+            var contract = dbms.DoGetDataSQL<ContractRowValidation>(@"
+SELECT TOP (1) H.IsClosed, H.CUST_NO, H.ContractDate,
+       ProductExists = CONVERT(BIT, CASE WHEN EXISTS
+       (
+           SELECT 1 FROM dbo.CONTRACT_DTL AS D
+           WHERE D.ContractID = H.ContractID AND D.CODE = @Code
+       ) THEN 1 ELSE 0 END)
+FROM dbo.CONTRACT_HED AS H
+WHERE H.ContractID = @ContractID",
+                new { ContractID = row.ContractID.Value, Code = row.CODE }).FirstOrDefault();
+
+            if (contract is null)
+            {
+                new Msgwin(false, "قرارداد انتخاب‌شده وجود ندارد.").ShowDialog();
+                return false;
+            }
+            if (contract.IsClosed &&
+                (persisted?.ContractID != row.ContractID ||
+                 !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase)))
+            {
+                new Msgwin(false, "اتصال ردیف جدید به قرارداد مختومه مجاز نیست.").ShowDialog();
+                return false;
+            }
+            if (!contract.ProductExists)
+            {
+                new Msgwin(false, $"کالای {row.CODE} در ریز قرارداد انتخاب‌شده تعریف نشده است.").ShowDialog();
+                return false;
+            }
+            bool linkChanged = persisted?.ContractID != row.ContractID ||
+                               !string.Equals(persisted.CODE, row.CODE, StringComparison.OrdinalIgnoreCase);
+            if (linkChanged && !string.Equals(contract.CUST_NO, CUST_NO.SelectedValue?.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                new Msgwin(false, "مشتری سند با مشتری قرارداد انتخاب‌شده یکسان نیست.").ShowDialog();
+                return false;
+            }
+            if (linkChanged && long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate) && documentDate < contract.ContractDate)
+            {
+                new Msgwin(false, "تاریخ سند نمی‌تواند قبل از تاریخ قرارداد انتخاب‌شده باشد.").ShowDialog();
+                return false;
+            }
+            return true;
+        }
+
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -2414,6 +2477,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            if (!ValidateRowContract(ROW))
+            {
+                e.Cancel = true;
+                return;
+            }
+
             IVM.StartTransaction(); //--------------------------------------------------------------------------------------------------------
 
             long? _id_ = null;
@@ -2421,7 +2490,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             string Qre = "";
             if (ROW?.id == null) //INSERT
             {
-                Qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                Qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO, ContractID)
                                           OUTPUT INSERTED.id
                                           VALUES({NUMBER.Text}, {TAG},
                                           {ROW.ANBAR},
@@ -2448,7 +2517,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                           N'{ROW.VISITOR}',
                                           {ROW.TKHN},
                                           {(ROW.JAY is null ? "NULL" : ROW.JAY)},
-                                          {(ROW.JAYO is null ? "NULL" : ROW.JAYO)})";
+                                          {(ROW.JAYO is null ? "NULL" : ROW.JAYO)},
+                                          {ROW.ContractID?.ToString() ?? "NULL"})";
             }
             else //UPDATE
             {
@@ -2466,7 +2536,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                          IMBAA = {ROW.IMBAA} ,
                                          MANDAH = N'{ROW.MANDAH}' ,
                                          JAY = {(ROW.JAY is null ? "NULL" : ROW.JAY)},
-                                         JAYO = {(ROW.JAYO is null ? "NULL" : ROW.JAYO)}
+                                         JAYO = {(ROW.JAYO is null ? "NULL" : ROW.JAYO)},
+                                         ContractID = {ROW.ContractID?.ToString() ?? "NULL"}
                                          WHERE id = {ROW.id} AND NUMBER = {NUMBER.Text} AND TAG = {TAG}";
             }
 
@@ -2522,6 +2593,18 @@ namespace Wins.WinMenus.KHARID_FORUSH
         bool isSavedSuccess = false;
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
+            int? selectedContractID = ContractID.SelectedValue is int contractID ? contractID : null;
+            int? originalContractID = !NewRecord && double.TryParse(NUMBER.Text, out double documentNumber)
+                ? dbms.DoGetDataSQL<int?>(
+                    "SELECT TOP (1) ContractID FROM dbo.HEAD_LST WHERE NUMBER = @Number AND TAG = 20",
+                    new { Number = documentNumber }).FirstOrDefault()
+                : null;
+            if (ContractID.SelectedItem is ContractLookup selectedContract && selectedContract.IsClosed &&
+                selectedContractID != originalContractID)
+            {
+                new Msgwin(false, "نمی‌توان قرارداد پیش‌فرض جدیدی از میان قراردادهای مختومه انتخاب کرد.").ShowDialog();
+                return;
+            }
             isSavedSuccess = false;
 
             if (!BTN_SAVE.IsEnabled) { return; }
@@ -2530,6 +2613,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 return;
             }
+            if (!ValidatePersistedRowContractsForHeader()) return;
 
             DoCmdSaveHeader();
 
@@ -2573,6 +2657,26 @@ namespace Wins.WinMenus.KHARID_FORUSH
             isSavedSuccess = true;
         }
 
+        private bool ValidatePersistedRowContractsForHeader()
+        {
+            if (!double.TryParse(NUMBER.Text, out double number) || number <= 0) return true;
+            string customerCode = CUST_NO.SelectedValue?.ToString() ?? string.Empty;
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long documentDate)) return false;
+
+            bool invalid = dbms.DoGetDataSQL<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.INVO_LST AS I
+    INNER JOIN dbo.CONTRACT_HED AS H ON H.ContractID=I.ContractID
+    WHERE I.NUMBER=@Number AND I.TAG=20 AND I.ContractID IS NOT NULL
+      AND (H.CUST_NO<>@CustomerCode OR @DocumentDate<H.ContractDate)
+) THEN 1 ELSE 0 END)", new { Number = number, CustomerCode = customerCode, DocumentDate = documentDate }).FirstOrDefault();
+            if (!invalid) return true;
+            new Msgwin(false, "مشتری یا تاریخ سربرگ با قرارداد یکی از ردیف‌ها سازگار نیست.").ShowDialog();
+            return false;
+        }
+
         private void DoCmdSaveHeader()
         {
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0") // Insert | Is New PreInvoice Header
@@ -2601,8 +2705,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         var rst_f = db.Query<HEAD_LST>("select NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID from HEAD_LST where NUMBER = " + num, null, transaction).FirstOrDefault();
 
                         string QRE_HEADINSUP =
-                        $@"INSERT INTO dbo.HEAD_LST(NUMBER, TAG, ANBAR, NUMBER1, 					   DATE_N, TAH, 	   MAS, VAS, 					 CUST_NO, 			 MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, 		MABL_HAZ, MOIN_HAZ, 		TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, 					DEPATMAN, 						SHIFT, 				   CUST_KIND, 			 USER_NAME, 		   SHARAYET, 		MBAA , HMBAA, 										   TAMIR, 							  TICMBAA, TKHF, 							 OKF, SADER, ARZD, ARZKIND, 				   CDDATE, CDTIME, OKDATE, OKTIME, 							   JAY, 															   MODAT_PPID, 															 PEPID, 														PEID,							  SGN1, 							SGN2, 							  SGN3, 										sgn1usid, 										  sgn2usid, 									  sgn3usid)
-	                    				       VALUES({num}, 20 ,  0   ,    0.0 , {DATE_N.Text.ToRawTarikh()},N'' , {MAS.Text},0.0 , N'{CUST_NO.SelectedValue}' , N'{MOLAH.Text}' ,    0.0 ,     0.0 ,     N'' ,     0.0 ,     N'' , {MABL_HAZ.Text},     N'' , {TAKHFIF.Text} ,     N'' ,   0   ,   0.0 , {DEPATMAN.SelectedValue} , {CL_Generaly.SHIFT_OF_USER}, {CUST_KIND.SelectedValue}, N'{USER_NAME.Text}' , N'{SHARAYET.Text}' , {MBAA.Text} ,  N'' , {((FrameworkElement)TAMIR.SelectedValue).Tag} , {Convert.ToByte(TICMBAA.IsChecked)}, NULL, {Convert.ToByte(OKF.IsChecked)},  0   , 0.0 ,    0   , {Tarikh.FullCurrentDate} ,   0   ,   0   ,   0   , {Convert.ToByte(JAY.IsChecked)}, {(MODAT_PPID.SelectedValue is null ? "NULL" : MODAT_PPID.SelectedValue)} , {(PEPID.SelectedValue is null ? "NULL" : PEPID.SelectedValue)} ,{(PEID.SelectedValue is null ? "NULL" : PEID.SelectedValue)} , {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, {Convert.ToByte(SGN3.IsChecked)}, {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
+                        $@"INSERT INTO dbo.HEAD_LST(NUMBER, TAG, ANBAR, NUMBER1, 					   DATE_N, TAH, 	   MAS, VAS, 					 CUST_NO, 			 MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, 		MABL_HAZ, MOIN_HAZ, 		TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, 					DEPATMAN, 						SHIFT, 				   CUST_KIND, 			 USER_NAME, 		   SHARAYET, 		MBAA , HMBAA, 										   TAMIR, 							  TICMBAA, TKHF, 							 OKF, SADER, ARZD, ARZKIND, 				   CDDATE, CDTIME, OKDATE, OKTIME, 							   JAY, 															   MODAT_PPID, 															 PEPID, 														PEID,							  SGN1, 							SGN2, 							  SGN3, 										sgn1usid, 										  sgn2usid, 									  sgn3usid, ContractID)
+                                           VALUES({num}, 20 ,  0   ,    0.0 , {DATE_N.Text.ToRawTarikh()},N'' , {MAS.Text},0.0 , N'{CUST_NO.SelectedValue}' , N'{MOLAH.Text}' ,    0.0 ,     0.0 ,     N'' ,     0.0 ,     N'' , {MABL_HAZ.Text},     N'' , {TAKHFIF.Text} ,     N'' ,   0   ,   0.0 , {DEPATMAN.SelectedValue} , {CL_Generaly.SHIFT_OF_USER}, {CUST_KIND.SelectedValue}, N'{USER_NAME.Text}' , N'{SHARAYET.Text}' , {MBAA.Text} ,  N'' , {((FrameworkElement)TAMIR.SelectedValue).Tag} , {Convert.ToByte(TICMBAA.IsChecked)}, NULL, {Convert.ToByte(OKF.IsChecked)},  0   , 0.0 ,    0   , {Tarikh.FullCurrentDate} ,   0   ,   0   ,   0   , {Convert.ToByte(JAY.IsChecked)}, {(MODAT_PPID.SelectedValue is null ? "NULL" : MODAT_PPID.SelectedValue)} , {(PEPID.SelectedValue is null ? "NULL" : PEPID.SelectedValue)} ,{(PEID.SelectedValue is null ? "NULL" : PEID.SelectedValue)} , {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, {Convert.ToByte(SGN3.IsChecked)}, {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}, {(ContractID.SelectedValue is null ? "NULL" : ContractID.SelectedValue)}
                                   )";
 
 
@@ -2641,7 +2745,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                      SGN3 = {Convert.ToByte(SGN3.IsChecked)}, 
                                      sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, 
                                      sgn2usid = {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, 
-                                     sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
+                                     sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)},
+                                     ContractID = {(ContractID.SelectedValue is null ? "NULL" : ContractID.SelectedValue)}
                                      WHERE NUMBER={NUMBER.Text} AND TAG={TAG}");
             }
         }
@@ -3363,6 +3468,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             MODAT_PPID_Enter();
 
             MOLAH.Text = null;
+            ContractID.SelectedValue = null;
             MAS.Text = "0";
             TAKHFIF.Text = "0";
             MBAA.Text = "0";
@@ -3385,7 +3491,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 NUMBER.Text = HEADER.NUMBER.ToString();
                 USER_NAME.Text = HEADER.USER_NAME;
                 DATE_N.Text = HEADER.DATE_N.ToString();
-
+                ContractID.SelectedValue = dbms.DoGetDataSQL<int?>(
+                    "SELECT ContractID FROM dbo.HEAD_LST WHERE NUMBER=@Number AND TAG=20",
+                    new { Number = HEADER.NUMBER }).FirstOrDefault();
 
                 DEPATMAN.SelectionChanged -= DEPATMAN_SelectionChanged;
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh();
@@ -3554,7 +3662,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var QRE_LST = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($@"SELECT        dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.STUF_DEF.NAME AS NAME_CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, 
 																						 dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, 
 																					   	 dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.id, dbo.INVO_LST.AVRAGE2, 
-																					 	 dbo.INVO_LST.IMBAA, dbo.INVO_LST.TOTALARZ, dbo.INVO_LST.VISITOR, dbo.INVO_LST.TKHN, dbo.INVO_LST.JAY, dbo.INVO_LST.JAYO, dbo.INVO_LST.CRT, dbo.INVO_LST.UID
+																 dbo.INVO_LST.IMBAA, dbo.INVO_LST.TOTALARZ, dbo.INVO_LST.VISITOR, dbo.INVO_LST.TKHN, dbo.INVO_LST.JAY, dbo.INVO_LST.JAYO, dbo.INVO_LST.CRT, dbo.INVO_LST.UID, dbo.INVO_LST.ContractID
 																	FROM            dbo.INVO_LST LEFT OUTER JOIN
 																						 dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE LEFT OUTER JOIN
 																						 dbo.TCOD_ANBAR ON dbo.INVO_LST.ANBAR = dbo.TCOD_ANBAR.CODE LEFT OUTER JOIN
@@ -4879,17 +4987,46 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                                 // بروزرسانی وضعیت پیش فاکتور
                                 db.Execute("UPDATE HEAD_LST SET TAMIR = 2, OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
+                                bool hasInvalidContractRow = db.Query<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.INVO_LST AS I
+    LEFT JOIN dbo.CONTRACT_HED AS H ON H.ContractID = I.ContractID
+    LEFT JOIN dbo.HEAD_LST AS SourceHeader ON SourceHeader.NUMBER = I.NUMBER AND SourceHeader.TAG = I.TAG
+    WHERE I.NUMBER = @SourceNumber AND I.TAG = 20 AND I.ContractID IS NOT NULL
+      AND (H.ContractID IS NULL OR H.IsClosed = 1
+           OR SourceHeader.NUMBER IS NULL OR SourceHeader.CUST_NO <> H.CUST_NO OR SourceHeader.DATE_N < H.ContractDate
+           OR NOT EXISTS
+      (
+          SELECT 1 FROM dbo.CONTRACT_DTL AS D
+          WHERE D.ContractID = I.ContractID AND D.CODE = I.CODE
+      ))
+) THEN 1 ELSE 0 END)",
+                                    new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
+                                if (hasInvalidContractRow)
+                                    throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
 
+                                int? singleContractID = db.Query<int?>(@"
+SELECT CASE
+         WHEN COUNT(DISTINCT ContractID) = 1 AND COUNT(*) = COUNT(ContractID) THEN MAX(ContractID)
+         ELSE NULL
+       END
+FROM dbo.INVO_LST
+WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
+                                    new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
+                                db.Execute("UPDATE dbo.HEAD_LST SET ContractID=@ContractID WHERE NUMBER=@TargetNumber AND TAG IN (2,13)",
+                                    new { ContractID = singleContractID, TargetNumber = num }, transaction);
                                 // کپی اقلام فاکتور
                                 string copyInvoiceQuery = @"
                                     INSERT INTO dbo.INVO_LST 
                                         (NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, 
                                          MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, 
-                                         ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay)
+                                         ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay, ContractID)
                                     SELECT 
                                         " + num + @" AS NUMBER, 2 AS TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,
                                         MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO,
-                                        ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay
+                                        ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay, ContractID
                                     FROM dbo.INVO_LST 
                                     WHERE NUMBER = " + NUMBER.Text + " AND TAG = 20 AND (jay = 0 OR jay IS NULL)";
 
@@ -5505,17 +5642,46 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                                 // بروزرسانی وضعیت پیش فاکتور
                                 db.Execute("UPDATE HEAD_LST SET TAMIR = 2, OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
+                                bool hasInvalidContractRow = db.Query<bool>(@"
+SELECT CONVERT(BIT, CASE WHEN EXISTS
+(
+    SELECT 1
+    FROM dbo.INVO_LST AS I
+    LEFT JOIN dbo.CONTRACT_HED AS H ON H.ContractID = I.ContractID
+    LEFT JOIN dbo.HEAD_LST AS SourceHeader ON SourceHeader.NUMBER = I.NUMBER AND SourceHeader.TAG = I.TAG
+    WHERE I.NUMBER = @SourceNumber AND I.TAG = 20 AND I.ContractID IS NOT NULL
+      AND (H.ContractID IS NULL OR H.IsClosed = 1
+           OR SourceHeader.NUMBER IS NULL OR SourceHeader.CUST_NO <> H.CUST_NO OR SourceHeader.DATE_N < H.ContractDate
+           OR NOT EXISTS
+      (
+          SELECT 1 FROM dbo.CONTRACT_DTL AS D
+          WHERE D.ContractID = I.ContractID AND D.CODE = I.CODE
+      ))
+) THEN 1 ELSE 0 END)",
+                                    new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
+                                if (hasInvalidContractRow)
+                                    throw new InvalidOperationException("حداقل یک ردیف قرارداد نامعتبر دارد؛ قرارداد باید باز، متعلق به همین مشتری، دارای تاریخ معتبر و شامل کالای ردیف باشد.");
 
+                                int? singleContractID = db.Query<int?>(@"
+SELECT CASE
+         WHEN COUNT(DISTINCT ContractID) = 1 AND COUNT(*) = COUNT(ContractID) THEN MAX(ContractID)
+         ELSE NULL
+       END
+FROM dbo.INVO_LST
+WHERE NUMBER = @SourceNumber AND TAG = 20 AND (JAY = 0 OR JAY IS NULL)",
+                                    new { SourceNumber = Convert.ToDouble(NUMBER.Text) }, transaction).FirstOrDefault();
+                                db.Execute("UPDATE dbo.HEAD_LST SET ContractID=@ContractID WHERE NUMBER=@TargetNumber AND TAG IN (2,13)",
+                                    new { ContractID = singleContractID, TargetNumber = num }, transaction);
                                 // کپی اقلام فاکتور
                                 string copyInvoiceQuery = @"
                             INSERT INTO dbo.INVO_LST 
                                 (NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, 
                                  MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, 
-                                 ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay)
+                                 ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay, ContractID)
                             SELECT 
                                 " + num + @" AS NUMBER, 2 AS TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,
                                 MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO,
-                                ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay
+                                ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, TKHN, jay, ContractID
                             FROM dbo.INVO_LST 
                             WHERE NUMBER = " + NUMBER.Text + " AND TAG = 20 AND (jay = 0 OR jay IS NULL)";
 
@@ -6344,5 +6510,24 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 dataGrid.SelectedItem = row.Item;
             }
         }
+        private sealed class ContractLookup
+        {
+            public int? ContractID { get; set; }
+            public bool IsClosed { get; set; }
+            public string DisplayName { get; set; } = string.Empty;
+        }
+        private sealed class ContractRowValidation
+        {
+            public bool IsClosed { get; set; }
+            public bool ProductExists { get; set; }
+            public string CUST_NO { get; set; } = string.Empty;
+            public long ContractDate { get; set; }
+        }
+        private sealed class PersistedContractLink
+        {
+            public int? ContractID { get; set; }
+            public string CODE { get; set; } = string.Empty;
+        }
+
     }
 }
