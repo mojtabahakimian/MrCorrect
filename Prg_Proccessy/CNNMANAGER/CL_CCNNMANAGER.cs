@@ -629,11 +629,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
 
-                    if (sqlEx.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
-                    }
-
                     throw;
                 }
                 catch (OperationCanceledException)

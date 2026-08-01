@@ -110,8 +110,10 @@ namespace Prg_UI
             {
                 string userMessage = string.Empty;
 
-                // Handle SQL Exceptions
-                if (e.Exception is SqlException sqlEx)
+                // Handle SQL exceptions even when a caller has wrapped the original
+                // exception (for example, in ApplicationException).
+                var sqlEx = FindSqlException(e.Exception);
+                if (sqlEx is not null)
                 {
                     switch (sqlEx.Number)
                     {
@@ -252,6 +254,21 @@ namespace Prg_UI
 
             CL_LMethods.GoExitTheApplication();
 
+        }
+
+        private static SqlException? FindSqlException(Exception? exception)
+        {
+            while (exception is not null)
+            {
+                if (exception is SqlException sqlException)
+                {
+                    return sqlException;
+                }
+
+                exception = exception.InnerException;
+            }
+
+            return null;
         }
 
         [DllImport("user32.dll")]
