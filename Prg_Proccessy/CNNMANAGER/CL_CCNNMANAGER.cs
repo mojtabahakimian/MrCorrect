@@ -271,11 +271,6 @@ namespace Prg_SendInvoice.CNNMANAGER
 
                     LogSqlQuery(sql, sqlEx);
 
-                    if (sqlEx.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
-                    }
-
                     throw;
                 }
                 catch (Exception er)
@@ -332,11 +327,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     }
                     LogSqlQuery(sql, ex);
 
-                    if (ex.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", ex);
-                    }
-
                     throw; // Rethrow if not deadlock or max retries reached
                 }
                 catch (Exception er)
@@ -355,6 +345,7 @@ namespace Prg_SendInvoice.CNNMANAGER
 
         private static void LogSqlQuery(string sql, Exception er)
         {
+            if (er is SqlException sqlEx && sqlEx.Number >= 50000) return;
             try
             {
                 File.AppendAllText(DbmsFullPathFile, $"\n\n------------------------------------------------------------" +
@@ -385,11 +376,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
-
-                    if (sqlEx.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
-                    }
 
                     throw;
                 }
@@ -435,10 +421,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", ex);
-                    }
                     throw; // Rethrow the exception to be handled by the caller
                 }
                 catch
@@ -554,11 +536,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
 
-                    if (sqlEx.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
-                    }
-
                     throw;
                 }
                 catch (OperationCanceledException)
@@ -652,11 +629,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     }
                     await LogSqlQueryAsync(sql, sqlEx);
 
-                    if (sqlEx.Number == 18452)
-                    {
-                        throw new ApplicationException("ارتباط با سرور به دلیل استفاده از Windows Authentication در شبکه نامعتبر (Untrusted Domain) رد شد. لطفاً از SQL Server Authentication (نام کاربری و رمز عبور) استفاده کنید.", sqlEx);
-                    }
-
                     throw;
                 }
                 catch (OperationCanceledException)
@@ -691,6 +663,7 @@ namespace Prg_SendInvoice.CNNMANAGER
 
         private static async Task LogSqlQueryAsync(string sql, Exception er)
         {
+            if (er is SqlException sqlEx && sqlEx.Number >= 50000) return;
             try
             {
                 // اگر مسیر فایل موجود نیست، ایجاد کن
