@@ -251,8 +251,8 @@ namespace Functions
                     visibleCols.Add((col, path));
                 }
 
-                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
-                var orderedItems = dataGrid.Items.Cast<object>().Where(x => selectedSet.Contains(x)).ToList();
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.OfType<object>().Where(x => x != System.Windows.Data.CollectionView.NewItemPlaceholder));
+                var orderedItems = dataGrid.Items.OfType<object>().Where(x => selectedSet.Contains(x)).ToList();
                 if (orderedItems.Count == 0 || visibleCols.Count == 0) return;
 
                 int rowCount = orderedItems.Count;
@@ -348,8 +348,8 @@ namespace Functions
                     visibleCols.Add((col, path));
                 }
 
-                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
-                var orderedItems = dataGrid.Items.Cast<object>().Where(x => selectedSet.Contains(x)).ToList();
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.OfType<object>().Where(x => x != System.Windows.Data.CollectionView.NewItemPlaceholder));
+                var orderedItems = dataGrid.Items.OfType<object>().Where(x => selectedSet.Contains(x)).ToList();
                 if (orderedItems.Count == 0 || visibleCols.Count == 0) return;
 
                 int rowCount = orderedItems.Count;
@@ -559,7 +559,7 @@ namespace Functions
                     colMeta.Add((col, col.MappingName, comboLookup));
                 }
 
-                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.OfType<object>().Where(x => x != System.Windows.Data.CollectionView.NewItemPlaceholder));
                 var orderedRecords = dataGrid.View.Records
                     .Select(r => r.Data)
                     .Where(d => selectedSet.Contains(d))
