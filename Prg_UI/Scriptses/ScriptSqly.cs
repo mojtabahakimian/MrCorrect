@@ -4045,7 +4045,7 @@ VALUES
 ('ADV_USE_HES_T_FILTER', '1',             '1|0',                    '1',             N'مساعده',
  N'آیا فیلتر HES_T (تفصیلی=کد پرسنل) اعمال شود؟',
  N'1=هر پرسنل فقط مانده حساب خودش (معمول) | 0=جمع کل معین بدون تفکیک تفصیلی',
- N'per پرسنل|کل معین',        'BOOL', 2),
+ N'به تفکیک پرسنل|کل معین',   'BOOL', 2),
 
 ('ADV_MIN_POSITIVE',     '1',             '1|0',                    '1',             N'مساعده',
  N'مساعده فقط اگر مانده بدهکار (مثبت) باشد کسر شود',
@@ -7126,7 +7126,9 @@ BEGIN
 
     IF LEN(@MissingAcc) > 0
     BEGIN
-        DECLARE @Err2 NVARCHAR(MAX) = N'صدور سند متوقف شد: حساب‌های زیر در تنظیمات کارگاه خالی هستند: ' + SUBSTRING(@MissingAcc, 1, LEN(@MissingAcc)-2);
+        -- LEN در T-SQL فاصله‌ی انتهایی را نمی‌شمارد، پس LEN-2 علاوه بر جداکننده یک
+        -- کاراکترِ واقعی را هم می‌بُرید («سایر کسورات» → «سایر کسورا»). فقط «،» حذف شود.
+        DECLARE @Err2 NVARCHAR(MAX) = N'صدور سند متوقف شد: حساب‌های زیر در تنظیمات کارگاه خالی هستند: ' + SUBSTRING(@MissingAcc, 1, LEN(@MissingAcc)-1);
         RAISERROR(@Err2, 16, 1);
         RETURN;
     END
@@ -7366,7 +7368,9 @@ BEGIN
 
     IF LEN(@MissingAccounts) > 0
     BEGIN
-        DECLARE @ErrAcc NVARCHAR(MAX) = N'صدور سند متوقف شد. حساب‌های زیر نامعتبرند یا فاقد حداقل ۳ سطح (کل-معین-تفصیلی) می‌باشند: ' + SUBSTRING(@MissingAccounts, 1, LEN(@MissingAccounts)-2);
+        -- LEN در T-SQL فاصله‌ی انتهایی را نمی‌شمارد، پس LEN-2 علاوه بر جداکننده یک
+        -- کاراکترِ واقعی را هم می‌بُرید («سایر کسورات» → «سایر کسورا»). فقط «،» حذف شود.
+        DECLARE @ErrAcc NVARCHAR(MAX) = N'صدور سند متوقف شد. حساب‌های زیر نامعتبرند یا فاقد حداقل ۳ سطح (کل-معین-تفصیلی) می‌باشند: ' + SUBSTRING(@MissingAccounts, 1, LEN(@MissingAccounts)-1);
         RAISERROR(@ErrAcc, 16, 1);
         RETURN;
     END
@@ -7385,8 +7389,256 @@ END;");
                     throw new Exception($"خطای بحرانی در دیتابیس (SP_PAY2_GEN_DEED). آپدیت متوقف شد: {ex.Message}", ex);
                 }
 
-                LoadJobData(db);   // <-- این خط اضافه شود
+                // ===========================================================
+                // 4. Migration 011: PAY2 ACL Enforcements (Workshop scope, Auditing)
+                // ===========================================================
+                string aclScript = @"
+IF OBJECT_ID(N'dbo.PAY2_USER_WS', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[PAY2_USER_WS]
+    (
+        [USERCO] INT      NOT NULL,
+        [WS_ID]  INT      NOT NULL,
+        [CRT]    DATETIME NULL CONSTRAINT DF_PUW_CRT DEFAULT(GETDATE()),
+        [UID]    INT      NULL,
+        CONSTRAINT PK_PAY2_USER_WS PRIMARY KEY ([USERCO],[WS_ID]),
+        CONSTRAINT FK_PUW_WS FOREIGN KEY ([WS_ID])
+            REFERENCES [dbo].[PAY2_WORKSHOP]([WS_ID]) ON DELETE CASCADE
+    );
+    CREATE NONCLUSTERED INDEX IX_PAY2_USER_WS_USER ON [dbo].[PAY2_USER_WS]([USERCO]);
+END;
+GO
+
+IF OBJECT_ID(N'dbo.PAY2_SEC_AUDIT', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[PAY2_SEC_AUDIT]
+    (
+        [AUDIT_ID]  BIGINT        NOT NULL IDENTITY(1,1),
+        [USERCO]    INT           NOT NULL,
+        [USER_NAME] NVARCHAR(50)  NULL,
+        [FORM_NAME] NVARCHAR(50)  NULL,
+        [PERM_FLAG] NVARCHAR(10)  NULL,
+        [WS_ID]     INT           NULL,
+        [ENTITY_KEY] NVARCHAR(50) NULL,
+        [ALLOWED]   BIT           NOT NULL,
+        [HTTP_METHOD] NVARCHAR(10) NULL,
+        [PATH]      NVARCHAR(300) NULL,
+        [IP]        NVARCHAR(45)  NULL,
+        [DETAILS]   NVARCHAR(MAX) NULL,
+        [CRT]       DATETIME      NOT NULL CONSTRAINT DF_PSA_CRT DEFAULT(GETDATE()),
+        CONSTRAINT PK_PAY2_SEC_AUDIT PRIMARY KEY ([AUDIT_ID])
+    );
+    CREATE NONCLUSTERED INDEX IX_PAY2_SEC_AUDIT_USER_DATE
+        ON [dbo].[PAY2_SEC_AUDIT]([USERCO],[CRT] DESC);
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_DASHBOARD')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_DASHBOARD', N'داشبورد حقوق و دستمزد', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_WORKSHOP')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_WORKSHOP', N'کارگاه‌ها و سرفصل‌های حسابداری', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_EMPLOYEE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_EMPLOYEE', N'پرسنل، قرارداد و مرخصی', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_DECREE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_DECREE', N'احکام کارگزینی', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ATTENDANCE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ATTENDANCE', N'کارکرد ماهیانه', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ADVANCE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ADVANCE', N'مساعده', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_LOAN')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_LOAN', N'وام پرسنل', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_RUN')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_RUN', N'محاسبه حقوق ماهیانه', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_SETTLEMENT')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_SETTLEMENT', N'تسویه حساب پرسنل', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ITEM_DEF')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ITEM_DEF', N'تعریف آیتم‌های حکم و قالب‌ها', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_SETTINGS')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_SETTINGS', N'تنظیمات حقوق و دستمزد', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_REPORTS')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_REPORTS', N'گزارش‌های حقوق و دستمزد', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_CALC')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_CALC', N'اجرای محاسبه حقوق', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_FINALIZE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_FINALIZE', N'نهایی‌کردن محاسبه حقوق', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_REVERT')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_REVERT', N'برگشت محاسبه حقوق', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_DEED')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_DEED', N'صدور سند حسابداری حقوق', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_DEED_UNDO')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_DEED_UNDO', N'ابطال سند حسابداری حقوق', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_PERIOD_CLOSE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_PERIOD_CLOSE', N'بستن دوره کارکرد', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_PERIOD_REOPEN')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_PERIOD_REOPEN', N'بازگشایی/حذف دوره کارکرد', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_DECREE_CONFIRM')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_DECREE_CONFIRM', N'تأیید نهایی حکم کارگزینی', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_SETTLE_FINALIZE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_SETTLE_FINALIZE', N'نهایی‌کردن و برگشت تسویه حساب', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_VIEW_AMOUNTS')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_VIEW_AMOUNTS', N'مشاهده مبالغ حقوق سایر پرسنل', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_CONFIG_CRITICAL')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_CONFIG_CRITICAL', N'تغییر تنظیمات حساس (نرخ بیمه/مالیات/سقف)', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_ADV_EXCL')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_ADV_EXCL', N'ثبت استثنای دستی مساعده', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_OVERRIDE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_OVERRIDE', N'تغییر مشمولیت بیمه/مالیات پرسنل', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ACT_EXPORT')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ACT_EXPORT', N'خروجی اکسل/PDF و دیسکت بیمه و مالیات', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ADMIN_ACL')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_ADMIN_ACL', N'مدیریت دسترسی‌های حقوق و دستمزد', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+
+
+IF COL_LENGTH(N'dbo.PAY2_EMPLOYEE', N'USERCO') IS NULL
+BEGIN
+    ALTER TABLE dbo.PAY2_EMPLOYEE ADD [USERCO] INT NULL;
+    EXEC('CREATE UNIQUE NONCLUSTERED INDEX UX_EMP_USERCO ON dbo.PAY2_EMPLOYEE([USERCO]) WHERE [USERCO] IS NOT NULL');
+END;
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_SELF_PAYSLIP')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'PAY2_SELF_PAYSLIP', N'فیش حقوقی من', 3, 9, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.PAY2_CONFIG WHERE CFG_KEY=N'ACL_ENFORCE')
+    INSERT INTO dbo.PAY2_CONFIG (CFG_KEY, CFG_VALUE, CFG_OPTIONS, CFG_DEFAULT, CFG_SECTION, LABEL_FA, DESC_FA, OPT_LABELS, DATA_TYPE, ACCESS_LEVEL)
+    VALUES (N'ACL_ENFORCE', N'0', N'1|0', N'0', N'امنیت', N'فعال‌سازی کنترل دسترسی حقوق و دستمزد', N'۰ = خاموش (وضعیت فعلی). ۱ = کنترل دسترسی‌ها کاملا فعال و اعمال می‌شود.', NULL, N'BOOL', 1);
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.PAY2_CONFIG WHERE CFG_KEY=N'ACL_WS_SCOPE_ENFORCE')
+    INSERT INTO dbo.PAY2_CONFIG (CFG_KEY, CFG_VALUE, CFG_OPTIONS, CFG_DEFAULT, CFG_SECTION, LABEL_FA, DESC_FA, OPT_LABELS, DATA_TYPE, ACCESS_LEVEL)
+    VALUES (N'ACL_WS_SCOPE_ENFORCE', N'1', N'1|0', N'1', N'امنیت', N'محدودکردن کاربر به کارگاه‌های مجاز', N'۱ = کارگاه‌های مجاز هر فرد کنترل می‌شود', NULL, N'BOOL', 1);
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.PAY2_CONFIG WHERE CFG_KEY=N'ACL_CACHE_SECONDS')
+    INSERT INTO dbo.PAY2_CONFIG (CFG_KEY, CFG_VALUE, CFG_OPTIONS, CFG_DEFAULT, CFG_SECTION, LABEL_FA, DESC_FA, OPT_LABELS, DATA_TYPE, ACCESS_LEVEL)
+    VALUES (N'ACL_CACHE_SECONDS', N'120', NULL, N'120', N'امنیت', N'مدت نگهداری کش دسترسی‌ها (ثانیه)', NULL, NULL, N'INT', 1);
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.PAY2_CONFIG WHERE CFG_KEY=N'ACL_AUDIT_DENIED')
+    INSERT INTO dbo.PAY2_CONFIG (CFG_KEY, CFG_VALUE, CFG_OPTIONS, CFG_DEFAULT, CFG_SECTION, LABEL_FA, DESC_FA, OPT_LABELS, DATA_TYPE, ACCESS_LEVEL)
+    VALUES (N'ACL_AUDIT_DENIED', N'1', N'1|0', N'1', N'امنیت', N'ثبت لاگ تلاش‌های ناموفق دسترسی', NULL, NULL, N'BOOL', 1);
+GO
+IF NOT EXISTS (SELECT 1 FROM dbo.PAY2_CONFIG WHERE CFG_KEY=N'ACL_AUDIT_SENSITIVE')
+    INSERT INTO dbo.PAY2_CONFIG (CFG_KEY, CFG_VALUE, CFG_OPTIONS, CFG_DEFAULT, CFG_SECTION, LABEL_FA, DESC_FA, OPT_LABELS, DATA_TYPE, ACCESS_LEVEL)
+    VALUES (N'ACL_AUDIT_SENSITIVE', N'1', N'1|0', N'1', N'امنیت', N'ثبت لاگ عملیات حساس', NULL, NULL, N'BOOL', 1);
+GO
+
+-- این چهار کلید موقع اضافه شدن، OPT_LABELS نداشتند؛ صفحه‌ی تنظیمات به‌جای
+-- برچسب فارسی، خودِ عدد خام «۰»/«۱» را نشان می‌داد. روی نصب‌های قبلی هم
+-- (که این کلیدها را از قبل INSERT کرده‌اند) این UPDATE لازم است، چون
+-- IF NOT EXISTS بالا برای آن‌ها دیگر اجرا نمی‌شود.
+UPDATE dbo.PAY2_CONFIG SET OPT_LABELS = N'روشن — دسترسی‌ها اعمال می‌شود|خاموش — همه به همه‌چیز دسترسی دارند' WHERE CFG_KEY = N'ACL_ENFORCE';
+UPDATE dbo.PAY2_CONFIG SET OPT_LABELS = N'محدود به کارگاه‌های مجاز|بدون محدودیت کارگاه' WHERE CFG_KEY = N'ACL_WS_SCOPE_ENFORCE';
+UPDATE dbo.PAY2_CONFIG SET OPT_LABELS = N'ثبت می‌شود|ثبت نمی‌شود' WHERE CFG_KEY = N'ACL_AUDIT_DENIED';
+UPDATE dbo.PAY2_CONFIG SET OPT_LABELS = N'ثبت می‌شود|ثبت نمی‌شود' WHERE CFG_KEY = N'ACL_AUDIT_SENSITIVE';
+GO
+
+UPDATE dbo.PAY2_CONFIG
+SET DESC_FA = N'منسوخ — جایگزین: کنترل دسترسی مبتنی بر SAL_CHEK'
+WHERE CFG_KEY IN (N'CONFIG_MIN_ROLE', N'ITEM_DEF_MIN_ROLE');
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.SAL_CHEK WHERE [OBJECT] IN (SELECT IDH FROM dbo.TFORMS WHERE FORMNAME = N'PAY2_ADMIN_ACL'))
+BEGIN
+    DECLARE @Users TABLE (IDD INT);
+    INSERT INTO @Users SELECT USERCO FROM dbo.SAL_CHEK WHERE [OBJECT] = (SELECT IDH FROM dbo.TFORMS WHERE FORMNAME = N'DEED_HEAD') AND RUN = 1
+    AND USERCO IN (SELECT IDD FROM dbo.SALA_DTL WHERE ENABL = 1);
+
+    IF NOT EXISTS (SELECT 1 FROM @Users)
+    BEGIN
+        INSERT INTO @Users SELECT TOP 1 IDD FROM dbo.SALA_DTL WHERE ENABL = 1 ORDER BY IDD ASC;
+    END
+
+    INSERT INTO dbo.SAL_CHEK ([USERCO], [OBJECT], [RUN], [SEE], [INP], [UPD], [DEL], [CRT])
+    SELECT U.IDD, F.IDH, 1, 1, 1, 1, 1, GETDATE()
+    FROM @Users U
+    CROSS JOIN dbo.TFORMS F
+    WHERE F.FORMNAME LIKE N'PAY2!_%' ESCAPE N'!'
+      AND NOT EXISTS (SELECT 1 FROM dbo.SAL_CHEK SC WHERE SC.[USERCO] = U.IDD AND SC.[OBJECT] = F.IDH);
+
+    INSERT INTO dbo.PAY2_USER_WS ([USERCO], [WS_ID], [CRT])
+    SELECT U.IDD, W.WS_ID, GETDATE()
+    FROM @Users U
+    CROSS JOIN dbo.PAY2_WORKSHOP W
+    WHERE W.IS_ACTIVE = 1
+      AND NOT EXISTS (SELECT 1 FROM dbo.PAY2_USER_WS UW WHERE UW.[USERCO] = U.IDD AND UW.[WS_ID] = W.WS_ID);
+
+    PRINT N'مجوز اولیه (Bootstrap) برای کاربران صادر شد.';
+END;
+GO
+";
+                ExecuteBatches(db, aclScript);
+                LoadJobData(db);
+
+                // ===========================================================
+                // 4. Migration 011: PAY2 ACL Enforcements (Workshop scope, Auditing)
+                // ===========================================================
+
+                return;
             }
+
+            // ===========================================================
+            // 4. Migration 011: PAY2 ACL Enforcements (Workshop scope, Auditing)
+            // ===========================================================
+
+
+
+            // ===========================================================
+            // 4. Migration 011: PAY2 ACL Enforcements (Workshop scope, Auditing)
+            // ===========================================================
+
+
         }
         private static void ExecuteBatchesTransactional(SqlConnection db, string script)
         {
