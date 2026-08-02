@@ -3984,7 +3984,10 @@ namespace AUTO_BAZ.Functions
                 InternalCalling && auto_run != null ? auto_run.Dispatcher : null,
                 value =>
                 {
-                    auto_run.PRGR_C3.Value = value;
+                    // Math.Max لازم است: گزارش‌ها با BeginInvoke از چند Thread صف می‌شوند و
+                    // ممکن است بی‌ترتیب اجرا شوند (مثلاً ۴۶٪ قبل از ۴۵٪). بدون این، نوار پیشرفت
+                    // گاهی به عقب می‌پرد.
+                    auto_run.PRGR_C3.Value = Math.Max(auto_run.PRGR_C3.Value, value);
                     auto_run.UpdateOverallProgressBar();
                 });
 
