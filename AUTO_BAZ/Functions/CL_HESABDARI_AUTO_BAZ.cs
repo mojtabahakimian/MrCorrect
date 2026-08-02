@@ -502,26 +502,56 @@ namespace AUTO_BAZ.Functions
         {
             useSmartThrottling = useSmartThrottling || UseSmartThrottlingByDefault;
 
-            // ۱. اگر حالت هوشمند غیرفعال باشد، دات‌نت را به حال خودش رها می‌کنیم (حالت پیش‌فرض و نامحدود)
-            if (!useSmartThrottling)
+            var maxPoolSize = GetConnectionPoolCeiling();
+            int maxDegree;
+
+            if (useSmartThrottling)
             {
-                return new ParallelOptions { MaxDegreeOfParallelism = -1 };
+                // حالت محافظه‌کارانه: هر Iteration یک Connection لحظه‌ای می‌گیرد؛ پس فاصله امن از سقف Pool نگه می‌داریم.
+                // 25% از Pool (حداقل 4 و حداکثر 16) تا سایر ماژول‌ها هم Connection داشته باشند.
+                maxDegree = Math.Clamp(maxPoolSize / 4, 4, 16);
+            }
+            else
+            {
+                // حالت پیش‌فرض (پرسرعت):
+                // قبلاً اینجا MaxDegreeOfParallelism = -1 برگردانده می‌شد. «نامحدود» در عمل سریع‌تر نیست؛
+                // چون بدنه‌ی حلقه I/O مسدودکننده‌ی SQL است، Parallel.For به تعداد Thread های آزاد ThreadPool محدود می‌ماند
+                // و ThreadPool فقط حدود یک Thread در ثانیه به آن اضافه می‌کند (Thread Injection). نتیجه این است که
+                // موازی‌سازی واقعی مدت زیادی روی Environment.ProcessorCount گیر می‌ماند و کاربر شتابی حس نمی‌کند.
+                // پس یک درجه‌ی موازی‌سازی صریح می‌دهیم و ThreadPool را از قبل گرم می‌کنیم.
+                maxDegree = Math.Clamp(Environment.ProcessorCount * 2, 6, 24);
+
+                // مهم: بخش‌های C1 تا C11 با هم و به‌صورت همزمان اجرا می‌شوند (MainWindow → Task.WhenAll)،
+                // و هر Iteration یک Connection لحظه‌ای می‌گیرد. اگر هر حلقه سهم بزرگی بردارد، مجموع
+                // Connection ها از سقف Pool (پیش‌فرض ADO.NET یعنی 100) رد می‌شود و Timeout استخر اتصال
+                // می‌دهد که کل آن بخش را با خطا متوقف می‌کند.
+                // سهم هر حلقه یک‌شانزدهم Pool است: با ۱۱ بخش همزمان حدود ۷۰ از ۱۰۰ مصرف می‌شود و
+                // برای کوئری‌های تکی سایر بخش‌ها هم حاشیه می‌ماند.
+                // اگر Max Pool Size در رشته اتصال بالاتر تنظیم شود، این سقف هم خودکار بالا می‌رود.
+                maxDegree = Math.Min(maxDegree, Math.Max(4, maxPoolSize / 16));
             }
 
-            // ۲. در غیر این صورت، از منطق هوشمند و محافظت‌شده استفاده می‌کنیم
-            var defaultParallelism = Math.Max(2, Environment.ProcessorCount / 2);
-            var maxDegree = defaultParallelism;
+            maxDegree = Math.Max(1, Math.Min(maxDegree, Math.Max(1, itemCount)));
 
+            EnsureThreadPoolCapacity(maxDegree);
+
+            return new ParallelOptions { MaxDegreeOfParallelism = maxDegree };
+        }
+
+        /// <summary>
+        /// سقف Connection Pool رشته اتصال جاری (اگر قابل خواندن نبود مقدار پیش‌فرض ADO.NET یعنی 100).
+        /// </summary>
+        private static int GetConnectionPoolCeiling()
+        {
             try
             {
                 if (!string.IsNullOrWhiteSpace(CL_CCNNMANAGER.CONNECTION_STR))
                 {
                     var builder = new SqlConnectionStringBuilder(CL_CCNNMANAGER.CONNECTION_STR);
-                    var maxPoolSize = builder.MaxPoolSize > 0 ? builder.MaxPoolSize : 1000;
-
-                    // هر Iteration یک Connection لحظه‌ای می‌گیرد؛ پس باید فاصله امن از سقف Pool نگه داریم.
-                    // 25% از Pool (حداقل 4 و حداکثر 16) برای این ExecuteWithPreferredLoop استفاده می‌شود تا سایر ماژول‌ها هم Connection داشته باشند.
-                    maxDegree = Math.Clamp(maxPoolSize / 4, 4, 16);
+                    if (builder.MaxPoolSize > 0)
+                    {
+                        return builder.MaxPoolSize;
+                    }
                 }
             }
             catch
@@ -529,8 +559,119 @@ namespace AUTO_BAZ.Functions
                 // در صورت خطای parse رشته اتصال، با مقدار پیش‌فرض ادامه می‌دهیم.
             }
 
-            maxDegree = Math.Min(maxDegree, Math.Max(1, itemCount));
-            return new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, maxDegree) };
+            return 100;
+        }
+
+        /// <summary>
+        /// حداقل Thread های ThreadPool را بالا می‌برد تا Parallel.For بلافاصله به درجه‌ی موازی‌سازی هدف برسد
+        /// و منتظر Thread Injection تدریجی (تقریباً یک Thread در ثانیه) نماند.
+        /// </summary>
+        private static void EnsureThreadPoolCapacity(int desiredDegree)
+        {
+            try
+            {
+                ThreadPool.GetMinThreads(out var minWorker, out var minIo);
+                var target = Math.Min(Math.Max(minWorker, desiredDegree + Environment.ProcessorCount), 512);
+                if (target > minWorker)
+                {
+                    ThreadPool.SetMinThreads(target, Math.Max(minIo, target));
+                }
+            }
+            catch
+            {
+                // اگر تنظیم ThreadPool ممکن نبود، صرفاً کندتر گرم می‌شود و مشکل عملکردی جدی ایجاد نمی‌کند.
+            }
+        }
+
+        /// <summary>
+        /// اجرای یک عملیات SQL با تلاش مجدد در صورت Deadlock (خطای 1205).
+        /// وقتی حلقه واقعاً موازی اجرا شود احتمال Deadlock بین Thread ها بالا می‌رود،
+        /// و <see cref="CL_ConcurrencyManager.ExecuteSqlCommand"/> خودش Retry ندارد.
+        /// </summary>
+        public static void ExecuteWithDeadlockRetry(Action action, int maxRetries = 4)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    action();
+                    return;
+                }
+                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                {
+                    Thread.Sleep(50 * (attempt + 1));
+                }
+            }
+        }
+
+        /// <summary>
+        /// عدد را برای درج در متن SQL قالب‌بندی می‌کند (بدون نماد علمی و بدون وابستگی به Culture).
+        /// </summary>
+        private static string SqlNum(double? value)
+        {
+            return value.HasValue ? value.Value.ToString("0.##########", CultureInfo.InvariantCulture) : "NULL";
+        }
+
+        /// <summary>
+        /// Escape کردن کوتیشن برای درج متن در SQL literal.
+        /// </summary>
+        private static string SqlText(string? value)
+        {
+            return (value ?? string.Empty).Replace("'", "''");
+        }
+
+        /// <summary>
+        /// گزارش پیشرفت برای حلقه‌های موازی.
+        /// Dispatcher.Invoke مسدودکننده است؛ اگر به‌ازای هر رکورد صدا زده شود، همه‌ی Thread های حلقه
+        /// پشت تک‌Thread رابط کاربری صف می‌کشند و موازی‌سازی عملاً از بین می‌رود.
+        /// اینجا شمارنده اتمیک است و UI فقط حدود ۱۰۰ بار و با BeginInvoke غیرمسدودکننده به‌روز می‌شود.
+        /// </summary>
+        public sealed class ThrottledProgressReporter
+        {
+            private readonly int _total;
+            private readonly int _reportInterval;
+            private readonly System.Windows.Threading.Dispatcher? _dispatcher;
+            private readonly Action<double>? _applyToUi;
+            private int _done;
+
+            public ThrottledProgressReporter(int total, System.Windows.Threading.Dispatcher? dispatcher, Action<double>? applyToUi)
+            {
+                _total = Math.Max(1, total);
+                _reportInterval = Math.Max(1, _total / 100);
+                _dispatcher = dispatcher;
+                _applyToUi = applyToUi;
+            }
+
+            public void ReportOne()
+            {
+                var done = Interlocked.Increment(ref _done);
+                if (done % _reportInterval == 0)
+                {
+                    Report(done * 100.0 / _total);
+                }
+            }
+
+            /// <summary>نمایش نهایی ۱۰۰٪ پس از پایان حلقه.</summary>
+            public void Complete() => Report(100.0);
+
+            private void Report(double value)
+            {
+                var dispatcher = _dispatcher;
+                var applyToUi = _applyToUi;
+                if (dispatcher == null || applyToUi == null)
+                {
+                    return;
+                }
+
+                try
+                {
+                    dispatcher.BeginInvoke(new Action(() => applyToUi(value)), System.Windows.Threading.DispatcherPriority.Background);
+                }
+                catch
+                {
+                    // اگر پنجره بسته شده باشد نیازی به گزارش نیست.
+                }
+            }
         }
 
         public static string DECODEUN(string cody)
@@ -934,12 +1075,6 @@ namespace AUTO_BAZ.Functions
             long CreatesanadRet = default;
             long max_ns;
             Double BG;
-            object rss2 = null;
-            rss2 = dbms.DoGetDataSQL<double?>("SELECT Max(DEED_HED.BAYEG) AS MaxOfBG FROM DEED_HED").FirstOrDefault();
-            if (IsNull(rss2))
-            { BG = 100000000; }
-            else
-            { BG = (double)rss2 + 1; }
 
             object rss = null;
             using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
@@ -951,6 +1086,15 @@ namespace AUTO_BAZ.Functions
                     //Fake Query for Lock Table
                     db.Execute("UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR", null, transaction);
                     //Fake Query for Lock Table
+
+                    // شماره بایگانی هم باید داخل همین تراکنش و پس از گرفتن قفل خوانده شود.
+                    // قبلاً بیرون از تراکنش و روی Connection دیگری خوانده می‌شد، پس دو فراخوانی
+                    // همزمان (مثلاً سند فروش و سند خزانه) می‌توانستند BAYEG یکسان بگیرند.
+                    object rss2 = db.Query<double?>("SELECT Max(DEED_HED.BAYEG) AS MaxOfBG FROM DEED_HED", null, transaction).FirstOrDefault();
+                    if (IsNull(rss2))
+                    { BG = 100000000; }
+                    else
+                    { BG = (double)rss2 + 1; }
 
                     //rss = db.Execute("INSERT INTO DEED_HED (N_S,DATE_S,SHARH_S,GHATEI,NO_S,OKF,USER_NAME) VALUES (0,0,0,0,0,0,0)", null, transaction);
                     rss = db.Query<double?>("SELECT Max(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED", null, transaction).FirstOrDefault();
@@ -994,6 +1138,116 @@ namespace AUTO_BAZ.Functions
             return CreatesanadRet;
             //}
             // *************************************************************
+        }
+
+        /// <summary>
+        /// مشخصات یک هدر سند که قرار است ساخته شود.
+        /// </summary>
+        public sealed class SanadHeaderRequest
+        {
+            public long DATE_S { get; set; }
+            public string? SHARH_S { get; set; }
+            public int GHATEI { get; set; }
+            public int NO_S { get; set; }
+            public int OKF { get; set; }
+            public string? USER_NAME { get; set; }
+        }
+
+        /// <summary>
+        /// رزرو دسته‌ای شماره سند و درج هدرها.
+        ///
+        /// <para>
+        /// چرا لازم است: <see cref="Createsanad"/> برای هر سند یک تراکنش با
+        /// <see cref="IsolationLevel.Serializable"/> باز می‌کند و با کوئری عمدی
+        /// «UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR» روی همان یک ردیف قفل انحصاری می‌گیرد؛
+        /// یعنی آن ردیف نقش یک Mutex سراسری را بازی می‌کند. به‌علاوه SELECT MAX(N_S)
+        /// در سطح Serializable روی انتهای ایندکس N_S قفل بازه‌ای می‌گیرد.
+        /// هر دو قفل تا Commit نگه داشته می‌شوند، پس اگر این متد داخل یک حلقه‌ی Parallel
+        /// صدا زده شود همه‌ی Thread ها پشت همان Mutex صف می‌کشند و حلقه عملاً سریال اجرا می‌شود.
+        /// اینجا همان قفل‌ها گرفته می‌شوند، ولی یک بار برای کل دسته به‌جای یک بار برای هر سند.
+        /// </para>
+        /// </summary>
+        /// <returns>شماره سندهای رزرو شده، به همان ترتیب ورودی.</returns>
+        public static List<double> ReserveSanadNumbersBatch(IReadOnlyList<SanadHeaderRequest> headers)
+        {
+            var reserved = new List<double>(headers?.Count ?? 0);
+            if (headers == null || headers.Count == 0)
+            {
+                return reserved;
+            }
+
+            // قفل جدول DEED_HED نباید برای مدت طولانی نگه داشته شود (کاربران دیگر هم سند می‌سازند)،
+            // پس رزرو در دسته‌های حداکثر ۵۰۰۰تایی انجام می‌شود؛ هر دسته یک تراکنش کوتاه.
+            // بخش‌های C1 تا C11 همزمان اجرا می‌شوند و همه‌شان (از طریق Createsanad) روی همین
+            // جدول DEED_HED تراکنش Serializable می‌گیرند؛ پس Deadlock ممکن است و Retry می‌کنیم.
+            const int reservationBatchSize = 5000;
+            for (int start = 0; start < headers.Count; start += reservationBatchSize)
+            {
+                var chunkStart = start;
+                var chunkLength = Math.Min(reservationBatchSize, headers.Count - start);
+
+                List<double> chunk = null;
+                ExecuteWithDeadlockRetry(() => chunk = ReserveSanadNumbersChunk(headers, chunkStart, chunkLength));
+                reserved.AddRange(chunk);
+            }
+
+            return reserved;
+        }
+
+        private static List<double> ReserveSanadNumbersChunk(IReadOnlyList<SanadHeaderRequest> headers, int start, int length)
+        {
+            var reserved = new List<double>(length);
+
+            using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            {
+                db.Open();
+                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    // دقیقاً همان قفل عمدی که در Createsanad وجود دارد و به همان ترتیب گرفته می‌شود
+                    // (اول این ردیف، بعد انتهای ایندکس N_S). یکسان بودنِ ترتیب مهم است: باعث می‌شود
+                    // این متد و Createsanad فقط پشت هم صف بکشند و با هم Deadlock نکنند.
+                    // نتیجه: حتی اگر بخش‌های دیگر یا نسخه دیگری از برنامه همزمان سند بسازند،
+                    // شماره تکراری تولید نمی‌شود. تفاوت: یک بار برای کل دسته، نه به‌ازای هر سند.
+                    db.Execute("UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR", null, transaction, commandTimeout: 3600);
+
+                    var maxNs = db.Query<double?>("SELECT MAX(N_S) FROM DEED_HED", null, transaction).FirstOrDefault();
+                    var maxBg = db.Query<double?>("SELECT MAX(BAYEG) FROM DEED_HED", null, transaction).FirstOrDefault();
+
+                    var nextNs = (maxNs.HasValue ? Convert.ToInt64(maxNs.Value) : 0L) + 1L;
+                    var nextBg = maxBg.HasValue ? Convert.ToInt64(maxBg.Value) + 1L : 100000000L;
+
+                    var uid = Baseknow.USERCOD.HasValue
+                        ? Baseknow.USERCOD.Value.ToString(CultureInfo.InvariantCulture)
+                        : "NULL";
+
+                    var values = new List<string>(length);
+                    for (int i = 0; i < length; i++)
+                    {
+                        var header = headers[start + i];
+                        var ns = nextNs + i;
+                        var bg = nextBg + i;
+
+                        reserved.Add(ns);
+                        values.Add($"({ns},{header.DATE_S},N'{SqlText(header.SHARH_S)}',{header.GHATEI},{header.NO_S},{header.OKF},N'{SqlText(header.USER_NAME)}',GETDATE(),{uid},{bg})");
+                    }
+
+                    // سقف INSERT ... VALUES در SQL Server هزار ردیف است؛ محتاطانه 500تایی می‌فرستیم.
+                    const int insertChunkSize = 500;
+                    for (int offset = 0; offset < values.Count; offset += insertChunkSize)
+                    {
+                        var chunk = string.Join(",", values.Skip(offset).Take(insertChunkSize));
+                        db.Execute(
+                            "INSERT INTO DEED_HED (N_S,DATE_S,SHARH_S,GHATEI,NO_S,OKF,USER_NAME,CRT,uid,BAYEG) VALUES " + chunk,
+                            null, transaction, commandTimeout: 3600);
+                    }
+
+                    transaction.Commit();
+                }
+
+                db?.Close();
+            }
+
+            return reserved;
         }
 
         public static (double?, bool) GENSANADFROOSH(object fnum, long TNUM, bool InternalCalling = true)
@@ -3610,7 +3864,6 @@ namespace AUTO_BAZ.Functions
                 }
             }
 
-            double progress = 0;
             MainWindow auto_run = null;
             if (InternalCalling)
             {
@@ -3626,87 +3879,234 @@ namespace AUTO_BAZ.Functions
 
             LogWriter.WriteLog($"شروع باز سازي سند های خزانه از سند شماره :{fnum} تا سند شماره :{TNUM}");
 
+            static string BuildKhazSharh(PGET_HED row) => "خزانه داري شماره " + row.ID + " مورخ " + Strings.Format(row.DATE, "####/##/##");
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۱ (سریال، فقط چند کوئری): تشخیص اینکه کدام رکوردها هدر سند دارند.
+            // قبلاً این کار داخل حلقه و به‌ازای هر رکورد یک SELECT جدا بود (N رفت‌وبرگشت به سرور).
+            // ───────────────────────────────────────────────────────────────────────────────
+            var existingHeaderNumbers = new HashSet<double>();
+            var candidateNumbers = HFRST
+                .Where(row => row?.N_S != null)
+                .Select(row => row.N_S.Value)
+                .Distinct()
+                .ToList();
+
+            if (candidateNumbers.Count > 0)
+            {
+                var fromNs = SqlNum(candidateNumbers.Min());
+                var toNs = SqlNum(candidateNumbers.Max());
+                foreach (var found in cnnManager.SqlQuery<double?>(
+                    $"SELECT N_S FROM DEED_HED WHERE NO_S = 5 AND N_S BETWEEN {fromNs} AND {toNs}"))
+                {
+                    if (found.HasValue)
+                    {
+                        existingHeaderNumbers.Add(found.Value);
+                    }
+                }
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۲ (سریال، فقط یک تراکنش): رزرو دسته‌ای همه‌ی شماره سندهای لازم.
+            // قبلاً به‌ازای هر رکورد یک بار Createsanad صدا زده می‌شد که کل جدول DEED_HED را
+            // با Serializable قفل می‌کرد؛ همین تنها عامل کافی بود تا حلقه‌ی Parallel سریال شود.
+            // ───────────────────────────────────────────────────────────────────────────────
+            var needsNewHeader = new bool[HFRST.Count];
+            var newHeaderIndexes = new List<int>();
+
+            // هر شماره سند فقط می‌تواند به یک ردیف خزانه تعلق داشته باشد.
+            // اگر چند ردیف N_S یکسان داشته باشند (که دقیقاً پیامد باگ قبلیِ
+            // «UPDATE ... WHERE ID BETWEEN» است و می‌تواند در داده‌ی فعلی وجود داشته باشد)،
+            // فقط اولین ردیف مالک آن شماره می‌ماند و بقیه شماره سند تازه می‌گیرند.
+            // بدون این کار، دو Thread موازی روی یک N_S یکسان
+            // «DELETE FROM DEED_DTL WHERE N_S = x» و سپس INSERT می‌زدند و
+            // جزئیات یکدیگر را پاک می‌کردند (Overlap واقعی روی یک سند).
+            var claimedNumbers = new HashSet<double>();
+            var duplicateNumberCount = 0;
+
+            for (int i = 0; i < HFRST.Count; i++)
+            {
+                var row = HFRST[i];
+                if (row == null)
+                {
+                    continue;
+                }
+
+                var headerExists = row.N_S != null && existingHeaderNumbers.Contains(row.N_S.Value);
+                var ownsHeader = headerExists && claimedNumbers.Add(row.N_S.Value);
+
+                if (headerExists && !ownsHeader)
+                {
+                    duplicateNumberCount++;
+                }
+
+                if (!ownsHeader)
+                {
+                    needsNewHeader[i] = true;
+                    newHeaderIndexes.Add(i);
+                }
+            }
+
+            if (duplicateNumberCount > 0)
+            {
+                LogWriter.WriteLog(
+                    $"سند خزانه - هشدار: {duplicateNumberCount} ردیف خزانه شماره سند تکراری داشتند " +
+                    "(احتمالاً باقی‌مانده از باگ قبلی UPDATE بازه‌ای)؛ برای هرکدام شماره سند جدید ساخته شد.");
+            }
+
+            if (newHeaderIndexes.Count > 0)
+            {
+                var headerRequests = newHeaderIndexes
+                    .Select(i => new SanadHeaderRequest
+                    {
+                        DATE_S = Convert.ToInt64(HFRST[i].DATE),
+                        SHARH_S = BuildKhazSharh(HFRST[i]),
+                        GHATEI = 0,
+                        NO_S = 5,
+                        OKF = 1,
+                        USER_NAME = HFRST[i].USER_NAME
+                    })
+                    .ToList();
+
+                var reservedNumbers = ReserveSanadNumbersBatch(headerRequests);
+                for (int k = 0; k < newHeaderIndexes.Count; k++)
+                {
+                    HFRST[newHeaderIndexes[k]].N_S = reservedNumbers[k];
+                }
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۳ (موازی): کار هر سند کاملاً مستقل از بقیه است و هیچ قفل سراسری ندارد.
+            // ───────────────────────────────────────────────────────────────────────────────
+            var progressReporter = new ThrottledProgressReporter(
+                HFRST.Count,
+                InternalCalling && auto_run != null ? auto_run.Dispatcher : null,
+                value =>
+                {
+                    // Math.Max لازم است: گزارش‌ها با BeginInvoke از چند Thread صف می‌شوند و
+                    // ممکن است بی‌ترتیب اجرا شوند (مثلاً ۴۶٪ قبل از ۴۵٪). بدون این، نوار پیشرفت
+                    // گاهی به عقب می‌پرد.
+                    auto_run.PRGR_C3.Value = Math.Max(auto_run.PRGR_C3.Value, value);
+                    auto_run.UpdateOverallProgressBar();
+                });
+
             //for (int EOFi = 0; EOFi < HFRST.Count; EOFi++)
-            var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+            // با تراکنش بیرونی همه‌ی دستورها روی «یک» Connection مشترک اجرا می‌شوند و
+            // استفاده همزمان چند Thread از یک SqlConnection مجاز نیست؛ پس در آن حالت سریال اجرا می‌کنیم.
+            // (فراخوانی فعلی از فرم خزانه فقط یک رکورد می‌فرستد، ولی این محافظ برای آینده لازم است.)
+            var dbParallelOptions = useExternal
+                ? new ParallelOptions { MaxDegreeOfParallelism = 1 }
+                : CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
+
+            LogWriter.WriteLog(
+                $"سند خزانه - تعداد رکورد: {HFRST.Count} | هدر جدید: {newHeaderIndexes.Count} | " +
+                $"موازی: {Generaly.UseParallelProcessing} | MaxDegreeOfParallelism: {dbParallelOptions.MaxDegreeOfParallelism}");
+
+            // متن SQL «یک بار» ساخته می‌شود و برای همه‌ی ردیف‌ها ثابت می‌ماند؛ فقط پارامترها عوض می‌شوند.
+            // این نکته برای موازی‌سازی مهم است: با تولید متن SQL جداگانه برای هر ردیف، SQL Server
+            // مجبور می‌شد برای هر سند یک Execution Plan تازه Compile کند. Compile شدن روی
+            // Plan Cache قفل می‌گیرد و همین موضوع Thread های موازی را دوباره پشت هم صف می‌کند.
+            // با پارامتری کردن، فقط دو Plan ساخته و بین همه‌ی Thread ها بازاستفاده می‌شود.
+            var txPrefix = useExternal ? string.Empty : "SET XACT_ABORT ON; BEGIN TRANSACTION;";
+            var txSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
+
+            const string detailInsertSql =
+                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, MHAZ_NO " +
+                "FROM dbo.PGET_LST WHERE ID = @TreasuryId;" +
+                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, MHAZ_NO " +
+                "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
+
+            // حالت الف) هدر سند در مرحله ۲ ساخته شده؛ اینجا فقط شماره‌اش روی ردیف خزانه ثبت
+            // و ردیف‌های سند درج می‌شوند.
+            // این همان جایی است که باگ اصلی بود: شرط قبلی «WHERE (ID BETWEEN fnum AND TNUM)» بود،
+            // یعنی در هر تکرار کل بازه (عملاً کل جدول PGET_HED) با یک شماره سند بازنویسی می‌شد؛
+            // هم داده را خراب می‌کرد و هم با قفل انحصاری روی کل جدول، Thread های موازی را به صف می‌کرد.
+            // DELETE هم لازم نیست: شماره سند تازه از MAX(N_S)+1 آمده و قطعاً ردیفی در DEED_DTL ندارد.
+            var newHeaderSql = txPrefix +
+                "UPDATE dbo.PGET_HED SET N_S = @Ns WHERE ID = @TreasuryId;" +
+                detailInsertSql + txSuffix;
+
+            // حالت ب) هدر سند از قبل وجود دارد؛ سربرگ به‌روز و ردیف‌های قبلی‌اش بازسازی می‌شوند.
+            //
+            // DELETE عمداً همین‌جا داخل حلقه‌ی موازی است و نه یکجا قبل از حلقه:
+            // روی DEED_DTL ایندکس N_SI روی ستون N_S وجود دارد، پس پیدا کردن ردیف‌ها ارزان است.
+            // هزینه‌ی واقعی حذف، نگهداری ۷ ایندکس این جدول است — و آن هزینه چه یکجا انجام شود
+            // چه پراکنده، مقدارش یکسان است. پس بهتر است بین Thread ها پخش شود تا اینکه
+            // سریال و پیش از حلقه انجام شود. ضمناً این‌طور DELETE و INSERT دوباره در یک
+            // تراکنش قرار می‌گیرند و سند هیچ‌وقت بی‌ردیف یا نیمه‌کاره دیده نمی‌شود.
+            //
+            // توجه: BAYEG و base دست نمی‌خورند — شماره بایگانی و شناسه رهگیری مالیاتی باید ثابت بمانند.
+            var existingHeaderSql = txPrefix +
+                "UPDATE dbo.DEED_HED SET DATE_S = @DateS, SHARH_S = @Sharh, USER_NAME = @UserName, OKF = 1 " +
+                "WHERE NO_S = 5 AND N_S = @Ns;" +
+                "DELETE FROM dbo.DEED_DTL WHERE N_S = @Ns;" +
+                detailInsertSql + txSuffix;
 
             ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, EOFi =>
             {
+                observedThreads.TryAdd(Environment.CurrentManagedThreadId, 0);
 
-                string sharhd;
-                string SHRH;
-                double max_ns;
-
-                if (InternalCalling && auto_run != null)
+                var row = HFRST[EOFi];
+                if (row == null)
                 {
-                    auto_run.Dispatcher.Invoke(new Action(() =>
-                    {
-                        progress++;
-                        auto_run.PRGR_C3.Value = (progress / (double)HFRST.Count) * 100.0;
-                        auto_run.UpdateOverallProgressBar();
-                    }));
+                    progressReporter.ReportOne();
+                    return;
                 }
 
-                sharhd = "خزانه داري شماره " + HFRST[EOFi].ID + " مورخ " + Strings.Format(HFRST[EOFi].DATE, "####/##/##");
+                // همه‌ی دستورهای این سند در «یک» رفت‌وبرگشت به سرور فرستاده می‌شوند.
+                // قبلاً ۴ تا ۵ فراخوانی جدا بود و چون CL_ConcurrencyManager در حالت OnceStartCloseQuery
+                // برای هر فراخوانی یک Connection باز/بسته می‌کند، هزینه‌ی شبکه چند برابر می‌شد.
+                string sql;
+                object parameters;
 
-                if (IsNull(HFRST[EOFi]?.N_S))
+                if (needsNewHeader[EOFi])
                 {
-                    max_ns = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
-                    HFRST[EOFi].N_S = max_ns;
-                    string _where_HFRST = $" WHERE (ID BETWEEN {fnum} AND {TNUM})";
-                    cnnManager.ExecuteSqlCommand($"UPDATE dbo.PGET_HED SET N_S = {HFRST[EOFi].N_S} {_where_HFRST}");
-
-                    SANAD_NUMBER = max_ns;
+                    sql = newHeaderSql;
+                    parameters = new { Ns = row.N_S, TreasuryId = row.ID };
                 }
                 else
                 {
-                    max_ns = (double)HFRST[EOFi].N_S;
-                    SHRH = "خزانه داري شماره " + HFRST[EOFi].ID + " مورخ " + Strings.Format(HFRST[EOFi].DATE, "####/##/##");
-                    var SHRST_0 = cnnManager.SqlQuery<DEED_HED>($"SELECT * FROM DEED_HED WHERE NO_S = 5 AND N_S = {HFRST[EOFi].N_S}").ToList();
-                    string _where_HFRST = $" WHERE (ID BETWEEN {fnum} AND {TNUM})";
-                    if (SHRST_0.Count == 0)
+                    sql = existingHeaderSql;
+                    parameters = new
                     {
-                        HFRST[EOFi].N_S = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
-                        cnnManager.ExecuteSqlCommand($"UPDATE dbo.PGET_HED SET N_S = {HFRST[EOFi].N_S} {_where_HFRST}");
-
-                        SANAD_NUMBER = HFRST[EOFi].N_S;
-                    }
-                    else
-                    {
-                        SANAD_NUMBER = HFRST[EOFi].N_S;
-
-                        string _where_SHRST_0 = $" NO_S = 5 AND N_S = {HFRST[EOFi].N_S} ";
-                        var header = SHRST_0.FirstOrDefault();
-                        if (header != null)
-                        {
-                            header.DATE_S = (long)HFRST[EOFi].DATE;
-                            header.SHARH_S = SHRH;
-                            header.USER_NAME = HFRST[EOFi].USER_NAME;
-                            header.OKF = true;
-                            cnnManager.ExecuteSqlCommand(
-                                @$"UPDATE dbo.DEED_HED SET 
-                                DATE_S = {HFRST[EOFi].DATE},
-                                SHARH_S = N'{SHRH}',
-                                USER_NAME = N'{HFRST[EOFi].USER_NAME}',
-                                OKF = 1
-                              WHERE {_where_SHRST_0}");
-                        }
-                    }
+                        Ns = row.N_S,
+                        TreasuryId = row.ID,
+                        DateS = row.DATE,
+                        Sharh = BuildKhazSharh(row),
+                        // مثل کد قبلی، نبودِ نام کاربر به رشته خالی تبدیل می‌شود نه NULL.
+                        UserName = row.USER_NAME ?? string.Empty
+                    };
                 }
 
-                if (!IsNull(HFRST[EOFi].N_S))
+                if (useExternal)
                 {
-                    cnnManager.ExecuteSqlCommand("DELETE FROM dbo.DEED_DTL WHERE (N_S = " + HFRST[EOFi].N_S + ")");
+                    // تراکنش بیرونی پس از Deadlock قابل ادامه نیست، پس Retry نمی‌کنیم.
+                    cnnManager.ExecuteSqlCommand(sql, parameters);
+                }
+                else
+                {
+                    ExecuteWithDeadlockRetry(() => cnnManager.ExecuteSqlCommand(sql, parameters));
                 }
 
-                cnnManager.ExecuteSqlCommand(
-                 "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                    "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, THES, ARZD, MHAZ_NO " +
-                    "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
-                cnnManager.ExecuteSqlCommand(
-                 "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                    "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, FHES, ARZD, MHAZ_NO " +
-                    "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
+                progressReporter.ReportOne();
             });
+
+            stopwatch.Stop();
+            progressReporter.Complete();
+
+            // این خط لاگ دقیقاً به همان سوال جواب می‌دهد: واقعاً چند Thread درگیر شدند و چقدر طول کشید.
+            LogWriter.WriteLog(
+                $"پايان باز سازي سند های خزانه - {HFRST.Count} رکورد در {stopwatch.Elapsed.TotalSeconds:F1} ثانیه " +
+                $"با {observedThreads.Count} Thread همزمان");
+
+            // مثل حالت سریال، شماره سند آخرین ردیف پردازش‌شده برگردانده می‌شود
+            // (قبلاً این مقدار از داخل حلقه‌ی موازی نوشته می‌شد و نتیجه‌اش غیرقطعی بود).
+            SANAD_NUMBER = HFRST.LastOrDefault(row => row?.N_S != null)?.N_S;
 
             if (!useExternal && !cnnManager.OnceStartCloseQuery)
             {
