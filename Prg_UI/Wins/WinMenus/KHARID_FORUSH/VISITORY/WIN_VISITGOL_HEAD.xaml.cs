@@ -1,5 +1,4 @@
-﻿using Azure;
-using Functions;
+﻿using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Prg_Proccessy.FUNCTIONS;

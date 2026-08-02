@@ -662,9 +662,7 @@
 		<Reference Include="Microsoft.CodeAnalysis.VisualBasic">
 			<HintPath>DLLS\stimulydlls\Microsoft.CodeAnalysis.VisualBasic.dll</HintPath>
 		</Reference>
-		<Reference Include="Microsoft.Data.SqlClient">
-			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
-		</Reference>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
 		<!--<Reference Include="Microsoft.Data.SqlClient">
 			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
 		</Reference>-->
