@@ -30,12 +30,6 @@ namespace AUTO_BAZ.Functions
 
         public static bool UseSmartThrottlingByDefault { get; set; } = false;
 
-        /// <summary>
-        /// اگر بزرگ‌تر از صفر باشد، درجه‌ی موازی‌سازی محاسبه‌شده را بازنویسی می‌کند.
-        /// برای تنظیم دستی روی سرورهایی که Max Pool Size بزرگ‌تری دارند مفید است.
-        /// </summary>
-        public static int MaxParallelDegreeOverride { get; set; } = 0;
-
         #region Custom_Modelses
         public class QUERY_MODEL6
         {
@@ -517,10 +511,6 @@ namespace AUTO_BAZ.Functions
                 // 25% از Pool (حداقل 4 و حداکثر 16) تا سایر ماژول‌ها هم Connection داشته باشند.
                 maxDegree = Math.Clamp(maxPoolSize / 4, 4, 16);
             }
-            else if (MaxParallelDegreeOverride > 0)
-            {
-                maxDegree = MaxParallelDegreeOverride;
-            }
             else
             {
                 // حالت پیش‌فرض (پرسرعت):
@@ -629,23 +619,23 @@ namespace AUTO_BAZ.Functions
         }
 
         /// <summary>
-        /// گزارش پیشرفت با Throttle.
-        /// به‌جای یک Dispatcher.Invoke مسدودکننده به‌ازای هر رکورد (که همه‌ی Thread های حلقه موازی را
-        /// پشت تک‌Thread رابط کاربری صف می‌کند و عملاً موازی‌سازی را از بین می‌برد)،
-        /// فقط هنگام تغییر درصد صحیح یک BeginInvoke غیرمسدودکننده به UI فرستاده می‌شود.
+        /// گزارش پیشرفت برای حلقه‌های موازی.
+        /// Dispatcher.Invoke مسدودکننده است؛ اگر به‌ازای هر رکورد صدا زده شود، همه‌ی Thread های حلقه
+        /// پشت تک‌Thread رابط کاربری صف می‌کشند و موازی‌سازی عملاً از بین می‌رود.
+        /// اینجا شمارنده اتمیک است و UI فقط حدود ۱۰۰ بار و با BeginInvoke غیرمسدودکننده به‌روز می‌شود.
         /// </summary>
         public sealed class ThrottledProgressReporter
         {
             private readonly int _total;
+            private readonly int _reportInterval;
             private readonly System.Windows.Threading.Dispatcher? _dispatcher;
             private readonly Action<double>? _applyToUi;
             private int _done;
-            private int _lastPercent = -1;
-            private int _uiUpdatePending;
 
             public ThrottledProgressReporter(int total, System.Windows.Threading.Dispatcher? dispatcher, Action<double>? applyToUi)
             {
                 _total = Math.Max(1, total);
+                _reportInterval = Math.Max(1, _total / 100);
                 _dispatcher = dispatcher;
                 _applyToUi = applyToUi;
             }
@@ -653,51 +643,16 @@ namespace AUTO_BAZ.Functions
             public void ReportOne()
             {
                 var done = Interlocked.Increment(ref _done);
-
-                var dispatcher = _dispatcher;
-                var applyToUi = _applyToUi;
-                if (dispatcher == null || applyToUi == null)
+                if (done % _reportInterval == 0)
                 {
-                    return;
-                }
-
-                var percent = (int)(done * 100L / _total);
-                var last = Volatile.Read(ref _lastPercent);
-                if (percent <= last)
-                {
-                    return;
-                }
-
-                if (Interlocked.CompareExchange(ref _lastPercent, percent, last) != last)
-                {
-                    return;
-                }
-
-                // اگر هنوز یک به‌روزرسانی در صف UI منتظر است، دوباره صف نمی‌کنیم تا UI گلوگاه نشود.
-                if (Interlocked.Exchange(ref _uiUpdatePending, 1) == 1)
-                {
-                    return;
-                }
-
-                var value = done * 100.0 / _total;
-                try
-                {
-                    dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        try { applyToUi(value); }
-                        finally { Volatile.Write(ref _uiUpdatePending, 0); }
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                }
-                catch
-                {
-                    Volatile.Write(ref _uiUpdatePending, 0);
+                    Report(done * 100.0 / _total);
                 }
             }
 
-            /// <summary>
-            /// نمایش نهایی 100% پس از پایان حلقه (چون به‌روزرسانی‌های میانی Throttle شده‌اند).
-            /// </summary>
-            public void Complete()
+            /// <summary>نمایش نهایی ۱۰۰٪ پس از پایان حلقه.</summary>
+            public void Complete() => Report(100.0);
+
+            private void Report(double value)
             {
                 var dispatcher = _dispatcher;
                 var applyToUi = _applyToUi;
@@ -708,7 +663,7 @@ namespace AUTO_BAZ.Functions
 
                 try
                 {
-                    dispatcher.Invoke(new Action(() => applyToUi(100.0)));
+                    dispatcher.BeginInvoke(new Action(() => applyToUi(value)), System.Windows.Threading.DispatcherPriority.Background);
                 }
                 catch
                 {
@@ -1216,71 +1171,26 @@ namespace AUTO_BAZ.Functions
 
             // قفل جدول DEED_HED نباید برای مدت طولانی نگه داشته شود (کاربران دیگر هم سند می‌سازند)،
             // پس رزرو در دسته‌های حداکثر ۵۰۰۰تایی انجام می‌شود؛ هر دسته یک تراکنش کوتاه.
+            // بخش‌های C1 تا C11 همزمان اجرا می‌شوند و همه‌شان (از طریق Createsanad) روی همین
+            // جدول DEED_HED تراکنش Serializable می‌گیرند؛ پس Deadlock ممکن است و Retry می‌کنیم.
             const int reservationBatchSize = 5000;
             for (int start = 0; start < headers.Count; start += reservationBatchSize)
             {
-                var batchLength = Math.Min(reservationBatchSize, headers.Count - start);
                 var chunkStart = start;
+                var chunkLength = Math.Min(reservationBatchSize, headers.Count - start);
 
-                // بخش‌های C1 تا C11 همزمان اجرا می‌شوند و همه‌شان (از طریق Createsanad) روی
-                // همین جدول DEED_HED تراکنش Serializable می‌گیرند؛ پس Deadlock ممکن است.
-                // چون هر شکست اینجا یک دسته‌ی کامل را از بین می‌برد، حتماً Retry می‌کنیم.
-                // نکته: تراکنش پس از Deadlock به‌طور کامل Rollback شده، بنابراین هیچ شماره‌ای
-                // نیمه‌رزرو نمی‌ماند و تلاش مجدد دوباره MAX(N_S) تازه را می‌خواند.
-                var beforeRetry = reserved.Count;
-                ExecuteWithDeadlockRetry(() =>
-                {
-                    // در تلاش دوم به بعد، شماره‌های ناقصِ تلاش قبلی دور ریخته می‌شوند.
-                    if (reserved.Count > beforeRetry)
-                    {
-                        reserved.RemoveRange(beforeRetry, reserved.Count - beforeRetry);
-                    }
-
-                    ReserveSanadNumbersChunk(headers, chunkStart, batchLength, reserved);
-                });
+                List<double> chunk = null;
+                ExecuteWithDeadlockRetry(() => chunk = ReserveSanadNumbersChunk(headers, chunkStart, chunkLength));
+                reserved.AddRange(chunk);
             }
 
             return reserved;
         }
 
-        /// <summary>
-        /// ثبت دسته‌ای شماره سندهای رزرو شده روی ردیف‌های خزانه (PGET_HED.N_S).
-        /// به‌جای N دستور UPDATE تک‌ردیفی، هر بار حداکثر ۵۰۰ ردیف با یک JOIN روی VALUES به‌روزرسانی می‌شود.
-        /// </summary>
-        private static void LinkReservedSanadNumbers(CL_ConcurrencyManager cnnManager, List<PGET_HED> rows, List<int> indexes, bool useExternal)
+        private static List<double> ReserveSanadNumbersChunk(IReadOnlyList<SanadHeaderRequest> headers, int start, int length)
         {
-            const int chunkSize = 500; // سقف سازنده VALUES در SQL Server هزار ردیف است
-            for (int offset = 0; offset < indexes.Count; offset += chunkSize)
-            {
-                var pairs = indexes
-                    .Skip(offset)
-                    .Take(chunkSize)
-                    .Where(i => rows[i]?.ID != null && rows[i].N_S != null)
-                    .Select(i => $"({rows[i].ID},{SqlNum(rows[i].N_S)})")
-                    .ToList();
+            var reserved = new List<double>(length);
 
-                if (pairs.Count == 0)
-                {
-                    continue;
-                }
-
-                var sql =
-                    "UPDATE p SET p.N_S = CAST(v.Ns AS float) FROM dbo.PGET_HED AS p " +
-                    $"INNER JOIN (VALUES {string.Join(",", pairs)}) AS v(Id, Ns) ON p.ID = v.Id;";
-
-                if (useExternal)
-                {
-                    cnnManager.ExecuteSqlCommand(sql);
-                }
-                else
-                {
-                    ExecuteWithDeadlockRetry(() => cnnManager.ExecuteSqlCommand(sql));
-                }
-            }
-        }
-
-        private static void ReserveSanadNumbersChunk(IReadOnlyList<SanadHeaderRequest> headers, int start, int length, List<double> reserved)
-        {
             using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
                 db.Open();
@@ -1326,6 +1236,8 @@ namespace AUTO_BAZ.Functions
 
                 db?.Close();
             }
+
+            return reserved;
         }
 
         public static (double?, bool) GENSANADFROOSH(object fnum, long TNUM, bool InternalCalling = true)
@@ -3971,30 +3883,16 @@ namespace AUTO_BAZ.Functions
                 .Distinct()
                 .ToList();
 
-            const int inClauseChunkSize = 1000;
-            if (candidateNumbers.Count > 5 * inClauseChunkSize)
+            if (candidateNumbers.Count > 0)
             {
-                // برای بازه‌های بزرگ (مثل بازسازی کامل) یک بار خواندن همه‌ی هدرهای خزانه
-                // ارزان‌تر از ده‌ها کوئری IN است.
-                foreach (var found in cnnManager.SqlQuery<double?>("SELECT N_S FROM DEED_HED WHERE NO_S = 5"))
+                var fromNs = SqlNum(candidateNumbers.Min());
+                var toNs = SqlNum(candidateNumbers.Max());
+                foreach (var found in cnnManager.SqlQuery<double?>(
+                    $"SELECT N_S FROM DEED_HED WHERE NO_S = 5 AND N_S BETWEEN {fromNs} AND {toNs}"))
                 {
                     if (found.HasValue)
                     {
                         existingHeaderNumbers.Add(found.Value);
-                    }
-                }
-            }
-            else
-            {
-                for (int offset = 0; offset < candidateNumbers.Count; offset += inClauseChunkSize)
-                {
-                    var inList = string.Join(",", candidateNumbers.Skip(offset).Take(inClauseChunkSize).Select(v => SqlNum(v)));
-                    foreach (var found in cnnManager.SqlQuery<double?>($"SELECT N_S FROM DEED_HED WHERE NO_S = 5 AND N_S IN ({inList})"))
-                    {
-                        if (found.HasValue)
-                        {
-                            existingHeaderNumbers.Add(found.Value);
-                        }
                     }
                 }
             }
@@ -4066,13 +3964,6 @@ namespace AUTO_BAZ.Functions
                 {
                     HFRST[newHeaderIndexes[k]].N_S = reservedNumbers[k];
                 }
-
-                // شماره سندهای رزرو شده بلافاصله و دسته‌ای روی خود ردیف‌های خزانه ثبت می‌شوند.
-                // اگر این کار به داخل حلقه موازی موکول شود و اجرا وسط کار شکست بخورد یا کاربر لغو کند،
-                // هدرهای ساخته‌شده بی‌صاحب می‌مانند (سند بدون ردیف در دفتر کل) و اجرای بعدی هم
-                // دوباره شماره تازه می‌سازد، پس این زباله‌ها انباشته می‌شوند.
-                // با ثبت فوری، هر هدر از همان ابتدا به ردیف خزانه‌اش وصل است و اجرای مجدد کاملش می‌کند.
-                LinkReservedSanadNumbers(cnnManager, HFRST, newHeaderIndexes, useExternal);
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
@@ -4113,15 +4004,15 @@ namespace AUTO_BAZ.Functions
                 "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, MHAZ_NO " +
                 "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
 
-            // حالت الف) هدر سند در مرحله ۲ ساخته و در همان‌جا به ردیف خزانه وصل شده،
-            // پس اینجا فقط ردیف‌های سند درج می‌شوند.
-            // DELETE لازم نیست: شماره سند تازه از MAX(N_S)+1 گرفته شده و قطعاً هیچ ردیفی در
-            // DEED_DTL ندارد. حذف این DELETE مهم است چون اگر روی DEED_DTL.N_S ایندکسی نباشد،
-            // هر DELETE یک اسکن کامل جدول است.
-            // نکته تاریخی: قبلاً اینجا یک «UPDATE PGET_HED ... WHERE (ID BETWEEN fnum AND TNUM)» بود،
+            // حالت الف) هدر سند در مرحله ۲ ساخته شده؛ اینجا فقط شماره‌اش روی ردیف خزانه ثبت
+            // و ردیف‌های سند درج می‌شوند.
+            // این همان جایی است که باگ اصلی بود: شرط قبلی «WHERE (ID BETWEEN fnum AND TNUM)» بود،
             // یعنی در هر تکرار کل بازه (عملاً کل جدول PGET_HED) با یک شماره سند بازنویسی می‌شد؛
             // هم داده را خراب می‌کرد و هم با قفل انحصاری روی کل جدول، Thread های موازی را به صف می‌کرد.
-            var newHeaderSql = txPrefix + detailInsertSql + txSuffix;
+            // DELETE هم لازم نیست: شماره سند تازه از MAX(N_S)+1 آمده و قطعاً ردیفی در DEED_DTL ندارد.
+            var newHeaderSql = txPrefix +
+                "UPDATE dbo.PGET_HED SET N_S = @Ns WHERE ID = @TreasuryId;" +
+                detailInsertSql + txSuffix;
 
             // حالت ب) هدر سند از قبل وجود دارد؛ به‌روزرسانی می‌شود و ردیف‌های قبلی‌اش پاک و بازسازی می‌شوند.
             var existingHeaderSql = txPrefix +
