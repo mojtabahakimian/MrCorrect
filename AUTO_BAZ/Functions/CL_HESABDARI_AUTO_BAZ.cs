@@ -620,11 +620,6 @@ namespace AUTO_BAZ.Functions
             return value.HasValue ? value.Value.ToString("0.##########", CultureInfo.InvariantCulture) : "NULL";
         }
 
-        private static string SqlNum(long? value)
-        {
-            return value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : "NULL";
-        }
-
         /// <summary>
         /// Escape کردن کوتیشن برای درج متن در SQL literal.
         /// </summary>
@@ -1225,10 +1220,63 @@ namespace AUTO_BAZ.Functions
             for (int start = 0; start < headers.Count; start += reservationBatchSize)
             {
                 var batchLength = Math.Min(reservationBatchSize, headers.Count - start);
-                ReserveSanadNumbersChunk(headers, start, batchLength, reserved);
+                var chunkStart = start;
+
+                // بخش‌های C1 تا C11 همزمان اجرا می‌شوند و همه‌شان (از طریق Createsanad) روی
+                // همین جدول DEED_HED تراکنش Serializable می‌گیرند؛ پس Deadlock ممکن است.
+                // چون هر شکست اینجا یک دسته‌ی کامل را از بین می‌برد، حتماً Retry می‌کنیم.
+                // نکته: تراکنش پس از Deadlock به‌طور کامل Rollback شده، بنابراین هیچ شماره‌ای
+                // نیمه‌رزرو نمی‌ماند و تلاش مجدد دوباره MAX(N_S) تازه را می‌خواند.
+                var beforeRetry = reserved.Count;
+                ExecuteWithDeadlockRetry(() =>
+                {
+                    // در تلاش دوم به بعد، شماره‌های ناقصِ تلاش قبلی دور ریخته می‌شوند.
+                    if (reserved.Count > beforeRetry)
+                    {
+                        reserved.RemoveRange(beforeRetry, reserved.Count - beforeRetry);
+                    }
+
+                    ReserveSanadNumbersChunk(headers, chunkStart, batchLength, reserved);
+                });
             }
 
             return reserved;
+        }
+
+        /// <summary>
+        /// ثبت دسته‌ای شماره سندهای رزرو شده روی ردیف‌های خزانه (PGET_HED.N_S).
+        /// به‌جای N دستور UPDATE تک‌ردیفی، هر بار حداکثر ۵۰۰ ردیف با یک JOIN روی VALUES به‌روزرسانی می‌شود.
+        /// </summary>
+        private static void LinkReservedSanadNumbers(CL_ConcurrencyManager cnnManager, List<PGET_HED> rows, List<int> indexes, bool useExternal)
+        {
+            const int chunkSize = 500; // سقف سازنده VALUES در SQL Server هزار ردیف است
+            for (int offset = 0; offset < indexes.Count; offset += chunkSize)
+            {
+                var pairs = indexes
+                    .Skip(offset)
+                    .Take(chunkSize)
+                    .Where(i => rows[i]?.ID != null && rows[i].N_S != null)
+                    .Select(i => $"({rows[i].ID},{SqlNum(rows[i].N_S)})")
+                    .ToList();
+
+                if (pairs.Count == 0)
+                {
+                    continue;
+                }
+
+                var sql =
+                    "UPDATE p SET p.N_S = CAST(v.Ns AS float) FROM dbo.PGET_HED AS p " +
+                    $"INNER JOIN (VALUES {string.Join(",", pairs)}) AS v(Id, Ns) ON p.ID = v.Id;";
+
+                if (useExternal)
+                {
+                    cnnManager.ExecuteSqlCommand(sql);
+                }
+                else
+                {
+                    ExecuteWithDeadlockRetry(() => cnnManager.ExecuteSqlCommand(sql));
+                }
+            }
         }
 
         private static void ReserveSanadNumbersChunk(IReadOnlyList<SanadHeaderRequest> headers, int start, int length, List<double> reserved)
@@ -3958,6 +4006,17 @@ namespace AUTO_BAZ.Functions
             // ───────────────────────────────────────────────────────────────────────────────
             var needsNewHeader = new bool[HFRST.Count];
             var newHeaderIndexes = new List<int>();
+
+            // هر شماره سند فقط می‌تواند به یک ردیف خزانه تعلق داشته باشد.
+            // اگر چند ردیف N_S یکسان داشته باشند (که دقیقاً پیامد باگ قبلیِ
+            // «UPDATE ... WHERE ID BETWEEN» است و می‌تواند در داده‌ی فعلی وجود داشته باشد)،
+            // فقط اولین ردیف مالک آن شماره می‌ماند و بقیه شماره سند تازه می‌گیرند.
+            // بدون این کار، دو Thread موازی روی یک N_S یکسان
+            // «DELETE FROM DEED_DTL WHERE N_S = x» و سپس INSERT می‌زدند و
+            // جزئیات یکدیگر را پاک می‌کردند (Overlap واقعی روی یک سند).
+            var claimedNumbers = new HashSet<double>();
+            var duplicateNumberCount = 0;
+
             for (int i = 0; i < HFRST.Count; i++)
             {
                 var row = HFRST[i];
@@ -3966,11 +4025,26 @@ namespace AUTO_BAZ.Functions
                     continue;
                 }
 
-                if (row.N_S == null || !existingHeaderNumbers.Contains(row.N_S.Value))
+                var headerExists = row.N_S != null && existingHeaderNumbers.Contains(row.N_S.Value);
+                var ownsHeader = headerExists && claimedNumbers.Add(row.N_S.Value);
+
+                if (headerExists && !ownsHeader)
+                {
+                    duplicateNumberCount++;
+                }
+
+                if (!ownsHeader)
                 {
                     needsNewHeader[i] = true;
                     newHeaderIndexes.Add(i);
                 }
+            }
+
+            if (duplicateNumberCount > 0)
+            {
+                LogWriter.WriteLog(
+                    $"سند خزانه - هشدار: {duplicateNumberCount} ردیف خزانه شماره سند تکراری داشتند " +
+                    "(احتمالاً باقی‌مانده از باگ قبلی UPDATE بازه‌ای)؛ برای هرکدام شماره سند جدید ساخته شد.");
             }
 
             if (newHeaderIndexes.Count > 0)
@@ -3992,6 +4066,13 @@ namespace AUTO_BAZ.Functions
                 {
                     HFRST[newHeaderIndexes[k]].N_S = reservedNumbers[k];
                 }
+
+                // شماره سندهای رزرو شده بلافاصله و دسته‌ای روی خود ردیف‌های خزانه ثبت می‌شوند.
+                // اگر این کار به داخل حلقه موازی موکول شود و اجرا وسط کار شکست بخورد یا کاربر لغو کند،
+                // هدرهای ساخته‌شده بی‌صاحب می‌مانند (سند بدون ردیف در دفتر کل) و اجرای بعدی هم
+                // دوباره شماره تازه می‌سازد، پس این زباله‌ها انباشته می‌شوند.
+                // با ثبت فوری، هر هدر از همان ابتدا به ردیف خزانه‌اش وصل است و اجرای مجدد کاملش می‌کند.
+                LinkReservedSanadNumbers(cnnManager, HFRST, newHeaderIndexes, useExternal);
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
@@ -4016,6 +4097,39 @@ namespace AUTO_BAZ.Functions
                 $"سند خزانه - تعداد رکورد: {HFRST.Count} | هدر جدید: {newHeaderIndexes.Count} | " +
                 $"موازی: {Generaly.UseParallelProcessing} | MaxDegreeOfParallelism: {dbParallelOptions.MaxDegreeOfParallelism}");
 
+            // متن SQL «یک بار» ساخته می‌شود و برای همه‌ی ردیف‌ها ثابت می‌ماند؛ فقط پارامترها عوض می‌شوند.
+            // این نکته برای موازی‌سازی مهم است: با تولید متن SQL جداگانه برای هر ردیف، SQL Server
+            // مجبور می‌شد برای هر سند یک Execution Plan تازه Compile کند. Compile شدن روی
+            // Plan Cache قفل می‌گیرد و همین موضوع Thread های موازی را دوباره پشت هم صف می‌کند.
+            // با پارامتری کردن، فقط دو Plan ساخته و بین همه‌ی Thread ها بازاستفاده می‌شود.
+            var txPrefix = useExternal ? string.Empty : "SET XACT_ABORT ON; BEGIN TRANSACTION;";
+            var txSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
+
+            const string detailInsertSql =
+                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, MHAZ_NO " +
+                "FROM dbo.PGET_LST WHERE ID = @TreasuryId;" +
+                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, MHAZ_NO " +
+                "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
+
+            // حالت الف) هدر سند در مرحله ۲ ساخته و در همان‌جا به ردیف خزانه وصل شده،
+            // پس اینجا فقط ردیف‌های سند درج می‌شوند.
+            // DELETE لازم نیست: شماره سند تازه از MAX(N_S)+1 گرفته شده و قطعاً هیچ ردیفی در
+            // DEED_DTL ندارد. حذف این DELETE مهم است چون اگر روی DEED_DTL.N_S ایندکسی نباشد،
+            // هر DELETE یک اسکن کامل جدول است.
+            // نکته تاریخی: قبلاً اینجا یک «UPDATE PGET_HED ... WHERE (ID BETWEEN fnum AND TNUM)» بود،
+            // یعنی در هر تکرار کل بازه (عملاً کل جدول PGET_HED) با یک شماره سند بازنویسی می‌شد؛
+            // هم داده را خراب می‌کرد و هم با قفل انحصاری روی کل جدول، Thread های موازی را به صف می‌کرد.
+            var newHeaderSql = txPrefix + detailInsertSql + txSuffix;
+
+            // حالت ب) هدر سند از قبل وجود دارد؛ به‌روزرسانی می‌شود و ردیف‌های قبلی‌اش پاک و بازسازی می‌شوند.
+            var existingHeaderSql = txPrefix +
+                "UPDATE dbo.DEED_HED SET DATE_S = @DateS, SHARH_S = @Sharh, USER_NAME = @UserName, OKF = 1 " +
+                "WHERE NO_S = 5 AND N_S = @Ns;" +
+                "DELETE FROM dbo.DEED_DTL WHERE N_S = @Ns;" +
+                detailInsertSql + txSuffix;
+
             ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, EOFi =>
             {
                 observedThreads.TryAdd(Environment.CurrentManagedThreadId, 0);
@@ -4027,62 +4141,39 @@ namespace AUTO_BAZ.Functions
                     return;
                 }
 
-                var sharhd = BuildKhazSharh(row);
-                var nsLiteral = SqlNum(row.N_S);
-                var dateLiteral = SqlNum(row.DATE);
-
                 // همه‌ی دستورهای این سند در «یک» رفت‌وبرگشت به سرور فرستاده می‌شوند.
                 // قبلاً ۴ تا ۵ فراخوانی جدا بود و چون CL_ConcurrencyManager در حالت OnceStartCloseQuery
                 // برای هر فراخوانی یک Connection باز/بسته می‌کند، هزینه‌ی شبکه چند برابر می‌شد.
-                var batch = new StringBuilder();
-
-                // اگر تراکنش از بیرون تزریق شده باشد، تراکنش تودرتو باز نمی‌کنیم و مدیریتش با فراخواننده است.
-                if (!useExternal)
-                {
-                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
-                }
+                string sql;
+                object parameters;
 
                 if (needsNewHeader[EOFi])
                 {
-                    // هدر سند در مرحله ۲ ساخته شده؛ فقط شماره سند روی همین ردیف خزانه ثبت می‌شود.
-                    // نکته: قبلاً شرط این UPDATE به اشتباه «WHERE (ID BETWEEN fnum AND TNUM)» بود،
-                    // یعنی در هر تکرار کل بازه (عملاً کل جدول PGET_HED) با یک شماره سند بازنویسی می‌شد؛
-                    // هم داده را خراب می‌کرد و هم با قفل انحصاری روی کل جدول، Thread های موازی را به صف می‌کرد.
-                    batch.Append($"UPDATE dbo.PGET_HED SET N_S = {nsLiteral} WHERE ID = {row.ID};");
+                    sql = newHeaderSql;
+                    parameters = new { Ns = row.N_S, TreasuryId = row.ID };
                 }
                 else
                 {
-                    batch.Append($"UPDATE dbo.DEED_HED SET DATE_S = {dateLiteral}, SHARH_S = N'{SqlText(sharhd)}', USER_NAME = N'{SqlText(row.USER_NAME)}', OKF = 1 WHERE NO_S = 5 AND N_S = {nsLiteral};");
+                    sql = existingHeaderSql;
+                    parameters = new
+                    {
+                        Ns = row.N_S,
+                        TreasuryId = row.ID,
+                        DateS = row.DATE,
+                        Sharh = BuildKhazSharh(row),
+                        // مثل کد قبلی، نبودِ نام کاربر به رشته خالی تبدیل می‌شود نه NULL.
+                        UserName = row.USER_NAME ?? string.Empty
+                    };
                 }
 
-                if (row.N_S != null)
-                {
-                    batch.Append($"DELETE FROM dbo.DEED_DTL WHERE (N_S = {nsLiteral});");
-                }
-
-                batch.Append(
-                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                    "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, " + nsLiteral + " AS Expr1, THES, ARZD, MHAZ_NO " +
-                    "FROM dbo.PGET_LST WHERE (ID = " + row.ID + ");");
-                batch.Append(
-                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                    "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, " + nsLiteral + " AS Expr1, FHES, ARZD, MHAZ_NO " +
-                    "FROM dbo.PGET_LST WHERE (ID = " + row.ID + ");");
-
-                if (!useExternal)
-                {
-                    batch.Append("COMMIT TRANSACTION;");
-                }
-
-                var sql = batch.ToString();
                 if (useExternal)
                 {
                     // تراکنش بیرونی پس از Deadlock قابل ادامه نیست، پس Retry نمی‌کنیم.
-                    cnnManager.ExecuteSqlCommand(sql);
+                    cnnManager.ExecuteSqlCommand(sql, parameters);
                 }
                 else
                 {
-                    ExecuteWithDeadlockRetry(() => cnnManager.ExecuteSqlCommand(sql));
+                    ExecuteWithDeadlockRetry(() => cnnManager.ExecuteSqlCommand(sql, parameters));
                 }
 
                 progressReporter.ReportOne();
