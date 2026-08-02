@@ -523,10 +523,12 @@ namespace AUTO_BAZ.Functions
 
                 // مهم: بخش‌های C1 تا C11 با هم و به‌صورت همزمان اجرا می‌شوند (MainWindow → Task.WhenAll)،
                 // و هر Iteration یک Connection لحظه‌ای می‌گیرد. اگر هر حلقه سهم بزرگی بردارد، مجموع
-                // Connection ها از سقف Pool (پیش‌فرض ADO.NET یعنی 100) رد می‌شود و خطای Timeout استخر اتصال می‌دهد.
-                // پس سهم هر حلقه حدود یک‌دوازدهم Pool در نظر گرفته می‌شود (۱۱ بخش + حاشیه اطمینان).
+                // Connection ها از سقف Pool (پیش‌فرض ADO.NET یعنی 100) رد می‌شود و Timeout استخر اتصال
+                // می‌دهد که کل آن بخش را با خطا متوقف می‌کند.
+                // سهم هر حلقه یک‌شانزدهم Pool است: با ۱۱ بخش همزمان حدود ۷۰ از ۱۰۰ مصرف می‌شود و
+                // برای کوئری‌های تکی سایر بخش‌ها هم حاشیه می‌ماند.
                 // اگر Max Pool Size در رشته اتصال بالاتر تنظیم شود، این سقف هم خودکار بالا می‌رود.
-                maxDegree = Math.Min(maxDegree, Math.Max(4, maxPoolSize / 12));
+                maxDegree = Math.Min(maxDegree, Math.Max(4, maxPoolSize / 16));
             }
 
             maxDegree = Math.Max(1, Math.Min(maxDegree, Math.Max(1, itemCount)));
@@ -1073,12 +1075,6 @@ namespace AUTO_BAZ.Functions
             long CreatesanadRet = default;
             long max_ns;
             Double BG;
-            object rss2 = null;
-            rss2 = dbms.DoGetDataSQL<double?>("SELECT Max(DEED_HED.BAYEG) AS MaxOfBG FROM DEED_HED").FirstOrDefault();
-            if (IsNull(rss2))
-            { BG = 100000000; }
-            else
-            { BG = (double)rss2 + 1; }
 
             object rss = null;
             using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
@@ -1090,6 +1086,15 @@ namespace AUTO_BAZ.Functions
                     //Fake Query for Lock Table
                     db.Execute("UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR", null, transaction);
                     //Fake Query for Lock Table
+
+                    // شماره بایگانی هم باید داخل همین تراکنش و پس از گرفتن قفل خوانده شود.
+                    // قبلاً بیرون از تراکنش و روی Connection دیگری خوانده می‌شد، پس دو فراخوانی
+                    // همزمان (مثلاً سند فروش و سند خزانه) می‌توانستند BAYEG یکسان بگیرند.
+                    object rss2 = db.Query<double?>("SELECT Max(DEED_HED.BAYEG) AS MaxOfBG FROM DEED_HED", null, transaction).FirstOrDefault();
+                    if (IsNull(rss2))
+                    { BG = 100000000; }
+                    else
+                    { BG = (double)rss2 + 1; }
 
                     //rss = db.Execute("INSERT INTO DEED_HED (N_S,DATE_S,SHARH_S,GHATEI,NO_S,OKF,USER_NAME) VALUES (0,0,0,0,0,0,0)", null, transaction);
                     rss = db.Query<double?>("SELECT Max(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED", null, transaction).FirstOrDefault();
@@ -1154,10 +1159,12 @@ namespace AUTO_BAZ.Functions
         /// <para>
         /// چرا لازم است: <see cref="Createsanad"/> برای هر سند یک تراکنش با
         /// <see cref="IsolationLevel.Serializable"/> باز می‌کند و با کوئری عمدی
-        /// «UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR» کل جدول DEED_HED را قفل می‌کند.
-        /// اگر این متد داخل یک حلقه‌ی Parallel صدا زده شود، همه‌ی Thread ها پشت همان قفل صف می‌کشند
-        /// و حلقه عملاً سریال (و به‌خاطر Lock Convoy حتی کندتر از سریال) اجرا می‌شود.
-        /// اینجا همه‌ی شماره‌ها فقط با «یک بار» گرفتن آن قفل رزرو می‌شوند.
+        /// «UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR» روی همان یک ردیف قفل انحصاری می‌گیرد؛
+        /// یعنی آن ردیف نقش یک Mutex سراسری را بازی می‌کند. به‌علاوه SELECT MAX(N_S)
+        /// در سطح Serializable روی انتهای ایندکس N_S قفل بازه‌ای می‌گیرد.
+        /// هر دو قفل تا Commit نگه داشته می‌شوند، پس اگر این متد داخل یک حلقه‌ی Parallel
+        /// صدا زده شود همه‌ی Thread ها پشت همان Mutex صف می‌کشند و حلقه عملاً سریال اجرا می‌شود.
+        /// اینجا همان قفل‌ها گرفته می‌شوند، ولی یک بار برای کل دسته به‌جای یک بار برای هر سند.
         /// </para>
         /// </summary>
         /// <returns>شماره سندهای رزرو شده، به همان ترتیب ورودی.</returns>
@@ -1196,8 +1203,11 @@ namespace AUTO_BAZ.Functions
                 db.Open();
                 using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                 {
-                    // همان قفل عمدی جدول که در Createsanad وجود دارد، تا اگر نسخه دیگری از برنامه
-                    // هم‌زمان مشغول ساخت سند بود شماره تکراری تولید نشود. تفاوت: یک بار برای کل دسته، نه به‌ازای هر سند.
+                    // دقیقاً همان قفل عمدی که در Createsanad وجود دارد و به همان ترتیب گرفته می‌شود
+                    // (اول این ردیف، بعد انتهای ایندکس N_S). یکسان بودنِ ترتیب مهم است: باعث می‌شود
+                    // این متد و Createsanad فقط پشت هم صف بکشند و با هم Deadlock نکنند.
+                    // نتیجه: حتی اگر بخش‌های دیگر یا نسخه دیگری از برنامه همزمان سند بسازند،
+                    // شماره تکراری تولید نمی‌شود. تفاوت: یک بار برای کل دسته، نه به‌ازای هر سند.
                     db.Execute("UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR", null, transaction, commandTimeout: 3600);
 
                     var maxNs = db.Query<double?>("SELECT MAX(N_S) FROM DEED_HED", null, transaction).FirstOrDefault();
@@ -3979,7 +3989,12 @@ namespace AUTO_BAZ.Functions
                 });
 
             //for (int EOFi = 0; EOFi < HFRST.Count; EOFi++)
-            var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+            // با تراکنش بیرونی همه‌ی دستورها روی «یک» Connection مشترک اجرا می‌شوند و
+            // استفاده همزمان چند Thread از یک SqlConnection مجاز نیست؛ پس در آن حالت سریال اجرا می‌کنیم.
+            // (فراخوانی فعلی از فرم خزانه فقط یک رکورد می‌فرستد، ولی این محافظ برای آینده لازم است.)
+            var dbParallelOptions = useExternal
+                ? new ParallelOptions { MaxDegreeOfParallelism = 1 }
+                : CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
 
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
