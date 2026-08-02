@@ -3610,7 +3610,7 @@ namespace AUTO_BAZ.Functions
                 }
             }
 
-            double progress = 0;
+            int completedItems = 0;
             MainWindow auto_run = null;
             if (InternalCalling)
             {
@@ -3622,59 +3622,60 @@ namespace AUTO_BAZ.Functions
                 }));
             }
 
-            var HFRST = cnnManager.SqlQuery<PGET_HED>($"SELECT * FROM dbo.PGET_HED WHERE (ID BETWEEN {fnum} AND {TNUM}) ORDER BY ID").ToList();
+            var HFRST = cnnManager.SqlQuery<PGET_HED>(
+                "SELECT * FROM dbo.PGET_HED WHERE ID BETWEEN @FromId AND @ToId ORDER BY ID",
+                new { FromId = fnum, ToId = TNUM }).ToList();
+
+            var duplicateTreasuryId = HFRST.GroupBy(item => item.ID).FirstOrDefault(group => group.Count() > 1);
+            if (duplicateTreasuryId != null)
+            {
+                throw new InvalidOperationException($"شماره خزانه {duplicateTreasuryId.Key} بیش از یک بار در PGET_HED ثبت شده است.");
+            }
+
+            var duplicateDocumentNumber = HFRST
+                .Where(item => !IsNull(item.N_S))
+                .GroupBy(item => item.N_S)
+                .FirstOrDefault(group => group.Count() > 1);
+            if (duplicateDocumentNumber != null)
+            {
+                throw new InvalidOperationException(
+                    $"شماره سند {duplicateDocumentNumber.Key} به چند سند خزانه متصل است؛ بازسازی موازی برای جلوگیری از هم‌پوشانی متوقف شد.");
+            }
 
             LogWriter.WriteLog($"شروع باز سازي سند های خزانه از سند شماره :{fnum} تا سند شماره :{TNUM}");
 
             //for (int EOFi = 0; EOFi < HFRST.Count; EOFi++)
-            var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+            // SqlConnection/SqlTransaction خارجی اجرای هم‌زمان چند Command را پشتیبانی نمی‌کند.
+            var dbParallelOptions = useExternal
+                ? new ParallelOptions { MaxDegreeOfParallelism = 1 }
+                : CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+            var documentNumbers = new double?[HFRST.Count];
 
             ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, EOFi =>
             {
 
                 string sharhd;
                 string SHRH;
-                double max_ns;
-
-                if (InternalCalling && auto_run != null)
-                {
-                    auto_run.Dispatcher.Invoke(new Action(() =>
-                    {
-                        progress++;
-                        auto_run.PRGR_C3.Value = (progress / (double)HFRST.Count) * 100.0;
-                        auto_run.UpdateOverallProgressBar();
-                    }));
-                }
 
                 sharhd = "خزانه داري شماره " + HFRST[EOFi].ID + " مورخ " + Strings.Format(HFRST[EOFi].DATE, "####/##/##");
 
                 if (IsNull(HFRST[EOFi]?.N_S))
                 {
-                    max_ns = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
+                    var max_ns = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
                     HFRST[EOFi].N_S = max_ns;
-                    string _where_HFRST = $" WHERE (ID BETWEEN {fnum} AND {TNUM})";
-                    cnnManager.ExecuteSqlCommand($"UPDATE dbo.PGET_HED SET N_S = {HFRST[EOFi].N_S} {_where_HFRST}");
-
-                    SANAD_NUMBER = max_ns;
                 }
                 else
                 {
-                    max_ns = (double)HFRST[EOFi].N_S;
                     SHRH = "خزانه داري شماره " + HFRST[EOFi].ID + " مورخ " + Strings.Format(HFRST[EOFi].DATE, "####/##/##");
-                    var SHRST_0 = cnnManager.SqlQuery<DEED_HED>($"SELECT * FROM DEED_HED WHERE NO_S = 5 AND N_S = {HFRST[EOFi].N_S}").ToList();
-                    string _where_HFRST = $" WHERE (ID BETWEEN {fnum} AND {TNUM})";
+                    var SHRST_0 = cnnManager.SqlQuery<DEED_HED>(
+                        "SELECT * FROM DEED_HED WHERE NO_S = @DocumentType AND N_S = @DocumentNumber",
+                        new { DocumentType = 5, DocumentNumber = HFRST[EOFi].N_S }).ToList();
                     if (SHRST_0.Count == 0)
                     {
                         HFRST[EOFi].N_S = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
-                        cnnManager.ExecuteSqlCommand($"UPDATE dbo.PGET_HED SET N_S = {HFRST[EOFi].N_S} {_where_HFRST}");
-
-                        SANAD_NUMBER = HFRST[EOFi].N_S;
                     }
                     else
                     {
-                        SANAD_NUMBER = HFRST[EOFi].N_S;
-
-                        string _where_SHRST_0 = $" NO_S = 5 AND N_S = {HFRST[EOFi].N_S} ";
                         var header = SHRST_0.FirstOrDefault();
                         if (header != null)
                         {
@@ -3682,31 +3683,77 @@ namespace AUTO_BAZ.Functions
                             header.SHARH_S = SHRH;
                             header.USER_NAME = HFRST[EOFi].USER_NAME;
                             header.OKF = true;
-                            cnnManager.ExecuteSqlCommand(
-                                @$"UPDATE dbo.DEED_HED SET 
-                                DATE_S = {HFRST[EOFi].DATE},
-                                SHARH_S = N'{SHRH}',
-                                USER_NAME = N'{HFRST[EOFi].USER_NAME}',
-                                OKF = 1
-                              WHERE {_where_SHRST_0}");
+                            cnnManager.ExecuteSqlCommand(@"UPDATE dbo.DEED_HED SET
+                                    DATE_S = @DocumentDate,
+                                    SHARH_S = @Description,
+                                    USER_NAME = @UserName,
+                                    OKF = 1
+                                WHERE NO_S = @DocumentType AND N_S = @DocumentNumber",
+                                new
+                                {
+                                    DocumentDate = HFRST[EOFi].DATE,
+                                    Description = SHRH,
+                                    UserName = HFRST[EOFi].USER_NAME,
+                                    DocumentType = 5,
+                                    DocumentNumber = HFRST[EOFi].N_S
+                                });
                         }
                     }
                 }
 
-                if (!IsNull(HFRST[EOFi].N_S))
-                {
-                    cnnManager.ExecuteSqlCommand("DELETE FROM dbo.DEED_DTL WHERE (N_S = " + HFRST[EOFi].N_S + ")");
-                }
+                // هر Iteration فقط رکورد خزانه جاری را متصل می‌کند. شرط بازه‌ای قبلی تمام
+                // PGET_HED را در هر دور به‌روزرسانی می‌کرد و باعث خرابی N_S و قفل گسترده می‌شد.
+                // سه فرمان جزئیات نیز در یک batch اجرا می‌شوند تا تعداد round-tripها کاهش یابد.
+                var transactionPrefix = useExternal ? string.Empty : "SET XACT_ABORT ON; BEGIN TRANSACTION;";
+                var transactionSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
+                cnnManager.ExecuteSqlCommand(transactionPrefix + @"
+                    UPDATE dbo.PGET_HED
+                    SET N_S = @DocumentNumber
+                    WHERE ID = @TreasuryId;
 
-                cnnManager.ExecuteSqlCommand(
-                 "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                    "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, THES, ARZD, MHAZ_NO " +
-                    "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
-                cnnManager.ExecuteSqlCommand(
-                 "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                    "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, FHES, ARZD, MHAZ_NO " +
-                    "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
+                    DELETE FROM dbo.DEED_DTL
+                    WHERE N_S = @DocumentNumber;
+
+                    INSERT INTO dbo.DEED_DTL
+                        (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO)
+                    SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK,
+                           @DocumentNumber, THES, ARZD, MHAZ_NO
+                    FROM dbo.PGET_LST
+                    WHERE ID = @TreasuryId;
+
+                    INSERT INTO dbo.DEED_DTL
+                        (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO)
+                    SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK,
+                           @DocumentNumber, FHES, ARZD, MHAZ_NO
+                    FROM dbo.PGET_LST
+                    WHERE ID = @TreasuryId;
+                    " + transactionSuffix,
+                    new
+                    {
+                        DocumentNumber = HFRST[EOFi].N_S,
+                        TreasuryId = HFRST[EOFi].ID
+                    });
+                documentNumbers[EOFi] = HFRST[EOFi].N_S;
+
+                if (InternalCalling && auto_run != null)
+                {
+                    var completed = Interlocked.Increment(ref completedItems);
+                    var reportInterval = Math.Max(1, HFRST.Count / 100);
+                    if (completed == HFRST.Count || completed % reportInterval == 0)
+                    {
+                        auto_run.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            var percentage = (completed / (double)HFRST.Count) * 100.0;
+                            auto_run.PRGR_C3.Value = Math.Max(auto_run.PRGR_C3.Value, percentage);
+                            auto_run.UpdateOverallProgressBar();
+                        }));
+                    }
+                }
             });
+
+            // در اجرای موازی، آخرین Thread تمام‌شده الزاماً آخرین سند بازه نیست.
+            // نتیجه بر اساس ترتیب IDهای خوانده‌شده تعیین می‌شود تا مقدار بازگشتی قطعی باشد.
+            SANAD_NUMBER = documentNumbers.LastOrDefault(number => number.HasValue);
 
             if (!useExternal && !cnnManager.OnceStartCloseQuery)
             {
@@ -7158,4 +7205,3 @@ namespace AUTO_BAZ.Functions
         //AUTO_BAZ_FUNCTIONS ---------------------------------------------------------------------------------------------------------
     }
 }
-
