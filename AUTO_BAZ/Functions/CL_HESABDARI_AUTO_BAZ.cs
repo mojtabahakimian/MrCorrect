@@ -3977,46 +3977,6 @@ namespace AUTO_BAZ.Functions
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
-            // مرحله ۲-ب: پاک کردن یکجای ردیف‌های قدیمی سندهایی که هدرشان از قبل وجود دارد.
-            //
-            // چرا یکجا و نه داخل حلقه: جدول DEED_DTL بزرگ است (بیش از یک میلیون ردیف) و
-            // کلید خوشه‌ای آن id است، نه N_S. اگر روی N_S ایندکسی نباشد، هر
-            // «DELETE ... WHERE N_S = x» یعنی خواندن کل جدول. با هزار سند، این یعنی
-            // میلیاردها بار خواندن ردیف — گران‌تر از تمام کارهای دیگر روی هم.
-            // با حذف دسته‌ای، تعداد اسکن‌ها از «تعداد سندها» به «تعداد دسته‌ها» می‌رسد.
-            //
-            // سندهای تازه لازم نیست پاک شوند: شماره‌شان از MAX(N_S)+1 آمده و قطعاً ردیفی ندارند.
-            //
-            // پیامد پذیرفته‌شده: اگر اجرا بین این مرحله و پایان حلقه شکست بخورد، آن سندها
-            // موقتاً بدون ردیف می‌مانند. اجرای مجدد کاملشان می‌کند، چون هدر و شماره سند سرجایشان است.
-            var numbersToClear = new List<double>();
-            for (int i = 0; i < HFRST.Count; i++)
-            {
-                if (!needsNewHeader[i] && HFRST[i]?.N_S != null)
-                {
-                    numbersToClear.Add(HFRST[i].N_S.Value);
-                }
-            }
-
-            // ۵۰۰ سند در هر دستور: با میانگین چند ردیف برای هر سند، تعداد قفل‌ها زیر آستانه‌ی
-            // Lock Escalation سرور (۵۰۰۰) می‌ماند تا کل جدول برای بقیه قفل نشود.
-            const int deleteChunkSize = 500;
-            for (int offset = 0; offset < numbersToClear.Count; offset += deleteChunkSize)
-            {
-                var inList = string.Join(",", numbersToClear.Skip(offset).Take(deleteChunkSize).Select(v => SqlNum(v)));
-                var deleteSql = $"DELETE FROM dbo.DEED_DTL WHERE N_S IN ({inList});";
-
-                if (useExternal)
-                {
-                    cnnManager.ExecuteSqlCommand(deleteSql);
-                }
-                else
-                {
-                    ExecuteWithDeadlockRetry(() => cnnManager.ExecuteSqlCommand(deleteSql));
-                }
-            }
-
-            // ───────────────────────────────────────────────────────────────────────────────
             // مرحله ۳ (موازی): کار هر سند کاملاً مستقل از بقیه است و هیچ قفل سراسری ندارد.
             // ───────────────────────────────────────────────────────────────────────────────
             var progressReporter = new ThrottledProgressReporter(
@@ -4069,12 +4029,20 @@ namespace AUTO_BAZ.Functions
                 "UPDATE dbo.PGET_HED SET N_S = @Ns WHERE ID = @TreasuryId;" +
                 detailInsertSql + txSuffix;
 
-            // حالت ب) هدر سند از قبل وجود دارد؛ فقط سربرگ به‌روز می‌شود.
-            // ردیف‌های قدیمی‌اش در مرحله ۲-ب یکجا پاک شده‌اند.
+            // حالت ب) هدر سند از قبل وجود دارد؛ سربرگ به‌روز و ردیف‌های قبلی‌اش بازسازی می‌شوند.
+            //
+            // DELETE عمداً همین‌جا داخل حلقه‌ی موازی است و نه یکجا قبل از حلقه:
+            // روی DEED_DTL ایندکس N_SI روی ستون N_S وجود دارد، پس پیدا کردن ردیف‌ها ارزان است.
+            // هزینه‌ی واقعی حذف، نگهداری ۷ ایندکس این جدول است — و آن هزینه چه یکجا انجام شود
+            // چه پراکنده، مقدارش یکسان است. پس بهتر است بین Thread ها پخش شود تا اینکه
+            // سریال و پیش از حلقه انجام شود. ضمناً این‌طور DELETE و INSERT دوباره در یک
+            // تراکنش قرار می‌گیرند و سند هیچ‌وقت بی‌ردیف یا نیمه‌کاره دیده نمی‌شود.
+            //
             // توجه: BAYEG و base دست نمی‌خورند — شماره بایگانی و شناسه رهگیری مالیاتی باید ثابت بمانند.
             var existingHeaderSql = txPrefix +
                 "UPDATE dbo.DEED_HED SET DATE_S = @DateS, SHARH_S = @Sharh, USER_NAME = @UserName, OKF = 1 " +
                 "WHERE NO_S = 5 AND N_S = @Ns;" +
+                "DELETE FROM dbo.DEED_DTL WHERE N_S = @Ns;" +
                 detailInsertSql + txSuffix;
 
             ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, EOFi =>
