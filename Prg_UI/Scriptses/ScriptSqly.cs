@@ -7498,7 +7498,13 @@ BEGIN
         -- ولی اجراهایی که با نسخه‌های قدیمی‌تر محاسبه شده‌اند ریل اسمی را
         -- پرداخته‌اند. با قاعده‌ی ثابت، سندِ آن ماه‌ها به اندازه‌ی فاصله‌ی دو ریل
         -- غلط می‌شد — اختلافی که هم‌جنسِ گِردکردن نیست و نباید جذب شود.
-        CREATE TABLE #Rail (EMP_ID INT PRIMARY KEY, DROP_CODE NVARCHAR(30) NULL);
+        -- جدول موقت در tempdb ساخته می‌شود و در نصب‌هایی که collation دیتابیس
+        -- حسابداری با tempdb فرق دارد، مقایسه DROP_CODE با ITEM_CODE_SNAP بدون
+        -- COLLATE صریح با خطای 468 متوقف می‌شود.
+        CREATE TABLE #Rail (
+            EMP_ID INT PRIMARY KEY,
+            DROP_CODE NVARCHAR(30) COLLATE database_default NULL
+        );
 
         ;WITH Sums AS (
             SELECT D.EMP_ID,
@@ -7548,7 +7554,8 @@ BEGIN
         WHERE D.RUN_ID = @RUN_ID
           AND ISNULL(D.ITEM_TYPE_SNAP, I.ITEM_TYPE) IN (1, 2)
           AND D.AMOUNT <> 0
-          AND ISNULL(D.ITEM_CODE_SNAP, I.ITEM_CODE) <> ISNULL(R.DROP_CODE, N'');
+          AND ISNULL(D.ITEM_CODE_SNAP, I.ITEM_CODE) COLLATE database_default
+              <> ISNULL(R.DROP_CODE, N'') COLLATE database_default;
 
         -- تعدیلِ گِردکردنِ خالص جزو هیچ قلمی نیست. ستون ROUNDING_ADJ مبنا نیست
         -- چون در اجراهای قدیمی‌تر NULL است؛ ضمناً بسته به نسخه‌ی موتور، گِردکردن
