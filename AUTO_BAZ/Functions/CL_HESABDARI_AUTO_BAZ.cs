@@ -30,6 +30,47 @@ namespace AUTO_BAZ.Functions
 
         public static bool UseSmartThrottlingByDefault { get; set; } = false;
 
+        #region LOOKUP_CACHE
+        // ───────────────────────────────────────────────────────────────────────────────
+        // کش جستجوهای تکراری.
+        //
+        // چرا لازم است: توابع کمکی مثل ISHESAB، GETTAFNAME و GETF_DEPART داخل حلقه‌های
+        // بازسازی و به‌ازای هر قلم کالا صدا زده می‌شوند و هر بار یک رفت‌وبرگشت کامل به
+        // SQL Server می‌زنند — در حالی که تقریباً همیشه همان جواب قبلی را برمی‌گردانند.
+        // مثلاً GETF_DEPART(20) هزاران بار صدا زده می‌شود و همیشه یک رشته می‌دهد.
+        // در یک فاکتور با ۱۰ قلم کالا، این توابع به‌تنهایی ده‌ها رفت‌وبرگشت تولید می‌کنند.
+        //
+        // ایمنی: هر سه «خواندن خالص» از جدول‌های مرجع هستند که در طول یک اجرای بازسازی
+        // تغییر نمی‌کنند — به‌جز حساب‌هایی که خود CREATHES می‌سازد و بلافاصله کش را
+        // به‌روز می‌کند. ConcurrentDictionary برای استفاده‌ی همزمان چند Thread امن است.
+        //
+        // ⚠️ در ابتدای هر اجرای بازسازی حتماً ClearLookupCaches() صدا زده شود تا اگر
+        //    کاربر بین دو اجرا حسابی اضافه کرده باشد، داده‌ی کهنه نماند.
+        // ───────────────────────────────────────────────────────────────────────────────
+
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(int Kol, int Moin, int Taf), bool> _existingAccounts = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _tafNameCache = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, string> _departNameCache = new();
+
+        /// <summary>
+        /// پاک کردن همه‌ی کش‌های جستجو. در ابتدای هر اجرای بازسازی صدا زده شود.
+        /// </summary>
+        public static void ClearLookupCaches()
+        {
+            _existingAccounts.Clear();
+            _tafNameCache.Clear();
+            _departNameCache.Clear();
+        }
+
+        /// <summary>
+        /// ثبت اینکه یک حساب تفصیلی قطعاً وجود دارد (بعد از ساخت موفق آن).
+        /// </summary>
+        private static void MarkAccountExists(int kol, int moin, int taf)
+        {
+            _existingAccounts[(kol, moin, taf)] = true;
+        }
+        #endregion
+
         #region Custom_Modelses
         public class QUERY_MODEL6
         {
@@ -913,6 +954,13 @@ namespace AUTO_BAZ.Functions
 
         public static string GETTAFNAME(string HES)
         {
+            // نام حساب در طول یک اجرای بازسازی تغییر نمی‌کند، ولی این تابع
+            // چند بار برای هر فاکتور (در ساخت شرح‌ها) صدا زده می‌شود.
+            if (HES != null && _tafNameCache.TryGetValue(HES, out var cachedName))
+            {
+                return cachedName;
+            }
+
             string returnValue = "";
             var RRST = dbms.DoGetDataSQL<string>("SELECT     NAME FROM dbo.CUST_HESAB WHERE     (hes = N'" + HES + "')").ToList();
             if (RRST.Count > 0)
@@ -932,6 +980,12 @@ namespace AUTO_BAZ.Functions
             {
                 returnValue = " ";
             }
+
+            if (HES != null)
+            {
+                _tafNameCache[HES] = returnValue;
+            }
+
             return returnValue;
         }
 
@@ -1255,7 +1309,6 @@ namespace AUTO_BAZ.Functions
             double? SANAD_NUMBER = null;
             bool IsSuccessfully = true;
 
-            double progress = 0;
             MainWindow auto_run = null;
             if (InternalCalling)
             {
@@ -1268,15 +1321,44 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("شروع بازسازی سند فروش");
             //var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF FROM dbo.DEED_HED").ToList();
             var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT  * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG = 13) ORDER BY NUMBER").ToList();
-            string SHSH = string.Empty;
 
+            // گزارش پیشرفت غیرمسدودکننده.
+            // قبلاً برای هر فاکتور یک Dispatcher.Invoke همگام صدا زده می‌شد؛ چون فقط یک Thread
+            // اجازه‌ی دسترسی به رابط کاربری دارد، همه‌ی Threadهای حلقه پشت آن صف می‌کشیدند و
+            // موازی‌سازی عملاً از بین می‌رفت. ضمناً progress++ اتمیک نبود و عدد گم می‌کرد.
+            var progressReporter = new ThrottledProgressReporter(
+                HFRST.Count,
+                InternalCalling && auto_run != null ? auto_run.Dispatcher : null,
+                value =>
+                {
+                    // Math.Max لازم است: گزارش‌ها با BeginInvoke صف می‌شوند و ترتیب اجرایشان
+                    // تضمین‌شده نیست؛ بدون آن نوار پیشرفت گاهی به عقب می‌پرد.
+                    auto_run.PRGR_C1.Value = Math.Max(auto_run.PRGR_C1.Value, value);
+                    auto_run.LBL_C1.Content = $"{auto_run.PRGR_C1.Value:F2}%";
+                    auto_run.UpdateOverallProgressBar();
+                });
+
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
 
             try
             {
                 //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++)
                 var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+
+                LogWriter.WriteLog(
+                    $"سند فروش - تعداد رکورد: {HFRST.Count} | موازی: {Generaly.UseParallelProcessing} | " +
+                    $"MaxDegreeOfParallelism: {dbParallelOptions.MaxDegreeOfParallelism}");
+
                 ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
                 {
+                    observedThreads.TryAdd(Environment.CurrentManagedThreadId, 0);
+
+                    // ⚠️ SHSH قبلاً بیرون از حلقه تعریف شده بود و بین همه‌ی Threadها مشترک بود.
+                    // یعنی Thread دوم می‌توانست شرح فاکتور خودش را روی آن بنویسد و Thread اول
+                    // همان مقدار غلط را به Createsanad بدهد → شرح سند حسابداری اشتباه.
+                    // حالا برای هر فاکتور محلی است.
+                    string SHSH = string.Empty;
                     double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
                     string shart;
                     double MAVAD;
@@ -1288,17 +1370,6 @@ namespace AUTO_BAZ.Functions
                     var TAMIR = default(string);
                     string PER;
                     long permab;
-                    if (InternalCalling)
-                    {
-                        auto_run.Dispatcher.Invoke(new Action(() =>
-                        {
-                            progress++;
-                            auto_run.PRGR_C1.Value = progress / ((double)HFRST.Count) * 100.0; // Update the progress bar
-                            auto_run.LBL_C1.Content = $"{progress:F2}%";
-                            auto_run.UpdateOverallProgressBar();
-                        }));
-                    }
-
                     if (HFRST[HFRST_EOF]?.CUST_NO == "213-1-429") //213-1-429
                     {
 
@@ -2429,6 +2500,9 @@ namespace AUTO_BAZ.Functions
                     }
                     ;
 
+                    // گزارش پیشرفت در «پایان» کار هر فاکتور زده می‌شود، نه در ابتدای آن.
+                    // قبلاً در ابتدا بود و نوار پیشرفت زودتر از واقعیت جلو می‌رفت.
+                    progressReporter.ReportOne();
                 });
                 //}
             }
@@ -2446,7 +2520,12 @@ namespace AUTO_BAZ.Functions
                 IsSuccessfully = false;
             }
 
-            LogWriter.WriteLog("پایان بازسازی سند فروش");
+            stopwatch.Stop();
+            progressReporter.Complete();
+
+            LogWriter.WriteLog(
+                $"پایان بازسازی سند فروش - {HFRST.Count} رکورد در {stopwatch.Elapsed.TotalSeconds:F1} ثانیه " +
+                $"با {observedThreads.Count} Thread همزمان");
 
             return (SANAD_NUMBER, IsSuccessfully);
         }
@@ -2669,6 +2748,9 @@ namespace AUTO_BAZ.Functions
                 try
                 {
                     dbms.DoExecuteSQL(sql, new { Kol = kolValue, Moin = moinValue, Taf = tafValue, Name = accountName });
+
+                    // حساب قطعاً ساخته شد؛ ثبت در کش تا ISHESAB بعدی دوباره کوئری نزند.
+                    MarkAccountExists(kolValue, moinValue, tafValue);
                     return;
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when ((ex.Number == 2601 || ex.Number == 2627) && ex.Message.Contains("IX_TDETA_HES_NAME"))
@@ -2709,6 +2791,14 @@ namespace AUTO_BAZ.Functions
         [System.Diagnostics.DebuggerStepThrough]
         public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
         {
+            // فقط پاسخ مثبت کش می‌شود: حسابی که یک بار دیده شده هرگز در طول اجرا حذف نمی‌شود.
+            // پاسخ منفی کش نمی‌شود چون ممکن است CREATHES بلافاصله بعدش آن حساب را بسازد.
+            var key = (Kol: Convert.ToInt32(KOL ?? 0), Moin: Convert.ToInt32(MOIN ?? 0), Taf: Convert.ToInt32(taf ?? 0));
+            if (_existingAccounts.ContainsKey(key))
+            {
+                return true;
+            }
+
             bool tempISHESAB = false;
             var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf).ToList();
             if (rst.Count == 0)
@@ -2718,12 +2808,21 @@ namespace AUTO_BAZ.Functions
             else
             {
                 tempISHESAB = true;
+                MarkAccountExists(key.Kol, key.Moin, key.Taf);
             }
 
             return tempISHESAB;
         }
         public static string GETF_DEPART(long? DEPART)
         {
+            // نام دپارتمان در طول اجرا ثابت است، ولی این تابع به‌ازای هر ردیف سند
+            // صدا زده می‌شود و هر بار یک یا دو کوئری می‌زند. تعداد دپارتمان‌ها هم کم است.
+            var cacheKey = DEPART ?? long.MinValue;
+            if (_departNameCache.TryGetValue(cacheKey, out var cachedDepart))
+            {
+                return cachedDepart;
+            }
+
             string tempGETDEPART = null;
 
             if (DEPART != null)
@@ -2742,6 +2841,11 @@ namespace AUTO_BAZ.Functions
                 {
                     tempGETDEPART = rst2.DEPNAME;
                 }
+            }
+
+            if (tempGETDEPART != null)
+            {
+                _departNameCache[cacheKey] = tempGETDEPART;
             }
 
             return tempGETDEPART;

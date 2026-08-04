@@ -675,6 +675,10 @@ namespace AUTO_BAZ
                         StillMethodIsWorking = true;
                     }));
 
+                    // کش جستجوهای تکراری (نام حساب، نام دپارتمان، وجود حساب تفصیلی) برای هر اجرا
+                    // از نو ساخته می‌شود تا اگر کاربر بین دو اجرا حسابی اضافه کرده باشد، داده کهنه نماند.
+                    CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
+
                     if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
                     if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
 
