@@ -981,7 +981,10 @@ namespace AUTO_BAZ.Functions
                 returnValue = " ";
             }
 
-            if (HES != null)
+            // فقط پاسخ قطعی کش می‌شود. اگر حساب پیدا نشد (" ")، کش نمی‌کنیم؛
+            // چون همین‌جا در ادامه CREATHES ممکن است همان حساب را بسازد و
+            // پاسخ کهنه‌ی «پیدا نشد» تا پایان اجرا باقی بماند.
+            if (HES != null && returnValue != " ")
             {
                 _tafNameCache[HES] = returnValue;
             }
