@@ -48,9 +48,21 @@ namespace AUTO_BAZ.Functions
         //    کاربر بین دو اجرا حسابی اضافه کرده باشد، داده‌ی کهنه نماند.
         // ───────────────────────────────────────────────────────────────────────────────
 
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(int Kol, int Moin, int Taf), bool> _existingAccounts = new();
+        // کلید کش عمداً double است و نه int: صداکننده‌های ISHESAB مقادیری مثل
+        // Convert.ToInt64(CODE) می‌فرستند و STUF_DEF.CODE از نوع nvarchar(15) است،
+        // پس می‌تواند از محدوده‌ی int بیرون بزند. Convert.ToInt32 روی چنین مقداری
+        // OverflowException می‌داد — خطایی که قبلاً وجود نداشت.
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(double Kol, double Moin, double Taf), bool> _existingAccounts = new();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _tafNameCache = new();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, string> _departNameCache = new();
+
+        /// <summary>
+        /// کش فقط در جریان «بازسازی دسته‌ای» فعال می‌شود.
+        /// پیش‌فرض خاموش است چون فرم‌های برنامه‌ی اصلی هم همین توابع را صدا می‌زنند و
+        /// آنجا کاربر می‌تواند وسط کار نام حساب یا دپارتمان را عوض کند؛ کش ماندگار
+        /// باعث می‌شد تا پایان عمر برنامه مقدار کهنه برگردد.
+        /// </summary>
+        public static bool LookupCacheEnabled { get; set; } = false;
 
         /// <summary>
         /// پاک کردن همه‌ی کش‌های جستجو. در ابتدای هر اجرای بازسازی صدا زده شود.
@@ -65,9 +77,12 @@ namespace AUTO_BAZ.Functions
         /// <summary>
         /// ثبت اینکه یک حساب تفصیلی قطعاً وجود دارد (بعد از ساخت موفق آن).
         /// </summary>
-        private static void MarkAccountExists(int kol, int moin, int taf)
+        private static void MarkAccountExists(double kol, double moin, double taf)
         {
-            _existingAccounts[(kol, moin, taf)] = true;
+            if (LookupCacheEnabled)
+            {
+                _existingAccounts[(kol, moin, taf)] = true;
+            }
         }
         #endregion
 
@@ -956,7 +971,7 @@ namespace AUTO_BAZ.Functions
         {
             // نام حساب در طول یک اجرای بازسازی تغییر نمی‌کند، ولی این تابع
             // چند بار برای هر فاکتور (در ساخت شرح‌ها) صدا زده می‌شود.
-            if (HES != null && _tafNameCache.TryGetValue(HES, out var cachedName))
+            if (LookupCacheEnabled && HES != null && _tafNameCache.TryGetValue(HES, out var cachedName))
             {
                 return cachedName;
             }
@@ -984,7 +999,7 @@ namespace AUTO_BAZ.Functions
             // فقط پاسخ قطعی کش می‌شود. اگر حساب پیدا نشد (" ")، کش نمی‌کنیم؛
             // چون همین‌جا در ادامه CREATHES ممکن است همان حساب را بسازد و
             // پاسخ کهنه‌ی «پیدا نشد» تا پایان اجرا باقی بماند.
-            if (HES != null && returnValue != " ")
+            if (LookupCacheEnabled && HES != null && returnValue != " ")
             {
                 _tafNameCache[HES] = returnValue;
             }
@@ -2796,8 +2811,8 @@ namespace AUTO_BAZ.Functions
         {
             // فقط پاسخ مثبت کش می‌شود: حسابی که یک بار دیده شده هرگز در طول اجرا حذف نمی‌شود.
             // پاسخ منفی کش نمی‌شود چون ممکن است CREATHES بلافاصله بعدش آن حساب را بسازد.
-            var key = (Kol: Convert.ToInt32(KOL ?? 0), Moin: Convert.ToInt32(MOIN ?? 0), Taf: Convert.ToInt32(taf ?? 0));
-            if (_existingAccounts.ContainsKey(key))
+            var key = (Kol: KOL ?? 0d, Moin: MOIN ?? 0d, Taf: taf ?? 0d);
+            if (LookupCacheEnabled && _existingAccounts.ContainsKey(key))
             {
                 return true;
             }
@@ -2821,7 +2836,7 @@ namespace AUTO_BAZ.Functions
             // نام دپارتمان در طول اجرا ثابت است، ولی این تابع به‌ازای هر ردیف سند
             // صدا زده می‌شود و هر بار یک یا دو کوئری می‌زند. تعداد دپارتمان‌ها هم کم است.
             var cacheKey = DEPART ?? long.MinValue;
-            if (_departNameCache.TryGetValue(cacheKey, out var cachedDepart))
+            if (LookupCacheEnabled && _departNameCache.TryGetValue(cacheKey, out var cachedDepart))
             {
                 return cachedDepart;
             }
@@ -2846,7 +2861,7 @@ namespace AUTO_BAZ.Functions
                 }
             }
 
-            if (tempGETDEPART != null)
+            if (LookupCacheEnabled && tempGETDEPART != null)
             {
                 _departNameCache[cacheKey] = tempGETDEPART;
             }
