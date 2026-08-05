@@ -182,7 +182,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
     SELECT
         p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
         p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK,
-        p.MHAZ_NO, p.IDH, p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2,
+        p.MHAZ_NO, p.IDH, p.FHES, p.THES, p.ARZD, p.ARZKIND2, p.FHES_T2, p.THES_T2,
         p.FHES_T3, p.THES_T3, p.FHES_T4, p.THES_T4, p.CRT, p.UID,
         CAST(CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
         cf.NAME AS NAME_FHES,
@@ -199,7 +199,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
     SELECT
         p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T,
         p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK,
-        p.MHAZ_NO, p.IDH, p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2,
+        p.MHAZ_NO, p.IDH, p.FHES, p.THES, p.ARZD, p.ARZKIND2, p.FHES_T2, p.THES_T2,
         p.FHES_T3, p.THES_T3, p.FHES_T4, p.THES_T4, p.CRT, p.UID,
         CAST(CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS HasAttachment
     FROM dbo.PGET_LST AS p WITH (NOLOCK)
@@ -210,6 +210,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         UniversControl universControl = new UniversControl();
+
+        //حساب ارزی فعال است (تنظیمات شماره 14)
+        private static bool ARZ_IS_ACTIVE => Strings.Mid(Baseknow.OPTIONSS, 14, 1) == "5";
 
         private bool _newrecord = false;
         public bool NewRecord
@@ -480,14 +483,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //DataGrid SUB EVETNS LOADINGS:
             #region SUB_LOADING
             //Check Matter
-            if (Strings.Mid(Baseknow.OPTIONSS, 14, 1) == "5")
+            //حساب ارزی : نمایش ستون های نرخ ارز و نوع ارز
+            if (ARZ_IS_ACTIVE)
             {
                 this.aRZDColumn.Visibility = Visibility.Visible;
-                //  this.aRZDColumn.ColumnWidth = 600;
+                this.aRZKIND2Column.Visibility = Visibility.Visible;
             }
             else
             {
                 this.aRZDColumn.Visibility = Visibility.Hidden;
+                this.aRZKIND2Column.Visibility = Visibility.Hidden;
             }
             CL_HESABDARI.SETSECURITYSUB(PGET_LST_SUB, "PGET_HED");
             PLUS = false;
@@ -506,16 +511,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             #endregion
 
             #region SUB_LOAD
-            if (Strings.Mid(Baseknow.OPTIONSS, 14, 1) == "5")
-            {
-                //this.ARZD.ColumnHidden = false;
-                this.aRZDColumn.Visibility = Visibility.Hidden;
-                this.aRZDColumn.Width = 600;
-            }
-            else
-            {
-                this.aRZDColumn.Width = 0;
-            }
             CL_HESABDARI.SETSECURITYSUB(PGET_LST_SUB, "PGET_HED");
             PLUS = false;
 
@@ -1243,6 +1238,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             mHAZ_NOColumn.DisplayMemberPath = "MHAZNAME";
             mHAZ_NOColumn.SelectedValuePath = "MHAZ_NO";
 
+            //نوع ارز
+            if (ARZ_IS_ACTIVE)
+            {
+                aRZKIND2Column.ItemsSource = dbms.DoGetDataSQL<TCOD_ARZ>("SELECT ID, Code, Title, ISOCode, (ISOCode + N' - ' + Title + N' - ' + CountryName) AS ARZCOUNTRY, CRT, UID FROM dbo.[TCOD_ARZ]").ToList();
+                aRZKIND2Column.DisplayMemberPath = "ARZCOUNTRY";
+                aRZKIND2Column.SelectedValuePath = "ID";
+            }
+
         }
 
         private void BTN_ATTACH_Click(object sender, RoutedEventArgs e)
@@ -1635,13 +1638,13 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             {
                 if (Strings.Mid(Baseknow.OPTIONSS, 55, 1) == "5")
                 {
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD,ARZKIND2) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD,ARZKIND2 FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD,ARZKIND2) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, LEFT(SHARH + ' - ' + '" + CL_HESABDARI.GETDEPART(Convert.ToInt64(DEPATMAN.SelectedValue)) + "',100), MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD,ARZKIND2 FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
                 }
                 else
                 {
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
-                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES,ARZD,ARZKIND2) SELECT     THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, THES,ARZD,ARZKIND2 FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
+                    dbms.DoExecuteSQL("INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES,ARZD,ARZKIND2) SELECT     FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK," + N_S.Text + " AS Expr1, FHES,ARZD,ARZKIND2 FROM dbo.PGET_LST WHERE  (ID = " + ID.Text + ")");
                 }
             }
             catch (Exception)
@@ -3946,6 +3949,20 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
             }
 
+            //نوع ارز
+            if (e.Column.SortMemberPath == "ARZKIND2")
+            {
+                var ARZKIND2_COMBOBOX = (e.EditingElement as ComboBox);
+                if (ARZKIND2_COMBOBOX?.SelectedValue is not null)
+                {
+                    CURRENT_ITMES_ROW.ARZKIND2 = Convert.ToInt64(ARZKIND2_COMBOBOX.SelectedValue);
+                }
+                else
+                {
+                    CURRENT_ITMES_ROW.ARZKIND2 = null;
+                }
+            }
+
             //شرح
             if (e.Column.SortMemberPath == "SHARH")
             {
@@ -4554,10 +4571,22 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     ErrosMessages.Add(new MsgModel { MessageText_U = "مرکز هزینه انتخاب شده معتبر نیست." });
                 }
             }
-            //if (final_lst.ARZD is null)
-            //{
-            //    ErrosMessages.Add(new MsgModel { MessageText_U = "داده های دیتابیس برای نوع چک ,فیلد نوع ارز خالی است." });
-            //}
+            //حساب ارزی : در صورت ورود نرخ ارز , انتخاب نوع ارز الزامی است
+            if (ARZ_IS_ACTIVE)
+            {
+                if (final_lst.ARZD is not null && final_lst.ARZD != 1 && final_lst.ARZKIND2 is null)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "نوع ارز انتخاب نشده است." });
+                }
+                if (final_lst.ARZKIND2 is not null)
+                {
+                    var TheArz = dbms.DoGetDataSQL<long?>("SELECT TOP 1 ID FROM dbo.TCOD_ARZ WHERE ID = " + final_lst.ARZKIND2).FirstOrDefault();
+                    if (TheArz is null)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "نوع ارز انتخاب شده معتبر نیست." });
+                    }
+                }
+            }
 
 
             #endregion
@@ -4596,7 +4625,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 if (final_lst.IDH is null || final_lst.IDH <= 0) //INSERT
                 {
                     final_lst.ID = Convert.ToInt32(ID.Text);
-                    var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, MHAZ_NO)
+                    var IDH_RESULT_INSERT = dbms.DoGetDataSQL<int>($@"INSERT INTO dbo.PGET_LST(ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, FHES, THES, ARZD, ARZKIND2, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, MHAZ_NO)
                                          OUTPUT INSERTED.IDH
                                          VALUES(
                                          {final_lst.ID} ,
@@ -4617,6 +4646,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                          N'{final_lst.FHES}' ,
                                          N'{final_lst.THES}' ,
                                          {(final_lst.ARZD is null ? "NULL" : final_lst.ARZD)},
+                                         {(final_lst.ARZKIND2 is null ? "NULL" : final_lst.ARZKIND2)},
                                          {(FHES_T2 is null ? "NULL" : FHES_T2)}   ,
                                          {(THES_T2 is null ? "NULL" : THES_T2)}   ,
                                          {(FHES_T3 is null ? "NULL" : FHES_T3)}   ,
@@ -4647,6 +4677,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                            FHES = N'{final_lst.FHES}',
                                            THES = N'{final_lst.THES}',
                                            ARZD = {final_lst.ARZD},
+                                           ARZKIND2 = {(final_lst.ARZKIND2 is null ? "NULL" : final_lst.ARZKIND2.ToString())},
                                            FHES_T2 = {(FHES_T2 is null ? "NULL" : FHES_T2)},
                                            THES_T2 = {THES_T2},
                                            FHES_T3 = {(FHES_T3 is null ? "NULL" : FHES_T3)},

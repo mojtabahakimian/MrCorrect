@@ -3380,6 +3380,10 @@ ORDER BY B.NAME;"); } catch { }
                     try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
                     try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به جدول تاریخچه خزانه
 
+                    try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [ARZKIND2] [bigint] NULL"); } catch { } // اضافه کردن نوع ارز به سطرهای خزانه
+                    try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [ARZKIND2] [bigint] NULL"); } catch { } // اضافه کردن نوع ارز به جدول تاریخچه خزانه
+                    try { db.Execute($@"ALTER TABLE [dbo].[DEED_DTL] ADD [ARZKIND2] [bigint] NULL"); } catch { } // اضافه کردن نوع ارز به سطرهای سند
+
                     try { db.Execute($@"ALTER FUNCTION [dbo].[MOGHA_ANBAR] (@dt2 INT, @ANBAR INT, @KOL INT)
 RETURNS TABLE
 AS
