@@ -1388,6 +1388,18 @@ namespace AUTO_BAZ.Functions
             var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
 
             // ───────────────────────────────────────────────────────────────────────────────
+            // بهای تمام‌شده (مواد/دستمزد/سربار) فقط وقتی به کار می‌آید که کاراکتر ۶۶ گزینه‌ها
+            // برابر "5" نباشد — همان شرطِ if پایین‌تر. اگر "5" باشد آن بلوک هرگز اجرا نمی‌شود
+            // و MAVAD/DAST/SAR در هیچ جای دیگری استفاده نمی‌شوند.
+            //
+            // ولی سه فراخوانی GETSTANDARDPRICE_* «قبل» از آن شرط انجام می‌شد: برای هر قلم کالا
+            // سه کوئری سنگین روی HEAD_MANF + DTL_MANF (هرکدام به‌علاوه یک GETLASTFR) زده می‌شد
+            // و نتیجه‌اش دور ریخته می‌شد.
+            //
+            // این مقدار در طول اجرا ثابت است، پس یک بار حساب می‌شود.
+            var sanatPriceNeeded = Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5";
+
+            // ───────────────────────────────────────────────────────────────────────────────
             // حالت «سند روزانه» (Baseknow.SNDKH): همه‌ی فاکتورهای یک تاریخ باید یک شماره سند
             // مشترک بگیرند تا شماره سندها زیاد نشود.
             //
@@ -1716,7 +1728,9 @@ namespace AUTO_BAZ.Functions
                         //while (!jst_thr.EOF())
                         for (int jst_thr_EOF = 0; jst_thr_EOF < jst_thr.Count; jst_thr_EOF++)
                         {
-                            MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk));
+                            MAVAD = sanatPriceNeeded
+                                ? Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk))
+                                : 0d;
 
                             try
                             {
@@ -1736,8 +1750,12 @@ namespace AUTO_BAZ.Functions
                             catch { IsSuccessfully = false; }
 
 
-                            DAST = Math.Round((double)GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)(Convert.ToInt64(HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk)));
-                            SAR = Math.Round((double)((double)GETSTANDARDPRICE_SAR(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk));
+                            DAST = sanatPriceNeeded
+                                ? Math.Round((double)GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)(Convert.ToInt64(HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk)))
+                                : 0d;
+                            SAR = sanatPriceNeeded
+                                ? Math.Round((double)((double)GETSTANDARDPRICE_SAR(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk))
+                                : 0d;
                             CREATHES(Baseknow.MOGODIA, jst_thr[jst_thr_EOF].ANBAR, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), jst_thr[jst_thr_EOF].NAME);
 
                             if (MAVAD + DAST + SAR != 0d & Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5")
