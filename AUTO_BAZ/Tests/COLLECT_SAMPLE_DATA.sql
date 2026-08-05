@@ -186,3 +186,51 @@ UNION ALL SELECT N'شماره بایگانی تکراری',
 UNION ALL SELECT N'سربرگ بدون ردیف',
         (SELECT COUNT(*) FROM dbo.DEED_HED h WHERE h.NO_S IN (2,5)
          AND NOT EXISTS (SELECT 1 FROM dbo.DEED_DTL d WHERE d.N_S = h.N_S));
+
+
+/* ===========================================================================
+   بخش ۸ — ایندکس‌های موجود روی سه جدولی که بازسازی بیشترین فشار را روی آن‌ها می‌آورد
+   ---------------------------------------------------------------------------
+   چرا لازم است: بعد از حذف کوئری‌های تکراری، تنها چیزی که در حلقه‌ی بازسازی
+   باقی مانده «نوشتن» است. دو دستور زیر برای هر فاکتور یک بار اجرا می‌شوند:
+
+       DELETE FROM DEED_DTL WHERE NUMBER = ? AND TAG = 13
+       UPDATE HEAD_LST     SET n_s = ?  WHERE NUMBER = ? AND TAG = 13
+
+   اگر روی DEED_DTL.NUMBER و HEAD_LST.NUMBER ایندکس نباشد، SQL Server مجبور
+   است کل جدول را پیمایش کند — آن هم با قفلِ نوشتن. یعنی Threadها پشت هم در صف
+   می‌مانند و موازی‌سازی عملاً بی‌اثر می‌شود.
+
+   این کوئری فقط «می‌خواند» و هیچ چیزی را عوض نمی‌کند.
+   =========================================================================== */
+SELECT  t.name                                   AS Jadval,
+        ISNULL(i.name, N'— بدون ایندکس (HEAP) —') AS IndexName,
+        i.type_desc                              AS NoeIndex,
+        c.name                                   AS SotoonKelid,
+        ic.key_ordinal                           AS TartibKelid,
+        i.is_unique                              AS Yekta
+FROM        sys.tables            AS t
+LEFT JOIN   sys.indexes           AS i  ON i.object_id = t.object_id
+LEFT JOIN   sys.index_columns     AS ic ON ic.object_id = i.object_id
+                                       AND ic.index_id  = i.index_id
+                                       AND ic.is_included_column = 0
+LEFT JOIN   sys.columns           AS c  ON c.object_id = ic.object_id
+                                       AND c.column_id = ic.column_id
+WHERE   t.name IN (N'DEED_DTL', N'HEAD_LST', N'INVO_LST')
+ORDER BY t.name, i.index_id, ic.key_ordinal;
+
+
+/* ---------------------------------------------------------------------------
+   چطور نتیجه را بخوانید
+
+   دنبال این بگردید که آیا ایندکسی هست که ستون NUMBER در آن key_ordinal = 1
+   داشته باشد:
+
+     • DEED_DTL.NUMBER  →  اگر نیست، هر DELETE یک پیمایش کامل جدول است
+     • HEAD_LST.NUMBER  →  اگر نیست، هر UPDATE یک پیمایش کامل جدول است
+     • INVO_LST.NUMBER  →  روی سرعت پیش‌خوانی اثر دارد (فقط یک بار، نه هر فاکتور)
+
+   اگر NUMBER کلید اول هیچ ایندکسی نبود، این گلوگاه اصلیِ باقی‌مانده است.
+   با یک ایندکس حل می‌شود، ولی چون گفته‌اید دیتابیس را تغییر نمی‌دهید،
+   تصمیمش با شماست — من چیزی را عوض نکرده‌ام.
+   --------------------------------------------------------------------------- */

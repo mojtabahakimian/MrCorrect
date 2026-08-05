@@ -113,6 +113,21 @@ namespace AUTO_BAZ.Functions
             public double? Total { get; set; }
         }
 
+        /// <summary>
+        /// یک ردیف کالای فاکتور به‌همراه نام کالا. همان ستون‌هایی که QRE12/QRE14
+        /// می‌خوانند، به‌علاوه‌ی NUMBER تا بتوان ردیف‌ها را به فاکتورشان نسبت داد.
+        /// </summary>
+        public class InvoiceLineRow
+        {
+            public double? NUMBER { get; set; }
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public string CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string NAME { get; set; }
+            public double? AVRAGE { get; set; }
+        }
+
         public class QUERY_MODEL6
         {
             public int? IDH { get; set; }
@@ -1418,6 +1433,12 @@ namespace AUTO_BAZ.Functions
             var jamfByInvoice = new Dictionary<double, double>();
             var jamchByInvoice = new Dictionary<double, double>();
 
+            // ردیف‌های کالا و چک‌های هر فاکتور. بعد از این بلوک فقط خوانده می‌شوند،
+            // پس Dictionary معمولی برای خواندن هم‌زمان از چند Thread امن است.
+            var invoiceLines = new Dictionary<double, List<QRE12>>();
+            var invoiceLinesWithAnbar = new Dictionary<double, List<QRE14>>();
+            var invoiceCheques = new Dictionary<double, List<PAY_GETD>>();
+
             if (invoiceNumbers.Count > 0)
             {
                 var minNum = SqlNum(invoiceNumbers.Min());
@@ -1442,6 +1463,101 @@ namespace AUTO_BAZ.Functions
                         jamchByInvoice[row.NUMBER.Value] = row.Total.Value;
                     }
                 }
+
+                // ───────────────────────────────────────────────────────────────────────────
+                // ردیف‌های کالای فاکتورها (jst_sec و jst_thr) هم یکجا خوانده می‌شوند.
+                //
+                // قبلاً برای «هر» فاکتور دو کوئری جداگانه روی INVO_LST + STUF_DEF زده می‌شد؛
+                // آن دو کوئری ستون و JOIN کاملاً یکسان دارند و تنها تفاوتشان شرط ANBAR <> 0
+                // است. یعنی نتیجه‌ی دومی همیشه زیرمجموعه‌ی اولی است و با یک بار خواندن،
+                // هر دو ساخته می‌شوند.
+                //
+                // چرا امن است: بازسازی به INVO_LST و STUF_DEF نمی‌نویسد. تنها جایی که به
+                // INVO_LST می‌نویسد SANADKHAD است که فقط N_KOL و N_MOIN را عوض می‌کند —
+                // هیچ‌کدام از ستون‌های اینجا. نرخ میانگین (AVRAGE) هم در C0 نوشته می‌شود که
+                // قبل از شروع این بخش تمام شده است.
+                // ───────────────────────────────────────────────────────────────────────────
+                var wantedInvoices = new HashSet<double>(invoiceNumbers);
+
+                foreach (var row in dbms.DoGetDataSQL<InvoiceLineRow>(
+                    $"SELECT L.NUMBER, L.MABL_K, L.MEGHk, L.CODE, L.ANBAR, S.NAME, L.AVRAGE " +
+                    $"FROM dbo.INVO_LST AS L INNER JOIN dbo.STUF_DEF AS S ON S.CODE = L.CODE " +
+                    $"WHERE L.TAG = 2 AND L.NUMBER BETWEEN {minNum} AND {maxNum}"))
+                {
+                    if (row?.NUMBER == null || !wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
+
+                    var key = row.NUMBER.Value;
+
+                    if (!invoiceLines.TryGetValue(key, out var allLines))
+                    {
+                        allLines = new List<QRE12>();
+                        invoiceLines[key] = allLines;
+                    }
+                    allLines.Add(new QRE12
+                    {
+                        MABL_K = row.MABL_K,
+                        MEGHk = row.MEGHk,
+                        CODE = row.CODE,
+                        ANBAR = row.ANBAR,
+                        NAME = row.NAME,
+                        AVRAGE = row.AVRAGE ?? 0d
+                    });
+
+                    // همان شرط ANBAR <> 0 کوئری دوم. NULL هم مثل قبل رد می‌شود،
+                    // چون در SQL شرط ANBAR <> 0 برای NULL هرگز true نمی‌شود.
+                    if (row.ANBAR != null && row.ANBAR.Value != 0)
+                    {
+                        if (!invoiceLinesWithAnbar.TryGetValue(key, out var anbarLines))
+                        {
+                            anbarLines = new List<QRE14>();
+                            invoiceLinesWithAnbar[key] = anbarLines;
+                        }
+                        anbarLines.Add(new QRE14
+                        {
+                            MABL_K = row.MABL_K,
+                            MEGHk = row.MEGHk,
+                            CODE = row.CODE,
+                            ANBAR = row.ANBAR,
+                            NAME = row.NAME,
+                            AVRAGE = row.AVRAGE
+                        });
+                    }
+                }
+
+                // ───────────────────────────────────────────────────────────────────────────
+                // چک‌های دریافتی هر فاکتور. فقط برای فاکتورهایی لازم است که جمع چک آن‌ها
+                // صفر نیست (همان شرط if (JAMCH != 0d) پایین‌تر)، پس اگر هیچ فاکتوری چک
+                // نداشته باشد اصلاً کوئری زده نمی‌شود.
+                //
+                // چرا امن است: بازسازی هرگز به PAY_GETD نمی‌نویسد.
+                // ───────────────────────────────────────────────────────────────────────────
+                if (jamchByInvoice.Any(kv => kv.Value != 0d && wantedInvoices.Contains(kv.Key)))
+                {
+                    foreach (var row in dbms.DoGetDataSQL<PAY_GETD>(
+                        "SELECT N_SERI,BANK,DATE_S,DATE,SHOBEH,MABL,NAME_TAH,N_HESAB,N_S,N_KOL,N_MOIN,N_TAF," +
+                        "N_KOL2,N_MOIN2,N_TAF2,N_KOL3,N_MOIN3,N_TAF3,NUMBER,TAG,ANBAR,RADIF,CUST_NO,VAZ," +
+                        "LIST_NO,KIND,SANDUGH,HES1,HES2,HES3,ESTELAM FROM dbo.PAY_GETD " +
+                        $"WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum}"))
+                    {
+                        if (row?.NUMBER == null) { continue; }
+
+                        var key = row.NUMBER.Value;
+                        if (!wantedInvoices.Contains(key)) { continue; }
+
+                        if (!invoiceCheques.TryGetValue(key, out var cheques))
+                        {
+                            cheques = new List<PAY_GETD>();
+                            invoiceCheques[key] = cheques;
+                        }
+                        cheques.Add(row);
+                    }
+                }
+
+                // اگر روزی حجم پیش‌خوانی غیرعادی شد، در لاگ دیده می‌شود.
+                LogWriter.WriteLog(
+                    $"سند فروش - پیش‌خوانی: {invoiceNumbers.Count} فاکتور | " +
+                    $"{invoiceLines.Sum(kv => kv.Value.Count)} ردیف کالا | " +
+                    $"{invoiceCheques.Sum(kv => kv.Value.Count)} چک");
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
@@ -1642,7 +1758,12 @@ namespace AUTO_BAZ.Functions
 
                     }
 
-                    var jst_sec = dbms.DoGetDataSQL<QRE12>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.AVRAGE FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE     (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.INVO_LST.TAG = 2) ").ToList();
+                    // از پیش‌خوانده‌ها. نبودِ کلید یعنی این فاکتور ردیف کالا ندارد،
+                    // که همان لیست خالیِ کوئری قبلی است.
+                    var jst_sec = (HFRST[HFRST_EOF].NUMBER != null
+                                   && invoiceLines.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var jstSecLines))
+                                  ? jstSecLines
+                                  : new List<QRE12>();
                     //while (!jst_sec.EOF())
                     for (int jst_sec_EOF = 0; jst_sec_EOF < jst_sec.Count; jst_sec_EOF++)
                     {
@@ -1756,7 +1877,11 @@ namespace AUTO_BAZ.Functions
                     //if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                     if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                     {
-                        var jst_thr = dbms.DoGetDataSQL<QRE14>("SELECT     dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.CODE, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.NAME,  dbo.INVO_LST.AVRAGE FROM  dbo.INVO_LST INNER JOIN  dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") And (dbo.INVO_LST.TAG = 2) And (dbo.INVO_LST.ANBAR <> 0)").ToList();
+                        // همان ردیف‌های بالا با شرط ANBAR <> 0 — از پیش‌خوانده‌ها.
+                        var jst_thr = (HFRST[HFRST_EOF].NUMBER != null
+                                       && invoiceLinesWithAnbar.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var jstThrLines))
+                                      ? jstThrLines
+                                      : new List<QRE14>();
                         //while (!jst_thr.EOF())
                         for (int jst_thr_EOF = 0; jst_thr_EOF < jst_thr.Count; jst_thr_EOF++)
                         {
@@ -1982,7 +2107,11 @@ namespace AUTO_BAZ.Functions
                     if (JAMCH != 0d) // چكهاي دريافتي
                     {
                         //CHRST.Open("PAY_GETD", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-                        var CHRST = dbms.DoGetDataSQL<PAY_GETD>("SELECT N_SERI,BANK,DATE_S,DATE,SHOBEH,MABL,NAME_TAH,N_HESAB,N_S,N_KOL,N_MOIN,N_TAF,N_KOL2,N_MOIN2,N_TAF2,N_KOL3,N_MOIN3,N_TAF3,NUMBER,TAG,ANBAR,RADIF,CUST_NO,VAZ,LIST_NO,KIND,SANDUGH,HES1,HES2,HES3,ESTELAM FROM PAY_GETD WHERE NUMBER = " + HFRST[HFRST_EOF].NUMBER + " AND TAG = 2").ToList();
+                        // چک‌های این فاکتور — از پیش‌خوانده‌ها.
+                        var CHRST = (HFRST[HFRST_EOF].NUMBER != null
+                                     && invoiceCheques.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var chequeRows))
+                                    ? chequeRows
+                                    : new List<PAY_GETD>();
                         //CHRST.MoveLast();
                         //CHRST.MoveFirst();
                         //CHRST.Filter = "NUMBER = " + HFRST[HFRST_EOF].NUMBER + " AND TAG = 2";
