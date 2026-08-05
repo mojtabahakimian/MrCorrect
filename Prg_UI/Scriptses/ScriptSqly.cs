@@ -2244,12 +2244,12 @@ RETURN (
 
                     //تنظیمات عمومی بیشتر
                     try { db.Execute(@"CREATE TABLE [dbo].[GENERAL_OPTIONS] (
-								       [OptionName]  NVARCHAR(100) PRIMARY KEY NOT NULL,
-								       [OptionValue] NVARCHAR(500) NULL,
-								       [Description] NVARCHAR(1000) NULL,
-								       [LastUpdated] DATETIME DEFAULT GETDATE()
-				
-								   );"); } catch { }
+                                       [OptionName] [nvarchar](100) COLLATE Arabic_CI_AS NOT NULL,
+                                       [OptionValue] [nvarchar](500) COLLATE Arabic_CI_AS NULL,
+                                       [Description] [nvarchar](1000) COLLATE Arabic_CI_AS NULL,
+                                       [LastUpdated] [datetime] NULL CONSTRAINT [DF_GENERAL_OPTIONS_LastUpdated] DEFAULT (getdate()),
+                                       CONSTRAINT [PK_GENERAL_OPTIONS] PRIMARY KEY CLUSTERED ([OptionName])
+                                   );"); } catch { }
 
                     //اضافه کردن ستون CRT (تاریخ ایجاد) به GENERAL_OPTIONS
                     try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
@@ -2257,7 +2257,7 @@ RETURN (
                                    CONSTRAINT [DF__GENERAL_OPT__CRT__2C3B9588] DEFAULT (GETDATE());"); } catch { }
                     //اضافه کردن ستون UID (کد کاربر) به GENERAL_OPTIONS برای تنظیمات per-user
                     try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
-                                   ADD [UID] bigint NULL;"); } catch { }
+                                   ADD [UID] int NULL;"); } catch { }
 
 
 

@@ -39,23 +39,41 @@ namespace Prg_UI.Functions
 IF OBJECT_ID(N'dbo.GENERAL_OPTIONS', N'U') IS NULL
 BEGIN
     CREATE TABLE [dbo].[GENERAL_OPTIONS] (
-        [OptionName]  NVARCHAR(100) PRIMARY KEY NOT NULL,
-        [OptionValue] NVARCHAR(500) NULL,
-        [Description] NVARCHAR(1000) NULL,
-        [LastUpdated] DATETIME DEFAULT GETDATE(),
-        [CRT] DATETIME NULL CONSTRAINT [DF_GENERAL_OPTIONS_CRT] DEFAULT (GETDATE()),
-        [UID] bigint NULL
+        [OptionName] [nvarchar](100) COLLATE Arabic_CI_AS NOT NULL,
+        [OptionValue] [nvarchar](500) COLLATE Arabic_CI_AS NULL,
+        [Description] [nvarchar](1000) COLLATE Arabic_CI_AS NULL,
+        [LastUpdated] [datetime] NULL CONSTRAINT [DF_GENERAL_OPTIONS_LastUpdated] DEFAULT (getdate()),
+        [CRT] [datetime] NULL CONSTRAINT [DF_GENERAL_OPTIONS_CRT] DEFAULT (getdate()),
+        [UID] [int] NULL,
+        CONSTRAINT [PK_GENERAL_OPTIONS] PRIMARY KEY CLUSTERED ([OptionName])
     );
 END;
 
 IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'LastUpdated') IS NULL
-    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [LastUpdated] DATETIME NULL CONSTRAINT [DF_GENERAL_OPTIONS_LastUpdated] DEFAULT (GETDATE());
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [LastUpdated] [datetime] NULL CONSTRAINT [DF_GENERAL_OPTIONS_LastUpdated] DEFAULT (getdate());
 
 IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'CRT') IS NULL
-    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [CRT] DATETIME NULL CONSTRAINT [DF_GENERAL_OPTIONS_CRT] DEFAULT (GETDATE());
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [CRT] [datetime] NULL CONSTRAINT [DF_GENERAL_OPTIONS_CRT] DEFAULT (getdate());
 
 IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NULL
-    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [UID] bigint NULL;";
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [UID] [int] NULL;
+
+IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NOT NULL
+   AND EXISTS (
+       SELECT 1
+       FROM sys.columns c
+       INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+       WHERE c.object_id = OBJECT_ID(N'dbo.GENERAL_OPTIONS', N'U')
+         AND c.name = N'UID'
+         AND t.name <> N'int'
+   )
+   AND NOT EXISTS (
+       SELECT 1
+       FROM dbo.GENERAL_OPTIONS
+       WHERE UID IS NOT NULL
+         AND (TRY_CONVERT(bigint, UID) > 2147483647 OR TRY_CONVERT(bigint, UID) < -2147483648)
+   )
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ALTER COLUMN [UID] [int] NULL;";
 
         private void EnsureGeneralOptionsTableSync(SqlConnection db)
         {
