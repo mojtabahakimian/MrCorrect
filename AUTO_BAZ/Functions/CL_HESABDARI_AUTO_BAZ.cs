@@ -1359,6 +1359,55 @@ namespace AUTO_BAZ.Functions
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
 
+            // ───────────────────────────────────────────────────────────────────────────────
+            // حالت «سند روزانه» (Baseknow.SNDKH): همه‌ی فاکتورهای یک تاریخ باید یک شماره سند
+            // مشترک بگیرند تا شماره سندها زیاد نشود.
+            //
+            // این کار سه بار در بدنه‌ی حلقه تکرار شده بود و هر بار به شکل «بگرد؛ اگر نبود بساز».
+            // در اجرای موازی این یک رقابت واقعی است: دو Thread با فاکتورهای هم‌تاریخ می‌توانند
+            // هر دو جواب «سندی با این تاریخ نیست» بگیرند و هر دو سند بسازند — یعنی دو سند
+            // روزانه برای یک تاریخ، که دقیقاً نقض هدف این حالت است.
+            //
+            // راه‌حل: برای هر تاریخ یک قفل. تاریخ‌های مختلف همچنان موازی پیش می‌روند.
+            // نتیجه‌ی هر تاریخ هم نگه داشته می‌شود تا فاکتورهای بعدی همان تاریخ اصلاً کوئری نزنند
+            // (به‌جای یک کوئری برای هر فاکتور، یک کوئری برای هر تاریخ).
+            //
+            // محدودیت: این قفل درون‌پروسه‌ای است. اگر دو نسخه از برنامه هم‌زمان بازسازی کنند،
+            // رقابت باقی می‌ماند — ولی پنجره‌اش بسیار کوچک‌تر از قبل است.
+            // ───────────────────────────────────────────────────────────────────────────────
+            var dailyDocByDate = new System.Collections.Concurrent.ConcurrentDictionary<long, double>();
+            var dailyDocGates = new System.Collections.Concurrent.ConcurrentDictionary<long, object>();
+
+            // خروجی Created فقط وقتی true است که همین فراخوانی سند را ساخته باشد؛
+            // دقیقاً مثل کد قبلی که فقط در شاخه‌ی ساخت، N_S فاکتور را در حافظه ست می‌کرد.
+            (double Ns, bool Created) ResolveDailyDocument(long dateN, string sharh, string userName)
+            {
+                if (dailyDocByDate.TryGetValue(dateN, out var known))
+                {
+                    return (known, false);
+                }
+
+                lock (dailyDocGates.GetOrAdd(dateN, _ => new object()))
+                {
+                    if (dailyDocByDate.TryGetValue(dateN, out known))
+                    {
+                        return (known, false);
+                    }
+
+                    var found = dbms.DoGetDataSQL<QRE10>(
+                        "SELECT BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE no_s = 2 AND DATE_S = @DocDate",
+                        new { DocDate = dateN }).ToList();
+
+                    var created = found.Count == 0;
+                    var resolved = created
+                        ? Createsanad(dateN, sharh, 0, 2, -1, userName)
+                        : (double)found.Select(x => x.N_S).FirstOrDefault();
+
+                    dailyDocByDate[dateN] = resolved;
+                    return (resolved, created);
+                }
+            }
+
             try
             {
                 //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++)
@@ -1420,49 +1469,34 @@ namespace AUTO_BAZ.Functions
                                 }
                                 else
                                 {
-                                SEJ:
-                                    SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
-                                    if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                    // تاریخ سند با تاریخ فاکتور نمی‌خواند → سند روزانه‌ی تاریخ جدید
+                                    var daily = ResolveDailyDocument((long)HFRST[HFRST_EOF].DATE_N, SHSH, HFRST[HFRST_EOF].USER_NAME);
+                                    max_ns = daily.Ns;
+                                    if (daily.Created)
                                     {
-                                        max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
-                                    }
-                                    else
-                                    {
-                                        max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
-
-                                        HFRST[HFRST_EOF].N_S = max_ns;
+                                        HFRST[HFRST_EOF].N_S = daily.Ns;
                                     }
                                 }
                             }
                             else
                             {
-                                // goto SEJ;
-                                SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
-                                if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                // شماره سند فاکتور به هیچ سند فروشی اشاره نمی‌کند → سند روزانه‌ی این تاریخ
+                                var daily = ResolveDailyDocument((long)HFRST[HFRST_EOF].DATE_N, SHSH, HFRST[HFRST_EOF].USER_NAME);
+                                max_ns = daily.Ns;
+                                if (daily.Created)
                                 {
-                                    max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
-                                }
-                                else
-                                {
-                                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
-
-                                    HFRST[HFRST_EOF].N_S = max_ns;
+                                    HFRST[HFRST_EOF].N_S = daily.Ns;
                                 }
                             } // چک کن اگه نيست صادر کن
                         }
                         else
                         {
-                            // goto SEJ;
-                            SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
-                            if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            // فاکتور اصلاً شماره سند ندارد → سند روزانه‌ی این تاریخ
+                            var daily = ResolveDailyDocument((long)HFRST[HFRST_EOF].DATE_N, SHSH, HFRST[HFRST_EOF].USER_NAME);
+                            max_ns = daily.Ns;
+                            if (daily.Created)
                             {
-                                max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
-                            }
-                            else
-                            {
-                                max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
-
-                                HFRST[HFRST_EOF].N_S = max_ns;
+                                HFRST[HFRST_EOF].N_S = daily.Ns;
                             }
                         } // چک کن اگه نيست صادر کن
                     }
