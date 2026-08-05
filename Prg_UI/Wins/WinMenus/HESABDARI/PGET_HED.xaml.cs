@@ -4676,7 +4676,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                            BANK = {(final_lst.BANK is null ? "NULL" : final_lst.BANK)},
                                            FHES = N'{final_lst.FHES}',
                                            THES = N'{final_lst.THES}',
-                                           ARZD = {final_lst.ARZD},
+                                           ARZD = {(final_lst.ARZD is null ? "NULL" : final_lst.ARZD.ToString())},
                                            ARZKIND2 = {(final_lst.ARZKIND2 is null ? "NULL" : final_lst.ARZKIND2.ToString())},
                                            FHES_T2 = {(FHES_T2 is null ? "NULL" : FHES_T2)},
                                            THES_T2 = {THES_T2},
