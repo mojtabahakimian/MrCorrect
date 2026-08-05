@@ -294,10 +294,12 @@ namespace Prg_UI.Wins
             try
             {
 
-                string sqlSms = @"IF COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NOT NULL 
-                                      SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,SMSTYPE FROM dbo.SAZMAN 
-                                  ELSE 
-                                      SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,'TSMS' AS SMSTYPE FROM dbo.SAZMAN";
+                string sqlSms = @"DECLARE @sql nvarchar(max);
+                                  IF COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NOT NULL
+                                      SET @sql = N'SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,SMSTYPE FROM dbo.SAZMAN';
+                                  ELSE
+                                      SET @sql = N'SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,''TSMS'' AS SMSTYPE FROM dbo.SAZMAN';
+                                  EXEC sp_executesql @sql;";
                 var RST = dbms.DoGetDataSQL<SAZMAN>(sqlSms).FirstOrDefault();
                 if (RST != null)
                 {
@@ -372,7 +374,7 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr-pakzaban";
             Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
             //Baseknow.USERCOD = 5; Baseknow.UUSER = "كنترل";
-            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
             //Baseknow.USERCOD = 179; Baseknow.UUSER = "واحد تولید یزدویزیتوری";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
@@ -885,7 +887,7 @@ namespace Prg_UI.Wins
                 string basePath = UPDATE_SERVER_PATH;
                 try
                 {
-                    var options = dbms.DoGetDataSQL<string>("SELECT OptionValue FROM dbo.GENERAL_OPTIONS WHERE OptionName = 'UPDATE_SERVER_PATH'").ToList();
+                    var options = dbms.DoGetDataSQL<string>("IF OBJECT_ID(N'dbo.GENERAL_OPTIONS', N'U') IS NOT NULL SELECT OptionValue FROM dbo.GENERAL_OPTIONS WHERE OptionName = 'UPDATE_SERVER_PATH' ELSE SELECT CAST(NULL AS nvarchar(500)) AS OptionValue WHERE 1 = 0").ToList();
                     if (options.Count == 0)
                     {
                         ShowErrorAndExit("مسیر بروزرسانی برای این شرکت تنظیم نشده است. لطفا با پشتیبانی تماس بگیرید.");

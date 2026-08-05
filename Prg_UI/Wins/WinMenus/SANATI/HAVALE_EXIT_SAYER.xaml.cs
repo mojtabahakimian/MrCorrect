@@ -167,12 +167,13 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         public class SN_MODEL
         {
-            public int? MHAZ_NO { get; set; }
+            public double? MHAZ_NO { get; set; }
             public string? MHAZNAME { get; set; }
         }
         public class N_RASID_MODEL
         {
             public int? FNUMB { get; set; }
+            public string? FNUMB_TEXT => FNUMB?.ToString();
             public string? nam { get; set; }
             public int? Expr1 { get; set; }
         }
@@ -1488,7 +1489,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         }
                         else if (filteredN_KOL.Any())
                         {
-                            _COMBOBOX_.SelectedValue = filteredN_KOL.FirstOrDefault().FNUMB;
+                            _COMBOBOX_.SelectedValue = filteredN_KOL.FirstOrDefault().FNUMB_TEXT;
                         }
 
                         // رفرش کردن آیتم‌ها
