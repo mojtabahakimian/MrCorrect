@@ -887,7 +887,7 @@ namespace Prg_UI.Wins
                 string basePath = UPDATE_SERVER_PATH;
                 try
                 {
-                    var options = dbms.DoGetDataSQL<string>("SELECT OptionValue FROM dbo.GENERAL_OPTIONS WHERE OptionName = 'UPDATE_SERVER_PATH'").ToList();
+                    var options = dbms.DoGetDataSQL<string>("IF OBJECT_ID(N'dbo.GENERAL_OPTIONS', N'U') IS NOT NULL SELECT OptionValue FROM dbo.GENERAL_OPTIONS WHERE OptionName = 'UPDATE_SERVER_PATH' ELSE SELECT CAST(NULL AS nvarchar(500)) AS OptionValue WHERE 1 = 0").ToList();
                     if (options.Count == 0)
                     {
                         ShowErrorAndExit("مسیر بروزرسانی برای این شرکت تنظیم نشده است. لطفا با پشتیبانی تماس بگیرید.");
