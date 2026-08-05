@@ -294,10 +294,12 @@ namespace Prg_UI.Wins
             try
             {
 
-                string sqlSms = @"IF COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NOT NULL 
-                                      SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,SMSTYPE FROM dbo.SAZMAN 
-                                  ELSE 
-                                      SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,'TSMS' AS SMSTYPE FROM dbo.SAZMAN";
+                string sqlSms = @"DECLARE @sql nvarchar(max);
+                                  IF COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NOT NULL
+                                      SET @sql = N'SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,SMSTYPE FROM dbo.SAZMAN';
+                                  ELSE
+                                      SET @sql = N'SELECT SMS_USERNAME,SMS_PASSWORD,SMS_LIBKEY,SMS_TSMSHOST,DSMS,PRMFR,SMSACT,SMS_OWNER,''TSMS'' AS SMSTYPE FROM dbo.SAZMAN';
+                                  EXEC sp_executesql @sql;";
                 var RST = dbms.DoGetDataSQL<SAZMAN>(sqlSms).FirstOrDefault();
                 if (RST != null)
                 {
