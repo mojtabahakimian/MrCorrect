@@ -104,6 +104,15 @@ namespace AUTO_BAZ.Functions
         #endregion
 
         #region Custom_Modelses
+        /// <summary>
+        /// خروجی کوئری‌های «جمع به‌ازای هر سند» که یکجا پیش‌خوانده می‌شوند.
+        /// </summary>
+        public class InvoiceSumRow
+        {
+            public double? NUMBER { get; set; }
+            public double? Total { get; set; }
+        }
+
         public class QUERY_MODEL6
         {
             public int? IDH { get; set; }
@@ -1400,6 +1409,42 @@ namespace AUTO_BAZ.Functions
             var sanatPriceNeeded = Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5";
 
             // ───────────────────────────────────────────────────────────────────────────────
+            // پیش‌خواندن دو جمعِ هر فاکتور با «دو» کوئری، به‌جای دو کوئری برای «هر» فاکتور.
+            // مقدارشان فقط به شماره فاکتور بستگی دارد، پس یکجا خواندنشان دقیقاً همان
+            // نتیجه را می‌دهد. با هزاران فاکتور، هزاران رفت‌وبرگشت حذف می‌شود.
+            // نبودِ کلید در Dictionary یعنی «جمعی وجود ندارد» که همان صفرِ کد قبلی است.
+            // ───────────────────────────────────────────────────────────────────────────────
+            var invoiceNumbers = HFRST.Where(r => r?.NUMBER != null).Select(r => r.NUMBER.Value).ToList();
+            var jamfByInvoice = new Dictionary<double, double>();
+            var jamchByInvoice = new Dictionary<double, double>();
+
+            if (invoiceNumbers.Count > 0)
+            {
+                var minNum = SqlNum(invoiceNumbers.Min());
+                var maxNum = SqlNum(invoiceNumbers.Max());
+
+                foreach (var row in dbms.DoGetDataSQL<InvoiceSumRow>(
+                    $"SELECT NUMBER, SUM(MABL_K) AS Total FROM dbo.INVO_LST " +
+                    $"WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
+                {
+                    if (row?.NUMBER != null && row.Total != null)
+                    {
+                        jamfByInvoice[row.NUMBER.Value] = row.Total.Value;
+                    }
+                }
+
+                foreach (var row in dbms.DoGetDataSQL<InvoiceSumRow>(
+                    $"SELECT NUMBER, SUM(MABL) AS Total FROM dbo.PAY_GETD " +
+                    $"WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
+                {
+                    if (row?.NUMBER != null && row.Total != null)
+                    {
+                        jamchByInvoice[row.NUMBER.Value] = row.Total.Value;
+                    }
+                }
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
             // حالت «سند روزانه» (Baseknow.SNDKH): همه‌ی فاکتورهای یک تاریخ باید یک شماره سند
             // مشترک بگیرند تا شماره سندها زیاد نشود.
             //
@@ -1571,28 +1616,15 @@ namespace AUTO_BAZ.Functions
 
                     SANAD_NUMBER = HFRST[HFRST_EOF]?.N_S;
 
-                    var jst = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ) AND ((INVO_LST.TAG)=2))").ToList();
-                    if (jst.Count > 0 & !IsNull(jst.FirstOrDefault()))
-                    {
-                        JAMF = (double)jst.FirstOrDefault();
-                    }
-                    else
-                    {
-                        JAMF = 0d;
-                    }
-                    ;
+                    // از پیش‌خوانی مرحله‌ی اول؛ قبلاً اینجا یک کوئری جدا برای هر فاکتور بود.
+                    JAMF = HFRST[HFRST_EOF].NUMBER != null
+                           && jamfByInvoice.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var jamfValue)
+                        ? jamfValue : 0d;
 
 
-                    var jstOpen = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=2) AND ((PAY_GETD.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").ToList();
-                    if (jstOpen.Count > 0 & !IsNull(jstOpen.FirstOrDefault()))
-                    {
-                        JAMCH = (double)jstOpen.FirstOrDefault();
-                    }
-                    else
-                    {
-                        JAMCH = 0d;
-                    }
-                    ;
+                    JAMCH = HFRST[HFRST_EOF].NUMBER != null
+                            && jamchByInvoice.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var jamchValue)
+                        ? jamchValue : 0d;
                     dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 13))");
                     if (JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF != 0)
                     {
