@@ -572,7 +572,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                 return;
                             }
                             int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = DG.CurrentColumn?.SortMemberPath == "MABL";
+                            //با فعال بودن حساب ارزی , مسیر Enter تا ستون نوع ارز ادامه پیدا میکند
+                            bool isLastColumn = DG.CurrentColumn?.SortMemberPath == (ARZ_IS_ACTIVE ? "ARZKIND2" : "MABL");
                             bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
 
                             if (isLastColumn)
