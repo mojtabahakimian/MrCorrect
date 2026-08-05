@@ -56,6 +56,17 @@ namespace AUTO_BAZ.Functions
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _tafNameCache = new();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, string> _departNameCache = new();
 
+        // قیمت استاندارد (مواد / دستمزد / سربار) به‌ازای هر قلم کالای هر فاکتور خوانده می‌شود.
+        // هر سه تابع GETSTANDARDPRICE_* عیناً یک کوئری سنگین روی HEAD_MANF+DTL_MANF می‌زنند
+        // و هرکدام یک GETLASTFR هم صدا می‌زنند — یعنی ۶ رفت‌وبرگشت برای هر قلم کالا.
+        // این‌ها «خواندن خالص» از جدول‌های تولید هستند و در طول یک بازسازی تغییر نمی‌کنند.
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _standardPriceMavad = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _standardPriceDast = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _standardPriceSar = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _lastFrCache = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<double, string> _kalaNameCache = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<double, string> _bankNameCache = new();
+
         /// <summary>
         /// کش فقط در جریان «بازسازی دسته‌ای» فعال می‌شود.
         /// پیش‌فرض خاموش است چون فرم‌های برنامه‌ی اصلی هم همین توابع را صدا می‌زنند و
@@ -72,6 +83,12 @@ namespace AUTO_BAZ.Functions
             _existingAccounts.Clear();
             _tafNameCache.Clear();
             _departNameCache.Clear();
+            _standardPriceMavad.Clear();
+            _standardPriceDast.Clear();
+            _standardPriceSar.Clear();
+            _lastFrCache.Clear();
+            _kalaNameCache.Clear();
+            _bankNameCache.Clear();
         }
 
         /// <summary>
@@ -947,6 +964,11 @@ namespace AUTO_BAZ.Functions
 
         public static string GETKALANAME(double CODE)
         {
+            if (LookupCacheEnabled && _kalaNameCache.TryGetValue(CODE, out var cachedKala))
+            {
+                return cachedKala;
+            }
+
             string returnValue = "";
             var RRST = dbms.DoGetDataSQL<Custom_STUF_DEF>("SELECT CODE,NAME FROM STUF_DEF WHERE (CODE = " + Convert.ToString(CODE) + ")").FirstOrDefault();
             if (RRST != null)
@@ -964,6 +986,12 @@ namespace AUTO_BAZ.Functions
             {
                 returnValue = " ";
             }
+
+            if (LookupCacheEnabled)
+            {
+                _kalaNameCache[CODE] = returnValue;
+            }
+
             return returnValue;
         }
 
@@ -2583,6 +2611,14 @@ namespace AUTO_BAZ.Functions
         }
         public static double GETSTANDARDPRICE_SAR(string CODE, long dt)
         {
+            // «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند؛ برای هر قلم کالای
+            // هر فاکتور صدا زده می‌شود، پس تکرارش بسیار زیاد است.
+            var priceKey = (Code: CODE ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _standardPriceSar.TryGetValue(priceKey, out var cachedPrice))
+            {
+                return cachedPrice;
+            }
+
             double tempGETSTANDARDPRICE_SAR = 0;
             double fnum = 0;
             fnum = GETLASTFR(CODE, dt);
@@ -2610,10 +2646,23 @@ namespace AUTO_BAZ.Functions
                     tempGETSTANDARDPRICE_SAR = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _standardPriceSar[priceKey] = tempGETSTANDARDPRICE_SAR;
+            }
+
             return tempGETSTANDARDPRICE_SAR;
         }
         public static double GETSTANDARDPRICE_DAST(string CODE, long dt)
         {
+            // «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند؛ برای هر قلم کالای
+            // هر فاکتور صدا زده می‌شود، پس تکرارش بسیار زیاد است.
+            var priceKey = (Code: CODE ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _standardPriceDast.TryGetValue(priceKey, out var cachedPrice))
+            {
+                return cachedPrice;
+            }
+
             double tempGETSTANDARDPRICE_DAST = 0;
             double fnum = 0;
             fnum = GETLASTFR(CODE, dt);
@@ -2641,10 +2690,22 @@ namespace AUTO_BAZ.Functions
                     tempGETSTANDARDPRICE_DAST = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _standardPriceDast[priceKey] = tempGETSTANDARDPRICE_DAST;
+            }
+
             return tempGETSTANDARDPRICE_DAST;
         }
         public static double GETLASTFR(string co, long dt)
         {
+            // هر سه تابع GETSTANDARDPRICE_* این را صدا می‌زنند، پس برای هر قلم کالا چند بار اجرا می‌شود.
+            var lastFrKey = (Code: co ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _lastFrCache.TryGetValue(lastFrKey, out var cachedLastFr))
+            {
+                return cachedLastFr;
+            }
+
             double tempGETLASTFR = 0;
             long FNN = 0;
             //object rst = null;
@@ -2701,10 +2762,23 @@ namespace AUTO_BAZ.Functions
                     tempGETLASTFR = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _lastFrCache[lastFrKey] = tempGETLASTFR;
+            }
+
             return tempGETLASTFR;
         }
         public static double GETSTANDARDPRICE_MAVAD(string CODE, long dt)
         {
+            // «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند؛ برای هر قلم کالای
+            // هر فاکتور صدا زده می‌شود، پس تکرارش بسیار زیاد است.
+            var priceKey = (Code: CODE ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _standardPriceMavad.TryGetValue(priceKey, out var cachedPrice))
+            {
+                return cachedPrice;
+            }
+
             double tempGETSTANDARDPRICE_MAVAD = 0;
             double fnum = 0;
             fnum = GETLASTFR(CODE, dt);
@@ -2732,6 +2806,11 @@ namespace AUTO_BAZ.Functions
                     tempGETSTANDARDPRICE_MAVAD = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _standardPriceMavad[priceKey] = tempGETSTANDARDPRICE_MAVAD;
+            }
+
             return tempGETSTANDARDPRICE_MAVAD;
         }
 
@@ -2983,6 +3062,11 @@ namespace AUTO_BAZ.Functions
         }
         public static string GETBANK(double BANK)
         {
+            if (LookupCacheEnabled && _bankNameCache.TryGetValue(BANK, out var cachedBank))
+            {
+                return cachedBank;
+            }
+
             string GETBANKRet = default;
             var RRST = dbms.DoGetDataSQL<string>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS WHERE (((TCOD_BANKS.CODE)= " + BANK + "))").FirstOrDefault();
             if (!(RRST is null))
@@ -2994,6 +3078,11 @@ namespace AUTO_BAZ.Functions
             {
                 GETBANKRet = "";
             }
+            if (LookupCacheEnabled)
+            {
+                _bankNameCache[BANK] = GETBANKRet;
+            }
+
             return GETBANKRet;
         }
         private static bool IsNull(object p)
