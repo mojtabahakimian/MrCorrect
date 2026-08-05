@@ -206,7 +206,9 @@ SELECT  p.ID                                  AS ShomareBarge,
 FROM    dbo.PGET_HED p
         INNER JOIN dbo.DEED_HED h ON h.N_S = p.N_S AND h.NO_S = 5
 WHERE   p.N_S IS NOT NULL
-  AND   h.SHARH_S NOT LIKE N'خزانه داري شماره ' + CAST(p.ID AS NVARCHAR(20)) + N' %'
+        -- ISNULL لازم است: مقايسه‌ي NULL با LIKE نتيجه‌ي NULL مي‌دهد و رديف
+        -- بي‌سروصدا از خروجي حذف مي‌شود، يعني سند بدون شرح اصلاً گزارش نمي‌شد.
+  AND   ISNULL(h.SHARH_S, N'') NOT LIKE N'خزانه داري شماره ' + CAST(p.ID AS NVARCHAR(20)) + N' %'
 ORDER BY p.ID;
 
 IF @@ROWCOUNT = 0 PRINT '    OK — شرح همه‌ی اسناد با برگه‌شان می‌خواند';
