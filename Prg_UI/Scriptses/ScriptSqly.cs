@@ -21,6 +21,12 @@ namespace Prg_UI.Scriptses
             {
                 db.Open();
 
+                //نوع ارز سطرهای خزانه و سند ; در هر اجرا بررسی میشود چون فرم خزانه بدون این ستون کار نمیکند
+                foreach (var ARZKIND2_TABLE in new[] { "PGET_LST", "TR_PGET_LST", "DEED_DTL" })
+                {
+                    try { db.Execute($@"IF COL_LENGTH('dbo.{ARZKIND2_TABLE}', 'ARZKIND2') IS NULL ALTER TABLE [dbo].[{ARZKIND2_TABLE}] ADD [ARZKIND2] [bigint] NULL"); } catch { }
+                }
+
                 #region SALARY
                 if (_type_ == 2) //مخصوص حقوق
                 {
@@ -3379,10 +3385,6 @@ ORDER BY B.NAME;"); } catch { }
 
                     try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به خزانه
                     try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [MHAZ_NO] [int] NULL"); } catch { } // اضافه کردن مرکز هزینه به جدول تاریخچه خزانه
-
-                    try { db.Execute($@"ALTER TABLE [dbo].[PGET_LST] ADD [ARZKIND2] [bigint] NULL"); } catch { } // اضافه کردن نوع ارز به سطرهای خزانه
-                    try { db.Execute($@"ALTER TABLE [dbo].[TR_PGET_LST] ADD [ARZKIND2] [bigint] NULL"); } catch { } // اضافه کردن نوع ارز به جدول تاریخچه خزانه
-                    try { db.Execute($@"ALTER TABLE [dbo].[DEED_DTL] ADD [ARZKIND2] [bigint] NULL"); } catch { } // اضافه کردن نوع ارز به سطرهای سند
 
                     try { db.Execute($@"ALTER FUNCTION [dbo].[MOGHA_ANBAR] (@dt2 INT, @ANBAR INT, @KOL INT)
 RETURNS TABLE

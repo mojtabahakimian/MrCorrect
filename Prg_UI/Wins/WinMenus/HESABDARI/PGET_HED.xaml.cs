@@ -1241,7 +1241,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //نوع ارز
             if (ARZ_IS_ACTIVE)
             {
-                aRZKIND2Column.ItemsSource = dbms.DoGetDataSQL<TCOD_ARZ>("SELECT ID, Code, Title, ISOCode, (ISOCode + N' - ' + Title + N' - ' + CountryName) AS ARZCOUNTRY, CRT, UID FROM dbo.[TCOD_ARZ]").ToList();
+                aRZKIND2Column.ItemsSource = dbms.DoGetDataSQL<TCOD_ARZ>("IF OBJECT_ID('dbo.TCOD_ARZ') IS NOT NULL SELECT ID, Code, Title, ISOCode, (ISOCode + N' - ' + Title + N' - ' + CountryName) AS ARZCOUNTRY, CRT, UID FROM dbo.[TCOD_ARZ]").ToList();
                 aRZKIND2Column.DisplayMemberPath = "ARZCOUNTRY";
                 aRZKIND2Column.SelectedValuePath = "ID";
             }
