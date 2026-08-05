@@ -196,7 +196,12 @@ IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NOT NULL
             if (string.IsNullOrEmpty(_connectionString))
                 throw new InvalidOperationException("Connection string is not initialized in GeneralOptionManager.");
 
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName;";
+            const string sql = @"
+                SELECT TOP 1 *
+                FROM dbo.GENERAL_OPTIONS
+                WHERE OptionName = @EffectiveOptionName
+                   OR (@UID > 0 AND OptionName = @OptionName AND UID = @UID)
+                ORDER BY CASE WHEN OptionName = @EffectiveOptionName THEN 0 ELSE 1 END;";
             try
             {
                 // استفاده از Dapper به صورت همزمان، دقیقاً مانند App.xaml.cs
@@ -204,7 +209,7 @@ IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NOT NULL
                 {
                     db.Open();
                     EnsureGeneralOptionsTableSync(db);
-                    var result = db.Query<GENERAL_OPTIONS>(sql, new { OptionName = GetEffectiveOptionName(optionName, userId) });
+                    var result = db.Query<GENERAL_OPTIONS>(sql, new { EffectiveOptionName = GetEffectiveOptionName(optionName, userId), OptionName = optionName, UID = userId });
                     return result.FirstOrDefault();
                 }
             }
@@ -341,11 +346,16 @@ IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NOT NULL
             }
             int? currentUserId = userId;
             string effectiveOptionName = GetEffectiveOptionName(optionName, currentUserId);
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName";
+            const string sql = @"
+                SELECT TOP 1 *
+                FROM dbo.GENERAL_OPTIONS
+                WHERE OptionName = @EffectiveOptionName
+                   OR (@UID > 0 AND OptionName = @OptionName AND UID = @UID)
+                ORDER BY CASE WHEN OptionName = @EffectiveOptionName THEN 0 ELSE 1 END";
             try
             {
                 await EnsureGeneralOptionsTableAsync().ConfigureAwait(false);
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = effectiveOptionName })
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { EffectiveOptionName = effectiveOptionName, OptionName = optionName, UID = currentUserId })
                                        .ConfigureAwait(false);
                 return result.FirstOrDefault();
             }
