@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Wins.WinMenus.ANBAR;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -173,7 +174,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
-        private void set_box_josteju_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void set_box_josteju_LostFocus(object sender, RoutedEventArgs e)
         {
             string SHAR;
             if (string.IsNullOrEmpty(set_box_josteju.Text))
@@ -199,6 +200,23 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
                     e.Handled = true;
                     CL_LMethods.SendKey_US(Key.Tab);
+                }
+            }
+        }
+
+        private void mogudi_search_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (mogudi_search.Items.Count > 0)
+            {
+                if (mogudi_search.SelectedItem is not null)
+                {
+                    var row = mogudi_search.SelectedItem as Q8;
+                    if (row?.ANBAR != null && !string.IsNullOrEmpty(row.CODE))
+                    {
+                        F_MENU_KART f_MENU_KART = new F_MENU_KART("R", row.ANBAR.ToString(), row.CODE);
+                        f_MENU_KART.ExternalCallShowReport();
+                        f_MENU_KART.Close();
+                    }
                 }
             }
         }

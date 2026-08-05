@@ -675,8 +675,26 @@ namespace AUTO_BAZ
                         StillMethodIsWorking = true;
                     }));
 
+                    // کش خاموش است تا C0 و C00 تمام شوند.
+                    //
+                    // چرا مهم است: C0 (بازسازی نرخ میانگین) به dbo.DTL_MANF می‌نویسد و
+                    // GETSTANDARDPRICE_MAVAD/DAST/SAR دقیقاً از همان جدول می‌خوانند. اگر کش
+                    // در طول C0 روشن باشد و کسی روزی از داخل C0 یکی از آن توابع را صدا بزند،
+                    // مقدارِ «قبل از اصلاح» تا پایان بازسازی در کش قفل می‌شود و بهای تمام‌شده
+                    // غلط ثبت می‌گردد.
+                    //
+                    // امروز C0 هیچ‌کدام از توابع کش‌شده را صدا نمی‌زند (بررسی شد)، ولی اتکا به
+                    // این موضوع شکننده است. با روشن‌کردن کش بعد از C0/C00، این وابستگی از بین
+                    // می‌رود: هر چه کش می‌شود، حتماً بعد از نهایی‌شدن DTL_MANF خوانده شده است.
                     if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
                     if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
+
+                    // کش جستجوهای تکراری (نام حساب، نام دپارتمان، وجود حساب تفصیلی) فقط در
+                    // طول همین بازسازی دسته‌ای فعال است و برای هر اجرا از نو ساخته می‌شود.
+                    // بیرون از این محدوده خاموش می‌ماند، چون فرم‌های برنامه‌ی اصلی هم همین
+                    // توابع را صدا می‌زنند و آنجا کاربر می‌تواند وسط کار نام حساب را عوض کند.
+                    CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
+                    CL_HESABDARI_AUTO_BAZ.LookupCacheEnabled = true;
 
                     if (Generaly.C1) { tasks.Add(C1_TASK()); } //سند فروش
                     if (Generaly.C2) { tasks.Add(C2_TASK()); } //سند خرید
@@ -788,6 +806,11 @@ namespace AUTO_BAZ
             }
             finally
             {
+                // کش جستجو فقط تا پایان بازسازی زنده می‌ماند؛ بیرون از آن باید خاموش و خالی شود
+                // تا فرم‌های برنامه همیشه مقدار تازه از دیتابیس بخوانند.
+                CL_HESABDARI_AUTO_BAZ.LookupCacheEnabled = false;
+                CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
+
                 if (enteredDurabilityScope)
                 {
                     DelayedDurabilityGuard.ExitRebuildScope();

@@ -112,7 +112,12 @@ namespace Wins.WinMenus.ANBAR
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            CheckPermistion();
+            if (!CheckPermistion())
+            {
+                new Msgwin(false, "شما به کارت انبار دسترسی ندارید!").ShowDialog();
+                this.Close();
+            }
+
             if (!this.IsLoaded)
             {
                 this.Close();
@@ -141,7 +146,7 @@ namespace Wins.WinMenus.ANBAR
             KALA.ItemsSource = MasterAK; KALA.SelectedIndex = -1; KALA.Items.Refresh();
         }
 
-        private void CheckPermistion()
+        private bool CheckPermistion()
         {
             bool HasAccess = false;
             if (CL_HESABDARI.LETSGO("KARTR", this.GetType().Name))
@@ -166,17 +171,17 @@ namespace Wins.WinMenus.ANBAR
                 }
             }
 
-            if (!HasAccess)
-            {
-                new Msgwin(false, "شما به کارت انبار دسترسی ندارید!").ShowDialog();
-                this.Close();
-            }
-
+            return HasAccess;
         }
 
         public void ExternalCallShowReport()
         {
-            CheckPermistion();
+            if (!CheckPermistion())
+            {
+                new Msgwin(false, "شما به کارت انبار دسترسی ندارید!").ShowDialog();
+                this.Close();
+                return;
+            }
 
             if (ANBARCODE != null && KALACODE != null)
             {

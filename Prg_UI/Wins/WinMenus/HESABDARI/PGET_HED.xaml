@@ -286,6 +286,25 @@
                             </Style>
                         </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
+
+                    <DataGridTextColumn x:Name="aRZDColumn" Binding="{Binding ARZD,UpdateSourceTrigger=LostFocus}" Header="نرخ ارز" MinWidth="80" Width="120" Visibility="Hidden"/>
+
+                    <DataGridComboBoxColumn x:Name="aRZKIND2Column" SelectedValueBinding="{Binding ARZKIND2,UpdateSourceTrigger=LostFocus}" Header="نوع ارز" MinWidth="120" Width="220" Visibility="Hidden">
+                        <DataGridComboBoxColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                <Setter Property="IsEditable" Value="True"/>
+                                <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                <Setter Property="IsTextSearchEnabled" Value="True"/>
+                                <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                            </Style>
+                        </DataGridComboBoxColumn.EditingElementStyle>
+                        <DataGridComboBoxColumn.ElementStyle>
+                            <Style TargetType="{x:Type ComboBox}">
+                            </Style>
+                        </DataGridComboBoxColumn.ElementStyle>
+                    </DataGridComboBoxColumn>
                     <!--<DataGridTextColumn x:Name="mABLColumn"
                                         Header="مبلغ"
                                         Binding="{Binding MABL, UpdateSourceTrigger=LostFocus, StringFormat={}{0:N0}, 
@@ -343,8 +362,6 @@
                     <DataGridTextColumn x:Name="n_SERIColumn" Binding="{Binding N_SERI}" Header="شماره سریال" Width="auto" Visibility="Hidden"/>
                     <DataGridTextColumn x:Name="bANKColumn" Binding="{Binding BANK}" Header="بانک" Width="auto" Visibility="Hidden"/>
                     <DataGridTextColumn x:Name="iDHColumn" Binding="{Binding IDH}" Header="IDH" IsReadOnly="True" Width="auto" Visibility="Hidden"/>
-                    <DataGridTextColumn x:Name="aRZDColumn" Binding="{Binding ARZD}" Header="نرخ ارز" Width="auto" Visibility="Hidden"/>
-
 
 
                     <DataGridTextColumn x:Name="fHES_T2Column" Binding="{Binding FHES_T2}" Header="از تفضیلی 2" Width="auto" Visibility="Hidden"/>

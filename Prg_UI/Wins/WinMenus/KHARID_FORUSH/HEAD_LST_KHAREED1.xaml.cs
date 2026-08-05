@@ -470,16 +470,25 @@ namespace Wins.WinMenus.KHARID_FORUSH
             _restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(FTAG, WhereCondition);
             WhereCondition = _restrictionInfo.WhereClause;
 
+            if (IsExporty)
+            {
+                WhereCondition += " AND (ISNULL(dbo.HEAD_LST.SADER, 0) = 1) ";
+            }
+            else
+            {
+                WhereCondition += " AND (ISNULL(dbo.HEAD_LST.SADER, 0) = 0) ";
+            }
+
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} AND (ISNULL(SADER, 0) = {(IsExporty ? 1 : 0)}) ";
             }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-            x => $"SELECT TOP 1 * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+            x => $"SELECT TOP 1 * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG} AND (ISNULL(SADER, 0) = {(IsExporty ? 1 : 0)})", //On Change for One Record
             Convert.ToDouble(NUMBER.Text)
             );
 
@@ -1060,7 +1069,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (IsExporty)
                 {
-                    NUMBER.ItemsSource = dbms.DoGetDataSQL<NUMYS>($"SELECT NUMBER, TAG FROM HEAD_LST WHERE (TAG = {HTAG}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG}))))) AND (SADER = 1 OR SADER IS NULL) ORDER BY NUMBER").ToList();
+                    NUMBER.ItemsSource = dbms.DoGetDataSQL<NUMYS>($"SELECT NUMBER, TAG FROM HEAD_LST WHERE (TAG = {HTAG}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG}))))) AND (SADER = 1) ORDER BY NUMBER").ToList();
                 }
                 else
                 {
@@ -1078,7 +1087,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (IsExporty)
                 {
-                    NUMBER.ItemsSource = dbms.DoGetDataSQL<NUMYS>($"SELECT NUMBER, TAG FROM HEAD_LST WHERE (TAG = {HTAG}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG}))))) AND (SADER=1 OR SADER IS NULL) ORDER BY NUMBER").ToList();
+                    NUMBER.ItemsSource = dbms.DoGetDataSQL<NUMYS>($"SELECT NUMBER, TAG FROM HEAD_LST WHERE (TAG = {HTAG}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG}))))) AND (SADER = 1) ORDER BY NUMBER").ToList();
                 }
                 else
                 {
