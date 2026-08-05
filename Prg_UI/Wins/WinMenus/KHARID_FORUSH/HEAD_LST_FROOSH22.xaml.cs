@@ -1268,9 +1268,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(fTAG, WhereCondition);
             WhereCondition = _restrictionInfo.WhereClause;
 
+            if (IsExporty)
+            {
+                WhereCondition += " AND (ISNULL(dbo.HEAD_LST.SADER, 0) = 1) ";
+            }
+            else
+            {
+                WhereCondition += " AND (ISNULL(dbo.HEAD_LST.SADER, 0) = 0) ";
+            }
+
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {fTAG} ";
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {fTAG} AND (ISNULL(SADER, 0) = {(IsExporty ? 1 : 0)}) ";
             }
 
             //$"SELECT NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID, sgn1usid, sgn2usid, sgn3usid, CRT, UID, ARZKIND2, ARZCODING FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
@@ -1279,7 +1288,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT NUMBER1 , NUMBER , DATE_N , CUST_NO , USER_NAME , MOLAH FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-                x => $"SELECT TOP 1 NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID, sgn1usid, sgn2usid, sgn3usid, CRT, UID, ARZKIND2, ARZCODING FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {fTAG}", //On Change for One Record
+                x => $"SELECT TOP 1 NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID, sgn1usid, sgn2usid, sgn3usid, CRT, UID, ARZKIND2, ARZCODING FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {fTAG} AND (ISNULL(SADER, 0) = {(IsExporty ? 1 : 0)})", //On Change for One Record
                 Convert.ToDouble(NUMBER.Text)
                 );
 
@@ -2109,7 +2118,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if (IsExporty)
                 {
-                    NUMBER.ItemsSource = dbms.DoGetDataSQL<_MG_MODEL2_>("SELECT NUMBER FROM dbo.HEAD_LST WHERE(TAG=2)AND(NOT(NUMBER IN(SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE(((HEAD_LST.TAG)=13)))))AND(SADER=1 OR SADER IS NULL) ORDER BY NUMBER DESC").ToList();
+                    NUMBER.ItemsSource = dbms.DoGetDataSQL<_MG_MODEL2_>("SELECT NUMBER FROM dbo.HEAD_LST WHERE(TAG=2)AND(NOT(NUMBER IN(SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE(((HEAD_LST.TAG)=13)))))AND(SADER=1) ORDER BY NUMBER DESC").ToList();
                 }
                 else
                 {
