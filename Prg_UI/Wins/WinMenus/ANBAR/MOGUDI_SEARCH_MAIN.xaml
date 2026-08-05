@@ -40,7 +40,7 @@
         </ComboBox>
         <Label Content="انبار:" Width="32" Margin="368,58,0,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" HorizontalAlignment="Left"/>
 
-        <DataGrid x:Name="mogudi_search" FlowDirection="RightToLeft" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" MouseRightButtonUp="mogudi_search_MouseRightButtonUp"
+        <DataGrid x:Name="mogudi_search" FlowDirection="RightToLeft" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" MouseRightButtonUp="mogudi_search_MouseRightButtonUp" MouseDoubleClick="mogudi_search_MouseDoubleClick"
                     Style="{StaticResource DATAGRIDSTYLISH}"
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
