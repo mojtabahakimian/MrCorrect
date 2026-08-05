@@ -167,7 +167,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         public class SN_MODEL
         {
-            public int? MHAZ_NO { get; set; }
+            public double? MHAZ_NO { get; set; }
             public string? MHAZNAME { get; set; }
         }
         public class N_RASID_MODEL
