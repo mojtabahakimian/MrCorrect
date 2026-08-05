@@ -22,7 +22,7 @@
         </Border>
         <CheckBox x:Name="ONS" Content="جستجوی لحظه ای" HorizontalAlignment="Left" Margin="404,67,0,0" VerticalAlignment="Top" Width="auto" RenderTransformOrigin="0.5,0.5" Padding="4,-4,0,0"/>
 
-        <TextBox x:Name="set_box_josteju"  Text="" Height="27" Margin="522,61,62,0"   Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TextChanged="set_box_josteju_TextChanged" PreviewLostKeyboardFocus="set_box_josteju_PreviewLostKeyboardFocus"  />
+        <TextBox x:Name="set_box_josteju"  Text="" Height="27" Margin="522,61,62,0"   Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TextChanged="set_box_josteju_TextChanged" LostFocus="set_box_josteju_LostFocus"  />
         <ComboBox x:Name="ANBAR" IsSynchronizedWithCurrentItem="True"   Style="{StaticResource MaterialDesignOutlinedComboBox}" Padding="7,3,10,3"  IsTextSearchEnabled="True" Margin="10,62,0,0" VerticalAlignment="Top" Height="26" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Left" Width="244" SelectedIndex="0">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>

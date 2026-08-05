@@ -174,7 +174,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
-        private void set_box_josteju_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void set_box_josteju_LostFocus(object sender, RoutedEventArgs e)
         {
             string SHAR;
             if (string.IsNullOrEmpty(set_box_josteju.Text))
