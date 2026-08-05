@@ -172,9 +172,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         }
         public class N_RASID_MODEL
         {
-            public string? FNUMB { get; set; }
+            public int? FNUMB { get; set; }
+            public string? FNUMB_TEXT => FNUMB?.ToString();
             public string? nam { get; set; }
-            public string? Expr1 { get; set; }
+            public int? Expr1 { get; set; }
         }
         #endregion
 
@@ -798,7 +799,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
 
             //محل مصرف
-            N_RASID_ALL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT  CONVERT(nvarchar(50), dbo.HEAD_MANF.FNUMB) AS FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, CONVERT(nvarchar(50), dbo.HEAD_MANF.FNUMB) AS Expr1,  dbo.DTL_MANF.CODE FROM         dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE LEFT OUTER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.DTL_MANF.CODE IS NULL)").ToList();
+            N_RASID_ALL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT  dbo.HEAD_MANF.FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, dbo.HEAD_MANF.FNUMB AS Expr1,  dbo.DTL_MANF.CODE FROM         dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE LEFT OUTER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.DTL_MANF.CODE IS NULL)").ToList();
             N_RASID_COLUMN.ItemsSource = N_RASID_ALL;
 
             //مرکز هزینه
@@ -1476,7 +1477,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         var _COMBOBOX_ = e.EditingElement as ComboBox;
                         if (_COMBOBOX_ == null) return;
 
-                        var filteredN_KOL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT  CONVERT(nvarchar(50), dbo.HEAD_MANF.FNUMB) AS FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, CONVERT(nvarchar(50), dbo.HEAD_MANF.FNUMB) AS Expr1,  dbo.DTL_MANF.CODE FROM         dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE LEFT OUTER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.DTL_MANF.CODE IS NULL)").ToList();
+                        var filteredN_KOL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT  dbo.HEAD_MANF.FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, dbo.HEAD_MANF.FNUMB AS Expr1,  dbo.DTL_MANF.CODE FROM         dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE LEFT OUTER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.DTL_MANF.CODE IS NULL)").ToList();
 
                         // تنظیم آیتم‌های کمبوباکس
                         _COMBOBOX_.ItemsSource = filteredN_KOL;
@@ -1488,7 +1489,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         }
                         else if (filteredN_KOL.Any())
                         {
-                            _COMBOBOX_.SelectedValue = filteredN_KOL.FirstOrDefault().FNUMB;
+                            _COMBOBOX_.SelectedValue = filteredN_KOL.FirstOrDefault().FNUMB_TEXT;
                         }
 
                         // رفرش کردن آیتم‌ها

@@ -193,7 +193,7 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridComboBoxColumn x:Name="N_RASID_COLUMN" Width="*" Header="محل مصرف" SelectedValueBinding="{Binding N_RASID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="nam" SelectedValuePath="FNUMB">
+                    <DataGridComboBoxColumn x:Name="N_RASID_COLUMN" Width="*" Header="محل مصرف" SelectedValueBinding="{Binding N_RASID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="nam" SelectedValuePath="FNUMB_TEXT">
                         <DataGridComboBoxColumn.EditingElementStyle>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                 <Setter Property="IsEditable" Value="True"/>
