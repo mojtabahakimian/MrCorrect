@@ -339,7 +339,8 @@ namespace Wins.WinMenus.CONFIGS
             CL_HESABDARI.SETSECURITY(this.GetType().Name, "SYS", new WindowInteropHelper(this).Handle, this.GetType().Name);
             if (!this.IsLoaded) { this.Close(); return; }
 
-            var RST = dbms.DoGetDataSQL<SAZMAN>($"SELECT SMS_USERNAME,SMS_PASSWORD ,SMS_LIBKEY , SMS_TSMSHOST , DSMS , PRMFR , SMSACT , SMS_OWNER , SMSTYPE ," +
+            var smsTypeColumn = dbms.DoGetDataSQL<int>("SELECT CASE WHEN COL_LENGTH('dbo.SAZMAN', 'SMSTYPE') IS NULL THEN 0 ELSE 1 END").FirstOrDefault() == 1 ? "SMSTYPE" : "'TSMS' AS SMSTYPE";
+            var RST = dbms.DoGetDataSQL<SAZMAN>($"SELECT SMS_USERNAME,SMS_PASSWORD ,SMS_LIBKEY , SMS_TSMSHOST , DSMS , PRMFR , SMSACT , SMS_OWNER , {smsTypeColumn} ," +
                 $"WIDTH_D,HIGH_D,BACKPATH,TFADDRESS,TFTEL,SERVERNAM,EMZA,OPTIONSS " + //عمومی
                 $"PERSON,SANAD,TKHF,SIGN,CTL_DT,SNDKH,SAGHF,SAGHF2,CPI,ARSESH,TFTPAGE, " + //اسناد و حساب
                 $"GHAYM,KALA,FRUP,WAR,UPDDATE,LST,MOJU,RMOG,DIG,TFCODE_E,CODEVIEW,MAND,SERFACB,LOCKFAP,DEFANB,DEFTKH,TRANSF, " + //فاکتور انبار

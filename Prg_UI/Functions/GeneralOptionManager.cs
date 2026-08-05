@@ -35,6 +35,61 @@ namespace Prg_UI.Functions
             _connectionString = CL_CCNNMANAGER.CONNECTION_STR; // اضافه شد
         }
 
+        private const string EnsureGeneralOptionsTableSql = @"
+IF OBJECT_ID(N'dbo.GENERAL_OPTIONS', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[GENERAL_OPTIONS] (
+        [OptionName]  NVARCHAR(100) PRIMARY KEY NOT NULL,
+        [OptionValue] NVARCHAR(500) NULL,
+        [Description] NVARCHAR(1000) NULL,
+        [LastUpdated] DATETIME DEFAULT GETDATE(),
+        [CRT] DATETIME NULL DEFAULT GETDATE(),
+        [UID] int NULL
+    );
+END;
+
+IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'LastUpdated') IS NULL
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [LastUpdated] DATETIME NULL DEFAULT GETDATE();
+
+IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'CRT') IS NULL
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [CRT] DATETIME NULL DEFAULT GETDATE();
+
+IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NULL
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD [UID] int NULL;
+
+IF COL_LENGTH('dbo.GENERAL_OPTIONS', 'UID') IS NOT NULL
+   AND EXISTS (
+       SELECT 1
+       FROM sys.columns c
+       INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+       WHERE c.object_id = OBJECT_ID(N'dbo.GENERAL_OPTIONS', N'U')
+         AND c.name = N'UID'
+         AND t.name = N'bigint'
+   )
+   AND NOT EXISTS (
+       SELECT 1
+       FROM dbo.GENERAL_OPTIONS
+       WHERE UID IS NOT NULL
+         AND (UID > 2147483647 OR UID < -2147483648)
+   )
+    ALTER TABLE [dbo].[GENERAL_OPTIONS] ALTER COLUMN [UID] int NULL;";
+
+        private void EnsureGeneralOptionsTableSync(SqlConnection db)
+        {
+            db.Execute(EnsureGeneralOptionsTableSql);
+        }
+
+        private Task EnsureGeneralOptionsTableAsync()
+        {
+            return _dbms.ExecuteSqlCommandAsync(EnsureGeneralOptionsTableSql);
+        }
+
+        private static string GetEffectiveOptionName(string optionName, int? userId)
+        {
+            return userId > 0 ? $"{optionName}_U{userId}" : optionName;
+        }
+
+
         /// <summary>
         /// مقدار IsRDPMode را از کش دریافت می‌کند (Static Property - Per User).
         /// این پراپرتی بسیار سریع و بدون هنگ کردن (Deadlock-Free) است.
@@ -141,14 +196,20 @@ namespace Prg_UI.Functions
             if (string.IsNullOrEmpty(_connectionString))
                 throw new InvalidOperationException("Connection string is not initialized in GeneralOptionManager.");
 
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
+            const string sql = @"
+                SELECT TOP 1 *
+                FROM dbo.GENERAL_OPTIONS
+                WHERE OptionName = @EffectiveOptionName
+                   OR (@UID > 0 AND OptionName = @OptionName AND UID = @UID)
+                ORDER BY CASE WHEN OptionName = @EffectiveOptionName THEN 0 ELSE 1 END;";
             try
             {
                 // استفاده از Dapper به صورت همزمان، دقیقاً مانند App.xaml.cs
                 using (var db = new Microsoft.Data.SqlClient.SqlConnection(_connectionString))
                 {
                     db.Open();
-                    var result = db.Query<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = userId });
+                    EnsureGeneralOptionsTableSync(db);
+                    var result = db.Query<GENERAL_OPTIONS>(sql, new { EffectiveOptionName = GetEffectiveOptionName(optionName, userId), OptionName = optionName, UID = userId });
                     return result.FirstOrDefault();
                 }
             }
@@ -284,15 +345,17 @@ namespace Prg_UI.Functions
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
             int? currentUserId = userId;
-            string extra = "";
-            if (currentUserId > 0)
-            {
-                extra = " AND UID = @UID ";
-            }
-            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName {extra}";
+            string effectiveOptionName = GetEffectiveOptionName(optionName, currentUserId);
+            const string sql = @"
+                SELECT TOP 1 *
+                FROM dbo.GENERAL_OPTIONS
+                WHERE OptionName = @EffectiveOptionName
+                   OR (@UID > 0 AND OptionName = @OptionName AND UID = @UID)
+                ORDER BY CASE WHEN OptionName = @EffectiveOptionName THEN 0 ELSE 1 END";
             try
             {
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = currentUserId })
+                await EnsureGeneralOptionsTableAsync().ConfigureAwait(false);
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { EffectiveOptionName = effectiveOptionName, OptionName = optionName, UID = currentUserId })
                                        .ConfigureAwait(false);
                 return result.FirstOrDefault();
             }
@@ -313,15 +376,12 @@ namespace Prg_UI.Functions
                 return new List<GENERAL_OPTIONS>();
             }
             int? currentUserId = userId;
-            string extra = "";
-            if (currentUserId > 0)
-            {
-                extra = " AND UID = @UID ";
-            }
-            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
+            var effectiveOptionNames = optionNames.Select(optionName => GetEffectiveOptionName(optionName, currentUserId)).ToList();
+            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames";
             try
             {
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = currentUserId })
+                await EnsureGeneralOptionsTableAsync().ConfigureAwait(false);
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = effectiveOptionNames })
                                        .ConfigureAwait(false);
                 return result.ToList();
             }
@@ -343,11 +403,7 @@ namespace Prg_UI.Functions
             }
 
             int? currentUserId = userId;
-
-            if (currentUserId > 0)
-            {
-                option.UID = currentUserId;
-            }
+            string effectiveOptionName = GetEffectiveOptionName(option.OptionName, currentUserId);
 
             const string sql = @"
                 MERGE dbo.GENERAL_OPTIONS AS target
@@ -364,9 +420,10 @@ namespace Prg_UI.Functions
                     VALUES (@OptionName, @OptionValue, @Description, @UID, GETDATE());";
             try
             {
+                await EnsureGeneralOptionsTableAsync().ConfigureAwait(false);
                 var parameters = new
                 {
-                    option.OptionName,
+                    OptionName = effectiveOptionName,
                     option.OptionValue,
                     option.Description,
                     UID = currentUserId
@@ -392,10 +449,12 @@ namespace Prg_UI.Functions
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
             int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
-            const string sql = "DELETE FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
+            string effectiveOptionName = GetEffectiveOptionName(optionName, currentUserId);
+            const string sql = "DELETE FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName;";
             try
             {
-                int? affectedRows = await _dbms.ExecuteSqlCommandAsync(sql, new { OptionName = optionName, UID = currentUserId })
+                await EnsureGeneralOptionsTableAsync().ConfigureAwait(false);
+                int? affectedRows = await _dbms.ExecuteSqlCommandAsync(sql, new { OptionName = effectiveOptionName })
                                               .ConfigureAwait(false); // جلوگیری از ددلاک
 
                 // اگر حذف موفق بود، کش را هم پاک می‌کنیم
