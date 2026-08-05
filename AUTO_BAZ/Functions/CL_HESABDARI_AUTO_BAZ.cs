@@ -1907,8 +1907,25 @@ namespace AUTO_BAZ.Functions
                             catch { IsSuccessfully = false; }
 
 
+                            // ⚠️ اینجا قبلاً پرانتز جابه‌جا بسته شده بود و MEGHk به‌جای اینکه در
+                            // «نتیجه» ضرب شود، داخل آرگومان «تاریخ» رفته بود:
+                            //     GETSTANDARDPRICE_DAST(CODE, (long)(DATE_N * MEGHk))
+                            //
+                            // دو اثر داشت:
+                            //  ۱) dt فقط تعیین می‌کند کدام «فرمول ساخت» در آن تاریخ معتبر بوده
+                            //     (شرط HEAD_LST.DATE_N <= dt در GETLASTFR). با DATE_N * MEGHk
+                            //     عددی به‌دست می‌آمد که تاریخ نبود؛ اگر MEGHk > 1 بود همیشه
+                            //     جدیدترین فرمول انتخاب می‌شد، نه فرمول معتبرِ تاریخ فاکتور.
+                            //  ۲) ضرب در مقدار اصلاً انجام نمی‌شد، پس دستمزدِ «یک واحد» ثبت
+                            //     می‌شد در حالی که مواد و سربار برای کل مقدار حساب شده بودند.
+                            //
+                            // سند نامتوازن نمی‌شد (همین DAST هم در بدهکار و هم در بستانکار
+                            // می‌نشیند)، ولی بهای تمام‌شده کمتر از واقع ثبت می‌شد.
+                            //
+                            // شکل درست همان است که دو خط بالا و پایین (MAVAD و SAR) دارند و
+                            // همین محاسبه در خطوط ۶۰۰۴ و ۶۸۵۸ همین فایل هم درست نوشته شده.
                             DAST = sanatPriceNeeded
-                                ? Math.Round((double)GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)(Convert.ToInt64(HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk)))
+                                ? Math.Round((double)(GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk))
                                 : 0d;
                             SAR = sanatPriceNeeded
                                 ? Math.Round((double)((double)GETSTANDARDPRICE_SAR(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk))
