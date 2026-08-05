@@ -4455,12 +4455,20 @@ namespace AUTO_BAZ.Functions
             var txPrefix = useExternal ? string.Empty : "SET XACT_ABORT ON; BEGIN TRANSACTION;";
             var txSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
 
+            // ARZKIND2 = «نوع ارز» هر ردیف خزانه (دلار / یورو / …).
+            // چون در یک برگه‌ی خزانه ممکن است بخشی از وجه دلاری و بخشی یورویی باشد، نوع ارز
+            // روی «هر ردیف» نگهداری می‌شود و باید همراه بقیه‌ی ستون‌ها به ردیف سند منتقل شود؛
+            // وگرنه بازسازی، اطلاعات ارز اسناد قبلی را پاک می‌کند.
+            //
+            // ستون در ScriptSqly (بخش مهاجرت) به‌صورت idempotent و nullable روی
+            // PGET_LST / TR_PGET_LST / DEED_DTL ساخته می‌شود و در هر بار اجرای برنامه بررسی
+            // می‌شود، پس روی دیتابیسی که هنوز آن را ندارد هم مشکلی پیش نمی‌آید.
             const string detailInsertSql =
-                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, MHAZ_NO " +
+                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, ARZKIND2, MHAZ_NO) " +
+                "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, ARZKIND2, MHAZ_NO " +
                 "FROM dbo.PGET_LST WHERE ID = @TreasuryId;" +
-                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, MHAZ_NO " +
+                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, ARZKIND2, MHAZ_NO) " +
+                "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, ARZKIND2, MHAZ_NO " +
                 "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
 
             // حالت الف) هدر سند در مرحله ۲ ساخته شده؛ اینجا فقط شماره‌اش روی ردیف خزانه ثبت
