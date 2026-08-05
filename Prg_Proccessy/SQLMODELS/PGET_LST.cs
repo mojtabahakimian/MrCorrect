@@ -38,7 +38,7 @@ namespace Prg_Proccessy.SQLMODELS
         private double? _mabl;
         public double? MABL
         {
-            get => _mabl; 
+            get => _mabl;
             set
             {
                 if (_mabl == value) return; _mabl = value;
@@ -111,6 +111,9 @@ namespace Prg_Proccessy.SQLMODELS
 
         private double? _arzd;
         public double? ARZD { get => _arzd; set { if (_arzd == value) return; _arzd = value; OnPropertyChanged("ARZD"); } }
+
+        private long? _arzkind2;
+        public long? ARZKIND2 { get => _arzkind2; set { if (_arzkind2 == value) return; _arzkind2 = value; OnPropertyChanged("ARZKIND2"); } }
 
         private int? _fhes_t2;
         public int? FHES_T2 { get => _fhes_t2; set { if (_fhes_t2 == value) return; _fhes_t2 = value; OnPropertyChanged("FHES_T2"); } }
