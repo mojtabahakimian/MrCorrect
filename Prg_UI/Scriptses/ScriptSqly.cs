@@ -21,6 +21,12 @@ namespace Prg_UI.Scriptses
             {
                 db.Open();
 
+                //نوع ارز سطرهای خزانه و سند ; در هر اجرا بررسی میشود چون فرم خزانه بدون این ستون کار نمیکند
+                foreach (var ARZKIND2_TABLE in new[] { "PGET_LST", "TR_PGET_LST", "DEED_DTL" })
+                {
+                    try { db.Execute($@"IF COL_LENGTH('dbo.{ARZKIND2_TABLE}', 'ARZKIND2') IS NULL ALTER TABLE [dbo].[{ARZKIND2_TABLE}] ADD [ARZKIND2] [bigint] NULL"); } catch { }
+                }
+
                 #region SALARY
                 if (_type_ == 2) //مخصوص حقوق
                 {

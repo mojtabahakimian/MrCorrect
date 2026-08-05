@@ -675,6 +675,13 @@ namespace AUTO_BAZ
                         StillMethodIsWorking = true;
                     }));
 
+                    // کش جستجوهای تکراری (نام حساب، نام دپارتمان، وجود حساب تفصیلی) فقط در
+                    // طول همین بازسازی دسته‌ای فعال است و برای هر اجرا از نو ساخته می‌شود.
+                    // بیرون از این محدوده خاموش می‌ماند، چون فرم‌های برنامه‌ی اصلی هم همین
+                    // توابع را صدا می‌زنند و آنجا کاربر می‌تواند وسط کار نام حساب را عوض کند.
+                    CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
+                    CL_HESABDARI_AUTO_BAZ.LookupCacheEnabled = true;
+
                     if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
                     if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
 
@@ -788,6 +795,11 @@ namespace AUTO_BAZ
             }
             finally
             {
+                // کش جستجو فقط تا پایان بازسازی زنده می‌ماند؛ بیرون از آن باید خاموش و خالی شود
+                // تا فرم‌های برنامه همیشه مقدار تازه از دیتابیس بخوانند.
+                CL_HESABDARI_AUTO_BAZ.LookupCacheEnabled = false;
+                CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
+
                 if (enteredDurabilityScope)
                 {
                     DelayedDurabilityGuard.ExitRebuildScope();

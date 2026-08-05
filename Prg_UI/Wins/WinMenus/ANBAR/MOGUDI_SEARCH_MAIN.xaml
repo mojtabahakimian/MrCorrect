@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         FontFamily="{StaticResource IRANYEKAN}"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
@@ -22,7 +23,7 @@
         </Border>
         <CheckBox x:Name="ONS" Content="جستجوی لحظه ای" HorizontalAlignment="Left" Margin="404,67,0,0" VerticalAlignment="Top" Width="auto" RenderTransformOrigin="0.5,0.5" Padding="4,-4,0,0"/>
 
-        <TextBox x:Name="set_box_josteju"  Text="" Height="27" Margin="522,61,62,0"   Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TextChanged="set_box_josteju_TextChanged" PreviewLostKeyboardFocus="set_box_josteju_PreviewLostKeyboardFocus"  />
+        <TextBox x:Name="set_box_josteju"  Text="" Height="27" Margin="522,61,62,0"   Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TextChanged="set_box_josteju_TextChanged" LostFocus="set_box_josteju_LostFocus"  />
         <ComboBox x:Name="ANBAR" IsSynchronizedWithCurrentItem="True"   Style="{StaticResource MaterialDesignOutlinedComboBox}" Padding="7,3,10,3"  IsTextSearchEnabled="True" Margin="10,62,0,0" VerticalAlignment="Top" Height="26" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Left" Width="244" SelectedIndex="0">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -40,7 +41,7 @@
         </ComboBox>
         <Label Content="انبار:" Width="32" Margin="368,58,0,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" HorizontalAlignment="Left"/>
 
-        <DataGrid x:Name="mogudi_search" FlowDirection="RightToLeft" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" MouseRightButtonUp="mogudi_search_MouseRightButtonUp"
+        <DataGrid x:Name="mogudi_search" FlowDirection="RightToLeft" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" MouseRightButtonUp="mogudi_search_MouseRightButtonUp" MouseDoubleClick="mogudi_search_MouseDoubleClick"
                     Style="{StaticResource DATAGRIDSTYLISH}"
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"

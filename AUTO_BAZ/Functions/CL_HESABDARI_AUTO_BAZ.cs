@@ -30,7 +30,89 @@ namespace AUTO_BAZ.Functions
 
         public static bool UseSmartThrottlingByDefault { get; set; } = false;
 
+        #region LOOKUP_CACHE
+        // ───────────────────────────────────────────────────────────────────────────────
+        // کش جستجوهای تکراری.
+        //
+        // چرا لازم است: توابع کمکی مثل ISHESAB، GETTAFNAME و GETF_DEPART داخل حلقه‌های
+        // بازسازی و به‌ازای هر قلم کالا صدا زده می‌شوند و هر بار یک رفت‌وبرگشت کامل به
+        // SQL Server می‌زنند — در حالی که تقریباً همیشه همان جواب قبلی را برمی‌گردانند.
+        // مثلاً GETF_DEPART(20) هزاران بار صدا زده می‌شود و همیشه یک رشته می‌دهد.
+        // در یک فاکتور با ۱۰ قلم کالا، این توابع به‌تنهایی ده‌ها رفت‌وبرگشت تولید می‌کنند.
+        //
+        // ایمنی: هر سه «خواندن خالص» از جدول‌های مرجع هستند که در طول یک اجرای بازسازی
+        // تغییر نمی‌کنند — به‌جز حساب‌هایی که خود CREATHES می‌سازد و بلافاصله کش را
+        // به‌روز می‌کند. ConcurrentDictionary برای استفاده‌ی همزمان چند Thread امن است.
+        //
+        // ⚠️ در ابتدای هر اجرای بازسازی حتماً ClearLookupCaches() صدا زده شود تا اگر
+        //    کاربر بین دو اجرا حسابی اضافه کرده باشد، داده‌ی کهنه نماند.
+        // ───────────────────────────────────────────────────────────────────────────────
+
+        // کلید کش عمداً double است و نه int: صداکننده‌های ISHESAB مقادیری مثل
+        // Convert.ToInt64(CODE) می‌فرستند و STUF_DEF.CODE از نوع nvarchar(15) است،
+        // پس می‌تواند از محدوده‌ی int بیرون بزند. Convert.ToInt32 روی چنین مقداری
+        // OverflowException می‌داد — خطایی که قبلاً وجود نداشت.
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(double Kol, double Moin, double Taf), bool> _existingAccounts = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _tafNameCache = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<long, string> _departNameCache = new();
+
+        // قیمت استاندارد (مواد / دستمزد / سربار) به‌ازای هر قلم کالای هر فاکتور خوانده می‌شود.
+        // هر سه تابع GETSTANDARDPRICE_* عیناً یک کوئری سنگین روی HEAD_MANF+DTL_MANF می‌زنند
+        // و هرکدام یک GETLASTFR هم صدا می‌زنند — یعنی ۶ رفت‌وبرگشت برای هر قلم کالا.
+        // این‌ها «خواندن خالص» از جدول‌های تولید هستند و در طول یک بازسازی تغییر نمی‌کنند.
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _standardPriceMavad = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _standardPriceDast = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _standardPriceSar = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Code, long Dt), double> _lastFrCache = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<double, string> _kalaNameCache = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<double, string> _bankNameCache = new();
+
+        /// <summary>
+        /// کش فقط در جریان «بازسازی دسته‌ای» فعال می‌شود.
+        /// پیش‌فرض خاموش است چون فرم‌های برنامه‌ی اصلی هم همین توابع را صدا می‌زنند و
+        /// آنجا کاربر می‌تواند وسط کار نام حساب یا دپارتمان را عوض کند؛ کش ماندگار
+        /// باعث می‌شد تا پایان عمر برنامه مقدار کهنه برگردد.
+        /// </summary>
+        public static bool LookupCacheEnabled { get; set; } = false;
+
+        /// <summary>
+        /// پاک کردن همه‌ی کش‌های جستجو. در ابتدای هر اجرای بازسازی صدا زده شود.
+        /// </summary>
+        public static void ClearLookupCaches()
+        {
+            _existingAccounts.Clear();
+            _tafNameCache.Clear();
+            _departNameCache.Clear();
+            _standardPriceMavad.Clear();
+            _standardPriceDast.Clear();
+            _standardPriceSar.Clear();
+            _lastFrCache.Clear();
+            _kalaNameCache.Clear();
+            _bankNameCache.Clear();
+        }
+
+        /// <summary>
+        /// ثبت اینکه یک حساب تفصیلی قطعاً وجود دارد (بعد از ساخت موفق آن).
+        /// </summary>
+        private static void MarkAccountExists(double kol, double moin, double taf)
+        {
+            if (LookupCacheEnabled)
+            {
+                _existingAccounts[(kol, moin, taf)] = true;
+            }
+        }
+        #endregion
+
         #region Custom_Modelses
+        /// <summary>
+        /// خروجی کوئری‌های «جمع به‌ازای هر سند» که یکجا پیش‌خوانده می‌شوند.
+        /// </summary>
+        public class InvoiceSumRow
+        {
+            public double? NUMBER { get; set; }
+            public double? Total { get; set; }
+        }
+
         public class QUERY_MODEL6
         {
             public int? IDH { get; set; }
@@ -891,6 +973,11 @@ namespace AUTO_BAZ.Functions
 
         public static string GETKALANAME(double CODE)
         {
+            if (LookupCacheEnabled && _kalaNameCache.TryGetValue(CODE, out var cachedKala))
+            {
+                return cachedKala;
+            }
+
             string returnValue = "";
             var RRST = dbms.DoGetDataSQL<Custom_STUF_DEF>("SELECT CODE,NAME FROM STUF_DEF WHERE (CODE = " + Convert.ToString(CODE) + ")").FirstOrDefault();
             if (RRST != null)
@@ -908,11 +995,24 @@ namespace AUTO_BAZ.Functions
             {
                 returnValue = " ";
             }
+
+            if (LookupCacheEnabled)
+            {
+                _kalaNameCache[CODE] = returnValue;
+            }
+
             return returnValue;
         }
 
         public static string GETTAFNAME(string HES)
         {
+            // نام حساب در طول یک اجرای بازسازی تغییر نمی‌کند، ولی این تابع
+            // چند بار برای هر فاکتور (در ساخت شرح‌ها) صدا زده می‌شود.
+            if (LookupCacheEnabled && HES != null && _tafNameCache.TryGetValue(HES, out var cachedName))
+            {
+                return cachedName;
+            }
+
             string returnValue = "";
             var RRST = dbms.DoGetDataSQL<string>("SELECT     NAME FROM dbo.CUST_HESAB WHERE     (hes = N'" + HES + "')").ToList();
             if (RRST.Count > 0)
@@ -932,6 +1032,15 @@ namespace AUTO_BAZ.Functions
             {
                 returnValue = " ";
             }
+
+            // فقط پاسخ قطعی کش می‌شود. اگر حساب پیدا نشد (" ")، کش نمی‌کنیم؛
+            // چون همین‌جا در ادامه CREATHES ممکن است همان حساب را بسازد و
+            // پاسخ کهنه‌ی «پیدا نشد» تا پایان اجرا باقی بماند.
+            if (LookupCacheEnabled && HES != null && returnValue != " ")
+            {
+                _tafNameCache[HES] = returnValue;
+            }
+
             return returnValue;
         }
 
@@ -1255,7 +1364,6 @@ namespace AUTO_BAZ.Functions
             double? SANAD_NUMBER = null;
             bool IsSuccessfully = true;
 
-            double progress = 0;
             MainWindow auto_run = null;
             if (InternalCalling)
             {
@@ -1268,15 +1376,141 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("شروع بازسازی سند فروش");
             //var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF FROM dbo.DEED_HED").ToList();
             var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT  * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG = 13) ORDER BY NUMBER").ToList();
-            string SHSH = string.Empty;
 
+            // گزارش پیشرفت غیرمسدودکننده.
+            // قبلاً برای هر فاکتور یک Dispatcher.Invoke همگام صدا زده می‌شد؛ چون فقط یک Thread
+            // اجازه‌ی دسترسی به رابط کاربری دارد، همه‌ی Threadهای حلقه پشت آن صف می‌کشیدند و
+            // موازی‌سازی عملاً از بین می‌رفت. ضمناً progress++ اتمیک نبود و عدد گم می‌کرد.
+            var progressReporter = new ThrottledProgressReporter(
+                HFRST.Count,
+                InternalCalling && auto_run != null ? auto_run.Dispatcher : null,
+                value =>
+                {
+                    // Math.Max لازم است: گزارش‌ها با BeginInvoke صف می‌شوند و ترتیب اجرایشان
+                    // تضمین‌شده نیست؛ بدون آن نوار پیشرفت گاهی به عقب می‌پرد.
+                    auto_run.PRGR_C1.Value = Math.Max(auto_run.PRGR_C1.Value, value);
+                    auto_run.LBL_C1.Content = $"{auto_run.PRGR_C1.Value:F2}%";
+                    auto_run.UpdateOverallProgressBar();
+                });
+
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // بهای تمام‌شده (مواد/دستمزد/سربار) فقط وقتی به کار می‌آید که کاراکتر ۶۶ گزینه‌ها
+            // برابر "5" نباشد — همان شرطِ if پایین‌تر. اگر "5" باشد آن بلوک هرگز اجرا نمی‌شود
+            // و MAVAD/DAST/SAR در هیچ جای دیگری استفاده نمی‌شوند.
+            //
+            // ولی سه فراخوانی GETSTANDARDPRICE_* «قبل» از آن شرط انجام می‌شد: برای هر قلم کالا
+            // سه کوئری سنگین روی HEAD_MANF + DTL_MANF (هرکدام به‌علاوه یک GETLASTFR) زده می‌شد
+            // و نتیجه‌اش دور ریخته می‌شد.
+            //
+            // این مقدار در طول اجرا ثابت است، پس یک بار حساب می‌شود.
+            var sanatPriceNeeded = Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5";
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // پیش‌خواندن دو جمعِ هر فاکتور با «دو» کوئری، به‌جای دو کوئری برای «هر» فاکتور.
+            // مقدارشان فقط به شماره فاکتور بستگی دارد، پس یکجا خواندنشان دقیقاً همان
+            // نتیجه را می‌دهد. با هزاران فاکتور، هزاران رفت‌وبرگشت حذف می‌شود.
+            // نبودِ کلید در Dictionary یعنی «جمعی وجود ندارد» که همان صفرِ کد قبلی است.
+            // ───────────────────────────────────────────────────────────────────────────────
+            var invoiceNumbers = HFRST.Where(r => r?.NUMBER != null).Select(r => r.NUMBER.Value).ToList();
+            var jamfByInvoice = new Dictionary<double, double>();
+            var jamchByInvoice = new Dictionary<double, double>();
+
+            if (invoiceNumbers.Count > 0)
+            {
+                var minNum = SqlNum(invoiceNumbers.Min());
+                var maxNum = SqlNum(invoiceNumbers.Max());
+
+                foreach (var row in dbms.DoGetDataSQL<InvoiceSumRow>(
+                    $"SELECT NUMBER, SUM(MABL_K) AS Total FROM dbo.INVO_LST " +
+                    $"WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
+                {
+                    if (row?.NUMBER != null && row.Total != null)
+                    {
+                        jamfByInvoice[row.NUMBER.Value] = row.Total.Value;
+                    }
+                }
+
+                foreach (var row in dbms.DoGetDataSQL<InvoiceSumRow>(
+                    $"SELECT NUMBER, SUM(MABL) AS Total FROM dbo.PAY_GETD " +
+                    $"WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
+                {
+                    if (row?.NUMBER != null && row.Total != null)
+                    {
+                        jamchByInvoice[row.NUMBER.Value] = row.Total.Value;
+                    }
+                }
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // حالت «سند روزانه» (Baseknow.SNDKH): همه‌ی فاکتورهای یک تاریخ باید یک شماره سند
+            // مشترک بگیرند تا شماره سندها زیاد نشود.
+            //
+            // این کار سه بار در بدنه‌ی حلقه تکرار شده بود و هر بار به شکل «بگرد؛ اگر نبود بساز».
+            // در اجرای موازی این یک رقابت واقعی است: دو Thread با فاکتورهای هم‌تاریخ می‌توانند
+            // هر دو جواب «سندی با این تاریخ نیست» بگیرند و هر دو سند بسازند — یعنی دو سند
+            // روزانه برای یک تاریخ، که دقیقاً نقض هدف این حالت است.
+            //
+            // راه‌حل: برای هر تاریخ یک قفل. تاریخ‌های مختلف همچنان موازی پیش می‌روند.
+            // نتیجه‌ی هر تاریخ هم نگه داشته می‌شود تا فاکتورهای بعدی همان تاریخ اصلاً کوئری نزنند
+            // (به‌جای یک کوئری برای هر فاکتور، یک کوئری برای هر تاریخ).
+            //
+            // محدودیت: این قفل درون‌پروسه‌ای است. اگر دو نسخه از برنامه هم‌زمان بازسازی کنند،
+            // رقابت باقی می‌ماند — ولی پنجره‌اش بسیار کوچک‌تر از قبل است.
+            // ───────────────────────────────────────────────────────────────────────────────
+            var dailyDocByDate = new System.Collections.Concurrent.ConcurrentDictionary<long, double>();
+            var dailyDocGates = new System.Collections.Concurrent.ConcurrentDictionary<long, object>();
+
+            // خروجی Created فقط وقتی true است که همین فراخوانی سند را ساخته باشد؛
+            // دقیقاً مثل کد قبلی که فقط در شاخه‌ی ساخت، N_S فاکتور را در حافظه ست می‌کرد.
+            (double Ns, bool Created) ResolveDailyDocument(long dateN, string sharh, string userName)
+            {
+                if (dailyDocByDate.TryGetValue(dateN, out var known))
+                {
+                    return (known, false);
+                }
+
+                lock (dailyDocGates.GetOrAdd(dateN, _ => new object()))
+                {
+                    if (dailyDocByDate.TryGetValue(dateN, out known))
+                    {
+                        return (known, false);
+                    }
+
+                    var found = dbms.DoGetDataSQL<QRE10>(
+                        "SELECT BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE no_s = 2 AND DATE_S = @DocDate",
+                        new { DocDate = dateN }).ToList();
+
+                    var created = found.Count == 0;
+                    var resolved = created
+                        ? Createsanad(dateN, sharh, 0, 2, -1, userName)
+                        : (double)found.Select(x => x.N_S).FirstOrDefault();
+
+                    dailyDocByDate[dateN] = resolved;
+                    return (resolved, created);
+                }
+            }
 
             try
             {
                 //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++)
                 var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+
+                LogWriter.WriteLog(
+                    $"سند فروش - تعداد رکورد: {HFRST.Count} | موازی: {Generaly.UseParallelProcessing} | " +
+                    $"MaxDegreeOfParallelism: {dbParallelOptions.MaxDegreeOfParallelism}");
+
                 ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
                 {
+                    observedThreads.TryAdd(Environment.CurrentManagedThreadId, 0);
+
+                    // ⚠️ SHSH قبلاً بیرون از حلقه تعریف شده بود و بین همه‌ی Threadها مشترک بود.
+                    // یعنی Thread دوم می‌توانست شرح فاکتور خودش را روی آن بنویسد و Thread اول
+                    // همان مقدار غلط را به Createsanad بدهد → شرح سند حسابداری اشتباه.
+                    // حالا برای هر فاکتور محلی است.
+                    string SHSH = string.Empty;
                     double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
                     string shart;
                     double MAVAD;
@@ -1288,17 +1522,6 @@ namespace AUTO_BAZ.Functions
                     var TAMIR = default(string);
                     string PER;
                     long permab;
-                    if (InternalCalling)
-                    {
-                        auto_run.Dispatcher.Invoke(new Action(() =>
-                        {
-                            progress++;
-                            auto_run.PRGR_C1.Value = progress / ((double)HFRST.Count) * 100.0; // Update the progress bar
-                            auto_run.LBL_C1.Content = $"{progress:F2}%";
-                            auto_run.UpdateOverallProgressBar();
-                        }));
-                    }
-
                     if (HFRST[HFRST_EOF]?.CUST_NO == "213-1-429") //213-1-429
                     {
 
@@ -1331,49 +1554,34 @@ namespace AUTO_BAZ.Functions
                                 }
                                 else
                                 {
-                                SEJ:
-                                    SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
-                                    if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                    // تاریخ سند با تاریخ فاکتور نمی‌خواند → سند روزانه‌ی تاریخ جدید
+                                    var daily = ResolveDailyDocument((long)HFRST[HFRST_EOF].DATE_N, SHSH, HFRST[HFRST_EOF].USER_NAME);
+                                    max_ns = daily.Ns;
+                                    if (daily.Created)
                                     {
-                                        max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
-                                    }
-                                    else
-                                    {
-                                        max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
-
-                                        HFRST[HFRST_EOF].N_S = max_ns;
+                                        HFRST[HFRST_EOF].N_S = daily.Ns;
                                     }
                                 }
                             }
                             else
                             {
-                                // goto SEJ;
-                                SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
-                                if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                // شماره سند فاکتور به هیچ سند فروشی اشاره نمی‌کند → سند روزانه‌ی این تاریخ
+                                var daily = ResolveDailyDocument((long)HFRST[HFRST_EOF].DATE_N, SHSH, HFRST[HFRST_EOF].USER_NAME);
+                                max_ns = daily.Ns;
+                                if (daily.Created)
                                 {
-                                    max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
-                                }
-                                else
-                                {
-                                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
-
-                                    HFRST[HFRST_EOF].N_S = max_ns;
+                                    HFRST[HFRST_EOF].N_S = daily.Ns;
                                 }
                             } // چک کن اگه نيست صادر کن
                         }
                         else
                         {
-                            // goto SEJ;
-                            SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
-                            if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            // فاکتور اصلاً شماره سند ندارد → سند روزانه‌ی این تاریخ
+                            var daily = ResolveDailyDocument((long)HFRST[HFRST_EOF].DATE_N, SHSH, HFRST[HFRST_EOF].USER_NAME);
+                            max_ns = daily.Ns;
+                            if (daily.Created)
                             {
-                                max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
-                            }
-                            else
-                            {
-                                max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
-
-                                HFRST[HFRST_EOF].N_S = max_ns;
+                                HFRST[HFRST_EOF].N_S = daily.Ns;
                             }
                         } // چک کن اگه نيست صادر کن
                     }
@@ -1408,28 +1616,15 @@ namespace AUTO_BAZ.Functions
 
                     SANAD_NUMBER = HFRST[HFRST_EOF]?.N_S;
 
-                    var jst = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ) AND ((INVO_LST.TAG)=2))").ToList();
-                    if (jst.Count > 0 & !IsNull(jst.FirstOrDefault()))
-                    {
-                        JAMF = (double)jst.FirstOrDefault();
-                    }
-                    else
-                    {
-                        JAMF = 0d;
-                    }
-                    ;
+                    // از پیش‌خوانی مرحله‌ی اول؛ قبلاً اینجا یک کوئری جدا برای هر فاکتور بود.
+                    JAMF = HFRST[HFRST_EOF].NUMBER != null
+                           && jamfByInvoice.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var jamfValue)
+                        ? jamfValue : 0d;
 
 
-                    var jstOpen = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=2) AND ((PAY_GETD.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").ToList();
-                    if (jstOpen.Count > 0 & !IsNull(jstOpen.FirstOrDefault()))
-                    {
-                        JAMCH = (double)jstOpen.FirstOrDefault();
-                    }
-                    else
-                    {
-                        JAMCH = 0d;
-                    }
-                    ;
+                    JAMCH = HFRST[HFRST_EOF].NUMBER != null
+                            && jamchByInvoice.TryGetValue(HFRST[HFRST_EOF].NUMBER.Value, out var jamchValue)
+                        ? jamchValue : 0d;
                     dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 13))");
                     if (JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF != 0)
                     {
@@ -1565,7 +1760,9 @@ namespace AUTO_BAZ.Functions
                         //while (!jst_thr.EOF())
                         for (int jst_thr_EOF = 0; jst_thr_EOF < jst_thr.Count; jst_thr_EOF++)
                         {
-                            MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk));
+                            MAVAD = sanatPriceNeeded
+                                ? Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk))
+                                : 0d;
 
                             try
                             {
@@ -1585,8 +1782,12 @@ namespace AUTO_BAZ.Functions
                             catch { IsSuccessfully = false; }
 
 
-                            DAST = Math.Round((double)GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)(Convert.ToInt64(HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk)));
-                            SAR = Math.Round((double)((double)GETSTANDARDPRICE_SAR(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk));
+                            DAST = sanatPriceNeeded
+                                ? Math.Round((double)GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)(Convert.ToInt64(HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk)))
+                                : 0d;
+                            SAR = sanatPriceNeeded
+                                ? Math.Round((double)((double)GETSTANDARDPRICE_SAR(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk))
+                                : 0d;
                             CREATHES(Baseknow.MOGODIA, jst_thr[jst_thr_EOF].ANBAR, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), jst_thr[jst_thr_EOF].NAME);
 
                             if (MAVAD + DAST + SAR != 0d & Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5")
@@ -2429,6 +2630,9 @@ namespace AUTO_BAZ.Functions
                     }
                     ;
 
+                    // گزارش پیشرفت در «پایان» کار هر فاکتور زده می‌شود، نه در ابتدای آن.
+                    // قبلاً در ابتدا بود و نوار پیشرفت زودتر از واقعیت جلو می‌رفت.
+                    progressReporter.ReportOne();
                 });
                 //}
             }
@@ -2446,12 +2650,25 @@ namespace AUTO_BAZ.Functions
                 IsSuccessfully = false;
             }
 
-            LogWriter.WriteLog("پایان بازسازی سند فروش");
+            stopwatch.Stop();
+            progressReporter.Complete();
+
+            LogWriter.WriteLog(
+                $"پایان بازسازی سند فروش - {HFRST.Count} رکورد در {stopwatch.Elapsed.TotalSeconds:F1} ثانیه " +
+                $"با {observedThreads.Count} Thread همزمان");
 
             return (SANAD_NUMBER, IsSuccessfully);
         }
         public static double GETSTANDARDPRICE_SAR(string CODE, long dt)
         {
+            // «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند؛ برای هر قلم کالای
+            // هر فاکتور صدا زده می‌شود، پس تکرارش بسیار زیاد است.
+            var priceKey = (Code: CODE ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _standardPriceSar.TryGetValue(priceKey, out var cachedPrice))
+            {
+                return cachedPrice;
+            }
+
             double tempGETSTANDARDPRICE_SAR = 0;
             double fnum = 0;
             fnum = GETLASTFR(CODE, dt);
@@ -2479,10 +2696,23 @@ namespace AUTO_BAZ.Functions
                     tempGETSTANDARDPRICE_SAR = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _standardPriceSar[priceKey] = tempGETSTANDARDPRICE_SAR;
+            }
+
             return tempGETSTANDARDPRICE_SAR;
         }
         public static double GETSTANDARDPRICE_DAST(string CODE, long dt)
         {
+            // «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند؛ برای هر قلم کالای
+            // هر فاکتور صدا زده می‌شود، پس تکرارش بسیار زیاد است.
+            var priceKey = (Code: CODE ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _standardPriceDast.TryGetValue(priceKey, out var cachedPrice))
+            {
+                return cachedPrice;
+            }
+
             double tempGETSTANDARDPRICE_DAST = 0;
             double fnum = 0;
             fnum = GETLASTFR(CODE, dt);
@@ -2510,10 +2740,22 @@ namespace AUTO_BAZ.Functions
                     tempGETSTANDARDPRICE_DAST = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _standardPriceDast[priceKey] = tempGETSTANDARDPRICE_DAST;
+            }
+
             return tempGETSTANDARDPRICE_DAST;
         }
         public static double GETLASTFR(string co, long dt)
         {
+            // هر سه تابع GETSTANDARDPRICE_* این را صدا می‌زنند، پس برای هر قلم کالا چند بار اجرا می‌شود.
+            var lastFrKey = (Code: co ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _lastFrCache.TryGetValue(lastFrKey, out var cachedLastFr))
+            {
+                return cachedLastFr;
+            }
+
             double tempGETLASTFR = 0;
             long FNN = 0;
             //object rst = null;
@@ -2570,10 +2812,23 @@ namespace AUTO_BAZ.Functions
                     tempGETLASTFR = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _lastFrCache[lastFrKey] = tempGETLASTFR;
+            }
+
             return tempGETLASTFR;
         }
         public static double GETSTANDARDPRICE_MAVAD(string CODE, long dt)
         {
+            // «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند؛ برای هر قلم کالای
+            // هر فاکتور صدا زده می‌شود، پس تکرارش بسیار زیاد است.
+            var priceKey = (Code: CODE ?? string.Empty, Dt: dt);
+            if (LookupCacheEnabled && _standardPriceMavad.TryGetValue(priceKey, out var cachedPrice))
+            {
+                return cachedPrice;
+            }
+
             double tempGETSTANDARDPRICE_MAVAD = 0;
             double fnum = 0;
             fnum = GETLASTFR(CODE, dt);
@@ -2601,6 +2856,11 @@ namespace AUTO_BAZ.Functions
                     tempGETSTANDARDPRICE_MAVAD = 0;
                 }
             }
+            if (LookupCacheEnabled)
+            {
+                _standardPriceMavad[priceKey] = tempGETSTANDARDPRICE_MAVAD;
+            }
+
             return tempGETSTANDARDPRICE_MAVAD;
         }
 
@@ -2669,6 +2929,9 @@ namespace AUTO_BAZ.Functions
                 try
                 {
                     dbms.DoExecuteSQL(sql, new { Kol = kolValue, Moin = moinValue, Taf = tafValue, Name = accountName });
+
+                    // حساب قطعاً ساخته شد؛ ثبت در کش تا ISHESAB بعدی دوباره کوئری نزند.
+                    MarkAccountExists(kolValue, moinValue, tafValue);
                     return;
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when ((ex.Number == 2601 || ex.Number == 2627) && ex.Message.Contains("IX_TDETA_HES_NAME"))
@@ -2709,6 +2972,14 @@ namespace AUTO_BAZ.Functions
         [System.Diagnostics.DebuggerStepThrough]
         public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
         {
+            // فقط پاسخ مثبت کش می‌شود: حسابی که یک بار دیده شده هرگز در طول اجرا حذف نمی‌شود.
+            // پاسخ منفی کش نمی‌شود چون ممکن است CREATHES بلافاصله بعدش آن حساب را بسازد.
+            var key = (Kol: KOL ?? 0d, Moin: MOIN ?? 0d, Taf: taf ?? 0d);
+            if (LookupCacheEnabled && _existingAccounts.ContainsKey(key))
+            {
+                return true;
+            }
+
             bool tempISHESAB = false;
             var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf).ToList();
             if (rst.Count == 0)
@@ -2718,12 +2989,21 @@ namespace AUTO_BAZ.Functions
             else
             {
                 tempISHESAB = true;
+                MarkAccountExists(key.Kol, key.Moin, key.Taf);
             }
 
             return tempISHESAB;
         }
         public static string GETF_DEPART(long? DEPART)
         {
+            // نام دپارتمان در طول اجرا ثابت است، ولی این تابع به‌ازای هر ردیف سند
+            // صدا زده می‌شود و هر بار یک یا دو کوئری می‌زند. تعداد دپارتمان‌ها هم کم است.
+            var cacheKey = DEPART ?? long.MinValue;
+            if (LookupCacheEnabled && _departNameCache.TryGetValue(cacheKey, out var cachedDepart))
+            {
+                return cachedDepart;
+            }
+
             string tempGETDEPART = null;
 
             if (DEPART != null)
@@ -2742,6 +3022,11 @@ namespace AUTO_BAZ.Functions
                 {
                     tempGETDEPART = rst2.DEPNAME;
                 }
+            }
+
+            if (LookupCacheEnabled && tempGETDEPART != null)
+            {
+                _departNameCache[cacheKey] = tempGETDEPART;
             }
 
             return tempGETDEPART;
@@ -2827,6 +3112,11 @@ namespace AUTO_BAZ.Functions
         }
         public static string GETBANK(double BANK)
         {
+            if (LookupCacheEnabled && _bankNameCache.TryGetValue(BANK, out var cachedBank))
+            {
+                return cachedBank;
+            }
+
             string GETBANKRet = default;
             var RRST = dbms.DoGetDataSQL<string>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS WHERE (((TCOD_BANKS.CODE)= " + BANK + "))").FirstOrDefault();
             if (!(RRST is null))
@@ -2838,6 +3128,11 @@ namespace AUTO_BAZ.Functions
             {
                 GETBANKRet = "";
             }
+            if (LookupCacheEnabled)
+            {
+                _bankNameCache[BANK] = GETBANKRet;
+            }
+
             return GETBANKRet;
         }
         private static bool IsNull(object p)
@@ -3879,7 +4174,8 @@ namespace AUTO_BAZ.Functions
 
             LogWriter.WriteLog($"شروع باز سازي سند های خزانه از سند شماره :{fnum} تا سند شماره :{TNUM}");
 
-            static string BuildKhazSharh(PGET_HED row) => "خزانه داري شماره " + row.ID + " مورخ " + Strings.Format(row.DATE, "####/##/##");
+            static string BuildKhazSharh(PGET_HED row)
+                => "خزانه داري شماره " + row.ID + " مورخ " + Strings.Format(row.DATE, "####/##/##");
 
             // ───────────────────────────────────────────────────────────────────────────────
             // مرحله ۱ (سریال، فقط چند کوئری): تشخیص اینکه کدام رکوردها هدر سند دارند.
@@ -4014,12 +4310,12 @@ namespace AUTO_BAZ.Functions
             var txSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
 
             const string detailInsertSql =
-                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, MHAZ_NO " +
-                "FROM dbo.PGET_LST WHERE ID = @TreasuryId;" +
-                "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
-                "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, MHAZ_NO " +
-                "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
+                          "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                          "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, MHAZ_NO " +
+                          "FROM dbo.PGET_LST WHERE ID = @TreasuryId;" +
+                          "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, MHAZ_NO) " +
+                          "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, MHAZ_NO " +
+                          "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
 
             // حالت الف) هدر سند در مرحله ۲ ساخته شده؛ اینجا فقط شماره‌اش روی ردیف خزانه ثبت
             // و ردیف‌های سند درج می‌شوند.
