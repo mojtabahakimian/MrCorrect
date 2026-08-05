@@ -175,13 +175,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             private string? _fnumbText;
 
             public int? FNUMB { get; set; }
-
             public string? FNUMB_TEXT
             {
                 get => _fnumbText ?? FNUMB?.ToString();
                 set => _fnumbText = value;
             }
-
             public string? nam { get; set; }
             public int? Expr1 { get; set; }
         }
@@ -1503,24 +1501,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     // تنظیم آیتم‌های کمبوباکس
                     _COMBOBOX_.ItemsSource = filteredN_KOL;
 
-
                     // تنظیم مقدار انتخاب شده
                     if (!string.IsNullOrEmpty(LastSelected))
                     {
                         _COMBOBOX_.SelectedValue = LastSelected;
-
-                        // تنظیم مقدار انتخاب شده
-                        if (!string.IsNullOrEmpty(LastSelected))
-                        {
-                            _COMBOBOX_.SelectedValue = LastSelected;
-                        }
-                        else if (filteredN_KOL.Any())
-                        {
-                            _COMBOBOX_.SelectedValue = filteredN_KOL.FirstOrDefault().FNUMB_TEXT;
-                        }
-
-                        // رفرش کردن آیتم‌ها
-                        _COMBOBOX_.Items.Refresh();
                     }
                     else if (filteredN_KOL.Any())
                     {
