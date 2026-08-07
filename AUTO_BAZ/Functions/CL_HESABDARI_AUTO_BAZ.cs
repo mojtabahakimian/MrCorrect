@@ -500,6 +500,7 @@ namespace AUTO_BAZ.Functions
         {
             public string CODE { get; set; }
             public string NAME { get; set; }
+            public double? RADAH { get; set; }
         }
         public partial class Custom_INVO_STUF
         {
@@ -5142,6 +5143,144 @@ namespace AUTO_BAZ.Functions
                     LogWriter.WriteLog(
                         $"سند خروج مواد - پیش‌خوانی (حالت نهایی): {wantedSheets.Count} برگه | {finalLinesBySheet.Sum(kv => kv.Value.Count)} ردیف کالا");
                 }
+
+                // پیش‌خوانی یکجای اطلاعات کالاها (نام و گروه) در ۱ کوئری جهت پر کردن کش پیش از ورود به حلقه موازی
+                var allProductCodes = useFinalMode
+                    ? finalLinesBySheet.SelectMany(kv => kv.Value).Select(x => x.CODE).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList()
+                    : linesBySheet.SelectMany(kv => kv.Value).Select(x => x.CODE).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+
+                if (allProductCodes.Count > 0)
+                {
+                    const int codeBatchSize = 1000;
+                    for (int offset = 0; offset < allProductCodes.Count; offset += codeBatchSize)
+                    {
+                        var chunk = allProductCodes.Skip(offset).Take(codeBatchSize);
+                        var inClause = string.Join(",", chunk.Select(c => $"N'{SqlText(c)}'"));
+                        var stufRows = dbms.DoGetDataSQL<Custom_STUF_DEF>($"SELECT CODE, NAME, RADAH FROM dbo.STUF_DEF WHERE CODE IN ({inClause})");
+                        foreach (var row in stufRows)
+                        {
+                            if (row == null || string.IsNullOrEmpty(row.CODE)) continue;
+                            var codeLong = Convert.ToInt64(SafeToDouble(row.CODE));
+                            var codeDouble = Convert.ToDouble(codeLong);
+
+                            var name = string.IsNullOrEmpty(row.NAME) ? " " : row.NAME;
+                            _kalaNameCache[codeDouble] = name;
+
+                            int radahVal = row.RADAH.HasValue ? (int)row.RADAH.Value : 0;
+                            _kalaGroupCache[row.CODE] = radahVal;
+                        }
+                    }
+                }
+
+                // پیش‌ساخت دسته‌ای حساب‌های لازم (Bulk CREATHES) قبل از ورود به حلقه موازی
+                if (valdefacc)
+                {
+                    var reqAccounts = new HashSet<(int Kol, int Moin, int Taf, string Name)>();
+
+                    if (!useFinalMode)
+                    {
+                        foreach (var kv in linesBySheet)
+                        {
+                            foreach (var line in kv.Value)
+                            {
+                                var mablK = line.MABL_K ?? 0d;
+                                var meghK = line.MEGHk ?? 0d;
+                                var smab = line.SMAB ?? 0d;
+                                var sakht = smab * meghK;
+
+                                if (mablK != 0)
+                                {
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeDouble = Convert.ToDouble(codeLong);
+                                    var kalaName = _kalaNameCache.TryGetValue(codeDouble, out var kn) ? kn : " ";
+                                    var anbar = line.ANBAR ?? 0;
+
+                                    reqAccounts.Add((Convert.ToInt32(Baseknow.MOGODIA), anbar, Convert.ToInt32(codeLong), kalaName));
+
+                                    var rdd = _kalaGroupCache.TryGetValue(line.CODE ?? string.Empty, out var r) ? r : 0;
+                                    var phazMoin = (rdd == 2 || rdd == 3) ? 2 : 1;
+                                    reqAccounts.Add((Convert.ToInt32(Baseknow.PHAZ_TOL), phazMoin, Convert.ToInt32(codeLong), kalaName));
+
+                                    if (IsNull(line.COM))
+                                    {
+                                        reqAccounts.Add((Convert.ToInt32(line.N_KOL ?? 0), Convert.ToInt32(line.NUMBER ?? 0), Convert.ToInt32(line.TNUMBER ?? 0), kalaName));
+                                    }
+                                    else
+                                    {
+                                        var comVal = Convert.ToInt32(SafeToDouble(line.COM));
+                                        reqAccounts.Add((Convert.ToInt32(Baseknow.HAZ_TOL), comVal, Convert.ToInt32(codeLong), kalaName));
+                                    }
+                                }
+
+                                var jamch = Math.Round(mablK);
+                                if (jamch - sakht != 0)
+                                {
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeDouble = Convert.ToDouble(codeLong);
+                                    var kalaName = _kalaNameCache.TryGetValue(codeDouble, out var kn) ? kn : " ";
+                                    var comVal = Convert.ToInt32(SafeToDouble(line.COM));
+                                    reqAccounts.Add((Convert.ToInt32(Baseknow.AMALKARD), comVal, Convert.ToInt32(codeLong), kalaName));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var kv in finalLinesBySheet)
+                        {
+                            foreach (var line in kv.Value)
+                            {
+                                var mablK = line.MABL_K ?? 0d;
+                                var meghK = line.MEGHk ?? 0d;
+                                var smab = line.SMAB ?? 0d;
+                                var sakht = smab * meghK;
+
+                                if (mablK != 0)
+                                {
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeDouble = Convert.ToDouble(codeLong);
+                                    var kalaName = _kalaNameCache.TryGetValue(codeDouble, out var kn) ? kn : " ";
+
+                                    reqAccounts.Add((Convert.ToInt32(Baseknow.HAZ_TOL), 99999, Convert.ToInt32(codeLong), kalaName));
+                                }
+
+                                if (sakht != 0)
+                                {
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeDouble = Convert.ToDouble(codeLong);
+                                    var kalaName = _kalaNameCache.TryGetValue(codeDouble, out var kn) ? kn : " ";
+
+                                    reqAccounts.Add((Convert.ToInt32(Baseknow.CONKAL), 99999, Convert.ToInt32(codeLong), kalaName));
+                                }
+
+                                var jamch = Math.Round(mablK);
+                                if (jamch - sakht != 0)
+                                {
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeDouble = Convert.ToDouble(codeLong);
+                                    var kalaName = _kalaNameCache.TryGetValue(codeDouble, out var kn) ? kn : " ";
+
+                                    reqAccounts.Add((Convert.ToInt32(Baseknow.AMALKARD), 99999, Convert.ToInt32(codeLong), kalaName));
+                                }
+                            }
+                        }
+                    }
+
+                    if (reqAccounts.Count > 0)
+                    {
+                        foreach (var acc in reqAccounts)
+                        {
+                            try
+                            {
+                                CREATHES(acc.Kol, acc.Moin, acc.Taf, acc.Name);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogWriter.WriteLog($"[SANADKHORUGMAVAD] خطا در ساخت دسته‌ای حساب {acc.Kol}-{acc.Moin}-{acc.Taf}: {ex.Message}");
+                            }
+                        }
+                    }
+                }
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
@@ -5204,25 +5343,26 @@ namespace AUTO_BAZ.Functions
                         foreach (var line in lines)
                         {
                             var lineSharh = Strings.Left("حواله خروج شماره " + sheet.NUMBER + "-" + sheet.FNUMCO + " مورخ " + Strings.Format(sheet.DATE_N, "####/##/##") + " به مقدار" + line.MEGHk + " جهت " + Strings.Trim(line.NAM), 255);
+                            var mablK = line.MABL_K ?? 0d;
+                            var meghK = line.MEGHk ?? 0d;
+                            var smab = line.SMAB ?? 0d;
+                            var sakht = smab * meghK;
 
-                            if (line.MABL_K != 0)
+                            if (mablK != 0)
                             {
-                                var mablRounded = Math.Round((double)line.MABL_K);
-                                var kalaName = GETKALANAME(Convert.ToInt64(line.CODE));
-
-                                // HES_T در جدول DEED_DTL از نوع int است، ولی INVO_LST.CODE رشته است.
-                                // همان تبدیلی که خود کد برای ساختن رشته‌ی HES انجام می‌دهد اینجا هم
-                                // استفاده می‌شود تا ستون عددی و متن HES هرگز از هم جدا نیفتند و یک
-                                // مقدار خالی/غیرعددی نتواند دستور INSERT را نحوی خراب کند.
-                                var codeNum = Convert.ToDouble(line.CODE);
+                                var mablRounded = Math.Round(mablK);
+                                var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                var codeNum = Convert.ToDouble(codeLong);
+                                var kalaName = GETKALANAME(codeLong);
+                                var anbar = line.ANBAR ?? 0;
 
                                 // ۱) موجودی انبار (بستانکار)
                                 if (valdefacc)
                                 {
-                                    CREATHES(Baseknow.MOGODIA, line.ANBAR, Convert.ToInt64(line.CODE), kalaName);
+                                    CREATHES(Baseknow.MOGODIA, anbar, codeLong, kalaName);
                                 }
-                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(line.ANBAR), SqlNum(codeNum),
-                                    Baseknow.MOGODIA + "-" + line.ANBAR + "-" + codeNum, lineSharh, 0, mablRounded);
+                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(anbar), SqlNum(codeNum),
+                                    Baseknow.MOGODIA + "-" + anbar + "-" + codeNum, lineSharh, 0, mablRounded);
 
                                 // ۲) فازهای تولید (بستانکار)
                                 var RDD = GETGRPKALAco(line.CODE);
@@ -5230,17 +5370,12 @@ namespace AUTO_BAZ.Functions
                                 bool phazAccountReady;
                                 if (valdefacc)
                                 {
-                                    CREATHES(Baseknow.PHAZ_TOL, phazMoin, Convert.ToInt64(line.CODE), kalaName);
+                                    CREATHES(Baseknow.PHAZ_TOL, phazMoin, codeLong, kalaName);
                                     phazAccountReady = true;
                                 }
                                 else
                                 {
-                                    // کد قبلی این درج را داخل یک try/catch خالی گذاشته بود تا اگر حساب
-                                    // وجود نداشت خطا نادیده گرفته شود — حالتی که فقط وقتی «ساخت حساب‌های
-                                    // نبوده» خاموش است پیش می‌آید. حالا که همه‌ی ردیف‌های یک برگه در یک
-                                    // تراکنش درج می‌شوند نمی‌توان خطای یک ردیف را بلعید، پس همان شرط را
-                                    // صریح بررسی می‌کنیم: اگر حساب نیست، ردیف اصلاً ساخته نمی‌شود.
-                                    phazAccountReady = ISHESAB(Baseknow.PHAZ_TOL, phazMoin, Convert.ToInt64(line.CODE));
+                                    phazAccountReady = ISHESAB(Baseknow.PHAZ_TOL, phazMoin, codeLong);
                                 }
                                 if (phazAccountReady)
                                 {
@@ -5260,10 +5395,11 @@ namespace AUTO_BAZ.Functions
                                 }
                                 else
                                 {
+                                    var comNum = SafeToDouble(line.COM);
                                     hesKv = Convert.ToDouble(Baseknow.HAZ_TOL);
-                                    hesMv = Convert.ToDouble(line.COM);
-                                    hesTv = Convert.ToDouble(line.CODE);
-                                    hesCombined = Baseknow.HAZ_TOL + "-" + Convert.ToDouble(line.COM) + "-" + Convert.ToDouble(line.CODE);
+                                    hesMv = comNum;
+                                    hesTv = codeNum;
+                                    hesCombined = Baseknow.HAZ_TOL + "-" + comNum + "-" + codeNum;
                                 }
                                 if (valdefacc)
                                 {
@@ -5272,19 +5408,16 @@ namespace AUTO_BAZ.Functions
                                 AddDetail(SqlNum(hesKv), SqlNum(hesMv), SqlNum(hesTv), hesCombined, lineSharh, mablRounded, 0);
                             }
 
-                            var JAMCH = Math.Round((double)line.MABL_K);
-                            var sakht = line.SMAB * line.MEGHk;
+                            var JAMCH = Math.Round(mablK);
 
                             // ۴) كنترل كالاي در جريان ساخت (بدهکار) — کد قبلی اینجا عمداً CREATHES ندارد.
                             if (sakht != 0)
                             {
-                                // HES_M از HEAD_MANF.CODE می‌آید و می‌تواند NULL باشد (کد قبلی هم با
-                                // IsNull(COM) همین را در نظر گرفته). با همان Convert.ToDouble که برای
-                                // ساخت متن HES استفاده می‌شود، ستون عددی هم پر می‌شود تا مقدار خالی
-                                // دستور INSERT را نحوی خراب نکند.
-                                AddDetail(SqlNum(Baseknow.CONKAL), SqlNum(Convert.ToDouble(line.COM)), SqlNum(Convert.ToDouble(line.CODE)),
-                                    Baseknow.CONKAL + "-" + Convert.ToDouble(line.COM) + "-" + Convert.ToDouble(line.CODE),
-                                    lineSharh, Math.Round((double)sakht), 0);
+                                var comNum = SafeToDouble(line.COM);
+                                var codeNum = Convert.ToDouble(SafeToDouble(line.CODE));
+                                AddDetail(SqlNum(Baseknow.CONKAL), SqlNum(comNum), SqlNum(codeNum),
+                                    Baseknow.CONKAL + "-" + comNum + "-" + codeNum,
+                                    lineSharh, Math.Round(sakht), 0);
                             }
 
                             // ۵) عملكرد
@@ -5294,21 +5427,25 @@ namespace AUTO_BAZ.Functions
                                 bool amalIsBed;
                                 if (JAMCH > sakht)
                                 {
-                                    amalValue = Math.Round((double)(JAMCH - sakht));
+                                    amalValue = Math.Round(JAMCH - sakht);
                                     amalIsBed = true;
                                 }
                                 else
                                 {
-                                    amalValue = Math.Round((double)(sakht - JAMCH));
+                                    amalValue = Math.Round(sakht - JAMCH);
                                     amalIsBed = false;
                                 }
 
+                                var comNum = SafeToDouble(line.COM);
+                                var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                var codeNum = Convert.ToDouble(codeLong);
+
                                 if (valdefacc)
                                 {
-                                    CREATHES(Baseknow.AMALKARD, Convert.ToDouble(line.COM), Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToInt64(line.CODE)));
+                                    CREATHES(Baseknow.AMALKARD, comNum, codeLong, GETKALANAME(codeLong));
                                 }
-                                AddDetail(SqlNum(Baseknow.AMALKARD), SqlNum(Convert.ToDouble(line.COM)), SqlNum(Convert.ToDouble(line.CODE)),
-                                    Baseknow.AMALKARD + "-" + Convert.ToDouble(line.COM) + "-" + Convert.ToDouble(line.CODE),
+                                AddDetail(SqlNum(Baseknow.AMALKARD), SqlNum(comNum), SqlNum(codeNum),
+                                    Baseknow.AMALKARD + "-" + comNum + "-" + codeNum,
                                     lineSharh, amalIsBed ? amalValue : 0, amalIsBed ? 0 : amalValue);
                             }
                         }
@@ -5319,46 +5456,56 @@ namespace AUTO_BAZ.Functions
                         foreach (var line in lines)
                         {
                             var lineSharh = Strings.Left("حواله خروج شماره " + sheet.NUMBER + "-" + sheet.FNUMCO + " مورخ " + Strings.Format(sheet.DATE_N, "####/##/##") + " به مقدار" + line.MEGHk, 255);
+                            var mablK = line.MABL_K ?? 0d;
+                            var meghK = line.MEGHk ?? 0d;
+                            var smab = line.SMAB ?? 0d;
+                            var sakht = smab * meghK;
 
-                            if (line.MABL_K != 0)
+                            if (mablK != 0)
                             {
-                                var mablRounded = Math.Round((double)line.MABL_K);
+                                var mablRounded = Math.Round(mablK);
+                                var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                var codeNum = Convert.ToDouble(codeLong);
+                                var kalaName = GETKALANAME(codeLong);
+                                var anbar = line.ANBAR ?? 0;
 
-                                // مثل شاخه‌ی غیرنهایی: ستون عددی HES_T از همان تبدیلی پر می‌شود که
-                                // متن HES با آن ساخته می‌شود.
-                                var codeNum = Convert.ToDouble(line.CODE);
-
-                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(line.ANBAR), SqlNum(codeNum),
-                                    Baseknow.MOGODIA + "-" + line.ANBAR + "-" + codeNum, lineSharh, 0, mablRounded);
+                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(anbar), SqlNum(codeNum),
+                                    Baseknow.MOGODIA + "-" + anbar + "-" + codeNum, lineSharh, 0, mablRounded);
 
                                 AddDetail(SqlNum(Baseknow.PHAZ_TOL), "1", SqlNum(codeNum),
                                     Baseknow.PHAZ_TOL + "-1-" + codeNum, lineSharh, 0, mablRounded);
 
-                                if (valdefacc is true && !ISHESAB(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(line.CODE)))
+                                if (valdefacc is true && !ISHESAB(Baseknow.HAZ_TOL, 99999, codeLong))
                                 {
-                                    CREATHES(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToDouble(line.CODE)));
+                                    CREATHES(Baseknow.HAZ_TOL, 99999, codeLong, kalaName);
                                 }
                                 AddDetail(SqlNum(Baseknow.HAZ_TOL), "99999", SqlNum(codeNum),
                                     Baseknow.HAZ_TOL + "-99999-" + codeNum, lineSharh, mablRounded, 0);
                             }
 
-                            var JAMCH = Math.Round((double)line.MABL_K);
-                            var sakht = line.SMAB * line.MEGHk;
+                            var JAMCH = Math.Round(mablK);
 
                             if (sakht != 0)
                             {
-                                CREATHES(Baseknow.CONKAL, 99999, Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToDouble(line.CODE)));
-                                AddDetail(SqlNum(Baseknow.CONKAL), "99999", SqlNum(Convert.ToDouble(line.CODE)),
-                                    Baseknow.CONKAL + "-99999-" + Convert.ToDouble(line.CODE), lineSharh, Math.Round((double)sakht), 0);
+                                var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                var codeNum = Convert.ToDouble(codeLong);
+                                var kalaName = GETKALANAME(codeLong);
+                                CREATHES(Baseknow.CONKAL, 99999, codeLong, kalaName);
+                                AddDetail(SqlNum(Baseknow.CONKAL), "99999", SqlNum(codeNum),
+                                    Baseknow.CONKAL + "-99999-" + codeNum, lineSharh, Math.Round(sakht), 0);
                             }
 
                             if (JAMCH - sakht != 0)
                             {
+                                var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                var codeNum = Convert.ToDouble(codeLong);
+                                var kalaName = GETKALANAME(codeLong);
+
                                 if (valdefacc is true)
                                 {
                                     try
                                     {
-                                        CREATHES(Baseknow.AMALKARD, 99999, Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToDouble(line.CODE)));
+                                        CREATHES(Baseknow.AMALKARD, 99999, codeLong, kalaName);
                                     }
                                     catch (Exception)
                                     {
@@ -5370,17 +5517,17 @@ namespace AUTO_BAZ.Functions
                                 bool amalIsBed;
                                 if (JAMCH > sakht)
                                 {
-                                    amalValue = Math.Round((double)(JAMCH - sakht));
+                                    amalValue = Math.Round(JAMCH - sakht);
                                     amalIsBed = true;
                                 }
                                 else
                                 {
-                                    amalValue = Math.Round((double)(sakht - JAMCH));
+                                    amalValue = Math.Round(sakht - JAMCH);
                                     amalIsBed = false;
                                 }
 
-                                AddDetail(SqlNum(Baseknow.AMALKARD), "99999", SqlNum(Convert.ToDouble(line.CODE)),
-                                    Baseknow.AMALKARD + "-99999-" + Convert.ToDouble(line.CODE), lineSharh, amalIsBed ? amalValue : 0, amalIsBed ? 0 : amalValue);
+                                AddDetail(SqlNum(Baseknow.AMALKARD), "99999", SqlNum(codeNum),
+                                    Baseknow.AMALKARD + "-99999-" + codeNum, lineSharh, amalIsBed ? amalValue : 0, amalIsBed ? 0 : amalValue);
                             }
                         }
                     }
