@@ -640,6 +640,11 @@ namespace AUTO_BAZ.Functions
             public double? N_S { get; set; }
             public double? DIFF { get; set; }
         }
+
+        public class KhorugSayerLineRow : QRE_BAZ_5
+        {
+            public double? SHEETNO { get; set; }
+        }
         #endregion
 
         /// <summary>
@@ -5693,155 +5698,415 @@ namespace AUTO_BAZ.Functions
 
         public static (double?, bool) SANADKHORUGSAYER(long NUMBER, long NUMBER2, bool InternalCalling = true)
         {
-            double progress = 0;
-            MainWindow auto_run = null;
-
-
             double? SANAD_NUMBER = null;
             bool IsSuccessfully = true;
 
+            MainWindow auto_run = null;
             if (InternalCalling)
             {
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    //Paint
                     auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
                 }));
             }
 
-            var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 11 ) )").ToList();
-
+            var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>(
+                "SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME " +
+                $"FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= {NUMBER} AND HEAD_LST.NUMBER <= {NUMBER2} and HEAD_LST.tag = 11)) ORDER BY HEAD_LST.NUMBER").ToList();
 
             LogWriter.WriteLog("SANADKHORUGSAYER : \n شروع باز سازي از سند شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + " " + DateTime.Now);
 
-            //for (int EOF = 0; EOF < HEDRST.Count; EOF++)
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var observedThreads = new System.Collections.Concurrent.ConcurrentDictionary<int, byte>();
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۰ (در حافظه): نرمال‌سازی تاریخ و فیلتر برگه‌های معتبر (DATE_N >= 10101)
+            // ───────────────────────────────────────────────────────────────────────────────
+            var sheetUsable = new bool[HEDRST.Count];
+            for (int i = 0; i < HEDRST.Count; i++)
+            {
+                var sheet = HEDRST[i];
+                if (sheet == null || sheet.NUMBER == null) continue;
+
+                if (!TryGetDateNumber(sheet.DATE_N, out var normalizedDate) || normalizedDate < 10101)
+                {
+                    IsSuccessfully = false;
+                    continue;
+                }
+
+                sheet.DATE_N = normalizedDate;
+                sheetUsable[i] = true;
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۱ و ۲ (سریال): مدیریت دسته‌ای شماره اسناد (سند روزانه SNDKH=true / تک‌سندی SNDKH=false)
+            // ───────────────────────────────────────────────────────────────────────────────
+            static string BuildKhorugSayerSharhS(QRE_BAZ_0 hedRow)
+                => Strings.Left(" حواله خروج ساير مواد از انبار شماره " + hedRow.NUMBER + "-" + hedRow.FNUMCO + "مورخ " + Strings.Format(hedRow.DATE_N, "####/##/##"), 100);
+
+            var isDailyMode = (bool)Baseknow.SNDKH;
+            var needsNewHeader = new bool[HEDRST.Count];
+
+            if (isDailyMode)
+            {
+                var dates = HEDRST.Where((_, idx) => sheetUsable[idx]).Select(x => Convert.ToInt64(x.DATE_N)).Distinct().ToList();
+                var dailyNsByDate = new Dictionary<long, double>();
+
+                if (dates.Count > 0)
+                {
+                    var minDate = dates.Min();
+                    var maxDate = dates.Max();
+                    foreach (var row in dbms.DoGetDataSQL<QRE10>(
+                        $"SELECT BASE, n_s, date_s, no_s FROM dbo.DEED_HED WHERE no_s = 12 AND date_s BETWEEN {minDate} AND {maxDate}"))
+                    {
+                        if (row.DATE_S != null && row.N_S != null && !dailyNsByDate.ContainsKey((long)row.DATE_S.Value))
+                        {
+                            dailyNsByDate[(long)row.DATE_S.Value] = row.N_S.Value;
+                        }
+                    }
+
+                    var missingDates = dates.Where(d => !dailyNsByDate.ContainsKey(d)).ToList();
+                    if (missingDates.Count > 0)
+                    {
+                        var headerRequests = missingDates.Select(d =>
+                        {
+                            var sampleSheet = HEDRST.First(s => s.DATE_N == d);
+                            return new SanadHeaderRequest
+                            {
+                                DATE_S = d,
+                                SHARH_S = BuildKhorugSayerSharhS(sampleSheet),
+                                GHATEI = 0,
+                                NO_S = 12,
+                                OKF = -1,
+                                USER_NAME = sampleSheet.USER_NAME
+                            };
+                        }).ToList();
+
+                        var newNsValues = ReserveSanadNumbersBatch(headerRequests);
+                        for (int k = 0; k < missingDates.Count; k++)
+                        {
+                            dailyNsByDate[missingDates[k]] = newNsValues[k];
+                        }
+                    }
+                }
+
+                var updateBatch = new StringBuilder();
+                updateBatch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                for (int i = 0; i < HEDRST.Count; i++)
+                {
+                    if (!sheetUsable[i]) continue;
+                    var ns = dailyNsByDate[(long)HEDRST[i].DATE_N];
+                    if (HEDRST[i].N_S != ns)
+                    {
+                        HEDRST[i].N_S = ns;
+                        updateBatch.Append($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(ns)} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER.Value)} AND TAG = 11;");
+                    }
+                }
+                updateBatch.Append("COMMIT TRANSACTION;");
+                dbms.DoExecuteSQL(updateBatch.ToString());
+            }
+            else
+            {
+                var existingHeaderNumbers = new HashSet<double>();
+                var candidateNumbers = HEDRST.Where((s, idx) => sheetUsable[idx] && s.N_S != null && s.N_S.Value != 0)
+                                             .Select(s => s.N_S.Value).Distinct().ToList();
+
+                if (candidateNumbers.Count > 0)
+                {
+                    var minNs = candidateNumbers.Min();
+                    var maxNs = candidateNumbers.Max();
+                    foreach (var found in dbms.DoGetDataSQL<double?>(
+                        $"SELECT N_S FROM dbo.DEED_HED WHERE NO_S = 12 AND N_S BETWEEN {SqlNum(minNs)} AND {SqlNum(maxNs)}"))
+                    {
+                        if (found.HasValue) existingHeaderNumbers.Add(found.Value);
+                    }
+                }
+
+                var newHeaderIndexes = new List<int>();
+                var claimedNumbers = new HashSet<double>();
+
+                for (int i = 0; i < HEDRST.Count; i++)
+                {
+                    if (!sheetUsable[i]) continue;
+                    var ns = HEDRST[i].N_S;
+                    var headerExists = ns != null && ns.Value != 0 && existingHeaderNumbers.Contains(ns.Value);
+                    var ownsHeader = headerExists && claimedNumbers.Add(ns.Value);
+
+                    if (!ownsHeader)
+                    {
+                        needsNewHeader[i] = true;
+                        newHeaderIndexes.Add(i);
+                    }
+                }
+
+                if (newHeaderIndexes.Count > 0)
+                {
+                    var headerRequests = newHeaderIndexes.Select(i => new SanadHeaderRequest
+                    {
+                        DATE_S = Convert.ToInt64(HEDRST[i].DATE_N),
+                        SHARH_S = BuildKhorugSayerSharhS(HEDRST[i]),
+                        GHATEI = 0,
+                        NO_S = 12,
+                        OKF = -1,
+                        USER_NAME = HEDRST[i].USER_NAME
+                    }).ToList();
+
+                    var reservedNumbers = ReserveSanadNumbersBatch(headerRequests);
+                    for (int k = 0; k < newHeaderIndexes.Count; k++)
+                    {
+                        HEDRST[newHeaderIndexes[k]].N_S = reservedNumbers[k];
+                    }
+                }
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۳ (دسته‌ای): پیش‌خوانی اقلام INVO_LST، HEAD_MANF و استعلام حساب‌های TDETA_HES
+            // ───────────────────────────────────────────────────────────────────────────────
+            var wantedSheets = HEDRST.Where((_, idx) => sheetUsable[idx]).Select(x => x.NUMBER.Value).ToHashSet();
+            var linesBySheet = new Dictionary<double, List<KhorugSayerLineRow>>();
+            var emptyLines = new List<KhorugSayerLineRow>();
+
+            if (wantedSheets.Count > 0)
+            {
+                var minNum = SqlNum(wantedSheets.Min());
+                var maxNum = SqlNum(wantedSheets.Max());
+
+                foreach (var line in dbms.DoGetDataSQL<KhorugSayerLineRow>(
+                    "SELECT NUMBER AS SHEETNO, SANAD_NO, N_RASID, MABL_K, MEGHk, CODE, ANBAR " +
+                    $"FROM dbo.INVO_LST WHERE (NUMBER BETWEEN {minNum} AND {maxNum}) AND (TAG = 11) " +
+                    "ORDER BY NUMBER, id"))
+                {
+                    if (line?.SHEETNO == null || !wantedSheets.Contains(line.SHEETNO.Value)) continue;
+
+                    if (!linesBySheet.TryGetValue(line.SHEETNO.Value, out var bucket))
+                    {
+                        bucket = new List<KhorugSayerLineRow>();
+                        linesBySheet[line.SHEETNO.Value] = bucket;
+                    }
+                    bucket.Add(line);
+                }
+            }
+
+            // پیش‌خوانی HEAD_MANF برای N_RASID های عددی
+            var numericRasids = linesBySheet.SelectMany(kv => kv.Value)
+                                            .Select(x => x.N_RASID)
+                                            .Where(r => !string.IsNullOrEmpty(r) && Information.IsNumeric(r))
+                                            .Select(r => Convert.ToInt32(SafeToDouble(r)))
+                                            .Distinct().ToList();
+
+            var headManfDict = new Dictionary<int, QRE_BAZ_6>();
+            if (numericRasids.Count > 0)
+            {
+                const int rasidBatchSize = 1000;
+                for (int offset = 0; offset < numericRasids.Count; offset += rasidBatchSize)
+                {
+                    var chunk = numericRasids.Skip(offset).Take(rasidBatchSize);
+                    var inClause = string.Join(",", chunk);
+                    var rows = dbms.DoGetDataSQL<QRE_BAZ_6>($"SELECT FNUMB, NUMBER, TNUMBER, N_KOL, NAMES FROM dbo.HEAD_MANF WHERE FNUMB IN ({inClause})");
+                    foreach (var r in rows)
+                    {
+                        if (r?.FNUMB != null && !headManfDict.ContainsKey(r.FNUMB.Value))
+                        {
+                            headManfDict[r.FNUMB.Value] = r;
+                        }
+                    }
+                }
+            }
+
+            // پیش‌خوانی و استعلام حساب‌ها برای N_RASID های غیرعددی
+            var nonNumericRasids = linesBySheet.SelectMany(kv => kv.Value)
+                                               .Select(x => x.N_RASID)
+                                               .Where(r => !string.IsNullOrEmpty(r) && !Information.IsNumeric(r))
+                                               .Distinct().ToList();
+
+            if (nonNumericRasids.Count > 0)
+            {
+                foreach (var rasid in nonNumericRasids)
+                {
+                    double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null;
+                    GETTAF3(rasid, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                    if (CKOL != null && CMOIN != null && CTAF != null)
+                    {
+                        ISHESAB(CKOL, CMOIN, CTAF);
+                    }
+                    GETTAFNAME(rasid);
+                }
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // مرحله ۴ (موازی): کار هر برگه مستقل است و همه‌ی دستورها در ۱ SQL batch ارسال می‌شوند
+            // ───────────────────────────────────────────────────────────────────────────────
+            var progressReporter = new ThrottledProgressReporter(
+                HEDRST.Count,
+                InternalCalling && auto_run != null ? auto_run.Dispatcher : null,
+                value =>
+                {
+                    auto_run.PRGR_C6.Value = Math.Max(auto_run.PRGR_C6.Value, value);
+                    auto_run.UpdateOverallProgressBar();
+                });
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HEDRST.Count);
+
+            const int detailInsertChunkSize = 500;
+
             ExecuteWithPreferredLoop(0, HEDRST.Count, dbParallelOptions, EOF =>
             {
-                string DBStr;
-                double max_ns, MABL_CHK, JAMF, JAMCH;
-                string shart;
-                double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, fs, a = null;
+                observedThreads.TryAdd(Environment.CurrentManagedThreadId, 0);
 
-                if (InternalCalling)
+                if (!sheetUsable[EOF])
                 {
-                    auto_run.Dispatcher.Invoke(new Action(() =>
-                    {
-                        progress++;
-                        auto_run.PRGR_C6.Value = progress / ((double)HEDRST.Count) * 100.0; // Update the progress bar
-                        auto_run.UpdateOverallProgressBar();
-
-                    }));
+                    progressReporter.ReportOne();
+                    return;
                 }
-                string SHSH = "";
-                SHSH = Strings.Left(" حواله خروج ساير مواد از انبار شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO.ToString() + "مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##"), 100);
-                max_ns = CRSANADGEN(SHSH, 11, 12, (double)HEDRST[EOF].NUMBER, HEDRST[EOF].N_S, (long)HEDRST[EOF].DATE_N, HEDRST[EOF].USER_NAME);
-                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 11))");
-                var JST = dbms.DoGetDataSQL<QRE_BAZ_5>("SELECT     SANAD_NO, N_RASID, MABL_K, MEGHk, CODE, ANBAR FROM dbo.INVO_LST WHERE     (NUMBER = " + HEDRST[EOF].NUMBER + ") AND (TAG = 11)").ToList();
-                for (int q = 0; q < JST.Count; q++) // while (!JST.EOF())
+
+                var sheet = HEDRST[EOF];
+                var sheetNo = sheet.NUMBER.Value;
+                var nsValue = sheet.N_S.Value;
+
+                var valueRows = new List<string>();
+
+                void AddDetailFull(string hesK, string hesM, string hesT, string hesT2, string hesT3, string hesT4, string hes, double bed, double bes, string sharh, string mhazNo)
                 {
-                    if (JST[q]?.N_RASID == null)
+                    valueRows.Add(
+                        $"({SqlNum(nsValue)},{hesK},{hesM},{hesT},{hesT2},{hesT3},{hesT4},N'{SqlText(hes)}',{SqlNum(bed)},{SqlNum(bes)},N'{SqlText(sharh)}',{SqlNum(sheetNo)},{mhazNo},11)");
+                }
+
+                try
+                {
+                    var lines = linesBySheet.TryGetValue(sheetNo, out var bucket) ? bucket : emptyLines;
+
+                    foreach (var line in lines)
                     {
-                        continue; //Skip this
-                    }
-                    //DoEvents();
-                    if (Information.IsNumeric(JST[q].N_RASID))
-                    {
-                        JAMCH = 0d;
-                        //if ((string?)JST[q].N_RASID == "81")
-                        //{
-                        //    int i = 81;
-                        //}
-                        var JSTT = dbms.DoGetDataSQL<QRE_BAZ_6>("SELECT     FNUMB, NUMBER, TNUMBER, N_KOL, NAMES FROM dbo.HEAD_MANF WHERE     (FNUMB = " + JST[q].N_RASID + ")").ToList();
-                        if ((JST[q]?.MABL_K != 0) && (JSTT.Count > 0))
+                        if (string.IsNullOrEmpty(line?.N_RASID)) continue;
+
+                        var mablK = line.MABL_K ?? 0d;
+                        var meghK = line.MEGHk ?? 0d;
+
+                        if (Information.IsNumeric(line.N_RASID))
                         {
-                            if ((!IsNull(JSTT.FirstOrDefault().N_KOL)) && (!IsNull(JSTT.FirstOrDefault().NUMBER)) && (!IsNull(JSTT.FirstOrDefault().TNUMBER)))
+                            var fnumb = Convert.ToInt32(SafeToDouble(line.N_RASID));
+                            if (mablK != 0 && headManfDict.TryGetValue(fnumb, out var jstt))
                             {
-                                var _hes = JSTT.FirstOrDefault().N_KOL + "-" + JSTT.FirstOrDefault().NUMBER + "-" + JSTT.FirstOrDefault().TNUMBER;
-                                var _BED = Math.Round((double)JST[q].MABL_K);
-                                var _SHARH = Strings.Left("حواله خروج ساير شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk + " جهت " + Strings.Trim(JSTT.FirstOrDefault().NAMES), 255);
-                                dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, BED, SHARH,NUMBER,TAG)
-                                                         VALUES ({max_ns},{JSTT.FirstOrDefault().N_KOL},{JSTT.FirstOrDefault().NUMBER},{JSTT.FirstOrDefault().TNUMBER},N'{_hes}',{_BED},N'{_SHARH}',{HEDRST[EOF].NUMBER},11)");
-                                JAMCH = (double)JST[q].MABL_K;
-                                var hes_ = Baseknow.MOGODIA + "-" + JST[q].ANBAR + "-" + Convert.ToDouble(JST[q].CODE);
-                                var SHARH_ = Strings.Left("حواله خروج  ساير  مواد شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk, 255);
-                                var BES_ = Math.Round((double)JST[q].MABL_K);
-                                string SANAD_NO_VAL = (JST[q].SANAD_NO is null) ? "NULL" : JST[q].SANAD_NO.ToString();
-                                dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,      HES_K,            HES_M,            HES_T,   hes,     BES,     SHARH,      NUMBER,             MHAZ_NO ,      TAG)
-                                                         VALUES ({max_ns},{Baseknow.MOGODIA},{JST[q].ANBAR},{JST[q].CODE},N'{hes_}',{BES_},N'{SHARH_}',{HEDRST[EOF].NUMBER}, {SANAD_NO_VAL} ,11)");
+                                if (jstt.N_KOL != null && jstt.NUMBER != null && jstt.TNUMBER != null)
+                                {
+                                    var _hes = jstt.N_KOL + "-" + jstt.NUMBER + "-" + jstt.TNUMBER;
+                                    var _BED = Math.Round(mablK);
+                                    var _SHARH = Strings.Left("حواله خروج ساير شماره " + sheet.NUMBER + "-" + sheet.FNUMCO + " مورخ " + Strings.Format(sheet.DATE_N, "####/##/##") + " به مقدار" + meghK + " جهت " + Strings.Trim(jstt.NAMES), 255);
+
+                                    // بدهکار
+                                    AddDetailFull(SqlNum(jstt.N_KOL), SqlNum(jstt.NUMBER), SqlNum(jstt.TNUMBER), "NULL", "NULL", "NULL", _hes, _BED, 0, _SHARH, "NULL");
+
+                                    // بستانکار موجودی انبار
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeNum = Convert.ToDouble(codeLong);
+                                    var anbar = line.ANBAR ?? 0;
+                                    var hes_ = Baseknow.MOGODIA + "-" + anbar + "-" + codeNum;
+                                    var SHARH_ = Strings.Left("حواله خروج  ساير  مواد شماره " + sheet.NUMBER + "-" + sheet.FNUMCO + " مورخ " + Strings.Format(sheet.DATE_N, "####/##/##") + " به مقدار" + meghK, 255);
+                                    var BES_ = Math.Round(mablK);
+                                    string sanadNoVal = (line.SANAD_NO == null) ? "NULL" : SqlNum(line.SANAD_NO.Value);
+
+                                    AddDetailFull(SqlNum(Baseknow.MOGODIA), SqlNum(anbar), SqlNum(codeNum), "NULL", "NULL", "NULL", hes_, 0, BES_, SHARH_, sanadNoVal);
+                                }
                             }
                         }
-                        ;
-                    }
-                    else
-                    {
-                        if (JST[q]?.N_RASID != null && !string.IsNullOrEmpty(JST[q]?.N_RASID))
+                        else
                         {
-                            GETTAF3(JST[q].N_RASID, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                            double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null;
+                            GETTAF3(line.N_RASID, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
 
-                            if (CTAF == null)
+                            if (mablK != 0 && CTAF != null)
                             {
+                                var BED__ = Math.Round(mablK);
+                                var tafName = GETTAFNAME(line.N_RASID);
+                                var SHARH__ = Strings.Left("حواله خروج ساير شماره " + sheet.NUMBER + "-" + sheet.FNUMCO + " مورخ " + Strings.Format(sheet.DATE_N, "####/##/##") + " به مقدار" + meghK + " جهت " + Strings.Trim(tafName), 255);
 
-                            }
+                                string CTAF2T = (CTAF2 == null || CTAF2.Value == 0) ? "NULL" : SqlNum(CTAF2.Value);
+                                string CTAF3T = (CTAF3 == null || CTAF3.Value == 0) ? "NULL" : SqlNum(CTAF3.Value);
+                                string CTAF4T = (CTAF4 == null || CTAF4.Value == 0) ? "NULL" : SqlNum(CTAF4.Value);
 
-                            if (JST[q]?.MABL_K != 0 && CTAF != null) //حساب ها درست است و نال نیست
-                            {
-                                try
+                                if (ISHESAB(CKOL, CMOIN, CTAF))
                                 {
-                                    var BED__ = Math.Round((double)JST[q].MABL_K);
-                                    var SHARH__ = Strings.Left("حواله خروج ساير شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk + " جهت " + Strings.Trim(GETTAFNAME(JST[q].N_RASID)), 255);
-                                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
-                                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
-                                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                                    // بدهکار
+                                    AddDetailFull(SqlNum(CKOL), SqlNum(CMOIN), SqlNum(CTAF), CTAF2T, CTAF3T, CTAF4T, line.N_RASID, BED__, 0, SHARH__, "NULL");
 
-                                    var query = $"SELECT COUNT(1) FROM TDETA_HES WHERE N_KOL = {CKOL} AND NUMBER = {CMOIN} AND TNUMBER = {CTAF}";
-                                    var count = dbms.DoGetDataSQL<int>(query).FirstOrDefault();
-                                    if (count > 0) //حساب معادل آن در حسابهای کل وجود دارد
-                                    {
-                                        dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S, HES_K, HES_M,  HES_T, HES_T2 , HES_T3,HES_T4,        hes,           BED,      SHARH,      NUMBER,          TAG)
-                                                         VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T} ,{CTAF3T},{CTAF4T}, N'{JST[q].N_RASID}',{BED__},N'{SHARH__}',{HEDRST[EOF].NUMBER},11)");
+                                    // بستانکار موجودی انبار
+                                    var codeLong = Convert.ToInt64(SafeToDouble(line.CODE));
+                                    var codeNum = Convert.ToDouble(codeLong);
+                                    var anbar = line.ANBAR ?? 0;
+                                    var __hes = Baseknow.MOGODIA + "-" + anbar + "-" + codeNum;
+                                    var __SHARH = Strings.Left("حواله خروج  ساير  مواد شماره " + sheet.NUMBER + "-" + sheet.FNUMCO + " مورخ " + Strings.Format(sheet.DATE_N, "####/##/##") + " به مقدار" + meghK, 255);
+                                    var __BES = Math.Round(mablK);
+                                    string sanadNoVal = (line.SANAD_NO == null) ? "NULL" : SqlNum(line.SANAD_NO.Value);
 
-
-                                        JAMCH = (double)JST[q].MABL_K;
-                                        var __hes = Baseknow.MOGODIA + "-" + JST[q].ANBAR + "-" + Convert.ToDouble(JST[q].CODE);
-                                        var __SHARH = Strings.Left("حواله خروج  ساير  مواد شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk, 255);
-                                        var __BES = Math.Round((double)JST[q].MABL_K);
-                                        string SANAD_NO_VAL = (JST[q].SANAD_NO is null) ? "NULL" : JST[q].SANAD_NO.ToString();
-                                        dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,      HES_K,            HES_M,            HES_T,   hes,     BES,     SHARH,      NUMBER,       MHAZ_NO      , TAG)
-                                                         VALUES ({max_ns},{Baseknow.MOGODIA},{JST[q].ANBAR},{JST[q].CODE},N'{__hes}',{__BES},N'{__SHARH}',{HEDRST[EOF].NUMBER}, {SANAD_NO_VAL} ,11)");
-                                    }
-                                    else
-                                    {
-                                        var _HESAB_ = $"{CKOL}-{CMOIN}-{CTAF}";
-                                        string[] ctafs = { CTAF2T, CTAF3T, CTAF4T };
-                                        string result = string.Join("-", ctafs.Where(s => !string.IsNullOrEmpty(s)));
-                                        LogWriter.WriteLog($"[SANADKHORUGSAYER] : (RASID : {JST[q]?.N_RASID}) => حساب : {_HESAB_}{(!string.IsNullOrEmpty(result) ? $"-{result}" : "")}  " + DateTime.Now);
-                                    }
+                                    AddDetailFull(SqlNum(Baseknow.MOGODIA), SqlNum(anbar), SqlNum(codeNum), "NULL", "NULL", "NULL", __hes, 0, __BES, __SHARH, sanadNoVal);
                                 }
-                                catch (SqlException ex)
+                                else
                                 {
-                                    IsSuccessfully = false;
-
-                                    if (ex.Number == 547)  // 547 is the error number for foreign key violations in SQL Server
-                                    {
-                                        LogWriter.WriteLog($"[SANADKHORUGSAYER]: (RASID : {JST[q]?.N_RASID}) Foreign Key violation: {ex.Message}");
-                                    }
-                                    else
-                                    {
-                                        LogWriter.WriteLog($"[SANADKHORUGSAYER]: (RASID : {JST[q]?.N_RASID}) SQL Error: {ex.Message}");
-                                    }
+                                    var _HESAB_ = $"{CKOL}-{CMOIN}-{CTAF}";
+                                    string[] ctafs = { CTAF2T, CTAF3T, CTAF4T };
+                                    string resultStr = string.Join("-", ctafs.Where(s => s != "NULL"));
+                                    LogWriter.WriteLog($"[SANADKHORUGSAYER] : (RASID : {line.N_RASID}) => حساب : {_HESAB_}{(!string.IsNullOrEmpty(resultStr) ? $"-{resultStr}" : "")}  " + DateTime.Now);
                                 }
                             }
                         }
                     }
+
+                    var batch = new StringBuilder();
+                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+
+                    if (!isDailyMode)
+                    {
+                        if (needsNewHeader[EOF])
+                        {
+                            batch.Append($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(nsValue)} WHERE NUMBER = {SqlNum(sheetNo)} AND TAG = 11;");
+                        }
+                        else
+                        {
+                            batch.Append(
+                                $"UPDATE dbo.DEED_HED SET DATE_S = {SqlNum(sheet.DATE_N)}, SHARH_S = N'{SqlText(BuildKhorugSayerSharhS(sheet))}', " +
+                                $"GHATEI = 0, NO_S = 12, OKF = -1, USER_NAME = N'{SqlText(sheet.USER_NAME)}' WHERE NO_S = 12 AND N_S = {SqlNum(nsValue)};");
+                        }
+                    }
+
+                    batch.Append($"DELETE FROM dbo.DEED_DTL WHERE NUMBER = {SqlNum(sheetNo)} AND TAG = 11;");
+
+                    const string detailInsertPrefixFull =
+                        "INSERT INTO dbo.DEED_DTL (N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,BED,BES,SHARH,NUMBER,MHAZ_NO,TAG) VALUES ";
+
+                    for (int offset = 0; offset < valueRows.Count; offset += detailInsertChunkSize)
+                    {
+                        batch.Append(detailInsertPrefixFull);
+                        batch.Append(string.Join(",", valueRows.Skip(offset).Take(detailInsertChunkSize)));
+                        batch.Append(';');
+                    }
+
+                    batch.Append("COMMIT TRANSACTION;");
+                    dbms.DoExecuteSQL(batch.ToString());
                 }
-                ;
+                catch (Exception ex)
+                {
+                    IsSuccessfully = false;
+                    LogWriter.WriteLog($"SANADKHORUGSAYER: خطا در برگه {sheetNo} (سند {nsValue}): {ex.Message} | Stack: {ex.StackTrace}");
+                    if (!InternalCalling) throw;
+                }
 
-                SANAD_NUMBER = max_ns;
-
-                //};
+                progressReporter.ReportOne();
             });
+
+            stopwatch.Stop();
+            progressReporter.Complete();
+
+            LogWriter.WriteLog($"SANADKHORUGSAYER: پایان بازسازی - {HEDRST.Count} برگه در {stopwatch.Elapsed.TotalSeconds:F1} ثانیه با {observedThreads.Count} Thread همزمان");
+
+            for (int i = HEDRST.Count - 1; i >= 0; i--)
+            {
+                if (sheetUsable[i] && HEDRST[i].N_S != null)
+                {
+                    SANAD_NUMBER = HEDRST[i].N_S;
+                    break;
+                }
+            }
+
             return (SANAD_NUMBER, IsSuccessfully);
         }
 
