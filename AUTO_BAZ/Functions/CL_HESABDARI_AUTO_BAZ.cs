@@ -46,6 +46,26 @@ namespace AUTO_BAZ.Functions
         //
         // ⚠️ در ابتدای هر اجرای بازسازی حتماً ClearLookupCaches() صدا زده شود تا اگر
         //    کاربر بین دو اجرا حسابی اضافه کرده باشد، داده‌ی کهنه نماند.
+        //
+        // ───────────────────────────────────────────────────────────────────────────────
+        // ⚠️⚠️ خطر «نرخ کهنه» — قاعده‌ای که هنگام افزودن هر کش تازه باید رعایت شود:
+        //
+        //   هیچ چیزی که «خودِ بازسازی آن را می‌نویسد» نباید کش شود.
+        //
+        // جدول‌هایی که بازسازی به آن‌ها می‌نویسد (بررسی‌شده روی کل AUTO_BAZ):
+        //   • INVO_LST (AVRAGE, AVRAGE2, MABL, MABL_K)  ← C0_TASK «بازسازی نرخ میانگین»
+        //   • DTL_MANF (MABLK, SMABL)                    ← C0_TASK
+        //   • INVO_LST (N_KOL, N_MOIN) فقط برای TAG = 14 ← C11 / GENSANADVD
+        //   • TDETA_HES                                  ← CREATHES (که خودش کش را به‌روز می‌کند)
+        //   • DEED_HED / DEED_DTL / HEAD_LST.N_S         ← خروجی خودِ بازسازی
+        //
+        // به همین دلیل کش دقیقاً بعد از پایان C0/C00 روشن می‌شود (MainWindow.LetsGoBtn_Click):
+        // بهای تمام‌شده‌ی استانداردی که در کش می‌نشیند، حتماً «بعد از» اصلاح DTL_MANF خوانده شده.
+        //
+        // نکته‌ی مهم برای سند خروج مواد: نرخ ساخت (DTL_MANF.SMABl) و مبلغ ردیف (INVO_LST.MABL_K)
+        // هرگز کش نمی‌شوند؛ در هر اجرا مستقیم و تازه از دیتابیس خوانده می‌شوند. تنها چیزی که
+        // آنجا کش می‌شود گروه کالا (STUF_DEF.RADAH) و نام کالا/حساب است که هیچ‌کدام قیمت نیستند
+        // و بازسازی هم به آن‌ها نمی‌نویسد.
         // ───────────────────────────────────────────────────────────────────────────────
 
         // کلید کش عمداً double است و نه int: صداکننده‌های ISHESAB مقادیری مثل
@@ -4330,10 +4350,14 @@ namespace AUTO_BAZ.Functions
             }
 
             int GETGRPKALAcoRet = default;
-            var rst = dbms.DoGetDataSQL<double?>("SELECT     radah  FROM dbo.stuf_def WHERE     (CODE = '" + CC + "')").ToList();
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     radah  FROM dbo.stuf_def WHERE     (CODE = N'" + SqlText(CC) + "')").ToList();
             if (rst.Count > 0)
             {
-                GETGRPKALAcoRet = (int)rst.FirstOrDefault();
+                // اگر RADAH خالی باشد، (int) روی double? خطا می‌داد و کل تسک را از کار می‌انداخت.
+                // مقدار پیش‌فرض همان صفر است که در ادامه به معین «۱» ترجمه می‌شود — یعنی همان
+                // رفتاری که برای گروه‌های غیر از ۲ و ۳ وجود دارد.
+                var radah = rst.FirstOrDefault();
+                GETGRPKALAcoRet = radah.HasValue ? (int)radah.Value : 0;
             }
 
             if (LookupCacheEnabled)
@@ -4930,6 +4954,19 @@ namespace AUTO_BAZ.Functions
                     continue;
                 }
 
+                // DEED_HED یک CHECK دارد: CK_DEED_HED => date_s >= 10101
+                // ولی HEAD_LST.DATE_N هیچ CHECK ندارد، پس مقدار خراب (مثلاً صفر) در آن قابل ذخیره است.
+                // اگر چنین برگه‌ای وارد رزرو دسته‌ای شود، INSERT سربرگ به CHECK می‌خورد و چون
+                // رزرو برای «همه‌ی» برگه‌ها در یک تراکنش انجام می‌شود، یک ردیف خراب کل سند خروج مواد
+                // را از کار می‌انداخت. پس همان‌جا کنار گذاشته می‌شود.
+                if (normalizedDate < 10101)
+                {
+                    LogWriter.WriteLog(
+                        $"SANADKHORUGMAVAD: تاریخ برگ {sheet.NUMBER} برابر {normalizedDate} است و از حداقل مجاز سند (10101) کمتر می‌باشد؛ این برگه پردازش نشد.");
+                    IsSuccessfully = false;
+                    continue;
+                }
+
                 sheet.DATE_N = normalizedDate;
                 sheetUsable[i] = true;
             }
@@ -5173,13 +5210,19 @@ namespace AUTO_BAZ.Functions
                                 var mablRounded = Math.Round((double)line.MABL_K);
                                 var kalaName = GETKALANAME(Convert.ToInt64(line.CODE));
 
+                                // HES_T در جدول DEED_DTL از نوع int است، ولی INVO_LST.CODE رشته است.
+                                // همان تبدیلی که خود کد برای ساختن رشته‌ی HES انجام می‌دهد اینجا هم
+                                // استفاده می‌شود تا ستون عددی و متن HES هرگز از هم جدا نیفتند و یک
+                                // مقدار خالی/غیرعددی نتواند دستور INSERT را نحوی خراب کند.
+                                var codeNum = Convert.ToDouble(line.CODE);
+
                                 // ۱) موجودی انبار (بستانکار)
                                 if (valdefacc)
                                 {
                                     CREATHES(Baseknow.MOGODIA, line.ANBAR, Convert.ToInt64(line.CODE), kalaName);
                                 }
-                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(line.ANBAR), line.CODE,
-                                    Baseknow.MOGODIA + "-" + line.ANBAR + "-" + Convert.ToDouble(line.CODE), lineSharh, 0, mablRounded);
+                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(line.ANBAR), SqlNum(codeNum),
+                                    Baseknow.MOGODIA + "-" + line.ANBAR + "-" + codeNum, lineSharh, 0, mablRounded);
 
                                 // ۲) فازهای تولید (بستانکار)
                                 var RDD = GETGRPKALAco(line.CODE);
@@ -5201,8 +5244,8 @@ namespace AUTO_BAZ.Functions
                                 }
                                 if (phazAccountReady)
                                 {
-                                    AddDetail(SqlNum(Baseknow.PHAZ_TOL), SqlNum(phazMoin), line.CODE,
-                                        Baseknow.PHAZ_TOL + "-" + phazMoin + "-" + Convert.ToDouble(line.CODE), lineSharh, 0, mablRounded);
+                                    AddDetail(SqlNum(Baseknow.PHAZ_TOL), SqlNum(phazMoin), SqlNum(codeNum),
+                                        Baseknow.PHAZ_TOL + "-" + phazMoin + "-" + codeNum, lineSharh, 0, mablRounded);
                                 }
 
                                 // ۳) هزینه تولید / حساب فرمول ساخت (بدهکار)
@@ -5235,7 +5278,11 @@ namespace AUTO_BAZ.Functions
                             // ۴) كنترل كالاي در جريان ساخت (بدهکار) — کد قبلی اینجا عمداً CREATHES ندارد.
                             if (sakht != 0)
                             {
-                                AddDetail(SqlNum(Baseknow.CONKAL), line.COM, line.CODE,
+                                // HES_M از HEAD_MANF.CODE می‌آید و می‌تواند NULL باشد (کد قبلی هم با
+                                // IsNull(COM) همین را در نظر گرفته). با همان Convert.ToDouble که برای
+                                // ساخت متن HES استفاده می‌شود، ستون عددی هم پر می‌شود تا مقدار خالی
+                                // دستور INSERT را نحوی خراب نکند.
+                                AddDetail(SqlNum(Baseknow.CONKAL), SqlNum(Convert.ToDouble(line.COM)), SqlNum(Convert.ToDouble(line.CODE)),
                                     Baseknow.CONKAL + "-" + Convert.ToDouble(line.COM) + "-" + Convert.ToDouble(line.CODE),
                                     lineSharh, Math.Round((double)sakht), 0);
                             }
@@ -5260,7 +5307,7 @@ namespace AUTO_BAZ.Functions
                                 {
                                     CREATHES(Baseknow.AMALKARD, Convert.ToDouble(line.COM), Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToInt64(line.CODE)));
                                 }
-                                AddDetail(SqlNum(Baseknow.AMALKARD), line.COM, line.CODE,
+                                AddDetail(SqlNum(Baseknow.AMALKARD), SqlNum(Convert.ToDouble(line.COM)), SqlNum(Convert.ToDouble(line.CODE)),
                                     Baseknow.AMALKARD + "-" + Convert.ToDouble(line.COM) + "-" + Convert.ToDouble(line.CODE),
                                     lineSharh, amalIsBed ? amalValue : 0, amalIsBed ? 0 : amalValue);
                             }
@@ -5277,18 +5324,22 @@ namespace AUTO_BAZ.Functions
                             {
                                 var mablRounded = Math.Round((double)line.MABL_K);
 
-                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(line.ANBAR), line.CODE,
-                                    Baseknow.MOGODIA + "-" + line.ANBAR + "-" + Convert.ToDouble(line.CODE), lineSharh, 0, mablRounded);
+                                // مثل شاخه‌ی غیرنهایی: ستون عددی HES_T از همان تبدیلی پر می‌شود که
+                                // متن HES با آن ساخته می‌شود.
+                                var codeNum = Convert.ToDouble(line.CODE);
 
-                                AddDetail(SqlNum(Baseknow.PHAZ_TOL), "1", line.CODE,
-                                    Baseknow.PHAZ_TOL + "-1-" + Convert.ToDouble(line.CODE), lineSharh, 0, mablRounded);
+                                AddDetail(SqlNum(Baseknow.MOGODIA), SqlNum(line.ANBAR), SqlNum(codeNum),
+                                    Baseknow.MOGODIA + "-" + line.ANBAR + "-" + codeNum, lineSharh, 0, mablRounded);
+
+                                AddDetail(SqlNum(Baseknow.PHAZ_TOL), "1", SqlNum(codeNum),
+                                    Baseknow.PHAZ_TOL + "-1-" + codeNum, lineSharh, 0, mablRounded);
 
                                 if (valdefacc is true && !ISHESAB(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(line.CODE)))
                                 {
                                     CREATHES(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToDouble(line.CODE)));
                                 }
-                                AddDetail(SqlNum(Baseknow.HAZ_TOL), "99999", line.CODE,
-                                    Baseknow.HAZ_TOL + "-99999-" + Convert.ToDouble(line.CODE), lineSharh, mablRounded, 0);
+                                AddDetail(SqlNum(Baseknow.HAZ_TOL), "99999", SqlNum(codeNum),
+                                    Baseknow.HAZ_TOL + "-99999-" + codeNum, lineSharh, mablRounded, 0);
                             }
 
                             var JAMCH = Math.Round((double)line.MABL_K);
@@ -5297,7 +5348,7 @@ namespace AUTO_BAZ.Functions
                             if (sakht != 0)
                             {
                                 CREATHES(Baseknow.CONKAL, 99999, Convert.ToInt64(line.CODE), GETKALANAME(Convert.ToDouble(line.CODE)));
-                                AddDetail(SqlNum(Baseknow.CONKAL), "99999", line.CODE,
+                                AddDetail(SqlNum(Baseknow.CONKAL), "99999", SqlNum(Convert.ToDouble(line.CODE)),
                                     Baseknow.CONKAL + "-99999-" + Convert.ToDouble(line.CODE), lineSharh, Math.Round((double)sakht), 0);
                             }
 
@@ -5328,7 +5379,7 @@ namespace AUTO_BAZ.Functions
                                     amalIsBed = false;
                                 }
 
-                                AddDetail(SqlNum(Baseknow.AMALKARD), "99999", line.CODE,
+                                AddDetail(SqlNum(Baseknow.AMALKARD), "99999", SqlNum(Convert.ToDouble(line.CODE)),
                                     Baseknow.AMALKARD + "-99999-" + Convert.ToDouble(line.CODE), lineSharh, amalIsBed ? amalValue : 0, amalIsBed ? 0 : amalValue);
                             }
                         }
@@ -5411,9 +5462,14 @@ namespace AUTO_BAZ.Functions
                 var fromNs = SqlNum(sheetByNs.Keys.Min());
                 var toNs = SqlNum(sheetByNs.Keys.Max());
 
+                // چرا شرط TAG = 10 اضافه شده: شماره سندها از یک شمارنده‌ی مشترک گرفته می‌شوند و
+                // C1..C11 هم‌زمان اجرا می‌شوند، پس بازه‌ی [fromNs, toNs] شماره سند تسک‌های دیگر را
+                // هم در بر می‌گیرد. بدون این شرط، این SELECT ردیف‌های در حال درجِ تسک‌های دیگر را
+                // می‌خواند و پشت قفل تراکنش آن‌ها منتظر می‌ماند. تنها تولیدکننده‌ی DEED_DTL با
+                // TAG = 10 همین تابع است (بررسی شد)، پس جمع سندهای خودمان دقیقاً همان می‌ماند.
                 var unbalanced = dbms.DoGetDataSQL<KhorugMavadBalanceRow>(
                     "SELECT N_S, SUM(BED) - SUM(BES) AS DIFF FROM dbo.DEED_DTL " +
-                    $"WHERE N_S BETWEEN {fromNs} AND {toNs} GROUP BY N_S " +
+                    $"WHERE N_S BETWEEN {fromNs} AND {toNs} AND TAG = 10 GROUP BY N_S " +
                     "HAVING SUM(BED) - SUM(BES) <> 0 AND ABS(SUM(BED) - SUM(BES)) <= 40")
                     .Where(x => x?.N_S != null && x.DIFF != null && sheetByNs.ContainsKey(x.N_S.Value))
                     .ToList();
