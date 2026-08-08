@@ -39,24 +39,26 @@ namespace TestRunner
             var dbms = new CL_CCNNMANAGER();
 
             Console.WriteLine("=========================================================================");
-            Console.WriteLine("     FULL E2E BENCHMARK & AUDIT TEST (GENSANADKHAREED + UI SIMULATION)  ");
+            Console.WriteLine("     BENCHMARK & AUDIT TEST: GENSANADANBARGARD (سند انبارگردانی - C10_TASK)  ");
             Console.WriteLine("=========================================================================");
 
-            var tag12Count = dbms.DoGetDataSQL<int>("SELECT COUNT(*) FROM dbo.HEAD_LST WHERE TAG = 12").FirstOrDefault();
-            Console.WriteLine($"HEAD_LST (TAG=12) Document Count: {tag12Count}");
+            var headCount = dbms.DoGetDataSQL<int>("SELECT COUNT(*) FROM dbo.ANBGRD_HEAD").FirstOrDefault();
+            Console.WriteLine($"ANBGRD_HEAD Document Count: {headCount}");
 
-            List<DtlRow> origTag12 = SnapshotDtl(12);
-            Console.WriteLine($"Original DEED_DTL (TAG=12) Row Count: {origTag12.Count}");
+            var nsList = dbms.DoGetDataSQL<double?>("SELECT N_S FROM dbo.ANBGRD_HEAD WHERE N_S IS NOT NULL").Where(x => x.HasValue).Select(x => x.Value).ToList();
+            List<DtlRow> origDtl = SnapshotDtlByNs(nsList);
+            Console.WriteLine($"Original DEED_DTL Row Count for ANBGRD: {origDtl.Count}");
 
             var sw = Stopwatch.StartNew();
-            CL_HESABDARI_AUTO_BAZ.GENSANADKHAREED(1, 9999999999, false);
+            CL_HESABDARI_AUTO_BAZ.GENSANADANBARGARD(1, 9999999999, false);
             sw.Stop();
 
-            Console.WriteLine($"GENSANADKHAREED Execution Time: {sw.Elapsed.TotalSeconds:F3} s ({sw.ElapsedMilliseconds} ms)");
+            Console.WriteLine($"GENSANADANBARGARD Execution Time: {sw.Elapsed.TotalSeconds:F3} s ({sw.ElapsedMilliseconds} ms)");
 
-            List<DtlRow> newTag12 = SnapshotDtl(12);
-            Console.WriteLine("\n[AUDIT: TAG=12 (GENSANADKHAREED)]");
-            CompareRows(origTag12, newTag12, 12);
+            var newNsList = dbms.DoGetDataSQL<double?>("SELECT N_S FROM dbo.ANBGRD_HEAD WHERE N_S IS NOT NULL").Where(x => x.HasValue).Select(x => x.Value).ToList();
+            List<DtlRow> newDtl = SnapshotDtlByNs(newNsList);
+            Console.WriteLine("\n[AUDIT: GENSANADANBARGARD]");
+            CompareRows(origDtl, newDtl, 17);
 
             // Simulating MainWindow execution with full checkbox selection logic
             Console.WriteLine("\n[UI SIMULATION: UpdateOverallProgressBar Test]");
@@ -70,14 +72,17 @@ namespace TestRunner
             Console.WriteLine("=========================================================================");
         }
 
-        private static List<DtlRow> SnapshotDtl(double tag)
+        private static List<DtlRow> SnapshotDtlByNs(IEnumerable<double> nsList)
         {
+            var nsArr = nsList.ToList();
+            if (nsArr.Count == 0) return new List<DtlRow>();
+
             using (var conn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
                 conn.Open();
                 using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $"SELECT N_S, HES_K, HES_M, HES_T, HES, SHARH, BED, BES, NUMBER, TAG FROM dbo.DEED_DTL WHERE TAG = {tag} ORDER BY NUMBER, N_S, HES_K, HES_M, HES_T, BED DESC, BES DESC";
+                    cmd.CommandText = $"SELECT N_S, HES_K, HES_M, HES_T, HES, SHARH, BED, BES, NUMBER, TAG FROM dbo.DEED_DTL WHERE N_S IN ({string.Join(",", nsArr)}) ORDER BY N_S, HES_K, HES_M, HES_T, BED DESC, BES DESC";
                     using (var reader = cmd.ExecuteReader())
                     {
                         var list = new List<DtlRow>();
@@ -93,8 +98,8 @@ namespace TestRunner
                                 SHARH = reader.IsDBNull(5) ? "" : reader.GetString(5),
                                 BED = reader.GetDouble(6),
                                 BES = reader.GetDouble(7),
-                                NUMBER = reader.GetDouble(8),
-                                TAG = reader.GetDouble(9)
+                                NUMBER = reader.IsDBNull(8) ? 0 : reader.GetDouble(8),
+                                TAG = reader.IsDBNull(9) ? 0 : reader.GetDouble(9)
                             });
                         }
                         return list;
