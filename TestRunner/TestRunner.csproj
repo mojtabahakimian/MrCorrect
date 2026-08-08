@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AUTO_BAZ\AUTO_BAZ.csproj" />
+    <ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
+  </ItemGroup>
+</Project>
