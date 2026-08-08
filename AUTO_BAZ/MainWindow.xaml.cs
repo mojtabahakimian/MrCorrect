@@ -968,6 +968,31 @@ namespace AUTO_BAZ
             Dispatcher.Invoke(new Action(() => { C00.Foreground = Generaly.PutThisColor(); }));
 
         }
+        /// <summary>
+        /// منبع تراکنش‌های «بازسازی نرخ میانگین» برای یک (کالا، انبار).
+        ///
+        /// قبلاً همین SQL به شکل «DROP VIEW ← CREATE VIEW ← SELECT از VIEW ← DROP VIEW» اجرا می‌شد؛
+        /// یعنی ۴ رفت‌وبرگشت و دو دستور DDL به ازای هر کالا (برای ۲۴۹۱ کالا ≈ ۱۰ هزار دستور).
+        /// DDL روی کاتالوگ سیستم قفل Sch-M می‌گیرد و Recompile ایجاد می‌کند، پس در حلقه‌ی موازی
+        /// Thread ها پشت هم صف می‌کشیدند و موازی‌سازی عملاً بی‌اثر می‌شد.
+        ///
+        /// اینجا همان متن SQL داخل یک Derived Table قرار گرفته و همان ORDER BY بیرونی روی آن اعمال
+        /// می‌شود. VIEW در SQL Server مادی‌سازی نمی‌شود و هنگام اجرا در همان نقطه Inline می‌شود،
+        /// بنابراین درخت اجرا و در نتیجه مجموعه‌ی نتیجه و ترتیب آن دقیقاً همان قبل است.
+        ///
+        /// تنها تغییر در متن SQL: حذف ORDER BY داخل شاخه‌های UNION.
+        /// آن‌ها از ابتدا بی‌اثر بودند (UNION برای حذف تکراری‌ها خودش مرتب/هش می‌کند و ترتیب نهایی
+        /// را فقط ORDER BY بیرونی تعیین می‌کند) و داخل Derived Table نحو معتبری ندارند.
+        /// UNION (و نه UNION ALL) عیناً حفظ شده تا حذف رکوردهای تکراری مثل قبل انجام شود.
+        /// </summary>
+        private static string BuildAvgRebuildSourceSql(string code, int anbar, string dt)
+        {
+            return "SELECT     TOP 100 PERCENT DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID,  MEGH_R , RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, ID, BARGAH FROM ( "
+                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,  dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO,dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE WHERE  (dbo.INVO_LST.tag <> 20 and dbo.INVO_LST.tag <> 23) and (dbo.INVO_LST.CODE = '" + code + "') AND " + " (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ") UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1  = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBARF = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ")  AND (dbo.INVO_LST.TAG = 5) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN       dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_FBK.DATE_N > " + dt + ") UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A,dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH  FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag INNER JOIN " + " dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") union " + " SELECT     TOP 100 PERCENT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK, 0 AS megh_mar,' ' AS mol, dbo.ANBGRD_LST.MABL, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK, 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no, 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage, 0 AS id, '17' AS Expr1 FROM   dbo.ANBGRD_LST INNER JOIN  dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM INNER JOIN  dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE " + " WHERE      (dbo.ANBGRD_LST.CODE = '" + code + "') AND (dbo.ANBGRD_HEAD.GRD_ANBAR = " + anbar + ") and ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * - 1 <> 0) AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL)) "
+                 + " ) AS TMPAV101 ORDER BY DATE_N, BARGAH";
+        }
+
+
         public async Task C0_TASK()
         {
             await Task.Run(() =>
@@ -1026,19 +1051,57 @@ namespace AUTO_BAZ
                         ).ToList();
                         LogWriter.WriteLog($"rst.Count after filtering by rst3 transactions = {rst.Count}");
 
-                        //CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, r =>
+                        // ─────────────────────────────────────────────────────────────────────
+                        // نگاشت ID → ردیف INVO_LST.
+                        // قبلاً به ازای هر تراکنش «rst3.Where(x => x.id == ...).ToList()» اجرا می‌شد:
+                        // پویش خطی روی ۳۹ هزار ردیف + یک List تازه، برای هر یک از ~۴۰ هزار تراکنش
+                        // (در مجموع ≈ ۱٫۵ میلیارد مقایسه).
+                        // ⚠️ عمداً همان شیء‌های داخل rst3 نگه داشته می‌شوند و کپی گرفته نمی‌شود:
+                        //    منطق TAG=4 (برگشت فروش) مقدار AVRAGE ای را می‌خواند که هنگام پردازش
+                        //    TAG=2 (فروش) روی همان شیء نوشته شده است.
+                        //    ContainsKey هم برای این است که در صورت وجود ID تکراری، مثل
+                        //    FirstOrDefault اولین ردیف انتخاب شود.
+                        // ─────────────────────────────────────────────────────────────────────
+                        var rst3ById = new Dictionary<long, INVO_LST>(rst3.Count);
+                        foreach (var invoLine in rst3)
+                        {
+                            if (!rst3ById.ContainsKey(invoLine.id)) { rst3ById[invoLine.id] = invoLine; }
+                        }
+
+                        // قالب‌بندی عدد مستقل از Culture. قبلاً «{MIAN}» مستقیم داخل SQL درج می‌شد و
+                        // اگر Culture جاری جداکننده‌ی اعشار غیر از نقطه داشته باشد، SQL خراب می‌شود.
+                        // فرمت پیش‌فرض double عیناً حفظ شده تا مقدار درج‌شده تغییر نکند.
+                        static string N(double? v) => v.HasValue ? v.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
+
+                        // ─────────────────────────────────────────────────────────────────────
+                        // گزارش پیشرفت غیرمسدودکننده.
+                        // قبلاً به ازای هر تراکنش یک Dispatcher.Invoke مسدودکننده اجرا می‌شد
+                        // (خواندن متن TextBlock، جمع، نوشتن). یعنی ~۴۰ هزار بار قفل شدن پشت
+                        // تک‌Thread رابط کاربری؛ همین به‌تنهایی حلقه‌ی موازی را سریال می‌کرد.
+                        // ─────────────────────────────────────────────────────────────────────
+                        long processedRows = 0;
+                        long totalRowsForUi = (long)rcount;
+                        string currentCode = string.Empty;
+
+                        var uiProgress = new CL_HESABDARI_AUTO_BAZ.ThrottledProgressReporter(
+                            (int)Math.Max(1d, rcount),
+                            Dispatcher,
+                            value =>
+                            {
+                                var done = Interlocked.Read(ref processedRows);
+                                PRGR_C0.Value = value;
+                                Text19.Text = done.ToString();
+                                Text23.Text = Math.Max(0L, totalRowsForUi - done).ToString();
+                                co.Text = currentCode;
+                                UpdateOverallProgressBar();
+                            });
+
                         var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(rst.Count);
                         CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
                         {
-                            List<cm_model> RST2 = null;
-                            int errorno;
-                            string SQL;
                             double MIAN;
                             double MBKM;
                             var MOGUDI = default(double);
-                            double temp;
-
-                            //this.Repaint();
 
                             MBKM = rst[r].MABL_A ?? 0;
                             MIAN = rst[r].FI_A ?? 0;
@@ -1050,26 +1113,25 @@ namespace AUTO_BAZ
                                     MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[r].CODE);
                                 }
                             }
-                            string TBLTMP = "T" + rst[r].ANBAR + "MPAV101" + rst[r].CODE;
                             MOGUDI = rst[r].MOGODI_A ?? 0;
-                            dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS  WHERE TABLE_NAME = '{TBLTMP}')   DROP VIEW {TBLTMP}");
-                            dbms.DoExecuteSQL($"CREATE VIEW  {TBLTMP} as " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,  dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO,dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE WHERE  (dbo.INVO_LST.tag <> 20 and dbo.INVO_LST.tag <> 23) and (dbo.INVO_LST.CODE = '" + rst[r].CODE + "') AND " + " (dbo.INVO_LST.ANBAR = " + rst[r].ANBAR + ") AND (dbo.HEAD_LST.DATE_N > " + this.DT + ") ORDER BY dbo.HEAD_LST.DATE_N,  dbo.TAGCOD.BARGAH , dbo.INVO_LST.NUMBER UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1  = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + rst[r].CODE + "') AND (dbo.INVO_LST.ANBARF = " + rst[r].ANBAR + ") AND (dbo.HEAD_LST.DATE_N > " + this.DT + ")  AND (dbo.INVO_LST.TAG = 5) ORDER BY dbo.HEAD_LST.DATE_N,  dbo.TAGCOD.BARGAH, dbo.INVO_LST.NUMBER UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN       dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + rst[r].CODE + "') AND (dbo.INVO_LST.ANBAR = " + rst[r].ANBAR + ") AND (dbo.HEAD_LST_FBK.DATE_N > " + this.DT + ") ORDER BY dbo.HEAD_LST_FBK.DATE_N, dbo.TAGCOD.BARGAH, dbo.INVO_LST.NUMBER UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A,dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH  FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag INNER JOIN " + " dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + rst[r].CODE + "') AND (dbo.INVO_LST.ANBAR = " + rst[r].ANBAR + ") AND (dbo.HEAD_LST_KBK.DATE_N > " + this.DT + ") ORDER BY dbo.HEAD_LST_KBK.DATE_N, dbo.TAGCOD.BARGAH, dbo.INVO_LST.NUMBER  union " + " SELECT     TOP 100 PERCENT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK, 0 AS megh_mar,' ' AS mol, dbo.ANBGRD_LST.MABL, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK, 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no, 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage, 0 AS id, '17' AS Expr1 FROM   dbo.ANBGRD_LST INNER JOIN  dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM INNER JOIN  dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE " + " WHERE      (dbo.ANBGRD_LST.CODE = '" + rst[r].CODE + "') AND (dbo.ANBGRD_HEAD.GRD_ANBAR = " + rst[r].ANBAR + ") and ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * - 1 <> 0) AND (dbo.ANBGRD_HEAD.GRD_DATE > " + this.DT + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL)) ORDER BY dbo.ANBGRD_HEAD.GRD_DATE, dbo.ANBGRD_LST.GRD_NUM ");
+                            currentCode = rst[r].CODE;
 
-                            RST2 = dbms.DoGetDataSQL<cm_model>($"SELECT     TOP 100 PERCENT DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID,  MEGH_R , RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, ID, BARGAH FROM dbo.{TBLTMP} ORDER BY DATE_N, BARGAH").ToList();
+                            // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT + DROP VIEW.
+                            var RST2 = dbms.DoGetDataSQL<cm_model>(
+                                BuildAvgRebuildSourceSql(rst[r].CODE, rst[r].ANBAR ?? 0, this.DT)).ToList();
+
+                            // UPDATE ها انباشته می‌شوند تا به‌جای یک رفت‌وبرگشت برای هر تراکنش،
+                            // دسته‌ای اجرا شوند. ترتیب اجرا دقیقاً ترتیب تولید است، پس اگر یک ID
+                            // چند بار به‌روزرسانی شود (مثلاً TAG=2 و بعد TAG=4) نتیجه‌ی نهایی عوض نمی‌شود.
+                            var pending = new List<string>(RST2.Count);
 
                             for (int eof = 0; eof < RST2.Count; eof++) //while (!RST2.EOF)
                             {
                                 if (IsCancelRequestedBgWorker) { return; }
-                                Dispatcher.Invoke(new Action(() =>
-                                {
-                                    this.Text23.Text = Convert.ToString(Convert.ToInt64(Text23.Text) - 1);
-                                    Text19.Text = Convert.ToString(Convert.ToInt64(Text19.Text) + 1);
-                                    this.co.Text = rst[r].CODE;
-                                    progress++;
-                                    PRGR_C0.Value = progress / rcount * 100.0;// Update the progress bar
-                                    UpdateOverallProgressBar();
-                                }));
-                                var rst3Filter_ = rst3.Where(x => x.id == RST2[eof].ID).ToList();
+                                Interlocked.Increment(ref processedRows);
+                                uiProgress.ReportOne();
+
+                                var rst3Filter_ = rst3ById.TryGetValue(RST2[eof].ID ?? 0L, out var invoRow) ? invoRow : null;
 
                                 switch (RST2[eof].TAG)
                                 {
@@ -1090,8 +1152,8 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}"); //rst3Filter_.update();
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}"); //rst3Filter_.update();
                                             break;
                                         }
                                     case 22: // برگشت فروش سال قبل
@@ -1118,8 +1180,8 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}"); //rst3Filter_.update();
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}"); //rst3Filter_.update();
                                             break;
                                         }
                                     case 24: // برگشت فروش سال قبل
@@ -1146,16 +1208,16 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}"); //rst3Filter_.update();
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}"); //rst3Filter_.update();
                                             break;
                                         }
                                     case 2: // فروش
                                         {
                                             MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
                                             MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1176,14 +1238,14 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE2 = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE2 = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            rst3Filter_.AVRAGE2 = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
                                     case 4: // برگشت فروش
                                         {
-                                            MBKM = MBKM + (RST2[eof].MEGH_MAR ?? 0) * (rst3Filter_.FirstOrDefault()?.AVRAGE ?? 0);
+                                            MBKM = MBKM + (RST2[eof].MEGH_MAR ?? 0) * (rst3Filter_?.AVRAGE ?? 0);
                                             MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
                                             if (MBKM == 0d)
                                             {
@@ -1198,8 +1260,8 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE2 = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE2 = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            rst3Filter_.AVRAGE2 = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1207,14 +1269,14 @@ namespace AUTO_BAZ
                                         {
                                             MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
                                             MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            rst3Filter_.FirstOrDefault().MABL = MIAN;
-                                            rst3Filter_.FirstOrDefault().MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            rst3Filter_.MABL = MIAN;
+                                            rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
 
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , 
-                                                                                     MABL = {MIAN} ,
-                                                                                     MABL_K = {rst3Filter_.FirstOrDefault().MABL_K}
-                                                            WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , 
+                                                                                     MABL = {N(MIAN)} ,
+                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
+                                                            WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1235,8 +1297,8 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE2 = MIAN;
-                                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET AVRAGE2 = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            rst3Filter_.AVRAGE2 = MIAN;
+                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1244,14 +1306,14 @@ namespace AUTO_BAZ
                                         {
                                             MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
                                             MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            rst3Filter_.FirstOrDefault().MABL = MIAN;
-                                            rst3Filter_.FirstOrDefault().MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            rst3Filter_.MABL = MIAN;
+                                            rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
 
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , 
-                                                                                     MABL = {MIAN} ,
-                                                                                     MABL_K = {rst3Filter_.FirstOrDefault().MABL_K}
-                                                            WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , 
+                                                                                     MABL = {N(MIAN)} ,
+                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
+                                                            WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1259,14 +1321,14 @@ namespace AUTO_BAZ
                                         {
                                             MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
                                             MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            rst3Filter_.FirstOrDefault().MABL = MIAN;
-                                            rst3Filter_.FirstOrDefault().MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            rst3Filter_.MABL = MIAN;
+                                            rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
 
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , 
-                                                                                     MABL = {MIAN} ,
-                                                                                     MABL_K = {rst3Filter_.FirstOrDefault().MABL_K}
-                                                            WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , 
+                                                                                     MABL = {N(MIAN)} ,
+                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
+                                                            WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1277,32 +1339,32 @@ namespace AUTO_BAZ
                                                 List<THE_QUERY2> RST7 = dbms.DoGetDataSQL<THE_QUERY2>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[eof].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
                                                 if (RST7.Count > 0)
                                                 {
-                                                    //rst3Filter_.FirstOrDefault().MABL = RST7.Fields(0) + RST7.Fields(1) + RST7.Fields(2);
-                                                    rst3Filter_.FirstOrDefault().MABL = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
-                                                    rst3Filter_.FirstOrDefault().MABL_K = Math.Round(((RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0)) * (RST2[eof].MEGHk ?? 0));
-                                                    dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                                     MABL = {rst3Filter_.FirstOrDefault().MABL} ,
-                                                                                     MABL_K = {rst3Filter_.FirstOrDefault().MABL_K}
-                                                            WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                                    //rst3Filter_.MABL = RST7.Fields(0) + RST7.Fields(1) + RST7.Fields(2);
+                                                    rst3Filter_.MABL = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
+                                                    rst3Filter_.MABL_K = Math.Round(((RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0)) * (RST2[eof].MEGHk ?? 0));
+                                                    pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                     MABL = {N(rst3Filter_.MABL)} ,
+                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
+                                                            WHERE ID = {rst3Filter_.id}");
                                                     //rst3Filter_.update();
                                                 }
                                             }
                                             else
                                             {
-                                                rst3Filter_.FirstOrDefault().MABL = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[r].CODE, RST2[eof].DATE_N ?? 0L);
-                                                if (rst3Filter_.FirstOrDefault().MABL == 0)
+                                                rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[r].CODE, RST2[eof].DATE_N ?? 0L);
+                                                if (rst3Filter_.MABL == 0)
                                                 {
-                                                    rst3Filter_.FirstOrDefault().MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[r].CODE);
+                                                    rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[r].CODE);
                                                 }
-                                                rst3Filter_.FirstOrDefault().MABL_K = Math.Round(rst3Filter_.FirstOrDefault().MABL * (RST2[eof].MEGHk ?? 0));
+                                                rst3Filter_.MABL_K = Math.Round(rst3Filter_.MABL * (RST2[eof].MEGHk ?? 0));
 
-                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                                     MABL = {rst3Filter_.FirstOrDefault().MABL} ,
-                                                                                     MABL_K = {rst3Filter_.FirstOrDefault().MABL_K}
-                                                            WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                                pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                     MABL = {N(rst3Filter_.MABL)} ,
+                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
+                                                            WHERE ID = {rst3Filter_.id}");
                                                 //rst3Filter_.update();
                                             }
-                                            MBKM = MBKM + rst3Filter_.FirstOrDefault().MABL_K;
+                                            MBKM = MBKM + rst3Filter_.MABL_K;
                                             MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
                                             if (MBKM == 0d)
                                             {
@@ -1317,10 +1379,10 @@ namespace AUTO_BAZ
                                             {
                                                 MIAN = MBKM / MOGUDI;
                                             }
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                                     AVRAGE = {MIAN}
-                                                            WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            rst3Filter_.AVRAGE = MIAN;
+                                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                     AVRAGE = {N(MIAN)}
+                                                            WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
@@ -1348,8 +1410,8 @@ namespace AUTO_BAZ
                                             var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
                                             //RST6.Filter = "CODE = '" + RST2[eof].CODE + "' AND GRD_NUM = " + RST2[eof].NUMBER;
                                             //RST6.Fields("MABL") = MIAN;
-                                            RST6.FirstOrDefault().MABL = MIAN;
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {RST2[eof].NUMBER}");
+                                            if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
+                                            pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
                                             //RST6.update();
                                             break;
                                         }
@@ -1359,8 +1421,8 @@ namespace AUTO_BAZ
                                             MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
                                             var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
                                             //RST6.Filter = "CODE = '" + RST2[eof].CODE + "' AND GRD_NUM = " + RST2[eof].NUMBER;
-                                            RST6.FirstOrDefault().MABL = MIAN;
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {RST2[eof].NUMBER}");
+                                            if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
+                                            pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
                                             //RST6.update();
                                             break;
                                         }
@@ -1368,18 +1430,31 @@ namespace AUTO_BAZ
                                         {
                                             MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
                                             MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
+                                            rst3Filter_.AVRAGE = MIAN;
 
-                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}");
+                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
                                             //rst3Filter_.update();
                                             break;
                                         }
                                 }
 
                             }
-                            dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS  WHERE TABLE_NAME = '{TBLTMP}')   DROP VIEW {TBLTMP}");
 
+                            // ⚠️ بدون BEGIN TRANSACTION: دقیقاً مثل قبل هر دستور جداگانه Commit می‌شود،
+                            //    پس نه قفل طولانی‌مدت ایجاد می‌شود و نه رفتار در صورت خطا عوض می‌شود.
+                            //    همه‌ی این دستورها Idempotent اند (مقدار ثابت SET می‌کنند)، بنابراین
+                            //    اگر DoExecuteSQL به دلیل خطای گذرا دسته را دوباره اجرا کند مشکلی نیست.
+                            const int updateChunkSize = 200;
+                            for (int off = 0; off < pending.Count; off += updateChunkSize)
+                            {
+                                var batch = new StringBuilder();
+                                var endAt = Math.Min(off + updateChunkSize, pending.Count);
+                                for (int k = off; k < endAt; k++) { batch.Append(pending[k]).AppendLine(";"); }
+                                dbms.DoExecuteSQL(batch.ToString());
+                            }
                         });
+
+                        uiProgress.Complete();
                     }
                     else
                     {
