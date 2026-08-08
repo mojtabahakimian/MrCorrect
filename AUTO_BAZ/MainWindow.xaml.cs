@@ -1452,7 +1452,12 @@ namespace AUTO_BAZ
                 }
             });
 
-            Dispatcher.Invoke(new Action(() => { C0.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                C0.Foreground = Generaly.PutThisColor();
+                PRGR_C0.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C1_TASK()
         {
@@ -1492,7 +1497,12 @@ namespace AUTO_BAZ
                 }
 
             });
-            Dispatcher.Invoke(new Action(() => { c1.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c1.Foreground = Generaly.PutThisColor();
+                PRGR_C1.Value = 100;
+                UpdateOverallProgressBar();
+            }));
             //Generaly.DoResetCountersDisplay();
         }
         public async Task C2_TASK()
@@ -1534,7 +1544,12 @@ namespace AUTO_BAZ
                 }
 
             });
-            Dispatcher.Invoke(new Action(() => { c2.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c2.Foreground = Generaly.PutThisColor();
+                PRGR_C2.Value = 100;
+                UpdateOverallProgressBar();
+            }));
             //DoResetCountersDisplay();
         }
         public async Task C3_TASK()
@@ -1560,7 +1575,12 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(er, "سند خزانه خطا");
                 }
             });
-            Dispatcher.Invoke(new Action(() => { c3.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c3.Foreground = Generaly.PutThisColor();
+                PRGR_C3.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C4_TASK()
         {
@@ -1585,7 +1605,12 @@ namespace AUTO_BAZ
                 }
 
             });
-            Dispatcher.Invoke(new Action(() => { c4.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c4.Foreground = Generaly.PutThisColor();
+                PRGR_C4.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C5_TASK()
         {
@@ -1611,7 +1636,12 @@ namespace AUTO_BAZ
 
 
             });
-            Dispatcher.Invoke(new Action(() => { c5.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c5.Foreground = Generaly.PutThisColor();
+                PRGR_C5.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C6_TASK()
         {
@@ -1636,7 +1666,12 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(er, "سند خروج سایر خطا");
                 }
             });
-            Dispatcher.Invoke(new Action(() => { c6.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c6.Foreground = Generaly.PutThisColor();
+                PRGR_C6.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C7_TASK()
         {
@@ -1660,7 +1695,12 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(er, "سند ورود ساخته شده خطا");
                 }
             });
-            Dispatcher.Invoke(new Action(() => { c7.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c7.Foreground = Generaly.PutThisColor();
+                PRGR_C7.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C8_TASK()
         {
@@ -1684,7 +1724,12 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(er, "سند برگشت فروش خطا");
                 }
             });
-            Dispatcher.Invoke(new Action(() => { c8.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c8.Foreground = Generaly.PutThisColor();
+                PRGR_C8.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C9_TASK()
         {
@@ -1711,7 +1756,12 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(er, "سند خدمات خطا");
                 }
             });
-            Dispatcher.Invoke(new Action(() => { c9.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c9.Foreground = Generaly.PutThisColor();
+                PRGR_C9.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C10_TASK()
         {
@@ -1735,7 +1785,12 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(er, "سند انبار گردانی خطا");
                 }
             });
-            Dispatcher.Invoke(new Action(() => { c10.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c10.Foreground = Generaly.PutThisColor();
+                PRGR_C10.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
         public async Task C11_TASK()
         {
@@ -1756,7 +1811,12 @@ namespace AUTO_BAZ
                 }
 
             });
-            Dispatcher.Invoke(new Action(() => { c11.Foreground = Generaly.PutThisColor(); }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                c11.Foreground = Generaly.PutThisColor();
+                PRGR_C11.Value = 100;
+                UpdateOverallProgressBar();
+            }));
         }
 
         private void C0_Click(object sender, RoutedEventArgs e)
