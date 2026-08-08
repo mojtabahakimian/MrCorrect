@@ -1645,7 +1645,11 @@ namespace AUTO_BAZ
                                                                 //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].NUMBER;
                                                                 MOGUDI = MOGUDI + (RST2[f].MEGHk ?? 0);
                                                                 RST6Filter.FirstOrDefault().MABL = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
+                                                                // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
+                                                                //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
+                                                                //    انبارگردانی» می‌نوشت. فیلتر حافظه‌ای بالا و کد VB اصلی هر دو
+                                                                //    CODE را هم داشتند.
+                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[f].CODE}' AND GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
                                                                 //RST6.update();
                                                                 break;
                                                             }
@@ -1656,7 +1660,11 @@ namespace AUTO_BAZ
                                                                 var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
                                                                 //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].("NUMBER");
                                                                 RST6Filter.FirstOrDefault().MABL = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
+                                                                // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
+                                                                //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
+                                                                //    انبارگردانی» می‌نوشت. فیلتر حافظه‌ای بالا و کد VB اصلی هر دو
+                                                                //    CODE را هم داشتند.
+                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[f].CODE}' AND GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
                                                                 //RST6.update();
                                                                 break;
                                                             }
@@ -1868,7 +1876,8 @@ namespace AUTO_BAZ
                                                                 //RST6.Filter = "code = '" + RST2[w].CODE + "' and GRD_NUM = " + RST2[w].NUMBER;
                                                                 MOGUDI = (double)(MOGUDI + RST2[w].MEGHk);
                                                                 RST6Filter_.MABL = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter_.GRD_NUM}");
+                                                                // ⚠️ شرط CODE جا افتاده بود — توضیح در شاخه‌ی مشابه بالاتر.
+                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[w].CODE}' AND GRD_NUM = {RST6Filter_.GRD_NUM}");
                                                                 //RST6Filter_.update();
                                                                 break;
                                                             }
@@ -1879,7 +1888,8 @@ namespace AUTO_BAZ
                                                                 //RST6.Filter = "code = '" + RST2[w].CODE + "' and GRD_NUM = " + RST2[w].NUMBER;
                                                                 var RST6Filter_ = RST6.Where(x => x.CODE == RST2[w].CODE && x.GRD_NUM == RST2[w].NUMBER).FirstOrDefault();
                                                                 RST6Filter_.MABL = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter_.GRD_NUM}");
+                                                                // ⚠️ شرط CODE جا افتاده بود — توضیح در شاخه‌ی مشابه بالاتر.
+                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[w].CODE}' AND GRD_NUM = {RST6Filter_.GRD_NUM}");
                                                                 //RST6Filter_.update();
                                                                 break;
                                                             }
