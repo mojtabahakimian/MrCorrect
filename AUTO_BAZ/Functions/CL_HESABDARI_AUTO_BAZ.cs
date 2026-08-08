@@ -275,6 +275,7 @@ namespace AUTO_BAZ.Functions
             public double? IMBIBE_MANF { get; set; }
             public double? IMBIBE_SAR { get; set; }
             public string? CODE { get; set; }
+            public int? FNUMB { get; set; }
         }
         public class QRE_BAZ_13
         {
@@ -500,6 +501,7 @@ namespace AUTO_BAZ.Functions
         {
             public string CODE { get; set; }
             public string NAME { get; set; }
+            public double? RADAH { get; set; }
         }
         public partial class Custom_INVO_STUF
         {
@@ -8963,6 +8965,7 @@ namespace AUTO_BAZ.Functions
             }
         }
 
+
         public static void SANADKHAD(long NUMBER, long NUMBER2, bool InternalCalling = true)
         {
             MainWindow auto_run = null;
@@ -9668,4 +9671,3 @@ namespace AUTO_BAZ.Functions
         //AUTO_BAZ_FUNCTIONS ---------------------------------------------------------------------------------------------------------
     }
 }
-
