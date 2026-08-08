@@ -248,6 +248,11 @@ namespace AUTO_BAZ.Functions
             public double? JAMT { get; set; }
             public string? CODE { get; set; }
             public int? CUST_KIND { get; set; }
+            public double? GRD_NUM { get; set; }
+        }
+        public class QRE12_WITH_NUM : QRE12
+        {
+            public double? NUMBER { get; set; }
         }
         public class QRE_BAZ_16
         {
@@ -283,12 +288,18 @@ namespace AUTO_BAZ.Functions
             public int HES_K { get; set; }
             public int HES_M { get; set; }
             public int HES_T { get; set; }
+            public int? HES_T2 { get; set; }
+            public int? HES_T3 { get; set; }
+            public int? HES_T4 { get; set; }
             public string HES { get; set; }
             public string SHARH { get; set; }
             public double BED { get; set; }
             public double BES { get; set; }
+            public double? N_SERI { get; set; }
+            public int? BANK { get; set; }
             public double NUMBER { get; set; }
             public double TAG { get; set; }
+            public double? ARZD { get; set; }
         }
         public class QRE_BAZ_13
         {
@@ -6829,51 +6840,82 @@ namespace AUTO_BAZ.Functions
                 });
             }
 
-            var dtlsToInsert = deedDtlList.ToList();
-            if (dtlsToInsert.Count > 0)
-            {
-                using (var conn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
-                {
-                    conn.Open();
-                    using (var tx = conn.BeginTransaction())
-                    {
-                        using (var bulkCopy = new SqlBulkCopy(conn, SqlBulkCopyOptions.Default, tx))
-                        {
-                            bulkCopy.DestinationTableName = "dbo.DEED_DTL";
-                            bulkCopy.BulkCopyTimeout = 300;
-
-                            var dt = new DataTable();
-                            dt.Columns.Add("N_S", typeof(double));
-                            dt.Columns.Add("HES_K", typeof(int));
-                            dt.Columns.Add("HES_M", typeof(int));
-                            dt.Columns.Add("HES_T", typeof(int));
-                            dt.Columns.Add("HES", typeof(string));
-                            dt.Columns.Add("SHARH", typeof(string));
-                            dt.Columns.Add("BED", typeof(double));
-                            dt.Columns.Add("BES", typeof(double));
-                            dt.Columns.Add("NUMBER", typeof(double));
-                            dt.Columns.Add("TAG", typeof(double));
-                            dt.Columns.Add("CRT", typeof(DateTime));
-                            dt.Columns.Add("UID", typeof(int));
-
-                            foreach (var d in dtlsToInsert)
-                            {
-                                dt.Rows.Add(d.N_S, d.HES_K, d.HES_M, d.HES_T, d.HES, d.SHARH, d.BED, d.BES, d.NUMBER, d.TAG, DateTime.Now, Baseknow.USERCOD);
-                            }
-
-                            foreach (DataColumn col in dt.Columns)
-                            {
-                                bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);
-                            }
-
-                            bulkCopy.WriteToServer(dt);
-                        }
-                        tx.Commit();
-                    }
-                }
-            }
+            BulkInsertDeedDtl(deedDtlList);
 
             return (SANAD_NUMBER, IsSuccessfully);
+        }
+
+        private static void BulkInsertDeedDtl(IEnumerable<DEED_DTL_MODEL> dtlsToInsert)
+        {
+            var list = dtlsToInsert.ToList();
+            if (list.Count == 0) return;
+
+            using (var conn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            {
+                conn.Open();
+                using (var tx = conn.BeginTransaction())
+                {
+                    using (var bulkCopy = new SqlBulkCopy(conn, SqlBulkCopyOptions.Default, tx))
+                    {
+                        bulkCopy.DestinationTableName = "dbo.DEED_DTL";
+                        bulkCopy.BulkCopyTimeout = 300;
+
+                        var dt = new DataTable();
+                        dt.Columns.Add("N_S", typeof(double));
+                        dt.Columns.Add("HES_K", typeof(int));
+                        dt.Columns.Add("HES_M", typeof(int));
+                        dt.Columns.Add("HES_T", typeof(int));
+                        dt.Columns.Add("HES_T2", typeof(int));
+                        dt.Columns.Add("HES_T3", typeof(int));
+                        dt.Columns.Add("HES_T4", typeof(int));
+                        dt.Columns.Add("HES", typeof(string));
+                        dt.Columns.Add("SHARH", typeof(string));
+                        dt.Columns.Add("BED", typeof(double));
+                        dt.Columns.Add("BES", typeof(double));
+                        dt.Columns.Add("N_SERI", typeof(double));
+                        dt.Columns.Add("BANK", typeof(int));
+                        dt.Columns.Add("NUMBER", typeof(double));
+                        dt.Columns.Add("TAG", typeof(double));
+                        dt.Columns.Add("ARZD", typeof(double));
+                        dt.Columns.Add("CRT", typeof(DateTime));
+                        dt.Columns.Add("UID", typeof(int));
+
+                        DateTime now = DateTime.Now;
+                        int uid = (int)(Baseknow.USERCOD ?? 0);
+
+                        foreach (var d in list)
+                        {
+                            dt.Rows.Add(
+                                d.N_S,
+                                d.HES_K,
+                                d.HES_M,
+                                d.HES_T,
+                                (object?)d.HES_T2 ?? DBNull.Value,
+                                (object?)d.HES_T3 ?? DBNull.Value,
+                                (object?)d.HES_T4 ?? DBNull.Value,
+                                d.HES ?? "",
+                                d.SHARH ?? "",
+                                d.BED,
+                                d.BES,
+                                (object?)d.N_SERI ?? DBNull.Value,
+                                (object?)d.BANK ?? DBNull.Value,
+                                d.NUMBER,
+                                d.TAG,
+                                (object?)d.ARZD ?? DBNull.Value,
+                                now,
+                                uid);
+                        }
+
+                        foreach (DataColumn col in dt.Columns)
+                        {
+                            bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);
+                        }
+
+                        bulkCopy.WriteToServer(dt);
+                    }
+                    tx.Commit();
+                }
+            }
         }
 
         public static void gensanadbargashfroosh(long fnum, long TNUM, bool InternalCalling = true)
@@ -7785,12 +7827,217 @@ namespace AUTO_BAZ.Functions
             var progressCounter = 0;
 
             //var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
-            var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG = 25) ORDER BY NUMBER").ToList();
+            if (HFRST.Count == 0) return;
 
             LogWriter.WriteLog("شروع باز سازي از برگشت فروش 2 شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
 
-            //اینجا قبلا For بوده حالا شده Parallel یعنی برگشت آزاد
+            ClearLookupCaches();
+            LookupCacheEnabled = true;
 
+            var existingAccountsList = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL, NUMBER, TNUMBER FROM dbo.TDETA_HES").ToList();
+            foreach (var acc in existingAccountsList)
+            {
+                MarkAccountExists(acc.N_KOL ?? 0, acc.NUMBER ?? 0, acc.TNUMBER ?? 0);
+            }
+
+            var deedHedList = dbms.DoGetDataSQL<DEED_HED>("SELECT N_S, DATE_S, SHARH_S, NO_S, USER_NAME, OKF FROM dbo.DEED_HED WHERE NO_S = 4").ToList();
+            var deedHedMapByNs = new Dictionary<long, DEED_HED>();
+            foreach (var dh in deedHedList)
+            {
+                deedHedMapByNs[(long)dh.N_S] = dh;
+            }
+
+            double currentMaxNs = deedHedList.Count > 0 ? deedHedList.Max(x => x.N_S) : 0;
+            if (currentMaxNs <= 0)
+            {
+                var dbMaxNs = dbms.DoGetDataSQL<double?>("SELECT MAX(N_S) FROM dbo.DEED_HED").FirstOrDefault();
+                currentMaxNs = dbMaxNs ?? 0;
+            }
+
+            double currentMaxBayeg = 100000000;
+            var dbMaxBayeg = dbms.DoGetDataSQL<double?>("SELECT MAX(BAYEG) FROM dbo.DEED_HED").FirstOrDefault();
+            if (dbMaxBayeg.HasValue && dbMaxBayeg.Value > 0)
+            {
+                currentMaxBayeg = dbMaxBayeg.Value;
+            }
+
+            var newDeedHeds = new List<DEED_HED>();
+            var updateDeedHeds = new List<(long ns, long dateS, string sharhS, string userName)>();
+            var updateHeadLsts = new List<(double number, double maxNs)>();
+
+            foreach (var row in HFRST)
+            {
+                string SHSH = Strings.Right("فاكتور برگشت فروش شماره " + row.NUMBER + " مورخ " + Strings.Format(row.DATE_N, "####/##/##"), 100);
+                double max_ns;
+
+                if (row.N_S == null || !deedHedMapByNs.TryGetValue((long)row.N_S, out var existingDh))
+                {
+                    currentMaxNs++;
+                    currentMaxBayeg++;
+                    max_ns = currentMaxNs;
+
+                    var newDh = new DEED_HED
+                    {
+                        N_S = max_ns,
+                        DATE_S = Convert.ToInt64(row.DATE_N),
+                        SHARH_S = SHSH,
+                        GHATEI = false,
+                        NO_S = 4,
+                        OKF = true,
+                        USER_NAME = row.USER_NAME,
+                        BAYEG = (int)currentMaxBayeg
+                    };
+                    newDeedHeds.Add(newDh);
+                    deedHedMapByNs[(long)max_ns] = newDh;
+                }
+                else
+                {
+                    max_ns = existingDh.N_S;
+                    if (existingDh.DATE_S != row.DATE_N)
+                    {
+                        existingDh.DATE_S = (long)row.DATE_N;
+                        existingDh.SHARH_S = SHSH;
+                        updateDeedHeds.Add(((long)max_ns, (long)row.DATE_N, SHSH, row.USER_NAME ?? ""));
+                    }
+                }
+
+                if (row.N_S == null || row.N_S != max_ns)
+                {
+                    row.N_S = max_ns;
+                    updateHeadLsts.Add((row.NUMBER, max_ns));
+                }
+            }
+
+            if (newDeedHeds.Count > 0)
+            {
+                using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                {
+                    db.Open();
+                    using (var tx = db.BeginTransaction())
+                    {
+                        db.Execute(@"INSERT INTO dbo.DEED_HED (N_S, DATE_S, SHARH_S, GHATEI, NO_S, OKF, USER_NAME, CRT, UID, BAYEG)
+                                     VALUES (@N_S, @DATE_S, @SHARH_S, @GHATEI, @NO_S, @OKF, @USER_NAME, GETDATE(), @UID, @BAYEG)",
+                                     newDeedHeds.Select(dh => new { dh.N_S, dh.DATE_S, dh.SHARH_S, dh.GHATEI, dh.NO_S, dh.OKF, dh.USER_NAME, UID = Baseknow.USERCOD, dh.BAYEG }), tx);
+                        tx.Commit();
+                    }
+                }
+            }
+
+            if (updateDeedHeds.Count > 0)
+            {
+                using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                {
+                    db.Open();
+                    using (var tx = db.BeginTransaction())
+                    {
+                        db.Execute("UPDATE dbo.DEED_HED SET DATE_S = @dateS, SHARH_S = @sharhS, USER_NAME = @userName, OKF = 1 WHERE NO_S = 4 AND N_S = @ns",
+                            updateDeedHeds.Select(u => new { dateS = u.dateS, sharhS = u.sharhS, userName = u.userName, ns = u.ns }), tx);
+                        tx.Commit();
+                    }
+                }
+            }
+
+            if (updateHeadLsts.Count > 0)
+            {
+                using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                {
+                    db.Open();
+                    using (var tx = db.BeginTransaction())
+                    {
+                        db.Execute("UPDATE dbo.HEAD_LST SET N_S = @maxNs WHERE NUMBER = @number AND TAG = 25",
+                            updateHeadLsts.Select(h => new { maxNs = h.maxNs, number = h.number }), tx);
+                        tx.Commit();
+                    }
+                }
+            }
+
+            dbms.DoExecuteSQL($"DELETE FROM dbo.DEED_DTL WHERE (TAG = 25 OR TAG = 25) AND NUMBER BETWEEN {fnum} AND {TNUM}");
+
+            var jst0Dict = dbms.DoGetDataSQL<QUERY_MODEL1>($"SELECT NUMBER AS CODE, ISNULL(SUM(MABL_K), 0) AS JAMT FROM dbo.INVO_LST WHERE TAG = 24 AND ANBAR <> 0 AND NUMBER BETWEEN {fnum} AND {TNUM} GROUP BY NUMBER").ToDictionary(x => Convert.ToInt64(x.CODE), x => x.JAMT ?? 0d);
+            var jst1Dict = dbms.DoGetDataSQL<QUERY_MODEL1>($"SELECT NUMBER AS CODE, ISNULL(SUM(MABL_K), 0) AS JAMT FROM dbo.INVO_LST WHERE TAG = 24 AND ANBAR = 0 AND NUMBER BETWEEN {fnum} AND {TNUM} GROUP BY NUMBER").ToDictionary(x => Convert.ToInt64(x.CODE), x => x.JAMT ?? 0d);
+            var jst2Dict = dbms.DoGetDataSQL<QUERY_MODEL1>($"SELECT NUMBER AS CODE, ISNULL(SUM(MABL), 0) AS JAMT FROM dbo.PAY_GETP WHERE TAG = 24 AND NUMBER BETWEEN {fnum} AND {TNUM} GROUP BY NUMBER").ToDictionary(x => Convert.ToInt64(x.CODE), x => x.JAMT ?? 0d);
+
+            var jstSecList = dbms.DoGetDataSQL<QRE12_WITH_NUM>($"SELECT dbo.INVO_LST.NUMBER, dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.CODE, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.NAME, dbo.INVO_LST.AVRAGE FROM dbo.STUF_DEF INNER JOIN dbo.INVO_LST ON dbo.STUF_DEF.CODE = dbo.INVO_LST.CODE WHERE dbo.INVO_LST.TAG = 24 AND dbo.INVO_LST.NUMBER BETWEEN {fnum} AND {TNUM}").GroupBy(x => Convert.ToInt64(x.NUMBER)).ToDictionary(g => g.Key, g => g.ToList());
+
+            var payGetpList = dbms.DoGetDataSQL<PAY_GETP_1>($"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, KIND, VAZ, HES1, HES2, HES3 FROM dbo.PAY_GETP WHERE TAG = 24 AND NUMBER BETWEEN {fnum} AND {TNUM}").GroupBy(x => Convert.ToInt64(x.NUMBER)).ToDictionary(g => g.Key, g => g.ToList());
+
+            var visitorDtlList = dbms.DoGetDataSQL<VISITOR_DTL>($"SELECT * FROM dbo.VISITOR_DTL WHERE TAG = 24 AND NUMBER BETWEEN {fnum} AND {TNUM}").GroupBy(x => Convert.ToInt64(x.NUMBER)).ToDictionary(g => g.Key, g => g.ToList());
+
+            var takhfifList = dbms.DoGetDataSQL<QRE_BAZ_17>($"SELECT SUM(dbo.INVO_LST.N_KOL * dbo.INVO_LST.MABL * dbo.INVO_LST.MEGHk / 100) AS JAMT, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND, dbo.INVO_LST.NUMBER AS GRD_NUM FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG-1 WHERE dbo.INVO_LST.TAG = 24 AND dbo.INVO_LST.NUMBER BETWEEN {fnum} AND {TNUM} GROUP BY dbo.INVO_LST.NUMBER, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND").GroupBy(x => Convert.ToInt64(x.GRD_NUM)).ToDictionary(g => g.Key, g => g.ToList());
+
+            if (isDefaccChecked)
+            {
+                var accountsToEnsure = new HashSet<(double Kol, double Moin, double Taf, string Name)>();
+                bool isOption13_5 = Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5";
+
+                foreach (var row in HFRST)
+                {
+                    long num = Convert.ToInt64(row.NUMBER);
+                    if (jstSecList.TryGetValue(num, out var items))
+                    {
+                        foreach (var item in items)
+                        {
+                            if (!long.TryParse(item.CODE, out long codeL)) continue;
+                            double codeD = Convert.ToDouble(codeL);
+
+                            if (isOption13_5)
+                            {
+                                accountsToEnsure.Add((Baseknow.MFROSH ?? 0d, 4, codeL, item.NAME));
+                            }
+                            else if (item.ANBAR != 0)
+                            {
+                                accountsToEnsure.Add((Baseknow.MFROSH ?? 0d, codeL, codeL, item.NAME));
+                            }
+                            else
+                            {
+                                accountsToEnsure.Add((Baseknow.DARAM ?? 0d, row.DEPATMAN ?? 0, codeL, item.NAME));
+                            }
+
+                            accountsToEnsure.Add((Baseknow.MOGODIA ?? 0d, item.ANBAR ?? 0, codeL, item.NAME));
+
+                            if (tindataFlag is null || tindataFlag != 1d)
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, codeL, codeL, item.NAME));
+                            }
+
+                            if (tindataFlag is null || tindataFlag == 1d)
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, 1, 1, "مواد " + item.NAME));
+                            }
+                            else
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, codeD, codeD, "مواد " + item.NAME));
+                            }
+
+                            if (tindataFlag is null || tindataFlag == 1d)
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, 1, 9999999, "دستمزد " + item.NAME));
+                            }
+                            else
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, codeD, 9999999, "دستمزد " + item.NAME));
+                            }
+
+                            if (tindataFlag is null || tindataFlag == 1d)
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, 1, 9999998, "سربار " + item.NAME));
+                            }
+                            else
+                            {
+                                accountsToEnsure.Add((Baseknow.GHEYMAT ?? 0d, codeD, 9999998, "سربار " + item.NAME));
+                            }
+                        }
+                    }
+                }
+
+                foreach (var acc in accountsToEnsure)
+                {
+                    CREATHES(acc.Kol, acc.Moin, acc.Taf, acc.Name);
+                }
+            }
+
+            var deedDtlList = new System.Collections.Concurrent.ConcurrentBag<DEED_DTL_MODEL>();
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
             ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
             //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
