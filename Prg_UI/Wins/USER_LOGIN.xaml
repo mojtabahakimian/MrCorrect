@@ -216,7 +216,7 @@
                         <!-- App Branding -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16">
                             <Border Width="72" Height="72" CornerRadius="36" Background="#26FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,16">
-                                <materialDesign:PackIcon Kind="ShieldAccount" Width="40" Height="40" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="AccountCheckOutline" Width="40" Height="40" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
                             <TextBlock Text="Mr Correct" FontSize="30" FontWeight="Light" Foreground="White" HorizontalAlignment="Center" FontFamily="Segoe UI Light, IRANYEKAN"/>
