@@ -1665,6 +1665,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CURRENT_ITEMS_ROW = e.Row.Item as INVO_LST_FACTOR22;
             #endregion
 
+            if (CURRENT_ITEMS_ROW == null) return;
 
             if (IsNull(CURRENT_ITEMS_ROW.ANBAR))
             {

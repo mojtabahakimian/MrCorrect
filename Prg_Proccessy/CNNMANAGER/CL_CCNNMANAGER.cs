@@ -165,6 +165,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(exception.Message) &&
+                exception.Message.IndexOf("Cannot generate SSPI context", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
             return false;
         }
         public static bool IsConnectionRelated(SqlException? exception)
@@ -183,7 +189,8 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
 
             if (!string.IsNullOrWhiteSpace(exception.Message) &&
-                exception.Message.IndexOf("A network-related", StringComparison.OrdinalIgnoreCase) >= 0)
+                (exception.Message.IndexOf("A network-related", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 exception.Message.IndexOf("Cannot generate SSPI context", StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 return true;
             }
