@@ -234,7 +234,7 @@
                             </TextBlock>
                         </StackPanel>
 
-                        <StackPanel HorizontalAlignment="Left" Margin="20,0,20,20" VerticalAlignment="Bottom">
+                        <StackPanel HorizontalAlignment="Left" Margin="20,0,20,25" VerticalAlignment="Bottom">
                             <!-- SD_Status label -->
                             <Label FontSize="10" Foreground="#B3E5FC" Padding="0" x:Name="SD_Status">
                                 <Label.Content>SERVER : MERCEDES\SQL2022 | DATABASE : NEWFOODRIP05</Label.Content>
