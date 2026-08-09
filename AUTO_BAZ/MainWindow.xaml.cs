@@ -1025,23 +1025,19 @@ namespace AUTO_BAZ
                     Dispatcher.Invoke(new Action(() =>
                     {
                         PRGR_C0.Value = progress; // Update the progress bar
-                        UpdateOverallProgressBar();                                   // auto_run.LBL_C2.Content = $"{progress:F2}%";
+                        UpdateOverallProgressBar();
                     }));
 
                     //باز سازی نرخ میانگین
 
                     if (IsCancelRequestedBgWorker) { return; }
-                    //Forms["auto_run"].List5.AddItem("شروع :" + Conversions.ToString(DateTime.Now));
-
 
                     var RST6_0 = dbms.DoGetDataSQL<Int64>("select count(id) from invo_lst where tag <> 20 and tag <> 23").ToList(); LogWriter.WriteLog($"RST6_0.Count = {RST6_0.Count}");
-
 
                     Dispatcher.Invoke(new Action(() =>
                     {
                         this.Text23.Text = RST6_0.FirstOrDefault().ToString();
                     }));
-
 
                     var RST6_1 = dbms.DoGetDataSQL<Int64>("SELECT     COUNT(dbo.ANBGRD_HEAD.GRD_NUM) AS Expr1 FROM         dbo.ANBGRD_HEAD INNER JOIN  dbo.ANBGRD_LST ON dbo.ANBGRD_HEAD.GRD_NUM = dbo.ANBGRD_LST.GRD_NUM WHERE (Not (dbo.ANBGRD_HEAD.N_S Is Null)) And (dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3 <> 0)").ToList(); LogWriter.WriteLog($"RST6_1.Count = {RST6_1.Count}");
 
@@ -1053,1228 +1049,811 @@ namespace AUTO_BAZ
                     var RST4 = dbms.DoGetDataSQL<rst4_model>("SELECT TCOD_STUFGROUP.CODE, TCOD_STUFGROUP.NAMES FROM TCOD_STUFGROUP WHERE (((TCOD_STUFGROUP.CODE)<>0)) ORDER BY TCOD_STUFGROUP.NAMES").ToList(); LogWriter.WriteLog($"RST4.Count = {RST4.Count}");
                     var rst3 = dbms.DoGetDataSQL<INVO_LST>("SELECT CODE,ANBAR,ID FROM INVO_LST").ToList(); LogWriter.WriteLog($"rst3.Count = {rst3.Count}");
                     var RST6 = dbms.DoGetDataSQL<ANBGRD_LST>("SELECT * FROM ANBGRD_LST").ToList(); LogWriter.WriteLog($"RST6.Count = {RST6.Count}");
+
+                    // ─────────────────────────────────────────────────────────────────────
+                    // نگاشت ID → ردیف INVO_LST.
+                    // قبلاً به ازای هر تراکنش «rst3.Where(x => x.id == ...).ToList()» اجرا می‌شد:
+                    // پویش خطی روی ۳۹ هزار ردیف + یک List تازه، برای هر یک از ~۴۰ هزار تراکنش
+                    // (در مجموع ≈ ۱٫۵ میلیارد مقایسه).
+                    // ⚠️ عمداً همان شیء‌های داخل rst3 نگه داشته می‌شوند و کپی گرفته نمی‌شود:
+                    //    منطق TAG=4 (برگشت فروش) مقدار AVRAGE ای را می‌خواند که هنگام پردازش
+                    //    TAG=2 (فروش) روی همان شیء نوشته شده است.
+                    //    ContainsKey هم برای این است که در صورت وجود ID تکراری، مثل
+                    //    FirstOrDefault اولین ردیف انتخاب شود.
+                    // ─────────────────────────────────────────────────────────────────────
+                    var rst3ById = new Dictionary<long, INVO_LST>(rst3.Count);
+                    foreach (var invoLine in rst3)
+                    {
+                        if (!rst3ById.ContainsKey(invoLine.id)) { rst3ById[invoLine.id] = invoLine; }
+                    }
+
+                    // قالب‌بندی عدد مستقل از Culture. قبلاً «{MIAN}» مستقیم داخل SQL درج می‌شد و
+                    // اگر Culture جاری جداکننده‌ی اعشار غیر از نقطه داشته باشد، SQL خراب می‌شود.
+                    // فرمت پیش‌فرض double عیناً حفظ شده تا مقدار درج‌شده تغییر نکند.
+                    static string N(double? v) => v.HasValue ? v.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
+
+                    // ─────────────────────────────────────────────────────────────────────
+                    // گزارش پیشرفت غیرمسدودکننده.
+                    // قبلاً به ازای هر تراکنش یک Dispatcher.Invoke مسدودکننده اجرا می‌شد
+                    // (خواندن متن TextBlock، جمع، نوشتن). یعنی ~۴۰ هزار بار قفل شدن پشت
+                    // تک‌Thread رابط کاربری؛ همین به‌تنهایی حلقه‌ی موازی را سریال می‌کرد.
+                    // ─────────────────────────────────────────────────────────────────────
+                    long processedRows = 0;
+                    long totalRowsForUi = (long)rcount;
+                    string? currentCode = string.Empty;
+
+                    var uiProgress = new CL_HESABDARI_AUTO_BAZ.ThrottledProgressReporter(
+                        (int)Math.Max(1d, rcount),
+                        Dispatcher,
+                        value =>
+                        {
+                            var done = Interlocked.Read(ref processedRows);
+                            PRGR_C0.Value = value;
+                            Text19.Text = done.ToString();
+                            Text23.Text = Math.Max(0L, totalRowsForUi - done).ToString();
+                            // ⚠️ این Action روی Thread رابط کاربری و با BeginInvoke اجرا می‌شود،
+                            //    پس برخلاف Dispatcher.Invoke قبلی، استثنای آن به حلقه برنمی‌گردد و
+                            //    توسط try/catch بیرونی گرفته نمی‌شود. پس اینجا نباید null بدهیم.
+                            co.Text = currentCode ?? string.Empty;
+                            UpdateOverallProgressBar();
+                        });
+
                     if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == "5")
                     {
                         var rst = dbms.DoGetDataSQL<THE_QUERY1>("SELECT     dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                      dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE GROUP BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A").ToList(); LogWriter.WriteLog($" After    if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == \"5\") rst.Count = {rst.Count}");
 
-                        //قبل از شروع حلقه، کالاهایی که هیچ فاکتوری ندارند را از لیست حذف کردیم تا برای آن‌ها بی‌خودی VIEW ساخته نشود.
-                        // فیلتر کردن کدهایی که هیچ تراکنشی ندارند تا از ساخت VIEW بی‌مورد جلوگیری شود
+                        //قبل از شروع حلقه، کالاهایی که هیچ تراکنشی ندارند را از لیست حذف می‌کنیم تا کوئری بی‌مورد زده نشود.
                         // کالاهایی که فاکتور دارند (INVO_LST)
                         var rst3Lookup = rst3.Select(x => (x.CODE?.Trim(), x.ANBAR)).ToHashSet();
                         // کالاهایی که انبارگردانی دارند (ANBGRD_LST) — بدون ANBAR چون در جدول نیست
                         var rst6CodeLookup = RST6.Select(x => x.CODE?.Trim()).ToHashSet();
-                        // نگه‌دار کالایی که حداقل یکی از دو منبع را داشته باشد
-                        rst = rst.Where(r =>
-                            rst3Lookup.Contains((r.CODE?.Trim(), r.ANBAR ?? 0))  // دارای فاکتور
-                            || rst6CodeLookup.Contains(r.CODE?.Trim())            // یا دارای انبارگردانی
-                        ).ToList();
-                        LogWriter.WriteLog($"rst.Count after filtering by rst3 transactions = {rst.Count}");
 
                         // ─────────────────────────────────────────────────────────────────────
-                        // نگاشت ID → ردیف INVO_LST.
-                        // قبلاً به ازای هر تراکنش «rst3.Where(x => x.id == ...).ToList()» اجرا می‌شد:
-                        // پویش خطی روی ۳۹ هزار ردیف + یک List تازه، برای هر یک از ~۴۰ هزار تراکنش
-                        // (در مجموع ≈ ۱٫۵ میلیارد مقایسه).
-                        // ⚠️ عمداً همان شیء‌های داخل rst3 نگه داشته می‌شوند و کپی گرفته نمی‌شود:
-                        //    منطق TAG=4 (برگشت فروش) مقدار AVRAGE ای را می‌خواند که هنگام پردازش
-                        //    TAG=2 (فروش) روی همان شیء نوشته شده است.
-                        //    ContainsKey هم برای این است که در صورت وجود ID تکراری، مثل
-                        //    FirstOrDefault اولین ردیف انتخاب شود.
+                        // گروه‌بندی بر اساس «کالا» و نه (کالا، انبار).
+                        //
+                        // چرا: حواله‌ی انتقالی بین انبارها یک وابستگی ترتیبی می‌سازد؛ TAG = 5
+                        // (انتقالي خروج) مقدار MABL_K را روی ردیف INVO_LST می‌نویسد و همان ردیف
+                        // بعداً به‌عنوان TAG = 6 (انتقالي ورود) در گروهِ انبار مقصد خوانده می‌شود.
+                        // اگر دو انبارِ یک کالا هم‌زمان روی دو Thread پردازش شوند، انبار مقصد
+                        // ممکن است مقدار قدیمی را بخواند. با این گروه‌بندی، انبارهای یک کالا
+                        // پشت‌سرهم و روی یک Thread پردازش می‌شوند و آپدیت هر انبار پیش از شروع
+                        // انبار بعدی روی دیتابیس نشسته است.
+                        // (کالاهای مختلف همچنان کاملاً موازی پیش می‌روند.)
                         // ─────────────────────────────────────────────────────────────────────
-                        var rst3ById = new Dictionary<long, INVO_LST>(rst3.Count);
-                        foreach (var invoLine in rst3)
+                        var groupedByCode = rst
+                            .Where(r => rst3Lookup.Contains((r.CODE?.Trim(), r.ANBAR ?? 0))   // دارای فاکتور
+                                        || rst6CodeLookup.Contains(r.CODE?.Trim()))          // یا دارای انبارگردانی
+                            .GroupBy(x => x.CODE)
+                            .ToList();
+                        LogWriter.WriteLog($"groupedByCode.Count = {groupedByCode.Count}");
+
+                        var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(groupedByCode.Count);
+                        CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, groupedByCode.Count, dbParallelOptions, groupIndex =>
                         {
-                            if (!rst3ById.ContainsKey(invoLine.id)) { rst3ById[invoLine.id] = invoLine; }
-                        }
+                            var codeGroup = groupedByCode[groupIndex];
+                            currentCode = codeGroup.Key;
 
-                        // قالب‌بندی عدد مستقل از Culture. قبلاً «{MIAN}» مستقیم داخل SQL درج می‌شد و
-                        // اگر Culture جاری جداکننده‌ی اعشار غیر از نقطه داشته باشد، SQL خراب می‌شود.
-                        // فرمت پیش‌فرض double عیناً حفظ شده تا مقدار درج‌شده تغییر نکند.
-                        static string N(double? v) => v.HasValue ? v.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
-
-                        // ─────────────────────────────────────────────────────────────────────
-                        // گزارش پیشرفت غیرمسدودکننده.
-                        // قبلاً به ازای هر تراکنش یک Dispatcher.Invoke مسدودکننده اجرا می‌شد
-                        // (خواندن متن TextBlock، جمع، نوشتن). یعنی ~۴۰ هزار بار قفل شدن پشت
-                        // تک‌Thread رابط کاربری؛ همین به‌تنهایی حلقه‌ی موازی را سریال می‌کرد.
-                        // ─────────────────────────────────────────────────────────────────────
-                        long processedRows = 0;
-                        long totalRowsForUi = (long)rcount;
-                        string? currentCode = string.Empty;
-
-                        var uiProgress = new CL_HESABDARI_AUTO_BAZ.ThrottledProgressReporter(
-                            (int)Math.Max(1d, rcount),
-                            Dispatcher,
-                            value =>
+                            // انبارهای این کالا سریال پردازش می‌شوند (به دلیل وابستگی حواله انتقالی)
+                            foreach (var rRow in codeGroup)
                             {
-                                var done = Interlocked.Read(ref processedRows);
-                                PRGR_C0.Value = value;
-                                Text19.Text = done.ToString();
-                                Text23.Text = Math.Max(0L, totalRowsForUi - done).ToString();
-                                // ⚠️ این Action روی Thread رابط کاربری و با BeginInvoke اجرا می‌شود،
-                                //    پس برخلاف Dispatcher.Invoke قبلی، استثنای آن به حلقه برنمی‌گردد و
-                                //    توسط try/catch بیرونی گرفته نمی‌شود. پس اینجا نباید null بدهیم.
-                                co.Text = currentCode ?? string.Empty;
-                                UpdateOverallProgressBar();
-                            });
+                                double MIAN;
+                                double MBKM;
+                                var MOGUDI = default(double);
 
-                        var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(rst.Count);
-                        CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
-                        {
-                            double MIAN;
-                            double MBKM;
-                            var MOGUDI = default(double);
-
-                            MBKM = rst[r].MABL_A ?? 0;
-                            MIAN = rst[r].FI_A ?? 0;
-                            if (MIAN == 0d)
-                            {
-                                MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(rst[r].CODE);
+                                MBKM = rRow.MABL_A ?? 0;
+                                MIAN = rRow.FI_A ?? 0;
                                 if (MIAN == 0d)
                                 {
-                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[r].CODE);
+                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(rRow.CODE);
+                                    if (MIAN == 0d)
+                                    {
+                                        MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rRow.CODE);
+                                    }
                                 }
-                            }
-                            MOGUDI = rst[r].MOGODI_A ?? 0;
-                            currentCode = rst[r].CODE;
+                                MOGUDI = rRow.MOGODI_A ?? 0;
 
-                            // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT + DROP VIEW.
-                            var RST2 = dbms.DoGetDataSQL<cm_model>(
-                                BuildAvgRebuildSourceSql(rst[r].CODE, rst[r].ANBAR ?? 0, this.DT)).ToList();
+                                // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT + DROP VIEW.
+                                var RST2 = dbms.DoGetDataSQL<cm_model>(
+                                    BuildAvgRebuildSourceSql(rRow.CODE, rRow.ANBAR ?? 0, this.DT)).ToList();
 
-                            // UPDATE ها انباشته می‌شوند تا به‌جای یک رفت‌وبرگشت برای هر تراکنش،
-                            // دسته‌ای اجرا شوند. ترتیب اجرا دقیقاً ترتیب تولید است، پس اگر یک ID
-                            // چند بار به‌روزرسانی شود (مثلاً TAG=2 و بعد TAG=4) نتیجه‌ی نهایی عوض نمی‌شود.
-                            var pending = new List<string>(RST2.Count);
+                                // UPDATE ها انباشته می‌شوند تا به‌جای یک رفت‌وبرگشت برای هر تراکنش،
+                                // دسته‌ای اجرا شوند. ترتیب اجرا دقیقاً ترتیب تولید است، پس اگر یک ID
+                                // چند بار به‌روزرسانی شود (مثلاً TAG=2 و بعد TAG=4) نتیجه‌ی نهایی عوض نمی‌شود.
+                                var pending = new List<string>(RST2.Count);
 
-                            for (int eof = 0; eof < RST2.Count; eof++) //while (!RST2.EOF)
-                            {
-                                if (IsCancelRequestedBgWorker) { return; }
-                                Interlocked.Increment(ref processedRows);
-                                uiProgress.ReportOne();
-
-                                // ⚠️ اگر ID مقدار نداشته باشد نباید کلید ۰ جستجو شود: کد قبلی
-                                //    «x.id == RST2[eof].ID» بود و مقایسه با null همیشه false می‌داد،
-                                //    یعنی نتیجه null می‌شد. با «?? 0» رفتار برای ID خالی عوض می‌شد.
-                                INVO_LST? rst3Filter_ = null;
-                                if (RST2[eof].ID.HasValue && rst3ById.TryGetValue(RST2[eof].ID.Value, out var invoRow))
+                                for (int eof = 0; eof < RST2.Count; eof++) //while (!RST2.EOF)
                                 {
-                                    rst3Filter_ = invoRow;
-                                }
+                                    if (IsCancelRequestedBgWorker) { return; }
+                                    Interlocked.Increment(ref processedRows);
+                                    uiProgress.ReportOne();
 
-                                switch (RST2[eof].TAG)
-                                {
-                                    case 1: // خريد
-                                        {
-                                            MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                            if (MBKM == 0d)
-                                            {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}"); //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 22: // برگشت فروش سال قبل
-                                        {
-                                            if (MBKM <= 0d)
-                                            {
-                                                MBKM = (RST2[eof].MABL ?? 0) * (RST2[eof].MEGH_MAR ?? 0);
-                                            }
-                                            else
-                                            {
-                                                MBKM = MBKM + MIAN * (RST2[eof].MEGH_MAR ?? 0);
-                                            }
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
-                                            if (MBKM == 0d)
-                                            {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}"); //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 24: // برگشت فروش سال قبل
-                                        {
-                                            if (MBKM <= 0d)
-                                            {
-                                                MBKM = RST2[eof].MABL_K ?? 0;
-                                            }
-                                            else
-                                            {
-                                                MBKM = MBKM + (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            }
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                            if (MBKM == 0d)
-                                            {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}"); //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 2: // فروش
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 3: // برگشت خريد
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGH_MAR ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGH_MAR ?? 0);
-                                            if (MBKM == 0d)
-                                            {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE2 = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 4: // برگشت فروش
-                                        {
-                                            MBKM = MBKM + (RST2[eof].MEGH_MAR ?? 0) * (rst3Filter_?.AVRAGE ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
-                                            if (MBKM == 0d)
-                                            {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE2 = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 5: // انتقالي خروج
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            rst3Filter_.MABL = MIAN;
-                                            rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+                                    // ⚠️ اگر ID مقدار نداشته باشد نباید کلید ۰ جستجو شود: کد قبلی
+                                    //    «x.id == RST2[eof].ID» بود و مقایسه با null همیشه false می‌داد،
+                                    //    یعنی نتیجه null می‌شد. با «?? 0» رفتار برای ID خالی عوض می‌شد.
+                                    //
+                                    // ⚠️ اینجا نباید «اگر null بود continue» گذاشت: شاخه‌ی انبارگردانیِ
+                                    //    کوئری منبع، ستون id را «0 AS id» می‌دهد، پس ردیف‌های TAG = 17/18
+                                    //    هیچ‌وقت در rst3ById پیدا نمی‌شوند. با continue کل «کسری/اضافه
+                                    //    انبار» از بازسازی حذف می‌شد (نه MBKM/MOGUDI اصلاح می‌شد و نه
+                                    //    ANBGRD_LST.MABL نوشته می‌شد). این دو case اصلاً rst3Filter_ لازم ندارند.
+                                    INVO_LST? rst3Filter_ = null;
+                                    if (RST2[eof].ID.HasValue && rst3ById.TryGetValue(RST2[eof].ID.Value, out var invoRow))
+                                    {
+                                        rst3Filter_ = invoRow;
+                                    }
 
-                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , 
-                                                                                     MABL = {N(MIAN)} ,
-                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
-                                                            WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 6: // انتقالي ورود
-                                        {
-                                            MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                            if (MBKM == 0d)
+                                    switch (RST2[eof].TAG)
+                                    {
+                                        case 1: // خريد
                                             {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE2 = MIAN;
-                                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 10: // مواد خروج
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            rst3Filter_.MABL = MIAN;
-                                            rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
-
-                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , 
-                                                                                     MABL = {N(MIAN)} ,
-                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
-                                                            WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 11:    // موادساير خروج
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            rst3Filter_.MABL = MIAN;
-                                            rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
-
-                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , 
-                                                                                     MABL = {N(MIAN)} ,
-                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
-                                                            WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
-                                    case 9:    // توليد
-                                        {
-                                            if (RST2[eof].N_KOL != 0 & !IsNull(RST2[eof].N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
-                                            {
-                                                List<THE_QUERY2> RST7 = dbms.DoGetDataSQL<THE_QUERY2>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[eof].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
-                                                if (RST7.Count > 0)
+                                                MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                                if (MBKM == 0d)
                                                 {
-                                                    //rst3Filter_.MABL = RST7.Fields(0) + RST7.Fields(1) + RST7.Fields(2);
-                                                    rst3Filter_.MABL = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
-                                                    rst3Filter_.MABL_K = Math.Round(((RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0)) * (RST2[eof].MEGHk ?? 0));
+                                                }
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 22: // برگشت فروش سال قبل
+                                            {
+                                                if (MBKM <= 0d)
+                                                {
+                                                    MBKM = (RST2[eof].MABL ?? 0) * (RST2[eof].MEGH_MAR ?? 0);
+                                                }
+                                                else
+                                                {
+                                                    MBKM = MBKM + MIAN * (RST2[eof].MEGH_MAR ?? 0);
+                                                }
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
+                                                if (MBKM == 0d)
+                                                {
+                                                }
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 24: // برگشت فروش سال قبل
+                                            {
+                                                if (MBKM <= 0d)
+                                                {
+                                                    MBKM = RST2[eof].MABL_K ?? 0;
+                                                }
+                                                else
+                                                {
+                                                    MBKM = MBKM + (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                }
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                                if (MBKM == 0d)
+                                                {
+                                                }
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 2: // فروش
+                                            {
+                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 3: // برگشت خريد
+                                            {
+                                                MBKM = MBKM - (RST2[eof].MEGH_MAR ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGH_MAR ?? 0);
+                                                if (MBKM == 0d)
+                                                {
+                                                }
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE2 = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 4: // برگشت فروش
+                                            {
+                                                MBKM = MBKM + (RST2[eof].MEGH_MAR ?? 0) * (rst3Filter_?.AVRAGE ?? 0);
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
+                                                if (MBKM == 0d)
+                                                {
+                                                }
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE2 = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 5: // انتقالي خروج
+                                            {
+                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                rst3Filter_.MABL = MIAN;
+                                                rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+
+                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
+                                                                                         MABL = {N(MIAN)} ,
+                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
+                                                                WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 6: // انتقالي ورود
+                                            {
+                                                MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                                if (MBKM == 0d)
+                                                {
+                                                }
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE2 = MIAN;
+                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 10: // مواد خروج
+                                            {
+                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                rst3Filter_.MABL = MIAN;
+                                                rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+
+                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
+                                                                                         MABL = {N(MIAN)} ,
+                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
+                                                                WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 11:    // موادساير خروج
+                                            {
+                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
+                                                rst3Filter_.AVRAGE = MIAN;
+                                                rst3Filter_.MABL = MIAN;
+                                                rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
+
+                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
+                                                                                         MABL = {N(MIAN)} ,
+                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
+                                                                WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                        case 9:    // توليد
+                                            {
+                                                if (RST2[eof].N_KOL != 0 & !IsNull(RST2[eof].N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
+                                                {
+                                                    List<THE_QUERY2> RST7 = dbms.DoGetDataSQL<THE_QUERY2>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[eof].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
+                                                    if (RST7.Count > 0)
+                                                    {
+                                                        rst3Filter_.MABL = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
+                                                        rst3Filter_.MABL_K = Math.Round(((RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0)) * (RST2[eof].MEGHk ?? 0));
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                         MABL = {N(rst3Filter_.MABL)} ,
+                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
+                                                                WHERE ID = {rst3Filter_.id}");
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rRow.CODE, RST2[eof].DATE_N ?? 0L);
+                                                    if (rst3Filter_.MABL == 0)
+                                                    {
+                                                        rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rRow.CODE);
+                                                    }
+                                                    rst3Filter_.MABL_K = Math.Round(rst3Filter_.MABL * (RST2[eof].MEGHk ?? 0));
+
                                                     pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                     MABL = {N(rst3Filter_.MABL)} ,
-                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
-                                                            WHERE ID = {rst3Filter_.id}");
-                                                    //rst3Filter_.update();
+                                                                                         MABL = {N(rst3Filter_.MABL)} ,
+                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
+                                                                WHERE ID = {rst3Filter_.id}");
                                                 }
-                                            }
-                                            else
-                                            {
-                                                rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[r].CODE, RST2[eof].DATE_N ?? 0L);
-                                                if (rst3Filter_.MABL == 0)
+                                                // ⚠️ عمداً rst3Filter_.MABL_K (مقدارِ تازه محاسبه‌شده) و نه RST2[eof].MABL_K
+                                                //    (مقدارِ قبل از بازسازی که هنگام خواندن کوئری در حافظه آمده) استفاده می‌شود.
+                                                MBKM = MBKM + rst3Filter_.MABL_K;
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                                if (MBKM == 0d)
                                                 {
-                                                    rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[r].CODE);
                                                 }
-                                                rst3Filter_.MABL_K = Math.Round(rst3Filter_.MABL * (RST2[eof].MEGHk ?? 0));
-
+                                                // MIAN = 0
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                rst3Filter_.AVRAGE = MIAN;
                                                 pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                     MABL = {N(rst3Filter_.MABL)} ,
-                                                                                     MABL_K = {N(rst3Filter_.MABL_K)}
-                                                            WHERE ID = {rst3Filter_.id}");
-                                                //rst3Filter_.update();
+                                                                                         AVRAGE = {N(MIAN)}
+                                                                WHERE ID = {rst3Filter_.id}");
+                                                break;
                                             }
-                                            MBKM = MBKM + rst3Filter_.MABL_K;
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                            if (MBKM == 0d)
-                                            {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
-                                                // MIAN = 0
-                                                MBKM = 0d;
-                                            }
-                                            else
-                                            {
-                                                MIAN = MBKM / MOGUDI;
-                                            }
-                                            rst3Filter_.AVRAGE = MIAN;
-                                            pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                     AVRAGE = {N(MIAN)}
-                                                            WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
 
-                                    case 17: // كسري انبار
-                                        {
-                                            MBKM = MBKM + MIAN * (RST2[eof].MEGHk ?? 0);
-                                            MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                            if (MBKM == 0d)
+                                        case 17: // كسري انبار
                                             {
-                                            }
-                                            // MIAN = 0
-                                            else if (MOGUDI == 0d)
-                                            {
+                                                MBKM = MBKM + MIAN * (RST2[eof].MEGHk ?? 0);
+                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
+                                                if (MBKM == 0d)
+                                                {
+                                                }
                                                 // MIAN = 0
-                                                MBKM = 0d;
+                                                else if (MOGUDI == 0d)
+                                                {
+                                                    // MIAN = 0
+                                                    MBKM = 0d;
+                                                }
+                                                else
+                                                {
+                                                    MIAN = MBKM / MOGUDI;
+                                                }
+                                                // If MIAN < 0 Then
+                                                // MIAN = 0
+                                                // End If
+                                                var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
+                                                if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
+                                                // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
+                                                //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
+                                                //    انبارگردانی» می‌نوشت.
+                                                pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
+                                                break;
                                             }
-                                            else
+                                        case 18: // اضافه انبار
                                             {
-                                                MIAN = MBKM / MOGUDI;
+                                                // ⚠️ اینجا عمداً MIAN دوباره محاسبه نمی‌شود (برخلاف case 17)؛
+                                                //    عیناً همان چیزی است که کد اصلی انجام می‌داد.
+                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
+                                                var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
+                                                if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
+                                                pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
+                                                break;
                                             }
-                                            // If MIAN < 0 Then
-                                            // MIAN = 0
-                                            // End If
-                                            var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
-                                            //RST6.Filter = "CODE = '" + RST2[eof].CODE + "' AND GRD_NUM = " + RST2[eof].NUMBER;
-                                            //RST6.Fields("MABL") = MIAN;
-                                            if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
-                                            pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
-                                            //RST6.update();
-                                            break;
-                                        }
-                                    case 18: // فروش
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
-                                            //RST6.Filter = "CODE = '" + RST2[eof].CODE + "' AND GRD_NUM = " + RST2[eof].NUMBER;
-                                            if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
-                                            pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
-                                            //RST6.update();
-                                            break;
-                                        }
-                                    case 26: // برگشت خريد
-                                        {
-                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                            rst3Filter_.AVRAGE = MIAN;
+                                        case 26: // برگشت خريد
+                                            {
+                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
+                                                rst3Filter_.AVRAGE = MIAN;
 
-                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                            //rst3Filter_.update();
-                                            break;
-                                        }
+                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                break;
+                                            }
+                                    }
                                 }
 
-                            }
-
-                            // ⚠️ بدون BEGIN TRANSACTION: دقیقاً مثل قبل هر دستور جداگانه Commit می‌شود،
-                            //    پس نه قفل طولانی‌مدت ایجاد می‌شود و نه رفتار در صورت خطا عوض می‌شود.
-                            //    همه‌ی این دستورها Idempotent اند (مقدار ثابت SET می‌کنند)، بنابراین
-                            //    اگر DoExecuteSQL به دلیل خطای گذرا دسته را دوباره اجرا کند مشکلی نیست.
-                            const int updateChunkSize = 200;
-                            for (int off = 0; off < pending.Count; off += updateChunkSize)
-                            {
-                                var batch = new StringBuilder();
-                                var endAt = Math.Min(off + updateChunkSize, pending.Count);
-                                for (int k = off; k < endAt; k++) { batch.Append(pending[k]).AppendLine(";"); }
-                                dbms.DoExecuteSQL(batch.ToString());
+                                // ⚠️ بدون BEGIN TRANSACTION: دقیقاً مثل قبل هر دستور جداگانه Commit می‌شود،
+                                //    پس نه قفل طولانی‌مدت ایجاد می‌شود و نه رفتار در صورت خطا عوض می‌شود.
+                                //    همه‌ی این دستورها Idempotent اند (مقدار ثابت SET می‌کنند)، بنابراین
+                                //    اگر DoExecuteSQL به دلیل خطای گذرا دسته را دوباره اجرا کند مشکلی نیست.
+                                //
+                                //    اجرای این دسته «پیش از رفتن به انبار بعدیِ همین کالا» انجام می‌شود،
+                                //    پس MABL_K حواله‌ی انتقالی برای انبار مقصد آماده است.
+                                const int updateChunkSize = 200;
+                                for (int off = 0; off < pending.Count; off += updateChunkSize)
+                                {
+                                    var batch = new StringBuilder();
+                                    var endAt = Math.Min(off + updateChunkSize, pending.Count);
+                                    for (int k = off; k < endAt; k++) { batch.Append(pending[k]).AppendLine(";"); }
+                                    dbms.DoExecuteSQL(batch.ToString());
+                                }
                             }
                         });
-
-                        uiProgress.Complete();
                     }
                     else
                     {
-                        List<cm_model> RST2 = null;
-                        int errorno;
-                        string SQL;
-                        double MIAN;
-                        double MBKM;
-                        var MOGUDI = default(double);
-                        double temp;
                         for (int EOF = 0; EOF < RST4.Count; EOF++)
                         {
-                            var rst = dbms.DoGetDataSQL<_QRE_3>("SELECT     DISTINCT  dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE INNER JOIN              dbo.INVO_LST ON dbo.STUF_FSK.CODE = dbo.INVO_LST.CODE AND dbo.STUF_FSK.ANBAR = dbo.INVO_LST.ANBAR WHERE (dbo.STUF_DEF.RADAH =  " + RST4[EOF].CODE /*RST4[EOF].Fields(0)*/ + "  ) ORDER BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR").ToList();
-                            switch (RST4[EOF].CODE.ToString())
+                            if (IsCancelRequestedBgWorker) { return; }
+
+                            var rst = dbms.DoGetDataSQL<_QRE_3>("SELECT     DISTINCT  dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE INNER JOIN              dbo.INVO_LST ON dbo.STUF_FSK.CODE = dbo.INVO_LST.CODE AND dbo.STUF_FSK.ANBAR = dbo.INVO_LST.ANBAR WHERE (dbo.STUF_DEF.RADAH =  " + RST4[EOF].CODE + "  ) ORDER BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR").ToList();
+
+                            // مثل شاخه‌ی بالا: گروه‌بندی بر اساس کالا تا انبارهای یک کالا سریال بمانند.
+                            var groupedByCode = rst.GroupBy(x => x.CODE).ToList();
+                            var groupCode = RST4[EOF].CODE.ToString();
+                            var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(groupedByCode.Count);
+
+                            CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, groupedByCode.Count, dbParallelOptions, groupIndex =>
                             {
-                                case "2":
+                                var codeGroup = groupedByCode[groupIndex];
+                                currentCode = codeGroup.Key;
+
+                                foreach (var rRow in codeGroup)
+                                {
+                                    double MIAN;
+                                    double MBKM;
+                                    var MOGUDI = default(double);
+                                    var pending = new List<string>();
+
+                                    if (groupCode == "2" || groupCode == "3")
                                     {
-                                        // while (!rst.EOF)
-                                        for (int rstI = 0; rstI < rst.Count; rstI++)
+                                        MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(rRow.CODE);
+                                        if (MIAN == 0d)
                                         {
-
-
-                                            //this.Repaint();
-                                            MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(rst[rstI].CODE);
-                                            if (MIAN == 0d)
-                                            {
-                                                MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[rstI].CODE);
-                                            }
-                                            if (MIAN == 0d)
-                                            {
-                                                dbms.DoExecuteSQL("UPDATE    dbo.INVO_LST SET  AVRAGE = 0, AVRAGE2 = 0 WHERE     (CODE = N'" + rst[rstI].CODE + "') AND (dbo.INVO_LST.ANBAR = " + rst[rstI].ANBAR + ")");
-                                                dbms.DoExecuteSQL("update dbo.INVO_LST SET MABL = 0, MABL_K = 0 WHERE    ((TAG = 5) OR (TAG = 6) OR (TAG = 7) OR (TAG = 8) OR (TAG = 9) OR (TAG = 10) OR (TAG = 11) OR (TAG = 16) OR (TAG = 17) OR (TAG = 18)) AND ((CODE = N'" + rst[rstI].CODE + "') AND (dbo.INVO_LST.ANBAR = " + rst[rstI].ANBAR + "))");
-                                            }
-                                            else
-                                            {
-                                                // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT (و بدون شیء مشترک بین کاربران).
-                                                RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rst[rstI].CODE, rst[rstI].ANBAR ?? 0, this.DT)).ToList();
-                                                for (int f = 0; f < RST2.Count; f++)
-                                                {
-                                                    if (IsCancelRequestedBgWorker) { return; }
-                                                    Dispatcher.Invoke(new Action(() =>
-                                                    {
-                                                        this.co.Text = rst[rstI].CODE;
-                                                        Dispatcher.Invoke(new Action(() =>
-                                                        {
-                                                            progress++;
-                                                            PRGR_C0.Value = progress / rcount * 100.0;// Update the progress bar
-                                                            UpdateOverallProgressBar();
-
-                                                        }));
-                                                        UpdateOverallProgressBar();
-
-                                                    }));
-                                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[rstI].CODE, RST2[f].DATE_N ?? 0L);
-
-                                                    Dispatcher.Invoke(new Action(() =>
-                                                    {
-                                                        Text19.Text = Convert.ToString(Convert.ToInt64(Text19.Text) + 1);
-                                                    }));
-                                                    //this.Repaint();
-
-                                                    var rst3Filter = rst3.Where(x => x.id == RST2[f].ID).FirstOrDefault();
-                                                    //var rst[rstI].3Filter = "ID = " + RST2[f].("ID");
-                                                    switch (RST2[f].TAG)
-                                                    {
-                                                        case 1: // خريد
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , AVRAGE2 = {MIAN} WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 22: // برگشت فروش سال قبل
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , AVRAGE2 = {MIAN} WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 24: // برگشت فروش سال قبل
-                                                            {
-                                                                rst3Filter.AVRAGE2 = MIAN;
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , AVRAGE2 = {MIAN} WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 2: // فروش
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} , AVRAGE2 = {MIAN} WHERE ID = {rst3Filter.id}");
-                                                                //rst[rstI].3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 5: // انتقالي خروج
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.AVRAGE2 = MIAN;
-                                                                rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} ,
-                                                                                    MABL = {MIAN},
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 6: // انتقالي خروج
-                                                            {
-                                                                rst3Filter.AVRAGE2 = MIAN;
-                                                                rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE2 = {MIAN} ,
-                                                                                    MABL = {MIAN},
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 10: // مواد خروج
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN},
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 11:    // موادساير خروج
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN},
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 9:    // موادساير خروج
-                                                            {
-                                                                if (RST2[f].N_KOL != 0 & !IsNull(RST2[f].N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
-                                                                {
-                                                                    var RST7 = dbms.DoGetDataSQL<THE_QUERY3>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[f].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
-                                                                    if (RST7.Count > 0)
-                                                                    {
-                                                                        //MIAN = RST7.Fields(0) + RST7.Fields(1) + RST7.Fields(2);
-                                                                        MIAN = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
-                                                                    }
-                                                                }
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN},
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                        case 17: // كسري انبار
-                                                            {
-                                                                // MBKM = MBKM + rst[rstI].2.Fields("MABL_K")
-                                                                var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
-                                                                //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].NUMBER;
-                                                                MOGUDI = MOGUDI + (RST2[f].MEGHk ?? 0);
-                                                                RST6Filter.FirstOrDefault().MABL = MIAN;
-                                                                // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
-                                                                //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
-                                                                //    انبارگردانی» می‌نوشت. فیلتر حافظه‌ای بالا و کد VB اصلی هر دو
-                                                                //    CODE را هم داشتند.
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[f].CODE}' AND GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
-                                                                //RST6.update();
-                                                                break;
-                                                            }
-                                                        case 18: // فروش
-                                                            {
-                                                                // MBKM = MBKM - (rst[rstI].2.FieldsMEGHk * MIAN)
-                                                                MOGUDI = MOGUDI - (RST2[f].MEGHk ?? 0);
-                                                                var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
-                                                                //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].("NUMBER");
-                                                                RST6Filter.FirstOrDefault().MABL = MIAN;
-                                                                // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
-                                                                //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
-                                                                //    انبارگردانی» می‌نوشت. فیلتر حافظه‌ای بالا و کد VB اصلی هر دو
-                                                                //    CODE را هم داشتند.
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[f].CODE}' AND GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
-                                                                //RST6.update();
-                                                                break;
-                                                            }
-                                                        case 26:    // موادساير خروج
-                                                            {
-                                                                rst3Filter.AVRAGE = MIAN;
-                                                                rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN},
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                                //rst3Filter.update();
-                                                                break;
-                                                            }
-                                                    }
-                                                    //RST2.MoveNext();
-                                                }
-
-                                                Dispatcher.Invoke(new Action(() =>
-                                                {
-                                                    if (this.FORMOL.IsChecked is true)
-                                                    {
-                                                        dbms.DoExecuteSQL("UPDATE    dbo.DTL_MANF  SET  MABLK = (MEGHk + PERT) * " + MIAN + ", SMABL = " + MIAN + " WHERE     (CODE = N'" + rst[rstI].CODE + "')");
-                                                    }
-                                                }));
-                                            }
-                                            //rst[rstI]..MoveNext();
+                                            MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rRow.CODE);
                                         }
-                                        break;
-                                    }
-                                case "3":
-                                    {
-                                        //while (!rst.EOF)
-                                        for (int ef = 0; ef < rst.Count; ef++)
+                                        if (MIAN == 0d)
                                         {
-
-                                            //this.Repaint();
-                                            MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(rst[ef].CODE);
-                                            if (MIAN == 0d)
-                                            {
-                                                MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[ef].CODE);
-                                            }
-                                            if (MIAN == 0d)
-                                            {
-                                                dbms.DoExecuteSQL("UPDATE    dbo.INVO_LST SET  AVRAGE = 0, AVRAGE2 = 0 WHERE     (CODE = N'" + rst[ef].CODE + "') AND (dbo.INVO_LST.ANBAR = " + rst[ef].ANBAR + ")");
-                                                dbms.DoExecuteSQL("update dbo.INVO_LST SET MABL = 0, MABL_K = 0 WHERE    ((TAG = 5) OR (TAG = 6) OR (TAG = 7) OR (TAG = 8) OR (TAG = 9) OR (TAG = 10) OR (TAG = 11) OR (TAG = 16) OR (TAG = 17) OR (TAG = 18)) AND ((CODE = N'" + rst[ef].CODE + "') AND (dbo.INVO_LST.ANBAR = " + rst[ef].ANBAR + "))");
-                                            }
-                                            else
-                                            {
-                                                // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT (و بدون شیء مشترک بین کاربران).
-                                                RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rst[ef].CODE, rst[ef].ANBAR ?? 0, this.DT)).ToList();
-                                                for (int w = 0; w < RST2.Count; w++) //while (!RST2.EOF)
-                                                {
-                                                    if (IsCancelRequestedBgWorker) { return; }
-                                                    Dispatcher.Invoke(new Action(() =>
-                                                    {
-                                                        this.co.Text = rst[ef].CODE;
-                                                        Dispatcher.Invoke(new Action(() =>
-                                                        {
-                                                            progress++;
-                                                            PRGR_C0.Value = progress / rcount * 100.0;// Update the progress bar
-                                                            UpdateOverallProgressBar();
-
-                                                        }));
-                                                        UpdateOverallProgressBar();
-
-                                                    }));
-                                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[ef].CODE, (long)RST2[w].DATE_N);
-                                                    Dispatcher.Invoke(new Action(() =>
-                                                    {
-                                                        Text19.Text = Convert.ToString(Convert.ToInt64(Text19.Text) + 1);
-                                                    }));
-                                                    //this.Repaint();
-                                                    var rst3_Filter = rst3.Where(x => x.id == RST2[w].ID).FirstOrDefault();
-                                                    //rst3.Filter = "ID = " + RST2[w].("ID");
-                                                    switch (RST2[w].TAG)
-                                                    {
-                                                        case 1: // خريد
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} 
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 22: // برگشت فروش سال قبل
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} 
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 24: // برگشت فروش سال قبل
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} 
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 2: // فروش
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.AVRAGE2 = MIAN;
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} 
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 6: // انتقالي خروج
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.AVRAGE2 = MIAN;
-                                                                rst3_Filter.MABL = MIAN;
-                                                                rst3_Filter.MABL_K = Math.Round((double)(MIAN * RST2[w].MEGHk));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3_Filter.MABL_K}
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 5: // انتقالي خروج
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.AVRAGE2 = MIAN;
-                                                                rst3_Filter.MABL = MIAN;
-                                                                rst3_Filter.MABL_K = Math.Round((double)(MIAN * RST2[w].MEGHk));
-
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    AVRAGE2 = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3_Filter.MABL_K}
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 10: // مواد خروج
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.MABL = MIAN;
-                                                                rst3_Filter.MABL_K = Math.Round((double)(MIAN * RST2[w].MEGHk));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3_Filter.MABL_K}
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 11:    // موادساير خروج
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.MABL = MIAN;
-                                                                rst3_Filter.MABL_K = Math.Round((double)(MIAN * RST2[w].MEGHk));
-
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3_Filter.MABL_K}
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 9:    // موادساير خروج
-                                                            {
-                                                                if (RST2[w].N_KOL != 0 & !IsNull(RST2[w].N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
-                                                                {
-                                                                    var RST7Open = dbms.DoGetDataSQL<THE_QUERY2>("SELECT     dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[w].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
-                                                                    if (RST7Open.Count > 0)
-                                                                    {
-                                                                        MIAN = (double)(RST7Open.FirstOrDefault().IMBIBE_MANF + RST7Open.FirstOrDefault().IMBIBE_SAR + RST7Open.FirstOrDefault().MABLKs);
-                                                                        //MIAN = RST7Open.Fields(0) + RST7Open.Fields(1) + RST7Open.Fields(2);
-                                                                    }
-                                                                }
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.MABL = MIAN;
-                                                                rst3_Filter.MABL_K = Math.Round((double)(MIAN * RST2[w].MEGHk));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3_Filter.MABL_K}
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                        case 17: // كسري انبار
-                                                            {
-                                                                // MBKM = MBKM + rst2.Fields("MABL_K")
-                                                                var RST6Filter_ = RST6.Where(x => x.CODE == RST2[w].CODE && x.GRD_NUM == RST2[w].NUMBER).FirstOrDefault();
-                                                                //RST6.Filter = "code = '" + RST2[w].CODE + "' and GRD_NUM = " + RST2[w].NUMBER;
-                                                                MOGUDI = (double)(MOGUDI + RST2[w].MEGHk);
-                                                                RST6Filter_.MABL = MIAN;
-                                                                // ⚠️ شرط CODE جا افتاده بود — توضیح در شاخه‌ی مشابه بالاتر.
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[w].CODE}' AND GRD_NUM = {RST6Filter_.GRD_NUM}");
-                                                                //RST6Filter_.update();
-                                                                break;
-                                                            }
-                                                        case 18: // فروش
-                                                            {
-                                                                // MBKM = MBKM - (rst2.FieldsMEGHk * MIAN)
-                                                                MOGUDI = (double)(MOGUDI - RST2[w].MEGHk);
-                                                                //RST6.Filter = "code = '" + RST2[w].CODE + "' and GRD_NUM = " + RST2[w].NUMBER;
-                                                                var RST6Filter_ = RST6.Where(x => x.CODE == RST2[w].CODE && x.GRD_NUM == RST2[w].NUMBER).FirstOrDefault();
-                                                                RST6Filter_.MABL = MIAN;
-                                                                // ⚠️ شرط CODE جا افتاده بود — توضیح در شاخه‌ی مشابه بالاتر.
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[w].CODE}' AND GRD_NUM = {RST6Filter_.GRD_NUM}");
-                                                                //RST6Filter_.update();
-                                                                break;
-                                                            }
-                                                        case 26:    // موادساير خروج
-                                                            {
-                                                                rst3_Filter.AVRAGE = MIAN;
-                                                                rst3_Filter.MABL = MIAN;
-                                                                rst3_Filter.MABL_K = Math.Round((double)(MIAN * RST2[w].MEGHk));
-
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3_Filter.MABL_K}
-                                                                                    WHERE ID = {rst3_Filter.id}");
-                                                                //rst3_Filter.update();
-                                                                break;
-                                                            }
-                                                    }
-                                                    //RST2.MoveNext();
-                                                }
-                                                Dispatcher.Invoke(new Action(() =>
-                                                {
-                                                    if (FORMOL.IsChecked is true)
-                                                    {
-                                                        dbms.DoExecuteSQL("UPDATE    dbo.DTL_MANF  SET  MABLK = (MEGHk + PERT) * " + MIAN + ", SMABL = " + MIAN + " WHERE     (CODE = N'" + rst[ef].CODE + "')");
-                                                    }
-                                                }));
-                                            }
-                                            //rst.MoveNext();
+                                            pending.Add("UPDATE    dbo.INVO_LST SET  AVRAGE = 0, AVRAGE2 = 0 WHERE     (CODE = N'" + rRow.CODE + "') AND (dbo.INVO_LST.ANBAR = " + rRow.ANBAR + ")");
+                                            pending.Add("update dbo.INVO_LST SET MABL = 0, MABL_K = 0 WHERE    ((TAG = 5) OR (TAG = 6) OR (TAG = 7) OR (TAG = 8) OR (TAG = 9) OR (TAG = 10) OR (TAG = 11) OR (TAG = 16) OR (TAG = 17) OR (TAG = 18)) AND ((CODE = N'" + rRow.CODE + "') AND (dbo.INVO_LST.ANBAR = " + rRow.ANBAR + "))");
                                         }
-                                        break;
-                                    }
-
-                                default:
-                                    {
-
-                                        for (int o = 0; o < rst.Count; o++) //while (!rst.EOF)
+                                        else
                                         {
-
-                                            //this.Repaint();
-                                            MBKM = (double)rst[o].MABL_A;
-                                            MIAN = (double)rst[o].FI_A;
-                                            MOGUDI = (double)rst[o].MOGODI_A;
                                             // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT (و بدون شیء مشترک بین کاربران).
-                                            RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rst[o].CODE, rst[o].ANBAR ?? 0, this.DT)).ToList();
-                                            for (int e = 0; e < RST2.Count; e++) // while (!RST2.EOF)
+                                            var RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rRow.CODE, rRow.ANBAR ?? 0, this.DT)).ToList();
+                                            for (int f = 0; f < RST2.Count; f++)
                                             {
                                                 if (IsCancelRequestedBgWorker) { return; }
-                                                Dispatcher.Invoke(new Action(() =>
-                                                {
-                                                    Text19.Text = Convert.ToString(Convert.ToInt64(Text19.Text) + 1);
-                                                }));
-                                                if (IsCancelRequestedBgWorker) { return; }
-                                                Dispatcher.Invoke(new Action(() =>
-                                                {
-                                                    this.co.Text = rst[o].CODE;
-                                                    Dispatcher.Invoke(new Action(() =>
-                                                    {
-                                                        progress++;
-                                                        PRGR_C0.Value = progress / rcount * 100.0;// Update the progress bar
-                                                        UpdateOverallProgressBar();
+                                                Interlocked.Increment(ref processedRows);
+                                                uiProgress.ReportOne();
 
-                                                    }));
-                                                    UpdateOverallProgressBar();
+                                                MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rRow.CODE, RST2[f].DATE_N ?? 0L);
 
-                                                }));
-                                                //this.Repaint();
-                                                var rst3Filter = rst3.Where(x => x.id == RST2[e].ID).FirstOrDefault();
-                                                //rst3.Filter = "ID = " + RST2[e].("ID");
-                                                switch (RST2[e].TAG)
+                                                INVO_LST? rst3Filter = null;
+                                                if (RST2[f].ID.HasValue && rst3ById.TryGetValue(RST2[f].ID.Value, out var invoRow))
                                                 {
-                                                    case 1: // خريد
-                                                        {
-                                                            MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
-                                                            }
-                                                            rst3Filter.AVRAGE = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
-                                                            break;
-                                                        }
+                                                    rst3Filter = invoRow;
+                                                }
+
+                                                switch (RST2[f].TAG)
+                                                {
+                                                    case 1:  // خريد
                                                     case 22: // برگشت فروش سال قبل
-                                                        {
-                                                            MBKM = (double)(MBKM + MIAN * RST2[e].MEGH_MAR);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGH_MAR);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
-                                                            }
-                                                            rst3Filter.AVRAGE = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
-                                                            break;
-                                                        }
                                                     case 24: // برگشت فروش سال قبل
+                                                    case 2:  // فروش
                                                         {
-                                                            MBKM = (double)(MBKM + RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
-                                                            }
                                                             rst3Filter.AVRAGE = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
-                                                            break;
-                                                        }
-                                                    case 2: // فروش
-                                                        {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGHk);
-                                                            rst3Filter.AVRAGE = MIAN;
-
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN}
-                                                                                    WHERE ID = {rst3Filter.id}");
-
-                                                            //rst3Filter.update();
-                                                            break;
-                                                        }
-                                                    case 3: // برگشت خريد
-                                                        {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGH_MAR * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGH_MAR);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
-                                                            }
                                                             rst3Filter.AVRAGE2 = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE2 = {MIAN}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
-                                                            break;
-                                                        }
-                                                    case 4: // برگشت فروش
-                                                        {
-                                                            MBKM = (double)(MBKM + RST2[e].MEGH_MAR * rst3Filter.AVRAGE);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGH_MAR);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
-                                                            }
-                                                            rst3Filter.AVRAGE2 = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE2 = {MIAN}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} , AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter.id}");
                                                             break;
                                                         }
                                                     case 5: // انتقالي خروج
                                                         {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGHk);
                                                             rst3Filter.AVRAGE = MIAN;
+                                                            rst3Filter.AVRAGE2 = MIAN;
                                                             rst3Filter.MABL = MIAN;
-                                                            rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[e].MEGHk));
-
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3Filter.MABL_K}
+                                                            rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
+                                                                                    AVRAGE2 = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)},
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
                                                                                     WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
                                                             break;
                                                         }
                                                     case 6: // انتقالي ورود
                                                         {
-                                                            MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
-                                                            }
                                                             rst3Filter.AVRAGE2 = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE2 = {MIAN} 
+                                                            rst3Filter.MABL = MIAN;
+                                                            rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE2 = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)},
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
                                                                                     WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
                                                             break;
                                                         }
                                                     case 10: // مواد خروج
+                                                    case 11: // موادساير خروج
+                                                    case 26: // برگشت خريد
                                                         {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGHk);
                                                             rst3Filter.AVRAGE = MIAN;
                                                             rst3Filter.MABL = MIAN;
-                                                            rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[e].MEGHk));
-
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3Filter.MABL_K}
+                                                            rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)},
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
                                                                                     WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
-                                                            break;
-                                                        }
-                                                    case 11:    // موادساير خروج
-                                                        {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGHk);
-                                                            rst3Filter.AVRAGE = MIAN;
-                                                            rst3Filter.MABL = MIAN;
-                                                            rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[e].MEGHk));
-
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3Filter.MABL_K}
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
                                                             break;
                                                         }
                                                     case 9:    // توليد
                                                         {
-                                                            MBKM = (double)(MBKM + RST2[e].MABL_K);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
-                                                            if (MBKM == 0d)
+                                                            if (RST2[f].N_KOL != 0 & !IsNull(RST2[f].N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
                                                             {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                            }
-                                                            else
-                                                            {
-                                                                MIAN = MBKM / MOGUDI;
+                                                                var RST7 = dbms.DoGetDataSQL<THE_QUERY3>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[f].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
+                                                                if (RST7.Count > 0)
+                                                                {
+                                                                    MIAN = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
+                                                                }
                                                             }
                                                             rst3Filter.AVRAGE = MIAN;
                                                             rst3Filter.MABL = MIAN;
-                                                            rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[e].MEGHk));
-
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} ,
-                                                                                    MABL = {MIAN} ,
-                                                                                    MABL_K = {rst3Filter.MABL_K}
+                                                            rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)},
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
                                                                                     WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
                                                             break;
                                                         }
                                                     case 17: // كسري انبار
                                                         {
-                                                            MBKM = (double)(MBKM + MIAN * RST2[e].MEGHk);
-                                                            MOGUDI = (double)(MOGUDI + RST2[e].MEGHk);
-                                                            if (MBKM == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            else if (MOGUDI == 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                                MBKM = 0d;
-                                                                // Else
-                                                                // MIAN = MBKM / MOGUDI
-                                                            }
-                                                            if (MIAN < 0d)
-                                                            {
-                                                                MIAN = 0d;
-                                                            }
-                                                            var _RST6Filter_ = RST6.Where(x => x.CODE == RST2[e].CODE && x.GRD_NUM == RST2[e].NUMBER).FirstOrDefault();
-                                                            //var _RST6Filter_ = "code = '" + RST2[e].CODE + "' and GRD_NUM = " + RST2[e].NUMBER;
-                                                            //RST6.Filter = "code = '" + RST2[e].("code") + "' and GRD_NUM = " + RST2[e].("NUMBER");
-                                                            _RST6Filter_.MABL = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[e].CODE}' AND GRD_NUM = {RST2[e].NUMBER}");
-                                                            //_RST6Filter_.update();
+                                                            MOGUDI = MOGUDI + (RST2[f].MEGHk ?? 0);
+                                                            // ⚠️ شرط CODE جا افتاده بود؛ بدون آن نرخ این کالا روی همه‌ی
+                                                            //    کالاهای همان برگه‌ی انبارگردانی نوشته می‌شد.
+                                                            pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[f].CODE}' AND GRD_NUM = {N(RST2[f].NUMBER)}");
                                                             break;
                                                         }
-                                                    case 18: // فروش
+                                                    case 18: // اضافه انبار
                                                         {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGHk);
-
-                                                            var _RST6Filter_ = RST6.Where(x => x.CODE == RST2[e].CODE && x.GRD_NUM == RST2[e].NUMBER).FirstOrDefault();
-                                                            //RST6.Filter = "code = '" + RST2[e].("code") + "' and GRD_NUM = " + RST2[e].("NUMBER");
-
-                                                            _RST6Filter_.MABL = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE CODE = '{RST2[e].CODE}' AND GRD_NUM = {RST2[e].NUMBER}");
-                                                            //RST6.update();
-                                                            break;
-                                                        }
-                                                    case 26: // برگشت خريد
-                                                        {
-                                                            MBKM = (double)(MBKM - RST2[e].MEGHk * MIAN);
-                                                            MOGUDI = (double)(MOGUDI - RST2[e].MEGHk);
-                                                            rst3Filter.AVRAGE = MIAN;
-                                                            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
-                                                                                    AVRAGE = {MIAN} 
-                                                                                    WHERE ID = {rst3Filter.id}");
-                                                            //rst3Filter.update();
+                                                            MOGUDI = MOGUDI - (RST2[f].MEGHk ?? 0);
+                                                            pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[f].CODE}' AND GRD_NUM = {N(RST2[f].NUMBER)}");
                                                             break;
                                                         }
                                                 }
-                                                //RST2.MoveNext();
                                             }
 
+                                            bool isFormolChecked = false;
+                                            Dispatcher.Invoke(new Action(() => { isFormolChecked = FORMOL.IsChecked is true; }));
+                                            if (isFormolChecked)
+                                            {
+                                                pending.Add("UPDATE    dbo.DTL_MANF  SET  MABLK = (MEGHk + PERT) * " + N(MIAN) + ", SMABL = " + N(MIAN) + " WHERE     (CODE = N'" + rRow.CODE + "')");
+                                            }
                                         }
-                                        break;
                                     }
-                            }
-                            //rst.Close();
-                            //RST4[EOF].MoveNext();
+                                    else // ساير گروه‌ها
+                                    {
+                                        MBKM = rRow.MABL_A ?? 0;
+                                        MIAN = rRow.FI_A ?? 0;
+                                        MOGUDI = rRow.MOGODI_A ?? 0;
+
+                                        var RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rRow.CODE, rRow.ANBAR ?? 0, this.DT)).ToList();
+                                        for (int e = 0; e < RST2.Count; e++)
+                                        {
+                                            if (IsCancelRequestedBgWorker) { return; }
+                                            Interlocked.Increment(ref processedRows);
+                                            uiProgress.ReportOne();
+
+                                            INVO_LST? rst3Filter = null;
+                                            if (RST2[e].ID.HasValue && rst3ById.TryGetValue(RST2[e].ID.Value, out var invoRow))
+                                            {
+                                                rst3Filter = invoRow;
+                                            }
+
+                                            switch (RST2[e].TAG)
+                                            {
+                                                case 1: // خريد
+                                                    {
+                                                        MBKM = MBKM + (RST2[e].MABL_K ?? 0);
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGHk ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 22: // برگشت فروش سال قبل
+                                                    {
+                                                        MBKM = MBKM + MIAN * (RST2[e].MEGH_MAR ?? 0);
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGH_MAR ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 24: // برگشت فروش سال قبل
+                                                    {
+                                                        MBKM = MBKM + (RST2[e].MEGHk ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGHk ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 2: // فروش
+                                                    {
+                                                        MBKM = MBKM - (RST2[e].MEGHk ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI - (RST2[e].MEGHk ?? 0);
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 3: // برگشت خريد
+                                                    {
+                                                        MBKM = MBKM - (RST2[e].MEGH_MAR ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI - (RST2[e].MEGH_MAR ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE2 = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE2 = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 4: // برگشت فروش
+                                                    {
+                                                        MBKM = MBKM + (RST2[e].MEGH_MAR ?? 0) * (rst3Filter?.AVRAGE ?? 0);
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGH_MAR ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE2 = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE2 = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 5: // انتقالي خروج
+                                                    {
+                                                        MBKM = MBKM - (RST2[e].MEGHk ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI - (RST2[e].MEGHk ?? 0);
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        rst3Filter.MABL = MIAN;
+                                                        rst3Filter.MABL_K = Math.Round(MIAN * (RST2[e].MEGHk ?? 0));
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)} ,
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 6: // انتقالي ورود
+                                                    {
+                                                        MBKM = MBKM + (RST2[e].MABL_K ?? 0);
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGHk ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE2 = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE2 = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 10: // مواد خروج
+                                                case 11: // موادساير خروج
+                                                    {
+                                                        MBKM = MBKM - (RST2[e].MEGHk ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI - (RST2[e].MEGHk ?? 0);
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        rst3Filter.MABL = MIAN;
+                                                        rst3Filter.MABL_K = Math.Round(MIAN * (RST2[e].MEGHk ?? 0));
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)} ,
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 9:    // توليد
+                                                    {
+                                                        MBKM = MBKM + (RST2[e].MABL_K ?? 0);
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGHk ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        else { MIAN = MBKM / MOGUDI; }
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        rst3Filter.MABL = MIAN;
+                                                        rst3Filter.MABL_K = Math.Round(MIAN * (RST2[e].MEGHk ?? 0));
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)} ,
+                                                                                    MABL = {N(MIAN)} ,
+                                                                                    MABL_K = {N(rst3Filter.MABL_K)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                                case 17: // كسري انبار
+                                                    {
+                                                        // ⚠️ عیناً مثل کد اصلی: در این شاخه MIAN هرگز به MBKM/MOGUDI
+                                                        //    بازمحاسبه نمی‌شود (آن خط در کد اصلی کامنت است).
+                                                        MBKM = MBKM + MIAN * (RST2[e].MEGHk ?? 0);
+                                                        MOGUDI = MOGUDI + (RST2[e].MEGHk ?? 0);
+                                                        if (MBKM == 0d) { MIAN = 0d; }
+                                                        else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
+                                                        if (MIAN < 0d) { MIAN = 0d; }
+                                                        var _RST6Filter_ = RST6.Where(x => x.CODE == RST2[e].CODE && x.GRD_NUM == RST2[e].NUMBER).FirstOrDefault();
+                                                        if (_RST6Filter_ != null) { _RST6Filter_.MABL = MIAN; }
+                                                        pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[e].CODE}' AND GRD_NUM = {N(RST2[e].NUMBER)}");
+                                                        break;
+                                                    }
+                                                case 18: // اضافه انبار
+                                                    {
+                                                        MBKM = MBKM - (RST2[e].MEGHk ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI - (RST2[e].MEGHk ?? 0);
+                                                        var _RST6Filter_ = RST6.Where(x => x.CODE == RST2[e].CODE && x.GRD_NUM == RST2[e].NUMBER).FirstOrDefault();
+                                                        if (_RST6Filter_ != null) { _RST6Filter_.MABL = MIAN; }
+                                                        pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[e].CODE}' AND GRD_NUM = {N(RST2[e].NUMBER)}");
+                                                        break;
+                                                    }
+                                                case 26: // برگشت خريد
+                                                    {
+                                                        MBKM = MBKM - (RST2[e].MEGHk ?? 0) * MIAN;
+                                                        MOGUDI = MOGUDI - (RST2[e].MEGHk ?? 0);
+                                                        rst3Filter.AVRAGE = MIAN;
+                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                    AVRAGE = {N(MIAN)}
+                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        break;
+                                                    }
+                                            }
+                                        }
+                                    }
+
+                                    // اجرای دسته‌ای آپدیت‌های این (کالا، انبار) پیش از رفتن به انبار بعدی
+                                    const int updateChunkSize = 200;
+                                    for (int off = 0; off < pending.Count; off += updateChunkSize)
+                                    {
+                                        var batch = new StringBuilder();
+                                        var endAt = Math.Min(off + updateChunkSize, pending.Count);
+                                        for (int k = off; k < endAt; k++) { batch.Append(pending[k]).AppendLine(";"); }
+                                        dbms.DoExecuteSQL(batch.ToString());
+                                    }
+                                }
+                            });
                         }
                     }
+
+                    uiProgress.Complete();
                     //Generaly.DoResetCountersDisplay();
                 }
                 catch (Exception er)
