@@ -138,15 +138,15 @@
 
         <!-- Custom Rounded ComboBox Items -->
         <Style TargetType="ComboBoxItem" x:Key="RoundedComboBoxItemStyle">
-            <Setter Property="MinHeight" Value="40"/>
-            <Setter Property="Padding" Value="15,0,15,0"/>
+            <Setter Property="MinHeight" Value="46"/>
+            <Setter Property="Padding" Value="15,6,15,6"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="#334155"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
-                        <Border Background="Transparent" CornerRadius="8" Margin="6,2" x:Name="Bd">
+                        <Border Background="Transparent" CornerRadius="8" Margin="6,3" x:Name="Bd">
                             <ContentPresenter HorizontalAlignment="Left" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -321,7 +321,6 @@
 
                                 <Grid Grid.Column="1">
                                     <Border Style="{StaticResource HoverInputBorderStyle}">
-                                        <!-- Applied custom ComboBox style -->
                                         <ComboBox DisplayMemberPath="SAL_NAME" FlowDirection="RightToLeft" IsEditable="True" SelectedValuePath="IDD" SelectionChanged="CmbUsers_SelectionChanged" Style="{StaticResource RoundedComboBoxStyle}" Text="{Binding ElementName=Krbri, Path=Text, UpdateSourceTrigger=PropertyChanged}" x:Name="CmbUsers"/>
                                     </Border>
                                     <TextBox TextChanged="Krbri_TextChanged" Visibility="Hidden" x:Name="Krbri"/>
