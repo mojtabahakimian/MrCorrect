@@ -137,6 +137,10 @@ namespace AUTO_BAZ.Functions
             public double? NUMBER { get; set; }
             public double? Total { get; set; }
         }
+        /// <summary>
+        /// ردیف قلم «فاکتور خرید» — همان ستون‌های <c>QRE20</c> به‌علاوه NUMBER (شماره فاکتور)،
+        /// تا بتوان اقلام همه‌ی فاکتورهای بازه را با یک کوئری خواند و در حافظه گروه‌بندی کرد.
+        /// </summary>
         public class QRE_BAZ_KHAREED
         {
             public double? NUMBER { get; set; }
