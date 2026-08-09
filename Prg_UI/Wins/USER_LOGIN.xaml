@@ -21,7 +21,6 @@
 
     <Window.Resources>
         <!-- Soft Ambient Shadow -->
-        <DropShadowEffect x:Key="CardShadow" BlurRadius="28" ShadowDepth="6" Direction="270" Color="#000000" Opacity="0.22"/>
 
         <!-- Minimize Button Style -->
         <Style x:Key="CaptionBtnStyle" TargetType="Button">
@@ -186,7 +185,6 @@
         <Border x:Name="Brd" Margin="12" CornerRadius="18"
                 Background="White"
                 BorderBrush="#E2E8F0" BorderThickness="1"
-                Effect="{StaticResource CardShadow}"
                 RenderTransformOrigin="0.5,0.5">
             <Border.RenderTransform>
                 <ScaleTransform ScaleX="0.97" ScaleY="0.97"/>
@@ -370,7 +368,7 @@
         <!-- Auto Update Panel -->
         <Border x:Name="UpdatePanel" Visibility="Collapsed" CornerRadius="14" Background="#E6212121"
                 Width="400" Height="200" VerticalAlignment="Center" HorizontalAlignment="Center"
-                Panel.ZIndex="1000" Effect="{StaticResource CardShadow}">
+                Panel.ZIndex="1000">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <materialDesign:PackIcon Kind="CloudDownload" Width="44" Height="44" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,12"/>
                 <TextBlock Text="در حال دانلود نسخه جدید..." Foreground="White" FontSize="15" HorizontalAlignment="Center" Margin="0,0,0,12"/>
