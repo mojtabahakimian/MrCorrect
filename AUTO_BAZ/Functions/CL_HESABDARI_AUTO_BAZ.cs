@@ -652,6 +652,21 @@ namespace AUTO_BAZ.Functions
         }
 
         /// <summary>
+        /// ردیف قلم «فاکتور خرید» — همان ستون‌های <c>QRE20</c> به‌علاوه NUMBER (شماره فاکتور)،
+        /// تا بتوان اقلام همه‌ی فاکتورهای بازه را با یک کوئری خواند و در حافظه گروه‌بندی کرد.
+        /// </summary>
+        public class QRE_BAZ_KHAREED
+        {
+            public double? NUMBER { get; set; }
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string? NAME { get; set; }
+            public double? RADAH { get; set; }
+        }
+
+        /// <summary>
         /// ردیف کالای فاکتور به‌همراه شماره فاکتور (برای پیش‌خوانی دسته‌ای اقلام چند فاکتور).
         /// </summary>
         public class QRE12_WITH_NUM : QRE12
