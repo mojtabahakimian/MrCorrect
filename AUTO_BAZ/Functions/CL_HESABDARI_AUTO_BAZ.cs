@@ -7090,7 +7090,7 @@ namespace AUTO_BAZ.Functions
             for (int gbV = 0; gbV < HFRST.Count; gbV++)
             {
                 var sheet = HFRST[gbV];
-                if (sheet == null || sheet.NUMBER == null) { continue; }
+                if (sheet == null) { continue; }
 
                 if (!TryGetDateNumber(sheet.DATE_N, out var normalizedDate) || normalizedDate < 10101)
                 {
@@ -7178,7 +7178,7 @@ namespace AUTO_BAZ.Functions
                     if (HFRST[gbV].N_S != ns)
                     {
                         HFRST[gbV].N_S = ns;
-                        gbHeadUpdates.Add($"UPDATE HEAD_LST set n_s = {SqlNum(ns)} WHERE NUMBER = {SqlNum(HFRST[gbV].NUMBER.Value)} AND TAG = 4;");
+                        gbHeadUpdates.Add($"UPDATE HEAD_LST set n_s = {SqlNum(ns)} WHERE NUMBER = {SqlNum(HFRST[gbV].NUMBER)} AND TAG = 4;");
                     }
                 }
 
