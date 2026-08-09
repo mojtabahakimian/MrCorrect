@@ -137,7 +137,16 @@ namespace AUTO_BAZ.Functions
             public double? NUMBER { get; set; }
             public double? Total { get; set; }
         }
-
+        public class QRE_BAZ_KHAREED
+        {
+            public double? NUMBER { get; set; }
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string? NAME { get; set; }
+            public double? RADAH { get; set; }
+        }
         /// <summary>
         /// یک ردیف کالای فاکتور به‌همراه نام کالا. همان ستون‌هایی که QRE12/QRE14
         /// می‌خوانند، به‌علاوه‌ی NUMBER تا بتوان ردیف‌ها را به فاکتورشان نسبت داد.
