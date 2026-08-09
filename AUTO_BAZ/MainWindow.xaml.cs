@@ -1904,9 +1904,9 @@ namespace AUTO_BAZ
 
                 if (IsCancelRequestedBgWorker) { return; }
 
-                CL_HESABDARI_AUTO_BAZ.GENSANADFROOSH(1, 9999999999);
                 try
                 {
+                    CL_HESABDARI_AUTO_BAZ.GENSANADFROOSH(HF1, HF2);
                 }
                 catch (Exception er)
                 {
@@ -2048,10 +2048,10 @@ namespace AUTO_BAZ
                 Int64 HF2 = 9999999999;
 
                 if (IsCancelRequestedBgWorker) { return; }
-                CL_HESABDARI_AUTO_BAZ.SANADKHORUGSAYER(HF1, HF2);
 
                 try
                 {
+                    CL_HESABDARI_AUTO_BAZ.SANADKHORUGSAYER(HF1, HF2);
                 }
                 catch (Exception er)
                 {
