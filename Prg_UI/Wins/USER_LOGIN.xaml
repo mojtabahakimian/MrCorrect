@@ -149,27 +149,34 @@
                             <ToggleButton Background="Transparent" BorderThickness="0" ClickMode="Press" Cursor="Hand" Focusable="false" Grid.Column="1" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" x:Name="ToggleButton">
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
-                                        <Border Background="Transparent" CornerRadius="0,10,10,0" Width="36" x:Name="ArrowBorder">
-                                            <Path Data="M 0 0 L 4.5 4.5 L 9 0 Z" Fill="#94A3B8" HorizontalAlignment="Center" Opacity="0.8" VerticalAlignment="Center" x:Name="ArrowPath"/>
-                                        </Border>
+                                        <!-- قرار دادن المان‌ها داخل یک Grid به عنوان ریشه قالب برای جلوگیری از خطای VisualTree -->
+                                        <Grid Width="36">
+                                            <Border Background="Black" Opacity="0" CornerRadius="0,10,10,0" x:Name="ArrowBorder"/>
+                                            <Path Data="M 0 0 L 4.5 4.5 L 9 0 Z" Fill="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="ArrowPath" IsHitTestVisible="False" Opacity="0.8"/>
+                                        </Grid>
+
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Trigger.EnterActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
-                                                            <ColorAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#10000000"/>
-                                                            <DoubleAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowPath" Storyboard.TargetProperty="Opacity" To="1.0"/>
+                                                            <DoubleAnimation Duration="0:0:0.15" Storyboard.TargetName="ArrowBorder" Storyboard.TargetProperty="Opacity" To="0.08"/>
+                                                            <DoubleAnimation Duration="0:0:0.15" Storyboard.TargetName="ArrowPath" Storyboard.TargetProperty="Opacity" To="1.0"/>
                                                         </Storyboard>
                                                     </BeginStoryboard>
                                                 </Trigger.EnterActions>
                                                 <Trigger.ExitActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
-                                                            <ColorAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="Transparent"/>
-                                                            <DoubleAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowPath" Storyboard.TargetProperty="Opacity" To="0.8"/>
+                                                            <DoubleAnimation Duration="0:0:0.15" Storyboard.TargetName="ArrowBorder" Storyboard.TargetProperty="Opacity" To="0"/>
+                                                            <DoubleAnimation Duration="0:0:0.15" Storyboard.TargetName="ArrowPath" Storyboard.TargetProperty="Opacity" To="0.8"/>
                                                         </Storyboard>
                                                     </BeginStoryboard>
                                                 </Trigger.ExitActions>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="ArrowBorder" Property="Opacity" Value="0.12"/>
+                                                <Setter TargetName="ArrowPath" Property="Opacity" Value="1.0"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -234,8 +241,7 @@
                             </TextBlock>
                         </StackPanel>
 
-                        <StackPanel HorizontalAlignment="Left" Margin="20,0,20,25" VerticalAlignment="Bottom">
-                            <!-- SD_Status label -->
+                        <StackPanel HorizontalAlignment="Left" Margin="20,0,20,20" VerticalAlignment="Bottom">
                             <Label FontSize="10" Foreground="#B3E5FC" Padding="0" x:Name="SD_Status">
                                 <Label.Content>SERVER : MERCEDES\SQL2022 | DATABASE : NEWFOODRIP05</Label.Content>
                             </Label>
@@ -280,7 +286,6 @@
 
                                 <Grid Grid.Column="1">
                                     <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Height="48">
-                                        <!-- Applied custom ComboBox style -->
                                         <ComboBox DisplayMemberPath="SAL_NAME" FlowDirection="RightToLeft" IsEditable="True" SelectedValuePath="IDD" SelectionChanged="CmbUsers_SelectionChanged" Style="{StaticResource RoundedComboBoxStyle}" Text="{Binding ElementName=Krbri, Path=Text, UpdateSourceTrigger=PropertyChanged}" x:Name="CmbUsers"/>
                                     </Border>
                                     <TextBox TextChanged="Krbri_TextChanged" Visibility="Hidden" x:Name="Krbri"/>
