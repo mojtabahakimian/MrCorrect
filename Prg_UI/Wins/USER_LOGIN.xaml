@@ -4,140 +4,355 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins"
-        mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Background="{x:Null}" AllowsTransparency="True"
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        mc:Ignorable="d"
         FontFamily="{StaticResource IRANYEKAN}"
-        Title="" Width="565" Height="375"  WindowStyle="None" WindowStartupLocation="CenterScreen" Loaded="Window_Loaded" ResizeMode="NoResize" ContentRendered="Window_ContentRendered"  Foreground="{Binding Background, ElementName=Greet}" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing" >
-    <!--FontFamily="{StaticResource IRANYEKAN}"-->
+        Title=""
+        Width="720" Height="480"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded"
+        ContentRendered="Window_ContentRendered"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Closing="Window_Closing"
+        Foreground="{Binding Background, ElementName=Greet}">
 
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0"/>
     </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- Soft Card Shadow -->
+        <DropShadowEffect x:Key="CardShadow"
+                          BlurRadius="28"
+                          ShadowDepth="6"
+                          Direction="270"
+                          Color="#000000"
+                          Opacity="0.25"/>
+
+        <!-- Primary Action Button -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#29B6F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                Padding="15,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#03A9F4"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0288D1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#CFD8DC"/>
+                                <Setter Property="Foreground" Value="#78909C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Clean Responsive Input Styles -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+            <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.6"/>
+            <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush" Value="#29B6F6"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="ModernPasswordBox" TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}">
+            <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.6"/>
+            <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush" Value="#29B6F6"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <Style x:Key="ModernComboBox" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignFloatingHintComboBox}">
+            <Setter Property="materialDesign:HintAssist.HintOpacity" Value="0.6"/>
+            <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush" Value="#29B6F6"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+    </Window.Resources>
+
     <Grid x:Name="grid">
-        <!--Headeing-->
+        <!-- Hidden theme helper -->
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" IsHitTestVisible="False" Focusable="False" IsTabStop="False"/>
-        <Border x:Name="Brd" CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}" BorderThickness="1">
-        </Border>
-        <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" VerticalAlignment="Top" MinHeight="50" UseLayoutRounding="False" Height="25" Background="{Binding Background, ElementName=GENERAL_RANG}" BorderBrush="Black" >
+
+        <!-- Window Main Card -->
+        <Border x:Name="Brd"
+                CornerRadius="16"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="1"
+                Effect="{StaticResource CardShadow}"
+                Margin="12">
+
             <Grid>
-                <Button x:Name="Btn_Close" Click="Button_Click" Margin="0,12,11,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="23" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="29" Padding="1,-2,1,1" IsTabStop="False" >
-                    <Button.Content>
-                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
-                    </Button.Content>
-                </Button>
-                <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,12,43,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="23" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="29" Padding="1,-2,1,1" IsTabStop="False" >
-                    <Button.Content>
-                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
-                    </Button.Content>
-                </Button>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
+                <!-- ========== LEFT BRAND PANEL ========== -->
+                <Border Grid.Column="0" CornerRadius="15,0,0,15" ClipToBounds="True">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#4FC3F7" Offset="0"/>
+                            <GradientStop Color="#29B6F6" Offset="0.5"/>
+                            <GradientStop Color="#03A9F4" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
 
+                    <Grid>
+                        <!-- Background Decorative Shapes -->
+                        <Ellipse Width="180" Height="180" Fill="#20FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-60,-40,0,0"/>
+                        <Ellipse Width="130" Height="130" Fill="#15FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-30,-20"/>
+
+                        <!-- Branding Logo/Text -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16">
+                            <TextBlock Text="Mr Correct"
+                                       FontSize="32"
+                                       FontWeight="Light"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       FontFamily="Segoe UI Light, IRANYEKAN"/>
+                        </StackPanel>
+
+                        <!-- Server Status Info -->
+                        <Label x:Name="SD_Status"
+                               Content="SERVER : MERCEDES\SQL2022&#10;DATABASE : NEWFOODRIP05"
+                               FontSize="9.5"
+                               Foreground="#E0F7FA"
+                               VerticalAlignment="Bottom"
+                               HorizontalAlignment="Left"
+                               Margin="16,0,16,14"
+                               Padding="0"/>
+                    </Grid>
+                </Border>
+
+                <!-- ========== RIGHT FORM PANEL ========== -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="46"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- TitleBar Window Buttons -->
+                    <Border Grid.Row="0" Background="Transparent">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,4,8,0">
+                            <Button x:Name="Btn_Minimize"
+                                    Click="Btn_Minimize_Click"
+                                    Width="32" Height="28"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    IsTabStop="False"
+                                    ToolTip="کوچک کردن">
+                                <materialDesign:PackIcon Kind="WindowMinimize" Width="14" Height="14" Foreground="#78909C"/>
+                            </Button>
+                            <Button x:Name="Btn_Close"
+                                    Click="Button_Click"
+                                    Width="32" Height="28"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    IsTabStop="False"
+                                    ToolTip="بستن">
+                                <materialDesign:PackIcon Kind="WindowClose" Width="14" Height="14" Foreground="#78909C"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Login Form Body -->
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="38,0,38,0" FlowDirection="RightToLeft">
+
+                        <TextBlock Text="ورود به سیستم"
+                                   FontSize="21"
+                                   FontWeight="Bold"
+                                   Foreground="#263238"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,20"/>
+
+                        <!-- User Selection Dropdown -->
+                        <ComboBox x:Name="CmbUsers"
+                                  Style="{StaticResource ModernComboBox}"
+                                  materialDesign:HintAssist.Hint="انتخاب کاربر"
+                                  IsEditable="True"
+                                  IsTextSearchEnabled="True"
+                                  StaysOpenOnEdit="True"
+                                  DisplayMemberPath="SAL_NAME"
+                                  SelectedValuePath="IDD"
+                                  SelectionChanged="CmbUsers_SelectionChanged"
+                                  Text="{Binding ElementName=Krbri, Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                  FlowDirection="RightToLeft"/>
+
+                        <TextBox x:Name="Krbri" Visibility="Hidden" TextChanged="Krbri_TextChanged"/>
+
+                        <!-- Password Field -->
+                        <PasswordBox x:Name="Rmzo"
+                                     Style="{StaticResource ModernPasswordBox}"
+                                     materialDesign:HintAssist.Hint="رمز عبور"
+                                     PasswordChanged="Rmzo_PasswordChanged"
+                                     CommandManager.PreviewExecuted="Rmzo_PreviewExecuted"
+                                     ContextMenu="{x:Null}"
+                                     FlowDirection="RightToLeft"/>
+
+                        <TextBox x:Name="SecoRmzo"
+                                 Visibility="Hidden"
+                                 Style="{StaticResource ModernTextBox}"
+                                 materialDesign:HintAssist.Hint="رمز عبور"
+                                 TextChanged="SecoRmzo_TextChanged"
+                                 CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted"
+                                 ContextMenu="{x:Null}"
+                                 FlowDirection="RightToLeft"/>
+
+                        <!-- Show Password Option -->
+                        <CheckBox x:Name="dispass"
+                                  Content="نمایش رمز"
+                                  Margin="0,4,0,20"
+                                  FontSize="12"
+                                  Foreground="#546E7A"
+                                  Cursor="Hand"
+                                  Checked="PutedTick"
+                                  Unchecked="RemovedTick"
+                                  HorizontalAlignment="Right"/>
+
+                        <!-- Submit Button -->
+                        <Button x:Name="Greet"
+                                Content="ورود"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Click="Btn_Goin"
+                                GotFocus="Greet_GotFocus"
+                                LostFocus="Greet_LostFocus"
+                                IsDefault="True"
+                                IsEnabled="False"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <!-- Footer Section -->
+                    <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="0,0,15,0" Padding="24,0">
+                        <Grid>
+                            <Label x:Name="LBL_VERSION"
+                                   Content="Version 1.0.0.396  •  Date : 1405/01/30"
+                                   FontSize="10.5"
+                                   Foreground="#94A3B8"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Padding="0"
+                                   PreviewMouseDoubleClick="LBL_VERSION_PreviewMouseDoubleClick"/>
+
+                            <Button Content="اتصال به پایگاه داده"
+                                    Click="Button_Click_1"
+                                    FontSize="11.5"
+                                    Foreground="#29B6F6"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Padding="4,2"/>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
         </Border>
-        <!--Headeing-->
-        <Label x:Name="Lbl_usernam" Visibility="Collapsed"  Content="نام کاربری :"  HorizontalAlignment="Left" Margin="316,108,0,0" VerticalAlignment="Top" Width="64"  FlowDirection="RightToLeft" Height="32" PreviewMouseDoubleClick="Lbl_usernam_PreviewMouseDoubleClick"/>
-        <Label x:Name="label" Visibility="Collapsed"   Content="رمز عبور :"  HorizontalAlignment="Left" Margin="316,147,0,0" VerticalAlignment="Top" Width="54"  FlowDirection="RightToLeft" Height="30" Cursor="Hand" PreviewMouseLeftButtonUp="Label_PreviewMouseLeftButtonUp" />
-        <materialDesign:PackIcon Kind="User" Visibility="Visible" PreviewMouseDoubleClick="Lbl_usernam_PreviewMouseDoubleClick" Margin="313,140,0,0" Height="30" Width="27"/>
 
-        <ComboBox x:Name="CmbUsers" FlowDirection="RightToLeft"
-                  IsEditable="True" Text="{Binding ElementName=Krbri,Path=Text,UpdateSourceTrigger=PropertyChanged}"
-                  IsTextSearchEnabled="True"
-                  StaysOpenOnEdit="True"
-                  materialDesign:HintAssist.Hint="انتخاب کاربر"
-                  DisplayMemberPath="SAL_NAME"
-                  SelectedValuePath="IDD"
-                  SelectionChanged="CmbUsers_SelectionChanged"
-                  Margin="316,141,18,0" VerticalAlignment="Top"/>
+        <!-- ========== OVERLAYS & POPUPS ========== -->
 
-        <TextBox x:Name="Krbri" HorizontalAlignment="Left" Visibility="Hidden" Height="28" Padding="3" materialDesign:HintAssist.Hint="نام کاربری" Margin="317,142,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="230" FlowDirection="RightToLeft" TextChanged="Krbri_TextChanged"/>
+        <!-- Connection Loader -->
+        <Label x:Name="lblconnecting"
+               Visibility="Hidden"
+               Content=". . . در حال تست"
+               Background="#D8252526"
+               Foreground="White"
+               FontSize="20"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"/>
 
-        <Label x:Name="VorudLabel" Content="ورود کاربران" Visibility="Collapsed" HorizontalContentAlignment="Center" Margin="0,56,1,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" FontSize="14"  PreviewMouseLeftButtonUp="VorudLabel_PreviewMouseLeftButtonUp" Cursor="Hand"/>
+        <!-- Login Loader -->
+        <Label x:Name="lbloader"
+               Content="در حال ورود به سیستم ..."
+               Visibility="Collapsed"
+               Background="#BF1B1B1C"
+               Foreground="White"
+               FontSize="16"
+               FlowDirection="RightToLeft"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"/>
 
-        <Button x:Name="Greet" Content="ورود" Margin="0,273,21,0" Cursor="Hand"  
-                GotFocus="Greet_GotFocus"
-                LostFocus="Greet_LostFocus"
-                Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="227" FontWeight="Bold" Click="Btn_Goin" Padding="0,-1,3,4" Foreground="White" BorderBrush="#00000000" FontSize="14" IsDefault="True" IsEnabled="False">
-            <Button.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" />
-                </LinearGradientBrush>
-            </Button.Background>
-        </Button>
-
-        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Center"  StaysOpen="False"  VerticalOffset="-4">
-            <StackPanel>
-                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#FF007ACC" Height="auto">
-                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
-                     Text="رمز عبور وارد شده صحیح نمی باشد" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
-                </Border>
-            </StackPanel>
+        <!-- Password Error Popup -->
+        <Popup x:Name="Pop1"
+               AllowsTransparency="True"
+               PopupAnimation="Fade"
+               Placement="Center"
+               StaysOpen="False"
+               VerticalOffset="-4">
+            <Border x:Name="Pop_Border1"
+                    CornerRadius="10"
+                    Background="#EF5350"
+                    Padding="20,12"
+                    Effect="{StaticResource CardShadow}">
+                <TextBox x:Name="Pop1Text1"
+                         IsReadOnly="True"
+                         Text="رمز عبور وارد شده صحیح نمی باشد"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="White"
+                         FontSize="13"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center"/>
+            </Border>
         </Popup>
 
-
-        <Label x:Name="lblconnecting" Visibility="Hidden" Content=". . . در حال تست" HorizontalAlignment="Left" Margin="0,49,0,0" VerticalAlignment="Center" Height="271" Width="400" Background="#D8252526" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  FontSize="22"/>
-
-        <CheckBox x:Name="dispass" Content="نمایش رمز"  HorizontalAlignment="Left" Margin="315,225,0,0" VerticalAlignment="Top" Width="85"  Height="21"  Unchecked="RemovedTick" Checked="PutedTick" Padding="5,-3,0,0" UseLayoutRounding="False" Cursor="Hand" Foreground="{Binding Foreground, ElementName=label}" FontSize="11"/>
-
-        <PasswordBox x:Name="Rmzo"  CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" Padding="3"  materialDesign:HintAssist.Hint="رمز عبور"  ContextMenu="{x:Null}" HorizontalAlignment="Left" Height="28" Margin="317,187,0,0" VerticalAlignment="Top" Width="230" FlowDirection="RightToLeft" PasswordChanged="Rmzo_PasswordChanged"/>
-        <TextBox x:Name="SecoRmzo"  Visibility="Hidden" HorizontalAlignment="Left"   materialDesign:HintAssist.Hint="رمز عبور" Padding="3" Height="28" Margin="313,192,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="230" FlowDirection="RightToLeft"  CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted"  ContextMenu="{x:Null}"  TextChanged="SecoRmzo_TextChanged" />
-        <ComboBox x:Name="mycmb" HorizontalAlignment="Left" Margin="313,199,0,0" VerticalAlignment="Top" Width="135" Background="White" Visibility="Collapsed"/>
-        <Label x:Name="cnnparamlbl" Visibility="Hidden" Cursor="Hand" Content="اتصال به دیتابیس" Margin="9,274,411,10"  MouseLeftButtonUp="cnnparamlbl_MouseLeftButtonUp" FontSize="10"/>
-        <Border BorderThickness="1" CornerRadius="1,1,1,10" HorizontalAlignment="Left" Height="328" Margin="-1,48,0,0" VerticalAlignment="Top" Width="291">
-            <Border.Background>
-                <!--<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#FF5AEBDC" Offset="0"/>
-                    <GradientStop Color="#FF1BBBEF" Offset="1"/>
-                </LinearGradientBrush>-->
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="0"/>
-                    <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
-        </Border>
-
-        <materialDesign:PackIcon Kind="Password" Margin="312,189,0,0" Visibility="Visible" Height="23" Width="26"/>
-        <Label x:Name="SD_Status" Content="Server : SERVER1      Database : COR1"  VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="26" Margin="10,339,0,0" VerticalAlignment="Top" Width="275"  Foreground="#DDFFFFFF" FontSize="9"/>
-        <Button  Cursor="Hand" Margin="0,0,4,15" Content="اتصال به پایگاه داده" Click="Button_Click_1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="27" Width="124" FontSize="11" Background="{x:Null}" BorderBrush="{x:Null}" />
-        <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,52,280,39" Foreground="#DDFFFFFF" FontSize="30" FontFamily="/WpfApp5;component/FNT/#Raleway Light" IsHitTestVisible="False" d:IsLocked="True">Mr Correct</Label>
-        <Label x:Name="lbloader" Content="در حال ورود به سیستم ..." HorizontalContentAlignment="Center" Visibility="Collapsed" VerticalContentAlignment="Center"   Background="#BF1B1B1C" Foreground="White" FontSize="16" FlowDirection="RightToLeft"/>
-        <Label x:Name="LBL_VERSION" Content="Version 1.0.0.396 Date : 1405/01/30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="288,335,129,16" FontSize="9" PreviewMouseDoubleClick="LBL_VERSION_PreviewMouseDoubleClick" />
-
-        <!--SmallDarkOverlay:-->
-        <Border CornerRadius="10,10,0,0" Margin="0,0,0,325" Background="#11000000" IsHitTestVisible="False" Focusable="False">
-            <Border.Effect>
-                <BlurEffect Radius="1"/>
-            </Border.Effect>
-        </Border>
-
-        <Border CornerRadius="0,0,0,10" Margin="0,50,276,0" Background="#11000000" Focusable="False">
-            <Border.Effect>
-                <BlurEffect Radius="1"/>
-            </Border.Effect>
-        </Border>
-
-
-        <!-- Update Progress UI -->
-        <Border x:Name="UpdatePanel" Visibility="Collapsed" CornerRadius="10" Background="#E6212121" Width="450" Height="210" VerticalAlignment="Center" HorizontalAlignment="Center" Panel.ZIndex="1000">
+        <!-- Auto Update Panel -->
+        <Border x:Name="UpdatePanel"
+                Visibility="Collapsed"
+                CornerRadius="14"
+                Background="#E6212121"
+                Width="400"
+                Height="200"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Panel.ZIndex="1000"
+                Effect="{StaticResource CardShadow}">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <materialDesign:PackIcon Kind="CloudDownload" Width="50" Height="50" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,15" />
-
-                <Label Content="در حال دانلود نسخه جدید..." Foreground="White" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,10" FontFamily="{StaticResource IRANYEKAN}"/>
-
-                <ProgressBar x:Name="UpdatePrg" Width="350" Height="15" Minimum="0" Maximum="100" BorderBrush="White" BorderThickness="1" Background="Transparent" Foreground="#FF4CAF50"/>
-
-                <Label x:Name="UpdateLbl" Content="0%" Foreground="White" HorizontalAlignment="Center" Margin="0,5,0,0" FontSize="14" FontFamily="{StaticResource IRANYEKAN}"/>
-
-                <TextBlock Text="(پس از اتمام برنامه خودکار باز خواهد شد)" 
-                           Foreground="#CCFFFFFF" 
-                           FontSize="11" 
-                           HorizontalAlignment="Center" 
-                           Margin="0,0,0,0" 
-                           FontFamily="{StaticResource IRANYEKAN}"/>
+                <materialDesign:PackIcon Kind="CloudDownload" Width="44" Height="44" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                <TextBlock Text="در حال دانلود نسخه جدید..." Foreground="White" FontSize="15" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                <ProgressBar x:Name="UpdatePrg" Width="300" Height="8" Minimum="0" Maximum="100" BorderThickness="0" Background="#40FFFFFF" Foreground="#4FC3F7" Margin="0,0,0,8"/>
+                <Label x:Name="UpdateLbl" Content="0%" Foreground="White" HorizontalAlignment="Center" FontSize="13" Padding="0"/>
+                <TextBlock Text="(پس از اتمام برنامه خودکار باز خواهد شد)" Foreground="#BBFFFFFF" FontSize="11" HorizontalAlignment="Center" Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 
+        <!-- Hidden Legacy Elements for Backend Compatibility -->
+        <Label x:Name="Lbl_usernam" Visibility="Collapsed"/>
+        <Label x:Name="label" Visibility="Collapsed"/>
+        <Label x:Name="VorudLabel" Visibility="Collapsed"/>
+        <Label x:Name="cnnparamlbl" Visibility="Hidden"/>
+        <ComboBox x:Name="mycmb" Visibility="Collapsed"/>
+        <materialDesign:PackIcon Kind="User" Visibility="Collapsed"/>
+        <materialDesign:PackIcon Kind="Password" Visibility="Collapsed"/>
     </Grid>
 </Window>
