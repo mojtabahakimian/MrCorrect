@@ -208,8 +208,6 @@
 
                     <Grid>
                         <!-- Soft Abstract Background Bubbles -->
-                        <Ellipse Width="190" Height="190" Fill="#20FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-70,-50,0,0"/>
-                        <Ellipse Width="130" Height="130" Fill="#15FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-40,-30"/>
 
                         <!-- App Branding -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16">
@@ -358,7 +356,7 @@
 
         <!-- Error Alert Popup -->
         <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Center" StaysOpen="False" VerticalOffset="-4">
-            <Border x:Name="Pop_Border1" CornerRadius="10" Background="#EF5350" Padding="18,10" Effect="{StaticResource CardShadow}">
+            <Border x:Name="Pop_Border1" CornerRadius="10" Background="#EF5350" Padding="18,10" >
                 <TextBox x:Name="Pop1Text1" IsReadOnly="True" Text="رمز عبور وارد شده صحیح نمی باشد"
                          Background="Transparent" BorderThickness="0" Foreground="White"
                          FontSize="13" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
