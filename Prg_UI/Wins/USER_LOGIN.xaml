@@ -1,16 +1,4 @@
-﻿<Window x:Class="Prg_UI.Wins.USER_LOGIN"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:Prg_UI.Wins"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        AllowsTransparency="True" Background="Transparent" FontFamily="{StaticResource IRANYEKAN}" 
-        Height="460" ResizeMode="NoResize" UseLayoutRounding="True" Width="700" 
-        WindowStartupLocation="CenterScreen" WindowStyle="None"
-        Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" 
-        PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
+﻿<Window AllowsTransparency="True" Background="Transparent" Closing="Window_Closing" ContentRendered="Window_ContentRendered" FontFamily="{StaticResource IRANYEKAN}" Height="460" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ResizeMode="NoResize" UseLayoutRounding="True" Width="700" WindowStartupLocation="CenterScreen" WindowStyle="None" mc:Ignorable="d" x:Class="Prg_UI.Wins.USER_LOGIN" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Prg_UI.Wins" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="38" GlassFrameThickness="0" ResizeBorderThickness="0"/>
@@ -115,17 +103,16 @@
 
         <!-- Custom Rounded ComboBox Items -->
         <Style TargetType="ComboBoxItem" x:Key="RoundedComboBoxItemStyle">
-            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Padding" Value="15,0,15,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="#334155"/>
-            <!-- تراز متن آیتم‌های لیست از سمت راست فیزیکی -->
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
                         <Border Background="Transparent" CornerRadius="8" Margin="6,2" x:Name="Bd">
-                            <!-- اضافه کردن پدینگ به حاشیه راست داخل لیست کشویی -->
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="15,0,0,0" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Left" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
@@ -147,34 +134,48 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="14"/>
-            <!-- اینجا پدینگ اصلی را تنظیم می‌کنیم. ترتیب: Left, Top, Right, Bottom -->
-            <Setter Property="Padding" Value="10,0,15,0"/>
             <Setter Property="ItemContainerStyle" Value="{StaticResource RoundedComboBoxItemStyle}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <!-- FlowDirection=RightToLeft -->
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Style="{x:Null}" explicitly removes MaterialDesign default blue underline -->
-                            <!-- Margin="15,0,0,0" text to not stick to the right edge physically -->
-                            <TextBox Background="Transparent" BorderThickness="0" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding Foreground}" Grid.Column="0" HorizontalContentAlignment="Left" Margin="15,0,0,0" Style="{x:Null}" VerticalContentAlignment="Center" x:Name="PART_EditableTextBox"/>
+                            <TextBox Background="Transparent" BorderThickness="0" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding Foreground}" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="15,0,0,0" Style="{x:Null}" VerticalContentAlignment="Center" x:Name="PART_EditableTextBox"/>
 
-                            <ToggleButton Background="Transparent" BorderThickness="0" ClickMode="Press" Focusable="false" Grid.Column="1" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" x:Name="ToggleButton">
+                            <ToggleButton Background="Transparent" BorderThickness="0" ClickMode="Press" Cursor="Hand" Focusable="false" Grid.Column="1" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" x:Name="ToggleButton">
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
-                                        <Border Background="Transparent" Width="36">
-                                            <Path Data="M 0 0 L 4.5 4.5 L 9 0 Z" Fill="#94A3B8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Border Background="Transparent" CornerRadius="0,10,10,0" Width="36" x:Name="ArrowBorder">
+                                            <Path Data="M 0 0 L 4.5 4.5 L 9 0 Z" Fill="#94A3B8" HorizontalAlignment="Center" Opacity="0.8" VerticalAlignment="Center" x:Name="ArrowPath"/>
                                         </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Trigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <ColorAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#10000000"/>
+                                                            <DoubleAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowPath" Storyboard.TargetProperty="Opacity" To="1.0"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.EnterActions>
+                                                <Trigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <ColorAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="Transparent"/>
+                                                            <DoubleAnimation Duration="0:0:0.2" Storyboard.TargetName="ArrowPath" Storyboard.TargetProperty="Opacity" To="0.8"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.ExitActions>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </ToggleButton.Template>
                             </ToggleButton>
 
-                            <!-- Popup List -->
                             <Popup AllowsTransparency="True" Focusable="False" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" PopupAnimation="Slide" x:Name="Popup">
                                 <Grid MaxHeight="220" Width="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
                                     <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="12" Margin="0,4,0,8">
@@ -218,6 +219,8 @@
 
                     <Grid>
                         <!-- Soft abstract shapes -->
+                        <Ellipse Fill="#15FFFFFF" Height="250" HorizontalAlignment="Left" Margin="-80,-80,0,0" VerticalAlignment="Top" Width="250"/>
+                        <Ellipse Fill="#10FFFFFF" Height="200" HorizontalAlignment="Right" Margin="0,0,-50,-50" VerticalAlignment="Bottom" Width="200"/>
 
                         <StackPanel HorizontalAlignment="Center" Margin="16" VerticalAlignment="Center">
                             <Border Background="#26FFFFFF" CornerRadius="42" Height="84" HorizontalAlignment="Center" Margin="0,0,0,20" Width="84">
@@ -232,7 +235,7 @@
                         </StackPanel>
 
                         <StackPanel HorizontalAlignment="Left" Margin="20,0,20,20" VerticalAlignment="Bottom">
-                            <!-- SD_Status label restored -->
+                            <!-- SD_Status label -->
                             <Label FontSize="10" Foreground="#B3E5FC" Padding="0" x:Name="SD_Status">
                                 <Label.Content>SERVER : MERCEDES\SQL2022 | DATABASE : NEWFOODRIP05</Label.Content>
                             </Label>
@@ -296,9 +299,8 @@
                                 <Grid Grid.Column="1">
                                     <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Height="48">
                                         <Grid>
-                                            <!-- اضافه کردن Margin برای ایجاد فاصله متناسب از لبه سمت راست فیزیکی در رمز عبور -->
-                                            <PasswordBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalContentAlignment="Left" Margin="15,0,0,0" Padding="0,0,0,0" PasswordChanged="Rmzo_PasswordChanged" VerticalContentAlignment="Center" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="Rmzo"/>
-                                            <TextBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalContentAlignment="Left" Margin="15,0,0,0" Padding="0,0,0,0" TextChanged="SecoRmzo_TextChanged" VerticalContentAlignment="Center" Visibility="Hidden" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="SecoRmzo"/>
+                                            <PasswordBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="15,0,15,0" PasswordChanged="Rmzo_PasswordChanged" VerticalContentAlignment="Center" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="Rmzo"/>
+                                            <TextBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="15,0,15,0" TextChanged="SecoRmzo_TextChanged" VerticalContentAlignment="Center" Visibility="Hidden" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="SecoRmzo"/>
                                         </Grid>
                                     </Border>
                                 </Grid>
@@ -333,17 +335,14 @@
 
         <!-- Overlays and Popups -->
 
-        <!-- Connection Loader (Restored) -->
         <Label Background="#D8252526" FontSize="20" Foreground="White" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Visibility="Hidden" x:Name="lblconnecting">
             <Label.Content>. . . در حال تست</Label.Content>
         </Label>
 
-        <!-- Main Login Loader -->
         <Label Background="#BF1B1B1C" FlowDirection="RightToLeft" FontSize="16" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="Collapsed" x:Name="lbloader">
             <Label.Content>در حال ورود به سیستم ...</Label.Content>
         </Label>
 
-        <!-- Error Alert Popup -->
         <Popup AllowsTransparency="True" Placement="Center" PopupAnimation="Fade" StaysOpen="False" VerticalOffset="-4" x:Name="Pop1">
             <Border Background="#EF5350" CornerRadius="10" Padding="18,10" x:Name="Pop_Border1">
                 <TextBox Background="Transparent" BorderThickness="0" FontSize="13" Foreground="White" HorizontalContentAlignment="Center" IsReadOnly="True" VerticalContentAlignment="Center" x:Name="Pop1Text1">
@@ -352,7 +351,6 @@
             </Border>
         </Popup>
 
-        <!-- Auto Update Panel -->
         <Border Background="#E6212121" CornerRadius="14" Height="200" HorizontalAlignment="Center" Panel.ZIndex="1000" VerticalAlignment="Center" Visibility="Collapsed" Width="400" x:Name="UpdatePanel">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <materialDesign:PackIcon Kind="CloudDownload" Width="44" Height="44" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,12"/>
