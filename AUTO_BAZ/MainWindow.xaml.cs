@@ -547,10 +547,22 @@ namespace AUTO_BAZ
             Dispatcher.Invoke(new Action(() =>
             {
                 StillMethodIsWorking = false;
+
+                // ───────────────────────────────────────────────────────────────────────────
+                // پایان‌دهیِ تک‌معنا.
+                //
+                // قبلاً این متد سه کار متناقض پشت‌سرهم می‌کرد: اول ۱۰۰٪ می‌نوشت، بعد
+                // DoResetCountersDisplay() همه‌ی نوارها و درصد کل را صفر می‌کرد، و در انتها
+                // دوباره متن را "0.00%" می‌گذاشت. یعنی کاربر عملاً هیچ‌وقت ۱۰۰٪ را نمی‌دید.
+                //
+                // صفر کردن اینجا هم لازم نیست: ابتدای هر اجرای تازه در LetsGoBtn_Click
+                // خودش DoResetCountersDisplay() را صدا می‌زند. پس نتیجه‌ی اجرا روی صفحه
+                // می‌ماند تا کاربر ببیند کدام بخش‌ها کامل شده‌اند.
+                // ───────────────────────────────────────────────────────────────────────────
                 TOGHER_PROGRESS.Value = 100;
                 COUNTER_TXBL.Content = $"100%";
+                UpdateDataInSharedViewModel();
 
-                Generaly.DoResetCountersDisplay();
                 C00.Foreground = Generaly.PutThisColor("#FF000000");
                 C0.Foreground = Generaly.PutThisColor("#FF000000");
                 c1.Foreground = Generaly.PutThisColor("#FF000000");
@@ -565,8 +577,6 @@ namespace AUTO_BAZ
                 c10.Foreground = Generaly.PutThisColor("#FF000000");
                 c11.Foreground = Generaly.PutThisColor("#FF000000");
                 Btn_DoCancel.Content = "لغو";
-
-                COUNTER_TXBL.Content = $"0.00%";
             }));
         }
         private void Btn_DoCancel_Click(object sender, RoutedEventArgs e)
@@ -660,6 +670,17 @@ namespace AUTO_BAZ
                     tasks = new List<Task>();
                     AnyErrorHappend = false;
 
+                    // ───────────────────────────────────────────────────────────────────────
+                    // باطل کردن گزارش‌های پیشرفتِ عقب‌مانده‌ی اجرای قبلی و صفر کردن نوارها.
+                    //
+                    // چرا: ThrottledProgressReporter با اولویت Background صف می‌کند، پس
+                    // callback های آخرِ اجرای قبلی می‌توانند «بعد» از صفر شدن نوارها اجرا شوند
+                    // و مقدار کهنه بنویسند. با جلو بردن نسل، همه‌ی آن‌ها بی‌اثر می‌شوند.
+                    // ترتیب مهم است: اول نسل، بعد صفر کردن.
+                    // ───────────────────────────────────────────────────────────────────────
+                    CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
+                    Generaly.DoResetCountersDisplay();
+
                     Dispatcher.Invoke(new Action(() =>
                     {
                         if (LST_DATA5.Count > 30)
@@ -743,6 +764,20 @@ namespace AUTO_BAZ
                     {
                         await allTasks;
 
+                        // ───────────────────────────────────────────────────────────────────
+                        // تخلیه‌ی صف گزارش‌های پیشرفت پیش از پایان‌دهی.
+                        //
+                        // ادامه‌ی await با اولویت Normal اجرا می‌شود، ولی گزارش‌های پیشرفت با
+                        // اولویت Background صف شده‌اند؛ پس بدون این خط، آخرین Complete()ها
+                        // «بعد» از پایان‌دهی روی نوارها می‌نشستند. این InvokeAsync خالی صبر
+                        // می‌کند تا نوبت اولویت Background برسد، یعنی تا آن لحظه هرچه در صف
+                        // بوده اجرا شده است.
+                        //
+                        // (محافظ قطعی همان نسل است — این خط فقط باعث می‌شود مقادیر واقعی ۱۰۰٪
+                        //  پیش از پایان‌دهی روی صفحه بنشینند، نه اینکه دور ریخته شوند.)
+                        // ───────────────────────────────────────────────────────────────────
+                        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+
                         Dispatcher.Invoke(new Action(() =>
                         {
                             IsWorkisDone = true;
@@ -765,10 +800,14 @@ namespace AUTO_BAZ
                             }
 
                         }));
+
+                        // از این لحظه هیچ گزارش عقب‌مانده‌ای نباید نوارها را عوض کند.
+                        CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
                         SayOprationsFinished();
                     }
                     catch (OperationCanceledException ecx)
                     {
+                        CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
                         Dispatcher.Invoke(new Action(() =>
                         {
                             TOGHER_PROGRESS.Value = 0;
@@ -786,6 +825,7 @@ namespace AUTO_BAZ
                     }
                     catch (Exception ex)
                     {
+                        CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
                         StillMethodIsWorking = false;
 
                         LST_DATA5.Add("به خاطر خطا لغو شد. :" + Conversions.ToString(DateTime.Now));
@@ -810,6 +850,10 @@ namespace AUTO_BAZ
                 // تا فرم‌های برنامه همیشه مقدار تازه از دیتابیس بخوانند.
                 CL_HESABDARI_AUTO_BAZ.LookupCacheEnabled = false;
                 CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
+
+                // محافظ نهایی: اگر مسیری (مثلاً DelayedDurabilityGuard) استثنا بدهد و از
+                // بلوک‌های catch بالا رد نشویم، گزارش‌های عقب‌مانده نباید نوارها را عوض کنند.
+                CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
 
                 if (enteredDurabilityScope)
                 {

@@ -893,6 +893,31 @@ namespace AUTO_BAZ.Functions
             return (value ?? string.Empty).Replace("'", "''");
         }
 
+        // ───────────────────────────────────────────────────────────────────────────────
+        // «نسل» گزارش پیشرفت رابط کاربری.
+        //
+        // چرا لازم است: ThrottledProgressReporter با BeginInvoke و اولویت Background صف
+        // می‌کند — یعنی غیرمسدودکننده و با اولویتی پایین‌تر از ادامه‌ی await. پس آخرین
+        // callback های یک اجرا می‌توانند «بعد از» پایان‌دهی همان اجرا روی Thread رابط کاربری
+        // بنشینند و مقدار نوارها را دوباره بنویسند.
+        //
+        // این دقیقاً باگ «۸.۳٪» بود: پایان‌دهی همه‌ی نوارها را صفر می‌کرد، بعد یک callback
+        // عقب‌مانده تنها نوار خودش را ۱۰۰ می‌کرد و میانگین روی ۱۰۰÷۱۲ = ۸.۳ قفل می‌شد.
+        //
+        // راه‌حل: هر Reporter شماره‌ی نسلِ لحظه‌ی ساختش را نگه می‌دارد؛ به‌محض پایان‌دهی اجرا
+        // نسل یک واحد جلو می‌رود و همه‌ی گزارش‌های عقب‌مانده بی‌اثر می‌شوند. بررسی نسل «دو بار»
+        // انجام می‌شود — یک بار پیش از صف کردن و یک بار داخل خودِ callback — چون نسل می‌تواند
+        // بین این دو لحظه عوض شود و مهم‌تر همان بررسی دوم است.
+        // ───────────────────────────────────────────────────────────────────────────────
+        private static int _uiProgressGeneration;
+
+        public static int UiProgressGeneration => Volatile.Read(ref _uiProgressGeneration);
+
+        /// <summary>
+        /// باطل کردن همه‌ی گزارش‌های پیشرفتِ در صف. در شروع و پایان هر اجرای بازسازی صدا زده شود.
+        /// </summary>
+        public static void BumpUiProgressGeneration() => Interlocked.Increment(ref _uiProgressGeneration);
+
         /// <summary>
         /// گزارش پیشرفت برای حلقه‌های موازی.
         /// Dispatcher.Invoke مسدودکننده است؛ اگر به‌ازای هر رکورد صدا زده شود، همه‌ی Thread های حلقه
@@ -905,6 +930,7 @@ namespace AUTO_BAZ.Functions
             private readonly int _reportInterval;
             private readonly System.Windows.Threading.Dispatcher? _dispatcher;
             private readonly Action<double>? _applyToUi;
+            private readonly int _generation;
             private int _done;
 
             public ThrottledProgressReporter(int total, System.Windows.Threading.Dispatcher? dispatcher, Action<double>? applyToUi)
@@ -913,6 +939,7 @@ namespace AUTO_BAZ.Functions
                 _reportInterval = Math.Max(1, _total / 100);
                 _dispatcher = dispatcher;
                 _applyToUi = applyToUi;
+                _generation = UiProgressGeneration;
             }
 
             public void ReportOne()
@@ -936,9 +963,25 @@ namespace AUTO_BAZ.Functions
                     return;
                 }
 
+                // اجرای این Reporter تمام شده و پایان‌دهی انجام شده؛ نوشتن روی نوارها دیگر
+                // فقط داده‌ی کهنه تولید می‌کند.
+                if (_generation != UiProgressGeneration)
+                {
+                    return;
+                }
+
+                var generation = _generation;
+
                 try
                 {
-                    dispatcher.BeginInvoke(new Action(() => applyToUi(value)), System.Windows.Threading.DispatcherPriority.Background);
+                    dispatcher.BeginInvoke(
+                        new Action(() =>
+                        {
+                            // بررسی دوم و اصلی: نسل می‌تواند بین صف شدن و اجرا شدن عوض شود.
+                            if (generation != UiProgressGeneration) { return; }
+                            applyToUi(value);
+                        }),
+                        System.Windows.Threading.DispatcherPriority.Background);
                 }
                 catch
                 {
@@ -6248,8 +6291,23 @@ namespace AUTO_BAZ.Functions
 
             var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>($"SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= {NUMBER} AND HEAD_LST.NUMBER <= {NUMBER2} and HEAD_LST.tag = 9 )) ORDER BY HEAD_LST.NUMBER").ToList();
 
+            // این دو خروجِ زودهنگام «پیش از» ساخته شدن progressReporter اتفاق می‌افتند، پس هیچ
+            // Complete() ای نوار C7 را به ۱۰۰ نمی‌رساند و میانگین کلی روی عددی کمتر گیر می‌کند.
+            void MarkC7Finished()
+            {
+                if (InternalCalling && auto_run != null)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        auto_run.PRGR_C7.Value = 100;
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+            }
+
             if (HEDRST.Count == 0)
             {
+                MarkC7Finished();
                 return (SANAD_NUMBER, IsSuccessfully);
             }
 
@@ -6258,6 +6316,7 @@ namespace AUTO_BAZ.Functions
             if (!(Baseknow.SANAT == true || IsNull(Baseknow.SANAT)))
             {
                 dbms.DoExecuteSQL($"DELETE FROM dbo.DEED_DTL WHERE TAG = 9 AND NUMBER BETWEEN {NUMBER} AND {NUMBER2}");
+                MarkC7Finished();
                 return (SANAD_NUMBER, IsSuccessfully);
             }
 
@@ -8017,12 +8076,32 @@ namespace AUTO_BAZ.Functions
 
                 //} ////For loop normal
             }); // ExecuteWithPreferredLoop
+
             LogWriter.WriteLog("پایان فاکتور برگشت فروش" + DateTime.Now.ToString());
             //DoCmd.Close(acForm, "GUG");
             // DoCmd.Close acForm, "GENSANADFROOSH"
             if (InternalCalling)
             {
                 gensanadbargashfroosh2(fnum, TNUM);
+            }
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // اعلام صریح ۱۰۰٪ برای نوار C8.
+            //
+            // چرا لازم است: این بخش (برخلاف بقیه) نوارش را با فرمول processed/Count پیش می‌برد و
+            // هیچ Complete() ندارد؛ اگر HFRST خالی باشد نوار روی صفر می‌ماند. gensanadbargashfroosh2
+            // هم روی همین نوار می‌نویسد و خودش وقتی رکوردی نداشته باشد زودتر return می‌کند.
+            // پس ۱۰۰٪ باید «بعد» از آن و در انتهای کل بخش نوشته شود، وگرنه میانگین کلی هرگز به
+            // ۱۰۰ نمی‌رسد. (اگر پیش از فراخوانی gbf2 نوشته شود، Math.Max داخل آن باعث می‌شد
+            // پیشرفت واقعی مرحله‌ی دوم هم دیده نشود.)
+            // ───────────────────────────────────────────────────────────────────────────────
+            if (InternalCalling && auto_run != null)
+            {
+                auto_run.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run.PRGR_C8.Value = 100;
+                    auto_run.UpdateOverallProgressBar();
+                }));
             }
         }
 
@@ -9284,6 +9363,17 @@ namespace AUTO_BAZ.Functions
 
             }
             LogWriter.WriteLog("پایان فاکتور خدمات" + DateTime.Now.ToString());
+
+            // نوار C9 با فرمول (ROW+1)/Count پیش می‌رود و Complete() ندارد؛ اگر HEDRST خالی
+            // باشد روی صفر می‌ماند و میانگین کلی هرگز به ۱۰۰ نمی‌رسد.
+            if (InternalCalling && auto_run != null)
+            {
+                auto_run.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run.PRGR_C9.Value = 100;
+                    auto_run.UpdateOverallProgressBar();
+                }));
+            }
             //DoCmd.Close(acForm, "GUG");
 
 
@@ -9696,6 +9786,17 @@ namespace AUTO_BAZ.Functions
                 }
             });
             LogWriter.WriteLog("پایان وصول چكهاي دريافتي");
+
+            // نوار C11 با فرمول progressu/Count پیش می‌رود و Complete() ندارد؛ اگر HFRST خالی
+            // باشد روی صفر می‌ماند و میانگین کلی هرگز به ۱۰۰ نمی‌رسد.
+            if (InternalCalling && auto_run != null)
+            {
+                auto_run.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run.PRGR_C11.Value = 100;
+                    auto_run.UpdateOverallProgressBar();
+                }));
+            }
         }
 
         //AUTO_BAZ_FUNCTIONS ---------------------------------------------------------------------------------------------------------
