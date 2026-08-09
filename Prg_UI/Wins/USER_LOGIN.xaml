@@ -260,8 +260,6 @@
 
                     <Grid>
                         <!-- Soft abstract shapes -->
-                        <Ellipse Fill="#15FFFFFF" Height="250" HorizontalAlignment="Left" Margin="-80,-80,0,0" VerticalAlignment="Top" Width="250"/>
-                        <Ellipse Fill="#10FFFFFF" Height="200" HorizontalAlignment="Right" Margin="0,0,-50,-50" VerticalAlignment="Bottom" Width="200"/>
 
                         <StackPanel HorizontalAlignment="Center" Margin="16" VerticalAlignment="Center">
                             <Border Background="#26FFFFFF" CornerRadius="42" Height="84" HorizontalAlignment="Center" Margin="0,0,0,20" Width="84">
@@ -269,9 +267,6 @@
                             </Border>
                             <TextBlock FontFamily="Segoe UI" FontSize="34" FontWeight="Light" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8">
                                 <TextBlock.Text>Mr Correct</TextBlock.Text>
-                            </TextBlock>
-                            <TextBlock FontSize="14" Foreground="#E0F7FA" HorizontalAlignment="Center">
-                                <TextBlock.Text>سیستم مدیریت هوشمند</TextBlock.Text>
                             </TextBlock>
                         </StackPanel>
 

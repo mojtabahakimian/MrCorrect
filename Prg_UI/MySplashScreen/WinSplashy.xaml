@@ -4,24 +4,86 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.MySplashScreen"
-        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:gifplayer="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
-        Background="{x:Null}"
+        mc:Ignorable="d"
+        Background="Transparent"
         AllowsTransparency="True"
-        AllowDrop="True" WindowStyle="None" ResizeMode="NoResize"
+        WindowStyle="None"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Title="" Width="501" Height="308" ShowInTaskbar="False" Loaded="Window_Loaded" >
-    <Grid>
-        <Rectangle RadiusX="10" RadiusY="10">
-            <Rectangle.Fill>
-                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
-                    <GradientStop Color="#FF09D4AA" Offset="1"/>
-                    <GradientStop Color="#FF14D66E"/>
-                </LinearGradientBrush>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Image x:Name="myg" Margin="3,8,4,5" Visibility="Hidden" gifplayer:AnimationBehavior.RepeatBehavior="2x" gifplayer:AnimationBehavior.AutoStart="True" gifplayer:AnimationBehavior.SourceUri="/UiDrive/IMGS/SplashHandwrite.gif" Stretch="UniformToFill"/>
-        <Border BorderBrush="White" BorderThickness="1" CornerRadius="10"/>
-        <Label x:Name="RDP_LABEL" Visibility="Hidden" d:Visibility="Hidden" Content="Mr Correct ..." HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="#DDFFFFFF" FontSize="60" FontFamily="Calibri"/>
-    </Grid>
+        ShowInTaskbar="False"
+        Width="480"
+        Height="280"
+        Title=""
+        Loaded="Window_Loaded">
+
+    <Border Background="White" CornerRadius="14" x:Name="MainBorder">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" Color="Black" Direction="270" Opacity="0.18" ShadowDepth="8"/>
+        </Border.Effect>
+
+        <Grid>
+            <!-- Background Gradient (هماهنگ با لاگین) -->
+            <Border CornerRadius="14" ClipToBounds="True">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#4FC3F7" Offset="0"/>
+                        <GradientStop Color="#0288D1" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- Soft decorative circles -->
+            <Ellipse Width="220" Height="220" Fill="#18FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-70,-70,0,0"/>
+            <Ellipse Width="180" Height="180" Fill="#12FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-50,-50"/>
+
+            <!-- Content -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                <!-- Logo Circle -->
+                <Border Width="90" Height="90" CornerRadius="45" Background="#28FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,22">
+                    <materialDesign:PackIcon Kind="AccountCheckOutline" Width="48" Height="48" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Title -->
+                <TextBlock Text="Mr Correct" 
+                           FontFamily="Segoe UI" 
+                           FontSize="36" 
+                           FontWeight="Light" 
+                           Foreground="White" 
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,6"/>
+
+                <!-- Subtitle -->
+                <TextBlock Text="سیستم مدیریت هوشمند" 
+                           FontSize="15" 
+                           Foreground="#E0F7FA" 
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- GIF (فقط در حالت غیر RDP) -->
+            <Image x:Name="myg" 
+                   Margin="0" 
+                   Visibility="Collapsed"
+                   gifplayer:AnimationBehavior.RepeatBehavior="2x"
+                   gifplayer:AnimationBehavior.AutoStart="True"
+                   gifplayer:AnimationBehavior.SourceUri="/UiDrive/IMGS/SplashHandwrite.gif"
+                   Stretch="UniformToFill"
+                   Opacity="0.92"/>
+
+            <!-- RDP Mode Label (حالت ساده) -->
+            <Label x:Name="RDP_LABEL" 
+                   Visibility="Collapsed"
+                   Content="Mr Correct ..." 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   HorizontalContentAlignment="Center" 
+                   VerticalContentAlignment="Center" 
+                   Foreground="White" 
+                   FontSize="42" 
+                   FontFamily="Segoe UI" 
+                   FontWeight="Light"/>
+        </Grid>
+    </Border>
 </Window>
