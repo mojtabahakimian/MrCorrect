@@ -118,12 +118,14 @@
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="#334155"/>
+            <!-- تراز متن آیتم‌های لیست از سمت راست فیزیکی -->
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
                         <Border Background="Transparent" CornerRadius="8" Margin="6,2" x:Name="Bd">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                            <!-- اضافه کردن پدینگ به حاشیه راست داخل لیست کشویی -->
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="15,0,0,0" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
@@ -145,20 +147,22 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Padding" Value="10,0,10,0"/>
+            <!-- اینجا پدینگ اصلی را تنظیم می‌کنیم. ترتیب: Left, Top, Right, Bottom -->
+            <Setter Property="Padding" Value="10,0,15,0"/>
             <Setter Property="ItemContainerStyle" Value="{StaticResource RoundedComboBoxItemStyle}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <!-- FlowDirection=RightToLeft ensures Column 0 is on the physical Right, Column 1 is on physical Left -->
+                                <!-- FlowDirection=RightToLeft -->
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- Style="{x:Null}" explicitly removes MaterialDesign default blue underline -->
-                            <TextBox Background="Transparent" BorderThickness="0" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding Foreground}" Grid.Column="0" HorizontalContentAlignment="Left" Padding="{TemplateBinding Padding}" Style="{x:Null}" VerticalContentAlignment="Center" x:Name="PART_EditableTextBox"/>
+                            <!-- Margin="15,0,0,0" text to not stick to the right edge physically -->
+                            <TextBox Background="Transparent" BorderThickness="0" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" Foreground="{TemplateBinding Foreground}" Grid.Column="0" HorizontalContentAlignment="Left" Margin="15,0,0,0" Style="{x:Null}" VerticalContentAlignment="Center" x:Name="PART_EditableTextBox"/>
 
                             <ToggleButton Background="Transparent" BorderThickness="0" ClickMode="Press" Focusable="false" Grid.Column="1" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" x:Name="ToggleButton">
                                 <ToggleButton.Template>
@@ -294,8 +298,9 @@
                                 <Grid Grid.Column="1">
                                     <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Height="48">
                                         <Grid>
-                                            <PasswordBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalContentAlignment="Left" Padding="10,0,10,0" PasswordChanged="Rmzo_PasswordChanged" VerticalContentAlignment="Center" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="Rmzo"/>
-                                            <TextBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalContentAlignment="Left" Padding="10,0,10,0" TextChanged="SecoRmzo_TextChanged" VerticalContentAlignment="Center" Visibility="Hidden" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="SecoRmzo"/>
+                                            <!-- اضافه کردن Margin برای ایجاد فاصله متناسب از لبه سمت راست فیزیکی در رمز عبور -->
+                                            <PasswordBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalContentAlignment="Left" Margin="15,0,0,0" Padding="0,0,0,0" PasswordChanged="Rmzo_PasswordChanged" VerticalContentAlignment="Center" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="Rmzo"/>
+                                            <TextBox Background="Transparent" BorderThickness="0" CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted" FlowDirection="RightToLeft" FontSize="14" Foreground="#334155" HorizontalContentAlignment="Left" Margin="15,0,0,0" Padding="0,0,0,0" TextChanged="SecoRmzo_TextChanged" VerticalContentAlignment="Center" Visibility="Hidden" materialDesign:TextFieldAssist.UnderlineBrush="Transparent" x:Name="SecoRmzo"/>
                                         </Grid>
                                     </Border>
                                 </Grid>
