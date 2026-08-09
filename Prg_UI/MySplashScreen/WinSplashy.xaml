@@ -18,14 +18,14 @@
         Title=""
         Loaded="Window_Loaded">
 
-    <Border Background="White" CornerRadius="14" x:Name="MainBorder">
+    <Border x:Name="MainBorder" Background="White" CornerRadius="14">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="30" Color="Black" Direction="270" Opacity="0.18" ShadowDepth="8"/>
+            <DropShadowEffect BlurRadius="28" Color="Black" Direction="270" Opacity="0.16" ShadowDepth="7"/>
         </Border.Effect>
 
         <Grid>
-            <!-- Background Gradient (هماهنگ با لاگین) -->
-            <Border CornerRadius="14" ClipToBounds="True">
+            <!-- Background Gradient (رنگ مورد علاقه شما) -->
+            <Border x:Name="BgBorder" CornerRadius="14" ClipToBounds="True">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#4FC3F7" Offset="0"/>
@@ -35,36 +35,41 @@
             </Border>
 
             <!-- Soft decorative circles -->
-            <Ellipse Width="220" Height="220" Fill="#18FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-70,-70,0,0"/>
-            <Ellipse Width="180" Height="180" Fill="#12FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-50,-50"/>
+            <Ellipse x:Name="Circle1" Width="220" Height="220" Fill="#18FFFFFF"
+                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-70,-70,0,0"/>
+            <Ellipse x:Name="Circle2" Width="180" Height="180" Fill="#12FFFFFF"
+                     HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-50,-50"/>
 
-            <!-- Content -->
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-
+            <!-- محتوای عادی -->
+            <StackPanel x:Name="NormalContent" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <!-- Logo Circle -->
-                <Border Width="90" Height="90" CornerRadius="45" Background="#28FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,22">
-                    <materialDesign:PackIcon Kind="AccountCheckOutline" Width="48" Height="48" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border Width="90" Height="90" CornerRadius="45" Background="#28FFFFFF"
+                        HorizontalAlignment="Center" Margin="0,0,0,22">
+                    <materialDesign:PackIcon Kind="AccountCheckOutline"
+                                             Width="48" Height="48"
+                                             Foreground="White"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
                 </Border>
 
                 <!-- Title -->
-                <TextBlock Text="Mr Correct" 
-                           FontFamily="Segoe UI" 
-                           FontSize="36" 
-                           FontWeight="Light" 
-                           Foreground="White" 
+                <TextBlock Text="Mr Correct"
+                           FontFamily="Segoe UI"
+                           FontSize="36"
+                           FontWeight="Light"
+                           Foreground="White"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,6"/>
 
                 <!-- Subtitle -->
-                <TextBlock Text="سیستم مدیریت هوشمند" 
-                           FontSize="15" 
-                           Foreground="#E0F7FA" 
+                <TextBlock Text="سیستم مدیریت هوشمند"
+                           FontSize="15"
+                           Foreground="#E0F7FA"
                            HorizontalAlignment="Center"/>
             </StackPanel>
 
-            <!-- GIF (فقط در حالت غیر RDP) -->
-            <Image x:Name="myg" 
-                   Margin="0" 
+            <!-- GIF -->
+            <Image x:Name="myg"
                    Visibility="Collapsed"
                    gifplayer:AnimationBehavior.RepeatBehavior="2x"
                    gifplayer:AnimationBehavior.AutoStart="True"
@@ -72,18 +77,16 @@
                    Stretch="UniformToFill"
                    Opacity="0.92"/>
 
-            <!-- RDP Mode Label (حالت ساده) -->
-            <Label x:Name="RDP_LABEL" 
-                   Visibility="Collapsed"
-                   Content="Mr Correct ..." 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center" 
-                   HorizontalContentAlignment="Center" 
-                   VerticalContentAlignment="Center" 
-                   Foreground="White" 
-                   FontSize="42" 
-                   FontFamily="Segoe UI" 
-                   FontWeight="Light"/>
+            <!-- حالت RDP (سبک) -->
+            <TextBlock x:Name="RDP_LABEL"
+                       Visibility="Collapsed"
+                       Text="Mr Correct ..."
+                       FontFamily="Segoe UI"
+                       FontSize="40"
+                       FontWeight="Light"
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
         </Grid>
     </Border>
 </Window>
