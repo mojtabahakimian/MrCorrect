@@ -939,7 +939,6 @@ namespace AUTO_BAZ.Functions
                 }
             }
         }
-
         public static string DECODEUN(string cody)
         {
             byte[] RawCoded = Encoding.GetEncoding(1256).GetBytes(cody);// ی 237
@@ -3179,9 +3178,7 @@ namespace AUTO_BAZ.Functions
             return tempGETSTANDARDPRICE_MAVAD;
         }
 
-
         private static readonly object _creatHesLock = new object();
-
 
         [System.Diagnostics.DebuggerStepThrough]
         public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
@@ -3280,8 +3277,6 @@ namespace AUTO_BAZ.Functions
                 }
             }
         }
-
-
 
 
         [System.Diagnostics.DebuggerStepThrough]

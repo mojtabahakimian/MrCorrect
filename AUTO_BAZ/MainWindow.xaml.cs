@@ -1,17 +1,13 @@
 ﻿using AUTO_BAZ.Functions;
-using AUTO_BAZ.HelperWins;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
-using Microsoft.Win32;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -22,19 +18,12 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using static AUTO_BAZ.Functions.CL_LMethods;
 using static AUTO_BAZ.LocalModles;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static System.Net.Mime.MediaTypeNames;
 using Application = System.Windows.Application;
 
 namespace AUTO_BAZ
@@ -992,7 +981,6 @@ namespace AUTO_BAZ
                  + " ) AS AVGSRC ORDER BY DATE_N, BARGAH";
         }
 
-
         public async Task C0_TASK()
         {
             await Task.Run(() =>
@@ -1896,8 +1884,6 @@ namespace AUTO_BAZ
             CL_HESABDARI_AUTO_BAZ.UseSmartThrottlingByDefault = chkUseSmartThrottling.IsChecked ?? false;
             SaveCheckBoxesState();
         }
-
-
         private void HRSTK1_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             LST_DATA5.CollectionChanged -= LST_DATA5_CollectionChanged;
@@ -1906,7 +1892,6 @@ namespace AUTO_BAZ
             Properties.Settings.Default.TheHistoryLST = null;
             Properties.Settings.Default.Save();
         }
-
         private void repeatb_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (string.IsNullOrEmpty(repeatb.Text.Trim()) || !Information.IsNumeric(repeatb.Text.Trim()))
@@ -1917,6 +1902,5 @@ namespace AUTO_BAZ
             Properties.Settings.Default.RepeatCount = repeatb.Text;
             Properties.Settings.Default.Save();
         }
-
     }
 }
