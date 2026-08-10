@@ -30,6 +30,13 @@ namespace TestRunner
 
         static void Main(string[] args)
         {
+            // حالت تست Progressbar: بدون اتصال به دیتابیس، فقط رفتار Dispatcher.
+            if (args.Length > 0 && args[0] == "progress")
+            {
+                ProgressBarTest.Run();
+                return;
+            }
+
             CL_Generaly.IsCalledExternally = true;
             string dbName = args.Length > 0 ? args[0] : "YAZDSEPAR1405";
             CL_CCNNMANAGER.CONNECTION_STR = $"Data Source=MERCEDES\\SQL2022;Initial Catalog={dbName};Integrated Security=True;TrustServerCertificate=True;Max Pool Size=1000;";

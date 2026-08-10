@@ -1730,7 +1730,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
                     MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
                     MABL_HAV.Text = header.MABL_HAV.ToStringNullSafe();
-                    TAKHFIF.Text = header.TAKHFIF.ToStringNullSafe();
+                    SetHeaderDiscount(header.TAKHFIF);
                     MOIN_VAR.Text = header.MOIN_VAR.ToStringNullSafe();
                     MOIN_HAV.Text = header.MOIN_HAV.ToStringNullSafe();
                     SHARAYET.Text = header.SHARAYET;
@@ -7166,6 +7166,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 VISITOR_DTL_SUB_ReGetData();
                 PAY_GETD_SUB_ReGetData();
                 TAKHFIF_APLAY_ReGetData();
+                SyncHeaderDiscountFromInvoiceLines();
+                Summer();
             }
         }
 
@@ -8392,6 +8394,24 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             MN.Text = MAN.Text; // مانده روی فاکتور
         }
 
+
+        private void SyncHeaderDiscountFromInvoiceLines()
+        {
+            if (FACTOR22_INVO_DATA is null || FACTOR22_INVO_DATA.Count == 0)
+            {
+                return;
+            }
+
+            SetHeaderDiscount(FACTOR22_INVO_DATA.Sum(x => x?.N_MOIN ?? 0));
+        }
+
+        private void SetHeaderDiscount(double discountAmount)
+        {
+            var discountText = Math.Round(discountAmount).ToString();
+            TAKHFIF2.Text = discountText;
+            TAKHFIF.Text = discountText;
+        }
+
         private bool DoCmdHeaderSaveUpdate()
         {
             try
@@ -9057,6 +9077,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     jamf = 0;
                 }
+                if (jamf <= 0)
+                {
+                    foreach (var item in FACTOR22_INVO_DATA)
+                    {
+                        item.N_MOIN = 0;
+                        item.N_KOL = 0;
+                    }
+                    return;
+                }
+
                 foreach (var item in FACTOR22_INVO_DATA)
                 {
                     i++;
@@ -13168,6 +13198,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
 
                         ReGetdata();
+                        SyncHeaderDiscountFromInvoiceLines();
+                        Summer();
 
                         if (!string.IsNullOrEmpty(strSpecificError)) //Error Happened
                         {

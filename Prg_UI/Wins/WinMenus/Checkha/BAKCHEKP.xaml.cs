@@ -177,6 +177,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             isClosing = true;
 
+            var parentWindow = THE_WIN as PGET_HED;
+
             //ON_Close
             if (can)
             {
@@ -184,6 +186,22 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
+                if (parentWindow == null || INDEX_DG < 0)
+                {
+                    return;
+                }
+
+                var currentItem = parentWindow.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+                if (currentItem == null)
+                {
+                    return;
+                }
+
+                if (this.N_SERI.SelectedValue == null || this.BANK.SelectedValue == null)
+                {
+                    return;
+                }
+
                 var rst = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = N'{this.N_SERI.SelectedValue}' AND BANK = N'{this.BANK.SelectedValue}' AND DATE_S = N'{this.DATE_S.SelectedValue}'").ToList();
                 if (rst.Count == 0)
                 {
