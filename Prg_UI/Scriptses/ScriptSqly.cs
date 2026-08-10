@@ -1150,12 +1150,12 @@ VALUES
 									         BEGIN
 									             UPDATE il
 									             SET 
-									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
-									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
-									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
+									                 il.N_KOL = 0,
+									                 il.TKHN = 0,
+									                 il.N_MOIN = 0,
 									                 il.IMBAA = CASE 
 									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
+									                         FLOOR(il.MABL_K * sd.vra / 100.0)
 									                     ELSE 0 
 									                 END
 									             FROM dbo.INVO_LST il
@@ -1167,12 +1167,12 @@ VALUES
 									     BEGIN
 									         UPDATE il
 									         SET 
-									             il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
-									             il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
-									             il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
+									             il.N_KOL = 0,
+									             il.TKHN = 0,
+									             il.N_MOIN = 0,
 									             il.IMBAA = CASE 
 									                 WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                     FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
+									                     FLOOR(il.MABL_K * sd.vra / 100.0)
 									                 ELSE 0 
 									             END
 									         FROM dbo.INVO_LST il

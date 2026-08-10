@@ -7166,6 +7166,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 VISITOR_DTL_SUB_ReGetData();
                 PAY_GETD_SUB_ReGetData();
                 TAKHFIF_APLAY_ReGetData();
+                SyncHeaderDiscountFromInvoiceLines();
+                Summer();
             }
         }
 
@@ -8373,7 +8375,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
             HKH.Text = MABL_HAZ.Text; // هزینه خدمات
-            SyncHeaderDiscountFromInvoiceLines();
             NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
             JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
             Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
@@ -9076,6 +9077,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     jamf = 0;
                 }
+                if (jamf <= 0)
+                {
+                    foreach (var item in FACTOR22_INVO_DATA)
+                    {
+                        item.N_MOIN = 0;
+                        item.N_KOL = 0;
+                    }
+                    return;
+                }
+
                 foreach (var item in FACTOR22_INVO_DATA)
                 {
                     i++;
