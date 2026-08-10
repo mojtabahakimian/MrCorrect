@@ -1133,18 +1133,18 @@ VALUES
 									             )
 									             UPDATE il
 									             SET 
-									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE flv.TF1_Final END,
-									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE flv.TF2_Final END,
-									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END,
+									                 il.N_KOL = flv.TF1_Final,
+									                 il.TKHN = flv.TF2_Final,
+									                 il.N_MOIN = flv.TotalLineDiscount,
 									                 il.IMBAA = CASE 
 									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END)) * sd.vra / 100.0)
+									                         FLOOR((il.MABL_K - flv.TotalLineDiscount) * sd.vra / 100.0)
 									                     ELSE 0 
 									                 END
 									             FROM dbo.INVO_LST il
 									             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id
 									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									             WHERE il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
+									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
 									         END
 									         ELSE 
 									         BEGIN

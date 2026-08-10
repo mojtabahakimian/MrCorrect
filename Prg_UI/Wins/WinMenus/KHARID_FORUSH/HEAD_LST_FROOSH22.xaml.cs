@@ -1730,7 +1730,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
                     MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
                     MABL_HAV.Text = header.MABL_HAV.ToStringNullSafe();
-                    TAKHFIF.Text = header.TAKHFIF.ToStringNullSafe();
+                    SetHeaderDiscount(header.TAKHFIF.GetValueOrDefault());
                     MOIN_VAR.Text = header.MOIN_VAR.ToStringNullSafe();
                     MOIN_HAV.Text = header.MOIN_HAV.ToStringNullSafe();
                     SHARAYET.Text = header.SHARAYET;
@@ -8373,6 +8373,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
             HKH.Text = MABL_HAZ.Text; // هزینه خدمات
+            SyncHeaderDiscountFromInvoiceLines();
             NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
             JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
             Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
@@ -8390,6 +8391,24 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //=[GHABEL]-[NPAR]
             MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
             MN.Text = MAN.Text; // مانده روی فاکتور
+        }
+
+
+        private void SyncHeaderDiscountFromInvoiceLines()
+        {
+            if (FACTOR22_INVO_DATA is null || FACTOR22_INVO_DATA.Count == 0)
+            {
+                return;
+            }
+
+            SetHeaderDiscount(FACTOR22_INVO_DATA.Sum(x => x?.N_MOIN ?? 0));
+        }
+
+        private void SetHeaderDiscount(double discountAmount)
+        {
+            var discountText = Math.Round(discountAmount).ToString();
+            TAKHFIF2.Text = discountText;
+            TAKHFIF.Text = discountText;
         }
 
         private bool DoCmdHeaderSaveUpdate()
@@ -13168,6 +13187,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
 
                         ReGetdata();
+                        SyncHeaderDiscountFromInvoiceLines();
+                        Summer();
 
                         if (!string.IsNullOrEmpty(strSpecificError)) //Error Happened
                         {
