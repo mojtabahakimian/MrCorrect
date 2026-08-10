@@ -859,6 +859,9 @@ namespace AUTO_BAZ
                 {
                     DelayedDurabilityGuard.ExitRebuildScope();
                 }
+
+                // لاگ بافرشده است؛ پیش از پایان، صف باید روی دیسک بنشیند تا فایل لاگ کامل باشد.
+                LogWriter.Flush();
             }
 
 

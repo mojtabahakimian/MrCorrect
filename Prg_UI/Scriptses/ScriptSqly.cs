@@ -21,8 +21,6 @@ namespace Prg_UI.Scriptses
             {
                 db.Open();
 
-          
-
                 #region SALARY
                 if (_type_ == 2) //مخصوص حقوق
                 {
@@ -41,11 +39,14 @@ namespace Prg_UI.Scriptses
 
                 if (isCustomCall)
                 {
+
                     //نوع ارز سطرهای خزانه و سند ; در هر اجرا بررسی میشود چون فرم خزانه بدون این ستون کار نمیکند
                     foreach (var ARZKIND2_TABLE in new[] { "PGET_LST", "TR_PGET_LST", "DEED_DTL" })
                     {
                         try { db.Execute($@"IF COL_LENGTH('dbo.{ARZKIND2_TABLE}', 'ARZKIND2') IS NULL ALTER TABLE [dbo].[{ARZKIND2_TABLE}] ADD [ARZKIND2] [bigint] NULL"); } catch { }
                     }
+
+                    SequentialKeyContentionScript(db);
 
                     try
                     {
@@ -923,298 +924,298 @@ VALUES
 
                     try { db.Execute($"DROP PROCEDURE dbo.sp_UpdateInvoicePricingAndDiscount"); } catch { }
                     try { db.Execute($@"CREATE PROCEDURE [dbo].[sp_UpdateInvoicePricingAndDiscount]
-									     @numb INT,
-									     @tgg INT,
-									     @PEPID_In INT,
-									     @PEID_In INT,
-									     @MODAT_PPID_In INT,
-									     @TICMBAA_In BIT,
-									     @CUST_KIND_In INT,
-									     @DTT_In INT,
-									     @DEPATMAN_In INT
-									 AS
-									 BEGIN
-									     SET NOCOUNT ON;
-									     BEGIN TRANSACTION;
-									 
-									     DECLARE @effective_tgg INT;
-									     DECLARE @CurrentPEPID INT;
-									     DECLARE @CurrentPEID INT;
-									     
-									     DECLARE @General_TF1 REAL;
-									     DECLARE @General_TF2 REAL;
-									     DECLARE @PETID INT; 
-									 
-									     DECLARE @stf_total_discount FLOAT = 0;
-									     DECLARE @MLBAA_total_vat FLOAT = 0;
-									     DECLARE @ErrorMessage NVARCHAR(1000);
-									     
-									     DECLARE @modat_from_price_payno INT;
-									     DECLARE @current_mas_in_head_lst FLOAT;
-									 
-									 	 SET @effective_tgg = CASE WHEN @tgg = 13 THEN 2 WHEN @tgg = 25 THEN 24 ELSE @tgg END;
+							     @numb INT,
+							     @tgg INT,
+							     @PEPID_In INT,
+							     @PEID_In INT,
+							     @MODAT_PPID_In INT,
+							     @TICMBAA_In BIT,
+							     @CUST_KIND_In INT,
+							     @DTT_In INT,
+							     @DEPATMAN_In INT
+							 AS
+							 BEGIN
+							     SET NOCOUNT ON;
+							     BEGIN TRANSACTION;
+							 
+							     DECLARE @effective_tgg INT;
+							     DECLARE @CurrentPEPID INT;
+							     DECLARE @CurrentPEID INT;
+							     
+							     DECLARE @General_TF1 REAL;
+							     DECLARE @General_TF2 REAL;
+							     DECLARE @PETID INT; 
+							 
+							     DECLARE @stf_total_discount FLOAT = 0;
+							     DECLARE @MLBAA_total_vat FLOAT = 0;
+							     DECLARE @ErrorMessage NVARCHAR(1000);
+							     
+							     DECLARE @modat_from_price_payno INT;
+							     DECLARE @current_mas_in_head_lst FLOAT;
+							 
+							 	 SET @effective_tgg = CASE WHEN @tgg = 13 THEN 2 WHEN @tgg = 25 THEN 24 ELSE @tgg END;
 
-									     -- بخش جدید: محاسبه و به‌روزرسانی MAS در HEAD_LST
-									     IF @MODAT_PPID_In IS NOT NULL AND @MODAT_PPID_In <> 0
-									     BEGIN
-									         SELECT @modat_from_price_payno = COALESCE(MODAT, 0) 
-									         FROM dbo.PRICE_PAYNO 
-									         WHERE PPID = @MODAT_PPID_In;
-									 
-									         -- خواندن مقدار فعلی MAS از HEAD_LST
-									         SELECT @current_mas_in_head_lst = MAS 
-									         FROM dbo.HEAD_LST 
-									         WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
-									 
-									         IF @modat_from_price_payno <> ISNULL(@current_mas_in_head_lst, -1) -- مقایسه با مقدار فعلی، اگر MAS قبلا Null بوده با -1 مقایسه می‌شود تا آپدیت شود
-									         BEGIN
-									             UPDATE dbo.HEAD_LST 
-									             SET MAS = @modat_from_price_payno 
-									             WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
-									 
-									             IF @tgg = 13 -- اگر فاکتور فروش بود، MAS حواله مرتبط را نیز به‌روز کن
-									             BEGIN
-									                 UPDATE dbo.HEAD_LST 
-									                 SET MAS = @modat_from_price_payno 
-									                 WHERE ""NUMBER"" = @numb AND TAG = 2; 
-									             END
-									         END
-									     END
-									     -- پایان بخش جدید
-									 
-									     -- 1. تعیین PEPID (شناسه اعلامیه قیمت)
-									     IF @PEPID_In IS NULL OR @PEPID_In = 0
-									     BEGIN
-									         SELECT TOP 1 @CurrentPEPID = PEPID 
-									         FROM dbo.PRICE_ELAMIE 
-									         WHERE PEPDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
-									         ORDER BY PEPID DESC;
-									     END
-									     ELSE
-									     BEGIN
-									         SET @CurrentPEPID = @PEPID_In;
-									     END
-									 
-									     IF @CurrentPEPID IS NULL
-									     BEGIN
-									         IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg)
-									         BEGIN
-									              UPDATE dbo.INVO_LST SET IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0, MABL_K = 0, MABL = 0 
-									              WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
-									              
-									              SET @ErrorMessage = N'اعلامیه قیمت فعال برای تاریخ ' + CAST(@DTT_In AS NVARCHAR(10)) + N' و واحد ' + CAST(@DEPATMAN_In AS NVARCHAR(10)) + N' یافت نشد. قیمت‌ها به‌روز نشدند.';
-									              RAISERROR(@ErrorMessage, 16, 1);
-									              IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-									              RETURN -1; 
-									         END
-									     END
-									 
-									     -- 2. تعیین PEID (شناسه اعلامیه تخفیف)
-									     IF @PEID_In IS NULL OR @PEID_In = 0
-									     BEGIN
-									         SELECT TOP 1 @CurrentPEID = PEID 
-									         FROM dbo.PRICE_ELAMIETF 
-									         WHERE PEDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
-									         ORDER BY PEID DESC;
-									     END
-									     ELSE
-									     BEGIN
-									         SET @CurrentPEID = @PEID_In;
-									     END
-									 
-									     -- 3. به‌روزرسانی PEPID و PEID در جدول HEAD_LST (اگر از قبل به‌روز نشده باشند یا تغییر کرده باشند)
-									     UPDATE dbo.HEAD_LST 
-									     SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
-									     WHERE ""NUMBER"" = @numb AND TAG = @tgg 
-									       AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) ); -- فقط در صورت تغییر آپدیت کن
-									 
-									     IF @tgg = 13
-									     BEGIN
-									         UPDATE dbo.HEAD_LST 
-									         SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
-									         WHERE ""NUMBER"" = @numb AND TAG = 2
-									           AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) );
-									     END
-									     
-									     -- 4. به‌روزرسانی قیمت‌ها در INVO_LST
-									     IF @CurrentPEPID IS NOT NULL
-									     BEGIN
-									         DECLARE @MissingPriceProductCode_HAVEPRICE NVARCHAR(15);
-									         DECLARE @MissingPriceProductName_HAVEPRICE NVARCHAR(80);
-									 
-									         SELECT TOP 1 @MissingPriceProductCode_HAVEPRICE = il.CODE, @MissingPriceProductName_HAVEPRICE = sd.NAME
-									         FROM dbo.INVO_LST il
-									         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									         LEFT JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID AND ped.PEPID = @CurrentPEPID
-									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ped.PRICE1 IS NULL;
-									 
-									         IF @MissingPriceProductCode_HAVEPRICE IS NOT NULL
-									         BEGIN
-									             SET @ErrorMessage = N'کالای : ''' + @MissingPriceProductCode_HAVEPRICE + N''' - ''' + ISNULL(@MissingPriceProductName_HAVEPRICE, N'') + N''' دارای گروه بندی قیمتی نیست یا گروه آن در اعلامیه قیمت با شناسه ' + CAST(@CurrentPEPID AS NVARCHAR(10)) + N' تعریف نشده.';
-									             RAISERROR(@ErrorMessage, 16, 1);
-									             IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-									             RETURN -2; 
-									         END
-									 
-									         UPDATE il
-									         SET 
-									             il.MABL = ped.PRICE1,
-									             il.MABL_K = ROUND(ped.PRICE1 * il.MEGHk, 0)
-									         FROM dbo.INVO_LST il
-									         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									         JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID
-									         WHERE il.""NUMBER"" = @numb 
-									           AND il.TAG = @effective_tgg 
-									           AND ped.PEPID = @CurrentPEPID;
-									     END
-									     ELSE 
-									     BEGIN
-									         IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg)
-									         BEGIN
-									              UPDATE dbo.INVO_LST 
-									              SET MABL = 0, MABL_K = 0, IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0 
-									              WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
-									         END
-									     END
-									 
-									     -- 5. اعمال تخفیفات و محاسبه ارزش افزوده
-									     IF @CurrentPEID IS NOT NULL 
-									     BEGIN
-									         SELECT 
-									             @General_TF1 = COALESCE(TF1, 0), 
-									             @General_TF2 = COALESCE(TF2, 0), 
-									             @PETID = PETID
-									         FROM dbo.PRICE_ELAMIETF_DTL 
-									         WHERE PEID = @CurrentPEID
-									           AND CUSTCODE = @CUST_KIND_In 
-									           AND PPID = @MODAT_PPID_In;
-									 
-									         IF @PETID IS NOT NULL 
-									         BEGIN
-									             WITH InvoiceLineCalculations AS (
-									                 SELECT 
-									                     il.id AS invo_lst_id,
-									                     il.CODE AS ProductCode,
-									                     il.MABL_K AS Current_MABL_K,
-									                     sd.CMBAA,
-									                     sd.vra AS VatRate 
-									                 FROM dbo.INVO_LST il
-									                 JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									                 WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0
-									             ),
-									             AppliedDiscounts AS (
-									                 SELECT
-									                     ild.invo_lst_id,
-									                     ild.Current_MABL_K,
-									                     ild.CMBAA,
-									                     ild.VatRate,
-									                     COALESCE(exc.EXCEPTION_TF1, @General_TF1) AS TF1_Final,
-									                     COALESCE(exc.EXCEPTION_TF2, @General_TF2) AS TF2_Final
-									                 FROM InvoiceLineCalculations ild
-									                 LEFT JOIN dbo.PRICE_ELAMIETF_EXCEPTION exc ON exc.PETID = @PETID AND exc.CODE = ild.ProductCode
-									             ),
-									             FinalLineValues AS (
-									                 SELECT
-									                     ad.invo_lst_id,
-									                     ad.TF1_Final,
-									                     ad.TF2_Final,
-									                     (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
-									                      ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
-									                     AS TotalLineDiscount,
-									                     CASE 
-									                         WHEN @TICMBAA_In = 1 AND ad.CMBAA = 1 AND ad.VatRate IS NOT NULL THEN 
-									                             FLOOR((ad.Current_MABL_K - 
-									                                    (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
-									                                     ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
-									                                   ) * ad.VatRate / 100.0)
-									                         ELSE 0 
-									                     END AS LineVAT
-									                 FROM AppliedDiscounts ad
-									             )
-									             UPDATE il
-									             SET 
-									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE flv.TF1_Final END,
-									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE flv.TF2_Final END,
-									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END,
-									                 il.IMBAA = CASE 
-									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE flv.TotalLineDiscount END)) * sd.vra / 100.0)
-									                     ELSE 0 
-									                 END
-									             FROM dbo.INVO_LST il
-									             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id
-									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									             WHERE il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
-									         END
-									         ELSE 
-									         BEGIN
-									             UPDATE il
-									             SET 
-									                 il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
-									                 il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
-									                 il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
-									                 il.IMBAA = CASE 
-									                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                         FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
-									                     ELSE 0 
-									                 END
-									             FROM dbo.INVO_LST il
-									             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
-									         END
-									     END
-									     ELSE 
-									     BEGIN
-									         UPDATE il
-									         SET 
-									             il.N_KOL = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_KOL ELSE 0 END,
-									             il.TKHN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.TKHN ELSE 0 END,
-									             il.N_MOIN = CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END,
-									             il.IMBAA = CASE 
-									                 WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
-									                     FLOOR((il.MABL_K - (CASE WHEN ISNULL(il.N_MOIN, 0) > 0 THEN il.N_MOIN ELSE 0 END)) * sd.vra / 100.0)
-									                 ELSE 0 
-									             END
-									         FROM dbo.INVO_LST il
-									         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-									         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
-									     END
-									 
-									     SELECT 
-									         @stf_total_discount = COALESCE(SUM(N_MOIN), 0), 
-									         @MLBAA_total_vat = COALESCE(SUM(IMBAA), 0)
-									     FROM dbo.INVO_LST 
-									     WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
-									 
-									     -- 6. به‌روزرسانی نهایی سرفصل فاکتور HEAD_LST
-									     UPDATE dbo.HEAD_LST 
-									     SET 
-									         MBAA = @MLBAA_total_vat, 
-									         TAKHFIF = @stf_total_discount
-									     WHERE ""NUMBER"" = @numb AND TAG = @tgg;
-									 
-									     IF @tgg = 13
-									     BEGIN
-									         UPDATE dbo.HEAD_LST 
-									         SET 
-									             MBAA = @MLBAA_total_vat, 
-									             TAKHFIF = @stf_total_discount
-									         WHERE ""NUMBER"" = @numb AND TAG = 2;
-									     END
-									 
-									     IF @@ERROR <> 0
-									     BEGIN
-									         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-									         SET @ErrorMessage = N'خطایی در حین عملیات به‌روزرسانی رخ داد و تغییرات بازگردانده شد. کد خطای SQL: ' + CAST(@@ERROR AS NVARCHAR(10));
-									         RAISERROR(@ErrorMessage, 16, 1);
-									         RETURN -99; 
-									     END
-									 
-									     IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
-									     RETURN 0; -- موفقیت
-									 
-									 END
-									 "); } catch { }
+							     -- بخش جدید: محاسبه و به‌روزرسانی MAS در HEAD_LST
+							     IF @MODAT_PPID_In IS NOT NULL AND @MODAT_PPID_In <> 0
+							     BEGIN
+							         SELECT @modat_from_price_payno = COALESCE(MODAT, 0) 
+							         FROM dbo.PRICE_PAYNO 
+							         WHERE PPID = @MODAT_PPID_In;
+							 
+							         -- خواندن مقدار فعلی MAS از HEAD_LST
+							         SELECT @current_mas_in_head_lst = MAS 
+							         FROM dbo.HEAD_LST 
+							         WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
+							 
+							         IF @modat_from_price_payno <> ISNULL(@current_mas_in_head_lst, -1) -- مقایسه با مقدار فعلی، اگر MAS قبلا Null بوده با -1 مقایسه می‌شود تا آپدیت شود
+							         BEGIN
+							             UPDATE dbo.HEAD_LST 
+							             SET MAS = @modat_from_price_payno 
+							             WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
+							 
+							             IF @tgg = 13 -- اگر فاکتور فروش بود، MAS حواله مرتبط را نیز به‌روز کن
+							             BEGIN
+							                 UPDATE dbo.HEAD_LST 
+							                 SET MAS = @modat_from_price_payno 
+							                 WHERE ""NUMBER"" = @numb AND TAG = 2; 
+							             END
+							         END
+							     END
+							     -- پایان بخش جدید
+							 
+							     -- 1. تعیین PEPID (شناسه اعلامیه قیمت)
+							     IF @PEPID_In IS NULL OR @PEPID_In = 0
+							     BEGIN
+							         SELECT TOP 1 @CurrentPEPID = PEPID 
+							         FROM dbo.PRICE_ELAMIE 
+							         WHERE PEPDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
+							         ORDER BY PEPID DESC;
+							     END
+							     ELSE
+							     BEGIN
+							         SET @CurrentPEPID = @PEPID_In;
+							     END
+							 
+							     IF @CurrentPEPID IS NULL
+							     BEGIN
+							         IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg)
+							         BEGIN
+							              UPDATE dbo.INVO_LST SET IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0, MABL_K = 0, MABL = 0 
+							              WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+							              
+							              SET @ErrorMessage = N'اعلامیه قیمت فعال برای تاریخ ' + CAST(@DTT_In AS NVARCHAR(10)) + N' و واحد ' + CAST(@DEPATMAN_In AS NVARCHAR(10)) + N' یافت نشد. قیمت‌ها به‌روز نشدند.';
+							              RAISERROR(@ErrorMessage, 16, 1);
+							              IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+							              RETURN -1; 
+							         END
+							     END
+							 
+							     -- 2. تعیین PEID (شناسه اعلامیه تخفیف)
+							     IF @PEID_In IS NULL OR @PEID_In = 0
+							     BEGIN
+							         SELECT TOP 1 @CurrentPEID = PEID 
+							         FROM dbo.PRICE_ELAMIETF 
+							         WHERE PEDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
+							         ORDER BY PEID DESC;
+							     END
+							     ELSE
+							     BEGIN
+							         SET @CurrentPEID = @PEID_In;
+							     END
+							 
+							     -- 3. به‌روزرسانی PEPID و PEID در جدول HEAD_LST (اگر از قبل به‌روز نشده باشند یا تغییر کرده باشند)
+							     UPDATE dbo.HEAD_LST 
+							     SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
+							     WHERE ""NUMBER"" = @numb AND TAG = @tgg 
+							       AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) ); -- فقط در صورت تغییر آپدیت کن
+							 
+							     IF @tgg = 13
+							     BEGIN
+							         UPDATE dbo.HEAD_LST 
+							         SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
+							         WHERE ""NUMBER"" = @numb AND TAG = 2
+							           AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) );
+							     END
+							     
+							     -- 4. به‌روزرسانی قیمت‌ها در INVO_LST
+							     IF @CurrentPEPID IS NOT NULL
+							     BEGIN
+							         DECLARE @MissingPriceProductCode_HAVEPRICE NVARCHAR(15);
+							         DECLARE @MissingPriceProductName_HAVEPRICE NVARCHAR(80);
+							 
+							         SELECT TOP 1 @MissingPriceProductCode_HAVEPRICE = il.CODE, @MissingPriceProductName_HAVEPRICE = sd.NAME
+							         FROM dbo.INVO_LST il
+							         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+							         LEFT JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID AND ped.PEPID = @CurrentPEPID
+							         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ped.PRICE1 IS NULL;
+							 
+							         IF @MissingPriceProductCode_HAVEPRICE IS NOT NULL
+							         BEGIN
+							             SET @ErrorMessage = N'کالای : ''' + @MissingPriceProductCode_HAVEPRICE + N''' - ''' + ISNULL(@MissingPriceProductName_HAVEPRICE, N'') + N''' دارای گروه بندی قیمتی نیست یا گروه آن در اعلامیه قیمت با شناسه ' + CAST(@CurrentPEPID AS NVARCHAR(10)) + N' تعریف نشده.';
+							             RAISERROR(@ErrorMessage, 16, 1);
+							             IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+							             RETURN -2; 
+							         END
+							 
+							         UPDATE il
+							         SET 
+							             il.MABL = ped.PRICE1,
+							             il.MABL_K = ROUND(ped.PRICE1 * il.MEGHk, 0)
+							         FROM dbo.INVO_LST il
+							         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+							         JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID
+							         WHERE il.""NUMBER"" = @numb 
+							           AND il.TAG = @effective_tgg 
+							           AND ped.PEPID = @CurrentPEPID;
+							     END
+							     ELSE 
+							     BEGIN
+							         IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg)
+							         BEGIN
+							              UPDATE dbo.INVO_LST 
+							              SET MABL = 0, MABL_K = 0, IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0 
+							              WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+							         END
+							     END
+							 
+							     -- 5. اعمال تخفیفات و محاسبه ارزش افزوده
+							     IF @CurrentPEID IS NOT NULL 
+							     BEGIN
+							         SELECT 
+							             @General_TF1 = COALESCE(TF1, 0), 
+							             @General_TF2 = COALESCE(TF2, 0), 
+							             @PETID = PETID
+							         FROM dbo.PRICE_ELAMIETF_DTL 
+							         WHERE PEID = @CurrentPEID
+							           AND CUSTCODE = @CUST_KIND_In 
+							           AND PPID = @MODAT_PPID_In;
+							 
+							         IF @PETID IS NOT NULL 
+							         BEGIN
+							             WITH InvoiceLineCalculations AS (
+							                 SELECT 
+							                     il.id AS invo_lst_id,
+							                     il.CODE AS ProductCode,
+							                     il.MABL_K AS Current_MABL_K,
+							                     sd.CMBAA,
+							                     sd.vra AS VatRate 
+							                 FROM dbo.INVO_LST il
+							                 JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+							                 WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0
+							             ),
+							             AppliedDiscounts AS (
+							                 SELECT
+							                     ild.invo_lst_id,
+							                     ild.Current_MABL_K,
+							                     ild.CMBAA,
+							                     ild.VatRate,
+							                     COALESCE(exc.EXCEPTION_TF1, @General_TF1) AS TF1_Final,
+							                     COALESCE(exc.EXCEPTION_TF2, @General_TF2) AS TF2_Final
+							                 FROM InvoiceLineCalculations ild
+							                 LEFT JOIN dbo.PRICE_ELAMIETF_EXCEPTION exc ON exc.PETID = @PETID AND exc.CODE = ild.ProductCode
+							             ),
+							             FinalLineValues AS (
+							                 SELECT
+							                     ad.invo_lst_id,
+							                     ad.TF1_Final,
+							                     ad.TF2_Final,
+							                     (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
+							                      ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
+							                     AS TotalLineDiscount,
+							                     CASE 
+							                         WHEN @TICMBAA_In = 1 AND ad.CMBAA = 1 AND ad.VatRate IS NOT NULL THEN 
+							                             FLOOR((ad.Current_MABL_K - 
+							                                    (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
+							                                     ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
+							                                   ) * ad.VatRate / 100.0)
+							                         ELSE 0 
+							                     END AS LineVAT
+							                 FROM AppliedDiscounts ad
+							             )
+							             UPDATE il
+							             SET 
+							                 il.N_KOL = flv.TF1_Final,
+							                 il.TKHN = flv.TF2_Final,
+							                 il.N_MOIN = flv.TotalLineDiscount,
+							                 il.IMBAA = CASE 
+							                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+							                         FLOOR((il.MABL_K - flv.TotalLineDiscount) * sd.vra / 100.0)
+							                     ELSE 0 
+							                 END
+							             FROM dbo.INVO_LST il
+							             JOIN FinalLineValues flv ON il.id = flv.invo_lst_id
+							             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+							             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
+							         END
+							         ELSE 
+							         BEGIN
+							             UPDATE il
+							             SET 
+							                 il.N_KOL = 0,
+							                 il.TKHN = 0,
+							                 il.N_MOIN = 0,
+							                 il.IMBAA = CASE 
+							                     WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+							                         FLOOR(il.MABL_K * sd.vra / 100.0)
+							                     ELSE 0 
+							                 END
+							             FROM dbo.INVO_LST il
+							             JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+							             WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
+							         END
+							     END
+							     ELSE 
+							     BEGIN
+							         UPDATE il
+							         SET 
+							             il.N_KOL = 0,
+							             il.TKHN = 0,
+							             il.N_MOIN = 0,
+							             il.IMBAA = CASE 
+							                 WHEN @TICMBAA_In = 1 AND sd.CMBAA = 1 AND sd.vra IS NOT NULL THEN 
+							                     FLOOR(il.MABL_K * sd.vra / 100.0)
+							                 ELSE 0 
+							             END
+							         FROM dbo.INVO_LST il
+							         JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+							         WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(il.JAY, 0) = 0;
+							     END
+							 
+							     SELECT 
+							         @stf_total_discount = COALESCE(SUM(N_MOIN), 0), 
+							         @MLBAA_total_vat = COALESCE(SUM(IMBAA), 0)
+							     FROM dbo.INVO_LST 
+							     WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+							 
+							     -- 6. به‌روزرسانی نهایی سرفصل فاکتور HEAD_LST
+							     UPDATE dbo.HEAD_LST 
+							     SET 
+							         MBAA = @MLBAA_total_vat, 
+							         TAKHFIF = @stf_total_discount
+							     WHERE ""NUMBER"" = @numb AND TAG = @tgg;
+							 
+							     IF @tgg = 13
+							     BEGIN
+							         UPDATE dbo.HEAD_LST 
+							         SET 
+							             MBAA = @MLBAA_total_vat, 
+							             TAKHFIF = @stf_total_discount
+							         WHERE ""NUMBER"" = @numb AND TAG = 2;
+							     END
+							 
+							     IF @@ERROR <> 0
+							     BEGIN
+							         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+							         SET @ErrorMessage = N'خطایی در حین عملیات به‌روزرسانی رخ داد و تغییرات بازگردانده شد. کد خطای SQL: ' + CAST(@@ERROR AS NVARCHAR(10));
+							         RAISERROR(@ErrorMessage, 16, 1);
+							         RETURN -99; 
+							     END
+							 
+							     IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
+							     RETURN 0; -- موفقیت
+							 
+							 END
+							 "); } catch { }
 
                     #region SP_JAYZEH
                     try
@@ -8319,7 +8320,65 @@ GO
 
 
         }
+        /// <summary>
+        /// رفع «ازدحام درج روی آخرین صفحه» (Last-Page Insert Contention).
+        ///
+        /// چرا لازم است: جدول‌های پرترافیک درج مثل DEED_DTL و INVO_LST روی یک ستون IDENTITY
+        /// صعودی خوشه‌بندی شده‌اند، پس هر درج تازه روی «همان» آخرین صفحه می‌نشیند. وقتی
+        /// بازسازی AUTO_BAZ بخش‌های C1..C11 را هم‌زمان اجرا می‌کند، همه‌ی Threadها برای همان
+        /// یک صفحه latch انحصاری می‌خواهند و پشت هم صف می‌کشند. اندازه‌گیری روی YAZDSEPAR1405:
+        /// PAGELATCH_EX با ۲٫۵ میلیون انتظار و ۸۵ میلیون میلی‌ثانیه، در حالی که قفل ردیف
+        /// (LCK_M_X) فقط ۵٫۶ هزار میلی‌ثانیه بود — یعنی گلوگاه latch صفحه است نه قفل تراکنش.
+        ///
+        /// OPTIMIZE_FOR_SEQUENTIAL_KEY (از SQL Server 2019) همین صف را منظم می‌کند و
+        /// convoy را می‌شکند. عملیات metadata-only است: نه Rebuild لازم دارد، نه قفل طولانی.
+        ///
+        /// دامنه: فقط ایندکس‌هایی که ستون کلید «اولشان» IDENTITY است — چون تنها همین‌ها
+        /// الگوی درج صعودی دارند. ایندکس روی HES یا NUMBER از این گزینه سودی نمی‌برد.
+        ///
+        /// idempotent است: هر ایندکسی که از قبل ON باشد در فهرست نمی‌آید.
+        /// </summary>
+        private static void SequentialKeyContentionScript(SqlConnection db)
+        {
+            try
+            {
+                // بهینه‌سازی کلید صعودی (OPTIMIZE_FOR_SEQUENTIAL_KEY) برای SQL Server 2019+
+                db.Execute(@"
+IF TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT) >= 15
+BEGIN
+    DECLARE @sql NVARCHAR(MAX) = N'';
+
+    SELECT @sql = @sql + N'ALTER INDEX ' + QUOTENAME(i.name)
+                       + N' ON ' + QUOTENAME(SCHEMA_NAME(t.schema_id)) + N'.' + QUOTENAME(t.name)
+                       + N' SET (OPTIMIZE_FOR_SEQUENTIAL_KEY = ON);' + CHAR(10)
+    FROM sys.indexes AS i
+    INNER JOIN sys.tables AS t
+        ON t.object_id = i.object_id
+    INNER JOIN sys.index_columns AS ic
+        ON ic.object_id = i.object_id
+       AND ic.index_id  = i.index_id
+       AND ic.key_ordinal = 1
+    INNER JOIN sys.columns AS c
+        ON c.object_id = i.object_id
+       AND c.column_id = ic.column_id
+    WHERE i.index_id > 0
+      AND i.is_hypothetical = 0
+      AND i.is_disabled = 0
+      AND i.optimize_for_sequential_key = 0
+      AND c.is_identity = 1
+      AND t.name IN (N'DEED_DTL', N'INVO_LST', N'PGET_LST', N'PGET_HED', N'DEED_HED', N'HEAD_LST');
+
+    IF LEN(@sql) > 0
+    BEGIN
+        EXEC sys.sp_executesql @sql;
+    END
+END");
+            }
+            catch { }
+        }
+
         private static void ExecuteBatchesTransactional(SqlConnection db, string script)
+
         {
             using var transaction = db.BeginTransaction();
             try

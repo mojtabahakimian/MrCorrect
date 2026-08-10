@@ -130,22 +130,32 @@ namespace Prg_Proccessy.CNNMANAGER
         {
             if (OnceStartCloseQuery)
             {
-                using (var db = new SqlConnection(SQLCNN))
+                const int maxRetries = 15;
+                for (int attempt = 0; ; attempt++)
                 {
-                    try
+                    using (var db = new SqlConnection(SQLCNN))
                     {
-                        db.Open();
-                        var result = db.Execute(sql, parameters, commandTimeout: 3600);
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogError(ex, sql);
-                        throw; // Re-throw the exception to handle it further up the call stack
-                    }
-                    finally
-                    {
-                        db?.Close(); db?.Dispose();
+                        try
+                        {
+                            db.Open();
+                            var result = db.Execute(sql, parameters, commandTimeout: 3600);
+                            return result;
+                        }
+                        catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                        {
+                            var baseMs = 100 * (1 << Math.Min(attempt, 5));
+                            Thread.Sleep(baseMs + Random.Shared.Next(baseMs));
+                            continue;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogError(ex, sql);
+                            throw; // Re-throw the exception to handle it further up the call stack
+                        }
+                        finally
+                        {
+                            db?.Close(); db?.Dispose();
+                        }
                     }
                 }
             }

@@ -91,6 +91,32 @@ namespace AUTO_BAZ.Functions
         // برای تعیین معین حساب فازهای تولید. «خواندن خالص» است و در طول یک بازسازی تغییر نمی‌کند.
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, int> _kalaGroupCache = new();
 
+        // ───────────────────────────────────────────────────────────────────────────────
+        // فهرست‌های خالیِ مشترک برای وقتی پیش‌خوانی کلیدی ندارد. عمداً یک نمونه‌ی مشترک است
+        // چون هیچ‌کدام از مسیرها به این فهرست‌ها نمی‌نویسند (فقط شمارش و خواندن می‌شوند).
+        // ───────────────────────────────────────────────────────────────────────────────
+        private static readonly List<QRE16> EmptyQre16 = new();
+        private static readonly List<QRE17> EmptyQre17 = new();
+        private static readonly List<QRE18> EmptyQre18 = new();
+        private static readonly List<VISITOR_DTL_1> EmptyVisitorDtl = new();
+
+        /// <summary>
+        /// (ویزیتور، کالا)هایی که پیام «فاقد الگوی پورسانت» برایشان نوشته شده.
+        /// قبلاً همان پیام برای هر فاکتور تکرار می‌شد؛ در یک اجرا ۴۵۲ بار.
+        /// </summary>
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(int Porid, string Code), byte> _missingPorsantPatternLogged = new();
+
+        /// <summary>
+        /// یکسان‌سازی کلید متنی با معنای مقایسه در SQL Server.
+        ///
+        /// چرا لازم است: کوئری قبلی مقایسه را به SQL می‌سپرد و collation دیتابیس
+        /// (Arabic_CI_AS) به بزرگی/کوچکی حرف حساس نیست و فاصله‌های انتهایی را هم نادیده
+        /// می‌گیرد. مقایسه‌ی پیش‌فرض Dictionary در دات‌نت ordinal است و هر دو را مهم می‌شمارد،
+        /// پس بدون این یکسان‌سازی می‌شد جایی که SQL «برابر» می‌دید، کش «نابرابر» ببیند.
+        /// </summary>
+        private static string SqlKey(string? value)
+            => (value ?? string.Empty).TrimEnd(' ').ToUpperInvariant();
+
         /// <summary>
         /// کش فقط در جریان «بازسازی دسته‌ای» فعال می‌شود.
         /// پیش‌فرض خاموش است چون فرم‌های برنامه‌ی اصلی هم همین توابع را صدا می‌زنند و
@@ -114,6 +140,7 @@ namespace AUTO_BAZ.Functions
             _kalaNameCache.Clear();
             _bankNameCache.Clear();
             _kalaGroupCache.Clear();
+            _missingPorsantPatternLogged.Clear();
         }
 
         /// <summary>
@@ -125,6 +152,20 @@ namespace AUTO_BAZ.Functions
             {
                 _existingAccounts[(kol, moin, taf)] = true;
             }
+        }
+
+        /// <summary>
+        /// حذف یک حساب از کش، تا فراخوانی بعدی <see cref="ISHESAB"/> تازه از دیتابیس بخواند.
+        ///
+        /// چرا لازم است: <see cref="ISHESAB"/> پاسخ منفی را هم کش می‌کند. اگر <see cref="CREATHES"/>
+        /// شکست بخورد، «نبودِ» حساب دیگر یک واقعیت قطعی نیست — ممکن است حساب واقعاً وجود داشته
+        /// باشد ولی با نامی دیگر (خطای IX_TDETA_HES_NAME)، یا کاربر دیگری همان لحظه ساخته باشد.
+        /// اگر آن پاسخ منفیِ کهنه در کش بماند، ردیف‌هایی که وجود حساب را شرط درج می‌دانند
+        /// (مثل فازهای تولید در سند خروج مواد) تا پایان بازسازی «حذف» می‌شوند و سند ناتراز می‌ماند.
+        /// </summary>
+        private static void ForgetAccount(double kol, double moin, double taf)
+        {
+            _existingAccounts.TryRemove((kol, moin, taf), out _);
         }
         #endregion
 
@@ -151,6 +192,35 @@ namespace AUTO_BAZ.Functions
             public int? ANBAR { get; set; }
             public string NAME { get; set; }
             public double? AVRAGE { get; set; }
+        }
+
+        /// <summary>
+        /// همان QRE18 (کد کالا و مبلغ خالص ردیف) به‌علاوه‌ی شماره فاکتور، برای پیش‌خوانی یکجا.
+        /// </summary>
+        public class InvoicePorsantLineRow
+        {
+            public double? NUMBER { get; set; }
+            public string code { get; set; }
+            public double? mablk { get; set; }
+        }
+
+        /// <summary>یک ردیف الگوی پورسانت کالا برای هر ویزیتور.</summary>
+        public class PorsantKalaRow
+        {
+            public int PORID { get; set; }
+            public string CODE { get; set; }
+            public double? PORSANT { get; set; }
+        }
+
+        /// <summary>
+        /// مقدار پورسانت یک (ویزیتور، کالا). Duplicate یعنی بیش از یک ردیف برای همان کلید
+        /// وجود دارد؛ کد اصلی در آن حالت مقدار را نمی‌پذیرفت (شرط rst2.Count == 1)،
+        /// پس اینجا هم باید مثل «الگو ندارد» رفتار شود.
+        /// </summary>
+        public class PorsantKalaEntry
+        {
+            public double? Porsant { get; set; }
+            public bool Duplicate { get; set; }
         }
 
         public class QUERY_MODEL6
@@ -766,6 +836,186 @@ namespace AUTO_BAZ.Functions
             }
         }
 
+        // ───────────────────────────────────────────────────────────────────────────────
+        // یادداشت اندازه‌گیری: «سهمیه‌ی سراسری همزمانی» آزمایش شد و رد شد.
+        //
+        // فرضیه این بود که چون بخش‌های C1..C11 هم‌زمان اجرا می‌شوند و هر کدام سقف
+        // موازی‌سازی خودش را جدا حساب می‌کند، مجموع درخواست‌ها (تا ۱۷۶ روی سروری با
+        // MAXDOP = 8) خودش عامل کندی است و محدود کردنش کار را سریع‌تر می‌کند.
+        //
+        // سه اجرای کامل روی YAZDSEPAR1405 (۵۷۱۲ فاکتور فروش و بقیه‌ی بخش‌ها) خلافش را
+        // نشان داد — سهمیه هرچه تنگ‌تر، کل کار کندتر:
+        //     بدون سهمیه          → ۴۷۰ ثانیه
+        //     سهمیه ۹۶            → ۷۷۰ ثانیه
+        //     سهمیه ۳۲            → ۹۲۱ ثانیه
+        //
+        // دلیلش این است که گلوگاه واقعی I/O دیسک است، نه CPU و نه latch: در همان اجراها
+        // PAGEIOLATCH_EX بین ۴٫۵ تا ۵٫۸ میلیون میلی‌ثانیه بود و میانگین تأخیر نوشتن فایل
+        // داده روی این ماشین حدود ۷۸۶ میلی‌ثانیه (دیسک مکانیکی). وقتی گلوگاه I/O است،
+        // درخواست‌های همزمانِ بیشتر عمق صف دیسک را پر می‌کنند و توان کل را بالا می‌برند؛
+        // محدود کردنشان فقط دیسک را بی‌کار می‌گذارد.
+        //
+        // پس این کد عمداً سقف موازی‌سازی سراسری ندارد. اگر روزی روی سروری با دیسک سریع
+        // (NVMe) رفتار عوض شد، اندازه‌گیری باید از نو انجام شود — نه بر اساس این فرضیه.
+        // ───────────────────────────────────────────────────────────────────────────────
+
+        // ───────────────────────────────────────────────────────────────────────────────
+        // بافر دستورهای SQL یک واحد کار (مثلاً یک فاکتور).
+        //
+        // مشکلی که حل می‌کند: CL_CCNNMANAGER.DoExecuteSQL برای «هر» فراخوانی یک Connection
+        // تازه می‌گیرد و یک رفت‌وبرگشت جدا به سرور می‌زند. بدنه‌ی حلقه‌ی سند فروش حدود ۴۰ نقطه‌ی
+        // چنین فراخوانی دارد، پس برای ۵۷۱۲ فاکتور ده‌ها هزار رفت‌وبرگشت می‌شد. با بافر کردن،
+        // همه‌ی دستورهای یک فاکتور در «یک» رفت‌وبرگشت می‌روند — همان الگویی که در سند خروج
+        // مواد (SANADKHORUGMAVAD) و سند خروج سایر از قبل جواب داده است.
+        //
+        // چرا نامش DoExecuteSQL است: تا در بدنه‌ی حلقه فقط با تعریف یک متغیر محلیِ همنام
+        // (`var dbms = new SqlStatementBatch();`) همه‌ی آن ۴۰ نقطه بدون تغییر یک حرف از کد،
+        // به بافر هدایت شوند. کمترین تغییر یعنی کمترین ریسک در حساس‌ترین تابع سیستم.
+        //
+        // معنای تراکنش: هر Flush یک تراکنش است. دلیلش این است که DoExecuteSQL روی خطای
+        // بن‌بست (۱۲۰۵) خودش تلاش مجدد می‌کند؛ اگر دسته تراکنشی نبود، تلاش مجدد می‌توانست
+        // ردیف‌هایی که بار اول درج شده‌اند را دوباره درج کند.
+        //
+        // حفظ رفتار قبلی روی خطا: چند نقطه در کد اصلی خطای درج یک ردیف را با try/catch
+        // نادیده می‌گیرند و بقیه‌ی سند را ادامه می‌دهند. آن try/catchها دور «افزودن به بافر»
+        // قرار می‌گیرند، نه دور اجرای واقعی. پس اگر دسته خطا بدهد، همان دستورها یکی‌یکی و
+        // مستقیم اجرا می‌شوند و خطای هر کدام جدا لاگ و رد می‌شود — دقیقاً همان نتیجه‌ی قبلی.
+        // این مسیر فقط در حالت خطا اجرا می‌شود و هزینه‌ای به مسیر عادی اضافه نمی‌کند.
+        // ───────────────────────────────────────────────────────────────────────────────
+        public sealed class SqlStatementBatch
+        {
+            // سقف حجم متن هر رفت‌وبرگشت. با احتیاط انتخاب شده تا از محدودیت‌های اندازه‌ی
+            // batch و مصرف حافظه‌ی سرور فاصله بماند.
+            private const int MaxChunkChars = 120_000;
+
+            private readonly List<string> _statements = new();
+
+            // برای دستورهایی که کد اصلی خطایشان را با try/catch نادیده می‌گرفت. کلید همان
+            // اندیس دستور در _statements است و مقدار، متنی که باید در لاگ بیاید.
+            private readonly Dictionary<int, string> _tolerantLabels = new();
+
+            public int Count => _statements.Count;
+
+            /// <summary>
+            /// افزودن یک دستور به بافر. امضای این متد عمداً با
+            /// <see cref="CL_CCNNMANAGER.DoExecuteSQL"/> یکی است.
+            /// </summary>
+            public int? DoExecuteSQL(string sql, object? parameters = null)
+            {
+                if (parameters != null)
+                {
+                    // بافر پارامتر را پشتیبانی نمی‌کند (پارامترهای چند دستور با هم تعارض
+                    // پیدا می‌کنند). چنین فراخوانی باید مستقیم و بی‌بافر اجرا شود.
+                    throw new NotSupportedException(
+                        "SqlStatementBatch پارامتر نمی‌پذیرد؛ برای دستور پارامتری مستقیماً CL_CCNNMANAGER را صدا بزنید.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(sql))
+                {
+                    _statements.Add(sql.Trim().TrimEnd(';'));
+                }
+
+                return null;
+            }
+
+            /// <summary>
+            /// افزودن دستوری که «اجازه دارد خطا بدهد» — جانشین try/catchهای دور تک‌درجِ
+            /// کد اصلی. اگر در اجرای مستقیم خطا بدهد، فقط لاگ می‌شود و بقیه ادامه می‌دهند.
+            /// </summary>
+            public void AddTolerant(string sql, string errorLabel)
+            {
+                if (string.IsNullOrWhiteSpace(sql)) { return; }
+
+                _tolerantLabels[_statements.Count] = errorLabel;
+                _statements.Add(sql.Trim().TrimEnd(';'));
+            }
+
+            /// <summary>
+            /// فرستادن بافر به سرور و خالی کردن آن. اگر بافر خالی باشد هیچ رفت‌وبرگشتی نمی‌شود.
+            /// </summary>
+            public void Flush()
+            {
+                if (_statements.Count == 0) { return; }
+
+                // شماره‌ی اولین دستوری که هنوز Commit نشده. اگر دسته چند تکه شود و تکه‌ی
+                // دوم خطا بدهد، تکه‌ی اول از قبل Commit شده است و «نباید» دوباره اجرا شود
+                // (درج‌ها Idempotent نیستند و تکراری می‌شدند).
+                var committedUpTo = 0;
+
+                try
+                {
+                    var index = 0;
+                    while (index < _statements.Count)
+                    {
+                        var sb = new StringBuilder();
+
+                        sb.AppendLine("SET XACT_ABORT ON;");
+                        sb.AppendLine("BEGIN TRANSACTION;");
+
+                        var chunkStart = index;
+                        while (index < _statements.Count)
+                        {
+                            var statement = _statements[index];
+
+                            // حداقل یک دستور در هر دسته می‌رود، حتی اگر خودش از سقف بزرگ‌تر باشد.
+                            if (index > chunkStart && sb.Length + statement.Length > MaxChunkChars)
+                            {
+                                break;
+                            }
+
+                            sb.AppendLine(statement + ";");
+                            index++;
+                        }
+
+                        sb.AppendLine("COMMIT TRANSACTION;");
+
+                        dbms.DoExecuteSQL(sb.ToString());
+
+                        // این تکه با موفقیت Commit شد.
+                        committedUpTo = index;
+                    }
+                }
+                catch (Exception batchEx)
+                {
+                    // تکه‌ی جاری کامل Rollback شد (XACT_ABORT ON). فقط دستورهای Commit نشده
+                    // را یکی‌یکی اجرا می‌کنیم تا رفتار مثل قبل شود: دستورهایی که کد اصلی
+                    // خطایشان را نادیده می‌گرفت رد می‌شوند و بقیه اجرا می‌شوند.
+                    LogWriter.WriteLog(
+                        $"[SqlStatementBatch] دسته خطا داد؛ اجرای تک‌تکِ {_statements.Count - committedUpTo} " +
+                        $"دستور باقی‌مانده از {_statements.Count}: {batchEx.Message}");
+
+                    RunIndividually(committedUpTo);
+                }
+                finally
+                {
+                    _statements.Clear();
+                    _tolerantLabels.Clear();
+                }
+            }
+
+            private void RunIndividually(int startIndex)
+            {
+                for (int i = startIndex; i < _statements.Count; i++)
+                {
+                    try
+                    {
+                        dbms.DoExecuteSQL(_statements[i]);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_tolerantLabels.TryGetValue(i, out var label))
+                        {
+                            // کد اصلی این خطا را نادیده می‌گرفت و ادامه می‌داد.
+                            LogWriter.WriteLog($"{label}: {ex.Message} | Stack: {ex.StackTrace} |");
+                            continue;
+                        }
+
+                        throw;
+                    }
+                }
+            }
+        }
+
         public static ParallelOptions BuildDbAwareParallelOptions(int itemCount, bool useSmartThrottling = false)
         {
             useSmartThrottling = useSmartThrottling || UseSmartThrottlingByDefault;
@@ -855,6 +1105,10 @@ namespace AUTO_BAZ.Functions
         /// اجرای یک عملیات SQL با تلاش مجدد در صورت Deadlock (خطای 1205).
         /// وقتی حلقه واقعاً موازی اجرا شود احتمال Deadlock بین Thread ها بالا می‌رود،
         /// و <see cref="CL_ConcurrencyManager.ExecuteSqlCommand"/> خودش Retry ندارد.
+        ///
+        /// چرا فاصله‌ها تصادفی‌اند: وقتی دو تراکنش هم‌زمان قربانی شوند و هر دو با فاصله‌ی
+        /// یکسان دوباره تلاش کنند، دقیقاً همان بن‌بست تکرار می‌شود. با jitter، ترتیبشان
+        /// می‌شکند و یکی جلو می‌افتد.
         /// </summary>
         public static void ExecuteWithDeadlockRetry(Action action, int maxRetries = 4)
         {
@@ -867,9 +1121,18 @@ namespace AUTO_BAZ.Functions
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
-                    Thread.Sleep(50 * (attempt + 1));
+                    Thread.Sleep(DeadlockBackoffMs(attempt));
                 }
             }
+        }
+
+        /// <summary>
+        /// فاصله‌ی نمایی + تصادفی برای تلاش مجدد بن‌بست. بازه: ~۱۰۰ms تا ~۳٫۲s.
+        /// </summary>
+        private static int DeadlockBackoffMs(int attempt)
+        {
+            var baseMs = 100 * (1 << Math.Min(attempt, 5));
+            return baseMs + Random.Shared.Next(baseMs);
         }
 
         /// <summary>
@@ -1658,6 +1921,14 @@ namespace AUTO_BAZ.Functions
             var invoiceLinesWithAnbar = new Dictionary<double, List<QRE14>>();
             var invoiceCheques = new Dictionary<double, List<PAY_GETD>>();
 
+            // تخفیف الگوی مشتری، کلید: (شماره فاکتور، نوع مشتری) — چون شرط CUST_CO کوئری
+            // اصلی به نوع مشتریِ همان فاکتور بستگی داشت.
+            var invoiceTakhPers = new Dictionary<(double Number, double CustKind), List<QRE16>>();
+            var invoiceLineDiscounts = new Dictionary<double, List<QRE17>>();
+            var invoiceVisitors = new Dictionary<double, List<VISITOR_DTL_1>>();
+            var invoicePorsantLines = new Dictionary<double, List<QRE18>>();
+            var porsantKala = new Dictionary<(int Porid, string Code), PorsantKalaEntry>();
+
             if (invoiceNumbers.Count > 0)
             {
                 var minNum = SqlNum(invoiceNumbers.Min());
@@ -1772,11 +2043,122 @@ namespace AUTO_BAZ.Functions
                     }
                 }
 
+                // ───────────────────────────────────────────────────────────────────────────
+                // پیش‌خوانی تخفیف‌ها، ویزیتورها و الگوی پورسانت.
+                //
+                // قبلاً داخل حلقه‌ی موازی، برای «هر» فاکتور چهار کوئری جدا زده می‌شد
+                // (rst6، rst7، PRST، rst1) و یکی از آن‌ها (rst2) داخل حلقه‌ی «هر قلم کالا»
+                // بود. با ۵۷۱۲ فاکتور یعنی بیش از ۲۳ هزار رفت‌وبرگشت، و چون DoExecuteSQL/
+                // DoGetDataSQL برای هر فراخوانی Connection تازه می‌گیرد و متن SQL هم با
+                // درج مستقیم مقدار ساخته می‌شود، هر کدام یک Compile تازه هم می‌خواست.
+                //
+                // چرا امن است: هر چهار کوئری خواندنِ خالص از جدول‌هایی هستند که بازسازی
+                // به آن‌ها نمی‌نویسد (INVO_LST، TAKHPERS، HEAD_LST، VISITORS_PORSANT_KALA).
+                //
+                // تنها استثنا VISITOR_DTL است که همین بخش به آن می‌نویسد — ولی هر Thread
+                // فقط ردیف‌های «فاکتور خودش» را عوض می‌کند و هیچ Thread دیگری آن ردیف‌ها را
+                // نمی‌خواند. پس پیش‌خواندن مقدار اولیه دقیقاً همان چیزی است که کد قبلی هم
+                // در ابتدای کار همان فاکتور می‌خواند.
+                // ───────────────────────────────────────────────────────────────────────────
+
+                // rst6: تخفیف بر اساس الگوی تخفیف مشتری. شرط CUST_CO به نوع مشتریِ همان
+                // فاکتور بستگی دارد، پس کلید شامل CUST_KIND هم می‌شود.
+                foreach (var row in dbms.DoGetDataSQL<QRE16>(
+                    "SELECT L.NUMBER, L.TAG, T.CUST_CO, T.TAKH_COD, T.TAFPER, L.MABL_K " +
+                    "FROM dbo.INVO_LST AS L INNER JOIN dbo.TAKHPERS AS T ON L.CODE = T.TAKH_COD " +
+                    $"WHERE L.TAG = 2 AND L.NUMBER BETWEEN {minNum} AND {maxNum}"))
+                {
+                    if (row?.NUMBER == null || row.CUST_CO == null) { continue; }
+                    if (!wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
+
+                    var key = (row.NUMBER.Value, (double)row.CUST_CO.Value);
+                    if (!invoiceTakhPers.TryGetValue(key, out var takhList))
+                    {
+                        takhList = new List<QRE16>();
+                        invoiceTakhPers[key] = takhList;
+                    }
+                    takhList.Add(row);
+                }
+
+                // rst7: تخفیف ردیفی. همان JOIN فاکتور با سرفاکتور روی (NUMBER, TAG).
+                foreach (var row in dbms.DoGetDataSQL<QRE17>(
+                    "SELECT H.NUMBER, H.TAG, L.MABL_K, L.N_MOIN, L.CODE, H.CUST_KIND " +
+                    "FROM dbo.INVO_LST AS L INNER JOIN dbo.HEAD_LST AS H " +
+                    "ON L.NUMBER = H.NUMBER AND L.TAG = H.TAG " +
+                    $"WHERE H.TAG = 2 AND H.NUMBER BETWEEN {minNum} AND {maxNum}"))
+                {
+                    if (row?.NUMBER == null || !wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
+
+                    if (!invoiceLineDiscounts.TryGetValue(row.NUMBER.Value, out var discList))
+                    {
+                        discList = new List<QRE17>();
+                        invoiceLineDiscounts[row.NUMBER.Value] = discList;
+                    }
+                    discList.Add(row);
+                }
+
+                // PRST: سهم ویزیتورهای هر فاکتور.
+                foreach (var row in dbms.DoGetDataSQL<VISITOR_DTL_1>(
+                    "SELECT NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID, CRT, UID " +
+                    $"FROM dbo.VISITOR_DTL WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum}"))
+                {
+                    if (row?.NUMBER == null || !wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
+
+                    if (!invoiceVisitors.TryGetValue(row.NUMBER.Value, out var visList))
+                    {
+                        visList = new List<VISITOR_DTL_1>();
+                        invoiceVisitors[row.NUMBER.Value] = visList;
+                    }
+                    visList.Add(row);
+                }
+
+                // rst1 و rst2 فقط وقتی لازم می‌شوند که ویزیتوری PORID داشته باشد. اگر هیچ
+                // ویزیتوری الگوی پورسانت نداشته باشد، هیچ‌کدام از این دو خوانده نمی‌شود.
+                if (invoiceVisitors.Any(kv => kv.Value.Any(v => v.PORID != null && v.PORID.Value != 0)))
+                {
+                    foreach (var row in dbms.DoGetDataSQL<InvoicePorsantLineRow>(
+                        "SELECT NUMBER, CODE AS code, MABL_K - N_MOIN AS mablk " +
+                        $"FROM dbo.INVO_LST WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum}"))
+                    {
+                        if (row?.NUMBER == null || !wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
+
+                        if (!invoicePorsantLines.TryGetValue(row.NUMBER.Value, out var porsList))
+                        {
+                            porsList = new List<QRE18>();
+                            invoicePorsantLines[row.NUMBER.Value] = porsList;
+                        }
+                        porsList.Add(new QRE18 { code = row.code, mablk = row.mablk });
+                    }
+
+                    // کل جدول الگوی پورسانت کوچک است (روی YAZDSEPAR1405: ۱۱۹۷ ردیف) و
+                    // (PORID, code) در آن یکتاست. پس یک بار کامل خوانده می‌شود.
+                    foreach (var row in dbms.DoGetDataSQL<PorsantKalaRow>(
+                        "SELECT PORID, CODE, PORSANT FROM dbo.VISITORS_PORSANT_KALA"))
+                    {
+                        if (row?.CODE == null) { continue; }
+
+                        var key = (row.PORID, SqlKey(row.CODE));
+                        if (porsantKala.TryGetValue(key, out var existing))
+                        {
+                            // کد قبلی فقط وقتی مقدار را می‌پذیرفت که «دقیقاً یک» ردیف برگردد.
+                            // پس تکراری یعنی «الگو ندارد» و باید مثل نبودن رفتار کند.
+                            existing.Duplicate = true;
+                        }
+                        else
+                        {
+                            porsantKala[key] = new PorsantKalaEntry { Porsant = row.PORSANT };
+                        }
+                    }
+                }
+
                 // اگر روزی حجم پیش‌خوانی غیرعادی شد، در لاگ دیده می‌شود.
                 LogWriter.WriteLog(
                     $"سند فروش - پیش‌خوانی: {invoiceNumbers.Count} فاکتور | " +
                     $"{invoiceLines.Sum(kv => kv.Value.Count)} ردیف کالا | " +
-                    $"{invoiceCheques.Sum(kv => kv.Value.Count)} چک");
+                    $"{invoiceCheques.Sum(kv => kv.Value.Count)} چک | " +
+                    $"{invoiceLineDiscounts.Sum(kv => kv.Value.Count)} ردیف تخفیف | " +
+                    $"{invoiceVisitors.Sum(kv => kv.Value.Count)} سهم ویزیتور | " +
+                    $"{porsantKala.Count} الگوی پورسانت");
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
@@ -1887,7 +2269,7 @@ namespace AUTO_BAZ.Functions
                     for (int offset = 0; offset < frHeadUpdates.Count; offset += frHeadUpdateChunkSize)
                     {
                         var batch = new StringBuilder();
-                        batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                        batch.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                         foreach (var stmt in frHeadUpdates.Skip(offset).Take(frHeadUpdateChunkSize)) { batch.Append(stmt); }
                         batch.Append("COMMIT TRANSACTION;");
                         dbms.DoExecuteSQL(batch.ToString());
@@ -1960,6 +2342,37 @@ namespace AUTO_BAZ.Functions
                 {
                     observedThreads.TryAdd(Environment.CurrentManagedThreadId, 0);
 
+                    // ───────────────────────────────────────────────────────────────────
+                    // همه‌ی دستورهای این فاکتور در یک رفت‌وبرگشت می‌روند.
+                    //
+                    // این متغیر محلی، عمداً همنام فیلد سراسری `dbms` است و آن را در تمام
+                    // بدنه‌ی حلقه سایه می‌اندازد. پس حدود ۴۰ نقطه‌ی dbms.DoExecuteSQL پایین‌تر
+                    // بدون تغییر یک حرف، به بافر می‌روند و در پایان همین Iteration یکجا
+                    // فرستاده می‌شوند. کمترین تغییر در حساس‌ترین تابع سیستم.
+                    //
+                    // مهم: توابعی مثل CREATHES و ISHESAB و GETTAF3 که از داخل همین بدنه صدا
+                    // زده می‌شوند، خودشان به فیلد سراسری dbms دسترسی دارند و مستقیم و فوری
+                    // اجرا می‌شوند — همان‌طور که باید، چون حساب باید «پیش از» درج ردیفی که
+                    // به آن ارجاع می‌دهد وجود داشته باشد (FK_DEED_DTL_TDETA_HES).
+                    // ───────────────────────────────────────────────────────────────────
+                    var dbms = new SqlStatementBatch();
+
+                    try
+                    {
+                        ProcessInvoice(HFRST_EOF, dbms);
+                    }
+                    finally
+                    {
+                        dbms.Flush();
+                    }
+
+                    // گزارش پیشرفت در «پایان» کار هر فاکتور زده می‌شود، نه در ابتدای آن.
+                    // قبلاً در ابتدا بود و نوار پیشرفت زودتر از واقعیت جلو می‌رفت.
+                    progressReporter.ReportOne();
+                });
+
+                void ProcessInvoice(int HFRST_EOF, SqlStatementBatch dbms)
+                {
                     double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
                     string shart;
                     double MAVAD;
@@ -1991,7 +2404,7 @@ namespace AUTO_BAZ.Functions
                     if (!frRowUsable[HFRST_EOF])
                     {
                         // تاریخ نامعتبر بود؛ در مرحله‌ی صفر (پیش از حلقه) لاگ و رد شد.
-                        progressReporter.ReportOne();
+                        // گزارش پیشرفت در صداکننده (پس از Flush) زده می‌شود.
                         return;
                     }
 
@@ -2033,7 +2446,7 @@ namespace AUTO_BAZ.Functions
                             CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
                         }
 
-                        dbms.DoExecuteSQL($"INSERT INTO dbo.DEED_DTL(N_S,  HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES,SHARH, BED, NUMBER, TAG, RADIF ) VALUES( {max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{HFRST[HFRST_EOF].CUST_NO}',N'{Strings.Right("ف ف ش " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + HFRST[HFRST_EOF].MOLAH + Interaction.IIf(Strings.Mid(Baseknow.OPTIONSS, 55, 1) == "5", " - " + GETF_DEPART(HFRST[HFRST_EOF]?.DEPATMAN), " "), 255)}',{Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF))},{HFRST[HFRST_EOF].NUMBER},13,{HFRST[HFRST_EOF].NUMBER})");
+                        dbms.DoExecuteSQL($"INSERT INTO dbo.DEED_DTL(N_S,  HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES,SHARH, BED, NUMBER, TAG, RADIF ) VALUES( {max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{SqlText(HFRST[HFRST_EOF].CUST_NO)}',N'{SqlText(Strings.Right("ف ف ش " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + HFRST[HFRST_EOF].MOLAH + Interaction.IIf(Strings.Mid(Baseknow.OPTIONSS, 55, 1) == "5", " - " + GETF_DEPART(HFRST[HFRST_EOF]?.DEPATMAN), " "), 255))}',{Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF))},{HFRST[HFRST_EOF].NUMBER},13,{HFRST[HFRST_EOF].NUMBER})");
 
                     }
 
@@ -2059,7 +2472,7 @@ namespace AUTO_BAZ.Functions
                                     dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
                                             VALUES({max_ns},{Baseknow.FROSH},{1},{jst_sec[jst_sec_EOF].CODE}
                                         ,N'{Baseknow.FROSH + "-1-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
-                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,N'{SqlText(Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255))}'
                                         ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
                                         {HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
@@ -2077,7 +2490,7 @@ namespace AUTO_BAZ.Functions
                                     dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
                                             VALUES({max_ns},{Baseknow.FROSH},{2},{jst_sec[jst_sec_EOF].CODE}
                                         ,N'{Baseknow.FROSH + "-1-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
-                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,N'{SqlText(Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255))}'
                                         ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
                                         {HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
@@ -2094,7 +2507,7 @@ namespace AUTO_BAZ.Functions
                                     $@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
                                             VALUES({max_ns},{Baseknow.DARAM},{HFRST[HFRST_EOF].DEPATMAN},{jst_sec[jst_sec_EOF].CODE}
                                         ,N'{Baseknow.DARAM + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
-                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,N'{SqlText(Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255))}'
                                         ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
                                         {HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
@@ -2126,7 +2539,7 @@ namespace AUTO_BAZ.Functions
                                         ,{jst_sec[jst_sec_EOF].CODE}
                                         ,{jst_sec[jst_sec_EOF].CODE}
                                         ,N'{Baseknow.FROSH + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
-                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,N'{SqlText(Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255))}'
                                         ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)}
                                         ,{HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
@@ -2141,7 +2554,7 @@ namespace AUTO_BAZ.Functions
                                   $@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
                                             VALUES({max_ns},{Baseknow.DARAM},{HFRST[HFRST_EOF].DEPATMAN},{jst_sec[jst_sec_EOF].CODE}
                                         ,N'{Baseknow.DARAM + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + jst_sec[jst_sec_EOF].CODE}'
-                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,N'{SqlText(Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255))}'
                                         ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
                                         {HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
@@ -2218,7 +2631,7 @@ namespace AUTO_BAZ.Functions
                             {Baseknow.MOGODIA},
                             {jst_thr[jst_thr_EOF].ANBAR},
                             {jst_thr[jst_thr_EOF].CODE},
-                            N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " خروج " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255)}'
+                            N'{SqlText(Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " خروج " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255))}'
                             ,N'{Baseknow.MOGODIA + "-" + jst_thr[jst_thr_EOF].ANBAR + "-" + Convert.ToInt64(jst_thr[jst_thr_EOF].CODE)}',
                             {MAVAD + DAST + SAR},
                             {Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
@@ -2254,7 +2667,7 @@ namespace AUTO_BAZ.Functions
                                     TAG = 13;
 
                                     //SDRST.update();
-                                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T}, N'{hes}', N'{SHARH}', {BED}, {ARZD}, {NUMBER}, {TAG})");
+                                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SqlText(Convert.ToString(hes))}', N'{SqlText(Convert.ToString(SHARH))}', {BED}, {ARZD}, {NUMBER}, {TAG})");
                                 }
                                 CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(jst_thr[jst_thr_EOF].CODE), 9999999, "دستمزد " + jst_thr[jst_thr_EOF].NAME);
 
@@ -2273,7 +2686,7 @@ namespace AUTO_BAZ.Functions
                                     BED = DAST;
                                     NUMBER = HFRST[HFRST_EOF].NUMBER;
                                     TAG = 13;
-                                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T}, N'{hes}', N'{SHARH}', {BED}, {ARZD}, {NUMBER}, {TAG})");
+                                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SqlText(Convert.ToString(hes))}', N'{SqlText(Convert.ToString(SHARH))}', {BED}, {ARZD}, {NUMBER}, {TAG})");
                                     //SDRST.update();
 
                                 }
@@ -2293,7 +2706,7 @@ namespace AUTO_BAZ.Functions
                                     ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
                                     NUMBER = HFRST[HFRST_EOF].NUMBER;
                                     TAG = 13;
-                                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T},N'{hes}', N'{SHARH}', {BED}, {ARZD}, {NUMBER}, {TAG})");
+                                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T},N'{SqlText(Convert.ToString(hes))}', N'{SqlText(Convert.ToString(SHARH))}', {BED}, {ARZD}, {NUMBER}, {TAG})");
                                     //SDRST.update();
                                 }
                             }
@@ -2312,8 +2725,8 @@ namespace AUTO_BAZ.Functions
                                 ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
                                 NUMBER = HFRST[HFRST_EOF].NUMBER;
                                 TAG = 13;
-                                // string testtrace = $"INSERT INTO DEED_DTL( N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG) VALUES ( {N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SHARH}', N'{hes}', {BES}, {ARZD}, {NUMBER}, {TAG})";
-                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL( N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG) VALUES ( {N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SHARH}', N'{hes}', {BES}, {ARZD}, {NUMBER}, {TAG})");
+                                // string testtrace = $"INSERT INTO DEED_DTL( N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG) VALUES ( {N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SqlText(Convert.ToString(SHARH))}', N'{SqlText(Convert.ToString(hes))}', {BES}, {ARZD}, {NUMBER}, {TAG})";
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL( N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG) VALUES ( {N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SqlText(Convert.ToString(SHARH))}', N'{SqlText(Convert.ToString(hes))}', {BES}, {ARZD}, {NUMBER}, {TAG})");
                                 //SDRST.update();
 
 
@@ -2351,8 +2764,8 @@ namespace AUTO_BAZ.Functions
                                 TAG = 13;
                                 //SDRST.update();
 
-                                //  string testtrace2 = $"INSERT INTO DEED_DTL(N_S,HES_K ,HES_M ,HES_T ,hes   ,SHARH ,BED   ,ARZD  ,NUMBER,TAG) VALUES ({N_S},{HES_K} ,{HES_M} ,{HES_T} ,N'{hes}'   ,N'{SHARH}' ,{BED}   ,{ARZD}  ,{NUMBER},{TAG})";
-                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K ,HES_M ,HES_T ,hes   ,SHARH ,BED   ,ARZD  ,NUMBER,TAG) VALUES ({N_S},{HES_K} ,{HES_M} ,{HES_T} ,N'{hes}'   ,N'{SHARH}' ,{BED}   ,{ARZD}  ,{NUMBER},{TAG})");
+                                //  string testtrace2 = $"INSERT INTO DEED_DTL(N_S,HES_K ,HES_M ,HES_T ,hes   ,SHARH ,BED   ,ARZD  ,NUMBER,TAG) VALUES ({N_S},{HES_K} ,{HES_M} ,{HES_T} ,N'{SqlText(Convert.ToString(hes))}'   ,N'{SqlText(Convert.ToString(SHARH))}' ,{BED}   ,{ARZD}  ,{NUMBER},{TAG})";
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K ,HES_M ,HES_T ,hes   ,SHARH ,BED   ,ARZD  ,NUMBER,TAG) VALUES ({N_S},{HES_K} ,{HES_M} ,{HES_T} ,N'{SqlText(Convert.ToString(hes))}'   ,N'{SqlText(Convert.ToString(SHARH))}' ,{BED}   ,{ARZD}  ,{NUMBER},{TAG})");
 
                             }
                             //jst_thr.MoveNext();
@@ -2395,7 +2808,7 @@ namespace AUTO_BAZ.Functions
                             string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                             string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M} ,{HES_T} ,{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}'  ,N'{SHARH}' ,{BES}  ,{NUMBER},{ARZD} ,{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M} ,{HES_T} ,{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}'  ,N'{SqlText(Convert.ToString(SHARH))}' ,{BES}  ,{NUMBER},{ARZD} ,{TAG})");
 
                             //SDRST.update();
                         }
@@ -2434,7 +2847,7 @@ namespace AUTO_BAZ.Functions
                                 TAG = 13;
                                 //SDRST.update();
 
-                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, N_SERI, BANK, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{N_SERI},{BANK},{NUMBER},{ARZD},{TAG})");
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, N_SERI, BANK, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BED},{N_SERI},{BANK},{NUMBER},{ARZD},{TAG})");
 
 
 
@@ -2458,7 +2871,7 @@ namespace AUTO_BAZ.Functions
                                 string CTAF3T = (CTAF3 == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                                 string CTAF4T = (CTAF4 == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
                                 dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BES,NUMBER,ARZD,TAG) 
-                                    VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{ARZD},13 ) ");
+                                    VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BES},{NUMBER},{ARZD},13 ) ");
                                 //SDRST.update();
                                 //CHRST.MoveNext();
                             }
@@ -2500,15 +2913,15 @@ namespace AUTO_BAZ.Functions
 
                         if (!(BES is null))
                         {
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,BES,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,BES,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BES},{ARZD},{NUMBER},{TAG})");
                         }
                         else if (!(BED is null))
                         {
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,BED,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,BED,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BED},{ARZD},{NUMBER},{TAG})");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},{hes},N'{SHARH}',{ARZD},{NUMBER},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},{hes},N'{SqlText(Convert.ToString(SHARH))}',{ARZD},{NUMBER},{TAG})");
                         }
                         //SDRST.update();
                     }
@@ -2538,15 +2951,15 @@ namespace AUTO_BAZ.Functions
 
                         if (!(BED is null))
                         {
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,BED,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{ARZD},{NUMBER},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,BED,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BED},{ARZD},{NUMBER},{TAG})");
                         }
                         else if (!(BES is null))
                         {
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,BES,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BES},{ARZD},{NUMBER},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,BES,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BES},{ARZD},{NUMBER},{TAG})");
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{ARZD},{NUMBER},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{ARZD},{NUMBER},{TAG})");
                         }
                         //SDRST.update();
                     }
@@ -2569,7 +2982,7 @@ namespace AUTO_BAZ.Functions
                             ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
                             TAG = 13;
 
-                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M ,HES_T ,SHARH ,hes,BED,NUMBER,ARZD,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M ,HES_T ,SHARH ,hes,BED,NUMBER,ARZD,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BED},{NUMBER},{ARZD},{TAG})");
                             //SDRST.update();
                         }
                     }
@@ -2580,7 +2993,19 @@ namespace AUTO_BAZ.Functions
                         {
                             takh = 0d;
                             //rst.Close();
-                            var rst6 = dbms.DoGetDataSQL<QRE16>("SELECT INVO_LST.NUMBER, INVO_LST.TAG, TAKHPERS.CUST_CO, TAKHPERS.TAKH_COD, TAKHPERS.TAFPER ,INVO_LST.MABL_K FROM INVO_LST INNER JOIN TAKHPERS ON INVO_LST.CODE = TAKHPERS.TAKH_COD WHERE (((INVO_LST.NUMBER)=" + HFRST[HFRST_EOF].NUMBER + ") AND ((INVO_LST.TAG)=2) AND ((TAKHPERS.CUST_CO)= " + HFRST[HFRST_EOF].CUST_KIND + "))").ToList();
+                            // پیش‌خوانده شد؛ کلید همان دو شرط کوئری اصلی است: شماره فاکتور و
+                            // نوع مشتری (CUST_CO = HFRST.CUST_KIND).
+                            //
+                            // اگر CUST_KIND تهی باشد، کوئری قبلی شرط «CUST_CO = NULL» می‌داد که
+                            // در SQL هرگز true نمی‌شود؛ پس اینجا هم باید فهرست خالی برگردد و
+                            // نه ردیف‌های CUST_CO = 0.
+                            var rst6 = (HFRST[HFRST_EOF].CUST_KIND != null
+                                        && invoiceTakhPers.TryGetValue(
+                                            (HFRST[HFRST_EOF].NUMBER ?? 0d, Convert.ToDouble(HFRST[HFRST_EOF].CUST_KIND.Value)),
+                                            out var takhPersRows))
+                                ? takhPersRows
+                                : EmptyQre16;
+
                             if (rst6.Count > 0)
                             {
                                 //while (!rst6.EOF())
@@ -2605,7 +3030,7 @@ namespace AUTO_BAZ.Functions
                                             ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
                                             TAG = 13;
                                             takh = takh + Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
-                                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BED},{NUMBER},{ARZD},{TAG})");
 
                                             //SDRST.update();
                                         }
@@ -2628,14 +3053,11 @@ namespace AUTO_BAZ.Functions
                                             TAG = 13;
                                             takh = takh + Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
                                             //SDRST.update();
-                                            try
-                                            {
-                                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                LogWriter.WriteLog($"خطا در قسمت تخفيف فروش : {SHARH} {HFRST[HFRST_EOF].NUMBER}: {ex.Message} | Stack: {ex.StackTrace} |");
-                                            }
+                                            // این درج در کد اصلی داخل try/catch بود و خطایش نادیده
+                                            // گرفته می‌شد؛ AddTolerant همان معنا را در بافر حفظ می‌کند.
+                                            dbms.AddTolerant(
+                                                $"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BED},{NUMBER},{ARZD},{TAG})",
+                                                $"خطا در قسمت تخفيف فروش : {SHARH} {HFRST[HFRST_EOF].NUMBER}");
 
                                         }
                                     }
@@ -2662,18 +3084,22 @@ namespace AUTO_BAZ.Functions
 
                                     if (residual > 0)
                                     {
-                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
                                     }
                                     else
                                     {
-                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            var rst7 = dbms.DoGetDataSQL<QRE17>("SELECT     dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.TAG, dbo.INVO_LST.MABL_K, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE     (dbo.HEAD_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.HEAD_LST.TAG = 2)").ToList();
+                            // پیش‌خوانده شد.
+                            var rst7 = invoiceLineDiscounts.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var lineDiscountRows)
+                                ? lineDiscountRows
+                                : EmptyQre17;
+
                             if (rst7.Count > 0)
                             {
                                 takh = 0d;
@@ -2704,7 +3130,7 @@ namespace AUTO_BAZ.Functions
                                             TAG = 13;
                                             takh = takh + Math.Round((double)rst7[rst7_EOF].N_MOIN);
 
-                                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BED},{NUMBER},{ARZD},{TAG})");
                                             //SDRST.update();
                                         }
                                         else
@@ -2726,15 +3152,10 @@ namespace AUTO_BAZ.Functions
                                             NUMBER = HFRST[HFRST_EOF].NUMBER;
                                             TAG = 13;
                                             takh = takh + Math.Round((double)rst7[rst7_EOF].N_MOIN);
-                                            try
-                                            {
-                                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                LogWriter.WriteLog($"خطا در قسمت تخفيف فروش : {SHARH} {HFRST[HFRST_EOF].NUMBER}: {ex.Message} | Stack: {ex.StackTrace} |");
-                                                /*On Error Resume Next*/
-                                            }
+                                            // مثل بالا: خطای همین یک درج در کد اصلی نادیده گرفته می‌شد.
+                                            dbms.AddTolerant(
+                                                $"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{BED},{NUMBER},{ARZD},{TAG})",
+                                                $"خطا در قسمت تخفيف فروش : {SHARH} {HFRST[HFRST_EOF].NUMBER}");
 
                                             //SDRST.update();
                                         }
@@ -2762,11 +3183,11 @@ namespace AUTO_BAZ.Functions
 
                                     if (residual > 0)
                                     {
-                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
                                     }
                                     else
                                     {
-                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(SHARH))}',N'{SqlText(Convert.ToString(hes))}',{Math.Abs(residual)},{NUMBER},{ARZD},{TAG})");
                                     }
                                 }
                             }
@@ -2794,7 +3215,7 @@ namespace AUTO_BAZ.Functions
                         string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                         string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
                         //{N_S},{HES_K },{HES_M },{HES_T },{HES_T2},{HES_T3},{HES_T4},{hes},{SHARH },{BES},{ARZD},{NUMBER},{TAG}
-                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BES},{ARZD},{NUMBER},{TAG})");
                         //SDRST.update();
                     }
                     if (HFRST[HFRST_EOF].MABL_HAV != 0)
@@ -2824,7 +3245,7 @@ namespace AUTO_BAZ.Functions
                         string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                         string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
-                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BED},{ARZD},{NUMBER},{TAG})");
                         //SDRST.update();
                     }
                     if (HFRST[HFRST_EOF].MABL_VAR != 0)
@@ -2851,7 +3272,7 @@ namespace AUTO_BAZ.Functions
                         string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                         string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
-                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BES},{ARZD},{NUMBER},{TAG})");
                         //SDRST.update();
                     }
                     if (HFRST[HFRST_EOF].MABL_VAR != 0)
@@ -2881,7 +3302,7 @@ namespace AUTO_BAZ.Functions
                         string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                         string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
-                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BED},{ARZD},{NUMBER},{TAG})");
                         //SDRST.update();
                     }
                     if (HFRST[HFRST_EOF].MBAA != 0)
@@ -2918,13 +3339,19 @@ namespace AUTO_BAZ.Functions
                         string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
                         dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES" +
-                            $" ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                            $" ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BES},{ARZD},{NUMBER},{TAG})");
                         //SDRST.update();
                     }
                     JAMP = 0d;
                     if (JAMF > 0d)
                     {
-                        var PRST = dbms.DoGetDataSQL<VISITOR_DTL_1>("SELECT     dbo.VISITOR_DTL.* FROM dbo.VISITOR_DTL WHERE     (NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 2) ").ToList();
+                        // پیش‌خوانده شد. ردیف‌های هر فاکتور فقط توسط Thread همان فاکتور
+                        // خوانده و تغییر داده می‌شوند، پس تغییر مقدار PURSANT/DARSAD روی
+                        // این شیءها همان معنای قبلی را دارد.
+                        var PRST = invoiceVisitors.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var visitorRows)
+                            ? visitorRows
+                            : EmptyVisitorDtl;
+
                         //while (!PRST.EOF)
 
                         for (int PRST_EOF = 0; PRST_EOF < PRST.Count; PRST_EOF++)
@@ -2957,7 +3384,7 @@ namespace AUTO_BAZ.Functions
                                     {
                                         PRST[PRST_EOF].PURSANT = Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100));
 
-                                        dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
+                                        dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
                                         //PRST.update;
                                     }
                                 }
@@ -2965,7 +3392,7 @@ namespace AUTO_BAZ.Functions
                                 else if (PRST[PRST_EOF].DARSAD != PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100)
                                 {
                                     PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100;
-                                    dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
+                                    dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
                                     //PRST.update;
                                 }
 
@@ -2977,19 +3404,33 @@ namespace AUTO_BAZ.Functions
                                 prs = 0L;
                                 MBK = 0L;
                                 //پرداخت پورسانت بر اساس الگوی پرداخت پورسانت
-                                var rst1 = dbms.DoGetDataSQL<QRE18>("select code ,mabl_k  - n_moin as mablk from invo_lst where tag = 2 and number = " + HFRST[HFRST_EOF].NUMBER).ToList();
+                                // rst1 پیش‌خوانده شد.
+                                var rst1 = invoicePorsantLines.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var porsantLineRows)
+                                    ? porsantLineRows
+                                    : EmptyQre18;
                                 //while (!rst1.EOF)
                                 for (int rst1_EOF = 0; rst1_EOF < rst1.Count; rst1_EOF++)
                                 {
-                                    var rst2 = dbms.DoGetDataSQL<double?>("SELECT  PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE (PORID = " + PRST[PRST_EOF].PORID + ") and (code = '" + rst1[rst1_EOF].code + "')").ToList();
-                                    if (rst2.Count == 1)
+                                    // rst2 هم پیش‌خوانده شد. «یافت نشد» و «بیش از یک ردیف» هر دو
+                                    // مثل کد قبلی (شرط rst2.Count == 1) نپذیرفتن مقدار معنی می‌شوند.
+                                    var porsantKey = (PRST[PRST_EOF].PORID ?? 0, SqlKey(rst1[rst1_EOF].code));
+                                    var porsantFound = porsantKala.TryGetValue(porsantKey, out var porsantEntry)
+                                                       && !porsantEntry.Duplicate;
+
+                                    if (porsantFound)
                                     {
-                                        prs = (long)(prs + Math.Round((double)(rst1[rst1_EOF].mablk * rst2.FirstOrDefault() / 100)));
+                                        prs = (long)(prs + Math.Round((double)(rst1[rst1_EOF].mablk * porsantEntry.Porsant / 100)));
                                         MBK = (long)(MBK + rst1[rst1_EOF].mablk);
                                     }
                                     else
                                     {
-                                        LogWriter.WriteLog("تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+                                        // یک پیام برای هر (ویزیتور، کالا) کافی است. قبلاً برای هر
+                                        // فاکتور تکرار می‌شد — روی YAZDSEPAR1405 همین یک پیام ۴۵۲ بار
+                                        // نوشته شد و هر نوشتن، همه‌ی بخش‌های موازی را سریال می‌کرد.
+                                        if (_missingPorsantPatternLogged.TryAdd(porsantKey, 0))
+                                        {
+                                            LogWriter.WriteLog("تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+                                        }
 
                                         //Msgwin msgwin = new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
                                         //msgwin.ShowDialog();
@@ -3003,7 +3444,7 @@ namespace AUTO_BAZ.Functions
                                 {
                                     PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / MBK * 100;
                                 }
-                                dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {prs} , DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
+                                dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {prs} , DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
                                 //PRST.update();
                             }
 
@@ -3019,7 +3460,7 @@ namespace AUTO_BAZ.Functions
                                 string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                                 string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
-                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES,NUMBER,TAG) VALUES({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG})");
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES,NUMBER,TAG) VALUES({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BES},{NUMBER},{TAG})");
                             }
                             //PRST.MoveNext();
                         }
@@ -3048,18 +3489,13 @@ namespace AUTO_BAZ.Functions
                                 ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
                                 NUMBER = HFRST[HFRST_EOF].NUMBER;
                                 TAG = 13;
-                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES({N_S},{HES_K},{HES_M},{HES_T},N'{SqlText(Convert.ToString(hes))}',N'{SqlText(Convert.ToString(SHARH))}',{BED},{ARZD},{NUMBER},{TAG})");
                                 //SDRST.update();
                             }
                         }
                     }
                     ;
-
-                    // گزارش پیشرفت در «پایان» کار هر فاکتور زده می‌شود، نه در ابتدای آن.
-                    // قبلاً در ابتدا بود و نوار پیشرفت زودتر از واقعیت جلو می‌رفت.
-                    progressReporter.ReportOne();
-                });
-                //}
+                } // ProcessInvoice
             }
             catch (AggregateException ae)
             {
@@ -3348,6 +3784,16 @@ namespace AUTO_BAZ.Functions
                 END CATCH;
 ";
 
+            // ⚠️ تلاش مجدد بن‌بست «اینجا» انجام نمی‌شود.
+            //
+            // چرا: DoExecuteSQL خودش روی خطای ۱۲۰۵ تا هشت بار با فاصله‌ی نمایی (تا ۳٫۲ ثانیه)
+            // دوباره تلاش می‌کند. اگر این حلقه هم برای ۱۲۰۵ تلاش کند، دو لایه در هم ضرب
+            // می‌شوند: ۳ × ۹ = ۲۷ اجرا و بیش از ۳۸ ثانیه Thread.Sleep برای «یک» فراخوانی —
+            // در حالی که CREATHES به‌ازای هر ردیف سند و از داخل حلقه‌ی موازی صدا زده می‌شود.
+            // نتیجه‌اش قحطی ThreadPool است، نه تحمل‌پذیری بیشتر.
+            //
+            // این حلقه فقط برای Timeout (خطای -2) می‌ماند که DoExecuteSQL آن را تلاش مجدد
+            // نمی‌کند و روی دیسک کند واقعاً پیش می‌آید.
             int maxRetries = 3;
             for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
@@ -3368,6 +3814,9 @@ namespace AUTO_BAZ.Functions
 
                     LogWriter.WriteLog("[CREATHES] " + message + " | " + ex.Message);
                     ExpectionLogWriter.WriteLog(ex, "CREATHES");
+
+                    // وضعیت این حساب نامعلوم است؛ پاسخ منفیِ کش‌شده باید باطل شود.
+                    ForgetAccount(kolValue, moinValue, tafValue);
                     throw new Exception(message, ex);
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1205 || ex.Number == -2)
@@ -3377,15 +3826,17 @@ namespace AUTO_BAZ.Functions
                         var msg = $"خطای بن‌بست پس از {maxRetries} تلاش. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
                         LogWriter.WriteLog(msg + " | " + ex.Message);
                         ExpectionLogWriter.WriteLog(ex, "CREATHES");
+                        ForgetAccount(kolValue, moinValue, tafValue);
                         throw new Exception(msg, ex);
                     }
-                    System.Threading.Thread.Sleep(new Random().Next(10, 50));
+                    System.Threading.Thread.Sleep(DeadlockBackoffMs(attempt - 1));
                 }
                 catch (Exception ex)
                 {
                     var message = $"خطای بحرانی در ساخت سرفصل حساب. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
                     LogWriter.WriteLog(message + " | " + ex.Message);
                     ExpectionLogWriter.WriteLog(ex, "CREATHES");
+                    ForgetAccount(kolValue, moinValue, tafValue);
                     throw new Exception(message, ex);
                 }
             }
@@ -3397,16 +3848,22 @@ namespace AUTO_BAZ.Functions
         [System.Diagnostics.DebuggerStepThrough]
         public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
         {
-            // فقط پاسخ مثبت کش می‌شود: حسابی که یک بار دیده شده هرگز در طول اجرا حذف نمی‌شود.
-            // پاسخ منفی کش نمی‌شود چون ممکن است CREATHES بلافاصله بعدش آن حساب را بسازد.
+            // ───────────────────────────────────────────────────────────────────────────
+            // فقط پاسخ مثبت کش می‌شود (Positive Caching Only).
+            //
+            // پاسخ منفی کش نمی‌شود تا ریسک Race Condition (مثلاً ساخت همزمان حساب توسط
+            // کاربر دیگری در نرم‌افزار اصلی) کاملاً صفر شود.
+            // ───────────────────────────────────────────────────────────────────────────
             var key = (Kol: KOL ?? 0d, Moin: MOIN ?? 0d, Taf: taf ?? 0d);
-            if (LookupCacheEnabled && _existingAccounts.ContainsKey(key))
+            if (LookupCacheEnabled && _existingAccounts.TryGetValue(key, out var cachedExists) && cachedExists)
             {
                 return true;
             }
 
             bool tempISHESAB = false;
-            var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf).ToList();
+            var rst = dbms.DoGetDataSQL<QRE13>(
+                "SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf",
+                new { Kol = KOL, Moin = MOIN, Taf = taf }).ToList();
             if (rst.Count == 0)
             {
                 tempISHESAB = false;
@@ -3760,7 +4217,7 @@ namespace AUTO_BAZ.Functions
                 for (int offset = 0; offset < khHeadUpdates.Count; offset += khHeadUpdateChunkSize)
                 {
                     var batch = new StringBuilder();
-                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    batch.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                     foreach (var stmt in khHeadUpdates.Skip(offset).Take(khHeadUpdateChunkSize)) { batch.Append(stmt); }
                     batch.Append("COMMIT TRANSACTION;");
                     dbms.DoExecuteSQL(batch.ToString());
@@ -4115,7 +4572,7 @@ namespace AUTO_BAZ.Functions
                 if (batchQueries.Count > 0)
                 {
                     var sb = new StringBuilder();
-                    sb.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    sb.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                     foreach (var q in batchQueries) { sb.Append(q).Append(';'); }
                     sb.Append("COMMIT TRANSACTION;");
                     dbms.DoExecuteSQL(sb.ToString());
@@ -4414,7 +4871,7 @@ namespace AUTO_BAZ.Functions
             // مجبور می‌شد برای هر سند یک Execution Plan تازه Compile کند. Compile شدن روی
             // Plan Cache قفل می‌گیرد و همین موضوع Thread های موازی را دوباره پشت هم صف می‌کند.
             // با پارامتری کردن، فقط دو Plan ساخته و بین همه‌ی Thread ها بازاستفاده می‌شود.
-            var txPrefix = useExternal ? string.Empty : "SET XACT_ABORT ON; BEGIN TRANSACTION;";
+            var txPrefix = useExternal ? string.Empty : "SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;";
             var txSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
             //اضافه شدن ستون نوع ارز به خزانه در صورت فعال بودن نرخ ارز
             const string detailInsertSql =
@@ -4805,7 +5262,7 @@ namespace AUTO_BAZ.Functions
 
                 // همه‌ی دستورهای این برگه در «یک» تراکنش، تا سند هیچ‌وقت نیمه‌کاره دیده نشود.
                 var sb = new StringBuilder();
-                sb.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                sb.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                 foreach (var q in batchQueries) { sb.Append(q).Append(';'); }
                 sb.Append("COMMIT TRANSACTION;");
                 dbms.DoExecuteSQL(sb.ToString());
@@ -5493,7 +5950,7 @@ namespace AUTO_BAZ.Functions
                     }
 
                     var batch = new StringBuilder();
-                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    batch.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
 
                     if (needsNewHeader[R])
                     {
@@ -5587,10 +6044,28 @@ namespace AUTO_BAZ.Functions
                 for (int offset = 0; offset < nsKeys.Count; offset += balanceQueryChunkSize)
                 {
                     var nsIn = string.Join(",", nsKeys.Skip(offset).Take(balanceQueryChunkSize).Select(k => SqlNum(k)));
-                    unbalanced.AddRange(dbms.DoGetDataSQL<KhorugMavadBalanceRow>(
+
+                    // ⚠️ چرا MAXDOP 1:
+                    //
+                    // این SELECT یک تجمیع روی صدها شماره سند است و در حالی اجرا می‌شود که
+                    // بخش‌های دیگر (مخصوصاً سند فروش) با سرعت زیاد در همان جدول درج می‌کنند.
+                    // در اجرای واقعی روی YAZDSEPAR1405 همین کوئری قربانی بن‌بست شد و کل بخش
+                    // با خطا متوقف ماند (ردیف «كسر دهم ريال» یک سند ثبت نشد).
+                    //
+                    // گراف بن‌بست از system_health نشان داد طرفین قفل‌های PAGE روی DEED_DTL
+                    // بودند و این کوئری با «چند Thread موازی» (ecid های ۹ و ۱۲ و ۱۵) در آن
+                    // شرکت داشت. پلن موازی برای این تجمیع نه لازم است و نه سود دارد، ولی
+                    // همان چیزی است که آن را به یک شرکت‌کننده‌ی چندنخی در بن‌بست تبدیل می‌کرد.
+                    //
+                    // تلاش مجدد لازم نیست اینجا نوشته شود: DoGetDataSQL خودش روی خطای ۱۲۰۵
+                    // تا هشت بار با فاصله‌ی نمایی و تصادفی دوباره تلاش می‌کند.
+                    var sql =
                         "SELECT N_S, SUM(BED) - SUM(BES) AS DIFF FROM dbo.DEED_DTL " +
                         $"WHERE N_S IN ({nsIn}) GROUP BY N_S " +
-                        "HAVING SUM(BED) - SUM(BES) <> 0 AND ABS(SUM(BED) - SUM(BES)) <= 40")
+                        "HAVING SUM(BED) - SUM(BES) <> 0 AND ABS(SUM(BED) - SUM(BES)) <= 40 " +
+                        "OPTION (MAXDOP 1)";
+
+                    unbalanced.AddRange(dbms.DoGetDataSQL<KhorugMavadBalanceRow>(sql)
                         .Where(x => x?.N_S != null && x.DIFF != null && sheetByNs.ContainsKey(x.N_S.Value)));
                 }
 
@@ -5643,7 +6118,7 @@ namespace AUTO_BAZ.Functions
                             // در اولین اجرا این DELETE هیچ ردیفی پیدا نمی‌کند، چون DELETE مرحله ۴
                             // ردیف کسر دهم ریالِ اجرای قبلی را از قبل پاک کرده است.
                             dbms.DoExecuteSQL(
-                                "SET XACT_ABORT ON; BEGIN TRANSACTION;" +
+                                "SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;" +
                                 $"DELETE FROM dbo.DEED_DTL WHERE N_S IN ({nsIn}) AND TAG = 10 " +
                                 $"AND HES_K = {SqlNum(Baseknow.AMALKARD)} AND HES_M = 99999 AND HES_T = 99999;" +
                                 detailInsertPrefix + chunk + ";" +
@@ -5820,7 +6295,7 @@ namespace AUTO_BAZ.Functions
                 for (int offset = 0; offset < headUpdates.Count; offset += headUpdateChunkSize)
                 {
                     var batch = new StringBuilder();
-                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    batch.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                     foreach (var stmt in headUpdates.Skip(offset).Take(headUpdateChunkSize)) { batch.Append(stmt); }
                     batch.Append("COMMIT TRANSACTION;");
                     dbms.DoExecuteSQL(batch.ToString());
@@ -6107,7 +6582,7 @@ namespace AUTO_BAZ.Functions
                     }
 
                     var batch = new StringBuilder();
-                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    batch.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
 
                     // در حالت «سند روزانه» چند برگه یک سند مشترک دارند، پس سربرگ نه ساخته و نه
                     // به‌روز می‌شود (مرحله ۱ و ۲ آن را انجام داده‌اند) و شماره سند هم همان‌جا روی
@@ -6459,7 +6934,7 @@ namespace AUTO_BAZ.Functions
                 for (int offset = 0; offset < headerUpdates.Count; offset += headUpdateChunkSize)
                 {
                     var b = new StringBuilder();
-                    b.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    b.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                     foreach (var stmt in headerUpdates.Skip(offset).Take(headUpdateChunkSize)) { b.Append(stmt); }
                     b.Append("COMMIT TRANSACTION;");
                     dbms.DoExecuteSQL(b.ToString());
@@ -7244,7 +7719,7 @@ namespace AUTO_BAZ.Functions
                 for (int offset = 0; offset < gbHeadUpdates.Count; offset += gbHeadUpdateChunkSize)
                 {
                     var batch = new StringBuilder();
-                    batch.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    batch.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                     foreach (var stmt in gbHeadUpdates.Skip(offset).Take(gbHeadUpdateChunkSize)) { batch.Append(stmt); }
                     batch.Append("COMMIT TRANSACTION;");
                     dbms.DoExecuteSQL(batch.ToString());
@@ -8301,7 +8776,7 @@ namespace AUTO_BAZ.Functions
                 for (int offset = 0; offset < headerUpdates.Count; offset += headUpdateChunkSize)
                 {
                     var b = new StringBuilder();
-                    b.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                    b.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                     foreach (var stmt in headerUpdates.Skip(offset).Take(headUpdateChunkSize)) { b.Append(stmt); }
                     b.Append("COMMIT TRANSACTION;");
                     dbms.DoExecuteSQL(b.ToString());
@@ -9594,7 +10069,7 @@ namespace AUTO_BAZ.Functions
 
                 // همه‌ی دستورهای این برگه در «یک» تراکنش
                 var sb = new StringBuilder();
-                sb.Append("SET XACT_ABORT ON; BEGIN TRANSACTION;");
+                sb.Append("SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;");
                 foreach (var q in batchQueries) { sb.Append(q).Append(';'); }
                 sb.Append("COMMIT TRANSACTION;");
                 dbms.DoExecuteSQL(sb.ToString());

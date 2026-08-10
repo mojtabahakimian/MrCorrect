@@ -252,9 +252,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
 
+            // مثل DoExecuteSQL: برای بن‌بست تلاش بیشتری می‌کنیم، چون اجرای دوباره‌ی یک
+            // خواندنِ قربانی‌شده تقریباً همیشه موفق است.
             const int maxRetries = 3;
+            const int maxDeadlockRetries = 8;
 
-            for (int attempt = 0; attempt <= maxRetries; attempt++)
+            for (int attempt = 0; ; attempt++)
             {
                 using var db = new SqlConnection(CONNECTION_STR);
                 try
@@ -264,9 +267,10 @@ namespace Prg_SendInvoice.CNNMANAGER
                     return results;
                 }
                 //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
-                catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex))) && attempt < maxRetries)
+                catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
+                                              && attempt < (ex.Number == 1205 ? maxDeadlockRetries : maxRetries))
                 {
-                    Thread.Sleep(200 * (attempt + 1));
+                    Thread.Sleep(RetryDelayMs(attempt, ex.Number == 1205));
                     continue;
                 }
                 catch (SqlException sqlEx)
@@ -291,8 +295,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     db?.Close(); db?.Dispose();
                 }
             }
-
-            return null;
         }
         [System.Diagnostics.DebuggerStepThrough]
         public int? DoExecuteSQL(string sql, object parameters = null)
@@ -311,8 +313,12 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             //using var db = new SqlConnection(CONNECTION_STR);
 
-            int maxRetries = 3;
-            for (int i = 0; i <= maxRetries; i++)
+            // برای بن‌بست (1205) تلاش بیشتری می‌کنیم تا خطاهای گذرای اتصال.
+            // دلیل: بن‌بست یعنی «کار درست بود ولی نوبتش نشد» و اجرای دوباره‌اش تقریباً همیشه
+            // موفق می‌شود؛ در حالی که خطای اتصال معمولاً پایدارتر است.
+            const int maxRetries = 3;
+            const int maxDeadlockRetries = 8;
+            for (int i = 0; ; i++)
             {
                 using var db = new SqlConnection(CONNECTION_STR);
                 try
@@ -323,9 +329,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
                 catch (SqlException ex)
                 {
-                    if ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex))) && i < maxRetries) // 1205 = Deadlock or transient connection error
+                    var isDeadlock = ex.Number == 1205;
+                    var limit = isDeadlock ? maxDeadlockRetries : maxRetries;
+
+                    if ((isDeadlock || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex))) && i < limit)
                     {
-                        System.Threading.Thread.Sleep(200 * (i + 1)); // Wait and retry
+                        System.Threading.Thread.Sleep(RetryDelayMs(i, isDeadlock));
                         continue;
                     }
                     if (IsConnectionRelated(ex))
@@ -346,8 +355,24 @@ namespace Prg_SendInvoice.CNNMANAGER
                     db?.Close(); db?.Dispose();
                 }
             }
+        }
 
-            return null;
+        /// <summary>
+        /// فاصله‌ی تلاش مجدد. برای بن‌بست نمایی + تصادفی (jitter) است.
+        ///
+        /// چرا jitter لازم است: در بن‌بست معمولاً دو تراکنش درگیرند. اگر هر دو با فاصله‌ی
+        /// «یکسان» دوباره تلاش کنند، دقیقاً همان بن‌بست بازتولید می‌شود. با فاصله‌ی تصادفی
+        /// ترتیبشان می‌شکند و یکی جلو می‌افتد.
+        /// </summary>
+        private static int RetryDelayMs(int attempt, bool isDeadlock)
+        {
+            if (!isDeadlock)
+            {
+                return 200 * (attempt + 1);
+            }
+
+            var baseMs = 100 * (1 << Math.Min(attempt, 5)); // 100, 200, 400 ... 3200
+            return baseMs + Random.Shared.Next(baseMs);
         }
 
         private static void LogSqlQuery(string sql, Exception er)
