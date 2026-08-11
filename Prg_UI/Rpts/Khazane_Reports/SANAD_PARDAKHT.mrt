@@ -68,7 +68,7 @@
           <value>NAMBER_PARM,,6,7</value>
         </Parameters>
         <SqlCommand>SELECT SALA_DTL.EMZA AS emza1, SALA_DTL_1.EMZA AS emza2, SALA_DTL_2.EMZA AS emza3, PGET_HED.sgn1usid, PGET_HED.sgn2usid, PGET_HED.sgn3usid, PGET_HED.ID, sanadpar_sub.MOLAH, sanadpar_sub.DATE_S, sanadpar_sub.SHOBEH, sanadpar_sub.mabld, sanadpar_sub.N_HESAB, sanadpar_sub.DATE, sanadpar_sub.RADIF, sanadpar_sub.NO_AM, sanadpar_sub.NAHVA, sanadpar_sub.FHES_K, sanadpar_sub.FHES_M, sanadpar_sub.FHES_T, sanadpar_sub.THES_K, sanadpar_sub.THES_M, sanadpar_sub.THES_T, sanadpar_sub.SHARH, sanadpar_sub.MABL, sanadpar_sub.N_SERI, sanadpar_sub.BANK, sanadpar_sub.IDH, sanadpar_sub.FHES, sanadpar_sub.THES, sanadpar_sub.ARZD, sanadpar_sub.FHES_T2, sanadpar_sub.THES_T2, sanadpar_sub.FHES_T3, sanadpar_sub.THES_T3, sanadpar_sub.FHES_T4, sanadpar_sub.THES_T4, sanadpar_sub.hes, sanadpar_sub.NAME, sanadpar_sub.NAMES, sanadpar_sub.IDK, PGET_HED.SGN1, PGET_HED.SGN2, PGET_HED.SGN3 FROM SALA_DTL RIGHT OUTER JOIN SALA_DTL SALA_DTL_1 RIGHT OUTER JOIN sanadpar_sub RIGHT OUTER JOIN PGET_HED ON sanadpar_sub.ID = PGET_HED.ID LEFT OUTER JOIN SALA_DTL SALA_DTL_2 ON PGET_HED.sgn3usid = SALA_DTL_2.IDD ON SALA_DTL_1.IDD = PGET_HED.sgn2usid ON SALA_DTL.IDD = PGET_HED.sgn1usid
-WHERE PGET_HED.ID = @NAMBER_PARM</SqlCommand>
+WHERE PGET_HED.ID = @NAMBER_PARM AND (sanadpar_sub.N_SERI IS NULL) AND (sanadpar_sub.BANK IS NULL) AND (sanadpar_sub.NO_AM = 2) AND ((sanadpar_sub.NAHVA = 2) OR (sanadpar_sub.NAHVA > 3))</SqlCommand>
       </SD>
     </DataSources>
     <Relations isList="true" count="0" />
