@@ -3964,26 +3964,42 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                            o.CAM_KHALY, o.CAM_POOR, o.TOZIH, c.CITYNAME 
                     FROM dbo.OTHER_DTL o 
                     LEFT JOIN dbo.TCOD_CITY c ON o.MAGHSAD = c.CITYCODE 
-                    WHERE o.NUMBER = @Number AND o.TAG = @Tag",
-                    new { Number = NUMBER.Text, Tag = 2 }).FirstOrDefault();
+                    WHERE o.NUMBER = @Number AND o.TAG IN (2, 13)",
+                    new { Number = NUMBER.Text }).FirstOrDefault();
+
+                Action<string, object> setReportText = (compName, val) =>
+                {
+                    var comp = report.GetComponentByName(compName) as StiText;
+                    if (comp != null)
+                    {
+                        var strVal = val?.ToString();
+                        comp.Text = !string.IsNullOrWhiteSpace(strVal) ? strVal : "---";
+                    }
+                };
 
                 if (otherDtlQuery != null)
                 {
-                    Action<string, object> setReportText = (compName, val) =>
-                    {
-                        var comp = report.GetComponentByName(compName) as StiText;
-                        if (comp != null) comp.Text = val != null ? val.ToString() : "---";
-                    };
-
-                    setReportText("txtDriver", otherDtlQuery.DRIVER);
-                    setReportText("txtDriverMob", otherDtlQuery.DRIVER_MOB);
+                    setReportText("Text44", otherDtlQuery.DRIVER);
+                    setReportText("Text45", otherDtlQuery.DRIVER_MOB);
                     setReportText("txtCamiun", otherDtlQuery.CAMIUN);
-                    setReportText("txtCamiunNum", otherDtlQuery.CAMIUN_NUM);
-                    setReportText("txtBarnameh", otherDtlQuery.BARNAMEH);
+                    setReportText("Text46", otherDtlQuery.CAMIUN_NUM);
+                    setReportText("Text47", otherDtlQuery.BARNAMEH);
                     setReportText("txtCamKhaly", otherDtlQuery.CAM_KHALY);
                     setReportText("txtCamPoor", otherDtlQuery.CAM_POOR);
                     setReportText("txtCityName", otherDtlQuery.CITYNAME);
                     setReportText("txtTozih", otherDtlQuery.TOZIH);
+                }
+                else
+                {
+                    setReportText("Text44", "---");
+                    setReportText("Text45", "---");
+                    setReportText("txtCamiun", "---");
+                    setReportText("Text46", "---");
+                    setReportText("Text47", "---");
+                    setReportText("txtCamKhaly", "---");
+                    setReportText("txtCamPoor", "---");
+                    setReportText("txtCityName", "---");
+                    setReportText("txtTozih", "---");
                 }
 
                 //report.Compile();
