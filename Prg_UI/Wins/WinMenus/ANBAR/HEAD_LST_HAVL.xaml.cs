@@ -3906,6 +3906,59 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 report["NUM_PARAM"] = NUMBER.Text;
 
+                //===========================================================
+                // Fetch Driver and Shipping Info from OTHER_DTL with City Name
+                //===========================================================
+                var otherDtlData = dbms.DoGetDataSQL<CTABLES.OTHER_DTL_WITH_CITY>(
+                    @"SELECT 
+                        od.NUMBER, 
+                        od.TAG, 
+                        od.REQUEST_NO, 
+                        od.BARNAMEH, 
+                        od.DRIVER, 
+                        od.DRIVER_MOB, 
+                        od.CAMIUN_NUM, 
+                        od.MAGHSAD, 
+                        ISNULL(c.CITYNAME, '') AS CITYNAME,
+                        od.CAM_KHALY, 
+                        od.CAM_POOR, 
+                        od.TOZIH, 
+                        od.CAMIUN
+                      FROM dbo.OTHER_DTL od
+                      LEFT JOIN dbo.TCOD_CITY c ON od.MAGHSAD = c.CITYCODE
+                      WHERE od.NUMBER = @Number AND od.TAG = @Tag",
+                    new { Number = Convert.ToDouble(NUMBER.Text), Tag = 2 }
+                ).FirstOrDefault();
+
+                if (otherDtlData != null)
+                {
+                    // Pass data to Stimulsoft report components
+                    // Make sure these component names exist in your .mrt file
+                    (report.GetComponentByName("txtDRIVER") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.DRIVER) ? otherDtlData.DRIVER : "---";
+                    (report.GetComponentByName("txtDRIVER_MOB") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.DRIVER_MOB) ? otherDtlData.DRIVER_MOB : "---";
+                    (report.GetComponentByName("txtCAMIUN") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.CAMIUN) ? otherDtlData.CAMIUN : "---";
+                    (report.GetComponentByName("txtCAMIUN_NUM") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.CAMIUN_NUM) ? otherDtlData.CAMIUN_NUM : "---";
+                    (report.GetComponentByName("txtBARNAMEH") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.BARNAMEH) ? otherDtlData.BARNAMEH : "---";
+                    (report.GetComponentByName("txtCITYNAME") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.CITYNAME) ? otherDtlData.CITYNAME : "---";
+                    (report.GetComponentByName("txtCAM_KHALY") as StiText).Text = otherDtlData.CAM_KHALY.HasValue && otherDtlData.CAM_KHALY.Value > 0 ? otherDtlData.CAM_KHALY.Value.ToString("#,##0") : "---";
+                    (report.GetComponentByName("txtCAM_POOR") as StiText).Text = otherDtlData.CAM_POOR.HasValue && otherDtlData.CAM_POOR.Value > 0 ? otherDtlData.CAM_POOR.Value.ToString("#,##0") : "---";
+                    (report.GetComponentByName("txtTOZIH") as StiText).Text = !string.IsNullOrEmpty(otherDtlData.TOZIH) ? otherDtlData.TOZIH : "---";
+                }
+                else
+                {
+                    // If no record exists, show empty or placeholder values
+                    (report.GetComponentByName("txtDRIVER") as StiText).Text = "---";
+                    (report.GetComponentByName("txtDRIVER_MOB") as StiText).Text = "---";
+                    (report.GetComponentByName("txtCAMIUN") as StiText).Text = "---";
+                    (report.GetComponentByName("txtCAMIUN_NUM") as StiText).Text = "---";
+                    (report.GetComponentByName("txtBARNAMEH") as StiText).Text = "---";
+                    (report.GetComponentByName("txtCITYNAME") as StiText).Text = "---";
+                    (report.GetComponentByName("txtCAM_KHALY") as StiText).Text = "---";
+                    (report.GetComponentByName("txtCAM_POOR") as StiText).Text = "---";
+                    (report.GetComponentByName("txtTOZIH") as StiText).Text = "---";
+                }
+                //===========================================================
+
                 //Report_OnOpen: چاپ  حواله - چاپ 2 - چاپ اصلاحیه
                 if (NUM is 5 || NUM is 6 || NUM is 8)
                 {

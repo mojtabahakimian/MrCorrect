@@ -2718,5 +2718,24 @@ namespace Prg_Proccessy.SQLMODELS
             public bool? SGN0234 { get; set; }
             public bool? SGN0334 { get; set; }
         }
+        /// <summary>
+        /// Model for OTHER_DTL with City Name (for Havaleh Print Report)
+        /// </summary>
+        public class OTHER_DTL_WITH_CITY
+        {
+            public double? NUMBER { get; set; }
+            public double? TAG { get; set; }
+            public string REQUEST_NO { get; set; }
+            public string BARNAMEH { get; set; }
+            public string DRIVER { get; set; }
+            public string DRIVER_MOB { get; set; }
+            public string CAMIUN_NUM { get; set; }
+            public double? MAGHSAD { get; set; }
+            public string CITYNAME { get; set; }  // From TCOD_CITY join
+            public double? CAM_KHALY { get; set; }
+            public double? CAM_POOR { get; set; }
+            public string TOZIH { get; set; }
+            public string CAMIUN { get; set; }
+        }
     }
 }
