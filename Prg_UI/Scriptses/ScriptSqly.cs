@@ -10383,7 +10383,7 @@ GO
 
 CREATE OR ALTER PROCEDURE dbo.CC_sp_Rollback
     @RunId    INT,
-    @StepCode VARCHAR(10) = NULL,   -- خالي = آخرين اسنپ‌شات هر جدول
+    @StepCode VARCHAR(10) = NULL,   -- خالي = بازگرداني کل اجرا (قديمي‌ترين اسنپ‌شات)
     @UserName NVARCHAR(50) = N'system',
     @WhatIf   BIT = 1
 AS
@@ -10391,13 +10391,33 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
+    ---- دورهٔ تأييدشده قفل است
+    -- CC_sp_S14_ApproveClose به کاربر مي‌گويد «دوره تأييد و قفل شد»؛ اگر
+    -- بازگرداني بتواند بعد از آن اجرا شود، آن قفل واقعي نيست و يک بستنِ
+    -- رسميِ تأييدشده بي‌صدا باطل مي‌شود. تأييد بايد اول برداشته شود.
+    IF EXISTS (SELECT 1 FROM dbo.CC_Run
+               WHERE RunId = @RunId AND ApprovedAtUtc IS NOT NULL)
+    BEGIN
+        RAISERROR(N'اين اجرا تأييد و قفل شده است؛ بازگرداني ممکن نيست.', 16, 1);
+        RETURN;
+    END
+
     ---- اسنپ‌شات‌هاي قابل استفاده
+    -- MIN و نه MAX: در يک اجراي کامل چند گام اسنپ‌شات مي‌گيرند (S02, S09,
+    -- S10, S11) و هرکدام هر سه جدول را نگه مي‌دارند. S03 و S04 که اسناد را
+    -- حذف و بازشماره مي‌کنند بين اسنپ‌شات S02 و اسنپ‌شات S09 اجرا مي‌شوند،
+    -- پس اسنپ‌شات‌هاي بعدي وضعيتِ «بعد از S03/S04» را در خود دارند. اگر
+    -- بازگرداني کل اجرا از آخرين اسنپ‌شات انجام شود، حذف و بازشماره‌گذاري
+    -- هرگز برنمي‌گردد — درحالي‌که هم دکمهٔ رابط کاربري و هم نام اين رويه به
+    -- کاربر قول «بازگشت به وضعيت پيش از اجرا» را مي‌دهند. قديمي‌ترين
+    -- اسنپ‌شات همان وضعيت پيش از اجراست. براي بازگرداني يک گام مشخص هم
+    -- درست است، چون هر گام براي هر جدول فقط يک اسنپ‌شات دارد.
     IF OBJECT_ID('tempdb..#Snap') IS NOT NULL DROP TABLE #Snap;
 
     SELECT  s.SnapshotId, s.TableName, s.BackupTable, s.RowsCopied, s.StepCode
     INTO    #Snap
     FROM    dbo.CC_Snapshot s
-    JOIN   (SELECT TableName, MAX(SnapshotId) AS Id
+    JOIN   (SELECT TableName, MIN(SnapshotId) AS Id
             FROM   dbo.CC_Snapshot
             WHERE  RunId = @RunId
               AND (@StepCode IS NULL OR StepCode = @StepCode)
@@ -10529,10 +10549,15 @@ BEGIN
     DEALLOCATE cSnap;
 
     ---- علامت‌گذاري اسنپ‌شات‌ها
+    -- در بازگرداني کل اجرا، اسنپ‌شات‌هاي مياني (S09/S10/S11) هم مصرف‌شده
+    -- حساب مي‌شوند؛ وگرنه بازگرداني دوباره، قديمي‌ترينِ باقيمانده يعني وضعيت
+    -- «بعد از S03/S04» را روي داده‌اي که همين الان درست برگشته مي‌نويسد.
     UPDATE  s
        SET  s.RestoredAtUtc = SYSUTCDATETIME()
     FROM    dbo.CC_Snapshot s
-    JOIN    #Snap t ON t.SnapshotId = s.SnapshotId;
+    WHERE   s.RunId = @RunId
+      AND   s.RestoredAtUtc IS NULL
+      AND  (@StepCode IS NULL OR s.StepCode = @StepCode);
 
     ---- تغييرات ثبت‌شده باطل مي‌شوند
     DELETE dbo.CC_FormulaChange
