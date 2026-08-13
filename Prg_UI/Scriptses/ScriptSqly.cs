@@ -8398,6 +8398,22 @@ GO
         /// اگر متن یکی از بلوک‌ها را عوض کردید، همان تغییر را در فایل
         /// .sql متناظرش هم بگذارید؛ این دو باید مو‌به‌مو یکی بمانند.
         /// </summary>
+        /// <summary>
+        /// ماژول «بستن ماه بهای تمام‌شده» (پیشوند CC_).
+        ///
+        /// هر ده اسکریپت Server/Database/10-schema.sql تا
+        /// 19-margin-fix-kalas.sql عیناً اینجا کپی شده‌اند، به همان ترتیب
+        /// وابستگی: اول جدول‌های پایه، بعد داده اولیه، بعد رویه‌ها. پس
+        /// اجرای این فایل روی یک پایگاه تازه هم کامل بالا می‌آید و
+        /// پیش‌نیاز دستی ندارد.
+        ///
+        /// همه بلوک‌ها idempotent هستند (CREATE OR ALTER برای رویه‌ها،
+        /// IF NOT EXISTS برای جدول‌ها و داده اولیه) چون این فایل هر بار
+        /// دوباره روی همان پایگاه اجرا می‌شود.
+        ///
+        /// اگر متن یکی از بلوک‌ها را عوض کردید، همان تغییر را در فایل
+        /// .sql متناظرش هم بگذارید؛ این دو باید مو‌به‌مو یکی بمانند.
+        /// </summary>
         private static void CostCloseScript(SqlConnection db)
         {
             // ترتیب مهم است: بلوک‌های پایه (۱۰ تا ۱۳) جدول‌ها و رویه‌هایی را
@@ -9115,13 +9131,19 @@ BEGIN
     INSERT dbo.CC_Snapshot (RunId, StepCode, TableName, BackupTable, RowsCopied)
     VALUES (@RunId, @StepCode, 'HEAD_MANF', @bak, @n);
 
-    ---- DEED_HED : نگاشت شماره اسناد بازه
+    ---- DEED_HED : اسنپ‌شات کامل اسناد بازه، به‌همراه اسناد پس از @DT2 هم —
+    -- چون شاخهٔ جابه‌جايي CC_sp_S04_SortDeeds مي‌تواند شمارهٔ اسناد بعد از
+    -- پايان ماه را هم عوض کند تا با شمارهٔ تازهٔ اسناد اين ماه تلاقي نکند؛
+    -- اگر آن اسناد اينجا اسنپ‌شات نشوند، Rollback راهي براي برگرداندن
+    -- شماره‌شان ندارد. ستون‌ها هم کامل ذخيره مي‌شوند (نه فقط base/N_S/DATE_S)
+    -- تا اگر CC_sp_S03_DeleteEmptyDeeds سندي را کامل حذف کرد، Rollback
+    -- بتواند کل سطر را دوباره درج کند، نه فقط شماره‌اش را برگرداند.
     SET @bak = CONCAT('CC_BAK_DEED_HED_R', @RunId, '_', @StepCode);
     IF OBJECT_ID('dbo.' + @bak, 'U') IS NOT NULL
         EXEC('DROP TABLE dbo.' + @bak);
-    SET @sql = N'SELECT base, N_S, DATE_S INTO dbo.' + QUOTENAME(@bak) + N'
-                 FROM dbo.DEED_HED WHERE DATE_S BETWEEN @a AND @b';
-    EXEC sp_executesql @sql, N'@a BIGINT, @b BIGINT', @a = @DT1, @b = @DT2;
+    SET @sql = N'SELECT * INTO dbo.' + QUOTENAME(@bak) + N'
+                 FROM dbo.DEED_HED WHERE DATE_S >= @a';
+    EXEC sp_executesql @sql, N'@a BIGINT', @a = @DT1;
     SET @n = @@ROWCOUNT;
     INSERT dbo.CC_Snapshot (RunId, StepCode, TableName, BackupTable, RowsCopied)
     VALUES (@RunId, @StepCode, 'DEED_HED', @bak, @n);
@@ -9306,11 +9328,31 @@ BEGIN
 
     IF OBJECT_ID('tempdb..#Empty') IS NOT NULL DROP TABLE #Empty;
 
+    -- «خالی» یعنی نه فقط بدون ردیف DEED_DTL، بلکه هیچ جدول دیگری هم به آن
+    -- ارجاع ندهد. طبق sys.foreign_keys، هشت جدول به DEED_HED.N_S کلید
+    -- خارجی دارند (DEED_DTL, HEAD_LST, ANBGRD_HEAD, CHKREC_H, CHREC_HP,
+    -- WORKHEAD, MO_DTL, PGET_HED, HEAD_LST_TMP_WPF). سندی که هنوز از
+    -- کاردکس انبار یا هرکدام دیگر ارجاع می‌شود واقعاً خالی نیست، حتی اگر
+    -- DEED_DTL نداشته باشد — نباید حذفش کرد، و مطلقاً نباید ارجاع آن
+    -- جدول‌ها را NULL کرد تا حذف زور بشود؛ آن ارجاع همان چیزی است که
+    -- ردگیری سند حسابداری را از رکورد انبار ممکن می‌کند.
     SELECT h.N_S, h.DATE_S
     INTO   #Empty
     FROM   dbo.DEED_HED h
     WHERE  h.DATE_S BETWEEN @DT1 AND @DT2
-      AND  NOT EXISTS (SELECT 1 FROM dbo.DEED_DTL d WHERE d.N_S = h.N_S);
+      AND  NOT EXISTS (SELECT 1 FROM dbo.DEED_DTL    d WHERE d.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.HEAD_LST    x WHERE x.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.ANBGRD_HEAD x WHERE x.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.CHKREC_H    x WHERE x.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.CHREC_HP    x WHERE x.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.WORKHEAD    x WHERE x.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.MO_DTL      x WHERE x.N_S = h.N_S)
+      AND  NOT EXISTS (SELECT 1 FROM dbo.PGET_HED    x WHERE x.N_S = h.N_S);
+
+    -- HEAD_LST_TMP_WPF ممکن است روی همهٔ نصب‌ها نباشد؛ اگر هست همان قاعده.
+    IF OBJECT_ID('dbo.HEAD_LST_TMP_WPF', 'U') IS NOT NULL
+        DELETE e FROM #Empty e
+        WHERE EXISTS (SELECT 1 FROM dbo.HEAD_LST_TMP_WPF t WHERE t.N_S = e.N_S);
 
     DECLARE @n INT = (SELECT COUNT(*) FROM #Empty);
 
@@ -9358,12 +9400,39 @@ BEGIN
         CASE WHEN @WholeYear = 1 THEN 0
              ELSE ISNULL((SELECT MAX(N_S) FROM dbo.DEED_HED WHERE DATE_S < @DT1), 0) END;
 
+    -- کل جدول را می‌آوریم (نه فقط بازهٔ ماه) چون برای جلوگیری از تلاقی با
+    -- اسناد ماه‌های بعدی باید بدانیم شمارهٔ فعلی‌شان چیست؛ اسناد بیرون بازه
+    -- در ستون NewNS همان شمارهٔ فعلی خودشان را می‌گیرند (دست‌نخورده).
     SELECT  base,
+            DATE_S,
             N_S AS OldNS,
-            @seed + ROW_NUMBER() OVER (ORDER BY DATE_S ASC, N_S ASC) AS NewNS
+            CASE WHEN @WholeYear = 1 OR DATE_S BETWEEN @DT1 AND @DT2
+                 THEN @seed + ROW_NUMBER() OVER (
+                          PARTITION BY CASE WHEN @WholeYear = 1
+                                             OR DATE_S BETWEEN @DT1 AND @DT2
+                                        THEN 1 ELSE 0 END
+                          ORDER BY DATE_S ASC, N_S ASC)
+                 ELSE N_S END AS NewNS
     INTO    #Map
-    FROM    dbo.DEED_HED
-    WHERE   @WholeYear = 1 OR DATE_S BETWEEN @DT1 AND @DT2;
+    FROM    dbo.DEED_HED;
+
+    -- اگر بازهٔ شمارهٔ جدید ماه جاری با شمارهٔ فعلی اولین سند ماه‌های بعدی
+    -- تلاقی کند، همهٔ اسناد بعد از @DT2 را به یک اندازه جلو می‌بریم؛ چون
+    -- همه با هم جابه‌جا می‌شوند، ترتیب و فاصلهٔ نسبی‌شان دست‌نخورده می‌ماند
+    -- و تلاقی تازه‌ای ایجاد نمی‌شود.
+    IF @WholeYear = 0
+    BEGIN
+        DECLARE @maxNewInMonth FLOAT =
+            ISNULL((SELECT MAX(NewNS) FROM #Map WHERE DATE_S BETWEEN @DT1 AND @DT2), @seed);
+        DECLARE @minAfterMonth FLOAT =
+            ISNULL((SELECT MIN(OldNS) FROM #Map WHERE DATE_S > @DT2), 0);
+
+        IF @minAfterMonth > 0 AND @maxNewInMonth >= @minAfterMonth
+        BEGIN
+            DECLARE @shift FLOAT = (@maxNewInMonth - @minAfterMonth) + 1;
+            UPDATE #Map SET NewNS = OldNS + @shift WHERE DATE_S > @DT2;
+        END
+    END
 
     CREATE UNIQUE CLUSTERED INDEX IX_Map ON #Map(base);
 
@@ -9384,12 +9453,22 @@ BEGIN
     -- تريگرهاي Audit را فقط براي همين نشست کنار مي‌گذاريم
     EXEC sp_set_session_context @key = N'cc_bulk', @value = 1;
 
-    -- ۹ جدول فرزند با ON UPDATE CASCADE خودکار به‌روز مي‌شوند
+    -- ۹ جدول فرزند با ON UPDATE CASCADE خودکار به‌روز مي‌شوند.
+    -- دو مرحله‌اي: چون شمارهٔ جدید یک سند می‌تواند برابر شمارهٔ فعلیِ سند
+    -- دیگری باشد که هنوز عوض نشده (Shift یا جابه‌جایی داخل ماه)، یک
+    -- UPDATE مستقیم وسط کار به PRIMARY KEY تکراری می‌خورد. اول همه را به
+    -- یک بازهٔ منفیِ ناهم‌پوشان می‌بریم، بعد به مقدار نهایی.
+    UPDATE  h
+       SET  h.N_S = -1000000.0 - m.NewNS
+    FROM    dbo.DEED_HED h
+    JOIN    #Map m ON m.base = h.base
+    WHERE   h.N_S <> m.NewNS;
+
     UPDATE  h
        SET  h.N_S = m.NewNS
     FROM    dbo.DEED_HED h
     JOIN    #Map m ON m.base = h.base
-    WHERE   h.N_S <> m.NewNS;
+    WHERE   h.N_S < 0;
 
     EXEC sp_set_session_context @key = N'cc_bulk', @value = 0;
 
@@ -10395,15 +10474,48 @@ BEGIN
         END
         ELSE IF @tbl = 'DEED_HED'
         BEGIN
-            -- بازگرداني شماره اسناد؛ ۹ جدول فرزند خودکار دنبال مي‌آيند
+            -- بازگرداني شماره اسناد و اسناد حذف‌شده؛ ۹ جدول فرزند خودکار دنبال
+            -- مي‌آيند. سه مرحله، به همان دليلي که CC_sp_S04_SortDeeds دو-مرحله‌اي
+            -- است: اگر شمارهٔ اصليِ يک سند برابر شمارهٔ فعليِ سند ديگري باشد که
+            -- هنوز به حالت اصلي‌اش برنگشته، UPDATE يا INSERT مستقيم به
+            -- PRIMARY KEY تکراري مي‌خورد.
             EXEC sp_set_session_context @key = N'cc_bulk', @value = 1;
 
+            -- ۱) هر سندي که شماره‌اش فرق کرده را به يک بازهٔ منفيِ ناهم‌پوشان
+            --    مي‌بريم تا شمارهٔ اصلي‌اش براي درج سندهاي حذف‌شده (مرحلهٔ ۲) و
+            --    بازگرداني خودش (مرحلهٔ ۳) آزاد و بدون برخورد باشد.
+            SET @sql = N'
+                UPDATE  h
+                   SET  h.N_S = -3000000.0 - h.N_S
+                FROM    dbo.DEED_HED h
+                JOIN    dbo.' + QUOTENAME(@bak) + N' b ON b.base = h.base
+                WHERE   h.N_S <> b.N_S';
+            EXEC sp_executesql @sql;
+
+            -- ۲) سندهايي که CC_sp_S03_DeleteEmptyDeeds کامل حذف کرده بود را با
+            --    همان base و همان مقادير همهٔ ستون‌ها دوباره درج مي‌کنيم. امن
+            --    است چون مرحلهٔ ۱ هر شمارهٔ زندهٔ همپوشان را قبلاً کنار زده.
+            SET @sql = N'
+                SET IDENTITY_INSERT dbo.DEED_HED ON;
+                INSERT INTO dbo.DEED_HED
+                    (N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME,
+                     base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid,
+                     CRT, UID, BAYEG)
+                SELECT b.N_S, b.DATE_S, b.SHARH_S, b.NO_S, b.ANBAR, b.N_FACTOR, b.GHATEI,
+                       b.USER_NAME, b.base, b.SGN1, b.SGN2, b.SGN3, b.SGN4, b.OKF,
+                       b.sgn1usid, b.sgn2usid, b.sgn3usid, b.CRT, b.UID, b.BAYEG
+                FROM   dbo.' + QUOTENAME(@bak) + N' b
+                WHERE  NOT EXISTS (SELECT 1 FROM dbo.DEED_HED h WHERE h.base = b.base);
+                SET IDENTITY_INSERT dbo.DEED_HED OFF;';
+            EXEC sp_executesql @sql;
+
+            -- ۳) سندهاي مرحلهٔ ۱ را از بازهٔ منفي به شمارهٔ اصلي‌شان برمي‌گردانيم.
             SET @sql = N'
                 UPDATE  h
                    SET  h.N_S = b.N_S
                 FROM    dbo.DEED_HED h
                 JOIN    dbo.' + QUOTENAME(@bak) + N' b ON b.base = h.base
-                WHERE   h.N_S <> b.N_S';
+                WHERE   h.N_S < 0';
             EXEC sp_executesql @sql;
             SET @n += @@ROWCOUNT;
 
@@ -11586,12 +11698,6 @@ GO
                 "CC_sp_S12_CalcMargin (نسخه کاردکس)، CC_sp_CompareMarginMethods",
                 "اسکریپت 19-margin-fix-kalas.sql را اجرا کنید (به دیدگاه KALAS و ستون‌های KHFR/MABRIAL/TAGCODE/MM نیاز دارد).");
         }
-        /// <summary>
-        /// یک بلوک SQL از ماژول بستن ماه بهای تمام‌شده را اجرا می‌کند و
-        /// اگر جدول‌های پایه CC_* هنوز روی این پایگاه نباشند (اسکریپت‌های
-        /// 10 تا 13 اجرا نشده‌اند)، به‌جای متوقف کردن کل LetsGo فقط پیام
-        /// راهنما می‌دهد.
-        /// </summary>
         private static void TryExecuteCostCloseBatch(SqlConnection db, string script, string what, string hint)
         {
             try
