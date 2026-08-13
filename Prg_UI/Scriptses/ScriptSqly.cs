@@ -8429,6 +8429,14 @@ GO
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
 
+-- بدون این دو، CC_ItemCost که ستون محاسباتی PERSISTED دارد (TotalCost)
+-- در صورت خاموش بودن QUOTED_IDENTIFIER پیش‌فرض نشست/پایگاه، همان خطای
+-- 1934 را که در رویه‌ها دیدیم، هنگام خودِ CREATE TABLE می‌دهد.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 /* ───────────────────────── اجرا و گام‌ها ───────────────────────── */
 
 IF OBJECT_ID('dbo.CC_Run','U') IS NULL
@@ -9968,6 +9976,21 @@ BEGIN
     DECLARE @TafDastmozd BIGINT = 99999999;
     DECLARE @UnitId INT, @Dep INT, @SplitMode TINYINT;
 
+    -- Depatman = NULL يعني «همهٔ دپارتمان‌ها» — اگر بيش از يک واحد فعال اين
+    -- حالت را داشته باشند، هر دو دقيقاً همان برگه‌هاي توليد را پردازش
+    -- مي‌کنند. چون اين حلقه IMBIBE_MANF/IMBIBE_SAR را در HEAD_MANF مستقيماً
+    -- ويرايش مي‌کند، واحد دومي که در همان اجرا پردازش مي‌شود ديگر مقدار
+    -- اصلي فرمول را نمي‌بيند بلکه مقدارِ از قبل تعديل‌شدهٔ واحد اول را
+    -- مي‌خواند و رويش دوباره ضريب مي‌زند — نتيجه فرمول را خراب مي‌کند، نه
+    -- فقط عدد کنترلي را. مقدار پيش‌فرض داده اوليه (11-seed-data.sql) دقيقاً
+    -- همين ترکيب را دارد؛ تا وقتي نصب‌کننده Depatman هر واحد را با دپارتمان
+    -- واقعي‌اش عوض نکند، اجراي واقعي همين‌جا فرمول‌ها را خراب مي‌کرد.
+    IF (SELECT COUNT(*) FROM dbo.CC_Unit WHERE IsActive = 1 AND Depatman IS NULL) > 1
+    BEGIN
+        RAISERROR(N'بيش از يک واحد توليدي فعال بدون دپارتمان مشخص (همه‌شمول) وجود دارد؛ اين باعث پردازش دوباره‌ي همان برگه‌ها و خراب شدن فرمول‌ها مي‌شود. دپارتمان هر واحد را در تنظیمات مشخص کنيد.', 16, 1);
+        RETURN;
+    END
+
     DELETE dbo.CC_ConversionCost WHERE RunId = @RunId;
 
     DECLARE cUnit CURSOR LOCAL FAST_FORWARD FOR
@@ -10457,7 +10480,7 @@ BEGIN
 
     BEGIN TRAN;
 
-    DECLARE @tbl SYSNAME, @bak SYSNAME, @sql NVARCHAR(MAX), @n INT = 0;
+    DECLARE @tbl SYSNAME, @bak SYSNAME, @sql NVARCHAR(MAX), @n INT = 0, @inserted INT;
 
     DECLARE cSnap CURSOR LOCAL FAST_FORWARD FOR
         SELECT TableName, BackupTable FROM #Snap;
@@ -10515,6 +10538,13 @@ BEGIN
             -- ۲) سندهايي که CC_sp_S03_DeleteEmptyDeeds کامل حذف کرده بود را با
             --    همان base و همان مقادير همهٔ ستون‌ها دوباره درج مي‌کنيم. امن
             --    است چون مرحلهٔ ۱ هر شمارهٔ زندهٔ همپوشان را قبلاً کنار زده.
+            -- @@ROWCOUNT را بلافاصله بعد از INSERT، داخل همان دستهٔ پویا، در
+            -- @inserted می‌ریزیم — چون SET IDENTITY_INSERT OFF که بعدش لازم
+            -- است خودش یک دستور SET است و @@ROWCOUNT را در نشستِ فراخوان صفر
+            -- می‌کند (رفتار واقعی SQL Server، با آزمایش مستقیم تأیید شد). بدون
+            -- این، بازگردانیِ سندی که فقط حذف شده بود (بدون تغییر شماره) به
+            -- کاربر «۰ سطر بازگردانده شد» نشان می‌داد، با اینکه سند واقعاً
+            -- برگشته بود.
             SET @sql = N'
                 SET IDENTITY_INSERT dbo.DEED_HED ON;
                 INSERT INTO dbo.DEED_HED
@@ -10526,8 +10556,10 @@ BEGIN
                        b.sgn1usid, b.sgn2usid, b.sgn3usid, b.CRT, b.UID, b.BAYEG
                 FROM   dbo.' + QUOTENAME(@bak) + N' b
                 WHERE  NOT EXISTS (SELECT 1 FROM dbo.DEED_HED h WHERE h.base = b.base);
+                SET @ins = @@ROWCOUNT;
                 SET IDENTITY_INSERT dbo.DEED_HED OFF;';
-            EXEC sp_executesql @sql;
+            EXEC sp_executesql @sql, N'@ins INT OUTPUT', @ins = @inserted OUTPUT;
+            SET @n += @inserted;
 
             -- ۳) سندهاي مرحلهٔ ۱ را از بازهٔ منفي به شمارهٔ اصلي‌شان برمي‌گردانيم.
             SET @sql = N'
