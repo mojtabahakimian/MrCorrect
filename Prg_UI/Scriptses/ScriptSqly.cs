@@ -8834,6 +8834,88 @@ BEGIN
 END
 GO
 
+/* ───────────────────────── ثبت فرم‌ها در TFORMS ─────────────────────────
+   نام‌ها دقیقاً باید با Shared/Constants/CostForms.cs یکی باشند — همان
+   جدولی که Pay2AccessService/Pay2Authorize برای دسترسی می‌خواند. الگو
+   عیناً از pay2_acl_migration.sql گرفته شده (GRP=10 برای این ماژول، تا
+   با گروه ۹ که PAY2 استفاده می‌کند تداخل نکند).
+
+   بدون این بخش، صفحهٔ مدیریت دسترسی هیچ ردیفی برای این ماژول نشان
+   نمی‌دهد و وقتی AclEnforced روشن باشد هیچ‌کس نمی‌تواند به آن دسترسی
+   بگیرد.
+   ─────────────────────────────────────────────────────────────────────── */
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_DASHBOARD')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_DASHBOARD', N'داشبورد بستن ماه بهای تمام‌شده', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_RUN')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_RUN', N'پیشرفت اجرای بستن ماه', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_EXCEPTIONS')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_EXCEPTIONS', N'مغایرت‌های بستن ماه', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_VARIANCE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_VARIANCE', N'تصمیم انحراف', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_CONVERSION')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_CONVERSION', N'هزینه تبدیل', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_MARGIN')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_MARGIN', N'سود و زیان کالا', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_HISTORY')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_HISTORY', N'سوابق اجراها', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_SETTINGS')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_SETTINGS', N'تنظیمات بستن ماه', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_START')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_START', N'شروع اجرای بستن ماه', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_AUTOFIX')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_AUTOFIX', N'اصلاح خودکار داده', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_RESOLVE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_RESOLVE', N'بستن استثنا', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_DECIDE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_DECIDE', N'ثبت تصمیم انحراف', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_APPLY_RATE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_APPLY_RATE', N'اعمال ضریب تعدیل', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_ROLLUP')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_ROLLUP', N'اجرای موتور نرخ', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_ROLLBACK')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_ROLLBACK', N'بازگردانی از اسنپ‌شات', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_APPROVE')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_APPROVE', N'تأیید نهایی و قفل ماه', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_EXPORT')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_EXPORT', N'خروجی اکسل', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+PRINT N'فرم‌های ماژول بستن ماه بهای تمام‌شده در TFORMS ثبت شدند.';
+GO
+
 PRINT N'داده اوليه ثبت شد.';
 
 SELECT RuleCode AS کد, RuleName AS قاعده, StepCode AS گام,
@@ -8862,6 +8944,13 @@ GO
    نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
+
+-- بدون این دو، رویه‌هایی که به CC_ItemCost/CC_ItemMargin می‌نویسند
+-- (ستون‌های محاسباتی PERSISTED) با خطای 1934 شکست می‌خورند.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 /* ═══════════════ مدیریت اجرا ═══════════════ */
 
@@ -9342,6 +9431,11 @@ GO
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 /* ستون جدید برای نگهداری فهرست برگه‌ها و امکان اصلاح خودکار */
 IF COL_LENGTH('dbo.CC_Exception','RefList') IS NULL
     ALTER TABLE dbo.CC_Exception ADD RefList NVARCHAR(2000) NULL;
@@ -9614,7 +9708,7 @@ BEGIN
        فقط اولین نقطه منفی هر کالا/انبار گزارش می‌شود؛ بقیه
        دنباله همان یک مشکل‌اند و فهرست را شلوغ می‌کنند.
        ───────────────────────────────────────────────────────────── */
-       ;WITH Harekat AS (
+    ;WITH Harekat AS (
         -- KALAS یک ویو گزارشی است، نه کاردکس خام؛ ستون انبار آن به‌جای
         -- ANBAR، سه ستون ANBARF/ANBARCODE/ANBARAS دارد. با مقایسه با
         -- INVO_LST.ANBAR (که مبنای درست است) روی داده واقعی تأیید شد که
@@ -9763,6 +9857,13 @@ GO
    نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
+
+-- بدون این دو، S11 که در CC_ItemCost (ستون محاسباتی PERSISTED) DELETE/INSERT
+-- می‌کند با خطای 1934 شکست می‌خورد.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 /* ═══════════════════════════════════════════════════════════════════
    S10 — تراز هزینه تبدیل به تفکیک واحد تولیدی
@@ -10196,6 +10297,11 @@ GO
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 CREATE OR ALTER PROCEDURE dbo.CC_sp_Rollback
     @RunId    INT,
     @StepCode VARCHAR(10) = NULL,   -- خالي = آخرين اسنپ‌شات هر جدول
@@ -10405,6 +10511,11 @@ GO
    نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 /* ═══════════════════════════════════════════════════════════════════
    S07 — بازتولید خروج مواد و انبارگردانی
@@ -10858,6 +10969,13 @@ GO
    نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
    ═══════════════════════════════════════════════════════════════════ */
 
+-- بدون این دو، S12 که در CC_ItemMargin (ستون محاسباتی PERSISTED) DELETE/INSERT
+-- می‌کند با خطای 1934 شکست می‌خورد.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 /* جدول نتیجه سود کالا */
 IF OBJECT_ID('dbo.CC_ItemMargin','U') IS NULL
 CREATE TABLE dbo.CC_ItemMargin (
@@ -11267,6 +11385,13 @@ GO
    ⚠ حتماً پس از 18-margin-report-approve.sql اجرا شود — نسخه S12
    آن فایل را جایگزین می‌کند.
    ═══════════════════════════════════════════════════════════════════ */
+
+-- بدون این دو، S12 که در CC_ItemMargin (ستون محاسباتی PERSISTED) DELETE/INSERT
+-- می‌کند با خطای 1934 شکست می‌خورد — دقیقاً همان خطایی که تست واقعی گرفت.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
 /* ستون‌های جدید برای تفکیک تخفیف و برگشت */
 IF COL_LENGTH('dbo.CC_ItemMargin','GrossSales') IS NULL
