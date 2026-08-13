@@ -28,6 +28,10 @@ namespace Prg_UI.Scriptses
                 }
                 #endregion
 
+                if (_type_ == 2)
+                {
+                    CostCloseScript(db);
+                }
                 //try { db.Execute($@""); } catch { }
 
                 var SanadCount = db.Query<double?>("SELECT COUNT(*) FROM dbo.DEED_HED").FirstOrDefault();
@@ -8338,45 +8342,6 @@ GO
         ///
         /// idempotent است: هر ایندکسی که از قبل ON باشد در فهرست نمی‌آید.
         /// </summary>
-        private static void SequentialKeyContentionScript(SqlConnection db)
-        {
-            try
-            {
-                // بهینه‌سازی کلید صعودی (OPTIMIZE_FOR_SEQUENTIAL_KEY) برای SQL Server 2019+
-                db.Execute(@"
-IF TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT) >= 15
-BEGIN
-    DECLARE @sql NVARCHAR(MAX) = N'';
-
-    SELECT @sql = @sql + N'ALTER INDEX ' + QUOTENAME(i.name)
-                       + N' ON ' + QUOTENAME(SCHEMA_NAME(t.schema_id)) + N'.' + QUOTENAME(t.name)
-                       + N' SET (OPTIMIZE_FOR_SEQUENTIAL_KEY = ON);' + CHAR(10)
-    FROM sys.indexes AS i
-    INNER JOIN sys.tables AS t
-        ON t.object_id = i.object_id
-    INNER JOIN sys.index_columns AS ic
-        ON ic.object_id = i.object_id
-       AND ic.index_id  = i.index_id
-       AND ic.key_ordinal = 1
-    INNER JOIN sys.columns AS c
-        ON c.object_id = i.object_id
-       AND c.column_id = ic.column_id
-    WHERE i.index_id > 0
-      AND i.is_hypothetical = 0
-      AND i.is_disabled = 0
-      AND i.optimize_for_sequential_key = 0
-      AND c.is_identity = 1
-      AND t.name IN (N'DEED_DTL', N'INVO_LST', N'PGET_LST', N'PGET_HED', N'DEED_HED', N'HEAD_LST');
-
-    IF LEN(@sql) > 0
-    BEGIN
-        EXEC sys.sp_executesql @sql;
-    END
-END");
-            }
-            catch { }
-        }
-
         private static void ExecuteBatchesTransactional(SqlConnection db, string script)
 
         {
@@ -8404,6 +8369,7 @@ END");
                 {
                     try
                     {
+                        string test = cmdText;
                         db.Execute(cmdText, transaction: transaction);
                     }
                     catch (SqlException ex)
@@ -8416,6 +8382,3104 @@ END");
                 }
             }
         }
+        /// <summary>
+        /// ماژول «بستن ماه بهای تمام‌شده» (پیشوند CC_).
+        ///
+        /// هر ده اسکریپت Server/Database/10-schema.sql تا
+        /// 19-margin-fix-kalas.sql عیناً اینجا کپی شده‌اند، به همان ترتیب
+        /// وابستگی: اول جدول‌های پایه، بعد داده اولیه، بعد رویه‌ها. پس
+        /// اجرای این فایل روی یک پایگاه تازه هم کامل بالا می‌آید و
+        /// پیش‌نیاز دستی ندارد.
+        ///
+        /// همه بلوک‌ها idempotent هستند (CREATE OR ALTER برای رویه‌ها،
+        /// IF NOT EXISTS برای جدول‌ها و داده اولیه) چون این فایل هر بار
+        /// دوباره روی همان پایگاه اجرا می‌شود.
+        ///
+        /// اگر متن یکی از بلوک‌ها را عوض کردید، همان تغییر را در فایل
+        /// .sql متناظرش هم بگذارید؛ این دو باید مو‌به‌مو یکی بمانند.
+        /// </summary>
+        private static void CostCloseScript(SqlConnection db)
+        {
+            // ترتیب مهم است: بلوک‌های پایه (۱۰ تا ۱۳) جدول‌ها و رویه‌هایی را
+            // می‌سازند که بقیه بلوک‌ها به آن‌ها وابسته‌اند.
+            string baseSchema = @"
+/* ═══════════════════════════════════════════════════════════════════
+   فاز ۱ — فایل ۱ از ۳ : ساختار جداول
+
+   هیچ جدول موجودی تغییر نمی‌کند. همه چیز با پیشوند CC_ اضافه می‌شود.
+   قابل اجرای مکرر: اگر جدولی از قبل باشد، دست‌نخورده می‌ماند.
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────── اجرا و گام‌ها ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_Run','U') IS NULL
+CREATE TABLE dbo.CC_Run (
+    RunId          INT IDENTITY(1,1) PRIMARY KEY,
+    FiscalYear     SMALLINT      NOT NULL,
+    PeriodMonth    TINYINT       NOT NULL,          -- ۱ تا ۱۲ = HEAD_MANF.GHEYMAT
+    DateFrom       BIGINT        NOT NULL,          -- 14050401
+    DateTo         BIGINT        NOT NULL,          -- 14050431
+    RunNo          SMALLINT      NOT NULL,          -- شماره اجرا در همان ماه
+    PrevRunId      INT           NULL,
+    IsLatest       BIT           NOT NULL DEFAULT 1,
+    RunKind        TINYINT       NOT NULL,          -- 1=آزمایشی 2=قطعی
+    Status         TINYINT       NOT NULL,          -- 0=پیش‌نویس 1=درحال‌اجرا 2=متوقف
+                                                    -- 3=تکمیل 4=خطا 5=بازگردانی‌شده
+    FormulasDirty  BIT           NOT NULL DEFAULT 0,
+    StartedAtUtc   DATETIME2     NULL,
+    FinishedAtUtc  DATETIME2     NULL,
+    StartedByUser  NVARCHAR(50)  NOT NULL,
+    ApprovedByUser NVARCHAR(50)  NULL,
+    ApprovedAtUtc  DATETIME2     NULL,
+    Note           NVARCHAR(500) NULL,
+    CreatedAtUtc   DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_Run_Period')
+    CREATE INDEX IX_CC_Run_Period ON dbo.CC_Run(FiscalYear, PeriodMonth, Status);
+GO
+
+IF OBJECT_ID('dbo.CC_RunStep','U') IS NULL
+CREATE TABLE dbo.CC_RunStep (
+    RunStepId     INT IDENTITY(1,1) PRIMARY KEY,
+    RunId         INT           NOT NULL REFERENCES dbo.CC_Run(RunId),
+    StepCode      VARCHAR(10)   NOT NULL,
+    StepTitle     NVARCHAR(120) NOT NULL,
+    SeqNo         SMALLINT      NOT NULL,
+    Attempt       TINYINT       NOT NULL DEFAULT 1,
+    Status        TINYINT       NOT NULL,           -- 0=درانتظار 1=درحال‌اجرا 2=موفق
+                                                    -- 3=هشدار 4=خطا 5=رد‌شده
+    StartedAtUtc  DATETIME2     NULL,
+    FinishedAtUtc DATETIME2     NULL,
+    DurationMs    INT           NULL,
+    RowsAffected  INT           NULL,
+    ResultJson    NVARCHAR(MAX) NULL,
+    ErrorMessage  NVARCHAR(MAX) NULL,
+    CONSTRAINT UQ_CC_RunStep UNIQUE (RunId, StepCode, Attempt)
+);
+GO
+
+IF OBJECT_ID('dbo.CC_RunLog','U') IS NULL
+CREATE TABLE dbo.CC_RunLog (
+    LogId       BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId       INT            NULL,
+    StepCode    VARCHAR(10)    NULL,
+    LoggedAtUtc DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME(),
+    Severity    TINYINT        NOT NULL,            -- 0=ریز 1=اطلاع 2=هشدار 3=خطا
+    Message     NVARCHAR(2000) NOT NULL,
+    ContextJson NVARCHAR(MAX)  NULL
+);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_RunLog_Run')
+    CREATE INDEX IX_CC_RunLog_Run ON dbo.CC_RunLog(RunId, LogId);
+GO
+
+/* ───────────────────────── اسنپ‌شات و بازگردانی ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_Snapshot','U') IS NULL
+CREATE TABLE dbo.CC_Snapshot (
+    SnapshotId    INT IDENTITY(1,1) PRIMARY KEY,
+    RunId         INT       NOT NULL,
+    StepCode      VARCHAR(10) NOT NULL,
+    TableName     SYSNAME   NOT NULL,
+    BackupTable   SYSNAME   NOT NULL,
+    RowsCopied    INT       NOT NULL,
+    TakenAtUtc    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    RestoredAtUtc DATETIME2 NULL
+);
+GO
+
+/* ───────────────────────── قواعد تشخیص و استثناها ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_CheckRule','U') IS NULL
+CREATE TABLE dbo.CC_CheckRule (
+    RuleCode        VARCHAR(12)   NOT NULL PRIMARY KEY,
+    RuleName        NVARCHAR(120) NOT NULL,
+    StepCode        VARCHAR(10)   NOT NULL,
+    ExType          TINYINT       NOT NULL,
+    DefaultSeverity TINYINT       NOT NULL,        -- 1=هشدار 2=مسدودکننده
+    Threshold       FLOAT         NULL,
+    RemedyText      NVARCHAR(600) NOT NULL,
+    IsActive        BIT           NOT NULL DEFAULT 1,
+    SortOrder       SMALLINT      NOT NULL
+);
+GO
+
+IF OBJECT_ID('dbo.CC_Exception','U') IS NULL
+CREATE TABLE dbo.CC_Exception (
+    ExceptionId    BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId          INT            NULL,
+    StepCode       VARCHAR(10)    NOT NULL,
+    RuleCode       VARCHAR(12)    NULL,
+    ExType         TINYINT        NOT NULL,
+    Severity       TINYINT        NOT NULL,
+    Anbar          INT            NULL,
+    Code           BIGINT         NULL,
+    DocNumber      INT            NULL,
+    DocTag         INT            NULL,
+    DocDate        BIGINT         NULL,
+    Amount         FLOAT          NULL,
+    Description    NVARCHAR(500)  NOT NULL,
+    IsResolved     BIT            NOT NULL DEFAULT 0,
+    ResolvedBy     NVARCHAR(50)   NULL,
+    ResolvedAtUtc  DATETIME2      NULL,
+    ResolutionNote NVARCHAR(500)  NULL,
+    CreatedAtUtc   DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+IF COL_LENGTH('dbo.CC_Exception','RuleCode') IS NULL
+    ALTER TABLE dbo.CC_Exception ADD RuleCode VARCHAR(12) NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_Exception_Run')
+    CREATE INDEX IX_CC_Exception_Run
+        ON dbo.CC_Exception(RunId, StepCode, IsResolved, Severity);
+GO
+
+/* استثناهایی که کاربر یک‌بار پذیرفته و نباید هر ماه تکرار شوند */
+IF OBJECT_ID('dbo.CC_AcceptedException','U') IS NULL
+CREATE TABLE dbo.CC_AcceptedException (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    RuleCode     VARCHAR(12)   NOT NULL,
+    Code         BIGINT        NULL,        -- کالا؛ NULL يعني همه
+    FNUMB        INT           NULL,        -- فرمول؛ NULL يعني همه
+    Reason       NVARCHAR(400) NOT NULL,
+    AcceptedBy   NVARCHAR(50)  NOT NULL,
+    AcceptedAtUtc DATETIME2    NOT NULL DEFAULT SYSUTCDATETIME(),
+    IsActive     BIT           NOT NULL DEFAULT 1
+);
+GO
+
+/* ───────────────────────── واحدهای تولیدی ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_Unit','U') IS NULL
+CREATE TABLE dbo.CC_Unit (
+    UnitId     INT IDENTITY(1,1) PRIMARY KEY,
+    UnitName   NVARCHAR(60) NOT NULL,
+    Depatman   INT          NULL,
+    SplitMode  TINYINT      NOT NULL DEFAULT 1,   -- 1=يک ضريب 2=دو ضريب
+    IsActive   BIT          NOT NULL DEFAULT 1,
+    SeqNo      SMALLINT     NOT NULL DEFAULT 1
+);
+GO
+
+IF OBJECT_ID('dbo.CC_UnitAnbar','U') IS NULL
+CREATE TABLE dbo.CC_UnitAnbar (
+    UnitId       INT      NOT NULL REFERENCES dbo.CC_Unit(UnitId),
+    Anbar        INT      NOT NULL,
+    AnbarRole    TINYINT  NOT NULL,   -- 1=مواد مصرفي توليد 2=مواد اوليه
+                                      -- 3=محصول 4=ساير
+    DoStockCount BIT      NOT NULL DEFAULT 1,
+    SeqNo        SMALLINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (UnitId, Anbar)
+);
+GO
+
+IF OBJECT_ID('dbo.CC_UnitAcc','U') IS NULL
+CREATE TABLE dbo.CC_UnitAcc (
+    Id       INT IDENTITY(1,1) PRIMARY KEY,
+    UnitId   INT           NOT NULL REFERENCES dbo.CC_Unit(UnitId),
+    HesKol   INT           NOT NULL,
+    CostKind TINYINT       NOT NULL,          -- 1=دستمزد 2=سربار
+    Ratio    DECIMAL(9,6)  NOT NULL DEFAULT 1,
+    IsActive BIT           NOT NULL DEFAULT 1,
+    Note     NVARCHAR(200) NULL,
+    CONSTRAINT UQ_CC_UnitAcc UNIQUE (UnitId, HesKol)
+);
+GO
+
+/* ───────────────────────── نتایج محاسبه ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_ItemCost','U') IS NULL
+CREATE TABLE dbo.CC_ItemCost (
+    Id           BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId        INT      NULL,
+    PeriodMonth  TINYINT  NOT NULL,
+    Code         BIGINT   NOT NULL,
+    LowLevelCode SMALLINT NOT NULL,
+    SourceKind   TINYINT  NOT NULL,      -- 1=ميانگين انبار 2=فرمول 3=بدون منبع
+    FNUMB        INT      NULL,
+    MaterialCost FLOAT    NOT NULL DEFAULT 0,
+    WageCost     FLOAT    NOT NULL DEFAULT 0,
+    OverheadCost FLOAT    NOT NULL DEFAULT 0,
+    TotalCost    AS (MaterialCost + WageCost + OverheadCost) PERSISTED,
+    CalculatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_ItemCost_Lookup')
+    CREATE INDEX IX_CC_ItemCost_Lookup ON dbo.CC_ItemCost(PeriodMonth, Code, RunId);
+GO
+
+IF OBJECT_ID('dbo.CC_FormulaChange','U') IS NULL
+CREATE TABLE dbo.CC_FormulaChange (
+    ChangeId     BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId        INT           NOT NULL,
+    StepCode     VARCHAR(10)   NOT NULL,
+    FNUMB        INT           NOT NULL,
+    ParentCode   BIGINT        NULL,
+    ChildCode    BIGINT        NULL,
+    FieldName    VARCHAR(20)   NOT NULL,   -- SMABL MABLK MEGHK PERT
+                                           -- IMBIBE_MANF IMBIBE_SAR
+    OldValue     FLOAT         NULL,
+    NewValue     FLOAT         NULL,
+    Reason       NVARCHAR(200) NULL,
+    ChangedAtUtc DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_FormulaChange_Run')
+    CREATE INDEX IX_CC_FormulaChange_Run ON dbo.CC_FormulaChange(RunId, StepCode, FNUMB);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_FormulaChange_Code')
+    CREATE INDEX IX_CC_FormulaChange_Code ON dbo.CC_FormulaChange(ChildCode, RunId);
+GO
+
+/* ───────────────────────── انحراف و تصمیم‌ها ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_Variance','U') IS NULL
+CREATE TABLE dbo.CC_Variance (
+    VarianceId     BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId          INT    NOT NULL,
+    Anbar          INT    NOT NULL,
+    Code           BIGINT NOT NULL,
+    QtyVariance    FLOAT  NOT NULL,
+    UnitRate       FLOAT  NULL,
+    AmountVariance FLOAT  NULL,
+    ConsumedQty    FLOAT  NULL,
+    IsKeyItem      BIT    NOT NULL DEFAULT 0,
+    CONSTRAINT UQ_CC_Variance UNIQUE (RunId, Anbar, Code)
+);
+GO
+
+IF OBJECT_ID('dbo.CC_VarianceDecision','U') IS NULL
+CREATE TABLE dbo.CC_VarianceDecision (
+    DecisionId   BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId        INT           NOT NULL,
+    Code         BIGINT        NOT NULL,
+    Mode         TINYINT       NOT NULL,   -- 1=اختصاص 2=تسهيم 3=بدون تخصيص
+    TargetCode   BIGINT        NULL,       -- کليد پايدار بين ماه‌ها
+    TargetFNUMB  INT           NULL,       -- فرمول ماه جاري، مشتق از TargetCode
+    AppliedQty   FLOAT         NULL,
+    DecidedBy    NVARCHAR(50)  NOT NULL,
+    DecidedAtUtc DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME(),
+    Note         NVARCHAR(300) NULL
+);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_CC_VarDecision_Code')
+    CREATE INDEX IX_CC_VarDecision_Code ON dbo.CC_VarianceDecision(Code, RunId);
+GO
+
+/* ───────────────────────── هزینه تبدیل و حاشیه سود ───────────────────────── */
+
+IF OBJECT_ID('dbo.CC_ConversionCost','U') IS NULL
+CREATE TABLE dbo.CC_ConversionCost (
+    Id               INT IDENTITY(1,1) PRIMARY KEY,
+    RunId            INT           NOT NULL,
+    UnitId           INT           NOT NULL,
+    CostKind         TINYINT       NOT NULL,   -- 0=کل 1=دستمزد 2=سربار
+    AbsorbedAmount   DECIMAL(19,0) NOT NULL,
+    AbsorbedFromWip  DECIMAL(19,0) NULL,
+    ActualAmount     DECIMAL(19,0) NOT NULL,
+    ActualDetailJson NVARCHAR(MAX) NULL,
+    AdjustFactor     DECIMAL(18,8) NOT NULL,
+    ApprovedBy       NVARCHAR(50)  NULL,
+    CONSTRAINT UQ_CC_ConversionCost UNIQUE (RunId, UnitId, CostKind)
+);
+GO
+
+IF OBJECT_ID('dbo.CC_MarginTarget','U') IS NULL
+CREATE TABLE dbo.CC_MarginTarget (
+    Id             INT IDENTITY(1,1) PRIMARY KEY,
+    Code           BIGINT       NOT NULL,
+    TargetKind     TINYINT      NOT NULL,   -- 1=سود صفر 2=درصد مشخص 3=آزاد
+    TargetPct      DECIMAL(9,4) NULL,
+    BalancingCode  BIGINT       NULL,
+    BalancingFNUMB INT          NULL,
+    IsActive       BIT          NOT NULL DEFAULT 1,
+    Note           NVARCHAR(300) NULL
+);
+GO
+
+PRINT N'ساختار جداول ايجاد شد.';
+
+SELECT  t.name AS جدول,
+        (SELECT SUM(p.rows) FROM sys.partitions p
+         WHERE p.object_id = t.object_id AND p.index_id IN (0,1)) AS تعداد_سطر
+FROM    sys.tables t
+WHERE   t.name LIKE 'CC[_]%'
+ORDER BY t.name;
+GO
+";
+            TryExecuteCostCloseBatch(db, baseSchema,
+                "جدول‌های پایه CC_*",
+                "اسکریپت 10-schema.sql را اجرا کنید.");
+
+            string seedData = @"
+/* ═══════════════════════════════════════════════════════════════════
+   فاز ۱ — فایل ۲ از ۳ : داده اولیه
+
+   قواعد تشخیص، واحدهای تولیدی، و استثناهای پذیرفته‌شده.
+   قابل اجرای مکرر.
+
+   ⚠ بخش واحدهای تولیدی را بر اساس واقعیت کارخانه ویرایش کنید.
+     مقادیر فعلی نمونه‌اند و از گزارش موجودی خودتان استخراج شده‌اند.
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────── قواعد تشخیص ───────────────────────── */
+
+MERGE dbo.CC_CheckRule AS t
+USING (VALUES
+ ('CHK-01', N'کاردکس منفی', 'S05', 1, 2, NULL,
+  N'تاریخ رسید یا حواله را جابه‌جا کنید تا موجودی در هیچ لحظه‌ای منفی نشود.', 10),
+
+ ('CHK-02', N'مغایرت کارت انبار و حسابداری', 'S05', 2, 2, NULL,
+  N'معمولاً حواله‌ای است که فاکتورش صادر نشده، یا تاریخ فاکتور در ماه بعد افتاده. تاریخ‌ها را یکسان کنید.', 20),
+
+ ('CHK-03', N'فرمول بدون نرخ جذب هزینه تبدیل', 'S00', 9, 1, NULL,
+  N'در فرمول، «جذب هزینه دستمزد» را پر کنید. اگر عمداً صفر است (محصول فرعی مانند آب پنیر خالص)، آن را در فهرست استثناهای پذیرفته‌شده ثبت کنید تا دیگر هشدار ندهد.', 30),
+
+ ('CHK-04', N'کالای تولیدشده بدون فرمول ماه', 'S00', 12, 2, NULL,
+  N'نسخه ماه جاری فرمول ساخته نشده است. با «کپی فرمول» نسخه ماه را بسازید.', 40),
+
+ ('CHK-05', N'ماده بدون منبع نرخ', 'S00', 4, 1, NULL,
+  N'این ماده نه فرمول دارد و نه گردش خروج در ماه، بنابراین نرخش صفر می‌ماند و صفر را به همه کالاهای بالادست منتقل می‌کند. یک نرخ برایش تعیین کنید.', 50),
+
+ ('CHK-06', N'حلقه در ساختار فرمول', 'S00', 5, 2, NULL,
+  N'کالا مستقیم یا غیرمستقیم خودش را مصرف می‌کند. تا این حلقه شکسته نشود، محاسبه نرخ ممکن نیست.', 60),
+
+ ('CHK-07', N'مانده نامتوازن مواد در حساب ۷۵۱', 'S00', 13, 1, 0.001,
+  N'اگر یک طرف صفر باشد، حواله جا افتاده است. آستانه یک در هزار است؛ کمتر از آن گِردکردن طبیعی است و نیاز به اقدام ندارد.', 70),
+
+ ('CHK-08', N'اختلاف جذب برگه تولید با سند', 'S10', 10, 1, NULL,
+  N'سند حسابداری وقتی صادر شده که فرمول نرخ دیگری داشته است. برگه تولید را بازسازی کنید.', 80),
+
+ ('CHK-09', N'نرخ منتشرنشده نیمه‌ساخته', 'S11', 14, 2, 0.001,
+  N'بهای خودِ فرمول این کالا با نرخی که در فرمول کالاهای بالادست دارد نمی‌خواند؛ یعنی انتشار نرخ کامل نشده. پس از اجرای کامل محاسبه نرخ، این قاعده باید صفر شود.', 90),
+
+ ('CHK-10', N'مانده حساب کالای در جریان ساخت', 'S10', 8, 1, 10000000,
+  N'فرض «کالای در جریان ساخت صفر» نقض شده است. آستانه ده میلیون ریال تنظیم شده تا باقیمانده گِردکردن هشدار کاذب ندهد.', 100),
+
+ ('CHK-11', N'انحراف روی ماده مصرف‌نشده', 'S09', 11, 1, NULL,
+  N'این ماده در هیچ فرمولی مصرف نشده ولی انحراف دارد. برگه انتقال یا انبارِ انبارگردانی را بررسی کنید.', 110),
+
+ ('CHK-12', N'فرمول مقصد ماه قبل موجود نیست', 'S09', 15, 1, NULL,
+  N'تصمیم ماه قبل قابل ادامه نیست چون کالای مقصد امسال فرمول ندارد. پیش‌فرض روی تسهیم به نسبت مصرف قرار گرفت.', 120),
+
+ ('CHK-13', N'حواله با مقدار صفر', 'S07', 16, 2, NULL,
+  N'ماده در فرمول مقدار دارد ولی حواله‌اش با مقدار صفر صادر شده؛ یعنی فرمول پس از صدور حواله ویرایش شده است. خروج مواد باید بازسازی شود.', 130)
+) AS s (RuleCode, RuleName, StepCode, ExType, DefaultSeverity, Threshold, RemedyText, SortOrder)
+ON t.RuleCode = s.RuleCode
+WHEN MATCHED THEN UPDATE SET
+    t.RuleName = s.RuleName, t.StepCode = s.StepCode, t.ExType = s.ExType,
+    t.DefaultSeverity = s.DefaultSeverity, t.Threshold = s.Threshold,
+    t.RemedyText = s.RemedyText, t.SortOrder = s.SortOrder
+WHEN NOT MATCHED THEN INSERT
+    (RuleCode, RuleName, StepCode, ExType, DefaultSeverity, Threshold, RemedyText, SortOrder)
+    VALUES (s.RuleCode, s.RuleName, s.StepCode, s.ExType, s.DefaultSeverity,
+            s.Threshold, s.RemedyText, s.SortOrder);
+GO
+
+
+/* ───────────────────────── استثنای پذیرفته‌شده ─────────────────────────
+   آب پنیر خالص محصول فرعی است و عمداً هزینه تبدیل جذب نمی‌کند.
+   تأیید شده توسط کاربر.
+   ─────────────────────────────────────────────────────────────────────── */
+
+IF NOT EXISTS (SELECT 1 FROM dbo.CC_AcceptedException
+               WHERE RuleCode = 'CHK-03' AND Code = 1787)
+INSERT dbo.CC_AcceptedException (RuleCode, Code, FNUMB, Reason, AcceptedBy)
+VALUES ('CHK-03', 1787, NULL,
+        N'آب پنیر خالص محصول فرعی است و عمداً هزینه تبدیل جذب نمی‌کند.',
+        N'مدیر مالی');
+GO
+
+
+/* ───────────────────────── واحدهای تولیدی ─────────────────────────
+   ⚠ این بخش نمونه است. انبارها را با واقعیت کارخانه تطبیق دهید.
+     نقش ۱ (مواد مصرفی تولید) مبنای محاسبه انحراف است و باید
+     برای هر واحد دقیقاً یک انبار داشته باشد.
+   ─────────────────────────────────────────────────────────────────── */
+
+IF NOT EXISTS (SELECT 1 FROM dbo.CC_Unit)
+BEGIN
+    INSERT dbo.CC_Unit (UnitName, Depatman, SplitMode, IsActive, SeqNo)
+    VALUES (N'واحد اصلی', NULL, 1, 1, 1),
+           (N'واحد یزد',  NULL, 1, 1, 2);
+
+    DECLARE @u1 INT = (SELECT UnitId FROM dbo.CC_Unit WHERE UnitName = N'واحد اصلی');
+    DECLARE @u2 INT = (SELECT UnitId FROM dbo.CC_Unit WHERE UnitName = N'واحد یزد');
+
+    INSERT dbo.CC_UnitAnbar (UnitId, Anbar, AnbarRole, DoStockCount, SeqNo)
+    VALUES (@u1,   7, 1, 1, 1),      -- مواد مصرفي توليد ← مبناي انحراف
+           (@u1,   1, 2, 1, 2),      -- مواد اوليه
+           (@u1,   2, 3, 1, 3),      -- کالاي ساخته شده
+           (@u1,   8, 4, 1, 4),
+           (@u2, 810, 1, 1, 1),      -- مواد مصرفي توليد يزد
+           (@u2, 811, 2, 1, 2),      -- مواد اوليه يزد
+           (@u2, 807, 3, 1, 3);      -- محصول يزد
+
+    -- نگاشت سرفصل‌هاي هزينه تبديل واقعي، بر اساس تراز خودتان
+    INSERT dbo.CC_UnitAcc (UnitId, HesKol, CostKind, Ratio, Note)
+    VALUES (@u1, 711, 1, 1.000, N'هزينه دستمزد توليد'),
+           (@u1, 712, 1, 0.700, N'هزينه دستمزد خدمات — سهم توليدي'),
+           (@u1, 713, 1, 0.600, N'هزينه دستمزد اداري — سهم توليدي'),
+           (@u1, 721, 2, 1.000, N'ساير هزينه‌هاي توليد'),
+           (@u1, 723, 2, 0.400, N'ساير هزينه‌هاي اداري — سهم توليدي'),
+           (@u1, 745, 2, 0.250, N'مرکز هزينه ضايعات و ساير'),
+           (@u2, 743, 2, 1.000, N'هزينه‌هاي واحد يزد');
+END
+GO
+
+PRINT N'داده اوليه ثبت شد.';
+
+SELECT RuleCode AS کد, RuleName AS قاعده, StepCode AS گام,
+       CASE DefaultSeverity WHEN 2 THEN N'مسدودکننده' ELSE N'هشدار' END AS شدت
+FROM   dbo.CC_CheckRule ORDER BY SortOrder;
+
+SELECT u.UnitName AS واحد, a.Anbar AS انبار,
+       CASE a.AnbarRole WHEN 1 THEN N'مبناي انحراف' WHEN 2 THEN N'مواد اوليه'
+                        WHEN 3 THEN N'محصول' ELSE N'ساير' END AS نقش,
+       CASE a.DoStockCount WHEN 1 THEN N'بله' ELSE N'خير' END AS انبارگرداني
+FROM   dbo.CC_Unit u JOIN dbo.CC_UnitAnbar a ON a.UnitId = u.UnitId
+ORDER BY u.SeqNo, a.SeqNo;
+GO
+";
+            TryExecuteCostCloseBatch(db, seedData,
+                "قواعد تشخیص و واحدهای تولیدی",
+                "اسکریپت 11-seed-data.sql را اجرا کنید (به CC_CheckRule و CC_Unit نیاز دارد).");
+
+            string phase1Procs = @"
+/* ═══════════════════════════════════════════════════════════════════
+   فاز ۱ — فایل ۳ از ۳ : رویه‌ها
+
+   مدیریت اجرا، اسنپ‌شات و بازگردانی، و گام‌های S00 تا S04.
+   قابل اجرای مکرر (همه با CREATE OR ALTER).
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════ مدیریت اجرا ═══════════════ */
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_RunCreate
+    @FiscalYear SMALLINT,
+    @Month      TINYINT,
+    @DateFrom   BIGINT,
+    @DateTo     BIGINT,
+    @RunKind    TINYINT,          -- 1=آزمايشي 2=قطعي
+    @UserName   NVARCHAR(50),
+    @Note       NVARCHAR(500) = NULL,
+    @RunId      INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF EXISTS (SELECT 1 FROM dbo.CC_Run
+               WHERE FiscalYear = @FiscalYear AND PeriodMonth = @Month
+                 AND RunKind = 2 AND Status = 3 AND ApprovedAtUtc IS NOT NULL)
+    BEGIN
+        RAISERROR(N'براي اين ماه يک اجراي قطعي تأييدشده وجود دارد.', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (SELECT 1 FROM dbo.CC_Run
+               WHERE FiscalYear = @FiscalYear AND PeriodMonth = @Month AND Status = 1)
+    BEGIN
+        RAISERROR(N'يک اجرا براي اين ماه در حال انجام است.', 16, 1);
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    DECLARE @no SMALLINT =
+        ISNULL((SELECT MAX(RunNo) FROM dbo.CC_Run
+                WHERE FiscalYear = @FiscalYear AND PeriodMonth = @Month), 0) + 1;
+
+    DECLARE @prev INT =
+        (SELECT TOP 1 RunId FROM dbo.CC_Run
+         WHERE FiscalYear = @FiscalYear AND PeriodMonth = @Month
+         ORDER BY RunNo DESC);
+
+    UPDATE dbo.CC_Run SET IsLatest = 0
+    WHERE FiscalYear = @FiscalYear AND PeriodMonth = @Month;
+
+    INSERT dbo.CC_Run (FiscalYear, PeriodMonth, DateFrom, DateTo, RunNo,
+                       PrevRunId, IsLatest, RunKind, Status, StartedByUser, Note)
+    VALUES (@FiscalYear, @Month, @DateFrom, @DateTo, @no,
+            @prev, 1, @RunKind, 0, @UserName, @Note);
+
+    SET @RunId = SCOPE_IDENTITY();
+
+    INSERT dbo.CC_RunLog (RunId, Severity, Message)
+    VALUES (@RunId, 1, CONCAT(N'اجراي شماره ', @no, N' براي دوره ',
+                              @FiscalYear, '/', @Month, N' ايجاد شد'));
+
+    COMMIT;
+END
+GO
+
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_StepStart
+    @RunId    INT,
+    @StepCode VARCHAR(10),
+    @Title    NVARCHAR(120),
+    @SeqNo    SMALLINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @try TINYINT =
+        ISNULL((SELECT MAX(Attempt) FROM dbo.CC_RunStep
+                WHERE RunId = @RunId AND StepCode = @StepCode), 0) + 1;
+
+    INSERT dbo.CC_RunStep (RunId, StepCode, StepTitle, SeqNo, Attempt, Status, StartedAtUtc)
+    VALUES (@RunId, @StepCode, @Title, @SeqNo, @try, 1, SYSUTCDATETIME());
+
+    UPDATE dbo.CC_Run
+       SET Status = 1, StartedAtUtc = ISNULL(StartedAtUtc, SYSUTCDATETIME())
+     WHERE RunId = @RunId;
+END
+GO
+
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_StepFinish
+    @RunId     INT,
+    @StepCode  VARCHAR(10),
+    @Status    TINYINT,                     -- 2=موفق 3=هشدار 4=خطا 5=رد‌شده
+    @Rows      INT           = NULL,
+    @Result    NVARCHAR(MAX) = NULL,
+    @Error     NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE  s
+       SET  s.Status        = @Status,
+            s.FinishedAtUtc = SYSUTCDATETIME(),
+            s.DurationMs    = DATEDIFF(MILLISECOND, s.StartedAtUtc, SYSUTCDATETIME()),
+            s.RowsAffected  = @Rows,
+            s.ResultJson    = @Result,
+            s.ErrorMessage  = @Error
+    FROM    dbo.CC_RunStep s
+    JOIN   (SELECT RunId, StepCode, MAX(Attempt) AS Attempt
+            FROM   dbo.CC_RunStep
+            WHERE  RunId = @RunId AND StepCode = @StepCode
+            GROUP BY RunId, StepCode) x
+           ON x.RunId = s.RunId AND x.StepCode = s.StepCode AND x.Attempt = s.Attempt;
+
+    IF @Status = 4
+        UPDATE dbo.CC_Run SET Status = 4 WHERE RunId = @RunId;
+END
+GO
+
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_SetFormulasDirty
+    @RunId INT, @Dirty BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE dbo.CC_Run SET FormulasDirty = @Dirty WHERE RunId = @RunId;
+END
+GO
+
+
+/* ═══════════════ اسنپ‌شات و بازگردانی ═══════════════ */
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_Snapshot
+    @RunId    INT,
+    @StepCode VARCHAR(10),
+    @Month    TINYINT,
+    @DT1      BIGINT,
+    @DT2      BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @bak SYSNAME, @sql NVARCHAR(MAX), @n INT;
+
+    ---- DTL_MANF : فقط فرمول‌هاي ماه
+    SET @bak = CONCAT('CC_BAK_DTL_MANF_R', @RunId, '_', @StepCode);
+    IF OBJECT_ID('dbo.' + @bak, 'U') IS NOT NULL
+        EXEC('DROP TABLE dbo.' + @bak);
+    SET @sql = N'SELECT d.* INTO dbo.' + QUOTENAME(@bak) + N'
+                 FROM dbo.DTL_MANF d
+                 JOIN dbo.HEAD_MANF h ON h.FNUMB = d.FNUMB AND h.GHEYMAT = @m';
+    EXEC sp_executesql @sql, N'@m TINYINT', @m = @Month;
+    SET @n = @@ROWCOUNT;
+    INSERT dbo.CC_Snapshot (RunId, StepCode, TableName, BackupTable, RowsCopied)
+    VALUES (@RunId, @StepCode, 'DTL_MANF', @bak, @n);
+
+    ---- HEAD_MANF : فقط فرمول‌هاي ماه
+    SET @bak = CONCAT('CC_BAK_HEAD_MANF_R', @RunId, '_', @StepCode);
+    IF OBJECT_ID('dbo.' + @bak, 'U') IS NOT NULL
+        EXEC('DROP TABLE dbo.' + @bak);
+    SET @sql = N'SELECT h.* INTO dbo.' + QUOTENAME(@bak) + N'
+                 FROM dbo.HEAD_MANF h WHERE h.GHEYMAT = @m';
+    EXEC sp_executesql @sql, N'@m TINYINT', @m = @Month;
+    SET @n = @@ROWCOUNT;
+    INSERT dbo.CC_Snapshot (RunId, StepCode, TableName, BackupTable, RowsCopied)
+    VALUES (@RunId, @StepCode, 'HEAD_MANF', @bak, @n);
+
+    ---- DEED_HED : نگاشت شماره اسناد بازه
+    SET @bak = CONCAT('CC_BAK_DEED_HED_R', @RunId, '_', @StepCode);
+    IF OBJECT_ID('dbo.' + @bak, 'U') IS NOT NULL
+        EXEC('DROP TABLE dbo.' + @bak);
+    SET @sql = N'SELECT base, N_S, DATE_S INTO dbo.' + QUOTENAME(@bak) + N'
+                 FROM dbo.DEED_HED WHERE DATE_S BETWEEN @a AND @b';
+    EXEC sp_executesql @sql, N'@a BIGINT, @b BIGINT', @a = @DT1, @b = @DT2;
+    SET @n = @@ROWCOUNT;
+    INSERT dbo.CC_Snapshot (RunId, StepCode, TableName, BackupTable, RowsCopied)
+    VALUES (@RunId, @StepCode, 'DEED_HED', @bak, @n);
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, @StepCode, 1, N'اسنپ‌شات گرفته شد');
+
+    SELECT TableName AS جدول, BackupTable AS جدول_پشتيبان, RowsCopied AS تعداد_سطر
+    FROM   dbo.CC_Snapshot
+    WHERE  RunId = @RunId AND StepCode = @StepCode;
+END
+GO
+
+
+/* ═══════════════ S00 — بازبینی ابتدای ماه ═══════════════ */
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S00_Preflight
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT,
+    @RunId INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_Exception
+    WHERE  StepCode = 'S00' AND ISNULL(RunId, -1) = ISNULL(@RunId, -1);
+
+    ---- CHK-03 : فرمول بدون نرخ جذب
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, DocNumber, DocDate, Amount, Description)
+    SELECT  @RunId, 'S00', 'CHK-03', 9, r.DefaultSeverity,
+            MIN(CAST(pl.CODE AS BIGINT)), hm.FNUMB, MAX(h.DATE_N), SUM(pl.MEGHK),
+            CONCAT(N'فرمول ', hm.FNUMB, N' نرخ جذب هزينه تبديل ندارد')
+    FROM    dbo.HEAD_LST  h
+    JOIN    dbo.INVO_LST  pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+    JOIN    dbo.HEAD_MANF hm ON hm.FNUMB  = TRY_CAST(pl.N_KOL AS INT)
+    CROSS   JOIN dbo.CC_CheckRule r
+    WHERE   r.RuleCode = 'CHK-03' AND r.IsActive = 1
+      AND   h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   ISNULL(hm.IMBIBE_MANF,0) + ISNULL(hm.IMBIBE_SAR,0) = 0
+      AND   NOT EXISTS (SELECT 1 FROM dbo.CC_AcceptedException ae
+                        WHERE ae.RuleCode = 'CHK-03' AND ae.IsActive = 1
+                          AND (ae.Code IS NULL
+                               OR ae.Code = CAST(pl.CODE AS BIGINT)))
+    GROUP BY hm.FNUMB, r.DefaultSeverity;
+
+    ---- CHK-04 : کالاي توليدشده بدون فرمول ماه
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Description)
+    SELECT  DISTINCT @RunId, 'S00', 'CHK-04', 12, 2, CAST(pl.CODE AS BIGINT),
+            N'کالا در اين ماه توليد شده ولي فرمول ماه را ندارد'
+    FROM    dbo.HEAD_LST h
+    JOIN    dbo.INVO_LST pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+    WHERE   h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   NOT EXISTS (SELECT 1 FROM dbo.HEAD_MANF hm
+                        WHERE CAST(hm.CODE AS BIGINT) = CAST(pl.CODE AS BIGINT)
+                          AND hm.GHEYMAT = @Month);
+
+    ---- CHK-05 : ماده بدون منبع نرخ
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Description)
+    SELECT  DISTINCT @RunId, 'S00', 'CHK-05', 4, 1, CAST(d.CODE AS BIGINT),
+            N'ماده بدون منبع نرخ — نرخ صفر به کالاهاي بالادست منتقل مي‌شود'
+    FROM    dbo.DTL_MANF  d
+    JOIN    dbo.HEAD_MANF h ON h.FNUMB = d.FNUMB AND h.GHEYMAT = @Month
+    WHERE   NOT EXISTS (SELECT 1 FROM dbo.HEAD_MANF p
+                        WHERE CAST(p.CODE AS BIGINT) = CAST(d.CODE AS BIGINT)
+                          AND p.GHEYMAT = @Month)
+      AND   NOT EXISTS (SELECT 1 FROM dbo.KALAS k
+                        WHERE k.code = CAST(d.CODE AS BIGINT)
+                          AND k.TAG = 10 AND k.MM = @Month AND k.MEGHk <> 0);
+
+    ---- CHK-06 : حلقه در ساختار فرمول
+    IF OBJECT_ID('tempdb..#E') IS NOT NULL DROP TABLE #E;
+    SELECT DISTINCT CAST(h.CODE AS BIGINT) AS P, CAST(d.CODE AS BIGINT) AS C
+    INTO   #E
+    FROM   dbo.HEAD_MANF h
+    JOIN   dbo.DTL_MANF  d ON d.FNUMB = h.FNUMB
+    WHERE  h.GHEYMAT = @Month AND h.CODE IS NOT NULL AND d.CODE IS NOT NULL
+      AND  CAST(h.CODE AS BIGINT) <> CAST(d.CODE AS BIGINT);
+    CREATE CLUSTERED INDEX IX_E ON #E(P, C);
+
+    ;WITH W AS (
+        SELECT P AS Root, C, 1 AS L,
+               CAST('/' + CAST(P AS VARCHAR(20)) + '/' AS VARCHAR(4000)) AS Pt
+        FROM   #E
+        UNION ALL
+        SELECT w.Root, e.C, w.L + 1,
+               CAST(w.Pt + CAST(e.P AS VARCHAR(20)) + '/' AS VARCHAR(4000))
+        FROM   W w JOIN #E e ON e.P = w.C
+        WHERE  w.L < 20
+          AND  w.Pt NOT LIKE '%/' + CAST(e.C AS VARCHAR(20)) + '/%'
+    )
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Description)
+    SELECT DISTINCT @RunId, 'S00', 'CHK-06', 5, 2, Root,
+           N'حلقه در ساختار فرمول — محاسبه نرخ ممکن نيست'
+    FROM   W WHERE C = Root
+    OPTION (MAXRECURSION 0);
+
+    DROP TABLE #E;
+
+    ---- CHK-07 : مانده نامتوازن مواد در ۷۵۱ (آستانه نسبي)
+    DECLARE @th FLOAT =
+        ISNULL((SELECT Threshold FROM dbo.CC_CheckRule WHERE RuleCode='CHK-07'), 0.001);
+
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, DocNumber, Amount, Description)
+    SELECT  @RunId, 'S00', 'CHK-07', 13,
+            CASE WHEN SUM(d.BED) = 0 OR SUM(d.BES) = 0 THEN 2 ELSE 1 END,
+            TRY_CAST(d.HES_T AS BIGINT), TRY_CAST(d.HES_M AS INT),
+            SUM(d.BED) - SUM(d.BES),
+            CASE WHEN SUM(d.BED) = 0
+                 THEN N'ماده با توليد خارج شده ولي با حواله وارد نشده'
+                 WHEN SUM(d.BES) = 0
+                 THEN N'ماده با حواله وارد شده ولي با توليد خارج نشده'
+                 ELSE N'مانده نامتوازن مواد در حساب کالاي در جريان ساخت' END
+    FROM    dbo.DEED_DTL d
+    JOIN    dbo.DEED_HED hd ON hd.N_S = d.N_S
+    WHERE   d.HES_K = 751 AND d.HES_T <> 99999999
+      AND   hd.DATE_S BETWEEN @DT1 AND @DT2
+    GROUP BY d.HES_M, d.HES_T
+    HAVING  (SUM(d.BED) = 0 AND SUM(d.BES) <> 0)
+         OR (SUM(d.BES) = 0 AND SUM(d.BED) <> 0)
+         OR (ABS(SUM(d.BED) - SUM(d.BES))
+             / NULLIF((SUM(d.BED) + SUM(d.BES)) / 2.0, 0) > @th);
+
+    ---- CHK-09 : نرخ منتشرنشده نيمه‌ساخته
+    DECLARE @th9 FLOAT =
+        ISNULL((SELECT Threshold FROM dbo.CC_CheckRule WHERE RuleCode='CHK-09'), 0.001);
+
+    ;WITH Khod AS (
+        SELECT CAST(hm.CODE AS BIGINT) AS Code,
+               SUM(ISNULL(d.MABLK,0)) + MAX(ISNULL(hm.IMBIBE_MANF,0))
+                                      + MAX(ISNULL(hm.IMBIBE_SAR,0)) AS Baha
+        FROM   dbo.HEAD_MANF hm JOIN dbo.DTL_MANF d ON d.FNUMB = hm.FNUMB
+        WHERE  hm.GHEYMAT = @Month
+        GROUP BY CAST(hm.CODE AS BIGINT), hm.FNUMB
+    ),
+    DarValed AS (
+        SELECT CAST(d.CODE AS BIGINT) AS Code,
+               AVG(d.SMABL) AS Nerkh, COUNT(DISTINCT d.FNUMB) AS Valedha
+        FROM   dbo.DTL_MANF d
+        JOIN   dbo.HEAD_MANF hm ON hm.FNUMB = d.FNUMB AND hm.GHEYMAT = @Month
+        GROUP BY CAST(d.CODE AS BIGINT)
+    )
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Amount, Description)
+    SELECT  @RunId, 'S00', 'CHK-09', 14, 2, k.Code, k.Baha - v.Nerkh,
+            CONCAT(N'نرخ منتشر نشده — بهاي فرمول ', CAST(ROUND(k.Baha,0) AS BIGINT),
+                   N' ولي نرخ در ', v.Valedha, N' فرمول بالادست ',
+                   CAST(ROUND(v.Nerkh,0) AS BIGINT))
+    FROM    Khod k
+    JOIN    DarValed v ON v.Code = k.Code
+    WHERE   ABS(k.Baha - v.Nerkh) / NULLIF(k.Baha, 0) > @th9;
+
+    ---- خلاصه
+    SELECT  e.RuleCode AS قاعده, r.RuleName AS عنوان,
+            CASE e.Severity WHEN 2 THEN N'مسدودکننده' ELSE N'هشدار' END AS شدت,
+            COUNT(*) AS تعداد
+    FROM    dbo.CC_Exception e
+    LEFT    JOIN dbo.CC_CheckRule r ON r.RuleCode = e.RuleCode
+    WHERE   e.StepCode = 'S00' AND ISNULL(e.RunId,-1) = ISNULL(@RunId,-1)
+    GROUP BY e.RuleCode, r.RuleName, e.Severity
+    ORDER BY e.Severity DESC, e.RuleCode;
+END
+GO
+
+
+/* ═══════════════ S03 — حذف اسناد حسابداری خالی ═══════════════ */
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S03_DeleteEmptyDeeds
+    @RunId INT,
+    @DT1   BIGINT,
+    @DT2   BIGINT,
+    @WhatIf BIT = 1                  -- ۱ = فقط گزارش، بدون حذف
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF OBJECT_ID('tempdb..#Empty') IS NOT NULL DROP TABLE #Empty;
+
+    SELECT h.N_S, h.DATE_S
+    INTO   #Empty
+    FROM   dbo.DEED_HED h
+    WHERE  h.DATE_S BETWEEN @DT1 AND @DT2
+      AND  NOT EXISTS (SELECT 1 FROM dbo.DEED_DTL d WHERE d.N_S = h.N_S);
+
+    DECLARE @n INT = (SELECT COUNT(*) FROM #Empty);
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT N_S AS شماره_سند, DATE_S AS تاريخ FROM #Empty ORDER BY DATE_S, N_S;
+        SELECT @n AS تعداد_سند_قابل_حذف, N'حالت گزارش — چيزي حذف نشد' AS وضعيت;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    DELETE h FROM dbo.DEED_HED h JOIN #Empty e ON e.N_S = h.N_S;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    VALUES (@RunId, 'S03', 1, CONCAT(N'حذف اسناد خالي: ', @n, N' سند'),
+            (SELECT N_S, DATE_S FROM #Empty FOR JSON PATH));
+
+    COMMIT;
+
+    -- ستون انگلیسی برای مصرف برنامه‌ای (CoreSteps.cs / S03_DeleteEmptyDeeds).
+    -- Dapper روی نام‌مستعار فارسی نگاشت نمی‌کند و بی‌صدا صفر برمی‌گرداند؛
+    -- شرح فارسی در CC_RunLog بالا ثبت شده است.
+    SELECT @n AS Value;
+END
+GO
+
+
+/* ═══════════════ S04 — مرتب‌سازی اسناد ═══════════════ */
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S04_SortDeeds
+    @RunId     INT,
+    @DT1       BIGINT,
+    @DT2       BIGINT,
+    @WholeYear BIT = 0,
+    @WhatIf    BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF OBJECT_ID('tempdb..#Map') IS NOT NULL DROP TABLE #Map;
+
+    DECLARE @seed FLOAT =
+        CASE WHEN @WholeYear = 1 THEN 0
+             ELSE ISNULL((SELECT MAX(N_S) FROM dbo.DEED_HED WHERE DATE_S < @DT1), 0) END;
+
+    SELECT  base,
+            N_S AS OldNS,
+            @seed + ROW_NUMBER() OVER (ORDER BY DATE_S ASC, N_S ASC) AS NewNS
+    INTO    #Map
+    FROM    dbo.DEED_HED
+    WHERE   @WholeYear = 1 OR DATE_S BETWEEN @DT1 AND @DT2;
+
+    CREATE UNIQUE CLUSTERED INDEX IX_Map ON #Map(base);
+
+    DECLARE @total INT   = (SELECT COUNT(*) FROM #Map);
+    DECLARE @changed INT = (SELECT COUNT(*) FROM #Map WHERE OldNS <> NewNS);
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT TOP 100 base, OldNS AS شماره_فعلي, NewNS AS شماره_جديد
+        FROM   #Map WHERE OldNS <> NewNS ORDER BY NewNS;
+        SELECT @total AS کل_اسناد, @changed AS تعداد_تغيير,
+               N'حالت گزارش — چيزي تغيير نکرد' AS وضعيت;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    -- تريگرهاي Audit را فقط براي همين نشست کنار مي‌گذاريم
+    EXEC sp_set_session_context @key = N'cc_bulk', @value = 1;
+
+    -- ۹ جدول فرزند با ON UPDATE CASCADE خودکار به‌روز مي‌شوند
+    UPDATE  h
+       SET  h.N_S = m.NewNS
+    FROM    dbo.DEED_HED h
+    JOIN    #Map m ON m.base = h.base
+    WHERE   h.N_S <> m.NewNS;
+
+    EXEC sp_set_session_context @key = N'cc_bulk', @value = 0;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    VALUES (@RunId, 'S04', 1, N'بازشماره‌گذاري اسناد انجام شد',
+            (SELECT @total AS total, @changed AS changed FOR JSON PATH));
+
+    COMMIT;
+
+    -- ستون انگلیسی برای مصرف برنامه‌ای (CoreSteps.cs / S04_SortDeeds).
+    -- Value = تعداد اسناد بازشماره‌شده؛ شرح فارسی در CC_RunLog بالا ثبت شد.
+    SELECT @changed AS Value, @total AS Total;
+END
+GO
+
+
+PRINT N'رويه‌هاي فاز ۱ ايجاد شدند.';
+
+SELECT  name AS رويه, create_date AS تاريخ_ايجاد, modify_date AS آخرين_تغيير
+FROM    sys.procedures
+WHERE   name LIKE 'CC[_]sp[_]%'
+ORDER BY name;
+GO
+";
+            TryExecuteCostCloseBatch(db, phase1Procs,
+                "CC_sp_RunCreate، CC_sp_StepStart/Finish، CC_sp_Snapshot، S00/S03/S04",
+                "اسکریپت 12-procedures-phase1.sql را اجرا کنید.");
+
+            string chk04AutoFix = @"
+/* ═══════════════════════════════════════════════════════════════════
+   دو تغییر بر اساس درخواست کاربر
+
+   ۱) CHK-04 حالا شماره برگه‌های تولید را هم می‌دهد، نه فقط کد کالا
+   ۲) رویه اصلاح خودکار: فرمول همان ماه را به برگه‌ها نسبت می‌دهد
+
+   قابل اجرای مکرر.
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ستون جدید برای نگهداری فهرست برگه‌ها و امکان اصلاح خودکار */
+IF COL_LENGTH('dbo.CC_Exception','RefList') IS NULL
+    ALTER TABLE dbo.CC_Exception ADD RefList NVARCHAR(2000) NULL;
+GO
+IF COL_LENGTH('dbo.CC_Exception','CanAutoFix') IS NULL
+    ALTER TABLE dbo.CC_Exception ADD CanAutoFix BIT NOT NULL DEFAULT 0;
+GO
+IF COL_LENGTH('dbo.CC_CheckRule','FixProcName') IS NULL
+    ALTER TABLE dbo.CC_CheckRule ADD FixProcName SYSNAME NULL;
+GO
+IF COL_LENGTH('dbo.CC_CheckRule','FixButtonText') IS NULL
+    ALTER TABLE dbo.CC_CheckRule ADD FixButtonText NVARCHAR(60) NULL;
+GO
+
+UPDATE dbo.CC_CheckRule
+   SET FixProcName   = 'CC_sp_Fix_MissingFormula',
+       FixButtonText = N'اصلاح خودکار برگه'
+ WHERE RuleCode = 'CHK-04';
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHK-04 — نسخه‌ای که شماره برگه می‌دهد
+
+   یک سطر به ازای هر کالا، با فهرست برگه‌های متأثر.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_Chk04_MissingFormula
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT,
+    @RunId INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_Exception
+    WHERE  RuleCode = 'CHK-04' AND ISNULL(RunId,-1) = ISNULL(@RunId,-1);
+
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, DocTag,
+         DocNumber, DocDate, Amount, RefList, CanAutoFix, Description)
+    SELECT  @RunId, 'S00', 'CHK-04', 12, 2,
+            CAST(pl.CODE AS BIGINT),
+            9,
+            MIN(h.NUMBER),                       -- اولين برگه
+            MIN(h.DATE_N),
+            SUM(pl.MEGHK),                       -- جمع مقدار توليد متأثر
+            STRING_AGG(CAST(h.NUMBER AS VARCHAR(12)), ', ')
+                WITHIN GROUP (ORDER BY h.NUMBER),
+            -- اصلاح خودکار فقط وقتي ممکن است که فرمول ماه واقعاً وجود داشته باشد
+            CASE WHEN EXISTS (SELECT 1 FROM dbo.HEAD_MANF hm
+                              WHERE CAST(hm.CODE AS BIGINT) = CAST(pl.CODE AS BIGINT)
+                                AND hm.GHEYMAT = @Month)
+                 THEN 1 ELSE 0 END,
+            CONCAT(N'کالا در ', COUNT(DISTINCT h.NUMBER),
+                   N' برگه توليد شده ولي فرمول ماه ', @Month, N' به آن نسبت داده نشده')
+    FROM    dbo.HEAD_LST h
+    JOIN    dbo.INVO_LST pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+    WHERE   h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   NOT EXISTS (
+                SELECT 1 FROM dbo.HEAD_MANF hm
+                WHERE hm.FNUMB = TRY_CAST(pl.N_KOL AS INT)
+                  AND hm.GHEYMAT = @Month)
+    GROUP BY CAST(pl.CODE AS BIGINT);
+
+    SELECT  e.Code       AS کد_کالا,
+            s.NAME       AS نام_کالا,
+            e.Amount     AS جمع_مقدار_توليد,
+            e.RefList    AS برگه_ها,
+            CASE e.CanAutoFix WHEN 1 THEN N'بله' ELSE N'خير — فرمول ماه وجود ندارد' END
+                         AS اصلاح_خودکار
+    FROM    dbo.CC_Exception e
+    LEFT    JOIN dbo.STUF_DEF s ON CAST(s.CODE AS BIGINT) = e.Code
+    WHERE   e.RuleCode = 'CHK-04' AND ISNULL(e.RunId,-1) = ISNULL(@RunId,-1)
+    ORDER BY e.Amount DESC;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   اصلاح خودکار — دکمه‌ای که کاربر می‌زند
+
+   فرمول همان ماه را پیدا و به برگه‌های تولید نسبت می‌دهد.
+   @ExceptionId داده شود  → فقط همان یک کالا
+   @ExceptionId خالی      → همه کالاهای قابل اصلاح
+
+   @WhatIf = 1 پیش‌فرض است: فقط نشان می‌دهد چه چیزی تغییر خواهد کرد.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_Fix_MissingFormula
+    @Month       TINYINT,
+    @DT1         BIGINT,
+    @DT2         BIGINT,
+    @RunId       INT           = NULL,
+    @ExceptionId BIGINT        = NULL,
+    @UserName    NVARCHAR(50)  = N'system',
+    @WhatIf      BIT           = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    ---- کالاهاي هدف
+    IF OBJECT_ID('tempdb..#Target') IS NOT NULL DROP TABLE #Target;
+    CREATE TABLE #Target (Code BIGINT PRIMARY KEY);
+
+    INSERT #Target(Code)
+    SELECT DISTINCT e.Code
+    FROM   dbo.CC_Exception e
+    WHERE  e.RuleCode = 'CHK-04'
+      AND  e.IsResolved = 0
+      AND  e.CanAutoFix = 1
+      AND  ISNULL(e.RunId,-1) = ISNULL(@RunId,-1)
+      AND  (@ExceptionId IS NULL OR e.ExceptionId = @ExceptionId);
+
+    ---- نگاشت کالا به فرمول ماه
+    ---- اگر يک کالا چند فرمول در همان ماه داشته باشد، تازه‌ترين انتخاب مي‌شود
+    IF OBJECT_ID('tempdb..#Map') IS NOT NULL DROP TABLE #Map;
+
+    SELECT  t.Code,
+            f.FNUMB,
+            f.Chand
+    INTO    #Map
+    FROM    #Target t
+    CROSS   APPLY (
+                SELECT TOP 1
+                       hm.FNUMB,
+                       COUNT(*) OVER () AS Chand
+                FROM   dbo.HEAD_MANF hm
+                WHERE  CAST(hm.CODE AS BIGINT) = t.Code
+                  AND  hm.GHEYMAT = @Month
+                ORDER BY hm.DATE_ACTIV DESC, hm.FNUMB DESC
+            ) f;
+
+    ---- سطرهايي که تغيير خواهند کرد
+    IF OBJECT_ID('tempdb..#Rows') IS NOT NULL DROP TABLE #Rows;
+
+    SELECT  h.NUMBER            AS ProdNo,
+            h.DATE_N            AS ProdDate,
+            pl.RADIF            AS Radif,
+            CAST(pl.CODE AS BIGINT) AS Code,
+            pl.N_KOL            AS OldFnumb,
+            m.FNUMB             AS NewFnumb,
+            pl.MEGHK            AS Meghdar,
+            m.Chand             AS ChandFormul
+    INTO    #Rows
+    FROM    dbo.HEAD_LST h
+    JOIN    dbo.INVO_LST pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+    JOIN    #Map m ON m.Code = CAST(pl.CODE AS BIGINT)
+    WHERE   h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   NOT EXISTS (SELECT 1 FROM dbo.HEAD_MANF hm
+                        WHERE hm.FNUMB = TRY_CAST(pl.N_KOL AS INT)
+                          AND hm.GHEYMAT = @Month);
+
+    ---- هشدار: کالايي که در ماه بيش از يک فرمول دارد نياز به انتخاب کاربر دارد
+    IF EXISTS (SELECT 1 FROM #Rows WHERE ChandFormul > 1)
+        SELECT DISTINCT
+               r.Code AS کد_کالا, s.NAME AS نام_کالا, r.ChandFormul AS تعداد_فرمول_ماه,
+               N'اين کالا در اين ماه بيش از يک فرمول دارد؛ تازه‌ترين انتخاب شد' AS هشدار
+        FROM   #Rows r LEFT JOIN dbo.STUF_DEF s ON CAST(s.CODE AS BIGINT) = r.Code
+        WHERE  r.ChandFormul > 1;
+
+    DECLARE @n INT = (SELECT COUNT(*) FROM #Rows);
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT  ProdNo    AS شماره_برگه,
+                ProdDate  AS تاريخ,
+                Code      AS کد_کالا,
+                OldFnumb  AS فرمول_فعلي,
+                NewFnumb  AS فرمول_جديد,
+                Meghdar   AS مقدار
+        FROM    #Rows
+        ORDER BY ProdDate, ProdNo;
+
+        SELECT @n AS تعداد_سطر_قابل_اصلاح, N'حالت گزارش — چيزي تغيير نکرد' AS وضعيت;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    UPDATE  pl
+       SET  pl.N_KOL = r.NewFnumb
+    FROM    dbo.INVO_LST pl
+    JOIN    #Rows r ON r.ProdNo = pl.NUMBER AND r.Radif = pl.RADIF
+    WHERE   pl.TAG = 9;
+
+    ---- ثبت در سابقه
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    SELECT  @RunId, 'S00', 1,
+            CONCAT(N'اصلاح خودکار فرمول برگه‌هاي توليد: ', @n, N' سطر توسط ', @UserName),
+            (SELECT ProdNo, Code, OldFnumb, NewFnumb FROM #Rows FOR JSON PATH);
+
+    ---- استثناها بسته مي‌شوند
+    UPDATE  e
+       SET  e.IsResolved     = 1,
+            e.ResolvedBy     = @UserName,
+            e.ResolvedAtUtc  = SYSUTCDATETIME(),
+            e.ResolutionNote = N'اصلاح خودکار — فرمول ماه به برگه‌ها نسبت داده شد'
+    FROM    dbo.CC_Exception e
+    JOIN    #Target t ON t.Code = e.Code
+    WHERE   e.RuleCode = 'CHK-04'
+      AND   ISNULL(e.RunId,-1) = ISNULL(@RunId,-1);
+
+    ---- خروج مواد بايد بازسازي شود، چون فرمول برگه عوض شد
+    IF @RunId IS NOT NULL
+        UPDATE dbo.CC_Run SET FormulasDirty = 1 WHERE RunId = @RunId;
+
+    COMMIT;
+
+    SELECT @n AS تعداد_سطر_اصلاح_شده;
+END
+GO
+
+
+PRINT N'CHK-04 و اصلاح خودکار آماده شد.';
+
+/* نمونه:
+   EXEC dbo.CC_sp_Chk04_MissingFormula  @Month=5, @DT1=14050501, @DT2=14050531;
+   EXEC dbo.CC_sp_Fix_MissingFormula    @Month=5, @DT1=14050501, @DT2=14050531, @WhatIf=1;
+   EXEC dbo.CC_sp_Fix_MissingFormula    @Month=5, @DT1=14050501, @DT2=14050531, @WhatIf=0,
+                                        @UserName=N'مدير مالي';
+*/
+GO
+";
+            TryExecuteCostCloseBatch(db, chk04AutoFix,
+                "CC_sp_Chk04_MissingFormula و CC_sp_Fix_MissingFormula",
+                "اسکریپت 13-chk04-and-autofix.sql را اجرا کنید (به CC_Exception و CC_CheckRule نیاز دارد).");
+
+            string s05Gate = @"
+/* ═══════════════════════════════════════════════════════════════════
+   S05 — دروازه اعتبارسنجی
+
+   دو کنترلی که امروز با دابل‌کلیک روی گزارش موجودی می‌گیرید:
+     CHK-01  کاردکس منفی
+     CHK-02  مغایرت کارت انبار و حسابداری
+     CHK-13  حواله با مقدار صفر
+
+   نتیجه مستقیم در CC_Exception می‌نشیند و صفحه مغایرت‌ها نشانش می‌دهد.
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند (YAZDSEPAR{YEAR} در تولید، SafirTest* در محیط تست).
+   اسکریپت را روی پایگاه هدف اجرا کنید. بقیه اسکریپت‌های
+   Server/Database/ هم همین قرارداد را دارند.
+   ═══════════════════════════════════════════════════════════════════ */
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S05_Gate
+    @RunId INT,
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_Exception
+    WHERE  RunId = @RunId AND RuleCode IN ('CHK-01','CHK-02','CHK-13');
+
+    /* ─────────────────────────────────────────────────────────────
+       CHK-01 — کاردکس منفی
+
+       موجودی تجمعی هر کالا در هر انبار به ترتیب تاریخ محاسبه و
+       هر جا منفی شد علامت می‌خورد. معمولاً یعنی تاریخ رسید بعد از
+       تاریخ حواله ثبت شده است.
+
+       فقط اولین نقطه منفی هر کالا/انبار گزارش می‌شود؛ بقیه
+       دنباله همان یک مشکل‌اند و فهرست را شلوغ می‌کنند.
+       ───────────────────────────────────────────────────────────── */
+       ;WITH Harekat AS (
+        -- KALAS یک ویو گزارشی است، نه کاردکس خام؛ ستون انبار آن به‌جای
+        -- ANBAR، سه ستون ANBARF/ANBARCODE/ANBARAS دارد. با مقایسه با
+        -- INVO_LST.ANBAR (که مبنای درست است) روی داده واقعی تأیید شد که
+        -- فقط ANBARCODE همیشه پر و همیشه برابر همان مقدار است؛ ANBARF و
+        -- ANBARAS اکثراً NULLاند.
+        SELECT  k.ANBARCODE AS ANBAR,
+                k.code,
+                k.DATE_N,
+                k.NUMBER,
+                k.TAG,
+                CASE WHEN k.TAG IN (1, 7, 9, 24) THEN k.MEGHk ELSE -k.MEGHk END AS Meghdar
+        FROM    dbo.KALAS k
+        WHERE   k.DATE_N <= @DT2
+          AND   k.MEGHk <> 0
+    ),
+    Tajamoi AS (
+        SELECT  ANBAR, code, DATE_N, NUMBER, TAG,
+                SUM(Meghdar) OVER (
+                    PARTITION BY ANBAR, code
+                    ORDER BY DATE_N, NUMBER
+                    ROWS UNBOUNDED PRECEDING) AS Mande
+        FROM    Harekat
+    ),
+    AvvalinManfi AS (
+        SELECT  ANBAR, code, DATE_N, NUMBER, TAG, Mande,
+                ROW_NUMBER() OVER (
+                    PARTITION BY ANBAR, code
+                    ORDER BY DATE_N, NUMBER) AS rn
+        FROM    Tajamoi
+        WHERE   Mande < -0.0001
+    )
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity,
+         Anbar, Code, DocNumber, DocTag, DocDate, Amount, Description)
+    SELECT  @RunId, 'S05', 'CHK-01', 1, 2,
+            m.ANBAR, m.code, m.NUMBER, m.TAG, m.DATE_N, m.Mande,
+            CONCAT(N'موجودی در تاریخ ',
+                   m.DATE_N / 10000, '/',
+                   FORMAT(m.DATE_N / 100 % 100, '00'), '/',
+                   FORMAT(m.DATE_N % 100, '00'),
+                   N' منفی می‌شود')
+    FROM    AvvalinManfi m
+    WHERE   m.rn = 1
+      AND   m.DATE_N BETWEEN @DT1 AND @DT2;
+
+    /* ─────────────────────────────────────────────────────────────
+       CHK-02 — مغایرت کارت انبار و حسابداری
+
+       مانده ریالی کارت انبار (KALAS) با مانده حساب موجودی جنسی
+       (۱۲۱) مقایسه می‌شود. اختلاف معمولاً یعنی حواله‌ای که فاکتورش
+       صادر نشده، یا تاریخ فاکتور در ماه بعد افتاده.
+
+       آستانه یک ریال است چون این دو باید دقیقاً یکی باشند.
+       ───────────────────────────────────────────────────────────── */
+    ;WITH KartAnbar AS (
+        SELECT  k.code,
+                SUM(CASE WHEN k.TAG IN (1, 7, 9, 24)
+                         THEN k.MABL_K ELSE -k.MABL_K END) AS Mande
+        FROM    dbo.KALAS k
+        WHERE   k.DATE_N <= @DT2
+        GROUP BY k.code
+    ),
+    Hesabdari AS (
+        SELECT  TRY_CAST(d.HES_T AS BIGINT) AS code,
+                SUM(d.BED) - SUM(d.BES)     AS Mande
+        FROM    dbo.DEED_DTL d
+        JOIN    dbo.DEED_HED h ON h.N_S = d.N_S
+        WHERE   d.HES_K = 121
+          AND   h.DATE_S <= @DT2
+        GROUP BY TRY_CAST(d.HES_T AS BIGINT)
+    )
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Amount, Description)
+    SELECT  @RunId, 'S05', 'CHK-02', 2, 2,
+            ISNULL(k.code, hh.code),
+            ISNULL(k.Mande, 0) - ISNULL(hh.Mande, 0),
+            CONCAT(N'کارت انبار ', FORMAT(ISNULL(k.Mande, 0), 'N0'),
+                   N' در برابر حسابداری ', FORMAT(ISNULL(hh.Mande, 0), 'N0'))
+    FROM    KartAnbar k
+    FULL    OUTER JOIN Hesabdari hh ON hh.code = k.code
+    WHERE   ABS(ISNULL(k.Mande, 0) - ISNULL(hh.Mande, 0)) > 1;
+
+    /* ─────────────────────────────────────────────────────────────
+       CHK-13 — حواله با مقدار صفر
+
+       ماده‌ای که در فرمول مقدار دارد ولی حواله‌اش صفر است، یعنی
+       فرمول پس از صدور حواله ویرایش شده و خروج مواد بازسازی نشده.
+       این همان چیزی است که برای کالای ۲۸۴۱ در ماه تیر رخ داد.
+       ───────────────────────────────────────────────────────────── */
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity,
+         Anbar, Code, DocNumber, DocDate, Amount, Description)
+    SELECT  DISTINCT @RunId, 'S05', 'CHK-13', 16, 2,
+            i.ANBAR, CAST(i.CODE AS BIGINT), h.NUMBER, h.DATE_N, 0,
+            N'حواله با مقدار صفر برای ماده‌ای که در فرمول ماه مقدار دارد'
+    FROM    dbo.INVO_LST i
+    JOIN    dbo.HEAD_LST h ON h.NUMBER = i.NUMBER AND h.TAG = i.TAG
+    WHERE   h.TAG = 10
+      AND   h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   ISNULL(i.MEGHK, 0) = 0
+      AND   EXISTS (
+                SELECT 1
+                FROM   dbo.DTL_MANF d
+                JOIN   dbo.HEAD_MANF hm ON hm.FNUMB = d.FNUMB AND hm.GHEYMAT = @Month
+                WHERE  CAST(d.CODE AS BIGINT) = CAST(i.CODE AS BIGINT)
+                  AND  d.MEGHk > 0);
+
+    /* ─────────────────────────── خلاصه ─────────────────────────── */
+    SELECT  e.RuleCode                                            AS قاعده,
+            r.RuleName                                            AS عنوان,
+            CASE e.Severity WHEN 2 THEN N'مسدودکننده'
+                            ELSE N'هشدار' END                     AS شدت,
+            COUNT(*)                                              AS تعداد
+    FROM    dbo.CC_Exception e
+    LEFT    JOIN dbo.CC_CheckRule r ON r.RuleCode = e.RuleCode
+    WHERE   e.RunId = @RunId AND e.StepCode = 'S05' AND e.IsResolved = 0
+    GROUP BY e.RuleCode, r.RuleName, e.Severity
+    ORDER BY e.Severity DESC, e.RuleCode;
+END
+GO
+
+/* رویه آزمایشی قدیمی که جای خود را به CC_sp_S00_Preflight داده است. */
+DROP PROCEDURE IF EXISTS dbo.CC_sp_Preflight;
+GO
+
+PRINT N'رويه دروازه اعتبارسنجي ايجاد شد.';
+GO
+";
+            TryExecuteCostCloseBatch(db, s05Gate, "CC_sp_S05_Gate",
+                "اسکریپت‌های 10-schema.sql تا 13-chk04-and-autofix.sql را اول اجرا کنید.");
+
+            string rateEngine = @"
+/* ═══════════════════════════════════════════════════════════════════
+   مرحله ۴ — موتور نرخ، نسخه تولیدی
+
+   تفاوت با نسخه آزمون بازگشتی (فایل 03):
+     ۱) در DTL_MANF و HEAD_MANF می‌نویسد، نه فقط در CC_ItemCost
+     ۲) هر تغییر در CC_FormulaChange ثبت می‌شود
+     ۳) @RunId می‌گیرد و به سابقه اجرا وصل است
+     ۴) S10 (تراز هزینه تبدیل) هم اینجاست
+
+   ترتیب اجرا: S10 سپس S11
+   چون ضریب تعدیل مستقل از نرخ مواد است، یک بار محاسبه کافی است
+   و دیگر نیازی به قرار گرفتن داخل حلقه ندارد.
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   S10 — تراز هزینه تبدیل به تفکیک واحد تولیدی
+
+   جذب‌شده = Σ (مقدار تولید × نرخ جذب فرمول)
+   واقعی   = Σ (مانده سرفصل × ضریب سهم)   طبق CC_UnitAcc
+   ضریب    = واقعی ÷ جذب‌شده
+
+   کنترل متقابل: به شرط صفر بودن کار در جریان، جذب باید با
+   گردش بستانکار حساب ۷۵۱ با تفصیلی 99999999 برابر باشد.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S10_BalanceConversion
+    @RunId INT,
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT,
+    @WhatIf BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @TafDastmozd BIGINT = 99999999;
+    DECLARE @UnitId INT, @Dep INT, @SplitMode TINYINT;
+
+    DELETE dbo.CC_ConversionCost WHERE RunId = @RunId;
+
+    DECLARE cUnit CURSOR LOCAL FAST_FORWARD FOR
+        SELECT UnitId, Depatman, SplitMode
+        FROM   dbo.CC_Unit WHERE IsActive = 1 ORDER BY SeqNo;
+
+    OPEN cUnit;
+    FETCH NEXT FROM cUnit INTO @UnitId, @Dep, @SplitMode;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        ---- ۱) جذب‌شده از برگه‌هاي توليد اين واحد
+        DECLARE @absWage FLOAT, @absOh FLOAT;
+
+        SELECT  @absWage = ISNULL(SUM(pl.MEGHK * ISNULL(hm.IMBIBE_MANF,0)), 0),
+                @absOh   = ISNULL(SUM(pl.MEGHK * ISNULL(hm.IMBIBE_SAR ,0)), 0)
+        FROM    dbo.HEAD_LST  h
+        JOIN    dbo.INVO_LST  pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+        JOIN    dbo.HEAD_MANF hm ON hm.FNUMB  = TRY_CAST(pl.N_KOL AS INT)
+                                AND hm.GHEYMAT = @Month
+        WHERE   h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+          AND  (@Dep IS NULL OR h.DEPATMAN = @Dep);
+
+        DECLARE @absTotal FLOAT = @absWage + @absOh;
+
+        ---- ۲) کنترل متقابل با حساب ۷۵۱ (فقط تفصيلي دستمزد)
+        DECLARE @absWip FLOAT;
+
+        SELECT  @absWip = ISNULL(SUM(d.BES) - SUM(d.BED), 0)
+        FROM    dbo.DEED_DTL d
+        JOIN    dbo.DEED_HED hd ON hd.N_S = d.N_S
+        WHERE   d.HES_K = 751 AND d.HES_T = @TafDastmozd
+          AND   hd.DATE_S BETWEEN @DT1 AND @DT2;
+
+        ---- ۳) واقعي از تراز، طبق نگاشت قابل ويرايش کاربر
+        DECLARE @actWage FLOAT, @actOh FLOAT;
+
+        SELECT  @actWage = ISNULL(SUM(CASE WHEN m.CostKind = 1
+                                           THEN t.Amount * m.Ratio ELSE 0 END), 0),
+                @actOh   = ISNULL(SUM(CASE WHEN m.CostKind = 2
+                                           THEN t.Amount * m.Ratio ELSE 0 END), 0)
+        FROM    dbo.CC_UnitAcc m
+        JOIN   (SELECT d.HES_K, SUM(d.BED) - SUM(d.BES) AS Amount
+                FROM   dbo.DEED_DTL d
+                JOIN   dbo.DEED_HED hd ON hd.N_S = d.N_S
+                WHERE  hd.DATE_S BETWEEN @DT1 AND @DT2
+                GROUP BY d.HES_K) t ON t.HES_K = m.HesKol
+        WHERE   m.IsActive = 1 AND m.UnitId = @UnitId;
+
+        DECLARE @actTotal FLOAT = @actWage + @actOh;
+
+        ---- ۴) ضريب تعديل
+        DECLARE @kWage FLOAT = 1, @kOh FLOAT = 1;
+
+        IF @absTotal <> 0
+        BEGIN
+            IF @SplitMode = 1                    -- يک ضريب براي کل هزينه تبديل
+            BEGIN
+                DECLARE @k FLOAT = @actTotal / @absTotal;
+                SET @kWage = @k;
+                SET @kOh   = @k;
+            END
+            ELSE                                 -- دو ضريب مجزا
+            BEGIN
+                SET @kWage = CASE WHEN @absWage <> 0 THEN @actWage / @absWage ELSE 1 END;
+                SET @kOh   = CASE WHEN @absOh   <> 0 THEN @actOh   / @absOh   ELSE 1 END;
+            END
+        END
+
+        ---- ۵) ثبت نتيجه
+        INSERT dbo.CC_ConversionCost
+            (RunId, UnitId, CostKind, AbsorbedAmount, AbsorbedFromWip,
+             ActualAmount, AdjustFactor, ActualDetailJson)
+        VALUES
+            (@RunId, @UnitId, 0, @absTotal, @absWip, @actTotal,
+             CASE WHEN @absTotal <> 0 THEN @actTotal / @absTotal ELSE 1 END,
+             (SELECT m.HesKol, m.CostKind, m.Ratio
+              FROM   dbo.CC_UnitAcc m
+              WHERE  m.UnitId = @UnitId AND m.IsActive = 1
+              FOR JSON PATH)),
+            (@RunId, @UnitId, 1, @absWage, NULL, @actWage, @kWage, NULL),
+            (@RunId, @UnitId, 2, @absOh,   NULL, @actOh,   @kOh,   NULL);
+
+        ---- ۶) هشدار اختلاف کنترلي
+        IF ABS(@absWip - @absTotal) > 10000000
+            INSERT dbo.CC_Exception
+                (RunId, StepCode, RuleCode, ExType, Severity, Amount, Description)
+            VALUES (@RunId, 'S10', 'CHK-08', 10, 1, @absWip - @absTotal,
+                    CONCAT(N'اختلاف جذب: برگه‌هاي توليد ', FORMAT(@absTotal, 'N0'),
+                           N' در برابر حساب ۷۵۱ ', FORMAT(@absWip, 'N0')));
+
+        ---- ۷) اعمال ضريب روي فرمول‌هاي کالاهاي توليدشده در اين واحد
+        IF @WhatIf = 0 AND (@kWage <> 1 OR @kOh <> 1)
+        BEGIN
+            BEGIN TRAN;
+
+            UPDATE  hm
+               SET  hm.IMBIBE_MANF = hm.IMBIBE_MANF * @kWage,
+                    hm.IMBIBE_SAR  = hm.IMBIBE_SAR  * @kOh
+            OUTPUT  @RunId, 'S10', inserted.FNUMB,
+                    TRY_CAST(inserted.CODE AS BIGINT), NULL, 'IMBIBE_MANF',
+                    deleted.IMBIBE_MANF, inserted.IMBIBE_MANF,
+                    CONCAT(N'ضريب تعديل هزينه تبديل ', FORMAT(@kWage, 'N5'))
+              INTO  dbo.CC_FormulaChange
+                    (RunId, StepCode, FNUMB, ParentCode, ChildCode,
+                     FieldName, OldValue, NewValue, Reason)
+            FROM    dbo.HEAD_MANF hm
+            WHERE   hm.GHEYMAT = @Month
+              AND   EXISTS (
+                        SELECT 1
+                        FROM   dbo.HEAD_LST h
+                        JOIN   dbo.INVO_LST pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+                        WHERE  h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+                          AND  TRY_CAST(pl.N_KOL AS INT) = hm.FNUMB
+                          AND (@Dep IS NULL OR h.DEPATMAN = @Dep));
+
+            INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+            VALUES (@RunId, 'S10', 1,
+                    CONCAT(N'واحد ', @UnitId, N': ضريب تعديل ',
+                           FORMAT(@kWage, 'N5'), N' روي ', @@ROWCOUNT, N' فرمول'));
+
+            COMMIT;
+        END
+
+        FETCH NEXT FROM cUnit INTO @UnitId, @Dep, @SplitMode;
+    END
+
+    CLOSE cUnit;
+    DEALLOCATE cUnit;
+
+    ---- خلاصه
+    SELECT  u.UnitName                          AS واحد,
+            CASE c.CostKind WHEN 0 THEN N'کل هزينه تبديل'
+                            WHEN 1 THEN N'دستمزد'
+                            ELSE N'سربار' END   AS نوع,
+            c.AbsorbedAmount                    AS جذب_شده,
+            c.AbsorbedFromWip                   AS کنترل_از_751,
+            c.ActualAmount                      AS واقعي,
+            c.AdjustFactor                      AS ضريب
+    FROM    dbo.CC_ConversionCost c
+    JOIN    dbo.CC_Unit u ON u.UnitId = c.UnitId
+    WHERE   c.RunId = @RunId
+    ORDER BY u.SeqNo, c.CostKind;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S11 — انتشار نرخ، نسخه تولیدی
+
+   سطح‌بندی درخت فرمول، سپس محاسبه از عمیق‌ترین سطح به سطح صفر.
+   نتیجه در DTL_MANF نوشته و در CC_FormulaChange ثبت می‌شود.
+
+   یک پاس، قطعی، بدون تکرار.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S11_PropagateRates
+    @RunId  INT,
+    @Month  TINYINT,
+    @WhatIf BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    /* ─── ۱) يال‌هاي درخت ─── */
+    IF OBJECT_ID('tempdb..#Edge') IS NOT NULL DROP TABLE #Edge;
+
+    SELECT  DISTINCT
+            CAST(h.CODE AS BIGINT) AS Parent,
+            CAST(d.CODE AS BIGINT) AS Child
+    INTO    #Edge
+    FROM    dbo.HEAD_MANF h
+    JOIN    dbo.DTL_MANF  d ON d.FNUMB = h.FNUMB
+    WHERE   h.GHEYMAT = @Month
+      AND   h.CODE IS NOT NULL AND d.CODE IS NOT NULL
+      AND   CAST(h.CODE AS BIGINT) <> CAST(d.CODE AS BIGINT);
+
+    CREATE CLUSTERED INDEX IX_Edge ON #Edge(Parent, Child);
+
+    /* ─── ۲) تشخيص حلقه؛ بدون اين، محاسبه بي‌نهايت مي‌شود ─── */
+    IF OBJECT_ID('tempdb..#Cycle') IS NOT NULL DROP TABLE #Cycle;
+    CREATE TABLE #Cycle (Code BIGINT PRIMARY KEY);
+
+    ;WITH Walk AS (
+        SELECT  Parent AS Root, Child, 1 AS Lvl,
+                CAST('/' + CAST(Parent AS VARCHAR(20)) + '/' AS VARCHAR(4000)) AS Pt
+        FROM    #Edge
+        UNION ALL
+        SELECT  w.Root, e.Child, w.Lvl + 1,
+                CAST(w.Pt + CAST(e.Parent AS VARCHAR(20)) + '/' AS VARCHAR(4000))
+        FROM    Walk w JOIN #Edge e ON e.Parent = w.Child
+        WHERE   w.Lvl < 20
+          AND   w.Pt NOT LIKE '%/' + CAST(e.Child AS VARCHAR(20)) + '/%'
+    )
+    INSERT #Cycle(Code)
+    SELECT DISTINCT Root FROM Walk WHERE Child = Root
+    OPTION (MAXRECURSION 0);
+
+    IF EXISTS (SELECT 1 FROM #Cycle)
+    BEGIN
+        INSERT dbo.CC_Exception
+            (RunId, StepCode, RuleCode, ExType, Severity, Code, Description)
+        SELECT @RunId, 'S11', 'CHK-06', 5, 2, Code,
+               N'حلقه در ساختار فرمول — محاسبه نرخ ممکن نيست'
+        FROM   #Cycle;
+
+        RAISERROR(N'حلقه در ساختار فرمول يافت شد؛ محاسبه متوقف شد.', 16, 1);
+        RETURN;
+    END
+
+    /* ─── ۳) سطح‌بندي ─── */
+    IF OBJECT_ID('tempdb..#C') IS NOT NULL DROP TABLE #C;
+
+    CREATE TABLE #C (
+        Code  BIGINT PRIMARY KEY,
+        Llc   SMALLINT NOT NULL DEFAULT 0,
+        FNUMB INT      NULL,
+        Src   TINYINT  NOT NULL DEFAULT 1,
+        Mat   FLOAT    NOT NULL DEFAULT 0,
+        Wage  FLOAT    NOT NULL DEFAULT 0,
+        Oh    FLOAT    NOT NULL DEFAULT 0
+    );
+
+    INSERT #C (Code)
+    SELECT Parent FROM #Edge UNION SELECT Child FROM #Edge;
+
+    DECLARE @changed INT = 1, @guard INT = 0;
+
+    WHILE @changed > 0 AND @guard < 30
+    BEGIN
+        UPDATE  c
+           SET  c.Llc = x.NewLlc
+        FROM    #C c
+        JOIN   (SELECT e.Child, MAX(p.Llc) + 1 AS NewLlc
+                FROM   #Edge e JOIN #C p ON p.Code = e.Parent
+                GROUP BY e.Child) x ON x.Child = c.Code
+        WHERE   x.NewLlc > c.Llc;
+
+        SET @changed = @@ROWCOUNT;
+        SET @guard  += 1;
+    END
+
+    CREATE INDEX IX_C_Llc ON #C(Llc);
+
+    ---- فرمول هر کالا
+    UPDATE  c
+       SET  c.FNUMB = f.FNUMB,
+            c.Src   = 2
+    FROM    #C c
+    CROSS   APPLY (SELECT TOP 1 hm.FNUMB
+                   FROM   dbo.HEAD_MANF hm
+                   WHERE  CAST(hm.CODE AS BIGINT) = c.Code AND hm.GHEYMAT = @Month
+                   ORDER BY hm.DATE_ACTIV DESC, hm.FNUMB DESC) f;
+
+    /* ─── ۴) نرخ مواد خريدني: ميانگين وزني خروج از انبار ─── */
+    UPDATE  c
+       SET  c.Mat = z.fi, c.Src = 1
+    FROM    #C c
+    JOIN   (SELECT k.code, SUM(k.MABL_K) / NULLIF(SUM(k.MEGHk), 0) AS fi
+            FROM   dbo.KALAS k
+            WHERE  k.TAG = 10 AND k.MM = @Month AND k.MEGHk <> 0
+            GROUP BY k.code) z ON z.code = c.Code
+    WHERE   c.FNUMB IS NULL AND z.fi IS NOT NULL;
+
+    ---- بدون گردش در ماه: آخرين نرخ ميانگين ثبت‌شده
+    UPDATE  c
+       SET  c.Mat = lp.AVRAGE
+    FROM    #C c
+    CROSS   APPLY (SELECT TOP 1 i.AVRAGE
+                   FROM   dbo.INVO_LST i
+                   JOIN   dbo.HEAD_LST h ON h.NUMBER = i.NUMBER AND h.TAG = i.TAG
+                   WHERE  CAST(i.CODE AS BIGINT) = c.Code AND i.AVRAGE > 0
+                   ORDER BY h.DATE_N DESC, i.NUMBER DESC) lp
+    WHERE   c.FNUMB IS NULL AND c.Mat = 0;
+
+    UPDATE #C SET Src = 3 WHERE FNUMB IS NULL AND Mat = 0;
+
+    /* ─── ۵) محاسبه از عميق‌ترين سطح به سطح صفر ───
+       چون فرزندها هميشه سطح عميق‌تري از والد دارند، وقتي به والد
+       مي‌رسيم بهاي همه اجزايش قبلاً محاسبه شده است. */
+
+    DECLARE @lvl SMALLINT = (SELECT MAX(Llc) FROM #C);
+    DECLARE @totalChanges INT = 0;
+
+    WHILE @lvl >= 0
+    BEGIN
+        IF @WhatIf = 0
+        BEGIN
+            BEGIN TRAN;
+
+            ---- ۵-الف) نرخ اجزا در فرمول والدهاي اين سطح
+            UPDATE  d
+               SET  d.SMABL = ch.Mat + ch.Wage + ch.Oh,
+                    d.MABLK = ROUND((ch.Mat + ch.Wage + ch.Oh) * d.MEGHk, 0)
+            OUTPUT  @RunId, 'S11', inserted.FNUMB,
+                    NULL, TRY_CAST(inserted.CODE AS BIGINT), 'SMABL',
+                    deleted.SMABL, inserted.SMABL,
+                    N'انتشار نرخ — سطح‌بندي BOM'
+              INTO  dbo.CC_FormulaChange
+                    (RunId, StepCode, FNUMB, ParentCode, ChildCode,
+                     FieldName, OldValue, NewValue, Reason)
+            FROM    dbo.DTL_MANF  d
+            JOIN    dbo.HEAD_MANF hm ON hm.FNUMB = d.FNUMB AND hm.GHEYMAT = @Month
+            JOIN    #C p  ON p.Code  = CAST(hm.CODE AS BIGINT) AND p.Llc = @lvl
+            JOIN    #C ch ON ch.Code = CAST(d.CODE  AS BIGINT)
+            WHERE   ABS(ISNULL(d.SMABL, 0) - (ch.Mat + ch.Wage + ch.Oh)) > 0.5;
+
+            SET @totalChanges += @@ROWCOUNT;
+
+            COMMIT;
+        END
+
+        ---- ۵-ب) بهاي والد = مجموع اجزا + جذب دستمزد + جذب سربار
+        UPDATE  c
+           SET  c.Mat  = ISNULL(a.MatCost, 0),
+                c.Wage = ISNULL(hm.IMBIBE_MANF, 0),
+                c.Oh   = ISNULL(hm.IMBIBE_SAR , 0)
+        FROM    #C c
+        JOIN    dbo.HEAD_MANF hm ON hm.FNUMB = c.FNUMB
+        CROSS   APPLY (SELECT SUM(d.MEGHk * (ch.Mat + ch.Wage + ch.Oh)) AS MatCost
+                       FROM   dbo.DTL_MANF d
+                       JOIN   #C ch ON ch.Code = CAST(d.CODE AS BIGINT)
+                       WHERE  d.FNUMB = c.FNUMB) a
+        WHERE   c.Llc = @lvl AND c.FNUMB IS NOT NULL;
+
+        SET @lvl -= 1;
+    END
+
+    /* ─── ۶) ثبت نتيجه در CC_ItemCost ─── */
+    DELETE dbo.CC_ItemCost WHERE RunId = @RunId;
+
+    INSERT dbo.CC_ItemCost
+        (RunId, PeriodMonth, Code, LowLevelCode, SourceKind, FNUMB,
+         MaterialCost, WageCost, OverheadCost)
+    SELECT  @RunId, @Month, Code, Llc, Src, FNUMB, Mat, Wage, Oh
+    FROM    #C;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    VALUES (@RunId, 'S11', 1,
+            CONCAT(N'انتشار نرخ: ', @totalChanges, N' نرخ به‌روز شد'),
+            (SELECT MAX(Llc) AS maxLevel, COUNT(*) AS items,
+                    SUM(CASE WHEN Src = 3 THEN 1 ELSE 0 END) AS noSource
+             FROM #C FOR JSON PATH));
+
+    /* ─── ۷) آزمون سلامت: CHK-09 بايد صفر شود ─── */
+    DELETE dbo.CC_Exception WHERE RunId = @RunId AND RuleCode = 'CHK-09';
+
+    ;WITH Khod AS (
+        SELECT CAST(hm.CODE AS BIGINT) AS Code,
+               SUM(ISNULL(d.MABLK,0)) + MAX(ISNULL(hm.IMBIBE_MANF,0))
+                                      + MAX(ISNULL(hm.IMBIBE_SAR,0)) AS Baha
+        FROM   dbo.HEAD_MANF hm JOIN dbo.DTL_MANF d ON d.FNUMB = hm.FNUMB
+        WHERE  hm.GHEYMAT = @Month
+        GROUP BY CAST(hm.CODE AS BIGINT), hm.FNUMB
+    ),
+    DarValed AS (
+        SELECT CAST(d.CODE AS BIGINT) AS Code, AVG(d.SMABL) AS Nerkh
+        FROM   dbo.DTL_MANF d
+        JOIN   dbo.HEAD_MANF hm ON hm.FNUMB = d.FNUMB AND hm.GHEYMAT = @Month
+        GROUP BY CAST(d.CODE AS BIGINT)
+    )
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Amount, Description)
+    SELECT  @RunId, 'S11', 'CHK-09', 14, 2, k.Code, k.Baha - v.Nerkh,
+            N'نرخ پس از اجراي موتور هنوز منتشر نشده — نياز به بررسي'
+    FROM    Khod k JOIN DarValed v ON v.Code = k.Code
+    WHERE   ABS(k.Baha - v.Nerkh) / NULLIF(k.Baha, 0) > 0.001;
+
+    /* ─── خلاصه ─── */
+    SELECT  Llc                                          AS سطح,
+            COUNT(*)                                     AS تعداد_کالا,
+            SUM(CASE WHEN Src = 3 THEN 1 ELSE 0 END)     AS بدون_منبع_نرخ
+    FROM    #C
+    GROUP BY Llc ORDER BY Llc;
+
+    SELECT  @totalChanges AS تعداد_نرخ_به‌روز_شده,
+            (SELECT COUNT(*) FROM dbo.CC_Exception
+             WHERE RunId = @RunId AND RuleCode = 'CHK-09' AND IsResolved = 0)
+                          AS نرخ_منتشر_نشده_باقيمانده;
+END
+GO
+
+
+PRINT N'موتور نرخ توليدي (S10 و S11) ايجاد شد.';
+
+/* نمونه:
+   EXEC dbo.CC_sp_S10_BalanceConversion @RunId=1, @Month=5,
+                                        @DT1=14050501, @DT2=14050531, @WhatIf=1;
+   EXEC dbo.CC_sp_S11_PropagateRates    @RunId=1, @Month=5, @WhatIf=1;
+*/
+GO
+";
+            TryExecuteCostCloseBatch(db, rateEngine, "CC_sp_S10_BalanceConversion و CC_sp_S11_PropagateRates",
+                "اسکریپت 15-rate-engine-production.sql را اجرا کنید (به CC_ConversionCost, CC_UnitAcc, CC_ItemCost نیاز دارد).");
+
+            string rollback = @"
+/* ═══════════════════════════════════════════════════════════════════
+   بازگردانی از اسنپ‌شات
+
+   هر گام نویسنده پیش از اجرا اسنپ‌شات می‌گیرد. این رویه آن را
+   برمی‌گرداند و اجرا را به وضعیت «بازگردانی‌شده» می‌برد.
+
+   بدون این، اجرای موتور روی داده واقعی ریسک دارد.
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_Rollback
+    @RunId    INT,
+    @StepCode VARCHAR(10) = NULL,   -- خالي = آخرين اسنپ‌شات هر جدول
+    @UserName NVARCHAR(50) = N'system',
+    @WhatIf   BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    ---- اسنپ‌شات‌هاي قابل استفاده
+    IF OBJECT_ID('tempdb..#Snap') IS NOT NULL DROP TABLE #Snap;
+
+    SELECT  s.SnapshotId, s.TableName, s.BackupTable, s.RowsCopied, s.StepCode
+    INTO    #Snap
+    FROM    dbo.CC_Snapshot s
+    JOIN   (SELECT TableName, MAX(SnapshotId) AS Id
+            FROM   dbo.CC_Snapshot
+            WHERE  RunId = @RunId
+              AND (@StepCode IS NULL OR StepCode = @StepCode)
+              AND  RestoredAtUtc IS NULL
+            GROUP BY TableName) x ON x.Id = s.SnapshotId;
+
+    IF NOT EXISTS (SELECT 1 FROM #Snap)
+    BEGIN
+        SELECT N'اسنپ‌شات قابل بازگرداني يافت نشد' AS پيام;
+        RETURN;
+    END
+
+    ---- بررسي وجود واقعي جداول پشتيبان
+    DECLARE @missing NVARCHAR(MAX) = NULL;
+
+    SELECT  @missing = STRING_AGG(BackupTable, ', ')
+    FROM    #Snap
+    WHERE   OBJECT_ID('dbo.' + BackupTable, 'U') IS NULL;
+
+    IF @missing IS NOT NULL
+    BEGIN
+        RAISERROR(N'جدول پشتيبان يافت نشد: %s', 16, 1, @missing);
+        RETURN;
+    END
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT  TableName   AS جدول,
+                BackupTable AS جدول_پشتيبان,
+                RowsCopied  AS تعداد_سطر,
+                StepCode    AS گام
+        FROM    #Snap ORDER BY TableName;
+
+        SELECT N'حالت گزارش — چيزي بازگردانده نشد' AS وضعيت;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    DECLARE @tbl SYSNAME, @bak SYSNAME, @sql NVARCHAR(MAX), @n INT = 0;
+
+    DECLARE cSnap CURSOR LOCAL FAST_FORWARD FOR
+        SELECT TableName, BackupTable FROM #Snap;
+
+    OPEN cSnap;
+    FETCH NEXT FROM cSnap INTO @tbl, @bak;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        IF @tbl = 'DTL_MANF'
+        BEGIN
+            SET @sql = N'
+                UPDATE  d
+                   SET  d.SMABL = b.SMABL,
+                        d.MABLK = b.MABLK,
+                        d.MEGHk = b.MEGHk,
+                        d.PERT  = b.PERT
+                FROM    dbo.DTL_MANF d
+                JOIN    dbo.' + QUOTENAME(@bak) + N' b
+                        ON b.FNUMB = d.FNUMB AND b.CODE = d.CODE';
+            EXEC sp_executesql @sql;
+            SET @n += @@ROWCOUNT;
+        END
+        ELSE IF @tbl = 'HEAD_MANF'
+        BEGIN
+            SET @sql = N'
+                UPDATE  h
+                   SET  h.IMBIBE_MANF = b.IMBIBE_MANF,
+                        h.IMBIBE_SAR  = b.IMBIBE_SAR
+                FROM    dbo.HEAD_MANF h
+                JOIN    dbo.' + QUOTENAME(@bak) + N' b ON b.FNUMB = h.FNUMB';
+            EXEC sp_executesql @sql;
+            SET @n += @@ROWCOUNT;
+        END
+        ELSE IF @tbl = 'DEED_HED'
+        BEGIN
+            -- بازگرداني شماره اسناد؛ ۹ جدول فرزند خودکار دنبال مي‌آيند
+            EXEC sp_set_session_context @key = N'cc_bulk', @value = 1;
+
+            SET @sql = N'
+                UPDATE  h
+                   SET  h.N_S = b.N_S
+                FROM    dbo.DEED_HED h
+                JOIN    dbo.' + QUOTENAME(@bak) + N' b ON b.base = h.base
+                WHERE   h.N_S <> b.N_S';
+            EXEC sp_executesql @sql;
+            SET @n += @@ROWCOUNT;
+
+            EXEC sp_set_session_context @key = N'cc_bulk', @value = 0;
+        END
+
+        FETCH NEXT FROM cSnap INTO @tbl, @bak;
+    END
+
+    CLOSE cSnap;
+    DEALLOCATE cSnap;
+
+    ---- علامت‌گذاري اسنپ‌شات‌ها
+    UPDATE  s
+       SET  s.RestoredAtUtc = SYSUTCDATETIME()
+    FROM    dbo.CC_Snapshot s
+    JOIN    #Snap t ON t.SnapshotId = s.SnapshotId;
+
+    ---- تغييرات ثبت‌شده باطل مي‌شوند
+    DELETE dbo.CC_FormulaChange
+    WHERE  RunId = @RunId
+      AND (@StepCode IS NULL OR StepCode = @StepCode);
+
+    ---- وضعيت اجرا
+    UPDATE dbo.CC_Run
+       SET Status = 5,                       -- بازگردانی‌شده
+           FormulasDirty = 0,
+           FinishedAtUtc = SYSUTCDATETIME()
+     WHERE RunId = @RunId;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, @StepCode, 2,
+            CONCAT(N'بازگرداني توسط ', @UserName, N': ', @n, N' سطر'));
+
+    COMMIT;
+
+    SELECT @n AS تعداد_سطر_بازگردانده_شده;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   پاکسازی اسنپ‌شات‌های قدیمی
+   جداول CC_BAK_* بعد از ۹۰ روز حذف می‌شوند.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_PurgeSnapshots
+    @OlderThanDays INT = 90,
+    @WhatIf        BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF OBJECT_ID('tempdb..#Old') IS NOT NULL DROP TABLE #Old;
+
+    SELECT  SnapshotId, BackupTable, TakenAtUtc
+    INTO    #Old
+    FROM    dbo.CC_Snapshot
+    WHERE   TakenAtUtc < DATEADD(DAY, -@OlderThanDays, SYSUTCDATETIME());
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT BackupTable AS جدول, TakenAtUtc AS تاريخ FROM #Old;
+        SELECT COUNT(*) AS تعداد_قابل_حذف FROM #Old;
+        RETURN;
+    END
+
+    DECLARE @bak SYSNAME;
+    DECLARE cOld CURSOR LOCAL FAST_FORWARD FOR SELECT BackupTable FROM #Old;
+
+    OPEN cOld;
+    FETCH NEXT FROM cOld INTO @bak;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        IF OBJECT_ID('dbo.' + @bak, 'U') IS NOT NULL
+            EXEC('DROP TABLE dbo.' + @bak);
+
+        FETCH NEXT FROM cOld INTO @bak;
+    END
+
+    CLOSE cOld;
+    DEALLOCATE cOld;
+
+    DELETE s FROM dbo.CC_Snapshot s JOIN #Old o ON o.SnapshotId = s.SnapshotId;
+
+    SELECT COUNT(*) AS تعداد_حذف_شده FROM #Old;
+END
+GO
+
+PRINT N'رويه‌هاي بازگرداني و پاکسازي ايجاد شدند.';
+GO
+";
+            TryExecuteCostCloseBatch(db, rollback, "CC_sp_Rollback و CC_sp_PurgeSnapshots",
+                "اسکریپت 16-rollback.sql را اجرا کنید (به CC_Snapshot نیاز دارد).");
+
+            string varianceSteps = @"
+/* ═══════════════════════════════════════════════════════════════════
+   S07 تا S09 — بازتولید، انحراف، و تخصیص
+
+   S07  بازتولید خروج مواد + انبارگردانی  (بازنویسی مجموعه‌ای)
+   S08  محاسبه انحراف مصرف
+   S09  تخصیص انحراف با تصمیم کاربر
+   S09a تولید پیشنهاد پیش‌فرض از ماه قبل
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   S07 — بازتولید خروج مواد و انبارگردانی
+
+   جایگزین اسکریپت فعلی با دو کرسر تودرتو و sp_executesql.
+   خروج مواد یک INSERT مجموعه‌ای است؛ انبارگردانی کرسر روز دارد
+   چون dbo.MOGUDI تابع جدولی پارامتری است.
+
+   انبارها از CC_UnitAnbar خوانده می‌شوند، نه از کد. با این کار
+   باگ تکرار انبار ۸ در اسکریپت فعلی موضوعیت خود را از دست می‌دهد.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S07_RebuildIssue
+    @RunId  INT,
+    @Month  TINYINT,
+    @DT1    BIGINT,
+    @DT2    BIGINT,
+    @WhatIf BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    /* ─── بخش يک: خروج مواد ─── */
+    IF OBJECT_ID('tempdb..#Prod') IS NOT NULL DROP TABLE #Prod;
+
+    SELECT  h.NUMBER  AS ProdNo,
+            h.NUMBER1 AS IssueNo
+    INTO    #Prod
+    FROM    dbo.HEAD_LST h
+    WHERE   h.TAG = 9
+      AND   h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   EXISTS (SELECT 1 FROM dbo.HEAD_LST x
+                    WHERE x.NUMBER = h.NUMBER1 AND x.TAG = 10);
+
+    CREATE CLUSTERED INDEX IX_Prod ON #Prod(IssueNo);
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT  COUNT(*) AS تعداد_برگه_توليد,
+                (SELECT COUNT(*) FROM dbo.INVO_LST i
+                 JOIN #Prod p ON p.IssueNo = i.NUMBER AND i.TAG = 10) AS سطر_فعلي_خروج
+        FROM    #Prod;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    DELETE  i
+    FROM    dbo.INVO_LST i
+    JOIN    #Prod p ON p.IssueNo = i.NUMBER AND i.TAG = 10;
+
+    DECLARE @deleted INT = @@ROWCOUNT;
+
+    INSERT dbo.INVO_LST
+        (NUMBER, TAG, ANBAR, CODE, VAHED_K, MEGH, MEGHK,
+         N_RASID, MABL, AVRAGE, MABL_K)
+    SELECT  p.IssueNo, 10, dm.ANBAR, dm.CODE, dm.VAHED_K,
+            (dm.MEGH  + dm.PERT) * pl.MEGHK,
+            (dm.MEGHK + dm.PERT) * pl.MEGHK,
+            dm.FNUMB, 1, 1,
+            (dm.MEGHK + dm.PERT) * pl.MEGHK
+    FROM    #Prod p
+    JOIN    dbo.INVO_LST  pl ON pl.NUMBER = p.ProdNo AND pl.TAG = 9
+    JOIN    dbo.HEAD_MANF hm ON hm.FNUMB  = TRY_CAST(pl.N_KOL AS INT)
+                            AND hm.GHEYMAT = @Month
+    JOIN    dbo.DTL_MANF  dm ON dm.FNUMB  = hm.FNUMB;
+
+    DECLARE @inserted INT = @@ROWCOUNT;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    VALUES (@RunId, 'S07', 1,
+            CONCAT(N'بازتوليد خروج مواد: ', @deleted, N' حذف، ', @inserted, N' درج'),
+            (SELECT @deleted AS deleted, @inserted AS inserted FOR JSON PATH));
+
+    COMMIT;
+
+    /* ─── بخش دو: انبارگرداني ─── */
+    DECLARE @anb INT, @grdNum INT, @grdDate INT, @countRows INT = 0;
+
+    DECLARE cAnb CURSOR LOCAL FAST_FORWARD FOR
+        SELECT   ua.Anbar
+        FROM     dbo.CC_UnitAnbar ua
+        JOIN     dbo.CC_Unit u ON u.UnitId = ua.UnitId AND u.IsActive = 1
+        WHERE    ua.DoStockCount = 1
+        GROUP BY ua.Anbar, ua.SeqNo      -- يک انبار در دو واحد = يک بار پردازش
+        ORDER BY ua.SeqNo;
+
+    OPEN cAnb;
+    FETCH NEXT FROM cAnb INTO @anb;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        DELETE  l
+        FROM    dbo.ANBGRD_LST l
+        JOIN    dbo.ANBGRD_HEAD h ON h.GRD_NUM = l.GRD_NUM
+        WHERE   h.GRD_ANBAR = @anb AND h.GRD_DATE BETWEEN @DT1 AND @DT2;
+
+        DECLARE cDay CURSOR LOCAL FAST_FORWARD FOR
+            SELECT GRD_NUM, GRD_DATE
+            FROM   dbo.ANBGRD_HEAD
+            WHERE  GRD_ANBAR = @anb AND GRD_DATE BETWEEN @DT1 AND @DT2
+            ORDER BY GRD_DATE;
+
+        OPEN cDay;
+        FETCH NEXT FROM cDay INTO @grdNum, @grdDate;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            INSERT dbo.ANBGRD_LST (CODE, MOG, GRD_NUM)
+            SELECT CODE, MAND, @grdNum FROM dbo.MOGUDI(@grdDate, @anb);
+
+            SET @countRows += @@ROWCOUNT;
+            FETCH NEXT FROM cDay INTO @grdNum, @grdDate;
+        END
+
+        CLOSE cDay;
+        DEALLOCATE cDay;
+
+        FETCH NEXT FROM cAnb INTO @anb;
+    END
+
+    CLOSE cAnb;
+    DEALLOCATE cAnb;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, 'S07', 1, CONCAT(N'انبارگرداني: ', @countRows, N' سطر'));
+
+    -- ستون‌های انگلیسی برای مصرف برنامه‌ای (CostCloseController/S07_RebuildIssue)؛
+    -- برای بازبینی دستی در SSMS از دو خلاصه بالا (INSERT به CC_RunLog) استفاده کنید.
+    SELECT @deleted AS Deleted, @inserted AS Inserted, @countRows AS StockCount;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S08 — محاسبه انحراف مصرف
+
+   مانده انبار مواد مصرفی تولید = انحراف مصرف
+   (به شرط صفر بودن کالای در جریان ساخت)
+
+   همان zanbekht{MM}، ولی با مبلغ ریالی و درصد نسبت به مصرف،
+   تا بتوان بر اساس اهمیت مرتب کرد.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S08_CalcVariance
+    @RunId INT,
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_Variance WHERE RunId = @RunId;
+
+    ---- انبارهاي «مبناي انحراف» هر واحد
+    INSERT dbo.CC_Variance
+        (RunId, Anbar, Code, QtyVariance, UnitRate, AmountVariance, ConsumedQty)
+    SELECT  @RunId,
+            h.GRD_ANBAR,
+            l.CODE,
+            SUM(l.MOG - ISNULL(l.NUM3, 0))                     AS QtyVar,
+            MAX(ic.TotalCost)                                  AS Rate,
+            SUM(l.MOG - ISNULL(l.NUM3, 0)) * MAX(ic.TotalCost) AS AmtVar,
+            MAX(u.Consumed)                                    AS Consumed
+    FROM    dbo.ANBGRD_LST  l
+    JOIN    dbo.ANBGRD_HEAD h ON h.GRD_NUM = l.GRD_NUM
+    JOIN    dbo.CC_UnitAnbar ua ON ua.Anbar = h.GRD_ANBAR AND ua.AnbarRole = 1
+    LEFT    JOIN dbo.CC_ItemCost ic ON ic.Code = l.CODE AND ic.RunId = @RunId
+    OUTER   APPLY (
+                SELECT SUM(pl.MEGHK * d.MEGHk) AS Consumed
+                FROM   dbo.HEAD_LST  hl
+                JOIN   dbo.INVO_LST  pl ON pl.NUMBER = hl.NUMBER AND pl.TAG = 9
+                JOIN   dbo.HEAD_MANF hm ON hm.FNUMB  = TRY_CAST(pl.N_KOL AS INT)
+                                       AND hm.GHEYMAT = @Month
+                JOIN   dbo.DTL_MANF  d  ON d.FNUMB   = hm.FNUMB
+                                       AND CAST(d.CODE AS BIGINT) = l.CODE
+                WHERE  hl.TAG = 9 AND hl.DATE_N BETWEEN @DT1 AND @DT2
+            ) u
+    WHERE   h.GRD_DATE BETWEEN @DT1 AND @DT2
+    GROUP BY h.GRD_ANBAR, l.CODE
+    HAVING  ABS(SUM(l.MOG - ISNULL(l.NUM3, 0))) > 0.0001;
+
+    ---- کالاي کليدي: بالاي يک درصد کل انحراف
+    DECLARE @total FLOAT =
+        (SELECT SUM(ABS(ISNULL(AmountVariance, 0)))
+         FROM dbo.CC_Variance WHERE RunId = @RunId);
+
+    IF @total > 0
+        UPDATE dbo.CC_Variance
+           SET IsKeyItem = 1
+         WHERE RunId = @RunId
+           AND ABS(ISNULL(AmountVariance, 0)) > @total * 0.01;
+
+    ---- CHK-11: انحراف روي ماده‌اي که در هيچ فرمولي مصرف نشده
+    DELETE dbo.CC_Exception WHERE RunId = @RunId AND RuleCode = 'CHK-11';
+
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Anbar, Code, Amount, Description)
+    SELECT  @RunId, 'S08', 'CHK-11', 11, 1, v.Anbar, v.Code, v.AmountVariance,
+            N'انحراف روي ماده‌اي که در هيچ فرمول اين ماه مصرف نشده'
+    FROM    dbo.CC_Variance v
+    WHERE   v.RunId = @RunId
+      AND   ISNULL(v.ConsumedQty, 0) = 0;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    SELECT  @RunId, 'S08', 1,
+            CONCAT(N'انحراف مصرف: ', COUNT(*), N' کالا، جمع ',
+                   FORMAT(SUM(ISNULL(AmountVariance,0)), 'N0'), N' ريال'),
+            (SELECT COUNT(*) AS items,
+                    SUM(CASE WHEN IsKeyItem = 1 THEN 1 ELSE 0 END) AS keyItems,
+                    SUM(ISNULL(AmountVariance,0)) AS netAmount
+             FROM dbo.CC_Variance WHERE RunId = @RunId FOR JSON PATH)
+    FROM    dbo.CC_Variance WHERE RunId = @RunId;
+
+    -- ستون‌های انگلیسی برای مصرف برنامه‌ای (S08_CalcVariance.VarianceSummary)
+    SELECT  COUNT(*)                                        AS Items,
+            SUM(CASE WHEN IsKeyItem = 1 THEN 1 ELSE 0 END)  AS KeyItems,
+            SUM(ISNULL(AmountVariance, 0))                  AS NetAmount,
+            SUM(ABS(ISNULL(AmountVariance, 0)))             AS GrossAmount
+    FROM    dbo.CC_Variance WHERE RunId = @RunId;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S09a — تولید پیشنهاد پیش‌فرض
+
+   زنجیره سه‌مرحله‌ای:
+     ۱) فرمول مقصد ماه قبل امسال هم هست  → همان تصمیم (Manual)
+     ۲) نیست ولی ماده مصرف شده           → تسهیم (Prorata)
+     ۳) ماده اصلاً مصرف نشده             → بدون تخصیص (Ignore)
+
+   کلید حمل تصمیم بین ماه‌ها TargetCode است نه TargetFNUMB، چون
+   GHEYMAT شماره ماه است و فرمول هر ماه FNUMB جداگانه دارد.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S09a_SeedDecisions
+    @RunId INT,
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_VarianceDecision WHERE RunId = @RunId;
+
+    ;WITH Prev AS (
+        SELECT  d.Code, d.Mode, d.TargetCode,
+                ROW_NUMBER() OVER (PARTITION BY d.Code
+                                   ORDER BY d.DecisionId DESC) AS rn
+        FROM    dbo.CC_VarianceDecision d
+        JOIN    dbo.CC_Run r ON r.RunId = d.RunId
+        WHERE   r.Status = 3            -- فقط از اجراهاي تکميل‌شده
+          AND   d.RunId <> @RunId
+    )
+    INSERT dbo.CC_VarianceDecision
+        (RunId, Code, Mode, TargetCode, TargetFNUMB, DecidedBy, Note)
+    SELECT  @RunId,
+            v.Code,
+            CASE
+              WHEN p.Mode = 1 AND hm.FNUMB IS NOT NULL THEN 1   -- ادامه تصميم قبلي
+              WHEN ISNULL(v.ConsumedQty, 0) > 0         THEN 2   -- تسهيم
+              ELSE 3                                             -- بدون تخصيص
+            END,
+            CASE WHEN hm.FNUMB IS NOT NULL THEN p.TargetCode END,
+            hm.FNUMB,
+            N'system',
+            CASE
+              WHEN p.Mode = 1 AND hm.FNUMB IS NOT NULL
+                   THEN N'مثل ماه قبل'
+              WHEN p.Mode = 1 AND hm.FNUMB IS NULL
+                   THEN N'فرمول مقصد ماه قبل امسال نيست — تسهيم'
+              WHEN ISNULL(v.ConsumedQty, 0) = 0
+                   THEN N'ماده در هيچ فرمولي مصرف نشده — بررسي شود'
+              ELSE N'تصميم جديد'
+            END
+    FROM    dbo.CC_Variance v
+    LEFT    JOIN Prev p ON p.Code = v.Code AND p.rn = 1
+    OUTER   APPLY (SELECT TOP 1 h.FNUMB
+                   FROM   dbo.HEAD_MANF h
+                   WHERE  CAST(h.CODE AS BIGINT) = p.TargetCode
+                     AND  h.GHEYMAT = @Month
+                   ORDER BY h.FNUMB DESC) hm
+    WHERE   v.RunId = @RunId;
+
+    ---- CHK-12: تصميم ماه قبل قابل ادامه نيست
+    DELETE dbo.CC_Exception WHERE RunId = @RunId AND RuleCode = 'CHK-12';
+
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Description)
+    SELECT  @RunId, 'S09', 'CHK-12', 15, 1, d.Code,
+            N'فرمول مقصد ماه قبل در اين ماه وجود ندارد؛ پيش‌فرض روي تسهيم رفت'
+    FROM    dbo.CC_VarianceDecision d
+    WHERE   d.RunId = @RunId
+      AND   d.Note LIKE N'%امسال نيست%';
+
+    SELECT  CASE Mode WHEN 1 THEN N'اختصاص'
+                      WHEN 2 THEN N'تسهيم'
+                      ELSE N'بدون تخصيص' END AS حالت,
+            COUNT(*) AS تعداد
+    FROM    dbo.CC_VarianceDecision
+    WHERE   RunId = @RunId
+    GROUP BY Mode ORDER BY Mode;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S09 — اعمال تصمیم‌ها
+
+   Manual   کل انحراف کالا به یک فرمول مشخص
+   Prorata  تسهیم بین فرمول‌هایی که آن ماده را مصرف کرده‌اند
+   Ignore   دست‌نخورده در حساب ۷۷۲ می‌ماند
+
+   تغییر روی MEGHk انجام می‌شود، به ازای یک واحد محصول:
+   مقدار افزوده = سهم انحراف ÷ مقدار تولید همان محصول
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S09_ApplyDecisions
+    @RunId  INT,
+    @Month  TINYINT,
+    @DT1    BIGINT,
+    @DT2    BIGINT,
+    @WhatIf BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    ---- مقدار توليد هر فرمول در ماه
+    IF OBJECT_ID('tempdb..#Prod') IS NOT NULL DROP TABLE #Prod;
+
+    SELECT  TRY_CAST(pl.N_KOL AS INT) AS FNUMB,
+            SUM(pl.MEGHK)             AS ProdQty
+    INTO    #Prod
+    FROM    dbo.HEAD_LST h
+    JOIN    dbo.INVO_LST pl ON pl.NUMBER = h.NUMBER AND pl.TAG = 9
+    WHERE   h.TAG = 9 AND h.DATE_N BETWEEN @DT1 AND @DT2
+      AND   TRY_CAST(pl.N_KOL AS INT) IS NOT NULL
+    GROUP BY TRY_CAST(pl.N_KOL AS INT)
+    HAVING  SUM(pl.MEGHK) > 0;
+
+    CREATE UNIQUE CLUSTERED INDEX IX_Prod ON #Prod(FNUMB);
+
+    ---- سهم هر فرمول از انحراف هر ماده
+    IF OBJECT_ID('tempdb..#Share') IS NOT NULL DROP TABLE #Share;
+
+    ;WITH Usage AS (
+        SELECT  d.FNUMB,
+                CAST(d.CODE AS BIGINT) AS Code,
+                p.ProdQty * d.MEGHk    AS UsedQty
+        FROM    dbo.DTL_MANF  d
+        JOIN    dbo.HEAD_MANF hm ON hm.FNUMB = d.FNUMB AND hm.GHEYMAT = @Month
+        JOIN    #Prod p ON p.FNUMB = d.FNUMB
+        WHERE   d.MEGHk > 0
+    )
+    SELECT  u.FNUMB,
+            u.Code,
+            v.QtyVariance,
+            dc.Mode,
+            CASE
+              -- اختصاص: کل انحراف به همان يک فرمول
+              WHEN dc.Mode = 1 AND u.FNUMB = dc.TargetFNUMB THEN 1.0
+              -- تسهيم: به نسبت مصرف
+              WHEN dc.Mode = 2
+                   THEN u.UsedQty / NULLIF(SUM(u.UsedQty) OVER (PARTITION BY u.Code), 0)
+              ELSE 0
+            END AS Ratio
+    INTO    #Share
+    FROM    Usage u
+    JOIN    dbo.CC_Variance          v  ON v.Code  = u.Code AND v.RunId  = @RunId
+    JOIN    dbo.CC_VarianceDecision  dc ON dc.Code = u.Code AND dc.RunId = @RunId
+    WHERE   dc.Mode IN (1, 2);
+
+    DELETE #Share WHERE Ratio IS NULL OR Ratio = 0;
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT  s.FNUMB                              AS شماره_فرمول,
+                s.Code                               AS کد_ماده,
+                st.NAME                              AS نام_ماده,
+                CASE s.Mode WHEN 1 THEN N'اختصاص'
+                            ELSE N'تسهيم' END        AS حالت,
+                s.QtyVariance                        AS کل_انحراف,
+                s.Ratio                              AS سهم,
+                s.QtyVariance * s.Ratio              AS مقدار_سهم,
+                p.ProdQty                            AS مقدار_توليد,
+                s.QtyVariance * s.Ratio / p.ProdQty  AS افزايش_در_فرمول
+        FROM    #Share s
+        JOIN    #Prod  p  ON p.FNUMB = s.FNUMB
+        LEFT    JOIN dbo.STUF_DEF st ON TRY_CAST(st.CODE AS BIGINT) = s.Code
+        ORDER BY ABS(s.QtyVariance * s.Ratio) DESC;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    UPDATE  d
+       SET  d.MEGHk = d.MEGHk + (s.QtyVariance * s.Ratio / p.ProdQty),
+            d.MABLK = ROUND(ISNULL(d.SMABL, 0) *
+                            (d.MEGHk + (s.QtyVariance * s.Ratio / p.ProdQty)), 0)
+    OUTPUT  @RunId, 'S09', inserted.FNUMB,
+            NULL, TRY_CAST(inserted.CODE AS BIGINT), 'MEGHk',
+            deleted.MEGHk, inserted.MEGHk,
+            N'تخصيص انحراف مصرف'
+      INTO  dbo.CC_FormulaChange
+            (RunId, StepCode, FNUMB, ParentCode, ChildCode,
+             FieldName, OldValue, NewValue, Reason)
+    FROM    dbo.DTL_MANF d
+    JOIN    #Share s ON s.FNUMB = d.FNUMB
+                    AND s.Code  = CAST(d.CODE AS BIGINT)
+    JOIN    #Prod  p ON p.FNUMB = d.FNUMB;
+
+    DECLARE @n INT = @@ROWCOUNT;
+
+    ---- ثبت مقدار اعمال‌شده در تصميم‌ها
+    UPDATE  dc
+       SET  dc.AppliedQty = x.Applied
+    FROM    dbo.CC_VarianceDecision dc
+    JOIN   (SELECT Code, SUM(QtyVariance * Ratio) AS Applied
+            FROM   #Share GROUP BY Code) x ON x.Code = dc.Code
+    WHERE   dc.RunId = @RunId;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, 'S09', 1,
+            CONCAT(N'تخصيص انحراف: ', @n, N' سطر فرمول به‌روز شد'));
+
+    COMMIT;
+
+    -- ستون انگلیسی برای مصرف برنامه‌ای (S09_ApplyDecisions.ApplyResult)
+    SELECT @n AS Value;
+END
+GO
+
+
+PRINT N'رويه‌هاي S07 تا S09 ايجاد شدند.';
+GO
+";
+            TryExecuteCostCloseBatch(db, varianceSteps,
+                "CC_sp_S07_RebuildIssue، CC_sp_S08_CalcVariance، CC_sp_S09_ApplyDecisions، CC_sp_S09a_SeedDecisions",
+                "اسکریپت 17-variance-steps.sql را اجرا کنید (به CC_Variance, CC_VarianceDecision, CC_UnitAnbar نیاز دارد).");
+
+            string marginReportApprove = @"
+/* ═══════════════════════════════════════════════════════════════════
+   S12 تا S14 — سود کالا، گزارش هیئت‌مدیره، تأیید نهایی
+
+   S12  سود و زیان به تفکیک کالا + اعمال هدف حاشیه
+   S13  داده گزارش اکسل
+   S14  تأیید و قفل دوره
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* جدول نتیجه سود کالا */
+IF OBJECT_ID('dbo.CC_ItemMargin','U') IS NULL
+CREATE TABLE dbo.CC_ItemMargin (
+    Id            BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RunId         INT      NOT NULL,
+    Code          BIGINT   NOT NULL,
+    QtySold       FLOAT    NOT NULL DEFAULT 0,
+    WeightKg      FLOAT    NULL,
+    SalesAmount   FLOAT    NOT NULL DEFAULT 0,   -- مبلغ خالص فروش
+    CostAmount    FLOAT    NOT NULL DEFAULT 0,   -- بهاي تمام‌شده کالاي فروش‌رفته
+    Profit        AS (SalesAmount - CostAmount) PERSISTED,
+    UnitCost      FLOAT    NULL,
+    UnitPrice     FLOAT    NULL,
+    CalculatedAt  DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT UQ_CC_ItemMargin UNIQUE (RunId, Code)
+);
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S12 — محاسبه سود و زیان کالا
+
+   فروش    از فاکتورهای TAG=2
+   بها     از حساب قیمت تمام‌شده (GHEYMAT) به تفکیک کالا
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S12_CalcMargin
+    @RunId INT,
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_ItemMargin WHERE RunId = @RunId;
+
+    ;WITH Forush AS (
+        SELECT  CAST(i.CODE AS BIGINT)                       AS Code,
+                SUM(i.MEGHk)                                 AS Qty,
+                SUM(i.MEGH)                                  AS Weight,
+                SUM(i.MABL_K - ISNULL(i.N_MOIN, 0))          AS NetSales
+        FROM    dbo.INVO_LST i
+        JOIN    dbo.HEAD_LST h ON h.NUMBER = i.NUMBER AND h.TAG = i.TAG
+        WHERE   i.TAG = 2 AND h.DATE_N BETWEEN @DT1 AND @DT2
+        GROUP BY CAST(i.CODE AS BIGINT)
+    ),
+    Baha AS (
+        -- بهاي تمام‌شده کالاي فروش‌رفته از سند حسابداري
+        SELECT  TRY_CAST(d.HES_M AS BIGINT) AS Code,
+                SUM(d.BED) - SUM(d.BES)     AS Cost
+        FROM    dbo.DEED_DTL d
+        JOIN    dbo.DEED_HED h ON h.N_S = d.N_S
+        WHERE   d.TAG = 13
+          AND   h.DATE_S BETWEEN @DT1 AND @DT2
+          AND   TRY_CAST(d.HES_M AS BIGINT) IS NOT NULL
+        GROUP BY TRY_CAST(d.HES_M AS BIGINT)
+    )
+    INSERT dbo.CC_ItemMargin
+        (RunId, Code, QtySold, WeightKg, SalesAmount, CostAmount, UnitCost, UnitPrice)
+    SELECT  @RunId,
+            f.Code,
+            f.Qty,
+            f.Weight,
+            f.NetSales,
+            ISNULL(b.Cost, ISNULL(ic.TotalCost, 0) * f.Qty),
+            CASE WHEN f.Qty <> 0
+                 THEN ISNULL(b.Cost, ISNULL(ic.TotalCost,0) * f.Qty) / f.Qty END,
+            CASE WHEN f.Qty <> 0 THEN f.NetSales / f.Qty END
+    FROM    Forush f
+    LEFT    JOIN Baha b ON b.Code = f.Code
+    LEFT    JOIN dbo.CC_ItemCost ic ON ic.Code = f.Code AND ic.RunId = @RunId
+    WHERE   f.Qty <> 0;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    SELECT  @RunId, 'S12', 1,
+            CONCAT(N'سود کالا: ', COUNT(*), N' کالا، ',
+                   SUM(CASE WHEN Profit < 0 THEN 1 ELSE 0 END), N' زيان‌ده'),
+            (SELECT COUNT(*) AS items,
+                    SUM(CASE WHEN Profit < 0 THEN 1 ELSE 0 END) AS lossItems,
+                    SUM(SalesAmount) AS totalSales,
+                    SUM(CostAmount)  AS totalCost,
+                    SUM(SalesAmount) - SUM(CostAmount) AS totalProfit
+             FROM dbo.CC_ItemMargin WHERE RunId = @RunId FOR JSON PATH)
+    FROM    dbo.CC_ItemMargin WHERE RunId = @RunId;
+
+    -- ستون‌های انگلیسی برای مصرف برنامه‌ای (S12_CalcMargin.MarginSummary)
+    SELECT  COUNT(*)                                              AS Items,
+            SUM(CASE WHEN Profit < 0 THEN 1 ELSE 0 END)           AS LossItems,
+            SUM(SalesAmount)                                      AS TotalSales,
+            SUM(CostAmount)                                       AS TotalCost,
+            SUM(SalesAmount) - SUM(CostAmount)                    AS TotalProfit
+    FROM    dbo.CC_ItemMargin WHERE RunId = @RunId;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S12b — اعمال هدف حاشیه سود
+
+   وقتی زیان یک کالا صفر می‌شود، مبلغ آن از بهای تمام‌شده‌اش کم و
+   به کالای متعادل‌کننده اضافه می‌شود، تا جمع کل دست‌نخورده بماند.
+
+   تغییر روی IMBIBE_MANF فرمول انجام می‌گیرد، چون تنها جزئی است
+   که مستقل از مواد قابل تنظیم است.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S12b_ApplyMarginTargets
+    @RunId  INT,
+    @Month  TINYINT,
+    @DT1    BIGINT,
+    @DT2    BIGINT,
+    @WhatIf BIT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF OBJECT_ID('tempdb..#Adj') IS NOT NULL DROP TABLE #Adj;
+
+    ---- مبلغ تعديل لازم براي هر کالاي هدف‌دار
+    SELECT  m.Code,
+            t.TargetKind,
+            t.TargetPct,
+            t.BalancingCode,
+            m.SalesAmount,
+            m.CostAmount,
+            m.QtySold,
+            CASE t.TargetKind
+                 WHEN 1 THEN m.CostAmount - m.SalesAmount                    -- سود صفر
+                 WHEN 2 THEN m.CostAmount - m.SalesAmount * (1 - t.TargetPct/100.0)
+                 ELSE 0 END AS AdjustAmount
+    INTO    #Adj
+    FROM    dbo.CC_ItemMargin m
+    JOIN    dbo.CC_MarginTarget t ON t.Code = m.Code AND t.IsActive = 1
+    WHERE   m.RunId = @RunId
+      AND   t.TargetKind IN (1, 2)
+      AND   m.QtySold <> 0;
+
+    DELETE #Adj WHERE ABS(AdjustAmount) < 1;
+
+    ---- هشدار: کالاي متعادل‌کننده زيان‌ده مي‌شود
+    IF OBJECT_ID('tempdb..#Warn') IS NOT NULL DROP TABLE #Warn;
+
+    SELECT  a.Code                    AS SourceCode,
+            a.BalancingCode,
+            a.AdjustAmount,
+            bm.Profit                 AS BalancerProfitBefore,
+            bm.Profit - a.AdjustAmount AS BalancerProfitAfter
+    INTO    #Warn
+    FROM    #Adj a
+    JOIN    dbo.CC_ItemMargin bm ON bm.Code = a.BalancingCode AND bm.RunId = @RunId
+    WHERE   a.BalancingCode IS NOT NULL
+      AND   bm.Profit - a.AdjustAmount < 0
+      AND   bm.Profit >= 0;
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT  a.Code               AS کد_کالا,
+                s.NAME               AS نام_کالا,
+                a.SalesAmount        AS فروش,
+                a.CostAmount         AS بها,
+                a.SalesAmount - a.CostAmount AS سود_فعلي,
+                a.AdjustAmount       AS مبلغ_تعديل,
+                a.BalancingCode      AS کالاي_متعادل_کننده,
+                sb.NAME              AS نام_متعادل_کننده
+        FROM    #Adj a
+        LEFT    JOIN dbo.STUF_DEF s  ON TRY_CAST(s.CODE  AS BIGINT) = a.Code
+        LEFT    JOIN dbo.STUF_DEF sb ON TRY_CAST(sb.CODE AS BIGINT) = a.BalancingCode
+        ORDER BY ABS(a.AdjustAmount) DESC;
+
+        SELECT  w.SourceCode              AS کالاي_مبدا,
+                w.BalancingCode           AS متعادل_کننده,
+                w.BalancerProfitBefore    AS سود_قبل,
+                w.BalancerProfitAfter     AS سود_بعد,
+                N'کالاي متعادل‌کننده زيان‌ده مي‌شود' AS هشدار
+        FROM    #Warn w;
+
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    ---- کاهش بهاي کالاي هدف: تعديل نرخ جذب دستمزد فرمول
+    UPDATE  hm
+       SET  hm.IMBIBE_MANF = hm.IMBIBE_MANF - (a.AdjustAmount / NULLIF(a.QtySold, 0))
+    OUTPUT  @RunId, 'S12', inserted.FNUMB,
+            TRY_CAST(inserted.CODE AS BIGINT), NULL, 'IMBIBE_MANF',
+            deleted.IMBIBE_MANF, inserted.IMBIBE_MANF,
+            N'هدف حاشيه سود'
+      INTO  dbo.CC_FormulaChange
+            (RunId, StepCode, FNUMB, ParentCode, ChildCode,
+             FieldName, OldValue, NewValue, Reason)
+    FROM    dbo.HEAD_MANF hm
+    JOIN    #Adj a ON CAST(hm.CODE AS BIGINT) = a.Code
+    WHERE   hm.GHEYMAT = @Month;
+
+    DECLARE @n1 INT = @@ROWCOUNT;
+
+    ---- افزايش بهاي کالاي متعادل‌کننده به همان مبلغ
+    UPDATE  hm
+       SET  hm.IMBIBE_MANF = hm.IMBIBE_MANF + (x.Amount / NULLIF(x.Qty, 0))
+    OUTPUT  @RunId, 'S12', inserted.FNUMB,
+            TRY_CAST(inserted.CODE AS BIGINT), NULL, 'IMBIBE_MANF',
+            deleted.IMBIBE_MANF, inserted.IMBIBE_MANF,
+            N'جذب اثر معکوس هدف حاشيه سود'
+      INTO  dbo.CC_FormulaChange
+            (RunId, StepCode, FNUMB, ParentCode, ChildCode,
+             FieldName, OldValue, NewValue, Reason)
+    FROM    dbo.HEAD_MANF hm
+    JOIN   (SELECT a.BalancingCode AS Code,
+                   SUM(a.AdjustAmount) AS Amount,
+                   MAX(bm.QtySold) AS Qty
+            FROM   #Adj a
+            JOIN   dbo.CC_ItemMargin bm
+                   ON bm.Code = a.BalancingCode AND bm.RunId = @RunId
+            WHERE  a.BalancingCode IS NOT NULL AND bm.QtySold <> 0
+            GROUP BY a.BalancingCode) x ON CAST(hm.CODE AS BIGINT) = x.Code
+    WHERE   hm.GHEYMAT = @Month;
+
+    DECLARE @n2 INT = @@ROWCOUNT;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, 'S12', 1,
+            CONCAT(N'هدف حاشيه سود: ', @n1, N' کالاي هدف، ', @n2, N' متعادل‌کننده'));
+
+    COMMIT;
+
+    SELECT @n1 AS کالاي_هدف, @n2 AS متعادل_کننده;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S13 — داده گزارش هیئت‌مدیره
+
+   شیت‌های موجود گزارش اکسل شما، به‌علاوه شیت جدید «خلاصه اجرا».
+   خروجی چند مجموعه است که سمت سرور با ClosedXML به اکسل تبدیل می‌شود.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S13_ReportData
+    @RunId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Month TINYINT, @DT1 BIGINT, @DT2 BIGINT;
+    SELECT @Month = PeriodMonth, @DT1 = DateFrom, @DT2 = DateTo
+    FROM   dbo.CC_Run WHERE RunId = @RunId;
+
+    ---- ۱) سود کالا به کالا
+    SELECT  m.Code                        AS کد_کالا,
+            s.NAME                        AS نام_کالا,
+            @Month                        AS ماه,
+            m.WeightKg                    AS وزن_به_کيلو,
+            m.QtySold                     AS مقدار_کل,
+            m.SalesAmount                 AS مبلغ_خالص,
+            m.CostAmount                  AS مبلغ_ريالي,
+            m.Profit                      AS سود,
+            CASE WHEN m.SalesAmount <> 0
+                 THEN ROUND(m.Profit / m.SalesAmount * 100, 0) END AS درصد
+    FROM    dbo.CC_ItemMargin m
+    LEFT    JOIN dbo.STUF_DEF s ON TRY_CAST(s.CODE AS BIGINT) = m.Code
+    WHERE   m.RunId = @RunId
+    ORDER BY m.Profit;
+
+    ---- ۲) خلاصه اجرا — شيت جديدي که امروز وجود ندارد
+    SELECT  r.RunId                       AS شماره_اجرا,
+            r.FiscalYear                  AS سال,
+            r.PeriodMonth                 AS ماه,
+            r.RunNo                       AS نوبت,
+            CASE r.RunKind WHEN 2 THEN N'قطعي' ELSE N'آزمايشي' END AS نوع,
+            r.StartedByUser               AS کاربر,
+            r.ApprovedByUser              AS تأييدکننده,
+            (SELECT COUNT(*) FROM dbo.CC_FormulaChange WHERE RunId = @RunId)
+                                          AS تعداد_تغيير_فرمول,
+            (SELECT SUM(ISNULL(AmountVariance,0)) FROM dbo.CC_Variance WHERE RunId = @RunId)
+                                          AS انحراف_مصرف,
+            (SELECT COUNT(*) FROM dbo.CC_Exception
+             WHERE RunId = @RunId AND IsResolved = 0)
+                                          AS استثناي_باز
+    FROM    dbo.CC_Run r WHERE r.RunId = @RunId;
+
+    ---- ۳) هزينه تبديل به تفکيک واحد
+    SELECT  u.UnitName                    AS واحد,
+            CASE c.CostKind WHEN 0 THEN N'کل' WHEN 1 THEN N'دستمزد'
+                            ELSE N'سربار' END AS نوع,
+            c.AbsorbedAmount              AS جذب_شده,
+            c.ActualAmount                AS واقعي,
+            c.AdjustFactor                AS ضريب
+    FROM    dbo.CC_ConversionCost c
+    JOIN    dbo.CC_Unit u ON u.UnitId = c.UnitId
+    WHERE   c.RunId = @RunId
+    ORDER BY u.SeqNo, c.CostKind;
+
+    ---- ۴) بيشترين تغيير نرخ — پاسخ به «چرا اين عدد عوض شد؟»
+    SELECT  TOP 100
+            f.FNUMB                       AS شماره_فرمول,
+            sp.NAME                       AS کالاي_توليدي,
+            sc.NAME                       AS ماده,
+            f.FieldName                   AS فيلد,
+            f.OldValue                    AS مقدار_قبل,
+            f.NewValue                    AS مقدار_بعد,
+            f.Reason                      AS علت
+    FROM    dbo.CC_FormulaChange f
+    LEFT    JOIN dbo.STUF_DEF sp ON TRY_CAST(sp.CODE AS BIGINT) = f.ParentCode
+    LEFT    JOIN dbo.STUF_DEF sc ON TRY_CAST(sc.CODE AS BIGINT) = f.ChildCode
+    WHERE   f.RunId = @RunId
+    ORDER BY ABS(ISNULL(f.NewValue,0) - ISNULL(f.OldValue,0)) DESC;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   S14 — تأیید نهایی و قفل دوره
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S14_Approve
+    @RunId    INT,
+    @UserName NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @kind TINYINT, @status TINYINT, @year SMALLINT, @month TINYINT;
+
+    SELECT @kind = RunKind, @status = Status,
+           @year = FiscalYear, @month = PeriodMonth
+    FROM   dbo.CC_Run WHERE RunId = @RunId;
+
+    IF @kind <> 2
+    BEGIN
+        RAISERROR(N'فقط اجراي قطعي قابل تأييد است.', 16, 1);
+        RETURN;
+    END
+
+    IF @status <> 3
+    BEGIN
+        RAISERROR(N'اجرا هنوز تکميل نشده است.', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (SELECT 1 FROM dbo.CC_Exception
+               WHERE RunId = @RunId AND Severity = 2 AND IsResolved = 0)
+    BEGIN
+        RAISERROR(N'استثناي مسدودکننده باز وجود دارد.', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (SELECT 1 FROM dbo.CC_Run
+               WHERE FiscalYear = @year AND PeriodMonth = @month
+                 AND RunKind = 2 AND ApprovedAtUtc IS NOT NULL AND RunId <> @RunId)
+    BEGIN
+        RAISERROR(N'براي اين ماه قبلاً يک اجراي قطعي تأييد شده است.', 16, 1);
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    UPDATE dbo.CC_Run
+       SET ApprovedByUser = @UserName,
+           ApprovedAtUtc  = SYSUTCDATETIME()
+     WHERE RunId = @RunId;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, 'S14', 1,
+            CONCAT(N'تأييد نهايي دوره ', @year, '/', @month, N' توسط ', @UserName));
+
+    COMMIT;
+
+    SELECT N'دوره تأييد و قفل شد' AS وضعيت;
+END
+GO
+
+
+PRINT N'رويه‌هاي S12 تا S14 ايجاد شدند.';
+GO
+";
+            TryExecuteCostCloseBatch(db, marginReportApprove,
+                "CC_sp_S12_CalcMargin، CC_sp_S12b_ApplyMarginTargets، CC_sp_S13_ReportData، CC_sp_S14_Approve",
+                "اسکریپت 18-margin-report-approve.sql را اجرا کنید (به CC_ItemMargin, CC_MarginTarget, CC_ConversionCost نیاز دارد).");
+
+            // ⚠ حتماً بعد از marginReportApprove اجرا شود — نسخه CC_sp_S12_CalcMargin
+            // را با محاسبه بر مبنای کاردکس (KALAS) جایگزین می‌کند.
+            string marginFixKalas = @"
+/* ═══════════════════════════════════════════════════════════════════
+   اصلاح S12 — محاسبه سود بر مبنای کاردکس
+
+   ── چه چیزی غلط بود ──
+   نسخه قبلی بهای تمام‌شده را از سند حسابداری (DEED_DTL با TAG=13)
+   می‌گرفت. آن عدد، بهای لحظه صدور سند است.
+
+   ── روش درست ──
+   AVRAGE در KALAS میانگین متحرک واقعی کاردکس است و MABRIAL همان
+   AVRAGE × MEGHk. برای سنجش سود این درست است، چون بهای واقعی
+   موجودی را نشان می‌دهد نه بهای لحظه‌ای.
+
+   سود = مبلغ خالص (KHFR) − مبلغ ریالی (MABRIAL)
+
+   ستون‌های KALAS که استفاده می‌شوند:
+     TAGCODE = 2   فاکتور فروش
+     KHFR          MABL_K − N_MOIN  (مبلغ خالص پس از تخفیف)
+     MABRIAL       AVRAGE × MEGHk   (بهای تمام‌شده از کاردکس)
+     MEGHk         مقدار کل
+     MEGH          وزن به کیلو
+
+   نکته: عمداً هیچ «USE <database>» اینجا نیست — نام پایگاه در هر
+   نصب فرق می‌کند. اسکریپت را روی پایگاه هدف اجرا کنید.
+
+   ⚠ حتماً پس از 18-margin-report-approve.sql اجرا شود — نسخه S12
+   آن فایل را جایگزین می‌کند.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ستون‌های جدید برای تفکیک تخفیف و برگشت */
+IF COL_LENGTH('dbo.CC_ItemMargin','GrossSales') IS NULL
+    ALTER TABLE dbo.CC_ItemMargin ADD GrossSales FLOAT NULL;
+GO
+IF COL_LENGTH('dbo.CC_ItemMargin','Discount') IS NULL
+    ALTER TABLE dbo.CC_ItemMargin ADD Discount FLOAT NULL;
+GO
+IF COL_LENGTH('dbo.CC_ItemMargin','ReturnAmount') IS NULL
+    ALTER TABLE dbo.CC_ItemMargin ADD ReturnAmount FLOAT NULL;
+GO
+IF COL_LENGTH('dbo.CC_ItemMargin','ReturnQty') IS NULL
+    ALTER TABLE dbo.CC_ItemMargin ADD ReturnQty FLOAT NULL;
+GO
+
+
+CREATE OR ALTER PROCEDURE dbo.CC_sp_S12_CalcMargin
+    @RunId INT,
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE dbo.CC_ItemMargin WHERE RunId = @RunId;
+
+    /* ─── فروش: TAGCODE = 2 ─── */
+    ;WITH Forush AS (
+        SELECT  k.CODE                       AS Code,
+                SUM(k.MEGHk)                 AS Qty,
+                SUM(k.MEGH)                  AS Weight,
+                SUM(k.MABL_K)                AS Gross,      -- پيش از تخفيف
+                SUM(ISNULL(k.N_MOIN, 0))     AS Discount,   -- تخفيف
+                SUM(k.KHFR)                  AS NetSales,   -- مبلغ خالص
+                SUM(k.MABRIAL)               AS CostRial    -- AVRAGE × MEGHk
+        FROM    dbo.KALAS k
+        WHERE   k.TAGCODE = 2
+          AND   k.MM = @Month
+        GROUP BY k.CODE
+    ),
+    /* ─── برگشت از فروش: TAGCODE = 4 ─── */
+    Bargasht AS (
+        SELECT  k.CODE           AS Code,
+                SUM(k.MEGHk)     AS Qty,
+                SUM(k.KHFR)      AS NetAmount,
+                SUM(k.MABRIAL)   AS CostRial
+        FROM    dbo.KALAS k
+        WHERE   k.TAGCODE = 4
+          AND   k.MM = @Month
+        GROUP BY k.CODE
+    )
+    INSERT dbo.CC_ItemMargin
+        (RunId, Code, QtySold, WeightKg, SalesAmount, CostAmount,
+         UnitCost, UnitPrice, GrossSales, Discount, ReturnAmount, ReturnQty)
+    SELECT  @RunId,
+            f.Code,
+            f.Qty      - ISNULL(b.Qty, 0),
+            f.Weight,
+            f.NetSales - ISNULL(b.NetAmount, 0),      -- فروش خالص پس از برگشت
+            f.CostRial - ISNULL(b.CostRial, 0),       -- بهاي واقعي از کاردکس
+            CASE WHEN f.Qty - ISNULL(b.Qty,0) <> 0
+                 THEN (f.CostRial - ISNULL(b.CostRial,0))
+                      / (f.Qty - ISNULL(b.Qty,0)) END,
+            CASE WHEN f.Qty - ISNULL(b.Qty,0) <> 0
+                 THEN (f.NetSales - ISNULL(b.NetAmount,0))
+                      / (f.Qty - ISNULL(b.Qty,0)) END,
+            f.Gross,
+            f.Discount,
+            ISNULL(b.NetAmount, 0),
+            ISNULL(b.Qty, 0)
+    FROM    Forush f
+    LEFT    JOIN Bargasht b ON b.Code = f.Code
+    WHERE   f.Qty <> 0;
+
+    /* ─── هشدار: کالاي فروش‌رفته بدون نرخ کاردکس ───
+       اگر MABRIAL صفر باشد يعني AVRAGE در کاردکس صفر است و
+       سود آن کالا کاملاً غلط محاسبه مي‌شود. */
+    DELETE dbo.CC_Exception WHERE RunId = @RunId AND RuleCode = 'CHK-14';
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.CC_CheckRule WHERE RuleCode = 'CHK-14')
+        INSERT dbo.CC_CheckRule
+            (RuleCode, RuleName, StepCode, ExType, DefaultSeverity,
+             RemedyText, SortOrder)
+        VALUES ('CHK-14', N'فروش بدون نرخ کاردکس', 'S12', 17, 1,
+                N'اين کالا فروخته شده ولي ميانگين نرخ در کاردکس صفر است، پس بهاي تمام‌شده و سودش صفر محاسبه مي‌شود. کاردکس کالا را بررسي کنيد؛ معمولاً يعني رسيد بدون مبلغ ثبت شده.',
+                140);
+
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Amount, Description)
+    SELECT  @RunId, 'S12', 'CHK-14', 17, 1, m.Code, m.SalesAmount,
+            N'کالا فروخته شده ولي نرخ کاردکسش صفر است — سود غيرواقعي'
+    FROM    dbo.CC_ItemMargin m
+    WHERE   m.RunId = @RunId
+      AND   m.CostAmount = 0
+      AND   m.SalesAmount <> 0;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
+    SELECT  @RunId, 'S12', 1,
+            CONCAT(N'سود کالا: ', COUNT(*), N' کالا، سود کل ',
+                   FORMAT(SUM(SalesAmount) - SUM(CostAmount), 'N0'), N' ريال'),
+            (SELECT COUNT(*) AS items,
+                    SUM(CASE WHEN Profit < 0 THEN 1 ELSE 0 END) AS lossItems,
+                    SUM(SalesAmount) AS sales,
+                    SUM(CostAmount)  AS cost
+             FROM dbo.CC_ItemMargin WHERE RunId = @RunId FOR JSON PATH)
+    FROM    dbo.CC_ItemMargin WHERE RunId = @RunId;
+
+    -- ستون‌های انگلیسی برای مصرف برنامه‌ای (S12_CalcMargin.MarginSummary)؛
+    -- خلاصه‌ی خواناترِ فارسی (فروش ناخالص/تخفیف/برگشت) در CC_RunLog بالا ثبت شد.
+    SELECT  COUNT(*)                                    AS Items,
+            SUM(CASE WHEN Profit < 0 THEN 1 ELSE 0 END) AS LossItems,
+            SUM(SalesAmount)                            AS TotalSales,
+            SUM(CostAmount)                              AS TotalCost,
+            SUM(SalesAmount) - SUM(CostAmount)          AS TotalProfit
+    FROM    dbo.CC_ItemMargin WHERE RunId = @RunId;
+END
+GO
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   مقایسه: روش کاردکس در برابر روش سند حسابداری
+
+   برای اطمینان از درستی تغییر. اگر اختلاف بزرگ بود، یعنی سند
+   حسابداری با کاردکس نمی‌خواند و خودِ آن یک یافته است.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_CompareMarginMethods
+    @Month TINYINT,
+    @DT1   BIGINT,
+    @DT2   BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ;WITH AzKardex AS (
+        SELECT  k.CODE AS Code,
+                SUM(k.KHFR)    AS NetSales,
+                SUM(k.MABRIAL) AS Cost
+        FROM    dbo.KALAS k
+        WHERE   k.TAGCODE = 2 AND k.MM = @Month
+        GROUP BY k.CODE
+    ),
+    AzSanad AS (
+        SELECT  TRY_CAST(d.HES_M AS BIGINT) AS Code,
+                SUM(d.BED) - SUM(d.BES)     AS Cost
+        FROM    dbo.DEED_DTL d
+        JOIN    dbo.DEED_HED h ON h.N_S = d.N_S
+        WHERE   d.TAG = 13 AND h.DATE_S BETWEEN @DT1 AND @DT2
+          AND   TRY_CAST(d.HES_M AS BIGINT) IS NOT NULL
+        GROUP BY TRY_CAST(d.HES_M AS BIGINT)
+    )
+    SELECT  TOP 50
+            k.Code                            AS کد_کالا,
+            s.NAME                            AS نام_کالا,
+            ROUND(k.NetSales, 0)              AS فروش_خالص,
+            ROUND(k.Cost, 0)                  AS بها_از_کاردکس,
+            ROUND(ISNULL(sn.Cost, 0), 0)      AS بها_از_سند,
+            ROUND(k.Cost - ISNULL(sn.Cost,0), 0) AS اختلاف,
+            ROUND(k.NetSales - k.Cost, 0)     AS سود_روش_کاردکس,
+            ROUND(k.NetSales - ISNULL(sn.Cost,0), 0) AS سود_روش_سند
+    FROM    AzKardex k
+    LEFT    JOIN AzSanad sn ON sn.Code = k.Code
+    LEFT    JOIN dbo.STUF_DEF s ON TRY_CAST(s.CODE AS BIGINT) = k.Code
+    WHERE   ABS(k.Cost - ISNULL(sn.Cost, 0)) > 1000
+    ORDER BY ABS(k.Cost - ISNULL(sn.Cost, 0)) DESC;
+
+    ;WITH AzKardex AS (
+        SELECT SUM(k.MABRIAL) AS Cost FROM dbo.KALAS k
+        WHERE k.TAGCODE = 2 AND k.MM = @Month
+    ),
+    AzSanad AS (
+        SELECT SUM(d.BED) - SUM(d.BES) AS Cost
+        FROM   dbo.DEED_DTL d JOIN dbo.DEED_HED h ON h.N_S = d.N_S
+        WHERE  d.TAG = 13 AND h.DATE_S BETWEEN @DT1 AND @DT2
+    )
+    SELECT  ROUND((SELECT Cost FROM AzKardex), 0) AS جمع_بها_کاردکس,
+            ROUND((SELECT Cost FROM AzSanad),  0) AS جمع_بها_سند,
+            ROUND((SELECT Cost FROM AzKardex) -
+                  (SELECT Cost FROM AzSanad), 0)  AS اختلاف_کل;
+END
+GO
+
+
+PRINT N'S12 با منطق کاردکس بازنويسي شد.';
+
+/* نمونه:
+   EXEC dbo.CC_sp_CompareMarginMethods @Month=4, @DT1=14050401, @DT2=14050431;
+*/
+GO
+";
+            TryExecuteCostCloseBatch(db, marginFixKalas,
+                "CC_sp_S12_CalcMargin (نسخه کاردکس)، CC_sp_CompareMarginMethods",
+                "اسکریپت 19-margin-fix-kalas.sql را اجرا کنید (به دیدگاه KALAS و ستون‌های KHFR/MABRIAL/TAGCODE/MM نیاز دارد).");
+        }
+        /// <summary>
+        /// یک بلوک SQL از ماژول بستن ماه بهای تمام‌شده را اجرا می‌کند و
+        /// اگر جدول‌های پایه CC_* هنوز روی این پایگاه نباشند (اسکریپت‌های
+        /// 10 تا 13 اجرا نشده‌اند)، به‌جای متوقف کردن کل LetsGo فقط پیام
+        /// راهنما می‌دهد.
+        /// </summary>
+        private static void TryExecuteCostCloseBatch(SqlConnection db, string script, string what, string hint)
+        {
+            try
+            {
+                ExecuteBatches(db, script);
+                Console.WriteLine($"[CostCloseScript] {what} ایجاد/به‌روزرسانی شد.");
+            }
+            catch (SqlException ex) when (ex.Message.Contains("Invalid object name 'dbo.CC_"))
+            {
+                Console.WriteLine($"[CostCloseScript] جدول‌های پایه CC_* پیدا نشدند برای {what} — {hint}");
+            }
+        }
+
         private static void LoadJobData(SqlConnection db)
         {
             const string JobFilePath = @"C:\CORRECT\joby.sql";
@@ -8512,6 +11576,44 @@ END");
                 Console.WriteLine($"[LoadJobData] خطا در BulkCopy: {ex.Message}");
                 throw;
             }
+        }
+        private static void SequentialKeyContentionScript(SqlConnection db)
+        {
+            try
+            {
+                // بهینه‌سازی کلید صعودی (OPTIMIZE_FOR_SEQUENTIAL_KEY) برای SQL Server 2019+
+                db.Execute(@"
+IF TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT) >= 15
+BEGIN
+    DECLARE @sql NVARCHAR(MAX) = N'';
+
+    SELECT @sql = @sql + N'ALTER INDEX ' + QUOTENAME(i.name)
+                       + N' ON ' + QUOTENAME(SCHEMA_NAME(t.schema_id)) + N'.' + QUOTENAME(t.name)
+                       + N' SET (OPTIMIZE_FOR_SEQUENTIAL_KEY = ON);' + CHAR(10)
+    FROM sys.indexes AS i
+    INNER JOIN sys.tables AS t
+        ON t.object_id = i.object_id
+    INNER JOIN sys.index_columns AS ic
+        ON ic.object_id = i.object_id
+       AND ic.index_id  = i.index_id
+       AND ic.key_ordinal = 1
+    INNER JOIN sys.columns AS c
+        ON c.object_id = i.object_id
+       AND c.column_id = ic.column_id
+    WHERE i.index_id > 0
+      AND i.is_hypothetical = 0
+      AND i.is_disabled = 0
+      AND i.optimize_for_sequential_key = 0
+      AND c.is_identity = 1
+      AND t.name IN (N'DEED_DTL', N'INVO_LST', N'PGET_LST', N'PGET_HED', N'DEED_HED', N'HEAD_LST');
+
+    IF LEN(@sql) > 0
+    BEGIN
+        EXEC sys.sp_executesql @sql;
+    END
+END");
+            }
+            catch { }
         }
         private static void BlazorDbScriptUpdate(SqlConnection db)
         {
