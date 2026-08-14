@@ -12,6 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinOther;
 using Rpts;
 using Stimulsoft.Report;
@@ -139,6 +140,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             public int NUMBER { get; set; }
             public int htag { get; set; }
+            public string? MOLAH { get; set; }
             public double MABL_HAZ { get; set; }
             public double MABL_VAR { get; set; }
             public double MABL_HAV { get; set; }
