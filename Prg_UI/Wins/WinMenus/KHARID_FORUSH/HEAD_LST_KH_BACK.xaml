@@ -23,6 +23,11 @@
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
         <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="صورت حساب این مشتری (Ctrl + F8)" x:Name="F8_CUSTOMER" Click="F8_CUSTOMER_Click">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="AccountDetails" />
+                </MenuItem.Icon>
+            </MenuItem>
             <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Warehouse" />
