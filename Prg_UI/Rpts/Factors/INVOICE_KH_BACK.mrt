@@ -1269,6 +1269,13 @@
               <Page isRef="5" />
               <Parent isRef="93" />
               <Text>{Sum(DataBand1,FACTOR_DATA.MEGHk)}</Text>
+							<TextFormat Ref="9991" type="NumberFormat" isKey="true">
+								<DecimalDigits>2</DecimalDigits>
+								<GroupSeparator>,</GroupSeparator>
+								<NegativePattern>3</NegativePattern>
+								<UseGroupSeparator>False</UseGroupSeparator>
+								<UseLocalSetting>False</UseLocalSetting>
+							</TextFormat>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Totals</Type>

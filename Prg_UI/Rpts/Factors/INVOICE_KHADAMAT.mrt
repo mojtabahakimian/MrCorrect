@@ -1242,6 +1242,13 @@
               <Page isRef="5" />
               <Parent isRef="91" />
               <Text>{Sum(DataBand1,FACTOR_DATA.MEGH)}</Text>
+							<TextFormat Ref="9991" type="NumberFormat" isKey="true">
+								<DecimalDigits>2</DecimalDigits>
+								<GroupSeparator>,</GroupSeparator>
+								<NegativePattern>3</NegativePattern>
+								<UseGroupSeparator>False</UseGroupSeparator>
+								<UseLocalSetting>False</UseLocalSetting>
+							</TextFormat>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Totals</Type>
@@ -1260,6 +1267,13 @@
               <Page isRef="5" />
               <Parent isRef="91" />
               <Text>{Sum(DataBand1,FACTOR_DATA.MEGH)}</Text>
+							<TextFormat Ref="9992" type="NumberFormat" isKey="true">
+								<DecimalDigits>2</DecimalDigits>
+								<GroupSeparator>,</GroupSeparator>
+								<NegativePattern>3</NegativePattern>
+								<UseGroupSeparator>False</UseGroupSeparator>
+								<UseLocalSetting>False</UseLocalSetting>
+							</TextFormat>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Totals</Type>

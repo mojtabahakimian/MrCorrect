@@ -1185,6 +1185,13 @@ WHERE        (dbo.INVO_LST.MEGH_MAR &lt;&gt; 0) AND (dbo.HEAD_BACK.NUMBER = @NUM
               <Page isRef="5" />
               <Parent isRef="84" />
               <Text>{Sum(DataBand1,FACTOR_DATA.MEGHk)}</Text>
+							<TextFormat Ref="9991" type="NumberFormat" isKey="true">
+								<DecimalDigits>2</DecimalDigits>
+								<GroupSeparator>,</GroupSeparator>
+								<NegativePattern>3</NegativePattern>
+								<UseGroupSeparator>False</UseGroupSeparator>
+								<UseLocalSetting>False</UseLocalSetting>
+							</TextFormat>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Totals</Type>
