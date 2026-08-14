@@ -9659,7 +9659,14 @@ BEGIN
     ---- سطرهايي که تغيير خواهند کرد
     IF OBJECT_ID('tempdb..#Rows') IS NOT NULL DROP TABLE #Rows;
 
-    SELECT  h.NUMBER            AS ProdNo,
+    -- کليد تطبيق id است نه (NUMBER, RADIF): ستون RADIF در INVO_LST
+    -- nullable است و روي داده‌ي واقعي مي‌تواند خالي باشد؛ آن‌وقت شرط
+    -- «r.Radif = pl.RADIF» در UPDATE هرگز برقرار نمي‌شود (NULL = NULL
+    -- در SQL نادرست است) و اصلاح خودکار بي‌صدا هيچ سطري را عوض
+    -- نمي‌کند، درحالي‌که تعداد را گزارش مي‌دهد و استثنا را هم مي‌بندد.
+    -- id کليد اصلي جدول است و اين حالت را کاملاً حذف مي‌کند.
+    SELECT  pl.id               AS InvoId,
+            h.NUMBER            AS ProdNo,
             h.DATE_N            AS ProdDate,
             pl.RADIF            AS Radif,
             CAST(pl.CODE AS BIGINT) AS Code,
@@ -9703,36 +9710,49 @@ BEGIN
 
     BEGIN TRAN;
 
+    -- کدهايي که واقعاً عوض شدند را نگه مي‌داريم تا فقط استثناي همان‌ها
+    -- بسته شود. اگر UPDATE به هر دليلي سطري را نگيرد، نبايد استثنا را
+    -- «رفع‌شده» علامت بزنيم و عدد قابل‌اصلاح را به‌عنوان عدد اصلاح‌شده
+    -- گزارش کنيم — کاربر بايد ببيند که کاري انجام نشده.
+    DECLARE @Applied TABLE (Code BIGINT);
+
     UPDATE  pl
        SET  pl.N_KOL = r.NewFnumb
+    OUTPUT  CAST(inserted.CODE AS BIGINT) INTO @Applied(Code)
     FROM    dbo.INVO_LST pl
-    JOIN    #Rows r ON r.ProdNo = pl.NUMBER AND r.Radif = pl.RADIF
+    JOIN    #Rows r ON r.InvoId = pl.id
     WHERE   pl.TAG = 9;
+
+    DECLARE @appliedRows INT = @@ROWCOUNT;
 
     ---- ثبت در سابقه
     INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message, ContextJson)
-    SELECT  @RunId, 'S00', 1,
-            CONCAT(N'اصلاح خودکار فرمول برگه‌هاي توليد: ', @n, N' سطر توسط ', @UserName),
+    SELECT  @RunId, 'S00', CASE WHEN @appliedRows = 0 AND @n > 0 THEN 2 ELSE 1 END,
+            CASE WHEN @appliedRows = 0 AND @n > 0
+                 THEN CONCAT(N'اصلاح خودکار هيچ سطري را عوض نکرد (', @n,
+                             N' سطر نامزد بود) — توسط ', @UserName)
+                 ELSE CONCAT(N'اصلاح خودکار فرمول برگه‌هاي توليد: ', @appliedRows,
+                             N' سطر توسط ', @UserName) END,
             (SELECT ProdNo, Code, OldFnumb, NewFnumb FROM #Rows FOR JSON PATH);
 
-    ---- استثناها بسته مي‌شوند
+    ---- استثناها بسته مي‌شوند — فقط براي کدهايي که واقعاً اصلاح شدند
     UPDATE  e
        SET  e.IsResolved     = 1,
             e.ResolvedBy     = @UserName,
             e.ResolvedAtUtc  = SYSUTCDATETIME(),
             e.ResolutionNote = N'اصلاح خودکار — فرمول ماه به برگه‌ها نسبت داده شد'
     FROM    dbo.CC_Exception e
-    JOIN    #Target t ON t.Code = e.Code
     WHERE   e.RuleCode = 'CHK-04'
-      AND   ISNULL(e.RunId,-1) = ISNULL(@RunId,-1);
+      AND   ISNULL(e.RunId,-1) = ISNULL(@RunId,-1)
+      AND   EXISTS (SELECT 1 FROM @Applied a WHERE a.Code = e.Code);
 
     ---- خروج مواد بايد بازسازي شود، چون فرمول برگه عوض شد
-    IF @RunId IS NOT NULL
+    IF @RunId IS NOT NULL AND @appliedRows > 0
         UPDATE dbo.CC_Run SET FormulasDirty = 1 WHERE RunId = @RunId;
 
     COMMIT;
 
-    SELECT @n AS تعداد_سطر_اصلاح_شده;
+    SELECT @appliedRows AS تعداد_سطر_اصلاح_شده, @n AS تعداد_سطر_نامزد;
 END
 GO
 
@@ -11299,6 +11319,43 @@ BEGIN
       AND   bm.Profit - a.AdjustAmount < 0
       AND   bm.Profit >= 0;
 
+    ---- نگهبان: نرخ جذب منفي
+    -- هشدار #Warn بالا فقط سودِ کالاي متعادل‌کننده را مي‌سنجد، نه نرخي که
+    -- واقعاً نوشته مي‌شود. اگر مبلغ تعديل از جذب فعلي بزرگ‌تر باشد،
+    -- IMBIBE_MANF منفي مي‌شود — نرخ جذب دستمزدِ منفي در بهاي تمام‌شده
+    -- بي‌معناست و S11 همان را به کل درخت محصول منتشر مي‌کند. اين حالت
+    -- روي داده واقعي ديده شد: کالايي که نرخ کاردکسش صفر بود (CHK-14) با
+    -- هدف «سود صفر»، جذب متعادل‌کننده را به عدد منفي برد.
+    IF OBJECT_ID('tempdb..#Neg') IS NOT NULL DROP TABLE #Neg;
+
+    SELECT q.Code, q.Naghsh, q.NerkhBefore, q.NerkhAfter
+    INTO   #Neg
+    FROM (
+        SELECT  CAST(hm.CODE AS BIGINT) AS Code,
+                N'کالاي هدف' AS Naghsh,
+                hm.IMBIBE_MANF AS NerkhBefore,
+                hm.IMBIBE_MANF - (a.AdjustAmount / NULLIF(a.QtySold, 0)) AS NerkhAfter
+        FROM    dbo.HEAD_MANF hm
+        JOIN    #Adj a ON CAST(hm.CODE AS BIGINT) = a.Code
+        WHERE   hm.GHEYMAT = @Month
+        UNION ALL
+        SELECT  CAST(hm.CODE AS BIGINT),
+                N'متعادل‌کننده',
+                hm.IMBIBE_MANF,
+                hm.IMBIBE_MANF + (x.Amount / NULLIF(x.Qty, 0))
+        FROM    dbo.HEAD_MANF hm
+        JOIN   (SELECT a.BalancingCode AS Code,
+                       SUM(a.AdjustAmount) AS Amount,
+                       MAX(bm.QtySold) AS Qty
+                FROM   #Adj a
+                JOIN   dbo.CC_ItemMargin bm
+                       ON bm.Code = a.BalancingCode AND bm.RunId = @RunId
+                WHERE  a.BalancingCode IS NOT NULL AND bm.QtySold <> 0
+                GROUP BY a.BalancingCode) x ON CAST(hm.CODE AS BIGINT) = x.Code
+        WHERE   hm.GHEYMAT = @Month
+    ) q
+    WHERE  q.NerkhAfter < 0;
+
     IF @WhatIf = 1
     BEGIN
         SELECT  a.Code               AS کد_کالا,
@@ -11321,6 +11378,25 @@ BEGIN
                 N'کالاي متعادل‌کننده زيان‌ده مي‌شود' AS هشدار
         FROM    #Warn w;
 
+        SELECT  n.Code        AS کد_کالا,
+                n.Naghsh      AS نقش,
+                n.NerkhBefore AS نرخ_جذب_فعلي,
+                n.NerkhAfter  AS نرخ_جذب_پس_از_اعمال,
+                N'نرخ جذب منفي مي‌شود — اعمال نخواهد شد' AS خطا
+        FROM    #Neg n;
+
+        RETURN;
+    END
+
+    IF EXISTS (SELECT 1 FROM #Neg)
+    BEGIN
+        SELECT  n.Code        AS کد_کالا,
+                n.Naghsh      AS نقش,
+                n.NerkhBefore AS نرخ_جذب_فعلي,
+                n.NerkhAfter  AS نرخ_جذب_پس_از_اعمال
+        FROM    #Neg n;
+
+        RAISERROR(N'اعمال هدف حاشيه سود، نرخ جذب را منفي مي‌کند و بهاي تمام‌شده را خراب مي‌کند؛ کالاي متعادل‌کننده يا هدف را تغيير دهيد.', 16, 1);
         RETURN;
     END
 
