@@ -12,6 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinOther;
 using Rpts;
 using Stimulsoft.Report;
@@ -139,6 +140,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             public int NUMBER { get; set; }
             public int htag { get; set; }
+            public string? MOLAH { get; set; }
             public double MABL_HAZ { get; set; }
             public double MABL_VAR { get; set; }
             public double MABL_HAV { get; set; }
@@ -476,6 +478,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.F8)
+            {
+                e.Handled = true;
+                F8_CUSTOMER_Click(null, null);
+                return;
+            }
+
             DataGrid DG = INVO_LST_SUB;
             UIElement uie = e.OriginalSource as UIElement;
 
@@ -3924,6 +3933,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //TXT_HIGH_D = متن پایین =[Forms]![Baseknow]![HIGH_D]
             if (report.GetComponentByName("TXT_HIGH_D") is StiText stiText4) stiText4.Text = Baseknow.HIGH_D;
 
+            //ملاحظات فاکتور برگشت خرید
+            var molahVal = !string.IsNullOrWhiteSpace(MOLAH.Text) ? MOLAH.Text : (headLst?.MOLAH ?? "");
+            if (report.GetComponentByName("SHARAYET") is StiText sharayetSti) sharayetSti.Text = molahVal;
+            if (report.GetComponentByName("Text109") is StiText text109Sti) text109Sti.Text = molahVal;
+
 
             //report.Render();
             //report.Show();
@@ -4999,6 +5013,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     return;
                 }
+            }
+        }
+
+        // صورت حساب این مشتری (Ctrl + F8)
+        private void F8_CUSTOMER_Click(object sender, RoutedEventArgs e)
+        {
+            if (CUST_NO.SelectedValue is not null)
+            {
+                new F_MENU_KOL_MOIN_TAFZIL(CUST_NO.SelectedValue.ToString());
             }
         }
 
