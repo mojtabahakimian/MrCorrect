@@ -8684,15 +8684,37 @@ GO
 
 IF OBJECT_ID('dbo.CC_UnitAcc','U') IS NULL
 CREATE TABLE dbo.CC_UnitAcc (
-    Id       INT IDENTITY(1,1) PRIMARY KEY,
-    UnitId   INT           NOT NULL REFERENCES dbo.CC_Unit(UnitId),
-    HesKol   INT           NOT NULL,
-    CostKind TINYINT       NOT NULL,          -- 1=دستمزد 2=سربار
-    Ratio    DECIMAL(9,6)  NOT NULL DEFAULT 1,
-    IsActive BIT           NOT NULL DEFAULT 1,
-    Note     NVARCHAR(200) NULL,
-    CONSTRAINT UQ_CC_UnitAcc UNIQUE (UnitId, HesKol)
+    Id         INT           IDENTITY(1,1) PRIMARY KEY,
+    UnitId     INT           NOT NULL REFERENCES dbo.CC_Unit(UnitId),
+    HesKol     INT           NOT NULL,
+    HesMoin    INT           NULL,   -- خالی = همه معین‌های این کل
+    HesTafsili INT           NULL,   -- خالی = همه تفصیلی‌های همان معین
+    CostKind   TINYINT       NOT NULL,          -- 1=دستمزد 2=سربار
+    Ratio      DECIMAL(9,6)  NOT NULL DEFAULT 1,
+    IsActive   BIT           NOT NULL DEFAULT 1,
+    Note       NVARCHAR(200) NULL,
+    CONSTRAINT UQ_CC_UnitAcc UNIQUE (UnitId, HesKol, HesMoin, HesTafsili)
 );
+GO
+
+-- روی نصب‌های قدیمی‌تر که این جدول را بدون سطح معین/تفصیلی دارند
+IF COL_LENGTH('dbo.CC_UnitAcc','HesMoin') IS NULL
+    ALTER TABLE dbo.CC_UnitAcc ADD HesMoin INT NULL;
+GO
+IF COL_LENGTH('dbo.CC_UnitAcc','HesTafsili') IS NULL
+    ALTER TABLE dbo.CC_UnitAcc ADD HesTafsili INT NULL;
+GO
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+           WHERE name = 'UQ_CC_UnitAcc' AND parent_object_id = OBJECT_ID('dbo.CC_UnitAcc'))
+   AND NOT EXISTS (SELECT 1 FROM sys.index_columns ic
+                   JOIN sys.indexes i ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                   JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+                   WHERE i.name = 'UQ_CC_UnitAcc' AND c.name = 'HesMoin')
+BEGIN
+    ALTER TABLE dbo.CC_UnitAcc DROP CONSTRAINT UQ_CC_UnitAcc;
+    ALTER TABLE dbo.CC_UnitAcc ADD CONSTRAINT UQ_CC_UnitAcc
+        UNIQUE (UnitId, HesKol, HesMoin, HesTafsili);
+END
 GO
 
 /* ───────────────────────── نتایج محاسبه ───────────────────────── */
@@ -8875,7 +8897,10 @@ USING (VALUES
   N'تصمیم ماه قبل قابل ادامه نیست چون کالای مقصد امسال فرمول ندارد. پیش‌فرض روی تسهیم به نسبت مصرف قرار گرفت.', 120),
 
  ('CHK-13', N'حواله با مقدار صفر', 'S07', 16, 2, NULL,
-  N'ماده در فرمول مقدار دارد ولی حواله‌اش با مقدار صفر صادر شده؛ یعنی فرمول پس از صدور حواله ویرایش شده است. خروج مواد باید بازسازی شود.', 130)
+  N'ماده در فرمول مقدار دارد ولی حواله‌اش با مقدار صفر صادر شده؛ یعنی فرمول پس از صدور حواله ویرایش شده است. خروج مواد باید بازسازی شود.', 130),
+
+ ('CHK-15', N'فرمول با مقدار منفی', 'S00', 17, 2, NULL,
+  N'مقدار منفی در یک سطر فرمول قابل قبول نیست و باعث می‌شود مانده حساب کالای در جریان ساخت (۷۵۱) هرگز متوازن نشود. با دکمه اصلاح، آن سطر را صفر یا حذف کنید.', 75)
 ) AS s (RuleCode, RuleName, StepCode, ExType, DefaultSeverity, Threshold, RemedyText, SortOrder)
 ON t.RuleCode = s.RuleCode
 WHEN MATCHED THEN UPDATE SET
@@ -9306,6 +9331,20 @@ BEGIN
                         WHERE k.code = CAST(d.CODE AS BIGINT)
                           AND k.TAG = 10 AND k.MM = @Month AND k.MEGHk <> 0);
 
+    ---- CHK-15 : فرمول با مقدار منفی
+    -- مقدار منفی در فرمول یعنی مانده حساب کالای در جریان ساخت (۷۵۱) هرگز
+    -- متوازن نمی‌شود (CHK-07)؛ چون خروج مواد از روی همین عدد بازتولید
+    -- می‌شود. کد سطر (DTL_MANF.id) در DocNumber ذخیره می‌شود تا اصلاح
+    -- خودکار دقیقاً همان سطر را هدف بگیرد.
+    INSERT dbo.CC_Exception
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, DocNumber, Amount, Description)
+    SELECT  @RunId, 'S00', 'CHK-15', 17, 2, CAST(d.CODE AS BIGINT),
+            CAST(d.id AS INT), d.MEGH,
+            CONCAT(N'فرمول ', h.FNUMB, N' مقدار منفی دارد: ', d.MEGH)
+    FROM    dbo.DTL_MANF  d
+    JOIN    dbo.HEAD_MANF h ON h.FNUMB = d.FNUMB AND h.GHEYMAT = @Month
+    WHERE   d.MEGH < 0 OR d.MEGHk < 0;
+
     ---- CHK-06 : حلقه در ساختار فرمول
     IF OBJECT_ID('tempdb..#E') IS NOT NULL DROP TABLE #E;
     SELECT DISTINCT CAST(h.CODE AS BIGINT) AS P, CAST(d.CODE AS BIGINT) AS C
@@ -9340,11 +9379,14 @@ BEGIN
     DECLARE @th FLOAT =
         ISNULL((SELECT Threshold FROM dbo.CC_CheckRule WHERE RuleCode='CHK-07'), 0.001);
 
+    -- DocNumber عمداً پر نمی‌شود: این قاعده مانده یک کالا را در کل بازه بررسی
+    -- می‌کند، نه یک سند مشخص را؛ ستون HES_M (کد معین حسابداری) شمارهٔ برگهٔ
+    -- تولید نیست و نمایشش به کاربر گمراه‌کننده بود.
     INSERT dbo.CC_Exception
-        (RunId, StepCode, RuleCode, ExType, Severity, Code, DocNumber, Amount, Description)
+        (RunId, StepCode, RuleCode, ExType, Severity, Code, Amount, Description)
     SELECT  @RunId, 'S00', 'CHK-07', 13,
             CASE WHEN SUM(d.BED) = 0 OR SUM(d.BES) = 0 THEN 2 ELSE 1 END,
-            TRY_CAST(d.HES_T AS BIGINT), TRY_CAST(d.HES_M AS INT),
+            TRY_CAST(d.HES_T AS BIGINT),
             SUM(d.BED) - SUM(d.BES),
             CASE WHEN SUM(d.BED) = 0
                  THEN N'ماده با توليد خارج شده ولي با حواله وارد نشده'
@@ -9838,6 +9880,107 @@ END
 GO
 
 
+/* ═══════════════════════════════════════════════════════════════════
+   CHK-15 — اصلاح فرمول با مقدار منفی
+
+   @ExceptionId الزامی است: هر سطر فرمول منفی جدا اصلاح می‌شود، نه گروهی،
+   چون هر سطر می‌تواند تصمیم متفاوتی بخواهد (صفر یا حذف). شناسه سطر
+   (DTL_MANF.id) در CC_Exception.DocNumber ذخیره شده — نگاه کنید به
+   CC_sp_S00_Preflight بخش CHK-15.
+
+   @Action = 'zero'   → مقدار (MEGH/MEGHk/MABLK/SMABL) صفر می‌شود، سطر می‌ماند
+   @Action = 'delete' → کل سطر فرمول حذف می‌شود
+
+   @WhatIf = 1 پیش‌فرض است: فقط نشان می‌دهد چه چیزی تغییر خواهد کرد.
+   ═══════════════════════════════════════════════════════════════════ */
+CREATE OR ALTER PROCEDURE dbo.CC_sp_Fix_NegativeFormulaQty
+    @ExceptionId BIGINT,
+    @Action      VARCHAR(10),
+    @RunId       INT           = NULL,
+    @UserName    NVARCHAR(50)  = N'system',
+    @WhatIf      BIT           = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @Action NOT IN ('zero', 'delete')
+    BEGIN
+        RAISERROR(N'مقدار @Action باید zero یا delete باشد.', 16, 1);
+        RETURN;
+    END
+
+    DECLARE @DtlId BIGINT, @Code BIGINT;
+
+    SELECT  @DtlId = e.DocNumber, @Code = e.Code
+    FROM    dbo.CC_Exception e
+    WHERE   e.ExceptionId = @ExceptionId AND e.RuleCode = 'CHK-15';
+
+    IF @DtlId IS NULL
+    BEGIN
+        RAISERROR(N'این استثنا یافت نشد یا مربوط به CHK-15 نیست.', 16, 1);
+        RETURN;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.DTL_MANF WHERE id = @DtlId)
+    BEGIN
+        -- سطر قبلاً حذف يا اصلاح شده — فقط استثنا را ببند
+        IF @WhatIf = 0
+            UPDATE dbo.CC_Exception
+               SET IsResolved = 1, ResolvedBy = @UserName, ResolvedAtUtc = SYSUTCDATETIME(),
+                   ResolutionNote = N'سطر فرمول از قبل اصلاح شده بود'
+             WHERE ExceptionId = @ExceptionId;
+
+        SELECT 0 AS تغيير_يافت, N'سطر فرمول از قبل اصلاح يا حذف شده بود' AS وضعيت;
+        RETURN;
+    END
+
+    IF @WhatIf = 1
+    BEGIN
+        SELECT  d.id AS شناسه_سطر, h.FNUMB AS شماره_فرمول, d.CODE AS کد_ماده,
+                d.MEGH AS مقدار_فعلي, d.MEGHk AS مقدار_کوچک_فعلي,
+                CASE @Action WHEN 'zero' THEN N'مقدار صفر مي‌شود'
+                             ELSE N'کل سطر فرمول حذف مي‌شود' END AS عمليات
+        FROM    dbo.DTL_MANF d
+        JOIN    dbo.HEAD_MANF h ON h.FNUMB = d.FNUMB
+        WHERE   d.id = @DtlId;
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    DECLARE @Fnumb INT;
+    SELECT @Fnumb = FNUMB FROM dbo.DTL_MANF WHERE id = @DtlId;
+
+    IF @Action = 'zero'
+        UPDATE dbo.DTL_MANF
+           SET MEGH = 0, MEGHk = 0, MABLK = 0, SMABL = 0
+         WHERE id = @DtlId;
+    ELSE
+        DELETE dbo.DTL_MANF WHERE id = @DtlId;
+
+    UPDATE dbo.CC_Exception
+       SET IsResolved = 1, ResolvedBy = @UserName, ResolvedAtUtc = SYSUTCDATETIME(),
+           ResolutionNote = CASE @Action WHEN 'zero' THEN N'مقدار سطر فرمول صفر شد'
+                                          ELSE N'سطر فرمول حذف شد' END
+     WHERE ExceptionId = @ExceptionId;
+
+    INSERT dbo.CC_RunLog (RunId, StepCode, Severity, Message)
+    VALUES (@RunId, 'S00', 1,
+            CONCAT(N'اصلاح فرمول با مقدار منفي — فرمول ', @Fnumb, N', کالا ', @Code,
+                   CASE @Action WHEN 'zero' THEN N' — مقدار صفر شد' ELSE N' — سطر حذف شد' END,
+                   N' توسط ', @UserName));
+
+    IF @RunId IS NOT NULL
+        UPDATE dbo.CC_Run SET FormulasDirty = 1 WHERE RunId = @RunId;
+
+    COMMIT;
+
+    SELECT 1 AS تغيير_يافت, N'انجام شد' AS وضعيت;
+END
+GO
+
+
 PRINT N'CHK-04 و اصلاح خودکار آماده شد.';
 
 /* نمونه:
@@ -10129,16 +10272,23 @@ BEGIN
         ---- ۳) واقعي از تراز، طبق نگاشت قابل ويرايش کاربر
         DECLARE @actWage FLOAT, @actOh FLOAT;
 
+        -- CROSS APPLY نه JOIN روي جمعِ از‌قبل‌گروه‌بندی‌شده، چون هر سطر
+        -- CC_UnitAcc ممکن است سطح معین/تفصیلی متفاوتی مشخص کرده باشد؛
+        -- خالی‌بودن هرکدام یعنی «همهٔ آن سطح» (نگاشت گسترده‌تر، مثل قبل).
         SELECT  @actWage = ISNULL(SUM(CASE WHEN m.CostKind = 1
                                            THEN t.Amount * m.Ratio ELSE 0 END), 0),
                 @actOh   = ISNULL(SUM(CASE WHEN m.CostKind = 2
                                            THEN t.Amount * m.Ratio ELSE 0 END), 0)
         FROM    dbo.CC_UnitAcc m
-        JOIN   (SELECT d.HES_K, SUM(d.BED) - SUM(d.BES) AS Amount
-                FROM   dbo.DEED_DTL d
-                JOIN   dbo.DEED_HED hd ON hd.N_S = d.N_S
-                WHERE  hd.DATE_S BETWEEN @DT1 AND @DT2
-                GROUP BY d.HES_K) t ON t.HES_K = m.HesKol
+        CROSS   APPLY (
+                    SELECT SUM(d.BED) - SUM(d.BES) AS Amount
+                    FROM   dbo.DEED_DTL d
+                    JOIN   dbo.DEED_HED hd ON hd.N_S = d.N_S
+                    WHERE  hd.DATE_S BETWEEN @DT1 AND @DT2
+                      AND  d.HES_K = m.HesKol
+                      AND  (m.HesMoin    IS NULL OR d.HES_M = m.HesMoin)
+                      AND  (m.HesTafsili IS NULL OR d.HES_T = m.HesTafsili)
+                ) t
         WHERE   m.IsActive = 1 AND m.UnitId = @UnitId;
 
         DECLARE @actTotal FLOAT = @actWage + @actOh;
@@ -10168,7 +10318,7 @@ BEGIN
         VALUES
             (@RunId, @UnitId, 0, @absTotal, @absWip, @actTotal,
              CASE WHEN @absTotal <> 0 THEN @actTotal / @absTotal ELSE 1 END,
-             (SELECT m.HesKol, m.CostKind, m.Ratio
+             (SELECT m.HesKol, m.HesMoin, m.HesTafsili, m.CostKind, m.Ratio
               FROM   dbo.CC_UnitAcc m
               WHERE  m.UnitId = @UnitId AND m.IsActive = 1
               FOR JSON PATH)),
