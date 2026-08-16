@@ -2747,6 +2747,40 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return false;
             }
         }
+        /// <summary>
+        /// کنترل اینکه محتوای یک فیلد حساب (پشت فاکتور) واقعاً یک حساب موجود در سرفصل است.
+        ///
+        /// چرا لازم است: این فیلدها TextBox آزادند و اگر کاربر متن دلخواه تایپ کند
+        /// (نمونه‌ی واقعی: «خمات» در فیلد معین خدمات) رکورد ذخیره می‌شود ولی بعداً
+        /// موتور صدور سند نمی‌تواند آن را به کل/معین/تفصیلی تفکیک کند و سند صادر نمی‌شود.
+        /// فیلد خالی خطا نیست؛ کنترل «خالی بودن در برابر مبلغ» جداگانه انجام می‌شود.
+        /// </summary>
+        private void ValidateHesabField(List<MsgModel> errors, string? hesText, string fieldTitle)
+        {
+            if (string.IsNullOrWhiteSpace(hesText)) { return; }
+
+            if (!CL_HESABDARI.ISHESAB3(hesText.Trim()))
+            {
+                errors.Add(new MsgModel { MessageText_U = $"مقدار «{hesText}» در فیلد {fieldTitle} یک حساب معتبر نیست؛ حساب را از لیست انتخاب کنید." });
+            }
+        }
+
+        /// <summary>
+        /// همان کنترل بالا، ولی لحظه‌ی خروج فوکوس از فیلدهای حساب پشت فاکتور.
+        /// مقدار نامعتبر همان‌جا پاک و پیام داده می‌شود، پس مقدار خراب در فرم نمی‌ماند.
+        /// </summary>
+        private void HesabField_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox tb) { return; }
+
+            string val = (tb.Text ?? "").Trim();
+            if (string.IsNullOrEmpty(val)) { return; }
+            if (CL_HESABDARI.ISHESAB3(val)) { return; }
+
+            tb.Text = "";
+            universControl.PopNotifyShow($"«{val}» حساب معتبری نیست ! حساب را از لیست انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
+        }
+
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -2900,6 +2934,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     ErrosMessages.Add(new MsgModel { MessageText_U = "  حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد! فیلد معین مالیات پشت فاکتور" });
                 }
             }
+
+            ValidateHesabField(ErrosMessages, MOIN_VAR.Text, "معین واریزی");
+            ValidateHesabField(ErrosMessages, MOIN_HAV.Text, "معین حواله");
+            ValidateHesabField(ErrosMessages, MOIN_HAZ.Text, "معین خدمات (هزینه) در پشت فاکتور");
+            ValidateHesabField(ErrosMessages, HMBAA.Text, "معین مالیات بر ارزش افزوده");
 
 
             if (ErrosMessages.Any())

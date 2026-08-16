@@ -4028,6 +4028,33 @@ namespace AUTO_BAZ.Functions
                 return true;
             }
         }
+
+        /// <summary>
+        /// آیا رشته‌ی حساب (مثل «۲۱۳-۳-۳-۳۲۳») واقعاً به کل/معین/تفصیلی تفکیک می‌شود؟
+        ///
+        /// چرا لازم است: <see cref="GETTAF3"/> وقتی رشته عدد نباشد (مثلاً کاربر در فیلد
+        /// «حساب معين خدمات» متن اشتباه ثبت کرده باشد) بی‌صدا هر سه را null برمی‌گرداند.
+        /// آن null بعداً داخل رشته‌ی INSERT درج می‌شد و SQL خراب می‌ساخت
+        /// («VALUES (331,,,,NULL,...)» → «Incorrect syntax near ','.»).
+        /// آن SqlException از Parallel.For به‌شکل AggregateException بیرون می‌زد و
+        /// بازسازی «همه‌ی» برگه‌های بعدی را هم متوقف می‌کرد؛ یعنی یک ردیف داده‌ی خراب
+        /// صدها فاکتور را بی‌سند می‌گذاشت. حالا پیش از ساخت SQL بررسی می‌شود.
+        ///
+        /// هر سه سطح لازم است، چون DEED_DTL با کلید خارجی
+        /// FK_DEED_DTL_TDETA_HES روی (HES_K, HES_M, HES_T) بسته شده است.
+        /// </summary>
+        private static bool HesIsResolvable(string? hes)
+        {
+            if (string.IsNullOrWhiteSpace(hes))
+            {
+                return false;
+            }
+
+            double? kol = null, moin = null, taf = null, taf2 = null, taf3 = null, taf4 = null;
+            GETTAF3(hes, ref kol, ref moin, ref taf, ref taf2, ref taf3, ref taf4);
+            return kol.HasValue && moin.HasValue && taf.HasValue;
+        }
+
         public static double? GENSANADKHAREED(object fnum, long TNUM, bool InternalCalling = true)
         {
             LogWriter.WriteLog("شروع بازسازی سند خرید");
@@ -4278,7 +4305,36 @@ namespace AUTO_BAZ.Functions
             }
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
+
+            // ───────────────────────────────────────────────────────────────────────────────
+            // جداسازی خطا به‌ازای هر فاکتور.
+            //
+            // پیش‌تر بدنه‌ی حلقه مستقیم داخل ExecuteWithPreferredLoop بود و هیچ try نداشت؛
+            // پس یک استثنا (مثلاً SqlException ناشی از یک ردیف داده‌ی خراب) از Parallel.For
+            // به‌شکل AggregateException بیرون می‌زد و «بازسازی همه‌ی فاکتورهای بعدی» را هم
+            // متوقف می‌کرد. اندازه‌گیری روی Arman1405: یک فاکتور خراب (شماره ۶۸۸ با
+            // MOIN_HAZ نامعتبر) باعث می‌شد از ۱۲۵۹ فاکتور مبلغ‌دار فقط ۷۸۳ سند بگیرند.
+            // حالا خطای هر فاکتور فقط همان فاکتور را بی‌سند می‌گذارد و لاگ می‌شود.
+            // ───────────────────────────────────────────────────────────────────────────────
             ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
+            {
+                try
+                {
+                    GenerateKhareedDeedForRow(HFRST_EOF);
+                }
+                catch (Exception ex)
+                {
+                    LogWriter.WriteLog($"GENSANADKHAREED: خطا در صدور سند فاکتور خرید {HFRST[HFRST_EOF]?.NUMBER}: {ex.Message}");
+                    ExpectionLogWriter.WriteLog(ex, "GENSANADKHAREED");
+                    progressReporter.ReportOne();
+                }
+            });
+
+            progressReporter.Complete();
+            LogWriter.WriteLog("پایان بازسازی سند خرید");
+            return _SANAD_NUMBER;
+
+            void GenerateKhareedDeedForRow(int HFRST_EOF)
             {
                 var hRow = HFRST[HFRST_EOF];
                 if (hRow == null)
@@ -4298,6 +4354,16 @@ namespace AUTO_BAZ.Functions
                     {
                         CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(hRow.CUST_NO));
                     }
+                }
+
+                // حساب فروشنده ستون فقرات سند خرید است؛ اگر تفکیک نشود هر آرتیکل سمت
+                // بستانکار SQL خراب می‌سازد. پس همین‌جا با لاگ رد می‌شود تا بقیه‌ی
+                // فاکتورها سند بگیرند (پیش‌تر خطای SQL کل بازسازی را متوقف می‌کرد).
+                if (!CKOL.HasValue || !CMOIN.HasValue || !CTAF.HasValue)
+                {
+                    LogWriter.WriteLog($"GENSANADKHAREED: فاکتور خرید {hRow.NUMBER} — حساب فروشنده نامعتبر است ('{hRow.CUST_NO}')؛ سند این فاکتور صادر نشد.");
+                    progressReporter.ReportOne();
+                    return;
                 }
 
                 if (!khRowUsable[HFRST_EOF])
@@ -4340,7 +4406,8 @@ namespace AUTO_BAZ.Functions
                     {
                         if (line.MABL_K != 0)
                         {
-                            CREATHES(Baseknow.MOGODIA, line.ANBAR, Convert.ToInt64(line.CODE), line.NAME);
+                            long.TryParse(line.CODE, out var codeLong);
+                            CREATHES(Baseknow.MOGODIA, line.ANBAR, codeLong, line.NAME);
                             var sharhLine = Strings.Right("خريدفاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
                             var arzdVal = IsNull(hRow.ARZD) ? "1" : SqlNum(hRow.ARZD);
 
@@ -4365,20 +4432,36 @@ namespace AUTO_BAZ.Functions
                     }
                 }
 
+                // آرتیکل خدمات دو طرف دارد (بدهکار حساب خدمات / بستانکار فروشنده). اگر یک
+                // طرف صادر شود و دیگری نه، سند از تراز خارج می‌شود؛ پس نتیجه‌ی اعتبارسنجی
+                // حساب خدمات همین‌جا نگه داشته می‌شود تا هر دو طرف با هم صادر یا حذف شوند.
+                var hazArticlePosted = false;
+
                 if ((hRow.MABL_HAZ ?? 0d) != 0d)
                 {
                     if (!IsNull(hRow.MOIN_HAZ))
                     {
                         GETTAF3(hRow.MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
                     }
-                    var sharhHaz = Strings.Right("خدمات فاكتور خريد  شماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " - " + GETTAFNAME(hRow.MOIN_HAZ), 255);
-                    var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
 
-                    string HES_T2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
-                    string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
-                    string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+                    // اگر «حساب معين خدمات» به کل/معین/تفصیلی تفکیک نشود (فیلد خالی یا متن
+                    // نامعتبر)، قبلاً همین‌جا SQL خراب ساخته می‌شد و کل بازسازی از کار می‌افتاد.
+                    if (!HKOL.HasValue || !HMOIN.HasValue || !HTAF.HasValue)
+                    {
+                        LogWriter.WriteLog($"GENSANADKHAREED: فاکتور خرید {hRow.NUMBER} — حساب معين خدمات نامعتبر است ('{hRow.MOIN_HAZ}')؛ آرتیکل خدمات (هر دو طرف) صادر نشد.");
+                    }
+                    else
+                    {
+                        var sharhHaz = Strings.Right("خدمات فاكتور خريد  شماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " - " + GETTAFNAME(hRow.MOIN_HAZ), 255);
+                        var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{HKOL},{HMOIN},{HTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.MOIN_HAZ}',N'{SqlText(sharhHaz)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},12,{arzdVal})");
+                        string HES_T2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                        string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                        string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.MOIN_HAZ)}',N'{SqlText(sharhHaz)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},12,{arzdVal})");
+                        hazArticlePosted = true;
+                    }
                 }
 
                 if (JAMCH != 0d && invoiceCheques.TryGetValue(hRow.NUMBER ?? 0d, out var chequesList))
@@ -4454,7 +4537,7 @@ namespace AUTO_BAZ.Functions
                     batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.PKHARID},1,1,N'{Baseknow.PKHARID + "-1-1"}',N'{SqlText(sharhPkharid)}',{besPk},{hRow.NUMBER},12,{arzdVal})");
                 }
 
-                if ((hRow.MABL_HAZ ?? 0d) != 0d)
+                if (hazArticlePosted)
                 {
                     var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
                     var sharhHazBes = Strings.Right("خدمات فاكتور خريد  شماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
@@ -4462,7 +4545,7 @@ namespace AUTO_BAZ.Functions
                     string HES_T2T_H2 = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T2T_H2},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhHazBes)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2T},{HES_T2T_H2},{HES_T4T},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhHazBes)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},12,{arzdVal})");
                 }
 
                 if ((hRow.M_NAGHD ?? 0d) != 0d)
@@ -4489,12 +4572,20 @@ namespace AUTO_BAZ.Functions
                     if (!IsNull(hRow.MOIN_HAV))
                     {
                         GETTAF3(hRow.MOIN_HAV, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
-                        var sharhHavMoin = Strings.Right("مبلغ حواله فاكتور خريد شماره " + hRow.NUMBER1 + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
-                        string HES_T2T_H = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
-                        string HES_T3T_H = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
-                        string HES_T4T_H = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{HKOL},{HMOIN},{HTAF},{HES_T2T_H},{HES_T3T_H},{HES_T4T_H},N'{hRow.MOIN_HAV}',N'{SqlText(sharhHavMoin)}',{N(hRow.MABL_HAV)},{hRow.NUMBER},12,{arzdVal})");
+                        if (!HKOL.HasValue || !HMOIN.HasValue || !HTAF.HasValue)
+                        {
+                            LogWriter.WriteLog($"GENSANADKHAREED: فاکتور خرید {hRow.NUMBER} — حساب معين حواله نامعتبر است ('{hRow.MOIN_HAV}')؛ طرف مقابل آرتیکل حواله صادر نشد.");
+                        }
+                        else
+                        {
+                            var sharhHavMoin = Strings.Right("مبلغ حواله فاكتور خريد شماره " + hRow.NUMBER1 + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
+                            string HES_T2T_H = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                            string HES_T3T_H = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                            string HES_T4T_H = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T_H},{HES_T3T_H},{HES_T4T_H},N'{SqlText(hRow.MOIN_HAV)}',N'{SqlText(sharhHavMoin)}',{N(hRow.MABL_HAV)},{hRow.NUMBER},12,{arzdVal})");
+                        }
                     }
                     else
                     {
@@ -4515,12 +4606,20 @@ namespace AUTO_BAZ.Functions
                     if (!IsNull(hRow.MOIN_VAR))
                     {
                         GETTAF3(hRow.MOIN_VAR, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
-                        var sharhVarMoin = Strings.Right("مبلغ واريزي فاكتور خريد شماره " + hRow.NUMBER1 + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
-                        string HES_T2T_V = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
-                        string HES_T3T_V = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
-                        string HES_T4T_V = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{HKOL},{HMOIN},{HTAF},{HES_T2T_V},{HES_T3T_V},{HES_T4T_V},N'{hRow.MOIN_VAR}',N'{SqlText(sharhVarMoin)}',{N(hRow.MABL_VAR)},{hRow.NUMBER},12,{arzdVal})");
+                        if (!HKOL.HasValue || !HMOIN.HasValue || !HTAF.HasValue)
+                        {
+                            LogWriter.WriteLog($"GENSANADKHAREED: فاکتور خرید {hRow.NUMBER} — حساب معين واریزی نامعتبر است ('{hRow.MOIN_VAR}')؛ طرف مقابل آرتیکل واریزی صادر نشد.");
+                        }
+                        else
+                        {
+                            var sharhVarMoin = Strings.Right("مبلغ واريزي فاكتور خريد شماره " + hRow.NUMBER1 + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
+                            string HES_T2T_V = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                            string HES_T3T_V = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                            string HES_T4T_V = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T_V},{HES_T3T_V},{HES_T4T_V},N'{SqlText(hRow.MOIN_VAR)}',N'{SqlText(sharhVarMoin)}',{N(hRow.MABL_VAR)},{hRow.NUMBER},12,{arzdVal})");
+                        }
                     }
                     else
                     {
@@ -4556,13 +4655,21 @@ namespace AUTO_BAZ.Functions
                     {
                         GETTAF3(hRow.HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
                     }
-                    var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
-                    var sharhMbaa = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور خريد شماره " + hRow.NUMBER1 + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
-                    string HES_T2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
-                    string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
-                    string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{HKOL},{HMOIN},{HTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.HMBAA}',N'{SqlText(sharhMbaa)}',{N(hRow.MBAA)},{hRow.NUMBER},12,{arzdVal})");
+                    if (!HKOL.HasValue || !HMOIN.HasValue || !HTAF.HasValue)
+                    {
+                        LogWriter.WriteLog($"GENSANADKHAREED: فاکتور خرید {hRow.NUMBER} — حساب ماليات بر ارزش افزوده نامعتبر است ('{hRow.HMBAA}')؛ آرتیکل ارزش افزوده صادر نشد.");
+                    }
+                    else
+                    {
+                        var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
+                        var sharhMbaa = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور خريد شماره " + hRow.NUMBER1 + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
+                        string HES_T2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                        string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                        string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                        batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.HMBAA)}',N'{SqlText(sharhMbaa)}',{N(hRow.MBAA)},{hRow.NUMBER},12,{arzdVal})");
+                    }
                 }
 
                 // اجرای یکباره و دسته‌ای تمام آرتیکل‌های این فاکتور خرید.
@@ -4579,11 +4686,7 @@ namespace AUTO_BAZ.Functions
                 }
 
                 progressReporter.ReportOne();
-            });
-
-            progressReporter.Complete();
-            LogWriter.WriteLog("پایان بازسازی سند خرید");
-            return _SANAD_NUMBER;
+            }
         }
         public static string GETGRPKALA(int CC)
         {
