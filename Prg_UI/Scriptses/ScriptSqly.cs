@@ -10044,55 +10044,163 @@ BEGIN
     WHERE  RunId = @RunId AND RuleCode IN ('CHK-01','CHK-02','CHK-13');
 
     /* ─────────────────────────────────────────────────────────────
+       طبقه‌بندی جهت TAG (ورود/خروج انبار) — منبع مرجع، نه حدس
+
+       نسخهٔ قبلی این دو کنترل با یک حدس چهارتایی (TAG IN (1,7,9,24)
+       = ورود، هر چیز دیگری = خروج) کار می‌کرد. کاربر تأیید کرد که
+       هم CHK-01 و هم CHK-02 هر دو با شمار خیلی بالا (به ترتیب ۱۹۹ و
+       ۱۱۸۳ مورد) غلط بودند، و کارت کالای واقعی هرگز منفی نمی‌شود؛
+       یعنی آن حدس اشتباه بود.
+
+       این نسخه از سه تابع واقعیِ همین دیتابیس که «کارت کالا» و
+       CC_sp_S07 (انبارگردانی) از قبل به آنها اعتماد دارند کپی شده:
+       dbo.AK_MOGO_AVL_KOL/_SUB (ورودی‌ها)، dbo.AK_MOGO_FR/_SUB
+       (خروجی‌ها)، و dbo.MOGUDI/dbo.AKMOGUDI_KOL_ANBAR (موجودی نقطه‌ای
+       — پایه گزارش کارت کالا). طبقه‌بندی TAG دقیقاً از همان‌جا آمده:
+
+         ورود:  ۱ رسید خرید، ۷ تولید-ورود، ۹ حواله ورود، ۲۴ برگشت فروش
+                ۲۲ برگشت فروش (فقط مقدار مرجوعی)
+                ۵ انتقالی — طرف انبار فرعی (ستون ANBARF) = ورود مقصد
+         خروج:  ۲ حواله فروش، ۸ تولید-خروج، ۱۰ حواله خروج،
+                ۱۱ حواله خروج سایر، ۲۶ برگشت خرید آزاد
+                ۵ انتقالی — طرف انبار اصلی (ستون ANBAR) = خروج مبدأ
+                ۲۰ پیش‌فاکتور تسویه‌شده (فقط TAMIR=1 یا ۴)
+
+       این لیست خودِ ۴ TAG قدیمی را هم دربردارد؛ فقط دیگر «هرچیز غیر
+       از این ۴تا خروج است» فرض نمی‌شود — TAG هایی که در هیچ‌کدام از
+       دو طرف رویه‌های مرجع نیامده‌اند (۳,۱۲,۱۳,۱۴,۱۵,۱۷,۱۸,۲۷) اصلاً
+       در این محاسبه شرکت نمی‌کنند، دقیقاً چون منبع مرجع هم شرکتشان
+       نمی‌دهد. TAG=6 «انتقالی-ورود» هم عمداً نیامده — طرف دیگرِ همان
+       سند TAG=5 است و اگر هر دو حساب شوند، انتقال دوبار شمرده می‌شود.
+
+       انبارگردانی (ANBGRD_LST/ANBGRD_HEAD) اینجا رویداد‌به‌رویداد
+       اعمال می‌شود (نه با قاعدهٔ جمع‌کلِ عجیب رویه‌های مرجع که کل
+       اختلاف یک کالا/انبار را یک‌جا یا کاملاً ورود یا کاملاً خروج
+       حساب می‌کند) — چون این کنترل به ترتیب واقعی رویدادها نیاز
+       دارد، نه فقط مانده نهایی.
+       ───────────────────────────────────────────────────────────── */
+
+    /* ─────────────────────────────────────────────────────────────
        CHK-01 — کاردکس منفی
 
        موجودی تجمعی هر کالا در هر انبار به ترتیب تاریخ محاسبه و
-       هر جا منفی شد علامت می‌خورد. معمولاً یعنی تاریخ رسید بعد از
-       تاریخ حواله ثبت شده است.
+       هر جا منفی شد علامت می‌خورد.
+
+       موجودی ابتدای دوره: چون تراکنش‌های ماه‌های قبل هم روی موجودی
+       اثر دارند (و اگر نادیده گرفته شوند، اولین حوالهٔ همین ماه
+       کاذباً منفی به‌نظر می‌رسد)، مانده ابتدای دوره از dbo.MOGUDI —
+       همان تابع مرجعِ کارت کالا — در تاریخ یک روز قبل از @DT1 خوانده
+       می‌شود، نه از صفر. (DATE_N به‌صورت اعداد ۸رقمی YYYYMMDD ذخیره
+       شده؛ DT1-1 حسابی همیشه زیر اولین تاریخ واقعی همان ماه و بالای
+       آخرین تاریخ واقعی ماه قبل می‌افتد، چون هیچ تاریخ واقعی روز/ماه
+       صفر وجود ندارد — نیازی به تقویم شمسی نیست.)
 
        ترتیب داخل یک روز: NUMBER به‌تنهایی بین انواع مختلف برگه
-       (TAGCOD — مثلاً انتقالی-ورود، اضافه گردانی، حواله خروج) دنباله‌ی
-       واحد و قابل‌اتکایی نیست، چون هرکدام شماره‌گذاری مستقل خودشان را
-       دارند (همان الگویی که برای DEED_DTL.RADIF هم شناخته‌شده است).
-       ترتیب واقعی طبق قرارداد این سیستم از شرح تگ (TAGCOD.BARGAH)
-       می‌آید، نه از NUMBER. مرتب‌سازی قبلی («ORDER BY DATE_N, NUMBER»
-       بدون این کلید) در داده‌ی واقعی می‌توانست یک حوالهٔ خروج را قبل
-       از رسید همان روزش پردازش کند و مانده را کاذباً منفی نشان دهد،
-       در حالی که در پایان همان روز موجودی صفر یا مثبت بود.
+       دنباله‌ی واحد و قابل‌اتکایی نیست (هرکدام شماره‌گذاری مستقل
+       خودشان را دارند). ترتیب واقعی طبق قرارداد این سیستم از شرح
+       تگ (TAGCOD.BARGAH) می‌آید، نه از NUMBER.
 
-       فقط اولین نقطه منفی هر کالا/انبار گزارش می‌شود؛ بقیه
-       دنباله همان یک مشکل‌اند و فهرست را شلوغ می‌کنند.
+       فقط اولین نقطه منفی هر کالا/انبار در همین دوره گزارش می‌شود؛
+       بقیه دنباله همان یک مشکل‌اند و فهرست را شلوغ می‌کنند.
        ───────────────────────────────────────────────────────────── */
-    ;WITH Harekat AS (
-        -- KALAS یک ویو گزارشی است، نه کاردکس خام؛ ستون انبار آن به‌جای
-        -- ANBAR، سه ستون ANBARF/ANBARCODE/ANBARAS دارد. با مقایسه با
-        -- INVO_LST.ANBAR (که مبنای درست است) روی داده واقعی تأیید شد که
-        -- فقط ANBARCODE همیشه پر و همیشه برابر همان مقدار است؛ ANBARF و
-        -- ANBARAS اکثراً NULLاند.
-        SELECT  k.ANBARCODE AS ANBAR,
-                k.code,
-                k.DATE_N,
-                k.NUMBER,
-                k.TAG,
-                ISNULL(tc.BARGAH, N'') AS Bargah,
-                CASE WHEN k.TAG IN (1, 7, 9, 24) THEN k.MEGHk ELSE -k.MEGHk END AS Meghdar
-        FROM    dbo.KALAS k
-        LEFT    JOIN dbo.TAGCOD tc ON tc.CODE = k.TAG
-        WHERE   k.DATE_N <= @DT2
-          AND   k.MEGHk <> 0
+    IF OBJECT_ID('tempdb..#PM') IS NOT NULL DROP TABLE #PM;
+
+    -- ستون‌ها صریحاً تعریف می‌شوند (نه SELECT…INTO) چون شاخهٔ انبارگردانی
+    -- برای TAG مقدار NULL دارد و نمی‌خواهیم NOT NULL این ستون از شاخهٔ
+    -- اول به‌صورت ضمنی استنتاج شود.
+    CREATE TABLE #PM (
+        Anbar   INT          NULL,
+        code    BIGINT       NULL,
+        DATE_N  BIGINT       NULL,
+        NUMBER  FLOAT        NULL,
+        TAG     FLOAT        NULL,
+        Meghdar FLOAT        NULL
+    );
+
+    INSERT #PM
+    SELECT  il.ANBAR AS Anbar, TRY_CAST(il.CODE AS BIGINT) AS code,
+            hl.DATE_N, hl.NUMBER, il.TAG, (il.MEGHk - il.MEGH_MAR) AS Meghdar
+    FROM    dbo.INVO_LST il
+    JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+    WHERE   il.TAG IN (1, 7, 9, 24)
+      AND   hl.DATE_N BETWEEN @DT1 AND @DT2;
+
+    INSERT #PM
+    SELECT  il.ANBAR, TRY_CAST(il.CODE AS BIGINT), hl.DATE_N, hl.NUMBER, il.TAG, il.MEGH_MAR
+    FROM    dbo.INVO_LST il
+    JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+    WHERE   il.TAG = 22
+      AND   hl.DATE_N BETWEEN @DT1 AND @DT2;
+
+    INSERT #PM
+    SELECT  CAST(il.ANBARF AS INT), TRY_CAST(il.CODE AS BIGINT), hl.DATE_N, hl.NUMBER, il.TAG,
+            (il.MEGHk - il.MEGH_MAR)
+    FROM    dbo.INVO_LST il
+    JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+    WHERE   il.TAG = 5
+      AND   il.ANBARF IS NOT NULL
+      AND   hl.DATE_N BETWEEN @DT1 AND @DT2;
+
+    INSERT #PM
+    SELECT  il.ANBAR, TRY_CAST(il.CODE AS BIGINT), hl.DATE_N, hl.NUMBER, il.TAG,
+            -(il.MEGHk - il.MEGH_MAR)
+    FROM    dbo.INVO_LST il
+    JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+    WHERE   il.TAG IN (2, 5, 8, 10, 11, 26)
+      AND   hl.DATE_N BETWEEN @DT1 AND @DT2;
+
+    INSERT #PM
+    SELECT  il.ANBAR, TRY_CAST(il.CODE AS BIGINT), hl.DATE_N, hl.NUMBER, il.TAG, -il.MEGHk
+    FROM    dbo.INVO_LST il
+    JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+    WHERE   il.TAG = 20
+      AND   (hl.TAMIR = 1 OR hl.TAMIR = 4)
+      AND   hl.DATE_N BETWEEN @DT1 AND @DT2;
+
+    INSERT #PM
+    SELECT  ah.GRD_ANBAR, TRY_CAST(al.CODE AS BIGINT), ah.GRD_DATE, ah.GRD_NUM,
+            CAST(NULL AS FLOAT), -(al.MOG - ISNULL(al.NUM3, 0))
+    FROM    dbo.ANBGRD_LST al
+    JOIN    dbo.ANBGRD_HEAD ah ON ah.GRD_NUM = al.GRD_NUM
+    WHERE   ah.N_S IS NOT NULL
+      AND   ah.GRD_ANBAR IS NOT NULL
+      AND   ah.GRD_DATE BETWEEN @DT1 AND @DT2;
+
+    ;WITH DistinctAnbars AS (
+        SELECT DISTINCT Anbar FROM #PM WHERE Anbar IS NOT NULL
+    ),
+    Opening AS (
+        -- مانده ابتدای دوره از تابع مرجع کارت کالا، فقط برای جفت‌های
+        -- (انبار، کالا) که واقعاً در همین دوره حرکت دارند.
+        SELECT  m.ANBAR AS Anbar, TRY_CAST(m.CODE AS BIGINT) AS code, m.MAND AS OpeningBalance
+        FROM    DistinctAnbars da
+        CROSS   APPLY dbo.MOGUDI(@DT1 - 1, CAST(da.Anbar AS NVARCHAR(50))) m
+    ),
+    AllMovement AS (
+        SELECT  o.Anbar, o.code, CAST(0 AS BIGINT) AS DATE_N, CAST(0 AS FLOAT) AS NUMBER,
+                CAST(NULL AS FLOAT) AS TAG, N'' AS Bargah, o.OpeningBalance AS Meghdar
+        FROM    Opening o
+        WHERE   EXISTS (SELECT 1 FROM #PM p WHERE p.Anbar = o.Anbar AND p.code = o.code)
+
+        UNION ALL
+        SELECT  p.Anbar, p.code, p.DATE_N, p.NUMBER, p.TAG,
+                ISNULL(tc.BARGAH, N'') AS Bargah, p.Meghdar
+        FROM    #PM p
+        LEFT    JOIN dbo.TAGCOD tc ON tc.CODE = p.TAG
+        WHERE   p.Anbar IS NOT NULL AND p.code IS NOT NULL
     ),
     Tajamoi AS (
-        SELECT  ANBAR, code, DATE_N, NUMBER, TAG, Bargah,
+        SELECT  Anbar, code, DATE_N, NUMBER, TAG, Bargah,
                 SUM(Meghdar) OVER (
-                    PARTITION BY ANBAR, code
+                    PARTITION BY Anbar, code
                     ORDER BY DATE_N, Bargah, NUMBER
                     ROWS UNBOUNDED PRECEDING) AS Mande
-        FROM    Harekat
+        FROM    AllMovement
     ),
     AvvalinManfi AS (
-        SELECT  ANBAR, code, DATE_N, NUMBER, TAG, Mande,
+        SELECT  Anbar, code, DATE_N, NUMBER, TAG, Bargah, Mande,
                 ROW_NUMBER() OVER (
-                    PARTITION BY ANBAR, code
+                    PARTITION BY Anbar, code
                     ORDER BY DATE_N, Bargah, NUMBER) AS rn
         FROM    Tajamoi
         WHERE   Mande < -0.0001
@@ -10101,33 +10209,34 @@ BEGIN
         (RunId, StepCode, RuleCode, ExType, Severity,
          Anbar, Code, DocNumber, DocTag, DocDate, Amount, Description)
     SELECT  @RunId, 'S05', 'CHK-01', 1, 2,
-            m.ANBAR, m.code, m.NUMBER, m.TAG, m.DATE_N, m.Mande,
-            CONCAT(N'انبار ', m.ANBAR, N' (', ISNULL(a.NAMES, N'نامشخص'), N'): موجودی در تاریخ ',
+            m.Anbar, m.code, m.NUMBER, m.TAG, m.DATE_N, m.Mande,
+            CONCAT(N'انبار ', m.Anbar, N' (', ISNULL(a.NAMES, N'نامشخص'), N'): موجودی در تاریخ ',
                    m.DATE_N / 10000, '/',
                    FORMAT(m.DATE_N / 100 % 100, '00'), '/',
                    FORMAT(m.DATE_N % 100, '00'),
                    N' منفی می‌شود')
     FROM    AvvalinManfi m
-    LEFT    JOIN dbo.TCOD_ANBAR a ON a.CODE = m.ANBAR
+    LEFT    JOIN dbo.TCOD_ANBAR a ON a.CODE = m.Anbar
     WHERE   m.rn = 1
       AND   m.DATE_N BETWEEN @DT1 AND @DT2;
+
+    DROP TABLE #PM;
 
     /* ─────────────────────────────────────────────────────────────
        CHK-02 — مغایرت کارت انبار و حسابداری
 
-       مانده ریالی کارت انبار (KALAS) با مانده حساب موجودی جنسی
-       مقایسه می‌شود. اختلاف معمولاً یعنی حواله‌ای که فاکتورش
-       صادر نشده، یا تاریخ فاکتور در ماه بعد افتاده.
+       مانده ریالی کارت انبار با مانده حساب موجودی جنسی مقایسه
+       می‌شود. کارت انبار اینجا مستقیماً از INVO_LST/HEAD_LST با
+       همان طبقه‌بندی TAG بالا محاسبه می‌شود (نه KALAS، که فقط یک ویو
+       گزارشی روی همین جدول‌هاست) — چون CHK-02 برخلاف CHK-01 فقط به
+       مانده نهایی نیاز دارد، نه ترتیب تراکنش‌ها، آستانهٔ زمانی همان
+       «<= @DT2» قبلی است (تجمعی از ابتدای تاریخچه، نه فقط این ماه).
 
        هر انبار زیر یک معین جداگانه در حسابداری ثبت می‌شود، نه یک
        معین ثابت مشترک برای همهٔ انبارها (تفصیلی طبق ساختار خودِ
        دیتابیس فقط زیر یک معین مشخص یکتاست: TDETA_HES.PK =
-       (N_KOL,NUMBER,TNUMBER)). قبلاً این کنترل فقط با کل=۱۲۱ و
-       بدون معین مقایسه می‌کرد، یعنی اگر همان شماره تفصیلی زیر چند
-       معین مختلف (چند انبار) تراکنش داشت، همه را با هم جمع می‌زد و
-       برای تقریباً هر کالا یک مانده کاملاً غلط و متورم می‌ساخت.
-       نگاشت واقعیِ انبار⇄معین از CC_AnbarHes (تنظیمات) خوانده
-       می‌شود، نه هاردکد، چون شرکت‌به‌شرکت فرق می‌کند.
+       (N_KOL,NUMBER,TNUMBER)). نگاشت واقعیِ انبار⇄معین از CC_AnbarHes
+       (تنظیمات) خوانده می‌شود، نه هاردکد، چون شرکت‌به‌شرکت فرق می‌کند.
 
        آستانه یک ریال است چون این دو باید دقیقاً یکی باشند.
        ───────────────────────────────────────────────────────────── */
@@ -10143,14 +10252,62 @@ BEGIN
     END
     ELSE
     BEGIN
-        ;WITH KartAnbar AS (
-            SELECT  k.ANBARCODE AS Anbar, k.code,
-                    SUM(CASE WHEN k.TAG IN (1, 7, 9, 24)
-                             THEN k.MABL_K ELSE -k.MABL_K END) AS Mande
-            FROM    dbo.KALAS k
-            WHERE   k.DATE_N <= @DT2
-              AND   k.ANBARCODE IN (SELECT Anbar FROM dbo.CC_AnbarHes)
-            GROUP BY k.ANBARCODE, k.code
+        ;WITH AnbarMovement AS (
+            SELECT  il.ANBAR AS Anbar, TRY_CAST(il.CODE AS BIGINT) AS code, il.MABL_K AS Mablk
+            FROM    dbo.INVO_LST il
+            JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+            WHERE   il.TAG IN (1, 7, 9, 24)
+              AND   hl.DATE_N <= @DT2
+              AND   il.ANBAR IN (SELECT Anbar FROM dbo.CC_AnbarHes)
+
+            UNION ALL
+            SELECT  il.ANBAR, TRY_CAST(il.CODE AS BIGINT), (il.MABL * il.MEGH_MAR)
+            FROM    dbo.INVO_LST il
+            JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+            WHERE   il.TAG = 22
+              AND   hl.DATE_N <= @DT2
+              AND   il.ANBAR IN (SELECT Anbar FROM dbo.CC_AnbarHes)
+
+            UNION ALL
+            SELECT  CAST(il.ANBARF AS INT), TRY_CAST(il.CODE AS BIGINT), il.MABL_K
+            FROM    dbo.INVO_LST il
+            JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+            WHERE   il.TAG = 5
+              AND   il.ANBARF IS NOT NULL
+              AND   hl.DATE_N <= @DT2
+              AND   CAST(il.ANBARF AS INT) IN (SELECT Anbar FROM dbo.CC_AnbarHes)
+
+            UNION ALL
+            SELECT  il.ANBAR, TRY_CAST(il.CODE AS BIGINT), -il.MABL_K
+            FROM    dbo.INVO_LST il
+            JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+            WHERE   il.TAG IN (2, 5, 8, 10, 11, 26)
+              AND   hl.DATE_N <= @DT2
+              AND   il.ANBAR IN (SELECT Anbar FROM dbo.CC_AnbarHes)
+
+            UNION ALL
+            SELECT  il.ANBAR, TRY_CAST(il.CODE AS BIGINT), -il.MABL_K
+            FROM    dbo.INVO_LST il
+            JOIN    dbo.HEAD_LST hl ON hl.TAG = il.TAG AND hl.NUMBER = il.NUMBER
+            WHERE   il.TAG = 20
+              AND   (hl.TAMIR = 1 OR hl.TAMIR = 4)
+              AND   hl.DATE_N <= @DT2
+              AND   il.ANBAR IN (SELECT Anbar FROM dbo.CC_AnbarHes)
+
+            UNION ALL
+            SELECT  ah.GRD_ANBAR, TRY_CAST(al.CODE AS BIGINT),
+                    -(al.MOG - ISNULL(al.NUM3, 0)) * ISNULL(al.MABL, 0)
+            FROM    dbo.ANBGRD_LST al
+            JOIN    dbo.ANBGRD_HEAD ah ON ah.GRD_NUM = al.GRD_NUM
+            WHERE   ah.N_S IS NOT NULL
+              AND   ah.GRD_DATE <= @DT2
+              AND   ah.GRD_ANBAR IN (SELECT Anbar FROM dbo.CC_AnbarHes)
+        ),
+        KartAnbar AS (
+            SELECT  Anbar, code, SUM(Mablk) AS Mande
+            FROM    AnbarMovement
+            WHERE   Anbar IS NOT NULL AND code IS NOT NULL
+            GROUP BY Anbar, code
         ),
         Hesabdari AS (
             SELECT  am.Anbar, TRY_CAST(d.HES_T AS BIGINT) AS code,
