@@ -8854,8 +8854,7 @@ GO
                 "جدول‌های پایه CC_*",
                 "اسکریپت 10-schema.sql را اجرا کنید.");
 
-            string seedData = @"
-/* ═══════════════════════════════════════════════════════════════════
+            string seedData = @"/* ═══════════════════════════════════════════════════════════════════
    فاز ۱ — فایل ۲ از ۳ : داده اولیه
 
    قواعد تشخیص، واحدهای تولیدی، و استثناهای پذیرفته‌شده.
@@ -9054,6 +9053,10 @@ IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_APPROVE')
 IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_EXPORT')
     INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
     VALUES (N'COST_ACT_EXPORT', N'خروجی اکسل', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
+
+IF NOT EXISTS (SELECT 1 FROM dbo.TFORMS WHERE FORMNAME = N'COST_ACT_REBUILD_DOCS')
+    INSERT INTO dbo.TFORMS (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+    VALUES (N'COST_ACT_REBUILD_DOCS', N'بازسازی سند حواله خروج مواد', 3, 10, (SELECT ISNULL(MAX(IDH),0)+1 FROM dbo.TFORMS), GETDATE());
 
 PRINT N'فرم‌های ماژول بستن ماه بهای تمام‌شده در TFORMS ثبت شدند.';
 GO
