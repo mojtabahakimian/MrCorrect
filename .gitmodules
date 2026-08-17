@@ -1,0 +1,3 @@
+[submodule "External/ScriptSqly"]
+	path = External/ScriptSqly
+	url = https://github.com/mojtabahakimian/ScriptSqly.git

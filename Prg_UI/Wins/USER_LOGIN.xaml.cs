@@ -9,7 +9,8 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_SendInvoice.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Prg_UI.Scriptses;
+using Prg_SendInvoice.CNNMANAGER;
+using ScriptSqly.Migrations;
 using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
@@ -190,7 +191,7 @@ namespace Prg_UI.Wins
                 this.Hide();
 
                 Baseknow.GetInitTheApp();
-                ScriptSqly.LetsGo();
+                ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
                 App.splashScreen.LoadComplete();
 
                 if (CL_Generaly.SectionName == "HEAD_LST_FROOSH22")
@@ -263,7 +264,7 @@ namespace Prg_UI.Wins
             return;//Should Remove this lone
 #endif
 
-            ScriptSqly.LetsGo();
+            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
 
             #region TinyLockCheck
             CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
@@ -1503,7 +1504,7 @@ del ""%~f0"" & exit
                 return;
             }
 
-            ScriptSqly.LetsGo(true);
+            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true);
             new Msgwin(false, "اسکریپت‌ها اجرا شدند.").Show();
         }
     }

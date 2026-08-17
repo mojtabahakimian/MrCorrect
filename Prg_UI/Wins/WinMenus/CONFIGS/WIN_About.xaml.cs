@@ -6,7 +6,8 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_SendInvoice.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Prg_UI.Scriptses;
+using Prg_SendInvoice.CNNMANAGER;
+using ScriptSqly.Migrations;
 using Prg_UI.UiTools;
 using Syncfusion.Windows.Shared;
 using System;
@@ -288,7 +289,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 return;
             }
 
-            ScriptSqly.LetsGo(true);
+            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true);
             new Msgwin(false, "اسکریپت‌ها اجرا شدند.").Show();
         }
 
@@ -335,7 +336,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 return;
             }
 
-            ScriptSqly.LetsGo(false, 2); //حقوق و دستمزد
+            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, false, 2); //حقوق و دستمزد
             new Msgwin(false, "اسکریپت حقوق اجرا شدند.").Show();
         }
     }

@@ -642,6 +642,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AUTO_BAZ\AUTO_BAZ.csproj" />
 		<ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
+		<ProjectReference Include="..\..\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
