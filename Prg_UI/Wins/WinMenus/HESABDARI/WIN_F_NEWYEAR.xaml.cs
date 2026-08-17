@@ -8,7 +8,8 @@ using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Prg_UI.Scriptses;
+using Prg_SendInvoice.CNNMANAGER;
+using ScriptSqly.Migrations;
 using Prg_UI.UiTools;
 using Syncfusion.Data.Extensions;
 using System;
@@ -665,7 +666,7 @@ END CATCH;";
             Msgwin MSG2 = new Msgwin(true, "آیا اسکریپت اجرا شود ؟"); MSG2.ShowDialog();
             if (MSG2.DialogResult == true)
             {
-                ScriptSqly.LetsGo(true);
+                ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true);
             }
 
             Command3.IsEnabled = false;
