@@ -3981,25 +3981,25 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
                     setReportText("Text44", otherDtlQuery.DRIVER);
                     setReportText("Text45", otherDtlQuery.DRIVER_MOB);
-                    setReportText("txtCamiun", otherDtlQuery.CAMIUN);
+                    setReportText("Text49", otherDtlQuery.CAMIUN);
                     setReportText("Text46", otherDtlQuery.CAMIUN_NUM);
                     setReportText("Text47", otherDtlQuery.BARNAMEH);
                     setReportText("txtCamKhaly", otherDtlQuery.CAM_KHALY);
                     setReportText("txtCamPoor", otherDtlQuery.CAM_POOR);
-                    setReportText("txtCityName", otherDtlQuery.CITYNAME);
-                    setReportText("txtTozih", otherDtlQuery.TOZIH);
+                    setReportText("Text51", otherDtlQuery.CITYNAME);
+                    setReportText("Text53", otherDtlQuery.TOZIH);
                 }
                 else
                 {
                     setReportText("Text44", "---");
                     setReportText("Text45", "---");
-                    setReportText("txtCamiun", "---");
+                    setReportText("Text49", "---");
                     setReportText("Text46", "---");
                     setReportText("Text47", "---");
                     setReportText("txtCamKhaly", "---");
                     setReportText("txtCamPoor", "---");
-                    setReportText("txtCityName", "---");
-                    setReportText("txtTozih", "---");
+                    setReportText("Text51", "---");
+                    setReportText("Text53", "---");
                 }
 
                 //report.Compile();

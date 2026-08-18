@@ -956,7 +956,7 @@
         <FooterBand1 Ref="75" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,7.92,19,9</ClientRectangle>
-          <Components isList="true" count="24">
+          <Components isList="true" count="30">
             <Text26 Ref="76" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>6.44,0.08,1.65,0.6</ClientRectangle>
@@ -1260,8 +1260,9 @@
               <Name>Text44</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
-              <Text>{RASID_ANBAR.DRIVER}</Text>
+              <Text>{DRIVER}</Text>
               <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
             </Text44>
             <Text45 Ref="97" type="Text" isKey="true">
               <Brush>Transparent</Brush>
@@ -1269,13 +1270,13 @@
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
-              <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text45</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
-              <Text>{RASID_ANBAR.DRIVER_MOB}</Text>
+              <Text>{DRIVER_MOB}</Text>
               <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </Text45>
             <Text46 Ref="98" type="Text" isKey="true">
@@ -1284,13 +1285,13 @@
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
-              <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text46</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
-              <Text>{RASID_ANBAR.CAMIUN_NUM}</Text>
+              <Text>{CAMIUN_NUM}</Text>
               <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </Text46>
             <Text47 Ref="99" type="Text" isKey="true">
@@ -1304,10 +1305,99 @@
               <Name>Text47</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
-              <Text>{RASID_ANBAR.BARNAMEH}</Text>
+              <Text>{BARNAMEH}</Text>
               <TextBrush>Black</TextBrush>
               <VertAlignment>Center</VertAlignment>
             </Text47>
+            <Text48 Ref="100" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.93,5,2.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text48</Name>
+              <Page isRef="5" />
+              <Parent isRef="75" />
+              <Text>نوع ماشین :</Text>
+              <TextBrush>[192:80:77]</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+            </Text48>
+            <Text49 Ref="101" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.49,5,3.4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text49</Name>
+              <Page isRef="5" />
+              <Parent isRef="75" />
+              <Text>{CAMIUN}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </Text49>
+            <Text50 Ref="102" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.17,5,1.65,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text50</Name>
+              <Page isRef="5" />
+              <Parent isRef="75" />
+              <Text>مقصد :</Text>
+              <TextBrush>[192:80:77]</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+            </Text50>
+            <Text51 Ref="103" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>12.11,5,5,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text51</Name>
+              <Page isRef="5" />
+              <Parent isRef="75" />
+              <Text>{CITYNAME}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </Text51>
+            <Text52 Ref="104" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.17,5.6,1.65,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text52</Name>
+              <Page isRef="5" />
+              <Parent isRef="75" />
+              <Text>توضیحات :</Text>
+              <TextBrush>[192:80:77]</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+            </Text52>
+            <Text53 Ref="105" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.49,5.6,16.5,1.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text53</Name>
+              <Page isRef="5" />
+              <Parent isRef="75" />
+              <Text>{TOZIH}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+            </Text53>
           </Components>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -1315,7 +1405,7 @@
           <Page isRef="5" />
           <Parent isRef="5" />
         </FooterBand1>
-        <RectanglePrimitive1 Ref="100" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive1 Ref="106" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0,3.74,19,1.54</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -1326,11 +1416,11 @@
           <Parent isRef="5" />
           <Size>3</Size>
         </RectanglePrimitive1>
-        <VerticalLinePrimitive6 Ref="101" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive6 Ref="107" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>17.77,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="102" type="Cap" isKey="true">
+          <EndCap Ref="108" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1338,15 +1428,15 @@
           <Name>VerticalLinePrimitive6</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="103" type="Cap" isKey="true">
+          <StartCap Ref="109" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive6>
-        <VerticalLinePrimitive1 Ref="104" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive1 Ref="110" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>16.57,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="105" type="Cap" isKey="true">
+          <EndCap Ref="111" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1354,15 +1444,15 @@
           <Name>VerticalLinePrimitive1</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="106" type="Cap" isKey="true">
+          <StartCap Ref="112" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive1>
-        <VerticalLinePrimitive2 Ref="107" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive2 Ref="113" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>13.57,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="108" type="Cap" isKey="true">
+          <EndCap Ref="114" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1370,15 +1460,15 @@
           <Name>VerticalLinePrimitive2</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="109" type="Cap" isKey="true">
+          <StartCap Ref="115" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive2>
-        <VerticalLinePrimitive3 Ref="110" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive3 Ref="116" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>12.18,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="111" type="Cap" isKey="true">
+          <EndCap Ref="117" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1386,15 +1476,15 @@
           <Name>VerticalLinePrimitive3</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="112" type="Cap" isKey="true">
+          <StartCap Ref="118" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive3>
-        <VerticalLinePrimitive4 Ref="113" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive4 Ref="119" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>6.38,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="114" type="Cap" isKey="true">
+          <EndCap Ref="120" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1402,15 +1492,15 @@
           <Name>VerticalLinePrimitive4</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="115" type="Cap" isKey="true">
+          <StartCap Ref="121" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive4>
-        <VerticalLinePrimitive5 Ref="116" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive5 Ref="122" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>4.38,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="117" type="Cap" isKey="true">
+          <EndCap Ref="123" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1418,15 +1508,15 @@
           <Name>VerticalLinePrimitive5</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="118" type="Cap" isKey="true">
+          <StartCap Ref="124" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive5>
-        <VerticalLinePrimitive17 Ref="119" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive17 Ref="125" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>2.38,3.74,0.0254,1.52</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="120" type="Cap" isKey="true">
+          <EndCap Ref="126" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1434,15 +1524,15 @@
           <Name>VerticalLinePrimitive17</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="121" type="Cap" isKey="true">
+          <StartCap Ref="127" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive17>
-        <VerticalLinePrimitive7 Ref="122" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive7 Ref="128" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>17.77,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="123" type="Cap" isKey="true">
+          <EndCap Ref="129" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1450,15 +1540,15 @@
           <Name>VerticalLinePrimitive7</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="124" type="Cap" isKey="true">
+          <StartCap Ref="130" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive7>
-        <VerticalLinePrimitive8 Ref="125" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive8 Ref="131" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>16.57,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="126" type="Cap" isKey="true">
+          <EndCap Ref="132" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1466,15 +1556,15 @@
           <Name>VerticalLinePrimitive8</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="127" type="Cap" isKey="true">
+          <StartCap Ref="133" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive8>
-        <VerticalLinePrimitive9 Ref="128" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive9 Ref="134" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>13.57,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="129" type="Cap" isKey="true">
+          <EndCap Ref="135" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1482,15 +1572,15 @@
           <Name>VerticalLinePrimitive9</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="130" type="Cap" isKey="true">
+          <StartCap Ref="136" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive9>
-        <VerticalLinePrimitive10 Ref="131" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive10 Ref="137" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>12.18,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="132" type="Cap" isKey="true">
+          <EndCap Ref="138" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1498,15 +1588,15 @@
           <Name>VerticalLinePrimitive10</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="133" type="Cap" isKey="true">
+          <StartCap Ref="139" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive10>
-        <VerticalLinePrimitive11 Ref="134" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive11 Ref="140" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>6.38,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="135" type="Cap" isKey="true">
+          <EndCap Ref="141" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1514,15 +1604,15 @@
           <Name>VerticalLinePrimitive11</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="136" type="Cap" isKey="true">
+          <StartCap Ref="142" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive11>
-        <VerticalLinePrimitive12 Ref="137" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive12 Ref="143" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>4.38,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="138" type="Cap" isKey="true">
+          <EndCap Ref="144" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1530,15 +1620,15 @@
           <Name>VerticalLinePrimitive12</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="139" type="Cap" isKey="true">
+          <StartCap Ref="145" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive12>
-        <VerticalLinePrimitive18 Ref="140" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive18 Ref="146" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>2.38,6.14,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="141" type="Cap" isKey="true">
+          <EndCap Ref="147" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1546,11 +1636,11 @@
           <Name>VerticalLinePrimitive18</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="142" type="Cap" isKey="true">
+          <StartCap Ref="148" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive18>
-        <RectanglePrimitive2 Ref="143" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive2 Ref="149" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0,6.13,19,0.94</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -1582,10 +1672,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/26/2024 5:07:37 PM</ReportChanged>
+  <ReportChanged>8/18/2026 4:30:33 PM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect167\Prg_UI\Rpts\HAVLAH_ANBARh.mrt</ReportFile>
-  <ReportGuid>11776067ba26496dae29de8cb00d3be0</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\HAVLAH_ANBARh.mrt</ReportFile>
+  <ReportGuid>48a18e57dc7e428d91b0d8477696d086</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
