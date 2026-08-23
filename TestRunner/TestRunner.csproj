@@ -8,5 +8,12 @@
   <ItemGroup>
     <ProjectReference Include="..\AUTO_BAZ\AUTO_BAZ.csproj" />
     <ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
+    <ProjectReference Include="..\Prg_UI\Prg_UI.csproj" />
+    <Reference Include="Stimulsoft.Base">
+      <HintPath>..\Prg_UI\DLLS\stimulydlls\Stimulsoft.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="Stimulsoft.Report">
+      <HintPath>..\Prg_UI\DLLS\stimulydlls\Stimulsoft.Report.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
