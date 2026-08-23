@@ -123,6 +123,10 @@ namespace Functions
             /// </summary>
             FCODE_CUSTOMER,
             /// <summary>
+            /// دفترچه تلفن
+            /// </summary>
+            TEL_WIN,
+            /// <summary>
             /// تعریف نوع مشتری
             /// </summary>
             CUSTKIND_WIN,
@@ -2167,6 +2171,10 @@ namespace Functions
 
                 case WinNameType.FCODE_CUSTOMER: //تعریف مشتری
                     CL_LMethods.OpenWindow(OWNERWIN, new FCODE_CUSTOMER((string?)_PARAMETERS_.FirstOrDefault()));
+                    break;
+
+                case WinNameType.TEL_WIN: //دفترچه تلفن
+                    CL_LMethods.OpenWindow(OWNERWIN, new Prg_UI.Wins.WinMenus.CRM.TEL_WIN());
                     break;
 
                 case WinNameType.GRADE_FORMAT_WIN: //فرمت رده بندی مشتری

@@ -467,6 +467,11 @@ namespace Prg_UI.Wins
             {
                 CL_Keyboard.ChangeKeyboardLayout("Farsi"); // فارسی
             }
+            else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && (e.Key == Key.D3 || e.Key == Key.NumPad3))
+            {
+                e.Handled = true;
+                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TEL_WIN, this);
+            }
             else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.D5))
             {
                 CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_LIST_KALA_CTRL5, this);

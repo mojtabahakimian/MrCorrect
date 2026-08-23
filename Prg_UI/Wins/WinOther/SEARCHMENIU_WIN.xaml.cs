@@ -164,6 +164,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کد مپ شماره فنی", WIN_NAME = CL_MenuManager.WinNameType.TCOD_MAPF_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف گروه حساب ها", WIN_NAME = CL_MenuManager.WinNameType.TCOD_HESGROUP_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف مشتری جدید", WIN_NAME = CL_MenuManager.WinNameType.FCODE_CUSTOMER });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "دفترچه تلفن", WIN_NAME = CL_MenuManager.WinNameType.TEL_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف نوع مشتری", WIN_NAME = CL_MenuManager.WinNameType.CUSTKIND_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف واحد های زیر مجموعه سازمان", WIN_NAME = CL_MenuManager.WinNameType.DEPART_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیمات اتصال به پایگاه داده", WIN_NAME = CL_MenuManager.WinNameType.WinConnectionChoose });
