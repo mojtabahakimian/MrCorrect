@@ -114,6 +114,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public string SE_SANDUGH { get; set; }
         public string SE_VAZ { get; set; }
         public int INDEX_DG { get; set; }
+        public long? CurrentPayGetdId { get; set; }
         private static bool IsNull(object p)
         {
             if (!(p is null))
@@ -183,6 +184,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             else
             {
                 var row = rst.FirstOrDefault();
+                CurrentPayGetdId = row?.ID;
                 this.RADIF.Text = row.RADIF?.ToString() ?? "";
 
                 // اگر شماره سریال در ItemsSource کمبوباکس موجود نباشد، آن را اضافه می‌کنیم تا SelectedValue پاک نشود
@@ -284,11 +286,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                var query = "SELECT * FROM PAY_GETD WHERE N_SERI = @N_SERI AND BANK = @BANK AND DATE_S = @DATE_S";
-                var parameters = new { N_SERI = this.N_SERI.SelectedValue, BANK = this.BANK.SelectedValue, DATE_S = this.DATE_S.Text.ToRawTarikh() };
+                var query = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? "SELECT * FROM PAY_GETD WHERE ID = @ID"
+                    : "SELECT * FROM PAY_GETD WHERE N_SERI = @N_SERI AND BANK = @BANK AND DATE_S = @DATE_S";
+                var parameters = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? (object)new { ID = CurrentPayGetdId.Value }
+                    : new { N_SERI = this.N_SERI.SelectedValue, BANK = this.BANK.SelectedValue, DATE_S = this.DATE_S.Text.ToRawTarikh() };
                 var rst = dbms.DoGetDataSQL<PAY_GETD>(query, parameters).ToList();
 
-                string _where = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
+                string _where = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? " WHERE ID = " + CurrentPayGetdId.Value
+                    : " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
 
 
                 if (rst.Count > 0)
@@ -456,10 +464,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (!IsNull(this.N_SERI.SelectedValue) && !IsNull(this.BANK.SelectedValue))
             {
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
+                string updateWhere = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? $"WHERE ID = {CurrentPayGetdId.Value}"
+                    : $"WHERE N_SERI = {SE_N_SERI} AND BANK = {SE_BANK} AND DATE_S = {SE_DATE_S}";
 
                 dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
                  SET N_SERI = {SE_N_SERI} , DATE_S = {SE_DATE_S} , SHOBEH = N'{SE_SHOBEH}' , DATE = {SE_DATE} , NAME_TAH = N'{_NAME_TAH_}' , N_HESAB = N'{SE_N_HESAB}' , MABL = {SE_MABL} , N_KOL = {(string.IsNullOrEmpty(SE_KOL) ? "NULL" : SE_KOL)} , N_MOIN = {(string.IsNullOrEmpty(SE_MOIN) ? "NULL" : SE_MOIN)} , N_TAF = {(string.IsNullOrEmpty(SE_TAF) ? "NULL" : SE_TAF)} , BANK = {SE_BANK} , HES1 = N'{(string.IsNullOrEmpty(SE_HES1) ? "NULL" : SE_HES1)}' , SANDUGH = {SE_SANDUGH} , VAZ = {SE_VAZ}
-                 WHERE N_SERI = {SE_N_SERI} AND BANK = {SE_BANK} AND DATE_S = {SE_DATE_S}
+                 {updateWhere}
                  ");
             }
 
