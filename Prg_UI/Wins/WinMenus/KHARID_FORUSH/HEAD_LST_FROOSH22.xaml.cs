@@ -7771,9 +7771,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
 
         /// <summary>
-        /// مبنای محاسبه پورسانت = جمع کل فاکتور منهای تخفیف.
-        /// همان مبنایی که پروسیجر dbo.RecalcVisitorPorsant_ByDarsad هم استفاده می‌کند
-        /// تا محاسبه فرم و بازسازی دیتابیس یک نتیجه بدهند.
+        /// مبنای محاسبه پورسانت = جمع کل فاکتور منهای تخفیف (و در صورت فعال بودن
+        /// گزینه ۶۲ سازمان، به‌علاوه ارزش افزوده).
+        /// عیناً همان مبنایی که CL_HESABDARI_AUTO_BAZ هنگام صدور سند و پروسیجر
+        /// dbo.RecalcVisitorPorsant_ByDarsad هنگام بازسازی استفاده می‌کنند،
+        /// تا هر سه یک عدد بدهند.
         /// </summary>
         private bool TryGetPorsantBase(out double porsantBase)
         {
@@ -7783,6 +7785,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return false;
 
             porsantBase = jfValue - takhfifValue;
+
+            // فرم تا امروز این گزینه را نادیده می‌گرفت و AUTO_BAZ لحاظ می‌کرد؛
+            // چون سند نهایی را AUTO_BAZ می‌زند، عدد فرم اشتباه نمایش داده می‌شد.
+            if (Baseknow.PorsantBaseIncludesVat && double.TryParse(MBAA.Text, out double mbaaValue))
+            {
+                porsantBase += mbaaValue;
+            }
+
             return true;
         }
 

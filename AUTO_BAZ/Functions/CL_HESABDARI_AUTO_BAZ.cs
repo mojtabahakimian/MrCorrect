@@ -3376,76 +3376,40 @@ namespace AUTO_BAZ.Functions
                                 TAMIR = PRST[PRST_EOF].CUST_NO;
                             }
                             SHARH = Strings.Right(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER + " : " + HFRST[HFRST_EOF].NUMBER1 + " بابت " + PRST[PRST_EOF].DARSAD + "% مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + Interaction.IIf(IsNull(PRST[PRST_EOF].TOZIH), "", PRST[PRST_EOF].TOZIH) + "مبلغ :  " + Strings.Format(Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF)), "#,###") + " " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
-                            if (IsNull(PRST[PRST_EOF].PORID))
+                            // «درصد ملاک است»: مبلغ پورسانت همیشه از روی درصدِ ثبت‌شده و مبنای همین
+                            // فاکتور ساخته می‌شود، چه سطر الگوی پورسانت (PORID) داشته باشد چه نداشته باشد.
+                            //
+                            // قبلاً وقتی PORID پر بود، اینجا مبلغ از نرخ تک‌تک کالاها (VISITORS_PORSANT_KALA)
+                            // بازنویسی می‌شد و DARSAD هم با مخرجِ MBK (فقط کالاهای دارای الگو، نه کل فاکتور)
+                            // پر می‌شد. نتیجه: هر اصلاحی که کاربر در فرم فاکتور فروش انجام می‌داد، موقع صدور
+                            // سند خنثی می‌شد و ستون درصد هم عددی نشان می‌داد که درصدِ جمع فاکتور نبود.
+                            double PORSANT_BASE = (JAMF ?? 0) - (HFRST[HFRST_EOF].TAKHFIF ?? 0)
+                                                  + (Baseknow.PorsantBaseIncludesVat ? (HFRST[HFRST_EOF].MBAA ?? 0) : 0);
+
+                            // شرط قبلی (bool)!STAT بود؛ برای سطرهایی که STAT آنها در دیتابیس NULL است
+                            // این عبارت InvalidOperationException پرتاب می‌کرد.
+                            if (PRST[PRST_EOF].STAT != true)
                             {
-                                if ((bool)!PRST[PRST_EOF].STAT)
+                                //مبلغ ثابت نیست: مبلغ از روی درصد ساخته می‌شود
+                                double _PURSANT_ = Math.Round(PORSANT_BASE * (PRST[PRST_EOF].DARSAD ?? 0) / 100);
+                                if (_PURSANT_ != PRST[PRST_EOF].PURSANT)
                                 {
-                                    if (Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100)) != PRST[PRST_EOF].PURSANT)
-                                    {
-                                        PRST[PRST_EOF].PURSANT = Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100));
-
-                                        dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
-                                        //PRST.update;
-                                    }
+                                    PRST[PRST_EOF].PURSANT = _PURSANT_;
+                                    dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
+                                    //PRST.update;
                                 }
-
-                                else if (PRST[PRST_EOF].DARSAD != PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100)
+                            }
+                            else if (PORSANT_BASE != 0)
+                            {
+                                //مبلغ ثابت است: درصد از روی مبلغ ساخته می‌شود
+                                //شرط قبلی مخرج را صفر بررسی نمی‌کرد و در آن حالت Infinity در دیتابیس می‌نشست
+                                double _DARSAD_ = (PRST[PRST_EOF].PURSANT ?? 0) / PORSANT_BASE * 100;
+                                if (PRST[PRST_EOF].DARSAD != _DARSAD_)
                                 {
-                                    PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100;
+                                    PRST[PRST_EOF].DARSAD = _DARSAD_;
                                     dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
                                     //PRST.update;
                                 }
-
-                            }
-                            else
-                            {
-                                long prs;
-                                long MBK;
-                                prs = 0L;
-                                MBK = 0L;
-                                //پرداخت پورسانت بر اساس الگوی پرداخت پورسانت
-                                // rst1 پیش‌خوانده شد.
-                                var rst1 = invoicePorsantLines.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var porsantLineRows)
-                                    ? porsantLineRows
-                                    : EmptyQre18;
-                                //while (!rst1.EOF)
-                                for (int rst1_EOF = 0; rst1_EOF < rst1.Count; rst1_EOF++)
-                                {
-                                    // rst2 هم پیش‌خوانده شد. «یافت نشد» و «بیش از یک ردیف» هر دو
-                                    // مثل کد قبلی (شرط rst2.Count == 1) نپذیرفتن مقدار معنی می‌شوند.
-                                    var porsantKey = (PRST[PRST_EOF].PORID ?? 0, SqlKey(rst1[rst1_EOF].code));
-                                    var porsantFound = porsantKala.TryGetValue(porsantKey, out var porsantEntry)
-                                                       && !porsantEntry.Duplicate;
-
-                                    if (porsantFound)
-                                    {
-                                        prs = (long)(prs + Math.Round((double)(rst1[rst1_EOF].mablk * porsantEntry.Porsant / 100)));
-                                        MBK = (long)(MBK + rst1[rst1_EOF].mablk);
-                                    }
-                                    else
-                                    {
-                                        // یک پیام برای هر (ویزیتور، کالا) کافی است. قبلاً برای هر
-                                        // فاکتور تکرار می‌شد — روی YAZDSEPAR1405 همین یک پیام ۴۵۲ بار
-                                        // نوشته شد و هر نوشتن، همه‌ی بخش‌های موازی را سریال می‌کرد.
-                                        if (_missingPorsantPatternLogged.TryAdd(porsantKey, 0))
-                                        {
-                                            LogWriter.WriteLog("تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
-                                        }
-
-                                        //Msgwin msgwin = new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
-                                        //msgwin.ShowDialog();
-                                    }
-                                    //rst1.MoveNext();
-                                    //rst2.Close();
-                                }
-                                //rst1.Close();
-                                PRST[PRST_EOF].PURSANT = prs;
-                                if (MBK > 0L)
-                                {
-                                    PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / MBK * 100;
-                                }
-                                dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {prs} , DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
-                                //PRST.update();
                             }
 
 

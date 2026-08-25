@@ -40,6 +40,16 @@ namespace Prg_Proccessy.MODELS
         public static bool? mrcorrect { get; set; } = false;
         public static int? TKHF { get; set; }
         public static string OPTIONSS { get; set; }
+
+        /// <summary>
+        /// گزینه شماره ۶۲ تنظیمات سازمان (SAZMAN.OPTIONSS): اگر «5» باشد،
+        /// مالیات بر ارزش افزوده هم جزو مبنای محاسبه پورسانت ویزیتور است.
+        /// AUTO_BAZ همیشه این گزینه را لحاظ می‌کرده ولی فرم فاکتور فروش نه؛
+        /// نتیجه‌اش دو مبلغ متفاوت برای یک فاکتور بود.
+        /// </summary>
+        public static bool PorsantBaseIncludesVat =>
+            !string.IsNullOrEmpty(OPTIONSS) && OPTIONSS.Length >= 62 && OPTIONSS[61] == '5';
+
         public static string UGRP { get; set; }
         public static double? DIG { get; set; }
         public static double? PERSON { get; set; }
