@@ -63,6 +63,34 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 
             // 4. Check "Documents Payable" vs "Check Book" balance : چک های پرداختی
             CheckPayableDocuments();
+
+            // 5. Check visitor commission (پورسانت ویزیتور) amounts on sales invoices
+            CheckVisitorCommissions();
+        }
+
+        /// <summary>
+        /// بررسی مبلغ پورسانت ویزیتور فاکتورهای فروش؛ اگر مغایرتی پیدا شود
+        /// پنجره‌ی «کنترل پورسانت فاکتور فروش» را باز می‌کند تا کاربر ببیند و در صورت تایید اصلاح کند.
+        /// </summary>
+        private static void CheckVisitorCommissions()
+        {
+            try
+            {
+                var mismatchCount = dbms.DoGetDataSQL<CONTROL_PORSANT_FROOSH.PorsantAuditRow>(
+                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=NULL, @TAG=2, @FromDate=NULL, @ToDate=NULL, @PREVIEW_ONLY=1")
+                    .Count();
+
+                if (mismatchCount > 0)
+                {
+                    new Msgwin(false, $"مبلغ پورسانت {mismatchCount} سطر از فاکتورهای فروش با درصد/الگوی تعریف‌شده نمی‌خواند.").ShowDialog();
+                    new CONTROL_PORSANT_FROOSH().Show();
+                }
+            }
+            catch
+            {
+                // اگر پروسیجر dbo.RecalcVisitorPorsant_ByDarsad هنوز روی این دیتابیس ساخته نشده،
+                // این بخش از کنترل اسناد را بی‌صدا رد می‌کنیم؛ نباید کل «کنترل اسناد و دفاتر چک» را بخواباند.
+            }
         }
         private static void CheckReceivableDocuments()
         {
