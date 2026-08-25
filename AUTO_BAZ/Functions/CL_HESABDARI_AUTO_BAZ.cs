@@ -3376,22 +3376,36 @@ namespace AUTO_BAZ.Functions
                                 TAMIR = PRST[PRST_EOF].CUST_NO;
                             }
                             SHARH = Strings.Right(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER + " : " + HFRST[HFRST_EOF].NUMBER1 + " بابت " + PRST[PRST_EOF].DARSAD + "% مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + Interaction.IIf(IsNull(PRST[PRST_EOF].TOZIH), "", PRST[PRST_EOF].TOZIH) + "مبلغ :  " + Strings.Format(Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF)), "#,###") + " " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
-                            // «درصد ملاک است»: مبلغ پورسانت همیشه از روی درصدِ ثبت‌شده و مبنای همین
-                            // فاکتور ساخته می‌شود، چه سطر الگوی پورسانت (PORID) داشته باشد چه نداشته باشد.
-                            //
-                            // قبلاً وقتی PORID پر بود، اینجا مبلغ از نرخ تک‌تک کالاها (VISITORS_PORSANT_KALA)
-                            // بازنویسی می‌شد و DARSAD هم با مخرجِ MBK (فقط کالاهای دارای الگو، نه کل فاکتور)
-                            // پر می‌شد. نتیجه: هر اصلاحی که کاربر در فرم فاکتور فروش انجام می‌داد، موقع صدور
-                            // سند خنثی می‌شد و ستون درصد هم عددی نشان می‌داد که درصدِ جمع فاکتور نبود.
+                            // قاعده‌ی نهایی (تایید کاربر): اگر سطر «الگوی پورسانت» (PORID) دارد،
+                            // مبلغ از روی نرخِ تک‌تک کالاها ساخته می‌شود — کالای بدون نرخ در الگو
+                            // عمداً سهمی از پورسانت نمی‌گیرد، این طراحی است نه باگ. اگر الگو ندارد،
+                            // مبلغ = درصد × مبنای فاکتور. در هر دو حالت، تیک «مبلغ ثابت» (STAT=1)
+                            // اولویت دارد و چیزی بازنویسی نمی‌شود؛ فقط درصدِ نمایشی بازسازی می‌شود.
                             double PORSANT_BASE = (JAMF ?? 0) - (HFRST[HFRST_EOF].TAKHFIF ?? 0)
                                                   + (Baseknow.PorsantBaseIncludesVat ? (HFRST[HFRST_EOF].MBAA ?? 0) : 0);
 
-                            // کالاهای فاقد نرخ در الگو دیگر روی مبلغ اثری ندارند، ولی همچنان باید
-                            // گزارش شوند: نبودِ نرخ برای این کالاها همان چیزی است که باعث می‌شد
-                            // درصدِ پیشنهادیِ الگو کمتر از انتظار دربیاید. تنها کاری که این حلقه
-                            // می‌کند نوشتن هشدار است.
-                            if (!IsNull(PRST[PRST_EOF].PORID))
+                            // شرط قبلی (bool)!STAT بود؛ برای سطرهایی که STAT آنها در دیتابیس NULL است
+                            // این عبارت InvalidOperationException پرتاب می‌کرد.
+                            if (PRST[PRST_EOF].STAT == true)
                             {
+                                //مبلغ ثابت است: مبلغ دست‌نخورده می‌ماند، فقط درصدِ نمایشی از رویش بازسازی می‌شود
+                                //شرط قبلی مخرج را صفر بررسی نمی‌کرد و در آن حالت Infinity در دیتابیس می‌نشست
+                                if (PORSANT_BASE != 0)
+                                {
+                                    double _DARSAD_ = (PRST[PRST_EOF].PURSANT ?? 0) / PORSANT_BASE * 100;
+                                    if (PRST[PRST_EOF].DARSAD != _DARSAD_)
+                                    {
+                                        PRST[PRST_EOF].DARSAD = _DARSAD_;
+                                        dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
+                                        //PRST.update;
+                                    }
+                                }
+                            }
+                            else if (!IsNull(PRST[PRST_EOF].PORID))
+                            {
+                                //الگو دارد: مبلغ از جمع (نرخ کالا × مبلغ کالا) کالاهایی ساخته می‌شود که در الگو نرخ دارند
+                                long prs = 0L;
+                                long MBK = 0L;
                                 var porsantLines = invoicePorsantLines.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var porsantLineRows)
                                     ? porsantLineRows
                                     : EmptyQre18;
@@ -3402,38 +3416,36 @@ namespace AUTO_BAZ.Functions
                                     var porsantFound = porsantKala.TryGetValue(porsantKey, out var porsantEntry)
                                                        && !porsantEntry.Duplicate;
 
-                                    // یک پیام برای هر (ویزیتور، کالا) کافی است. قبلاً برای هر
-                                    // فاکتور تکرار می‌شد — روی YAZDSEPAR1405 همین یک پیام ۴۵۲ بار
-                                    // نوشته شد و هر نوشتن، همه‌ی بخش‌های موازی را سریال می‌کرد.
-                                    if (!porsantFound && _missingPorsantPatternLogged.TryAdd(porsantKey, 0))
+                                    if (porsantFound)
                                     {
-                                        LogWriter.WriteLog("تذكر مهم : اين كالا در الگوي پورسانت اين ويزيتور نرخ ندارد و در درصد پيشنهادي الگو به حساب نيامده است. درصورت لزوم براي آن نرخ تعريف كنيد و مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(porsantLines[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+                                        prs = (long)(prs + Math.Round((double)(porsantLines[rst1_EOF].mablk * porsantEntry.Porsant / 100)));
+                                        MBK = (long)(MBK + porsantLines[rst1_EOF].mablk);
+                                    }
+                                    else
+                                    {
+                                        // یک پیام برای هر (ویزیتور، کالا) کافی است. قبلاً برای هر
+                                        // فاکتور تکرار می‌شد — روی YAZDSEPAR1405 همین یک پیام ۴۵۲ بار
+                                        // نوشته شد و هر نوشتن، همه‌ی بخش‌های موازی را سریال می‌کرد.
+                                        if (_missingPorsantPatternLogged.TryAdd(porsantKey, 0))
+                                        {
+                                            LogWriter.WriteLog("تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(porsantLines[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+                                        }
                                     }
                                 }
-                            }
 
-                            // شرط قبلی (bool)!STAT بود؛ برای سطرهایی که STAT آنها در دیتابیس NULL است
-                            // این عبارت InvalidOperationException پرتاب می‌کرد.
-                            if (PRST[PRST_EOF].STAT != true)
+                                PRST[PRST_EOF].PURSANT = prs;
+                                PRST[PRST_EOF].DARSAD = MBK > 0L ? prs / (double)MBK * 100 : 0;
+                                dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {prs} , DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
+                                //PRST.update();
+                            }
+                            else
                             {
-                                //مبلغ ثابت نیست: مبلغ از روی درصد ساخته می‌شود
+                                //الگو ندارد: مبلغ از روی درصد و مبنای کل فاکتور ساخته می‌شود
                                 double _PURSANT_ = Math.Round(PORSANT_BASE * (PRST[PRST_EOF].DARSAD ?? 0) / 100);
                                 if (_PURSANT_ != PRST[PRST_EOF].PURSANT)
                                 {
                                     PRST[PRST_EOF].PURSANT = _PURSANT_;
                                     dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
-                                    //PRST.update;
-                                }
-                            }
-                            else if (PORSANT_BASE != 0)
-                            {
-                                //مبلغ ثابت است: درصد از روی مبلغ ساخته می‌شود
-                                //شرط قبلی مخرج را صفر بررسی نمی‌کرد و در آن حالت Infinity در دیتابیس می‌نشست
-                                double _DARSAD_ = (PRST[PRST_EOF].PURSANT ?? 0) / PORSANT_BASE * 100;
-                                if (PRST[PRST_EOF].DARSAD != _DARSAD_)
-                                {
-                                    PRST[PRST_EOF].DARSAD = _DARSAD_;
-                                    dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
                                     //PRST.update;
                                 }
                             }
