@@ -1706,6 +1706,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     fullDetails.Checks.ForEach(PAY_GETD_SUB22_DATA.Add);
                     SAYER_VISITOR_DATA.Clear();
                     fullDetails.VisitorDetails.ForEach(SAYER_VISITOR_DATA.Add);
+                    RefreshPorsantSum(); //وگرنه جمع پورسانتِ فاکتور قبلی روی فرم می‌ماند
 
                     OKF.IsChecked = header.OKF ?? false;
                     if (header.OKF == null || header.OKF == false) MakeOKFReady();
@@ -7696,24 +7697,34 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private void UpdateVisitorCommissions()
         {
             if (SAYER_VISITOR_DATA == null || SAYER_VISITOR_DATA.Count == 0)
+            {
+                RefreshPorsantSum();
                 return;
+            }
 
             // اگر JF یا TAKHFIF خالی یا نامعتبر باشند، از محاسبه خارج شویم
-            if (!double.TryParse(JF.Text, out double jfValue) || !double.TryParse(TAKHFIF.Text, out double takhfifValue))
+            if (!TryGetPorsantBase(out double porsantBase))
                 return;
 
             // برای هر ویزیتور که مبلغش ثابت نیست، پورسانت را بروز کنیم
             foreach (var visitor in SAYER_VISITOR_DATA)
             {
-                // فقط آیتم‌هایی که STAT = false (مبلغ ثابت نیست)
-                if (visitor.STAT == false && visitor.DARSAD.HasValue && visitor.ID.HasValue)
+                // STAT نال هم یعنی «مبلغ ثابت نیست». مقایسه قبلی (STAT == false) روی bool?
+                // برای رکوردهای قدیمیِ NULL نتیجه false می‌داد و آن سطرها هرگز بازمحاسبه نمی‌شدند.
+                if (visitor.STAT == true || !visitor.DARSAD.HasValue)
                 {
-                    // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
-                    visitor.PURSANT = Math.Round((jfValue - takhfifValue) * visitor.DARSAD.Value / 100);
+                    continue;
+                }
 
-                    try
-                    {
-                        string sql = @"UPDATE dbo.VISITOR_DTL SET 
+                // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
+                visitor.PURSANT = Math.Round(porsantBase * visitor.DARSAD.Value / 100);
+
+                try
+                {
+                    // سطری که هنوز ID ندارد (تازه توسط dbo.CalculateVisitorPorsant درج شده)
+                    // با کلید منطقی فاکتور بروزرسانی می‌شود تا از قلم نیفتد
+                    string sql = visitor.ID.HasValue
+                        ? @"UPDATE dbo.VISITOR_DTL SET 
                             NUMBER = @NUMBER, 
                             CUST_NO = @CUST_NO, 
                             DARSAD = @DARSAD,
@@ -7721,37 +7732,102 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             TOZIH = @TOZIH, 
                             STAT = @STAT,
                             PORID = @PORID
-                            WHERE ID = @ID";
+                            WHERE ID = @ID"
+                        : @"UPDATE dbo.VISITOR_DTL SET 
+                            DARSAD = @DARSAD,
+                            PURSANT = @PURSANT, 
+                            TOZIH = @TOZIH, 
+                            STAT = @STAT,
+                            PORID = @PORID
+                            WHERE NUMBER = @NUMBER AND TAG = @TAG AND CUST_NO = @CUST_NO";
 
-                        var parameters = new
-                        {
-                            NUMBER = Convert.ToDouble(NUMBER.Text),
-                            CUST_NO = visitor.CUST_NO,
-                            DARSAD = visitor.DARSAD,
-                            PURSANT = visitor.PURSANT,
-                            TOZIH = visitor.TOZIH,
-                            STAT = visitor.STAT ?? false,
-                            PORID = visitor.PORID,
-                            ID = visitor.ID
-                        };
-
-                        dbms.DoExecuteSQL(sql, parameters);
-                    }
-                    catch (SqlException ex) when (ex.Number == 2627)
+                    var parameters = new
                     {
-                        new Msgwin(false, "ویزیتور تکراری است. ردیف‌های پورسانت را بررسی کنید.").ShowDialog();
-                        return;
-                    }
-                    catch (Exception)
-                    {
-                        new Msgwin(false, "خطا در انجام عملیات پورسانت.").ShowDialog();
-                    }
+                        NUMBER = Convert.ToDouble(NUMBER.Text),
+                        TAG = (double)hTAG,
+                        CUST_NO = visitor.CUST_NO,
+                        DARSAD = visitor.DARSAD,
+                        PURSANT = visitor.PURSANT,
+                        TOZIH = visitor.TOZIH,
+                        STAT = visitor.STAT ?? false,
+                        PORID = visitor.PORID,
+                        ID = visitor.ID
+                    };
 
+                    dbms.DoExecuteSQL(sql, parameters);
+                }
+                catch (SqlException ex) when (ex.Number == 2627)
+                {
+                    new Msgwin(false, "ویزیتور تکراری است. ردیف‌های پورسانت را بررسی کنید.").ShowDialog();
+                    return;
+                }
+                catch (Exception)
+                {
+                    new Msgwin(false, "خطا در انجام عملیات پورسانت.").ShowDialog();
                 }
             }
 
-            double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
-            Text190.Text = sum.ToString();
+            RefreshPorsantSum();
+        }
+
+        /// <summary>
+        /// مبنای محاسبه پورسانت = جمع کل فاکتور منهای تخفیف.
+        /// همان مبنایی که پروسیجر dbo.RecalcVisitorPorsant_ByDarsad هم استفاده می‌کند
+        /// تا محاسبه فرم و بازسازی دیتابیس یک نتیجه بدهند.
+        /// </summary>
+        private bool TryGetPorsantBase(out double porsantBase)
+        {
+            porsantBase = 0;
+
+            if (!double.TryParse(JF.Text, out double jfValue) || !double.TryParse(TAKHFIF.Text, out double takhfifValue))
+                return false;
+
+            porsantBase = jfValue - takhfifValue;
+            return true;
+        }
+
+        /// <summary>
+        /// جمع پورسانت را از روی سطرهای همین فاکتور بازخوانی می‌کند.
+        /// بدون این، مقدار فاکتور قبلی روی فرم باقی می‌ماند.
+        /// </summary>
+        private void RefreshPorsantSum()
+        {
+            Text190.Text = (SAYER_VISITOR_DATA?.Sum(item => item.PURSANT ?? 0.0) ?? 0d).ToString();
+        }
+
+        /// <summary>
+        /// اگر سطر «الگوی پرداخت پورسانت» داشته باشد، درصدِ سطر را از روی نرخ کالاهای همان الگو
+        /// (VISITORS_PORSANT_KALA) تعیین می‌کند؛ به شکلی که درصدِ به‌دست‌آمده روی مبنای فاکتور
+        /// دقیقاً همان مبلغ الگو را بازتولید کند. اگر الگو نداشته باشد، درصدِ واردشده دست‌نخورده می‌ماند.
+        /// </summary>
+        private void ApplyPorsantPatternDarsad(VISITOR_DTL rowItem, double porsantBase)
+        {
+            if (rowItem is null || IsNull(rowItem.PORID))
+            {
+                return;
+            }
+
+            double patternAmount = 0;
+
+            var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>(
+                "SELECT CODE ,MABL_K - N_MOIN AS MABLK FROM INVO_LST WHERE TAG = " + hTAG + " AND NUMBER = " + this.NUMBER.Text).ToList();
+
+            for (int I = 0; I < ROWS.Count; I++)
+            {
+                var RST2 = dbms.DoGetDataSQL<double?>("SELECT     PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE     (PORID = " + rowItem.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
+                if (RST2.Count == 1)
+                {
+                    patternAmount += Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100));
+                }
+                else
+                {
+                    new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
+                }
+            }
+
+            // تقسیم بر مبنای کل فاکتور (نه فقط کالاهای دارای الگو) تا مبلغِ نهایی
+            // که از روی همین درصد ساخته می‌شود با مبلغ الگو یکی دربیاید
+            rowItem.DARSAD = porsantBase != 0 ? patternAmount / porsantBase * 100 : 0;
         }
 
         private bool IsRowValid(INVO_LST_FACTOR22 TheRow)
@@ -8173,6 +8249,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 #endregion
             }
             UpdateVisitorCommissions();
+
+            // تضمین نهایی: سطرهایی که خودِ dbo.CalculateVisitorPorsant ساخته و در گرید نیستند
+            // هم با همان قاعده «درصد × مبنای فاکتور» یکدست شوند
+            try
+            {
+                CL_HESABDARI.RunRecalcVisitorPorsantByDarsad(Convert.ToDouble(NUMBER.Text), hTAG, previewOnly: false);
+            }
+            catch (Exception exPorsant)
+            {
+                CL_LMethods.DoWriteMyLog("خطا در یکسان‌سازی پورسانت فاکتور فروش", exPorsant);
+            }
             #endregion
 
             //سند زدن
@@ -10445,7 +10532,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (!string.IsNullOrEmpty(rst?.FirstOrDefault()) && Information.IsNumeric(rst.FirstOrDefault()))
                     {
                         CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(rst.FirstOrDefault());
-                        CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
+                        if (TryGetPorsantBase(out double custPorsantBase))
+                        {
+                            CURRENT_ROW_VISITOR.PURSANT = Math.Round(custPorsantBase * CURRENT_ROW_VISITOR.DARSAD.Value / 100);
+                        }
                         if ((bool)CURRENT_ROW_VISITOR.STAT)
                         {
                             CURRENT_ROW_VISITOR.STAT = false;
@@ -10466,7 +10556,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     //DARSAD_AfterUpdate
-                    CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
+                    if (TryGetPorsantBase(out double darsadPorsantBase))
+                    {
+                        CURRENT_ROW_VISITOR.PURSANT = Math.Round(darsadPorsantBase * (CURRENT_ROW_VISITOR.DARSAD ?? 0) / 100);
+                    }
                     if (Convert.ToBoolean(CURRENT_ROW_VISITOR.STAT))
                     {
                         CURRENT_ROW_VISITOR.STAT = false;
@@ -10489,11 +10582,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 if (!string.IsNullOrEmpty(VISITOR_DTL_SUB_ENTERED_VALUE))
                 {
                     //PURSANT_AfterUpdate
-                    if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
+                    // شرط قبلی MBAA را هم جمع می‌زد ولی بر (JF - TAKHFIF) تقسیم می‌کرد؛
+                    // اگر JF - TAKHFIF صفر و MBAA غیرصفر بود، تقسیم بر صفر می‌شد و Infinity در دیتابیس می‌نشست.
+                    if (TryGetPorsantBase(out double pursantPorsantBase) && pursantPorsantBase != 0)
                     {
-                        CURRENT_ROW_VISITOR.DARSAD = CURRENT_ROW_VISITOR.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
-
-                        CURRENT_ROW_VISITOR.DARSAD = (double)CURRENT_ROW_VISITOR.DARSAD;
+                        CURRENT_ROW_VISITOR.DARSAD = (CURRENT_ROW_VISITOR.PURSANT ?? 0) / pursantPorsantBase * 100;
                     }
                     else
                     {
@@ -10653,7 +10746,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 long? _id_ = null;
 
-                FINAL_CROW_ITEM.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100));
+                // مبنای پورسانت این فاکتور = جمع کل فاکتور منهای تخفیف.
+                // اگر مبنا خوانده نشد، مقادیر واردشده کاربر دست‌نخورده می‌مانند تا سطر بی‌دلیل صفر نشود.
+                if (TryGetPorsantBase(out double porsantBase))
+                {
+                    // اگر الگوی پورسانت انتخاب شده باشد، درصدِ سطر از روی نرخ تک‌تک کالاها به دست می‌آید.
+                    // این محاسبه قبلاً *بعد از* ذخیره انجام می‌شد و هرگز در دیتابیس نمی‌نشست؛
+                    // یعنی گرید یک عدد نشان می‌داد و دیتابیس عدد دیگری داشت.
+                    ApplyPorsantPatternDarsad(FINAL_CROW_ITEM, porsantBase);
+
+                    // درصد ملاک است: مبلغ همیشه از روی درصدِ همین سطر و مبنای همین فاکتور محاسبه می‌شود
+                    FINAL_CROW_ITEM.PURSANT = Math.Round(porsantBase * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
+                }
 
                 try
                 {
@@ -10708,57 +10812,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 #endregion
 
-                #region PORID_AfterUpdate
-                long prs;
-                var MBK = default(long);
-                prs = 0L;
-                if (!IsNull(FINAL_CROW_ITEM?.PORID))
-                {
-                    var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>("SELECT CODE ,MABL_K - N_MOIN AS MABLK FROM INVO_LST WHERE TAG = 2 AND NUMBER = " + this.NUMBER.Text).ToList();
-                    for (int I = 0; I < ROWS.Count; I++)//while (!ROWS.EOF)
-                    {
-                        var RST2 = dbms.DoGetDataSQL<double?>("SELECT     PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE     (PORID = " + FINAL_CROW_ITEM.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
-                        if (RST2.Count == 1)
-                        {
-                            prs = (long)(prs + Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100)));
-                            MBK = (long)(MBK + ROWS[I].MABLK);
-                        }
-                        else
-                        {
-                            new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
-                        }
-                    }
-                    FINAL_CROW_ITEM.PURSANT = Math.Round((double)(prs));
-                    if (MBK > 0L & prs > 0L)
-                    {
-                        FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / MBK * 100;
-                        FINAL_CROW_ITEM.DARSAD = (double)FINAL_CROW_ITEM.DARSAD;
-                    }
-                    else
-                    {
-                        FINAL_CROW_ITEM.DARSAD = 0;
-                    }
-                }
-                #endregion
-
-                //PURSANT
-                if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
-                {
-                    FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
-                    FINAL_CROW_ITEM.DARSAD = (double)FINAL_CROW_ITEM.DARSAD;
-                }
-                else
-                {
-                    FINAL_CROW_ITEM.DARSAD = 0;
-                }
-
                 if (FINAL_CROW_ITEM?.STAT is null)
                 {
                     FINAL_CROW_ITEM.STAT = false;
                 }
 
-                double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
-                Text190.Text = sum.ToString();
+                RefreshPorsantSum();
             }
             catch (SqlException ex)
             {
@@ -10865,8 +10924,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 //    }
                 //}
 
-                double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
-                Text190.Text = sum.ToString();
+                RefreshPorsantSum();
             }
         }
         private void sTATColumn_CheckBox_Click(object sender, RoutedEventArgs e)

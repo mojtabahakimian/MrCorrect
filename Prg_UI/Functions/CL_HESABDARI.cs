@@ -9368,6 +9368,70 @@ VALUES
             return messages;
         }
 
+        /// <summary>
+        /// نتیجه بازسازی پورسانت: پیام‌های SQL و سطرهای مغایر (در حالت پیش‌نمایش)
+        /// </summary>
+        public class PorsantRebuildResult
+        {
+            public List<string> Messages { get; } = new List<string>();
+            public DataTable Rows { get; } = new DataTable();
+            public bool Applied { get; set; }
+        }
+
+        /// <summary>
+        /// اجرای dbo.RecalcVisitorPorsant_ByDarsad — بازسازی مبلغ پورسانت فاکتورهای گذشته
+        /// بر مبنای درصدِ ثبت‌شده هر سطر و جمع فاکتور (جمع کل منهای تخفیف).
+        /// سطرهای «مبلغ ثابت» (STAT = 1) هرگز تغییر نمی‌کنند.
+        /// </summary>
+        /// <param name="number">شماره فاکتور؛ null یعنی همه فاکتورها.</param>
+        /// <param name="tag">نوع سند؛ 2 = فاکتور فروش، null یعنی همه.</param>
+        /// <param name="fromDate">تاریخ شمسی ۸ رقمی شروع بازه؛ null یعنی بدون محدودیت.</param>
+        /// <param name="toDate">تاریخ شمسی ۸ رقمی پایان بازه؛ null یعنی بدون محدودیت.</param>
+        /// <param name="previewOnly">true (پیش‌فرض) فقط گزارش می‌دهد و چیزی را تغییر نمی‌دهد.</param>
+        public static PorsantRebuildResult RunRecalcVisitorPorsantByDarsad(
+            double? number = null,
+            double? tag = 2,
+            long? fromDate = null,
+            long? toDate = null,
+            bool previewOnly = true)
+        {
+            var result = new PorsantRebuildResult { Applied = !previewOnly };
+
+            using (var conn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            using (var cmd = new SqlCommand("dbo.RecalcVisitorPorsant_ByDarsad", conn))
+            {
+                conn.InfoMessage += (s, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Message))
+                        result.Messages.Add(e.Message);
+                };
+
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 600;
+                cmd.Parameters.Add("@NUMBER", SqlDbType.Float).Value = (object)number ?? DBNull.Value;
+                cmd.Parameters.Add("@TAG", SqlDbType.Float).Value = (object)tag ?? DBNull.Value;
+                cmd.Parameters.Add("@FromDate", SqlDbType.BigInt).Value = (object)fromDate ?? DBNull.Value;
+                cmd.Parameters.Add("@ToDate", SqlDbType.BigInt).Value = (object)toDate ?? DBNull.Value;
+                cmd.Parameters.Add("@PREVIEW_ONLY", SqlDbType.Bit).Value = previewOnly;
+
+                conn.Open();
+
+                if (previewOnly)
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        result.Rows.Load(reader);
+                    }
+                }
+                else
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            return result;
+        }
+
         public static string CODEPAL(string ps)
         {
             if (string.IsNullOrEmpty(ps))
