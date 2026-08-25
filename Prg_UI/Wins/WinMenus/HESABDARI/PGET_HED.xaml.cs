@@ -2720,6 +2720,21 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 CURRENT_ITMES_ROW = item;
             }
 
+            //شرح آماده خزانه: اگر شرح با «+» تمام شود (همان قرارداد فرم اسناد حسابداری در SHARH_LIST)،
+            //پنجره انتخاب شرح آماده باز می‌شود و علامت + با شرح انتخاب‌شده جایگزین می‌گردد
+            if (e.Column?.SortMemberPath == "SHARH"
+                && e.Row.Item is PGET_LST sharhOwnerRow
+                && enteredValue is string sharhReadyText
+                && sharhReadyText.EndsWith("+"))
+            {
+                var sharhListWin = new SHARH_LIST();
+                await ShowDialogAfterCurrentDispatcherOperationAsync(sharhListWin);
+                if (sharhListWin.DialogResult == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
+                {
+                    sharhOwnerRow.SHARH = sharhReadyText.Substring(0, sharhReadyText.Length - 1) + sharhListWin.SelectedSharh;
+                }
+            }
+
             //نوع عمليات
             if (e.Column.SortMemberPath == "NO_AM")
             {
@@ -3996,6 +4011,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
         }
 
         bool IsSaveSuccess = true;
+        private bool _isReenteringEdit = false;
         private void PGET_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -4023,8 +4039,51 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (IsReallyNull == true)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد؛
+                    // اینجا به‌جای حذف، همان الگوی INVO_LST_SUB_RowEditEnding در HEAD_LST_PISHFROOSH2.xaml.cs استفاده شده:
+                    // جلوی خروج از ویرایش گرفته می‌شود و با یک BeginInvoke ردیف دوباره روی ستون مبلغ وارد حالت ویرایش می‌شود
+                    #region NEWWAY
+                    var DG = PGET_LST_SUB;
+                    e.Cancel = true;
+
+                    // جلوگیری از re-entrancy: اگر یک BeginInvoke قبلی هنوز صف Dispatcher هست، دوباره صف نکن
+                    if (_isReenteringEdit) { return; }
+                    _isReenteringEdit = true;
+
+                    DG.CellEditEnding -= PGET_LST_SUB_CellEditEnding;
+                    DG.RowEditEnding -= PGET_LST_SUB_RowEditEnding;
+
+                    DG.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            // Edge Case: ردیف ممکنه بین این فاصله از ItemsSource حذف شده باشه
+                            if (THE_ROW_ITEM == null || !DG.Items.Contains(THE_ROW_ITEM))
+                            {
+                                return;
+                            }
+
+                            var mablColumn = DG.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL");
+
+                            DG.SelectedItem = THE_ROW_ITEM;
+                            DG.ScrollIntoView(THE_ROW_ITEM);
+
+                            if (mablColumn != null)
+                            {
+                                DG.CurrentCell = new DataGridCellInfo(THE_ROW_ITEM, mablColumn);
+                            }
+
+                            DG.BeginEdit();
+                        }
+                        catch { }
+                        finally
+                        {
+                            DG.RowEditEnding += PGET_LST_SUB_RowEditEnding;
+                            DG.CellEditEnding += PGET_LST_SUB_CellEditEnding;
+                            _isReenteringEdit = false;
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                    #endregion
                     return;
                 }
             }
@@ -4037,8 +4096,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (HaveErrors)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // همان الگوی خطرناک دو مورد بالا: به‌جای حذف کامل سطر وقتی جایی در گرید خطای Validation باز است،
+                    // فقط جلوی خروج از ویرایش گرفته می‌شود تا داده‌ی این سطر از بین نرود.
+                    e.Cancel = true;
                     return;
                 }
 
@@ -4065,8 +4125,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (CmdSaveRecord(THE_ROW_ITEM) is false)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // BodyIsValid پیام خطای دقیق را همین الان با MsgListwin نشان داده (مثلا «فیلد از حساب خالی است.»)؛
+                    // قبلا اینجا با PGET_HED_SUB_CANCEL_EDIT() کل سطر (نوع عملیات/نحوه/از‌حساب/به‌حساب/شرح/مبلغ) پاک می‌شد،
+                    // یعنی حتی بعد از نشان دادن خطای درست، کاربر باید کل سطر را دوباره از اول تایپ می‌کرد.
+                    // با e.Cancel = true فقط از پایان یافتن ویرایش جلوگیری می‌شود؛ کاربر همان فیلد ناقص را اصلاح می‌کند.
+                    e.Cancel = true;
                 }
                 else //Success
                 {

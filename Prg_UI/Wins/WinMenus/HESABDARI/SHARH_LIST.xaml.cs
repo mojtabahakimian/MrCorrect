@@ -33,6 +33,20 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             LoadData();
         }
 
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            // وقتی این پنجره از داخل CellEditEnding یک گرید دیگر (مثلا PGET_LST_SUB_CellEditEnding) و به‌صورت
+            // deferred باز می‌شود، فوکوس پیش‌فرض ویندوز روی MasterDataGrid نمی‌نشیند و کیبورد (بالا/پایین/Enter)
+            // کار نمی‌کند تا کاربر اول با ماوس داخل گرید کلیک کند؛ اینجا صریحاً فوکوس را روی گرید می‌گذاریم.
+            if (MasterDataGrid.Items.Count > 0)
+            {
+                MasterDataGrid.SelectedIndex = 0;
+            }
+
+            Keyboard.Focus(MasterDataGrid);
+            MasterDataGrid.Focus();
+        }
+
         private void LoadData()
         {
             try
