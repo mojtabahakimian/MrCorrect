@@ -2070,6 +2070,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             }
             if (Convert.ToDouble(ID.Text) > 0)
             {
+                //اگر سطر ناقصی در حال ورود است، پیام ولیدیشن آن نمایش داده شده و سطر در حالت ویرایش می‌ماند؛
+                //عملیات اصلاح متوقف می‌شود تا کاربر سطر را تکمیل یا با ESC لغو کند
+                if (!ApplyDataGridItems()) { return; }
+
                 dt = DateTime.Now;
                 // If Forms![baseknow]![TRANSF] Then
                 CL_HESABDARI.TR("PGET_HED", "(ID = " + ID.Text + " )", dt, 1);
@@ -2081,7 +2085,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 //this.AllowEdits = true;
                 CL_LMethods.AllowDeletions(this.GetType().Name, false, new WindowInteropHelper(this).Handle);
 
-                ApplyDataGridItems();
                 AllowEdits = false;
                 //PGET_LST_SUB.IsReadOnly = false;
                 //this.PGET_LST_SUB.CanUserAddRows = true;
@@ -2322,33 +2325,39 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         }
 
-        private void ApplyDataGridItems()
+        /// <summary>
+        /// سطرِ در حال ورود/ویرایش گرید را نهایی می‌کند.
+        /// خروجی false یعنی سطر ناقص است و در حالت ویرایش باقی مانده؛ فراخوان باید عملیات خودش را متوقف کند.
+        /// </summary>
+        private bool ApplyDataGridItems()
         {
             try
             {
                 if (PGET_LST_SUB.Items is IEditableCollectionView editableCollectionView)
                 {
-                    if (editableCollectionView.IsAddingNew)
+                    //سطر دست‌نخورده (فقط placeholder باز شده) بی‌صدا کنار گذاشته می‌شود
+                    if (editableCollectionView.IsAddingNew
+                        && ConstructorRowDetector.IsPristine(editableCollectionView.CurrentAddItem as PGET_LST))
                     {
-                        // این متد از چند دکمه (اصلاح، حذف، رفرش سرور، امضاها) صدا زده می‌شود و مسیرش کاملا جدا از
-                        // PGET_LST_SUB_RowEditEnding است؛ یعنی حتی با e.Cancel = true آنجا، اگر کاربر همان لحظه
-                        // (که سطر جدید هنوز به‌خاطر ولیدیشن ناقص در حال ویرایش مانده) روی یکی از این دکمه‌ها کلیک
-                        // کند، اینجا بدون توجه به ولیدیشن، CancelNew سطر را کامل پاک می‌کرد. فقط وقتی سطر واقعا
-                        // دست‌نخورده (Pristine) است پاک می‌شود؛ اگر کاربر چیزی تایپ کرده، دست‌نخورده می‌ماند.
-                        var pendingNewItem = editableCollectionView.CurrentAddItem as PGET_LST;
-                        if (ConstructorRowDetector.IsPristine(pendingNewItem))
-                        {
-                            editableCollectionView.CancelNew(); // discard the new item
-                        }
+                        editableCollectionView.CancelNew();
+                        return true;
                     }
-                    if (editableCollectionView.IsEditingItem)
+
+                    if (editableCollectionView.IsAddingNew || editableCollectionView.IsEditingItem)
                     {
-                        editableCollectionView.CommitEdit(); // commit the edit transaction
+                        // نباید مستقیم روی CollectionView کامیت/کنسل کرد: CancelNew سطرِ پرشده را بی‌صدا پاک می‌کند و
+                        // CommitEdit آن را بدون ذخیره در دیتابیس، به‌شکل «ذخیره‌شده» داخل گرید جا می‌اندازد (سطر شبح؛
+                        // جمع مبالغ را هم اشتباه می‌کند و با اولین ناوبری می‌پرد).
+                        // پس از مسیر خود گرید کامیت می‌کنیم تا PGET_LST_SUB_RowEditEnding اجرا شود و همان ولیدیشن و
+                        // ذخیره‌ی واقعی مسیر عادی انجام گیرد. اگر ولیدیشن رد کند، آنجا e.Cancel = true می‌شود و
+                        // CommitEdit مقدار false برمی‌گرداند؛ سطر با داده‌هایش در حالت ویرایش می‌ماند.
+                        return PGET_LST_SUB.CommitEdit(DataGridEditingUnit.Row, true);
                     }
                 }
             }
             catch { }
 
+            return true;
         }
 
         private void SGN3_Click(object sender, RoutedEventArgs e)
@@ -5149,7 +5158,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 return;
             }
 
-            ApplyDataGridItems();
+            //سطر ناقص در حال ورود، حذف را متوقف می‌کند تا داده‌اش با یک کلیک اشتباهی از بین نرود
+            if (!ApplyDataGridItems()) { return; }
 
             PGET_LST_SUB.CommitEdit();
 
