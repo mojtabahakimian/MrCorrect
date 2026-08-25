@@ -4153,9 +4153,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (HaveErrors)
                 {
-                    // وقتی جایی در گرید خطای Validation باز است، سطر نه حذف می‌شود و نه به‌شکل ذخیره‌شده جا می‌ماند
+                    // وقتی جایی در گرید خطای Validation باز است، سطر نه حذف می‌شود و نه به‌شکل ذخیره‌شده جا می‌ماند.
+                    // فقط e.Cancel کافی است (طبق گزارش کاربر برای همین مسیر تایید شد)؛ BeginEdit صریح لازم نیست
+                    // و در تست عملی باعث سطرهای تکراری/انباشته‌شدن پیام‌ها شد.
                     e.Cancel = true;
-                    ReEnterRowEdit(THE_ROW_ITEM);
                     return;
                 }
 
@@ -4168,7 +4169,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                     // این شاخه e.Cancel نمی‌گذاشت و سطرِ ذخیره‌نشده به‌شکل یک سطر عادی داخل گرید کامیت می‌شد
                     e.Cancel = true;
-                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
                     return;
                 }
                 if (!this.NewRecord && Baseknow.WAR == 1)
@@ -4183,13 +4183,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
                 if (CmdSaveRecord(THE_ROW_ITEM) is false)
                 {
-                    // BodyIsValid پیام خطای دقیق را همین الان با MsgListwin نشان داده (مثلا «فیلد از حساب خالی است.»).
-                    // نمایش آن پنجره وسط همین هندلر، فوکوس را از گرید می‌گیرد و e.Cancel به‌تنهایی سطر را در حالت ویرایش
-                    // نگه نمی‌دارد؛ نتیجه‌اش سطری بود که مثل یک سطر ذخیره‌شده در گرید می‌ماند (و در جمع مبالغ هم می‌آمد)
-                    // در حالی که هرگز در دیتابیس ثبت نشده بود و با اولین ناوبری می‌پرید.
-                    // پس مثل بقیه‌ی شاخه‌های ولیدیشن، سطر صریحا به حالت ویرایش برگردانده می‌شود.
+                    // BodyIsValid پیام خطای دقیق را همین الان نشان داده (مثلا «فیلد از حساب خالی است.»)؛
+                    // e.Cancel = true کافی است تا سطر و داده‌هایش از بین نروند
                     e.Cancel = true;
-                    ReEnterRowEdit(THE_ROW_ITEM);
                 }
                 else //Success
                 {
@@ -4721,7 +4717,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             if (ErrosMessages.Any() && _DisplayMsg_)
             {
-                new MsgListwin(false, ErrosMessages).Show();
+                // ShowDialog (نه Show) - همان الگوی BodyIsValid در HEAD_LST_PISHFROOSH2.xaml.cs (فرم پیش‌فاکتور)؛
+                // چون RowEditEnding سطر را دوباره در حالت ویرایش نگه می‌دارد، کاربر می‌تواند بلافاصله فیلدهای
+                // دیگر همان سطر را هم ویرایش کند و اگر همچنان نامعتبر باشد RowEditEnding دوباره اجرا می‌شود؛
+                // با پنجره‌ی غیرمودال (Show) این چرخه چند پیام روی هم تلنبار می‌کرد
+                new MsgListwin(false, ErrosMessages).ShowDialog();
                 return false;
             }
             return true;
