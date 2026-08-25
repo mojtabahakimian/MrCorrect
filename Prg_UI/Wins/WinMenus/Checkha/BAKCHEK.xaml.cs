@@ -114,6 +114,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public string SE_SANDUGH { get; set; }
         public string SE_VAZ { get; set; }
         public int INDEX_DG { get; set; }
+        public long? CurrentPayGetdId { get; set; }
         private static bool IsNull(object p)
         {
             if (!(p is null))
@@ -147,14 +148,33 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             THE_WIN_2 = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+            Fill_ComboBoxes();
+
             //ON_Open
             List<PAY_GETD> rst = null;
             if (!string.IsNullOrEmpty(ServerFilter))
             {
                 rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE {ServerFilter} ").ToList();
+
+                // اگر با فیلتر کامل پیدا نشد، یک بار بدون شرط مبلغ جستجو می‌کند تا از عدم وجود چک مطمئن شود
+                if ((rst == null || rst.Count == 0) && ServerFilter.Contains("AND MABL ="))
+                {
+                    string fallbackFilter = ServerFilter.Substring(0, ServerFilter.IndexOf("AND MABL =")).Trim();
+                    rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE {fallbackFilter} ").ToList();
+                }
             }
 
-            if (rst?.Count == 0 || rst?.Count == null)
+            // اگر فرم برای ویرایش چک باز شده اما چک در دیتابیس وجود ندارد (حذف شده است)
+            if (!string.IsNullOrEmpty(ServerFilter) && (rst == null || rst.Count == 0))
+            {
+                new Msgwin(false, "این چک در دیتابیس یافت نشد یا ممکن است حذف شده باشد.").ShowDialog();
+                can = true;
+                //this.Close();
+                //return;
+            }
+
+            if (rst == null || rst.Count == 0)
             {
                 this.N_SERI.IsReadOnly = false;
                 this.SANDUGH.SelectedIndex = 0;
@@ -163,26 +183,42 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                this.RADIF.Text = rst.FirstOrDefault().RADIF.ToString();
-                this.N_SERI.SelectedValue = rst.FirstOrDefault().N_SERI;
-                this.DATE_S.Text = rst.FirstOrDefault().DATE_S.ToString();
-                this.SHOBEH.Text = rst.FirstOrDefault().SHOBEH;
-                this.DATE.Text = rst.FirstOrDefault().DATE.ToString();
-                this.NAME_TAH.Text = rst.FirstOrDefault().NAME_TAH;
-                this.N_HESAB.Text = rst.FirstOrDefault().N_HESAB;
-                this.MABL.Text = rst.FirstOrDefault().MABL.ToString();
-                this.KOL.Text = rst.FirstOrDefault().N_KOL.ToString();
-                this.MOIN.Text = rst.FirstOrDefault().N_MOIN.ToString();
-                this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
-                this.BANK.SelectedValue = rst.FirstOrDefault().BANK;
-                this.HES1.SelectedValue = rst.FirstOrDefault().HES1;
+                var row = rst.FirstOrDefault();
+                CurrentPayGetdId = row?.ID;
+                this.RADIF.Text = row.RADIF?.ToString() ?? "";
+
+                // اگر شماره سریال در ItemsSource کمبوباکس موجود نباشد، آن را اضافه می‌کنیم تا SelectedValue پاک نشود
+                var nSeriList = N_SERI.ItemsSource as List<BACK_QRE_1> ?? new List<BACK_QRE_1>();
+                if (row.N_SERI.HasValue && !nSeriList.Any(x => x.N_SERI == row.N_SERI))
+                {
+                    nSeriList.Insert(0, new BACK_QRE_1 { N_SERI = row.N_SERI, N_S = row.N_S, N_KOL2 = row.N_KOL2, N_KOL3 = row.N_KOL3 });
+                    N_SERI.ItemsSource = null;
+                    N_SERI.ItemsSource = nSeriList;
+                }
+
+                this.N_SERI.SelectedValue = row.N_SERI;
+                this.N_SERI.Text = row.N_SERI?.ToString() ?? "";
+                this.DATE_S.Text = row.DATE_S.ToString();
+                this.SHOBEH.Text = row.SHOBEH ?? "";
+                this.DATE.Text = row.DATE.ToString();
+                this.NAME_TAH.Text = row.NAME_TAH ?? "";
+                this.N_HESAB.Text = row.N_HESAB ?? "";
+                this.MABL.Text = row.MABL?.ToString() ?? "";
+                this.KOL.Text = row.N_KOL?.ToString() ?? "";
+                this.MOIN.Text = row.N_MOIN?.ToString() ?? "";
+                this.TAF.Text = row.N_TAF?.ToString() ?? "";
+                this.BANK.SelectedValue = row.BANK;
+                this.HES1.SelectedValue = row.HES1;
                 this.N_SERI.IsReadOnly = true;
-                this.SANDUGH.SelectedValue = rst.FirstOrDefault().SANDUGH;
-                this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ;
-
-
+                if (row.SANDUGH.HasValue)
+                {
+                    this.SANDUGH.SelectedValue = row.SANDUGH.Value;
+                }
+                if (row.VAZ.HasValue)
+                {
+                    this.VAZ.SelectedValue = Convert.ToInt32(row.VAZ.Value);
+                }
             }
-            Fill_ComboBoxes();
 
             if (IsReadOnlyMode)
             {
@@ -250,11 +286,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                var query = "SELECT * FROM PAY_GETD WHERE N_SERI = @N_SERI AND BANK = @BANK AND DATE_S = @DATE_S";
-                var parameters = new { N_SERI = this.N_SERI.SelectedValue, BANK = this.BANK.SelectedValue, DATE_S = this.DATE_S.Text.ToRawTarikh() };
+                var query = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? "SELECT * FROM PAY_GETD WHERE ID = @ID"
+                    : "SELECT * FROM PAY_GETD WHERE N_SERI = @N_SERI AND BANK = @BANK AND DATE_S = @DATE_S";
+                var parameters = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? (object)new { ID = CurrentPayGetdId.Value }
+                    : new { N_SERI = this.N_SERI.SelectedValue, BANK = this.BANK.SelectedValue, DATE_S = this.DATE_S.Text.ToRawTarikh() };
                 var rst = dbms.DoGetDataSQL<PAY_GETD>(query, parameters).ToList();
 
-                string _where = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
+                string _where = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? " WHERE ID = " + CurrentPayGetdId.Value
+                    : " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
 
 
                 if (rst.Count > 0)
@@ -343,7 +385,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             SANDUGH.ItemsSource = dbms.DoGetDataSQL<BACK_QRE_3>("SELECT TNUMBER, NAME FROM TDETA_HES WHERE (N_KOL = " + CL_HESABDARI.GETKOL(Baseknow.ADA) + ") AND (NUMBER = " + CL_HESABDARI.GETMOIN(Baseknow.ADA) + ")").ToList();
             SANDUGH.SelectedValuePath = "TNUMBER";
             SANDUGH.DisplayMemberPath = "NAME";
-            SANDUGH.SelectedIndex = 0;
 
             List<VAZ_MODEL> comboBoxItems = new List<VAZ_MODEL>
             {
@@ -357,12 +398,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             VAZ.ItemsSource = comboBoxItems.ToList();
             VAZ.SelectedValuePath = "ID";
             VAZ.DisplayMemberPath = "NAME";
-            VAZ.SelectedIndex = 0;
         }
 
         private void N_SERI_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (!IsVisible || !IsLoaded || isClosing) { return; }
+            if (!IsVisible || !IsLoaded || isClosing || IsReadOnlyMode || N_SERI.IsReadOnly) { return; }
 
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region After_Update
@@ -424,10 +464,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (!IsNull(this.N_SERI.SelectedValue) && !IsNull(this.BANK.SelectedValue))
             {
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
+                string updateWhere = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
+                    ? $"WHERE ID = {CurrentPayGetdId.Value}"
+                    : $"WHERE N_SERI = {SE_N_SERI} AND BANK = {SE_BANK} AND DATE_S = {SE_DATE_S}";
 
                 dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
                  SET N_SERI = {SE_N_SERI} , DATE_S = {SE_DATE_S} , SHOBEH = N'{SE_SHOBEH}' , DATE = {SE_DATE} , NAME_TAH = N'{_NAME_TAH_}' , N_HESAB = N'{SE_N_HESAB}' , MABL = {SE_MABL} , N_KOL = {(string.IsNullOrEmpty(SE_KOL) ? "NULL" : SE_KOL)} , N_MOIN = {(string.IsNullOrEmpty(SE_MOIN) ? "NULL" : SE_MOIN)} , N_TAF = {(string.IsNullOrEmpty(SE_TAF) ? "NULL" : SE_TAF)} , BANK = {SE_BANK} , HES1 = N'{(string.IsNullOrEmpty(SE_HES1) ? "NULL" : SE_HES1)}' , SANDUGH = {SE_SANDUGH} , VAZ = {SE_VAZ}
-                 WHERE N_SERI = {SE_N_SERI} AND BANK = {SE_BANK} AND DATE_S = {SE_DATE_S}
+                 {updateWhere}
                  ");
             }
 

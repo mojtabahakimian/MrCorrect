@@ -11,7 +11,7 @@ namespace Functions
     public static class CL_VERSION
     {
         //public static string MrCorrectFullVersion { get; } = "Version 1.0.0.395 Date : 1405/01/26";
-        public static string MrCorrectFullVersion { get; } = "Version 1.0.0.446 Date : 1405/07/01";
+        public static string MrCorrectFullVersion { get; } = "Version 1.0.0.447 Date : 1405/06/03";
 
         /// <summary>
         /// Checks if the current application version is valid and greater than or equal to the version stored in the database.
@@ -79,10 +79,10 @@ namespace Functions
                         if (currentAppData.Version >= storedDbData.Version) // Uses System.Version comparison
                         {
                             // If versions are equal, check the date (though typically version includes date implicitly)
-                            if (currentAppData.Version == storedDbData.Version && currentAppData.Date < storedDbData.Date)
+                            if (currentAppData.Version == storedDbData.Version)
                             {
                                 // Stored version is same number but newer date - unusual case, treat as newer
-                                return false;
+                                return true;
                             }
 
                             // Current version is newer or equal (with same/newer date), update DB
@@ -101,8 +101,7 @@ namespace Functions
                 }
                 catch (Exception ex)
                 {
-                    File.AppendAllText("C:\\CORRECT\\VersionCheckLog.txt",
-                        $"{DateTime.Now}: Version check/update failed: {ex.Message} \n{ex.StackTrace}\n");
+                    File.AppendAllText("C:\\CORRECT\\VersionCheckLog.txt", $"{DateTime.Now}: Version check/update failed: {ex.Message} \n{ex.StackTrace}\n");
                     return true;
                 }
             } // using SqlConnection ensures disposal
