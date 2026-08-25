@@ -4023,8 +4023,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (IsReallyNull == true)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // فقط از پایان یافتن ویرایش جلوگیری کن؛ CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد
+                    e.Cancel = true;
                     return;
                 }
             }
