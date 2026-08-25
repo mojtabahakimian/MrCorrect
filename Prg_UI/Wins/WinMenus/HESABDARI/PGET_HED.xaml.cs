@@ -4030,6 +4030,59 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         bool IsSaveSuccess = true;
         private bool _isReenteringEdit = false;
+
+        /// <summary>
+        /// سطری را که ولیدیشن رد کرده، دوباره وارد حالت ویرایش می‌کند.
+        /// بدون این کار، e.Cancel به‌تنهایی کافی نیست: پنجره‌ی پیام خطا فوکوس را از گرید می‌گیرد و سطرِ
+        /// ذخیره‌نشده به‌شکل یک سطر عادی در گرید جا می‌ماند (سطر شبح) و با اولین ناوبری می‌پرد.
+        /// </summary>
+        /// <param name="row">سطر هدف</param>
+        /// <param name="columnPath">ستونی که باید فوکوس شود؛ null یعنی ستون جاری حفظ شود</param>
+        private void ReEnterRowEdit(PGET_LST? row, string? columnPath = null)
+        {
+            var DG = PGET_LST_SUB;
+
+            // جلوگیری از re-entrancy: اگر یک BeginInvoke قبلی هنوز صف Dispatcher هست، دوباره صف نکن
+            if (_isReenteringEdit) { return; }
+            _isReenteringEdit = true;
+
+            DG.CellEditEnding -= PGET_LST_SUB_CellEditEnding;
+            DG.RowEditEnding -= PGET_LST_SUB_RowEditEnding;
+
+            DG.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    // Edge Case: ردیف ممکنه بین این فاصله از ItemsSource حذف شده باشه
+                    if (row == null || !DG.Items.Contains(row))
+                    {
+                        return;
+                    }
+
+                    DG.SelectedItem = row;
+                    DG.ScrollIntoView(row);
+
+                    if (!string.IsNullOrEmpty(columnPath))
+                    {
+                        var targetColumn = DG.Columns.FirstOrDefault(c => c.SortMemberPath == columnPath);
+                        if (targetColumn != null)
+                        {
+                            DG.CurrentCell = new DataGridCellInfo(row, targetColumn);
+                        }
+                    }
+
+                    DG.BeginEdit();
+                }
+                catch { }
+                finally
+                {
+                    DG.RowEditEnding += PGET_LST_SUB_RowEditEnding;
+                    DG.CellEditEnding += PGET_LST_SUB_CellEditEnding;
+                    _isReenteringEdit = false;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
         private void PGET_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -4058,50 +4111,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 if (IsReallyNull == true)
                 {
                     // CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد؛
-                    // اینجا به‌جای حذف، همان الگوی INVO_LST_SUB_RowEditEnding در HEAD_LST_PISHFROOSH2.xaml.cs استفاده شده:
-                    // جلوی خروج از ویرایش گرفته می‌شود و با یک BeginInvoke ردیف دوباره روی ستون مبلغ وارد حالت ویرایش می‌شود
-                    #region NEWWAY
-                    var DG = PGET_LST_SUB;
+                    // اینجا به‌جای حذف، سطر در حالت ویرایش نگه داشته و روی ستون مبلغ برگردانده می‌شود
                     e.Cancel = true;
-
-                    // جلوگیری از re-entrancy: اگر یک BeginInvoke قبلی هنوز صف Dispatcher هست، دوباره صف نکن
-                    if (_isReenteringEdit) { return; }
-                    _isReenteringEdit = true;
-
-                    DG.CellEditEnding -= PGET_LST_SUB_CellEditEnding;
-                    DG.RowEditEnding -= PGET_LST_SUB_RowEditEnding;
-
-                    DG.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        try
-                        {
-                            // Edge Case: ردیف ممکنه بین این فاصله از ItemsSource حذف شده باشه
-                            if (THE_ROW_ITEM == null || !DG.Items.Contains(THE_ROW_ITEM))
-                            {
-                                return;
-                            }
-
-                            var mablColumn = DG.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL");
-
-                            DG.SelectedItem = THE_ROW_ITEM;
-                            DG.ScrollIntoView(THE_ROW_ITEM);
-
-                            if (mablColumn != null)
-                            {
-                                DG.CurrentCell = new DataGridCellInfo(THE_ROW_ITEM, mablColumn);
-                            }
-
-                            DG.BeginEdit();
-                        }
-                        catch { }
-                        finally
-                        {
-                            DG.RowEditEnding += PGET_LST_SUB_RowEditEnding;
-                            DG.CellEditEnding += PGET_LST_SUB_CellEditEnding;
-                            _isReenteringEdit = false;
-                        }
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                    #endregion
+                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
                     return;
                 }
             }
@@ -4114,9 +4126,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (HaveErrors)
                 {
-                    // همان الگوی خطرناک دو مورد بالا: به‌جای حذف کامل سطر وقتی جایی در گرید خطای Validation باز است،
-                    // فقط جلوی خروج از ویرایش گرفته می‌شود تا داده‌ی این سطر از بین نرود.
+                    // وقتی جایی در گرید خطای Validation باز است، سطر نه حذف می‌شود و نه به‌شکل ذخیره‌شده جا می‌ماند
                     e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM);
                     return;
                 }
 
@@ -4126,6 +4138,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     msgwin.Show();
 
                     CANCEL = true;
+
+                    // این شاخه e.Cancel نمی‌گذاشت و سطرِ ذخیره‌نشده به‌شکل یک سطر عادی داخل گرید کامیت می‌شد
+                    e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
                     return;
                 }
                 if (!this.NewRecord && Baseknow.WAR == 1)
@@ -4138,20 +4154,23 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     //    CANCEL = true;
                     //}
                 }
-                this.MABL.Text = SUM_OF_MABL.ToString();
-
-
                 if (CmdSaveRecord(THE_ROW_ITEM) is false)
                 {
-                    // BodyIsValid پیام خطای دقیق را همین الان با MsgListwin نشان داده (مثلا «فیلد از حساب خالی است.»)؛
-                    // قبلا اینجا با PGET_HED_SUB_CANCEL_EDIT() کل سطر (نوع عملیات/نحوه/از‌حساب/به‌حساب/شرح/مبلغ) پاک می‌شد،
-                    // یعنی حتی بعد از نشان دادن خطای درست، کاربر باید کل سطر را دوباره از اول تایپ می‌کرد.
-                    // با e.Cancel = true فقط از پایان یافتن ویرایش جلوگیری می‌شود؛ کاربر همان فیلد ناقص را اصلاح می‌کند.
+                    // BodyIsValid پیام خطای دقیق را همین الان با MsgListwin نشان داده (مثلا «فیلد از حساب خالی است.»).
+                    // نمایش آن پنجره وسط همین هندلر، فوکوس را از گرید می‌گیرد و e.Cancel به‌تنهایی سطر را در حالت ویرایش
+                    // نگه نمی‌دارد؛ نتیجه‌اش سطری بود که مثل یک سطر ذخیره‌شده در گرید می‌ماند (و در جمع مبالغ هم می‌آمد)
+                    // در حالی که هرگز در دیتابیس ثبت نشده بود و با اولین ناوبری می‌پرید.
+                    // پس مثل بقیه‌ی شاخه‌های ولیدیشن، سطر صریحا به حالت ویرایش برگردانده می‌شود.
                     e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM);
                 }
                 else //Success
                 {
                     IsSaveSuccess = true;
+
+                    //جمع مبالغ فقط بعد از ذخیره‌ی موفق به‌روز می‌شود؛ قبلا قبل از ذخیره اجرا می‌شد و مبلغِ
+                    //سطرِ ردشده از ولیدیشن را هم در جمع نشان می‌داد
+                    this.MABL.Text = SUM_OF_MABL.ToString();
 
                     SANAD();
 
