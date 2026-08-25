@@ -1129,6 +1129,7 @@
 				<FooterBand1 Ref="84" type="FooterBand" isKey="true">
 					<Brush>Transparent</Brush>
 					<ClientRectangle>0,8.8,12.8,4.2</ClientRectangle>
+					<PrintAtBottom>True</PrintAtBottom>
 					<Components isList="true" count="35">
 						<HR Ref="85" type="Text" isKey="true">
 							<Brush>Transparent</Brush>
@@ -1634,6 +1635,7 @@
 				<FooterBand2 Ref="136" type="FooterBand" isKey="true">
 					<Brush>Transparent</Brush>
 					<ClientRectangle>0,13.8,12.8,2.2</ClientRectangle>
+					<PrintAtBottom>True</PrintAtBottom>
 					<Components isList="true" count="10">
 						<FIMG Ref="137" type="Image" isKey="true">
 							<AspectRatio>True</AspectRatio>

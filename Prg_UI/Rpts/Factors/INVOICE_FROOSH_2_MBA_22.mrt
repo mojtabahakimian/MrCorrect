@@ -2237,6 +2237,7 @@
 					<CanBreak>True</CanBreak>
 					<CanShrink>True</CanShrink>
 					<ClientRectangle>0,12.5,27.7,4.2</ClientRectangle>
+					<PrintAtBottom>True</PrintAtBottom>
 					<Components isList="true" count="34">
 						<Text7 Ref="101" type="Text" isKey="true">
 							<Brush>Transparent</Brush>

@@ -1715,6 +1715,7 @@
 				<GroupFooterBand1 Ref="116" type="GroupFooterBand" isKey="true">
 					<Brush>Transparent</Brush>
 					<ClientRectangle>0,13,27.7,5.4</ClientRectangle>
+					<PrintAtBottom>True</PrintAtBottom>
 					<Components isList="true" count="26">
 						<Text56 Ref="117" type="Text" isKey="true">
 							<Border>All;[0:0:0];2;Solid;False;4;Black</Border>

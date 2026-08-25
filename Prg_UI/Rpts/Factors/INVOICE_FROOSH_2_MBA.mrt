@@ -1652,6 +1652,7 @@
 				<FooterBand1 Ref="90" type="FooterBand" isKey="true">
 					<Brush>Transparent</Brush>
 					<ClientRectangle>0,5.3,11.29,1.8</ClientRectangle>
+					<PrintAtBottom>True</PrintAtBottom>
 					<Components isList="true" count="32">
 						<Text76 Ref="91" type="Text" isKey="true">
 							<Border>All;Black;2;Solid;False;4;Black</Border>

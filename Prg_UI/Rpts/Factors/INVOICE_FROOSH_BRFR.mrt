@@ -1096,6 +1096,7 @@
 				<FooterBand1 Ref="80" type="FooterBand" isKey="true">
 					<Brush>Transparent</Brush>
 					<ClientRectangle>0,9.07,19,10</ClientRectangle>
+					<PrintAtBottom>True</PrintAtBottom>
 					<Components isList="true" count="48">
 						<Text26 Ref="81" type="Text" isKey="true">
 							<Brush>Transparent</Brush>
