@@ -10514,7 +10514,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         if (Information.IsNumeric(tozihdata.FirstOrDefault()))
                         {
                             CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(tozihdata.FirstOrDefault().Replace("%", ""));
-                            CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
+                            if (TryGetPorsantBase(out double tafPorsantBase))
+                            {
+                                CURRENT_ROW_VISITOR.PURSANT = Math.Round(tafPorsantBase * CURRENT_ROW_VISITOR.DARSAD.Value / 100);
+                            }
                             if ((bool)CURRENT_ROW_VISITOR.STAT)
                             {
                                 CURRENT_ROW_VISITOR.STAT = false;
