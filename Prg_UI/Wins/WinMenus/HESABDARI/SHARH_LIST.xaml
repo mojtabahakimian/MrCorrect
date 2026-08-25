@@ -12,6 +12,7 @@
         AllowsTransparency="True"
         WindowStyle="None"
         Loaded="Window_Loaded"
+        ContentRendered="Window_ContentRendered"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Grid x:Name="mygrid" Margin="-1,0,1,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
         <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="10,10,10,10" Padding="8" BorderThickness="1" Margin="3,0,2,0">

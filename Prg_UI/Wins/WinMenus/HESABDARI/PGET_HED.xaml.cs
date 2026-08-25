@@ -2725,7 +2725,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             if (e.Column?.SortMemberPath == "SHARH"
                 && item is not null
                 && enteredValue is string sharhReadyText
-                && sharhReadyText.Length > 1
                 && sharhReadyText.EndsWith("+"))
             {
                 var sharhListWin = new SHARH_LIST();
