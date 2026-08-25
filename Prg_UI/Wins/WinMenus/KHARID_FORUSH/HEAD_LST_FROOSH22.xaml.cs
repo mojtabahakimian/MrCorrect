@@ -7825,9 +7825,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             for (int I = 0; I < ROWS.Count; I++)
             {
                 var RST2 = dbms.DoGetDataSQL<double?>("SELECT     PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE     (PORID = " + rowItem.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
-                if (RST2.Count == 1)
+                // شرط قبلی فقط «ردیف پیدا شد» را چک می‌کرد؛ PORSANT خودش nullable است، پس ردیفی
+                // با نرخِ خالی هم Count==1 می‌داد و (double)null یک InvalidOperationException می‌داد.
+                if (RST2.Count == 1 && RST2[0].HasValue)
                 {
-                    patternAmount += Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100));
+                    patternAmount += Math.Round((double)(ROWS[I].MABLK * RST2[0].Value / 100));
                 }
                 else
                 {

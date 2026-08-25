@@ -3413,12 +3413,15 @@ namespace AUTO_BAZ.Functions
                                 for (int rst1_EOF = 0; rst1_EOF < porsantLines.Count; rst1_EOF++)
                                 {
                                     var porsantKey = (PRST[PRST_EOF].PORID ?? 0, SqlKey(porsantLines[rst1_EOF].code));
+                                    //Porsant به صورت double? است؛ یک سطر می‌تواند وجود داشته باشد ولی نرخش NULL باشد،
+                                    //که بدون این بررسی هنگام تبدیل به double کرش می‌کرد
                                     var porsantFound = porsantKala.TryGetValue(porsantKey, out var porsantEntry)
-                                                       && !porsantEntry.Duplicate;
+                                                       && !porsantEntry.Duplicate
+                                                       && porsantEntry.Porsant.HasValue;
 
                                     if (porsantFound)
                                     {
-                                        prs = (long)(prs + Math.Round((double)(porsantLines[rst1_EOF].mablk * porsantEntry.Porsant / 100)));
+                                        prs = (long)(prs + Math.Round((double)(porsantLines[rst1_EOF].mablk * porsantEntry.Porsant.Value / 100)));
                                         MBK = (long)(MBK + porsantLines[rst1_EOF].mablk);
                                     }
                                     else
