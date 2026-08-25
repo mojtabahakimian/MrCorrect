@@ -4154,21 +4154,21 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 if (HaveErrors)
                 {
                     // وقتی جایی در گرید خطای Validation باز است، سطر نه حذف می‌شود و نه به‌شکل ذخیره‌شده جا می‌ماند.
-                    // فقط e.Cancel کافی است (طبق گزارش کاربر برای همین مسیر تایید شد)؛ BeginEdit صریح لازم نیست
-                    // و در تست عملی باعث سطرهای تکراری/انباشته‌شدن پیام‌ها شد.
                     e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM);
                     return;
                 }
 
                 if (THE_ROW_ITEM.MABL == 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                    msgwin.Show();
+                    msgwin.ShowDialog(); //ShowDialog نه Show ، تا قبل از ادامه اجرای کد کاربر پیام را ببیند
 
                     CANCEL = true;
 
                     // این شاخه e.Cancel نمی‌گذاشت و سطرِ ذخیره‌نشده به‌شکل یک سطر عادی داخل گرید کامیت می‌شد
                     e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
                     return;
                 }
                 if (!this.NewRecord && Baseknow.WAR == 1)
@@ -4183,9 +4183,12 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
                 if (CmdSaveRecord(THE_ROW_ITEM) is false)
                 {
-                    // BodyIsValid پیام خطای دقیق را همین الان نشان داده (مثلا «فیلد از حساب خالی است.»)؛
-                    // e.Cancel = true کافی است تا سطر و داده‌هایش از بین نروند
+                    // BodyIsValid پیام خطای دقیق را همین الان با ShowDialog (مودال) نشان داده (مثلا «فیلد از حساب خالی است.»).
+                    // e.Cancel داده‌های سطر را حفظ می‌کند، ولی جلوی این رفتار پیش‌فرض DataGrid را نمی‌گیرد که با Tab از
+                    // آخرین ستون، فوکوس/CurrentCell را به سطر بعدی (Placeholder جدید) می‌برد؛ همین باعث می‌شد یک سطر
+                    // خالی زیر سطر ناقص ظاهر شود. ReEnterRowEdit صریحا فوکوس را به همین سطر برمی‌گرداند.
                     e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM);
                 }
                 else //Success
                 {
