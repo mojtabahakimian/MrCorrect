@@ -8259,17 +8259,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 #endregion
             }
             UpdateVisitorCommissions();
-
-            // تضمین نهایی: سطرهایی که خودِ dbo.CalculateVisitorPorsant ساخته و در گرید نیستند
-            // هم با همان قاعده «درصد × مبنای فاکتور» یکدست شوند
-            try
-            {
-                CL_HESABDARI.RunRecalcVisitorPorsantByDarsad(Convert.ToDouble(NUMBER.Text), hTAG, previewOnly: false);
-            }
-            catch (Exception exPorsant)
-            {
-                CL_LMethods.DoWriteMyLog("خطا در یکسان‌سازی پورسانت فاکتور فروش", exPorsant);
-            }
             #endregion
 
             //سند زدن
