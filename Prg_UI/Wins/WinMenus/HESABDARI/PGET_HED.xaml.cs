@@ -2723,7 +2723,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             //شرح آماده خزانه: اگر شرح با «+» تمام شود (همان قرارداد فرم اسناد حسابداری در SHARH_LIST)،
             //پنجره انتخاب شرح آماده باز می‌شود و علامت + با شرح انتخاب‌شده جایگزین می‌گردد
             if (e.Column?.SortMemberPath == "SHARH"
-                && item is not null
+                && e.Row.Item is PGET_LST sharhOwnerRow
                 && enteredValue is string sharhReadyText
                 && sharhReadyText.EndsWith("+"))
             {
@@ -2731,7 +2731,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 await ShowDialogAfterCurrentDispatcherOperationAsync(sharhListWin);
                 if (sharhListWin.DialogResult == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
                 {
-                    item.SHARH = sharhReadyText.Substring(0, sharhReadyText.Length - 1) + sharhListWin.SelectedSharh;
+                    sharhOwnerRow.SHARH = sharhReadyText.Substring(0, sharhReadyText.Length - 1) + sharhListWin.SelectedSharh;
                 }
             }
 
