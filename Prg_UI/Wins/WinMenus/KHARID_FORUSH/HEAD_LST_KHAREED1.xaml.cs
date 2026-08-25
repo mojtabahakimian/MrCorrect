@@ -162,9 +162,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public ObservableCollection<PAY_GETP_MODEL> PAY_GETP_SUB_DATA { get; set; } = new ObservableCollection<PAY_GETP_MODEL>();
 
         /// <summary>
-        /// تگ هدر فاکتور خرید 12
+        /// تگ هدر فاکتور خرید 12 یا 15 بسته به نوع
         /// </summary>
-        public byte FTAG { get; } = 12; //فاکتور
+        public byte FTAG => (byte)(IsDirectFactor ? 15 : 12); //فاکتور
 
         /// <summary>
         /// تگ رسید انبار خرید 1 و سطر های اون

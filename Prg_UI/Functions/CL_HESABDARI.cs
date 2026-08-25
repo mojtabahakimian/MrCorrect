@@ -4236,7 +4236,7 @@ VALUES
         }
 
 
-        public static string SHARTCRATOR(string TXT)
+        public static string SHARTCRATOR(string TXT, string fieldName = "NAME")
         {
             string SHARTCRATORRet = default;
             int i, K;
@@ -4252,14 +4252,14 @@ VALUES
                 {
                     if (Strings.Len(shart) > 0)
                     {
-                        shart = shart + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K - 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
-                        shart2 = shart2 + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K - 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                        shart = shart + $" and {fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K - 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                        shart2 = shart2 + $" and {fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K - 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
                         K = i;
                     }
                     else
                     {
-                        shart = "NAME LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
-                        shart2 = "NAME LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                        shart = $"{fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                        shart2 = $"{fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
                         K = i;
                     }
                 }
@@ -4269,21 +4269,21 @@ VALUES
             {
                 if (Strings.Len(shart) > 0)
                 {
-                    shart = shart + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K + 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
-                    shart2 = shart2 + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K + 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                    shart = shart + $" and {fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K + 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                    shart2 = shart2 + $" and {fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K + 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
                     K = i;
                 }
                 else
                 {
-                    shart = "NAME LIKE  replace(replace('%" + Strings.Mid(TXT, K, i - K + 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
-                    shart2 = "NAME LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K + 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                    shart = $"{fieldName} LIKE  replace(replace('%" + Strings.Mid(TXT, K, i - K + 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                    shart2 = $"{fieldName} LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K + 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
                     K = i;
                 }
             }
             if (Strings.Len(TXT) == 1)
             {
-                shart = "NAME LIKE replace(replace('%" + TXT + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
-                shart2 = "NAME LIKE replace(replace('%" + TXT + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                shart = $"{fieldName} LIKE replace(replace('%" + TXT + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                shart2 = $"{fieldName} LIKE replace(replace('%" + TXT + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
             }
             if (Strings.Len(shart) > 1)
             {

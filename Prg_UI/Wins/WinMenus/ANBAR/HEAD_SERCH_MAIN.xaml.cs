@@ -590,10 +590,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(KALA <> '{kalaTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(KALA like '%{kalaTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(kalaTextBox.Text, "KALA")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(KALA not like '%{kalaTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(kalaTextBox.Text, "KALA")}))";
                         break;
                 }
             }
@@ -631,10 +631,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(CUSTNAME <> '{custnameTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(CUSTNAME like '%{custnameTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(custnameTextBox.Text, "CUSTNAME")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(CUSTNAME not like '%{custnameTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(custnameTextBox.Text, "CUSTNAME")}))";
                         break;
                 }
             }
@@ -654,10 +654,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(HES <> '{hesTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(HES like '%{hesTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(hesTextBox.Text, "HES")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(HES not like '%{hesTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(hesTextBox.Text, "HES")}))";
                         break;
                 }
             }
@@ -785,10 +785,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(MOLAH <> '{molahTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(MOLAH like '%{molahTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(molahTextBox.Text, "MOLAH")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(MOLAH not like '%{molahTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(molahTextBox.Text, "MOLAH")}))";
                         break;
                 }
             }
@@ -808,10 +808,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(SHARAYET <> '{sharayetTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(SHARAYET like '%{sharayetTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(sharayetTextBox.Text, "SHARAYET")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(SHARAYET not like '%{sharayetTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(sharayetTextBox.Text, "SHARAYET")}))";
                         break;
                 }
             }
@@ -858,10 +858,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(MANDAH <> '{mandahTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(MANDAH like '%{mandahTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(mandahTextBox.Text, "MANDAH")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(MANDAH not like '%{mandahTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(mandahTextBox.Text, "MANDAH")}))";
                         break;
                 }
             }
@@ -952,10 +952,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         SHART += $"(N_FANI <> '{nfaniTextBox.Text}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(N_FANI like '%{nfaniTextBox.Text}%')";
+                        SHART += $"({CL_HESABDARI.SHARTCRATOR(nfaniTextBox.Text, "N_FANI")})";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(N_FANI not like '%{nfaniTextBox.Text}%')";
+                        SHART += $"(NOT ({CL_HESABDARI.SHARTCRATOR(nfaniTextBox.Text, "N_FANI")}))";
                         break;
                 }
             }
