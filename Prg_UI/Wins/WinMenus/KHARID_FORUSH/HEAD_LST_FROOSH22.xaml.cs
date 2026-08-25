@@ -10760,13 +10760,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 // اگر مبنا خوانده نشد، مقادیر واردشده کاربر دست‌نخورده می‌مانند تا سطر بی‌دلیل صفر نشود.
                 if (TryGetPorsantBase(out double porsantBase))
                 {
-                    // اگر الگوی پورسانت انتخاب شده باشد، درصدِ سطر از روی نرخ تک‌تک کالاها به دست می‌آید.
-                    // این محاسبه قبلاً *بعد از* ذخیره انجام می‌شد و هرگز در دیتابیس نمی‌نشست؛
-                    // یعنی گرید یک عدد نشان می‌داد و دیتابیس عدد دیگری داشت.
-                    ApplyPorsantPatternDarsad(FINAL_CROW_ITEM, porsantBase);
+                    // «مبلغ ثابت» یعنی همان مبلغی که کاربر خودش تعیین کرده باید پورسانت باشد،
+                    // حتی اگر مبلغ فاکتور بعداً تغییر کند. این کد قبلاً همین‌جا بدون توجه به STAT
+                    // مبلغ را از روی درصد بازنویسی می‌کرد؛ یعنی تیک «مبلغ ثابت» را عملاً نادیده
+                    // می‌گرفت. حالا برای این سطرها فقط درصدِ نمایشی بازسازی می‌شود، نه مبلغ.
+                    if (FINAL_CROW_ITEM.STAT == true)
+                    {
+                        FINAL_CROW_ITEM.DARSAD = porsantBase != 0
+                            ? (FINAL_CROW_ITEM.PURSANT ?? 0) / porsantBase * 100
+                            : 0;
+                    }
+                    else
+                    {
+                        // اگر الگوی پورسانت انتخاب شده باشد، درصدِ سطر از روی نرخ تک‌تک کالاها به دست می‌آید.
+                        // این محاسبه قبلاً *بعد از* ذخیره انجام می‌شد و هرگز در دیتابیس نمی‌نشست؛
+                        // یعنی گرید یک عدد نشان می‌داد و دیتابیس عدد دیگری داشت.
+                        ApplyPorsantPatternDarsad(FINAL_CROW_ITEM, porsantBase);
 
-                    // درصد ملاک است: مبلغ همیشه از روی درصدِ همین سطر و مبنای همین فاکتور محاسبه می‌شود
-                    FINAL_CROW_ITEM.PURSANT = Math.Round(porsantBase * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
+                        // درصد ملاک است: مبلغ همیشه از روی درصدِ همین سطر و مبنای همین فاکتور محاسبه می‌شود
+                        FINAL_CROW_ITEM.PURSANT = Math.Round(porsantBase * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
+                    }
                 }
 
                 try
