@@ -3996,6 +3996,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
         }
 
         bool IsSaveSuccess = true;
+        private bool _isReenteringEdit = false;
         private void PGET_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -4023,8 +4024,51 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (IsReallyNull == true)
                 {
-                    // فقط از پایان یافتن ویرایش جلوگیری کن؛ CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد
+                    // CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد؛
+                    // اینجا به‌جای حذف، همان الگوی INVO_LST_SUB_RowEditEnding در HEAD_LST_PISHFROOSH2.xaml.cs استفاده شده:
+                    // جلوی خروج از ویرایش گرفته می‌شود و با یک BeginInvoke ردیف دوباره روی ستون مبلغ وارد حالت ویرایش می‌شود
+                    #region NEWWAY
+                    var DG = PGET_LST_SUB;
                     e.Cancel = true;
+
+                    // جلوگیری از re-entrancy: اگر یک BeginInvoke قبلی هنوز صف Dispatcher هست، دوباره صف نکن
+                    if (_isReenteringEdit) { return; }
+                    _isReenteringEdit = true;
+
+                    DG.CellEditEnding -= PGET_LST_SUB_CellEditEnding;
+                    DG.RowEditEnding -= PGET_LST_SUB_RowEditEnding;
+
+                    DG.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            // Edge Case: ردیف ممکنه بین این فاصله از ItemsSource حذف شده باشه
+                            if (THE_ROW_ITEM == null || !DG.Items.Contains(THE_ROW_ITEM))
+                            {
+                                return;
+                            }
+
+                            var mablColumn = DG.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL");
+
+                            DG.SelectedItem = THE_ROW_ITEM;
+                            DG.ScrollIntoView(THE_ROW_ITEM);
+
+                            if (mablColumn != null)
+                            {
+                                DG.CurrentCell = new DataGridCellInfo(THE_ROW_ITEM, mablColumn);
+                            }
+
+                            DG.BeginEdit();
+                        }
+                        catch { }
+                        finally
+                        {
+                            DG.RowEditEnding += PGET_LST_SUB_RowEditEnding;
+                            DG.CellEditEnding += PGET_LST_SUB_CellEditEnding;
+                            _isReenteringEdit = false;
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                    #endregion
                     return;
                 }
             }
