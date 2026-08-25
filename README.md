@@ -28,7 +28,7 @@
 -   **فریم‌ورک**: **.NET 8**
 -   **رابط کاربری (UI)**: **WPF (Windows Presentation Foundation)**
 -   **نوع برنامه**: Windows Desktop Application
--   **پایگاه داده**: **SQL Server** (حداقل نسخه 2008 R2)
+-   **پایگاه داده**: **SQL Server** (حدل اقل SQL Server 2019)
 -   **دسترسی به داده‌ها (Data Access)**:
     -   `System.Data.SqlClient` برای ارتباط پایه با دیتابیس.
     -   **Dapper** به عنوان یک Micro-ORM برای اجرای کوئری‌های بهینه.
