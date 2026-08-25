@@ -3386,6 +3386,32 @@ namespace AUTO_BAZ.Functions
                             double PORSANT_BASE = (JAMF ?? 0) - (HFRST[HFRST_EOF].TAKHFIF ?? 0)
                                                   + (Baseknow.PorsantBaseIncludesVat ? (HFRST[HFRST_EOF].MBAA ?? 0) : 0);
 
+                            // کالاهای فاقد نرخ در الگو دیگر روی مبلغ اثری ندارند، ولی همچنان باید
+                            // گزارش شوند: نبودِ نرخ برای این کالاها همان چیزی است که باعث می‌شد
+                            // درصدِ پیشنهادیِ الگو کمتر از انتظار دربیاید. تنها کاری که این حلقه
+                            // می‌کند نوشتن هشدار است.
+                            if (!IsNull(PRST[PRST_EOF].PORID))
+                            {
+                                var porsantLines = invoicePorsantLines.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var porsantLineRows)
+                                    ? porsantLineRows
+                                    : EmptyQre18;
+
+                                for (int rst1_EOF = 0; rst1_EOF < porsantLines.Count; rst1_EOF++)
+                                {
+                                    var porsantKey = (PRST[PRST_EOF].PORID ?? 0, SqlKey(porsantLines[rst1_EOF].code));
+                                    var porsantFound = porsantKala.TryGetValue(porsantKey, out var porsantEntry)
+                                                       && !porsantEntry.Duplicate;
+
+                                    // یک پیام برای هر (ویزیتور، کالا) کافی است. قبلاً برای هر
+                                    // فاکتور تکرار می‌شد — روی YAZDSEPAR1405 همین یک پیام ۴۵۲ بار
+                                    // نوشته شد و هر نوشتن، همه‌ی بخش‌های موازی را سریال می‌کرد.
+                                    if (!porsantFound && _missingPorsantPatternLogged.TryAdd(porsantKey, 0))
+                                    {
+                                        LogWriter.WriteLog("تذكر مهم : اين كالا در الگوي پورسانت اين ويزيتور نرخ ندارد و در درصد پيشنهادي الگو به حساب نيامده است. درصورت لزوم براي آن نرخ تعريف كنيد و مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(porsantLines[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+                                    }
+                                }
+                            }
+
                             // شرط قبلی (bool)!STAT بود؛ برای سطرهایی که STAT آنها در دیتابیس NULL است
                             // این عبارت InvalidOperationException پرتاب می‌کرد.
                             if (PRST[PRST_EOF].STAT != true)
