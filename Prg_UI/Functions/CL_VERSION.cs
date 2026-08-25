@@ -79,10 +79,10 @@ namespace Functions
                         if (currentAppData.Version >= storedDbData.Version) // Uses System.Version comparison
                         {
                             // If versions are equal, check the date (though typically version includes date implicitly)
-                            if (currentAppData.Version == storedDbData.Version && currentAppData.Date < storedDbData.Date)
+                            if (currentAppData.Version == storedDbData.Version)
                             {
                                 // Stored version is same number but newer date - unusual case, treat as newer
-                                return false;
+                                return true;
                             }
 
                             // Current version is newer or equal (with same/newer date), update DB
@@ -101,8 +101,7 @@ namespace Functions
                 }
                 catch (Exception ex)
                 {
-                    File.AppendAllText("C:\\CORRECT\\VersionCheckLog.txt",
-                        $"{DateTime.Now}: Version check/update failed: {ex.Message} \n{ex.StackTrace}\n");
+                    File.AppendAllText("C:\\CORRECT\\VersionCheckLog.txt", $"{DateTime.Now}: Version check/update failed: {ex.Message} \n{ex.StackTrace}\n");
                     return true;
                 }
             } // using SqlConnection ensures disposal
