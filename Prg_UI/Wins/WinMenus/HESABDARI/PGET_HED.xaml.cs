@@ -2330,7 +2330,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 {
                     if (editableCollectionView.IsAddingNew)
                     {
-                        editableCollectionView.CancelNew(); // discard the new item
+                        // این متد از چند دکمه (اصلاح، حذف، رفرش سرور، امضاها) صدا زده می‌شود و مسیرش کاملا جدا از
+                        // PGET_LST_SUB_RowEditEnding است؛ یعنی حتی با e.Cancel = true آنجا، اگر کاربر همان لحظه
+                        // (که سطر جدید هنوز به‌خاطر ولیدیشن ناقص در حال ویرایش مانده) روی یکی از این دکمه‌ها کلیک
+                        // کند، اینجا بدون توجه به ولیدیشن، CancelNew سطر را کامل پاک می‌کرد. فقط وقتی سطر واقعا
+                        // دست‌نخورده (Pristine) است پاک می‌شود؛ اگر کاربر چیزی تایپ کرده، دست‌نخورده می‌ماند.
+                        var pendingNewItem = editableCollectionView.CurrentAddItem as PGET_LST;
+                        if (ConstructorRowDetector.IsPristine(pendingNewItem))
+                        {
+                            editableCollectionView.CancelNew(); // discard the new item
+                        }
                     }
                     if (editableCollectionView.IsEditingItem)
                     {
