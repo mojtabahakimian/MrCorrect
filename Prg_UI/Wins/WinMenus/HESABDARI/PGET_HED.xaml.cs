@@ -4096,8 +4096,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (HaveErrors)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // همان الگوی خطرناک دو مورد بالا: به‌جای حذف کامل سطر وقتی جایی در گرید خطای Validation باز است،
+                    // فقط جلوی خروج از ویرایش گرفته می‌شود تا داده‌ی این سطر از بین نرود.
+                    e.Cancel = true;
                     return;
                 }
 
@@ -4124,8 +4125,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (CmdSaveRecord(THE_ROW_ITEM) is false)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // BodyIsValid پیام خطای دقیق را همین الان با MsgListwin نشان داده (مثلا «فیلد از حساب خالی است.»)؛
+                    // قبلا اینجا با PGET_HED_SUB_CANCEL_EDIT() کل سطر (نوع عملیات/نحوه/از‌حساب/به‌حساب/شرح/مبلغ) پاک می‌شد،
+                    // یعنی حتی بعد از نشان دادن خطای درست، کاربر باید کل سطر را دوباره از اول تایپ می‌کرد.
+                    // با e.Cancel = true فقط از پایان یافتن ویرایش جلوگیری می‌شود؛ کاربر همان فیلد ناقص را اصلاح می‌کند.
+                    e.Cancel = true;
                 }
                 else //Success
                 {
