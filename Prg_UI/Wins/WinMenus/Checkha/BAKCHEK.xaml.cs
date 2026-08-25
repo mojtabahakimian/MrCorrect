@@ -155,9 +155,25 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (!string.IsNullOrEmpty(ServerFilter))
             {
                 rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE {ServerFilter} ").ToList();
+
+                // اگر با فیلتر کامل پیدا نشد، یک بار بدون شرط مبلغ جستجو می‌کند تا از عدم وجود چک مطمئن شود
+                if ((rst == null || rst.Count == 0) && ServerFilter.Contains("AND MABL ="))
+                {
+                    string fallbackFilter = ServerFilter.Substring(0, ServerFilter.IndexOf("AND MABL =")).Trim();
+                    rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE {fallbackFilter} ").ToList();
+                }
             }
 
-            if (rst?.Count == 0 || rst?.Count == null)
+            // اگر فرم برای ویرایش چک باز شده اما چک در دیتابیس وجود ندارد (حذف شده است)
+            if (!string.IsNullOrEmpty(ServerFilter) && (rst == null || rst.Count == 0))
+            {
+                new Msgwin(false, "این چک در دیتابیس یافت نشد یا ممکن است حذف شده باشد.").ShowDialog();
+                can = true;
+                //this.Close();
+                //return;
+            }
+
+            if (rst == null || rst.Count == 0)
             {
                 this.N_SERI.IsReadOnly = false;
                 this.SANDUGH.SelectedIndex = 0;
