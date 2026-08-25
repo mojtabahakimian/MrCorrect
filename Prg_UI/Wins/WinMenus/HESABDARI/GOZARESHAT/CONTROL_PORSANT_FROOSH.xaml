@@ -77,12 +77,12 @@
 
             <!-- توضیح کوتاه -->
             <TextBlock Grid.Row="0" Margin="10,10,10,4" TextWrapping="Wrap" Foreground="{StaticResource MaterialDesignBody}"
+                       FlowDirection="RightToLeft"
                        Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی مقدار درست طبق درصد/الگوی همان سطر."/>
 
             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Grid.Row="1"
                 ItemsSource="{Binding AUDIT_DATA}" FilterRowPosition="Top"
                 AutoGenerateColumns="False"
-                EnableDataVirtualization="True"
                 SelectionUnit="Row"
                 IsReadOnly="True"
                 SelectionMode="Extended"
@@ -95,7 +95,7 @@
                 FlowDirection="RightToLeft"
                 Style="{StaticResource KDG}"
                 HeaderStyle="{StaticResource KDGHeader}"
-                Margin="10,0,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True">
+                Margin="10,0,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ShowRowHeader="True">
 
                 <syncfusion:SfDataGrid.Columns>
                     <syncfusion:GridTextColumn HeaderText="شماره فاکتور" MappingName="NUMBER" Width="100"/>
@@ -136,15 +136,17 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Label x:Name="SummaryLabel" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold" Content="..."/>
+                <Label x:Name="SummaryLabel" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold" FlowDirection="RightToLeft" Content="..."/>
 
                 <Button x:Name="RefreshButton" Grid.Column="1" Content="بروزرسانی فهرست" Click="RefreshButton_Click"
-                        Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,10,0" Padding="14,4"/>
+                        Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15"
+                        FontSize="10" Height="35" Margin="0,0,10,0" Padding="14,4"/>
 
                 <Button x:Name="FixButton" Grid.Column="2" Content="اصلاح پورسانت و صدور مجدد سند"
                         Click="FixButton_Click"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        Background="#FF1AAA2C" BorderBrush="#FF1AAA2C" Padding="16,4"/>
+                        Style="{StaticResource GerdC}"
+                        BorderBrush="{x:Null}" FontSize="10" Height="35" Width="200"
+                        Foreground="#DDFFFFFF" FontWeight="Bold"/>
             </Grid>
         </Grid>
     </Grid>
