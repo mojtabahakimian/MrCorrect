@@ -494,6 +494,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 this.aRZDColumn.Visibility = Visibility.Hidden;
                 this.aRZKIND2Column.Visibility = Visibility.Hidden;
             }
+
+            // نمایش ستون مرکز هزینه فقط برای شرکت آرمان سرام (کد مخصوص چاپ 19)
+            mHAZ_NOColumn.Visibility = CL_HESABDARI.IsMarkazPriceKhazanehEnabled ? Visibility.Visible : Visibility.Hidden;
+
             CL_HESABDARI.SETSECURITYSUB(PGET_LST_SUB, "PGET_HED");
             PLUS = false;
             #endregion
@@ -2070,6 +2074,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             }
             if (Convert.ToDouble(ID.Text) > 0)
             {
+                //اگر سطر ناقصی در حال ورود است، پیام ولیدیشن آن نمایش داده شده و سطر در حالت ویرایش می‌ماند؛
+                //عملیات اصلاح متوقف می‌شود تا کاربر سطر را تکمیل یا با ESC لغو کند
+                if (!ApplyDataGridItems()) { return; }
+
                 dt = DateTime.Now;
                 // If Forms![baseknow]![TRANSF] Then
                 CL_HESABDARI.TR("PGET_HED", "(ID = " + ID.Text + " )", dt, 1);
@@ -2081,7 +2089,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 //this.AllowEdits = true;
                 CL_LMethods.AllowDeletions(this.GetType().Name, false, new WindowInteropHelper(this).Handle);
 
-                ApplyDataGridItems();
                 AllowEdits = false;
                 //PGET_LST_SUB.IsReadOnly = false;
                 //this.PGET_LST_SUB.CanUserAddRows = true;
@@ -2322,24 +2329,59 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         }
 
-        private void ApplyDataGridItems()
+        /// <summary>
+        /// سطرِ در حال ورود/ویرایش گرید را نهایی می‌کند.
+        /// خروجی false یعنی سطر ناقص است و در حالت ویرایش باقی مانده؛ فراخوان باید عملیات خودش را متوقف کند.
+        /// </summary>
+        private bool ApplyDataGridItems()
         {
             try
             {
                 if (PGET_LST_SUB.Items is IEditableCollectionView editableCollectionView)
                 {
-                    if (editableCollectionView.IsAddingNew)
+                    //سطر دست‌نخورده (فقط placeholder باز شده) بی‌صدا کنار گذاشته می‌شود
+                    if (editableCollectionView.IsAddingNew
+                        && ConstructorRowDetector.IsPristine(editableCollectionView.CurrentAddItem as PGET_LST))
                     {
-                        editableCollectionView.CancelNew(); // discard the new item
+                        editableCollectionView.CancelNew();
+                        return true;
                     }
-                    if (editableCollectionView.IsEditingItem)
+
+                    if (editableCollectionView.IsAddingNew || editableCollectionView.IsEditingItem)
                     {
-                        editableCollectionView.CommitEdit(); // commit the edit transaction
+                        // نباید مستقیم روی CollectionView کامیت/کنسل کرد: CancelNew سطرِ پرشده را بی‌صدا پاک می‌کند و
+                        // CommitEdit آن را بدون ذخیره در دیتابیس، به‌شکل «ذخیره‌شده» داخل گرید جا می‌اندازد (سطر شبح؛
+                        // جمع مبالغ را هم اشتباه می‌کند و با اولین ناوبری می‌پرد).
+                        // پس از مسیر خود گرید کامیت می‌کنیم تا PGET_LST_SUB_RowEditEnding اجرا شود و همان ولیدیشن و
+                        // ذخیره‌ی واقعی مسیر عادی انجام گیرد. اگر ولیدیشن رد کند، آنجا e.Cancel = true می‌شود و
+                        // CommitEdit مقدار false برمی‌گرداند؛ سطر با داده‌هایش در حالت ویرایش می‌ماند.
+
+                        // CommitEdit روی سطرِ CurrentCell عمل می‌کند، نه لزوما روی سطرِ در حال ورود. این متد از
+                        // دکمه‌ها صدا زده می‌شود و ممکن است فوکوس روی سطر دیگری باشد؛ در آن حالت سطر اشتباه کامیت
+                        // می‌شد و سطر ناقص بدون ذخیره در گرید جا می‌ماند. پس اول CurrentCell را روی همان سطر می‌بریم.
+                        var pendingRow = (editableCollectionView.CurrentAddItem
+                                          ?? editableCollectionView.CurrentEditItem) as PGET_LST;
+
+                        if (pendingRow != null
+                            && PGET_LST_SUB.Items.Contains(pendingRow)
+                            && !ReferenceEquals(PGET_LST_SUB.CurrentCell.Item, pendingRow))
+                        {
+                            var column = PGET_LST_SUB.CurrentColumn
+                                         ?? PGET_LST_SUB.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible && !c.IsReadOnly);
+
+                            if (column != null)
+                            {
+                                PGET_LST_SUB.CurrentCell = new DataGridCellInfo(pendingRow, column);
+                            }
+                        }
+
+                        return PGET_LST_SUB.CommitEdit(DataGridEditingUnit.Row, true);
                     }
                 }
             }
             catch { }
 
+            return true;
         }
 
         private void SGN3_Click(object sender, RoutedEventArgs e)
@@ -2718,6 +2760,21 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             if (e.Row.Item is PGET_LST item)
             {
                 CURRENT_ITMES_ROW = item;
+            }
+
+            //شرح آماده خزانه: اگر شرح با «+» تمام شود (همان قرارداد فرم اسناد حسابداری در SHARH_LIST)،
+            //پنجره انتخاب شرح آماده باز می‌شود و علامت + با شرح انتخاب‌شده جایگزین می‌گردد
+            if (e.Column?.SortMemberPath == "SHARH"
+                && e.Row.Item is PGET_LST sharhOwnerRow
+                && enteredValue is string sharhReadyText
+                && sharhReadyText.EndsWith("+"))
+            {
+                var sharhListWin = new SHARH_LIST();
+                await ShowDialogAfterCurrentDispatcherOperationAsync(sharhListWin);
+                if (sharhListWin.DialogResult == true && !string.IsNullOrEmpty(sharhListWin.SelectedSharh))
+                {
+                    sharhOwnerRow.SHARH = sharhReadyText.Substring(0, sharhReadyText.Length - 1) + sharhListWin.SelectedSharh;
+                }
             }
 
             //نوع عمليات
@@ -3996,6 +4053,67 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
         }
 
         bool IsSaveSuccess = true;
+        private bool _isReenteringEdit = false;
+
+        /// <summary>
+        /// سطری را که ولیدیشن رد کرده، دوباره وارد حالت ویرایش می‌کند.
+        /// بدون این کار، e.Cancel به‌تنهایی کافی نیست: پنجره‌ی پیام خطا فوکوس را از گرید می‌گیرد و سطرِ
+        /// ذخیره‌نشده به‌شکل یک سطر عادی در گرید جا می‌ماند (سطر شبح) و با اولین ناوبری می‌پرد.
+        /// </summary>
+        /// <param name="row">سطر هدف</param>
+        /// <param name="columnPath">ستونی که باید فوکوس شود؛ null یعنی ستون جاری حفظ شود</param>
+        private void ReEnterRowEdit(PGET_LST? row, string? columnPath = null)
+        {
+            var DG = PGET_LST_SUB;
+
+            // جلوگیری از re-entrancy: اگر یک BeginInvoke قبلی هنوز صف Dispatcher هست، دوباره صف نکن
+            if (_isReenteringEdit) { return; }
+            _isReenteringEdit = true;
+
+            DG.CellEditEnding -= PGET_LST_SUB_CellEditEnding;
+            DG.RowEditEnding -= PGET_LST_SUB_RowEditEnding;
+
+            DG.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    // Edge Case: ردیف ممکنه بین این فاصله از ItemsSource حذف شده باشه
+                    if (row == null || !DG.Items.Contains(row))
+                    {
+                        return;
+                    }
+
+                    DG.SelectedItem = row;
+                    DG.ScrollIntoView(row);
+
+                    // CurrentCell باید حتما روی همین سطر بنشیند، حتی وقتی ستون مشخصی خواسته نشده.
+                    // BeginEdit روی CurrentCell عمل می‌کند و SelectedItem آن را جابه‌جا نمی‌کند؛ اگر اینجا رها شود،
+                    // CurrentCell روی سطری می‌ماند که کاربر تازه رویش کلیک کرده و ویرایش روی سطر اشتباه باز می‌شود،
+                    // سطر ناقص هم بدون ذخیره کامیت می‌شود.
+                    var targetColumn =
+                        (string.IsNullOrEmpty(columnPath)
+                            ? null
+                            : DG.Columns.FirstOrDefault(c => c.SortMemberPath == columnPath))
+                        ?? DG.CurrentColumn
+                        ?? DG.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible && !c.IsReadOnly);
+
+                    if (targetColumn != null)
+                    {
+                        DG.CurrentCell = new DataGridCellInfo(row, targetColumn);
+                    }
+
+                    DG.BeginEdit();
+                }
+                catch { }
+                finally
+                {
+                    DG.RowEditEnding += PGET_LST_SUB_RowEditEnding;
+                    DG.CellEditEnding += PGET_LST_SUB_CellEditEnding;
+                    _isReenteringEdit = false;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
         private void PGET_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -4023,8 +4141,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (IsReallyNull == true)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد؛
+                    // اینجا به‌جای حذف، سطر در حالت ویرایش نگه داشته و روی ستون مبلغ برگردانده می‌شود
+                    e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
                     return;
                 }
             }
@@ -4037,17 +4157,22 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (HaveErrors)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // وقتی جایی در گرید خطای Validation باز است، سطر نه حذف می‌شود و نه به‌شکل ذخیره‌شده جا می‌ماند.
+                    e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM);
                     return;
                 }
 
                 if (THE_ROW_ITEM.MABL == 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                    msgwin.Show();
+                    msgwin.ShowDialog(); //ShowDialog نه Show ، تا قبل از ادامه اجرای کد کاربر پیام را ببیند
 
                     CANCEL = true;
+
+                    // این شاخه e.Cancel نمی‌گذاشت و سطرِ ذخیره‌نشده به‌شکل یک سطر عادی داخل گرید کامیت می‌شد
+                    e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
                     return;
                 }
                 if (!this.NewRecord && Baseknow.WAR == 1)
@@ -4060,17 +4185,22 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     //    CANCEL = true;
                     //}
                 }
-                this.MABL.Text = SUM_OF_MABL.ToString();
-
-
                 if (CmdSaveRecord(THE_ROW_ITEM) is false)
                 {
-                    //e.Cancel = true;
-                    PGET_HED_SUB_CANCEL_EDIT();
+                    // BodyIsValid پیام خطای دقیق را همین الان با ShowDialog (مودال) نشان داده (مثلا «فیلد از حساب خالی است.»).
+                    // e.Cancel داده‌های سطر را حفظ می‌کند، ولی جلوی این رفتار پیش‌فرض DataGrid را نمی‌گیرد که با Tab از
+                    // آخرین ستون، فوکوس/CurrentCell را به سطر بعدی (Placeholder جدید) می‌برد؛ همین باعث می‌شد یک سطر
+                    // خالی زیر سطر ناقص ظاهر شود. ReEnterRowEdit صریحا فوکوس را به همین سطر برمی‌گرداند.
+                    e.Cancel = true;
+                    ReEnterRowEdit(THE_ROW_ITEM);
                 }
                 else //Success
                 {
                     IsSaveSuccess = true;
+
+                    //جمع مبالغ فقط بعد از ذخیره‌ی موفق به‌روز می‌شود؛ قبلا قبل از ذخیره اجرا می‌شد و مبلغِ
+                    //سطرِ ردشده از ولیدیشن را هم در جمع نشان می‌داد
+                    this.MABL.Text = SUM_OF_MABL.ToString();
 
                     SANAD();
 
@@ -4594,7 +4724,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             if (ErrosMessages.Any() && _DisplayMsg_)
             {
-                new MsgListwin(false, ErrosMessages).Show();
+                // ShowDialog (نه Show) - همان الگوی BodyIsValid در HEAD_LST_PISHFROOSH2.xaml.cs (فرم پیش‌فاکتور)؛
+                // چون RowEditEnding سطر را دوباره در حالت ویرایش نگه می‌دارد، کاربر می‌تواند بلافاصله فیلدهای
+                // دیگر همان سطر را هم ویرایش کند و اگر همچنان نامعتبر باشد RowEditEnding دوباره اجرا می‌شود؛
+                // با پنجره‌ی غیرمودال (Show) این چرخه چند پیام روی هم تلنبار می‌کرد
+                new MsgListwin(false, ErrosMessages).ShowDialog();
                 return false;
             }
             return true;
@@ -5077,7 +5211,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 return;
             }
 
-            ApplyDataGridItems();
+            //سطر ناقص در حال ورود، حذف را متوقف می‌کند تا داده‌اش با یک کلیک اشتباهی از بین نرود
+            if (!ApplyDataGridItems()) { return; }
 
             PGET_LST_SUB.CommitEdit();
 
