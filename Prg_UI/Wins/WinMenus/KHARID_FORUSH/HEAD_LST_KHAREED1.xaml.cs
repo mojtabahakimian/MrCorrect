@@ -2410,6 +2410,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             MasterTopErrorMessages.AddRange(ErrosMessages);
 
+            //باید قبل از SANAD() اجرا شود: SANAD/GENSANADKHAREED سربرگ را مستقیم از دیتابیس می‌خواند،
+            //پس مالیات باید همین الان (با همین سطر تازه‌ذخیره‌شده) در دیتابیس نشسته باشد.
+            //فقط وقتی این سطر واقعا Commit شده (ErrosMessages خالی)؛ وگرنه IMBAA این سطر در حافظه‌
+            //هنوز مقدار جدید دارد ولی نوشتنش روی INVO_LST همین الان Rollback شده، و جمع زدنش باعث
+            //می‌شد MBAA سربرگ با مالیاتی که واقعا در دیتابیس نیست هماهنگ شود
+            if (TICMBAA.IsChecked == true && !ErrosMessages.Any())
+            {
+                RecalcHeaderMBAA();
+            }
+
             SANAD();
 
             if (MasterTopErrorMessages.Any())
@@ -2420,11 +2430,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             AVRAGE_UPDATE();
-
-            if (TICMBAA.IsChecked == true)
-            {
-                RecalcHeaderMBAA();
-            }
         }
 
         private void MABL_AfterUpdate(INVO_LST_FACTOR22? Rowy, bool IsSingleCurrentRow = true, bool DoShoeMessages = true)
@@ -3309,13 +3314,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
 
                         INVO_LST_SUB_ReGetData();
-                        SANAD();
 
-                        //اگر سطر حذف‌شده مالیات داشت، جمع مالیات سربرگ باید دوباره محاسبه شود
+                        //اگر سطر حذف‌شده مالیات داشت، جمع مالیات سربرگ باید دوباره محاسبه شود؛ باید بعد از
+                        //ReGetData (تا سطر حذف‌شده دیگر در جمع نیاید) ولی قبل از SANAD (که سربرگ را از
+                        //دیتابیس می‌خواند) اجرا شود
                         if (TICMBAA.IsChecked == true)
                         {
                             RecalcHeaderMBAA();
                         }
+
+                        SANAD();
                     }
                 }
                 else
@@ -4693,7 +4701,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         /// <summary>
         /// جمع مالیات همه‌ی سطرهای فاکتور (IMBAA) را در فیلد سربرگ MBAA می‌ریزد، معین مالیات پیش‌فرض
         /// (Baseknow.HESMBAA) را ست می‌کند اگر کاربر خودش معین دیگری انتخاب نکرده باشد، و جمع‌های فاکتور
-        /// (مبلغ قابل پرداخت/مانده) را دوباره محاسبه می‌کند.
+        /// (مبلغ قابل پرداخت/مانده) را دوباره محاسبه می‌کند. در پایان MBAA/HMBAA را هم بلافاصله در
+        /// دیتابیس می‌نویسد (نه فقط روی صفحه) — نگاه کن به PersistHeaderMBAA.
         /// </summary>
         private void RecalcHeaderMBAA()
         {
@@ -4707,6 +4716,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
 
                 TAKHFIF_MABL_PRICE();
+                PersistHeaderMBAA();
                 return;
             }
 
@@ -4729,6 +4739,33 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             TAKHFIF_MABL_PRICE();
+            PersistHeaderMBAA();
+        }
+
+        /// <summary>
+        /// MBAA/HMBAA/TICMBAA سربرگ را بلافاصله در دیتابیس می‌نویسد، نه فقط روی صفحه. علتش این است که
+        /// SANAD() (صدور/بازسازی سند حسابداری، GENSANADKHAREED) سربرگ را همیشه مستقیم با یک SELECT از
+        /// دیتابیس می‌خواند، نه از مقدار زنده‌ی فیلدهای صفحه؛ و این سه فیلد فقط از طریق دکمه‌ی «ذخیره»ی
+        /// سربرگ (DoCmdHeaderSave) در دیتابیس می‌نشستند. بدون این متد، سندی که بعد از ذخیره‌ی هر سطر
+        /// خودکار صادر می‌شود، تا قبل از زدن دکمه‌ی ذخیره‌ی سربرگ، مالیات را نشان نمی‌داد.
+        /// </summary>
+        private void PersistHeaderMBAA()
+        {
+            if (NewRecord || string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
+            {
+                return;
+            }
+
+            dbms.DoExecuteSQL(
+                "UPDATE dbo.HEAD_LST SET MBAA = @MBAA, HMBAA = @HMBAA, TICMBAA = @TICMBAA WHERE NUMBER = @NUMBER AND TAG = @TAG",
+                new
+                {
+                    MBAA = Convert.ToDouble(MBAA.Text),
+                    HMBAA = (object)HMBAA.Text ?? DBNull.Value,
+                    TICMBAA = Convert.ToByte(TICMBAA.IsChecked),
+                    NUMBER = Convert.ToDouble(NUMBER.Text),
+                    TAG = HTAG
+                });
         }
 
         /// <summary>
@@ -4794,6 +4831,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE id = @ID", new { IMBAA = row.IMBAA ?? 0d, ID = row.id });
                 }
+
+                //سند حسابداری هم همین الان با مالیات تازه بازسازی شود، نه اینکه تا اولین ویرایش بعدی یک سطر
+                //یا زدن دکمه‌ی ذخیره‌ی سربرگ، مالیات را نشان ندهد
+                SANAD();
             }
         }
 
