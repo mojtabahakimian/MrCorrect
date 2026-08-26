@@ -494,6 +494,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 this.aRZDColumn.Visibility = Visibility.Hidden;
                 this.aRZKIND2Column.Visibility = Visibility.Hidden;
             }
+
+            // نمایش ستون مرکز هزینه فقط برای شرکت آرمان سرام (کد مخصوص چاپ 19)
+            mHAZ_NOColumn.Visibility = CL_HESABDARI.IsMarkazPriceKhazanehEnabled ? Visibility.Visible : Visibility.Hidden;
+
             CL_HESABDARI.SETSECURITYSUB(PGET_LST_SUB, "PGET_HED");
             PLUS = false;
             #endregion

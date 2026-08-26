@@ -270,7 +270,7 @@
                     </DataGridTextColumn>
                     <DataGridTextColumn x:Name="mABLColum" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}" Header="مبلغ" MinWidth="50" Width="200"/>
 
-                    <DataGridComboBoxColumn x:Name="mHAZ_NOColumn" SelectedValueBinding="{Binding MHAZ_NO,UpdateSourceTrigger=LostFocus}" Header="مرکز هزینه" MinWidth="100" Width="150">
+                    <DataGridComboBoxColumn x:Name="mHAZ_NOColumn" SelectedValueBinding="{Binding MHAZ_NO,UpdateSourceTrigger=LostFocus}" Header="مرکز هزینه" MinWidth="100" Width="150" Visibility="Hidden">
                         <DataGridComboBoxColumn.EditingElementStyle>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                 <Setter Property="IsEditable" Value="True"/>

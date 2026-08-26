@@ -360,6 +360,20 @@ namespace Prg_Proccessy.FUNCTIONS
         }
         #endregion
 
+        private static readonly string[] SpecialPrintCodes = { "19" };
+        /// <summary>
+        /// بررسی فعال بودن کد مخصوص چاپ فاکتور خاص یک شرکت در تنظیمات کلی (OPTIONSS).
+        /// کاراکتر ۱۰ (نمایه ۹) وضعیت فعال بودن تنظیمات و کاراکترهای ۱۱-۱۲ (نمایه ۱۰-۱۱) کد دو رقمی چاپ شرکت را مشخص می‌کند.
+        /// </summary>
+        public static bool IsMarkazPriceKhazanehEnabled
+        {
+            get
+            {
+                string options = Baseknow.OPTIONSS ?? string.Empty;
+                if (options.Length < 12) return false;
+                return options[9] == '5' && Array.IndexOf(SpecialPrintCodes, options.Substring(10, 2)) >= 0;
+            }
+        }
 
         /// <summary>
         /// Get Safe New ID of Table in Serializable level
