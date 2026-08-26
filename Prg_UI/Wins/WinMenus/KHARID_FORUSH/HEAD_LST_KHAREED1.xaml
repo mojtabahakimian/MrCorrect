@@ -267,6 +267,14 @@
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
 
+                            <DataGridTextColumn x:Name="IMBAA_COLUMN" Binding="{Binding IMBAA,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}" IsReadOnly="True" Header="مالیات ب.ا.ا" MinWidth="120" Visibility="Collapsed">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property = "IsTabStop" Value = "False" />
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+
                             <DataGridTemplateColumn x:Name="PARAMS" Header="پارامتر ها" IsReadOnly="True" CanUserResize="False">
                                 <DataGridTemplateColumn.CellStyle>
                                     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">

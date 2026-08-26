@@ -430,6 +430,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MBAA.IsEnabled = ican;
                 HMBAA.IsEnabled = ican;
                 CMB_HMBAA.IsEnabled = ican;
+                //بدون این، روی فاکتور قفل‌شده (امضاشده/تاییدشده) هم می‌شد تیک مالیات را عوض کرد و
+                //سند حسابداری را تغییر داد — همان الگوی TICMBAA.IsEnabled = CAN در فاکتور فروش
+                TICMBAA.IsEnabled = ican;
 
                 BUTTON_SAVE_POSHT.IsEnabled = ican;
                 PAY_GETP_SUB.IsEnabled = ican;
@@ -689,8 +692,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MBAA.Text = HEADER_FAC.MBAA.ToStringNullSafe(); //مالیات و عوارض مبلغ
                 HMBAA.Text = HEADER_FAC.HMBAA; //معین مالیات
                 TICMBAA.IsChecked = HEADER_FAC.TICMBAA; //مشمول مالیات بر ارزش افزوده
-                MBAA.IsReadOnly = TICMBAA.IsChecked == true;
-                HMBAA.IsReadOnly = TICMBAA.IsChecked == true;
+                ApplyVatUiState();
 
                 BTN_SAVE.IsEnabled = false;
 
@@ -4699,6 +4701,23 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
 
         /// <summary>
+        /// ظاهر بخش مالیات را با وضعیت تیک TICMBAA هماهنگ می‌کند: وقتی تیک خورده، مبلغ و معین مالیات
+        /// خودکار محاسبه می‌شوند پس فقط‌خواندنی‌اند و ستون مالیات هر سطر هم در گرید دیده می‌شود.
+        /// </summary>
+        private void ApplyVatUiState()
+        {
+            bool on = TICMBAA.IsChecked == true;
+
+            MBAA.IsReadOnly = on;
+            HMBAA.IsReadOnly = on;
+
+            if (IMBAA_COLUMN != null)
+            {
+                IMBAA_COLUMN.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
         /// جمع مالیات همه‌ی سطرهای فاکتور (IMBAA) را در فیلد سربرگ MBAA می‌ریزد، معین مالیات پیش‌فرض
         /// (Baseknow.HESMBAA) را ست می‌کند اگر کاربر خودش معین دیگری انتخاب نکرده باشد، و جمع‌های فاکتور
         /// (مبلغ قابل پرداخت/مانده) را دوباره محاسبه می‌کند. در پایان MBAA/HMBAA را هم بلافاصله در
@@ -4756,15 +4775,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            //هر دو سربرگ به‌روز می‌شوند، دقیقا مثل DoCmdHeaderSave: سربرگ فاکتور خرید (FTAG=12) که
+            //GENSANADKHAREED سند را از روی آن می‌سازد، و سربرگ رسید انبار (HTAG=1) که با همان شماره
+            //هم‌گام نگه داشته می‌شود. اگر فقط HTAG نوشته شود، سند هرگز مالیات را نمی‌بیند.
             dbms.DoExecuteSQL(
-                "UPDATE dbo.HEAD_LST SET MBAA = @MBAA, HMBAA = @HMBAA, TICMBAA = @TICMBAA WHERE NUMBER = @NUMBER AND TAG = @TAG",
+                "UPDATE dbo.HEAD_LST SET MBAA = @MBAA, HMBAA = @HMBAA, TICMBAA = @TICMBAA WHERE NUMBER = @NUMBER AND TAG IN (@FTAG, @HTAG)",
                 new
                 {
                     MBAA = Convert.ToDouble(MBAA.Text),
                     HMBAA = (object)HMBAA.Text ?? DBNull.Value,
                     TICMBAA = Convert.ToByte(TICMBAA.IsChecked),
                     NUMBER = Convert.ToDouble(NUMBER.Text),
-                    TAG = HTAG
+                    FTAG = (int)FTAG,
+                    HTAG = (int)HTAG
                 });
         }
 
@@ -4796,8 +4819,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void TICMBAA_Click(object sender, RoutedEventArgs e)
         {
-            MBAA.IsReadOnly = TICMBAA.IsChecked == true;
-            HMBAA.IsReadOnly = TICMBAA.IsChecked == true;
+            ApplyVatUiState();
 
             if (TICMBAA.IsChecked == true)
             {
@@ -5415,6 +5437,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             HMBAA.Text = null; //مالیات
             CMB_HMBAA.SelectedValue = null;
+
+            //تیک مالیات هم مثل خود مبلغ مالیات باید ریست شود، وگرنه از فاکتور قبلی روی فاکتور جدید
+            //تیک‌خورده می‌ماند در حالی که MBAA صفر شده. پیش‌فرضش از آخرین فاکتور خرید گرفته می‌شود،
+            //همان کاری که Form_BeforeInsert در فاکتور فروش می‌کند (اغلب سازمان‌ها یا همیشه مشمول‌اند یا هیچ‌وقت)
+            TICMBAA.IsChecked = dbms.DoGetDataSQL<bool?>(
+                $"SELECT TOP 1 TICMBAA FROM dbo.HEAD_LST WHERE TAG = {FTAG} ORDER BY NUMBER DESC").FirstOrDefault() ?? false;
+            ApplyVatUiState();
 
             JF.Text = "0"; //جمع کل فاکتور
             HKH.Text = "0"; //هزینه خدمات
