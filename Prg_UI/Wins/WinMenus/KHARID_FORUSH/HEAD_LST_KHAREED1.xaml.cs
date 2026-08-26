@@ -688,6 +688,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MOIN_HAZ.Text = HEADER_FAC.MOIN_HAZ; //معین خدمات
                 MBAA.Text = HEADER_FAC.MBAA.ToStringNullSafe(); //مالیات و عوارض مبلغ
                 HMBAA.Text = HEADER_FAC.HMBAA; //معین مالیات
+                TICMBAA.IsChecked = HEADER_FAC.TICMBAA; //مشمول مالیات بر ارزش افزوده
+                MBAA.IsReadOnly = TICMBAA.IsChecked == true;
+                HMBAA.IsReadOnly = TICMBAA.IsChecked == true;
 
                 BTN_SAVE.IsEnabled = false;
 
@@ -2273,6 +2276,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            //مالیات این سطر باید با همان مبلغی که الان در کوئری INSERT/UPDATE زیر جاسازی می‌شود هماهنگ باشد
+            RecalcRowIMBAA(TheRow);
 
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
@@ -2415,6 +2420,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             AVRAGE_UPDATE();
+
+            if (TICMBAA.IsChecked == true)
+            {
+                RecalcHeaderMBAA();
+            }
         }
 
         private void MABL_AfterUpdate(INVO_LST_FACTOR22? Rowy, bool IsSingleCurrentRow = true, bool DoShoeMessages = true)
@@ -3300,6 +3310,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         INVO_LST_SUB_ReGetData();
                         SANAD();
+
+                        //اگر سطر حذف‌شده مالیات داشت، جمع مالیات سربرگ باید دوباره محاسبه شود
+                        if (TICMBAA.IsChecked == true)
+                        {
+                            RecalcHeaderMBAA();
+                        }
                     }
                 }
                 else
@@ -3374,7 +3390,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     USER_NAME = N'{USER_NAME.Text}', FNUMCO = {FNUMCO.Text},
@@ -3395,7 +3411,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},  FNUMCO = {FNUMCO.Text},
                     sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, 
@@ -3435,7 +3451,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     FNUMCO = {FNUMCO.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ARZD = {(string.IsNullOrEmpty(ARZD.Text) ? "NULL" : ARZD.Text)},
                     ARZKIND2 = {(string.IsNullOrEmpty(ARZKIND2.SelectedValue.ToStringNullSafe()) ? "NULL" : ARZKIND2.SelectedValue)},
@@ -4665,6 +4681,119 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var JF_TXT = Convert.ToDouble(JF.Text);
 
                 TAKHFIF.Text = Math.Round(JF_TXT * DARSAD_TXT / 100).ToString();
+            }
+        }
+
+        private class VAT_ITEM_LOOKUP
+        {
+            public bool? CMBAA { get; set; }
+            public string CODE { get; set; }
+        }
+
+        /// <summary>
+        /// جمع مالیات همه‌ی سطرهای فاکتور (IMBAA) را در فیلد سربرگ MBAA می‌ریزد، معین مالیات پیش‌فرض
+        /// (Baseknow.HESMBAA) را ست می‌کند اگر کاربر خودش معین دیگری انتخاب نکرده باشد، و جمع‌های فاکتور
+        /// (مبلغ قابل پرداخت/مانده) را دوباره محاسبه می‌کند.
+        /// </summary>
+        private void RecalcHeaderMBAA()
+        {
+            if (TICMBAA.IsChecked != true)
+            {
+                if (Convert.ToDouble(MBAA.Text) > 0)
+                {
+                    MBAA.Text = "0";
+                    HMBAA.Text = null;
+                    CMB_HMBAA.SelectedValue = null;
+                }
+
+                TAKHFIF_MABL_PRICE();
+                return;
+            }
+
+            var sum = INVO_LST_FACTOR22_DATA.Sum(r => r.IMBAA ?? 0d);
+
+            if (sum > 0)
+            {
+                MBAA.Text = sum.ToString();
+                if (string.IsNullOrEmpty(HMBAA.Text))
+                {
+                    HMBAA.Text = Baseknow.HESMBAA;
+                    CMB_HMBAA.SelectedValue = HMBAA.Text;
+                }
+            }
+            else
+            {
+                MBAA.Text = "0";
+                HMBAA.Text = null;
+                CMB_HMBAA.SelectedValue = null;
+            }
+
+            TAKHFIF_MABL_PRICE();
+        }
+
+        /// <summary>
+        /// مبلغ مالیات بر ارزش افزوده‌ی یک سطر فاکتور خرید را بر اساس مشمولیت کالا (STUF_DEF.CMBAA) و نرخ آن
+        /// (STUF_DEF.VRA یا نرخ پیش‌فرض سازمان از CL_HESABDARI.GetArzesh) محاسبه می‌کند.
+        /// برخلاف فاکتور فروش، این فرم تخفیف سطری ندارد (N_KOL/N_MOIN/N_TAF در INVO_LST این پنجره هیچ‌جا
+        /// مقداردهی نمی‌شوند، فقط کدهای حساب‌اند)، پس مبنای مالیات همان MABL_K است، بدون کسر تخفیف.
+        /// </summary>
+        private void RecalcRowIMBAA(INVO_LST_FACTOR22 row)
+        {
+            if (row == null)
+            {
+                return;
+            }
+
+            if (TICMBAA.IsChecked != true || string.IsNullOrEmpty(row.CODE))
+            {
+                row.IMBAA = 0;
+                return;
+            }
+
+            var itemInfo = dbms.DoGetDataSQL<VAT_ITEM_LOOKUP>("SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE = @CODE", new { CODE = row.CODE }).FirstOrDefault();
+
+            row.IMBAA = itemInfo?.CMBAA == true
+                ? Math.Round((row.MABL_K ?? 0d) * CL_HESABDARI.GetArzesh(row.CODE) / 100)
+                : 0;
+        }
+
+        private void TICMBAA_Click(object sender, RoutedEventArgs e)
+        {
+            MBAA.IsReadOnly = TICMBAA.IsChecked == true;
+            HMBAA.IsReadOnly = TICMBAA.IsChecked == true;
+
+            if (TICMBAA.IsChecked == true)
+            {
+                //یک کوئری برای گرفتن مشمولیت همه‌ی کالاهای فاکتور، به‌جای یک کوئری به‌ازای هر سطر
+                var codes = INVO_LST_FACTOR22_DATA.Select(r => r.CODE).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                var cmbaaMap = codes.Count > 0
+                    ? dbms.DoGetDataSQL<VAT_ITEM_LOOKUP>("SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE IN @Codes", new { Codes = codes }).ToDictionary(x => x.CODE, x => x.CMBAA)
+                    : new Dictionary<string, bool?>();
+
+                foreach (var row in INVO_LST_FACTOR22_DATA)
+                {
+                    bool eligible = !string.IsNullOrEmpty(row.CODE) && cmbaaMap.TryGetValue(row.CODE, out var cmbaa) && cmbaa == true;
+                    row.IMBAA = eligible ? Math.Round((row.MABL_K ?? 0d) * CL_HESABDARI.GetArzesh(row.CODE) / 100) : 0;
+                }
+            }
+            else
+            {
+                foreach (var row in INVO_LST_FACTOR22_DATA)
+                {
+                    row.IMBAA = 0;
+                }
+            }
+
+            RecalcHeaderMBAA();
+
+            //سطرهایی که قبلا در دیتابیس ذخیره شده‌اند را هم به‌روز کن، وگرنه IMBAA فقط در حافظه می‌ماند
+            //تا دفعه‌ی بعد که همان سطر دوباره ویرایش و ذخیره شود
+            if (!NewRecord)
+            {
+                foreach (var row in INVO_LST_FACTOR22_DATA.Where(r => r.id is not null && r.id > 0))
+                {
+                    dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE id = @ID", new { IMBAA = row.IMBAA ?? 0d, ID = row.id });
+                }
             }
         }
 
