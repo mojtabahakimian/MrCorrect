@@ -124,6 +124,7 @@
                     <TextBox x:Name="MOLAH"   Text="" Height="58" Margin="511,112,59,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TabIndex="3" />
                     <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="308,44,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
                     <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید فاکتور" HorizontalAlignment="Left" Margin="303,130,0,0" VerticalAlignment="Top" Width="80" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
+                    <CheckBox x:Name="TICMBAA" IsChecked="False" Content="مالیات.ب.ا.ا" HorizontalAlignment="Left" Margin="303,153,0,0" VerticalAlignment="Top" Width="80" FontSize="10" Click="TICMBAA_Click"/>
 
                     <DataGrid   
                             x:Name="INVO_LST_SUB"
@@ -264,6 +265,14 @@
                                         <Setter Property="MaxLength" Value="30" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn x:Name="IMBAA_COLUMN" Binding="{Binding IMBAA,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}" IsReadOnly="True" Header="مالیات ب.ا.ا" MinWidth="120" Visibility="Collapsed">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property = "IsTabStop" Value = "False" />
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>
 
                             <DataGridTemplateColumn x:Name="PARAMS" Header="پارامتر ها" IsReadOnly="True" CanUserResize="False">

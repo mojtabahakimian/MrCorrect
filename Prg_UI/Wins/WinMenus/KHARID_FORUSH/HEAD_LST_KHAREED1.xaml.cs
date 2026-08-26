@@ -162,9 +162,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public ObservableCollection<PAY_GETP_MODEL> PAY_GETP_SUB_DATA { get; set; } = new ObservableCollection<PAY_GETP_MODEL>();
 
         /// <summary>
-        /// تگ هدر فاکتور خرید 12 یا 15 بسته به نوع
+        /// تگ هدر فاکتور خرید 12
         /// </summary>
-        public byte FTAG => (byte)(IsDirectFactor ? 15 : 12); //فاکتور
+        public byte FTAG { get; } = 12; //فاکتور
 
         /// <summary>
         /// تگ رسید انبار خرید 1 و سطر های اون
@@ -430,6 +430,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MBAA.IsEnabled = ican;
                 HMBAA.IsEnabled = ican;
                 CMB_HMBAA.IsEnabled = ican;
+                //بدون این، روی فاکتور قفل‌شده (امضاشده/تاییدشده) هم می‌شد تیک مالیات را عوض کرد و
+                //سند حسابداری را تغییر داد — همان الگوی TICMBAA.IsEnabled = CAN در فاکتور فروش
+                TICMBAA.IsEnabled = ican;
 
                 BUTTON_SAVE_POSHT.IsEnabled = ican;
                 PAY_GETP_SUB.IsEnabled = ican;
@@ -688,6 +691,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MOIN_HAZ.Text = HEADER_FAC.MOIN_HAZ; //معین خدمات
                 MBAA.Text = HEADER_FAC.MBAA.ToStringNullSafe(); //مالیات و عوارض مبلغ
                 HMBAA.Text = HEADER_FAC.HMBAA; //معین مالیات
+                TICMBAA.IsChecked = HEADER_FAC.TICMBAA; //مشمول مالیات بر ارزش افزوده
+                ApplyVatUiState();
 
                 BTN_SAVE.IsEnabled = false;
 
@@ -2273,6 +2278,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            //مالیات این سطر باید با همان مبلغی که الان در کوئری INSERT/UPDATE زیر جاسازی می‌شود هماهنگ باشد
+            RecalcRowIMBAA(TheRow);
 
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
@@ -2404,6 +2411,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 IVM.CommitTransaction(); // Commit Apply Save
             }
             MasterTopErrorMessages.AddRange(ErrosMessages);
+
+            //باید قبل از SANAD() اجرا شود: SANAD/GENSANADKHAREED سربرگ را مستقیم از دیتابیس می‌خواند،
+            //پس مالیات باید همین الان (با همین سطر تازه‌ذخیره‌شده) در دیتابیس نشسته باشد.
+            //فقط وقتی این سطر واقعا Commit شده (ErrosMessages خالی)؛ وگرنه IMBAA این سطر در حافظه‌
+            //هنوز مقدار جدید دارد ولی نوشتنش روی INVO_LST همین الان Rollback شده، و جمع زدنش باعث
+            //می‌شد MBAA سربرگ با مالیاتی که واقعا در دیتابیس نیست هماهنگ شود
+            if (TICMBAA.IsChecked == true && !ErrosMessages.Any())
+            {
+                RecalcHeaderMBAA();
+            }
 
             SANAD();
 
@@ -3299,6 +3316,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
 
                         INVO_LST_SUB_ReGetData();
+
+                        //اگر سطر حذف‌شده مالیات داشت، جمع مالیات سربرگ باید دوباره محاسبه شود؛ باید بعد از
+                        //ReGetData (تا سطر حذف‌شده دیگر در جمع نیاید) ولی قبل از SANAD (که سربرگ را از
+                        //دیتابیس می‌خواند) اجرا شود
+                        if (TICMBAA.IsChecked == true)
+                        {
+                            RecalcHeaderMBAA();
+                        }
+
                         SANAD();
                     }
                 }
@@ -3374,7 +3400,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     USER_NAME = N'{USER_NAME.Text}', FNUMCO = {FNUMCO.Text},
@@ -3395,7 +3421,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {takhfifSqlValue},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},  FNUMCO = {FNUMCO.Text},
                     sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, 
@@ -3435,7 +3461,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     FNUMCO = {FNUMCO.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ARZD = {(string.IsNullOrEmpty(ARZD.Text) ? "NULL" : ARZD.Text)},
                     ARZKIND2 = {(string.IsNullOrEmpty(ARZKIND2.SelectedValue.ToStringNullSafe()) ? "NULL" : ARZKIND2.SelectedValue)},
@@ -4668,6 +4694,191 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
         }
 
+        private class VAT_ITEM_LOOKUP
+        {
+            public bool? CMBAA { get; set; }
+            public string CODE { get; set; }
+        }
+
+        /// <summary>
+        /// ظاهر بخش مالیات را با وضعیت تیک TICMBAA هماهنگ می‌کند: وقتی تیک خورده، مبلغ و معین مالیات
+        /// خودکار محاسبه می‌شوند پس فقط‌خواندنی‌اند و ستون مالیات هر سطر هم در گرید دیده می‌شود.
+        /// </summary>
+        private void ApplyVatUiState()
+        {
+            bool on = TICMBAA.IsChecked == true;
+
+            MBAA.IsReadOnly = on;
+            HMBAA.IsReadOnly = on;
+
+            if (IMBAA_COLUMN != null)
+            {
+                IMBAA_COLUMN.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// جمع مالیات همه‌ی سطرهای فاکتور (IMBAA) را در فیلد سربرگ MBAA می‌ریزد، معین مالیات پیش‌فرض
+        /// (Baseknow.HESMBAA) را ست می‌کند اگر کاربر خودش معین دیگری انتخاب نکرده باشد، و جمع‌های فاکتور
+        /// (مبلغ قابل پرداخت/مانده) را دوباره محاسبه می‌کند. در پایان MBAA/HMBAA را هم بلافاصله در
+        /// دیتابیس می‌نویسد (نه فقط روی صفحه) — نگاه کن به PersistHeaderMBAA.
+        /// </summary>
+        private void RecalcHeaderMBAA()
+        {
+            //توجه: این متد وقتی تیک مالیات خاموش است مبلغ دستیِ کاربر را صفر می‌کند، پس فقط باید از
+            //TICMBAA_Click (لحظه‌ی برداشتن تیک) با حالت خاموش صدا زده شود. فراخوان‌های دیگر
+            //(ذخیره‌ی سطر / حذف سطر) عمدا با شرط TICMBAA.IsChecked == true محافظت شده‌اند.
+            if (TICMBAA.IsChecked != true)
+            {
+                if (ReadNumericText(MBAA.Text) > 0)
+                {
+                    MBAA.Text = "0";
+                    HMBAA.Text = null;
+                    CMB_HMBAA.SelectedValue = null;
+                }
+
+                TAKHFIF_MABL_PRICE();
+                PersistHeaderMBAA();
+                return;
+            }
+
+            var sum = INVO_LST_FACTOR22_DATA.Sum(r => r.IMBAA ?? 0d);
+
+            if (sum > 0)
+            {
+                MBAA.Text = sum.ToString();
+                if (string.IsNullOrEmpty(HMBAA.Text))
+                {
+                    HMBAA.Text = Baseknow.HESMBAA;
+                    CMB_HMBAA.SelectedValue = HMBAA.Text;
+                }
+            }
+            else
+            {
+                MBAA.Text = "0";
+                HMBAA.Text = null;
+                CMB_HMBAA.SelectedValue = null;
+            }
+
+            TAKHFIF_MABL_PRICE();
+            PersistHeaderMBAA();
+        }
+
+        /// <summary>
+        /// MBAA/HMBAA/TICMBAA سربرگ را بلافاصله در دیتابیس می‌نویسد، نه فقط روی صفحه. علتش این است که
+        /// SANAD() (صدور/بازسازی سند حسابداری، GENSANADKHAREED) سربرگ را همیشه مستقیم با یک SELECT از
+        /// دیتابیس می‌خواند، نه از مقدار زنده‌ی فیلدهای صفحه؛ و این سه فیلد فقط از طریق دکمه‌ی «ذخیره»ی
+        /// سربرگ (DoCmdHeaderSave) در دیتابیس می‌نشستند. بدون این متد، سندی که بعد از ذخیره‌ی هر سطر
+        /// خودکار صادر می‌شود، تا قبل از زدن دکمه‌ی ذخیره‌ی سربرگ، مالیات را نشان نمی‌داد.
+        /// </summary>
+        private void PersistHeaderMBAA()
+        {
+            if (NewRecord || string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
+            {
+                return;
+            }
+
+            //هر دو سربرگ به‌روز می‌شوند، دقیقا مثل DoCmdHeaderSave: سربرگ فاکتور خرید (FTAG=12) که
+            //GENSANADKHAREED سند را از روی آن می‌سازد، و سربرگ رسید انبار (HTAG=1) که با همان شماره
+            //هم‌گام نگه داشته می‌شود. اگر فقط HTAG نوشته شود، سند هرگز مالیات را نمی‌بیند.
+            dbms.DoExecuteSQL(
+                "UPDATE dbo.HEAD_LST SET MBAA = @MBAA, HMBAA = @HMBAA, TICMBAA = @TICMBAA WHERE NUMBER = @NUMBER AND TAG IN (@FTAG, @HTAG)",
+                new
+                {
+                    MBAA = ReadNumericText(MBAA.Text),
+                    HMBAA = string.IsNullOrWhiteSpace(HMBAA.Text) ? (object)DBNull.Value : HMBAA.Text,
+                    TICMBAA = Convert.ToByte(TICMBAA.IsChecked),
+                    NUMBER = Convert.ToDouble(NUMBER.Text),
+                    FTAG = (int)FTAG,
+                    HTAG = (int)HTAG
+                });
+        }
+
+        /// <summary>
+        /// متن یک فیلد عددی را امن به عدد تبدیل می‌کند. NumericTextBox بعد از پاک کردن توسط کاربر
+        /// می‌تواند موقتا متن خالی برگرداند (همان دلیلی که برای TAKHFIF در DoCmdHeaderSave گارد گذاشته
+        /// شده)؛ Convert.ToDouble روی رشته‌ی خالی استثنا پرتاب می‌کند.
+        /// </summary>
+        private static double ReadNumericText(string text)
+        {
+            return double.TryParse(text, out var value) ? value : 0d;
+        }
+
+        /// <summary>
+        /// مبلغ مالیات بر ارزش افزوده‌ی یک سطر فاکتور خرید را بر اساس مشمولیت کالا (STUF_DEF.CMBAA) و نرخ آن
+        /// (STUF_DEF.VRA یا نرخ پیش‌فرض سازمان از CL_HESABDARI.GetArzesh) محاسبه می‌کند.
+        /// برخلاف فاکتور فروش، این فرم تخفیف سطری ندارد (N_KOL/N_MOIN/N_TAF در INVO_LST این پنجره هیچ‌جا
+        /// مقداردهی نمی‌شوند، فقط کدهای حساب‌اند)، پس مبنای مالیات همان MABL_K است، بدون کسر تخفیف.
+        /// </summary>
+        private void RecalcRowIMBAA(INVO_LST_FACTOR22 row)
+        {
+            if (row == null)
+            {
+                return;
+            }
+
+            if (TICMBAA.IsChecked != true || string.IsNullOrEmpty(row.CODE))
+            {
+                row.IMBAA = 0;
+                return;
+            }
+
+            var itemInfo = dbms.DoGetDataSQL<VAT_ITEM_LOOKUP>("SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE = @CODE", new { CODE = row.CODE }).FirstOrDefault();
+
+            row.IMBAA = itemInfo?.CMBAA == true
+                ? Math.Round((row.MABL_K ?? 0d) * CL_HESABDARI.GetArzesh(row.CODE) / 100)
+                : 0;
+        }
+
+        private void TICMBAA_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyVatUiState();
+
+            if (TICMBAA.IsChecked == true)
+            {
+                //یک کوئری برای گرفتن مشمولیت همه‌ی کالاهای فاکتور، به‌جای یک کوئری به‌ازای هر سطر
+                var codes = INVO_LST_FACTOR22_DATA.Select(r => r.CODE).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                var cmbaaMap = codes.Count > 0
+                    ? dbms.DoGetDataSQL<VAT_ITEM_LOOKUP>("SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE IN @Codes", new { Codes = codes }).ToDictionary(x => x.CODE, x => x.CMBAA)
+                    : new Dictionary<string, bool?>();
+
+                foreach (var row in INVO_LST_FACTOR22_DATA)
+                {
+                    bool eligible = !string.IsNullOrEmpty(row.CODE) && cmbaaMap.TryGetValue(row.CODE, out var cmbaa) && cmbaa == true;
+                    row.IMBAA = eligible ? Math.Round((row.MABL_K ?? 0d) * CL_HESABDARI.GetArzesh(row.CODE) / 100) : 0;
+                }
+            }
+            else
+            {
+                foreach (var row in INVO_LST_FACTOR22_DATA)
+                {
+                    row.IMBAA = 0;
+                }
+            }
+
+            //ترتیب مهم است: اول مالیات سطرها در دیتابیس بنشیند، بعد جمعِ سربرگ (که از همین سطرها
+            //محاسبه می‌شود) نوشته شود، و در آخر سند ساخته شود. اگر سربرگ اول نوشته شود و بعد نوشتن
+            //سطرها خطا بدهد، سربرگ مالیاتی را ادعا می‌کند که در سطرها ثبت نشده است.
+            if (!NewRecord)
+            {
+                //سطرهایی که قبلا در دیتابیس ذخیره شده‌اند، وگرنه IMBAA فقط در حافظه می‌ماند
+                //تا دفعه‌ی بعد که همان سطر دوباره ویرایش و ذخیره شود
+                foreach (var row in INVO_LST_FACTOR22_DATA.Where(r => r.id is not null && r.id > 0))
+                {
+                    dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE id = @ID", new { IMBAA = row.IMBAA ?? 0d, ID = row.id });
+                }
+            }
+
+            RecalcHeaderMBAA();
+
+            //سند حسابداری هم همین الان با مالیات تازه بازسازی شود، نه اینکه تا اولین ویرایش بعدی یک سطر
+            //یا زدن دکمه‌ی ذخیره‌ی سربرگ، مالیات را نشان ندهد
+            if (!NewRecord)
+            {
+                SANAD();
+            }
+        }
+
         private string BEFOREDATEN;
         private void DATE_N_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
@@ -5245,6 +5456,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             HMBAA.Text = null; //مالیات
             CMB_HMBAA.SelectedValue = null;
+
+            //تیک مالیات هم مثل خود مبلغ مالیات باید ریست شود، وگرنه از فاکتور قبلی روی فاکتور جدید
+            //تیک‌خورده می‌ماند در حالی که MBAA صفر شده. پیش‌فرضش از آخرین فاکتور خرید گرفته می‌شود،
+            //همان کاری که Form_BeforeInsert در فاکتور فروش می‌کند (اغلب سازمان‌ها یا همیشه مشمول‌اند یا هیچ‌وقت)
+            TICMBAA.IsChecked = dbms.DoGetDataSQL<bool?>(
+                $"SELECT TOP 1 TICMBAA FROM dbo.HEAD_LST WHERE TAG = {FTAG} ORDER BY NUMBER DESC").FirstOrDefault() ?? false;
+            ApplyVatUiState();
 
             JF.Text = "0"; //جمع کل فاکتور
             HKH.Text = "0"; //هزینه خدمات
