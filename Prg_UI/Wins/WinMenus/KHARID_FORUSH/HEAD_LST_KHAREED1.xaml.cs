@@ -4725,9 +4725,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
         /// </summary>
         private void RecalcHeaderMBAA()
         {
+            //توجه: این متد وقتی تیک مالیات خاموش است مبلغ دستیِ کاربر را صفر می‌کند، پس فقط باید از
+            //TICMBAA_Click (لحظه‌ی برداشتن تیک) با حالت خاموش صدا زده شود. فراخوان‌های دیگر
+            //(ذخیره‌ی سطر / حذف سطر) عمدا با شرط TICMBAA.IsChecked == true محافظت شده‌اند.
             if (TICMBAA.IsChecked != true)
             {
-                if (Convert.ToDouble(MBAA.Text) > 0)
+                if (ReadNumericText(MBAA.Text) > 0)
                 {
                     MBAA.Text = "0";
                     HMBAA.Text = null;
@@ -4782,13 +4785,23 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 "UPDATE dbo.HEAD_LST SET MBAA = @MBAA, HMBAA = @HMBAA, TICMBAA = @TICMBAA WHERE NUMBER = @NUMBER AND TAG IN (@FTAG, @HTAG)",
                 new
                 {
-                    MBAA = Convert.ToDouble(MBAA.Text),
-                    HMBAA = (object)HMBAA.Text ?? DBNull.Value,
+                    MBAA = ReadNumericText(MBAA.Text),
+                    HMBAA = string.IsNullOrWhiteSpace(HMBAA.Text) ? (object)DBNull.Value : HMBAA.Text,
                     TICMBAA = Convert.ToByte(TICMBAA.IsChecked),
                     NUMBER = Convert.ToDouble(NUMBER.Text),
                     FTAG = (int)FTAG,
                     HTAG = (int)HTAG
                 });
+        }
+
+        /// <summary>
+        /// متن یک فیلد عددی را امن به عدد تبدیل می‌کند. NumericTextBox بعد از پاک کردن توسط کاربر
+        /// می‌تواند موقتا متن خالی برگرداند (همان دلیلی که برای TAKHFIF در DoCmdHeaderSave گارد گذاشته
+        /// شده)؛ Convert.ToDouble روی رشته‌ی خالی استثنا پرتاب می‌کند.
+        /// </summary>
+        private static double ReadNumericText(string text)
+        {
+            return double.TryParse(text, out var value) ? value : 0d;
         }
 
         /// <summary>
@@ -4843,19 +4856,25 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-            RecalcHeaderMBAA();
-
-            //سطرهایی که قبلا در دیتابیس ذخیره شده‌اند را هم به‌روز کن، وگرنه IMBAA فقط در حافظه می‌ماند
-            //تا دفعه‌ی بعد که همان سطر دوباره ویرایش و ذخیره شود
+            //ترتیب مهم است: اول مالیات سطرها در دیتابیس بنشیند، بعد جمعِ سربرگ (که از همین سطرها
+            //محاسبه می‌شود) نوشته شود، و در آخر سند ساخته شود. اگر سربرگ اول نوشته شود و بعد نوشتن
+            //سطرها خطا بدهد، سربرگ مالیاتی را ادعا می‌کند که در سطرها ثبت نشده است.
             if (!NewRecord)
             {
+                //سطرهایی که قبلا در دیتابیس ذخیره شده‌اند، وگرنه IMBAA فقط در حافظه می‌ماند
+                //تا دفعه‌ی بعد که همان سطر دوباره ویرایش و ذخیره شود
                 foreach (var row in INVO_LST_FACTOR22_DATA.Where(r => r.id is not null && r.id > 0))
                 {
                     dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE id = @ID", new { IMBAA = row.IMBAA ?? 0d, ID = row.id });
                 }
+            }
 
-                //سند حسابداری هم همین الان با مالیات تازه بازسازی شود، نه اینکه تا اولین ویرایش بعدی یک سطر
-                //یا زدن دکمه‌ی ذخیره‌ی سربرگ، مالیات را نشان ندهد
+            RecalcHeaderMBAA();
+
+            //سند حسابداری هم همین الان با مالیات تازه بازسازی شود، نه اینکه تا اولین ویرایش بعدی یک سطر
+            //یا زدن دکمه‌ی ذخیره‌ی سربرگ، مالیات را نشان ندهد
+            if (!NewRecord)
+            {
                 SANAD();
             }
         }
