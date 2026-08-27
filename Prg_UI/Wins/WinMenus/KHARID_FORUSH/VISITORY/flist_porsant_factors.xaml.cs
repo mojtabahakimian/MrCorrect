@@ -235,19 +235,32 @@ FROM (SELECT * FROM list_porsant_factors {0}) p
              ANBAR_NAME AS PRS_ANBAR_NAME, MABL_ANBAR AS PRS_MABL_ANBAR, RATIO AS PRS_RATIO,
              ANBAR_COUNT AS PRS_ANBAR_COUNT, PURSANT_ANBAR AS PRS_PURSANT_ANBAR
       FROM dbo.VISITOR_PORSANT_ANBAR) a
-       ON a.PRS_NUMBER = p.NUMBER AND a.PRS_TAG = p.TAG AND a.PRS_CUST_NO = p.CUST_NO";
+       {1}";
 
-            try
+            //حالت دوم برای وقتی که ویو قدیمیِ گزارش ستون TAG ندارد: کلیدِ سمتِ پورسانت روی
+            //فاکتور فروش (TAG = 2) بسته می‌شود؛ سطرهای پورسانتِ همین گزارش هم با همان تگ ثبت می‌شوند.
+            string[] joins =
             {
-                var rows = dbms.DoGetDataSQL<FLP>(string.Format(SQL_WITH_ANBAR, Condition)).ToList();
-                SplitByAnbar(rows);
-                return rows;
-            }
-            catch (Exception)
+                "ON a.PRS_NUMBER = p.NUMBER AND a.PRS_TAG = p.TAG AND a.PRS_CUST_NO = p.CUST_NO",
+                "ON a.PRS_NUMBER = p.NUMBER AND a.PRS_CUST_NO = p.CUST_NO AND a.PRS_TAG = 2"
+            };
+
+            foreach (var join in joins)
             {
-                //دیتابیسی که هنوز ویو تفکیک انبار روی آن ساخته نشده: گزارش مثل قبل کار کند
-                return dbms.DoGetDataSQL<FLP>(@$"SELECT * FROM list_porsant_factors {Condition}").ToList();
+                try
+                {
+                    var rows = dbms.DoGetDataSQL<FLP>(string.Format(SQL_WITH_ANBAR, Condition, join)).ToList();
+                    SplitByAnbar(rows);
+                    return rows;
+                }
+                catch (Exception)
+                {
+                    //حالت بعدی امتحان می‌شود
+                }
             }
+
+            //دیتابیسی که هنوز ویو تفکیک انبار روی آن ساخته نشده: گزارش مثل قبل کار کند
+            return dbms.DoGetDataSQL<FLP>(@$"SELECT * FROM list_porsant_factors {Condition}").ToList();
         }
 
         /// <summary>
