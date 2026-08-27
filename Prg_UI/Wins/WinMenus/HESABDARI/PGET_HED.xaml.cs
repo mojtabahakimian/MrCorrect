@@ -3462,6 +3462,13 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (CL_HESABDARI.ISTAF(CURRENT_ITMES_ROW.FHES))
                 {
+                    if (ConstructorRowDetector.IsPristine(CURRENT_ITMES_ROW))
+                    {
+                        // سطر تازه‌ی دست‌نخورده است؛ کاربر قصد اصلاح سطر دیگری را دارد، نه پرکردن همین سطر.
+                        // بدون اخطار و بدون گرفتن دوباره‌ی فوکوس، اجازه بده کلیک/ناوبری او انجام شود.
+                        PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        return;
+                    }
                     universControl.PopNotifyShow("حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ITMES_ROW.FHES = WAS_ROW_ITEM?.FHES;
                     RestoreFocusCell(e);
@@ -3619,6 +3626,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (CL_HESABDARI.ISTAF(CURRENT_ITMES_ROW.THES))
                 {
+                    if (ConstructorRowDetector.IsPristine(CURRENT_ITMES_ROW))
+                    {
+                        PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        return;
+                    }
                     universControl.PopNotifyShow("حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ITMES_ROW.THES = WAS_ROW_ITEM?.THES;
                     RestoreFocusCell(e);
@@ -3688,6 +3700,14 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 ENTERED_VALUE_ROW = ENTERED_VALUE_ROW.ToString().RemoveQut();
                 if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()) || !long.TryParse(ENTERED_VALUE_ROW.ToString(), out _))
                 {
+                    if (ConstructorRowDetector.IsPristine(CURRENT_ITMES_ROW))
+                    {
+                        // سطر تازه‌ی دست‌نخورده است (کاربر چیزی وارد نکرده)؛ کاربر می‌خواهد سطر
+                        // دیگری را اصلاح کند. بدون اخطار و بدون قاپیدن دوباره‌ی فوکوس، ادیت همین
+                        // سلول را رها کن تا کلیک/ناوبری کاربر انجام شود.
+                        PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        return;
+                    }
                     RestoreFocusCell(e);
                     universControl.PopNotifyShow("مبلغ صحیح وارد نشده", Pop1, Pop1Text1, Pop_Border1);
                     return;
