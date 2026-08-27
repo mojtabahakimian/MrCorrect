@@ -136,6 +136,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             public double? NUMBER1 { get; set; }
             public int? mm { get; set; }
             public double? SumOfMABL_K { get; set; }
+
+            //تفکیک انبارِ ارسال بار (از ویو dbo.VISITOR_PORSANT_ANBAR)
+            public int? PRS_ANBAR { get; set; }
+            public string? PRS_ANBAR_NAME { get; set; }
+            public double? PRS_MABL_ANBAR { get; set; }
+            public double? PRS_RATIO { get; set; }
+            public int? PRS_ANBAR_COUNT { get; set; }
+            public double? PRS_PURSANT_ANBAR { get; set; }
+
+            //مقادیر دست‌نخورده‌ی خودِ فاکتور؛ وقتی سطر به نسبت انبار تسهیم می‌شود اینها ثابت می‌مانند
+            public double? PURSANT_KOL { get; set; }
+            public double? MABL_KOL { get; set; }
         }
 
         #region ComboBoxes
@@ -196,7 +208,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             FLIST_PORSANT_DATA?.Clear();
 
-            var MasterHead = dbms.DoGetDataSQL<FLP>(@$"SELECT * FROM list_porsant_factors {Condition}").ToList();
+            var MasterHead = ReadPorsantRows();
 
             foreach (var item in MasterHead)
             {
@@ -205,6 +217,64 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             GenerateAutomaticSummary(SYNCFUSION_DG);
         }
+        /// <summary>
+        /// سطرهای گزارش به همراه تفکیکِ انبارِ ارسال بار.
+        /// هزینه‌ی پورسانتِ باری که از دفتر یزد رفته باید از بارِ کارخانه جدا باشد و ملاکِ دقیق،
+        /// انبارِ خودِ سطرهای فاکتور است نه واحدِ کاربرِ ثبت‌کننده (DEPATMAN)؛ چون ممکن است بار از
+        /// کارخانه رفته باشد و واحدِ کاربر یزد باشد یا برعکس.
+        /// فاکتوری که از چند انبار بار شده، به ازای هر انبار یک سطر می‌گیرد و مبالغش به نسبتِ
+        /// مبلغ خالصِ همان انبار تسهیم می‌شود تا جمعِ سطرها همان عددِ فاکتور بماند.
+        /// </summary>
+        private List<FLP> ReadPorsantRows()
+        {
+            const string SQL_WITH_ANBAR = @"
+SELECT p.*, a.PRS_ANBAR, a.PRS_ANBAR_NAME, a.PRS_MABL_ANBAR, a.PRS_RATIO, a.PRS_ANBAR_COUNT, a.PRS_PURSANT_ANBAR
+FROM (SELECT * FROM list_porsant_factors {0}) p
+     LEFT OUTER JOIN
+     (SELECT NUMBER AS PRS_NUMBER, TAG AS PRS_TAG, CUST_NO AS PRS_CUST_NO, ANBAR AS PRS_ANBAR,
+             ANBAR_NAME AS PRS_ANBAR_NAME, MABL_ANBAR AS PRS_MABL_ANBAR, RATIO AS PRS_RATIO,
+             ANBAR_COUNT AS PRS_ANBAR_COUNT, PURSANT_ANBAR AS PRS_PURSANT_ANBAR
+      FROM dbo.VISITOR_PORSANT_ANBAR) a
+       ON a.PRS_NUMBER = p.NUMBER AND a.PRS_TAG = p.TAG AND a.PRS_CUST_NO = p.CUST_NO";
+
+            try
+            {
+                var rows = dbms.DoGetDataSQL<FLP>(string.Format(SQL_WITH_ANBAR, Condition)).ToList();
+                SplitByAnbar(rows);
+                return rows;
+            }
+            catch (Exception)
+            {
+                //دیتابیسی که هنوز ویو تفکیک انبار روی آن ساخته نشده: گزارش مثل قبل کار کند
+                return dbms.DoGetDataSQL<FLP>(@$"SELECT * FROM list_porsant_factors {Condition}").ToList();
+            }
+        }
+
+        /// <summary>
+        /// تسهیم مبالغ سطر به نسبت سهم انبار. فاکتور تک‌انباره دست‌نخورده می‌ماند و فقط
+        /// نام/کد انبارش پر می‌شود؛ یعنی برای اکثر فاکتورها هیچ عددی تغییر نمی‌کند.
+        /// </summary>
+        private static void SplitByAnbar(List<FLP> rows)
+        {
+            foreach (var row in rows)
+            {
+                row.PURSANT_KOL = row.PURSANT;
+                row.MABL_KOL = row.SumOfMABL_K;
+
+                if ((row.PRS_ANBAR_COUNT ?? 0) <= 1 || !row.PRS_RATIO.HasValue)
+                {
+                    row.PRS_PURSANT_ANBAR ??= row.PURSANT;
+                    continue;
+                }
+
+                double ratio = row.PRS_RATIO.Value;
+
+                row.PURSANT = row.PRS_PURSANT_ANBAR ?? Math.Round((row.PURSANT ?? 0) * ratio);
+                if (row.SumOfMABL_K.HasValue) row.SumOfMABL_K = Math.Round(row.SumOfMABL_K.Value * ratio);
+                if (row.Expr2.HasValue) row.Expr2 = Math.Round(row.Expr2.Value * ratio);
+            }
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             //if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)

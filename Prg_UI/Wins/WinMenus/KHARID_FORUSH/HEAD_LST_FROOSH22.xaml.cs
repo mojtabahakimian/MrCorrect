@@ -10428,6 +10428,57 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
             }
             //SAYER_VISITOR_DATA.ItemsSource = PAY_GETD_SUB22_DATA;
+
+            RefreshRouteVisitorHint();
+        }
+
+        /// <summary>
+        /// با ورود به تب «سایر»، ویزیتورِ مسیر ویزیتِ مشتری تازه‌سازی می‌شود؛
+        /// چون ممکن است مشتری همین حالا در تب فاکتور انتخاب یا عوض شده باشد.
+        /// </summary>
+        private void Page155_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is bool isFocused && isFocused)
+            {
+                RefreshRouteVisitorHint();
+            }
+        }
+
+        /// <summary>
+        /// نمایش ویزیتورِ خودِ مشتری (از مسیر ویزیت) بالای گرید پورسانت.
+        /// پورسانت این فاکتور باید به نام همین شخص بخورد، نه به نام کاربری که برگه را ثبت کرده؛
+        /// چون ممکن است پیش‌فاکتور را کاربر دیگری به جای ویزیتور ثبت کرده باشد.
+        /// dbo.CalculateVisitorPorsant هم دقیقاً همین حساب را انتخاب می‌کند.
+        /// </summary>
+        private void RefreshRouteVisitorHint()
+        {
+            if (LBL_ROUTE_VISITOR is null)
+            {
+                return;
+            }
+
+            try
+            {
+                string custNo = CUST_NO?.SelectedValue?.ToStringNullSafe() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(custNo))
+                {
+                    LBL_ROUTE_VISITOR.Content = string.Empty;
+                    return;
+                }
+
+                string visitorHes = CL_HESABDARI.GetVisitHES(custNo);
+                if (string.IsNullOrWhiteSpace(visitorHes))
+                {
+                    LBL_ROUTE_VISITOR.Content = "ویزیتور مسیر ویزیت مشتری: تعریف نشده";
+                    return;
+                }
+
+                LBL_ROUTE_VISITOR.Content = $"ویزیتور مسیر ویزیت مشتری: {CL_HESABDARI.GETHESNAME(visitorHes)} ({visitorHes})";
+            }
+            catch (Exception)
+            {
+                LBL_ROUTE_VISITOR.Content = string.Empty;
+            }
         }
         public VISITOR_DTL CURRENT_ROW_VISITOR { get; set; }
         public long OKDATE { get; private set; }

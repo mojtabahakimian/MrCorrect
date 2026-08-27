@@ -226,5 +226,16 @@ namespace Prg_Proccessy.SQLMODELS
         public string? OSNAME { get => _osname; set { if (_osname == value) return; _osname = value; OnPropertyChanged("OSNAME"); } }
         private string? _cityname;
         public string? CITYNAME { get => _cityname; set { if (_cityname == value) return; _cityname = value; OnPropertyChanged("CITYNAME"); } }
+
+        //پورسانتِ پشتِ فاکتور (ویو dbo.KALAS_PORSANT): پورسانت سطحِ فاکتور است و روی سطرهای
+        //کالای همان فاکتور تکرار می‌شود؛ اگر فاکتور چند ویزیتور داشته باشد نام‌ها کنار هم و مبالغ جمع می‌آیند.
+        private string? _prs_visitor;
+        public string? PRS_VISITOR { get => _prs_visitor; set { if (_prs_visitor == value) return; _prs_visitor = value; OnPropertyChanged("PRS_VISITOR"); } }
+        private string? _prs_visitor_name;
+        public string? PRS_VISITOR_NAME { get => _prs_visitor_name; set { if (_prs_visitor_name == value) return; _prs_visitor_name = value; OnPropertyChanged("PRS_VISITOR_NAME"); } }
+        private double? _prs_darsad;
+        public double? PRS_DARSAD { get => _prs_darsad; set { if (_prs_darsad == value) return; _prs_darsad = value; OnPropertyChanged("PRS_DARSAD"); } }
+        private double? _prs_pursant;
+        public double? PRS_PURSANT { get => _prs_pursant; set { if (_prs_pursant == value) return; _prs_pursant = value; OnPropertyChanged("PRS_PURSANT"); } }
     }
 }
