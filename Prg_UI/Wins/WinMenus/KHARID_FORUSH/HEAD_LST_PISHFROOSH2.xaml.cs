@@ -5000,26 +5000,39 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     }
                                 }
 
-                                // کپی اطلاعات ویزیتور
-                                var visitorInfo = db.Query<dynamic>($@"
-                                    SELECT CUST_NO, DARSAD, PURSANT, TOZIH, PORID 
-                                    FROM dbo.VISITOR_DTL 
-                                    WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction).FirstOrDefault();
-
-                                if (visitorInfo != null)
+                                // ثبت اطلاعات ویزیتور بر اساس مسیر ویزیت مشتری (با درصد/مبلغ پورسانت صفر)
+                                string routeVisitorHes = CL_HESABDARI.GetVisitHES(CUST_NO.SelectedValue?.ToString() ?? "");
+                                if (!string.IsNullOrEmpty(routeVisitorHes))
                                 {
-                                    if (string.IsNullOrEmpty(visitorInfo.CUST_NO?.ToString()))
-                                    {
-                                        new Msgwin(false, "مشخصات ویزیتور صحیح نیست و اشکال دارد. پورسانت ویزیتور در فاکتور را بررسی و اصلاح کنید").ShowDialog();
-                                    }
-
                                     db.Execute($@"
                                         INSERT INTO dbo.VISITOR_DTL 
                                             (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, PORID)
-                                        SELECT 
-                                            {num}, 2, CUST_NO, DARSAD, PURSANT, TOZIH, PORID 
+                                        VALUES
+                                            ({num}, 2, N'{routeVisitorHes}', 0, 0, N'ثبت شده بر اساس مسیر ویزیت مشتری', NULL)", null, transaction);
+                                }
+                                else
+                                {
+                                    // اگر ویزیتور مسیر یافت نشد، کپی اطلاعات ویزیتور از پیش‌فاکتور انجام می‌شود
+                                    var visitorInfo = db.Query<dynamic>($@"
+                                        SELECT CUST_NO, DARSAD, PURSANT, TOZIH, PORID
                                         FROM dbo.VISITOR_DTL 
-                                        WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction);
+                                        WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction).FirstOrDefault();
+
+                                    if (visitorInfo != null)
+                                    {
+                                        if (string.IsNullOrEmpty(visitorInfo.CUST_NO?.ToString()))
+                                        {
+                                            new Msgwin(false, "مشخصات ویزیتور صحیح نیست و اشکال دارد. پورسانت ویزیتور در فاکتور را بررسی و اصلاح کنید").ShowDialog();
+                                        }
+
+                                        db.Execute($@"
+                                            INSERT INTO dbo.VISITOR_DTL
+                                                (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, PORID)
+                                            SELECT
+                                                {num}, 2, CUST_NO, DARSAD, PURSANT, TOZIH, PORID
+                                            FROM dbo.VISITOR_DTL
+                                            WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction);
+                                    }
                                 }
 
                                 // تایید تراکنش
@@ -5626,26 +5639,39 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     }
                                 }
 
-                                // کپی اطلاعات ویزیتور
-                                var visitorInfo = db.Query<dynamic>($@"
-                            SELECT CUST_NO, DARSAD, PURSANT, TOZIH, PORID 
-                            FROM dbo.VISITOR_DTL 
-                            WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction).FirstOrDefault();
-
-                                if (visitorInfo != null)
+                                // ثبت اطلاعات ویزیتور بر اساس مسیر ویزیت مشتری (با درصد/مبلغ پورسانت صفر)
+                                string routeVisitorHes2 = CL_HESABDARI.GetVisitHES(CUST_NO.SelectedValue?.ToString() ?? "");
+                                if (!string.IsNullOrEmpty(routeVisitorHes2))
                                 {
-                                    if (string.IsNullOrEmpty(visitorInfo.CUST_NO?.ToString()))
-                                    {
-                                        new Msgwin(false, "مشخصات ویزیتور صحیح نیست و اشکال دارد. پورسانت ویزیتور در فاکتور را بررسی و اصلاح کنید").ShowDialog();
-                                    }
-
                                     db.Execute($@"
-                                INSERT INTO dbo.VISITOR_DTL 
-                                    (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, PORID)
-                                SELECT 
-                                    {num}, 2, CUST_NO, DARSAD, PURSANT, TOZIH, PORID 
-                                FROM dbo.VISITOR_DTL 
-                                WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction);
+                                        INSERT INTO dbo.VISITOR_DTL
+                                            (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, PORID)
+                                        VALUES
+                                            ({num}, 2, N'{routeVisitorHes2}', 0, 0, N'ثبت شده بر اساس مسیر ویزیت مشتری', NULL)", null, transaction);
+                                }
+                                else
+                                {
+                                    // اگر ویزیتور مسیر یافت نشد، کپی اطلاعات ویزیتور از پیش‌فاکتور انجام می‌شود
+                                    var visitorInfo = db.Query<dynamic>($@"
+                                        SELECT CUST_NO, DARSAD, PURSANT, TOZIH, PORID
+                                        FROM dbo.VISITOR_DTL
+                                        WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction).FirstOrDefault();
+
+                                    if (visitorInfo != null)
+                                    {
+                                        if (string.IsNullOrEmpty(visitorInfo.CUST_NO?.ToString()))
+                                        {
+                                            new Msgwin(false, "مشخصات ویزیتور صحیح نیست و اشکال دارد. پورسانت ویزیتور در فاکتور را بررسی و اصلاح کنید").ShowDialog();
+                                        }
+
+                                        db.Execute($@"
+                                            INSERT INTO dbo.VISITOR_DTL
+                                                (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, PORID)
+                                            SELECT
+                                                {num}, 2, CUST_NO, DARSAD, PURSANT, TOZIH, PORID
+                                            FROM dbo.VISITOR_DTL
+                                            WHERE NUMBER = {NUMBER.Text} AND TAG = 20", null, transaction);
+                                    }
                                 }
 
                                 // تایید تراکنش
