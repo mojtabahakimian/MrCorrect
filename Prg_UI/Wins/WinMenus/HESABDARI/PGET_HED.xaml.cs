@@ -2146,8 +2146,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     {
                         if (PGET_LST_SUB.Items.Count > 0)
                         {
-                            var targetIndex = PGET_LST_SUB.Items.Count - 1;
-                            CL_LMethods.FocusCellReadyToEdit(PGET_LST_SUB, "NO_AM", targetIndex, true);
+                            var targetIndex = PGET_LST_SUB.SelectedIndex >= 0 ? PGET_LST_SUB.SelectedIndex : PGET_LST_SUB.Items.Count - 1;
+                            CL_LMethods.FocusCellReadyToEdit(PGET_LST_SUB, "NO_AM", targetIndex, false);
                         }
                     }), System.Windows.Threading.DispatcherPriority.Background);
                 }
@@ -4141,11 +4141,18 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (IsReallyNull == true)
                 {
-                    // CancelEdit قبلی، سطر نیمه‌پر را با هر افت فوکوس (مثلا باز کردن گزارش صورت‌حساب) کامل حذف می‌کرد؛
-                    // اینجا به‌جای حذف، سطر در حالت ویرایش نگه داشته و روی ستون مبلغ برگردانده می‌شود
-                    e.Cancel = true;
-                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
-                    return;
+                    if (ConstructorRowDetector.IsPristine(THE_ROW_ITEM))
+                    {
+                        PGET_HED_SUB_CANCEL_EDIT();
+                        return;
+                    }
+                    else
+                    {
+                        // سطر نیمه‌پر که کاربر شروع به پرکردن آن کرده را در حالت ویرایش نگه می‌دارد
+                        e.Cancel = true;
+                        ReEnterRowEdit(THE_ROW_ITEM, "MABL");
+                        return;
+                    }
                 }
             }
             if (THE_ROW_ITEM is not null)

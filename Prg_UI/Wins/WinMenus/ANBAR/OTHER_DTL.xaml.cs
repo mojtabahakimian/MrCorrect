@@ -837,9 +837,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 universControl.PopNotifyShowUp(".نوع ماشین نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
             }
-            if (TOZIH.Text?.Length > 150)
+            if (TOZIH.Text?.Length > 1000)
             {
-                universControl.PopNotifyShowUp(".توضیحات نباید بیشتر از ۱۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                universControl.PopNotifyShowUp(".توضیحات نباید بیشتر از ۱۰۰۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
             }
 
