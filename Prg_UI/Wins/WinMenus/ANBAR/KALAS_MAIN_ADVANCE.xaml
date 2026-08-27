@@ -820,6 +820,16 @@
                     DisplayMemberPath="CITYNAME"/>
 
                     <syncfusion:GridTextColumn HeaderText="مسیر ویزیت" MappingName="ROUTE_NAME" x:Name="ROUTE_NAME"  TextAlignment="Left"  IsHidden="True"/>
+
+                    <!--پورسانتِ پشتِ فاکتور: ویزیتور از مسیر ویزیتِ مشتری می‌آید، نه کاربرِ ثبت‌کننده-->
+                    <syncfusion:GridTextColumn HeaderText="کد ویزیتور پورسانت" MappingName="PRS_VISITOR" x:Name="PRS_VISITOR" TextAlignment="Left" IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="ویزیتور پورسانت" MappingName="PRS_VISITOR_NAME" x:Name="PRS_VISITOR_NAME" TextAlignment="Left" IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="درصد پورسانت" MappingName="PRS_DARSAD" x:Name="PRS_DARSAD" TextAlignment="Left" IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="مبلغ پورسانت" MappingName="PRS_PURSANT" x:Name="PRS_PURSANT" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="PRS_PURSANT" StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
                     <!--<syncfusion:GridComboBoxColumn 
                     x:Name="ROUTE_NAME"
                     HeaderText="مسیر ویزیت"

@@ -672,6 +672,30 @@
 
                 <syncfusion:GridTextColumn HeaderText="کاربر" MappingName="USER_NAME" Width="150"/>
                 <syncfusion:GridTextColumn HeaderText="مسیر ویزیت" MappingName="ROUTE_NAME" Width="400"/>
+
+                <!--تفکیک انبارِ ارسال بار: هزینه پورسانتِ بارِ هر انبار (دفتر یزد / کارخانه) جدا شود.
+                    ملاک، انبارِ خودِ سطرهای فاکتور است نه واحدِ کاربرِ ثبت‌کننده.-->
+                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="PRS_ANBAR" Width="100"/>
+                <syncfusion:GridTextColumn HeaderText="انبار ارسال بار" MappingName="PRS_ANBAR_NAME" Width="250"/>
+                <syncfusion:GridTextColumn HeaderText="تعداد انبار فاکتور" MappingName="PRS_ANBAR_COUNT" Width="130"/>
+
+                <syncfusion:GridTextColumn HeaderText="پورسانت انبار" MappingName="PRS_PURSANT_ANBAR" Width="200">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="PRS_PURSANT_ANBAR" StringFormat="{}{0:#,0}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+
+                <syncfusion:GridTextColumn HeaderText="پورسانت کل فاکتور" MappingName="PURSANT_KOL" Width="200">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="PURSANT_KOL" StringFormat="{}{0:#,0}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+
+                <syncfusion:GridTextColumn HeaderText="مبلغ کل فاکتور" MappingName="MABL_KOL" Width="250">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="MABL_KOL" StringFormat="{}{0:#,0}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
                 
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>

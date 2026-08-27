@@ -1008,7 +1008,7 @@
                     </ComboBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="سایر" x:Name="Page155" d:IsEnabled="True">
+            <TabItem Header="سایر" x:Name="Page155" d:IsEnabled="True" IsKeyboardFocusWithinChanged="Page155_IsKeyboardFocusWithinChanged">
                 <TabItem.Style>
                     <Style TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
                         <Style.Triggers>
@@ -1037,6 +1037,9 @@
                         </Style>
                     </Grid.Style>
                     <Label Content="پورسانت" Margin="0,46,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <!--ویزیتورِ خودِ مشتری (از مسیر ویزیت) تا معلوم باشد پورسانت این فاکتور به نام چه کسی باید بخورد،
+                        حتی وقتی پیش‌فاکتور را کاربر دیگری به جای او ثبت کرده است.-->
+                    <Label x:Name="LBL_ROUTE_VISITOR" Content="" ToolTip="ویزیتوری که این مشتری در مسیر ویزیت او تعریف شده است" Margin="0,46,170,0" FlowDirection="RightToLeft" FontSize="10" Foreground="#FF1565C0" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="شماره فاکتور :" Margin="0,10,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="تاریخ فاکتور :" Margin="0,10,179,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="مشتری :" Margin="0,10,324,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>

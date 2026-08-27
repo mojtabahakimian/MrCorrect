@@ -193,6 +193,28 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // x:Name در صورت تعریف دستی
             return this.FindName(name) as GridColumn;
         }
+        /// <summary>
+        /// اجرای کوئریِ ساخته‌شده. اگر دیتابیس هنوز ویو dbo.KALAS_PORSANT (پورسانتِ پشتِ فاکتور)
+        /// را نداشته باشد، همان کوئری روی KALAS اجرا می‌شود تا جستجوی گردش کالا از کار نیفتد؛
+        /// در این حالت فقط ستون‌های پورسانت خالی می‌مانند.
+        /// </summary>
+        private List<KALAS> ReadRows(string query)
+        {
+            try
+            {
+                return dbms.DoGetDataSQL<KALAS>(query).ToList();
+            }
+            catch (Exception) when (query.IndexOf("KALAS_PORSANT", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                //ستون‌های پورسانت از لیست انتخابی برداشته و منبع به خود KALAS برگردانده می‌شود
+                var fallback = System.Text.RegularExpressions.Regex
+                                     .Replace(query, @",\s*PRS_[A-Za-z_]+", string.Empty)
+                                     .Replace("KALAS_PORSANT", "KALAS");
+
+                return dbms.DoGetDataSQL<KALAS>(fallback).ToList();
+            }
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //Process Prc = ProcLoader.Start();
@@ -240,7 +262,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             //CL_LMethods.DoWriteMyLog(SqlQueryPassed, default);
 
-            var MasterHead = dbms.DoGetDataSQL<KALAS>(SqlQueryPassed).ToList();
+            var MasterHead = ReadRows(SqlQueryPassed);
             foreach (var item in MasterHead)
             {
                 FACTOR_DATA.Add(item);
