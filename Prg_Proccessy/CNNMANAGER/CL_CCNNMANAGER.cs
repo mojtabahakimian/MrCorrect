@@ -483,10 +483,14 @@ namespace Prg_SendInvoice.CNNMANAGER
                         ConnectedToSQLDB = false;
                     }
 
+                    await LogSqlQueryAsync(sql, sqlEx);
+
                     throw; // Rethrow the exception to be handled by the caller
                 }
-                catch
+                catch (Exception ex)
                 {
+                    await LogSqlQueryAsync(sql, ex);
+
                     throw; // Rethrow the exception to be handled by the caller
                 }
                 finally

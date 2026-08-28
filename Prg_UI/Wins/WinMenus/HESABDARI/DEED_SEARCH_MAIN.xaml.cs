@@ -643,7 +643,7 @@ namespace Wins.WinMenus.HESABDARI
 
         private static string NormalizeNumericText(string value)
         {
-            return value.Replace(",", string.Empty).Trim();
+            return value.FixPersianChars().Replace(",", string.Empty).Trim();
         }
 
         private static string GetComboValueOrText(ComboBox comboBox)
