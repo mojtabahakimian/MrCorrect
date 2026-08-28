@@ -393,13 +393,26 @@ namespace Prg_SendInvoice.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public async Task<int?> DoExecuteSQLAsync(string sql, object parameters = null)
         {
-            using (var db = new SqlConnection(CONNECTION_STR))
+            // مثل DoExecuteSQL همزمان: برای خطاهای گذرای اتصال، چند بار تلاش مجدد کوتاه و
+            // بدون انسداد UI (چون Async است) انجام می‌شود. خطاهای احراز هویت/دامنه که با
+            // تلاش مجدد حل نمی‌شوند (IsNonRetriableAuthenticationError) بلافاصله throw می‌شوند.
+            const int maxRetries = 3;
+            const int maxDeadlockRetries = 8;
+
+            for (int attempt = 0; ; attempt++)
             {
+                var db = new SqlConnection(CONNECTION_STR);
                 try
                 {
                     await db.OpenAsync();
                     var result = await db.ExecuteAsync(sql, parameters, commandTimeout: 3600);
                     return result;
+                }
+                catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
+                                              && attempt < (ex.Number == 1205 ? maxDeadlockRetries : maxRetries))
+                {
+                    await Task.Delay(RetryDelayMs(attempt, ex.Number == 1205));
+                    continue;
                 }
                 catch (SqlException sqlEx)
                 {
@@ -432,7 +445,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                         await db.CloseAsync();
                     }
                     await db.DisposeAsync();
-
                 }
             }
         }
@@ -441,8 +453,15 @@ namespace Prg_SendInvoice.CNNMANAGER
         //Asyncronize{↓
         public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync<TEntity>(string sql, object? parameters = null)
         {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            // مثل DoGetDataSQL همزمان: برای خطاهای گذرای اتصال، چند بار تلاش مجدد کوتاه و
+            // بدون انسداد UI (چون Async است) انجام می‌شود. خطاهای احراز هویت/دامنه که با
+            // تلاش مجدد حل نمی‌شوند (IsNonRetriableAuthenticationError) بلافاصله throw می‌شوند.
+            const int maxRetries = 3;
+            const int maxDeadlockRetries = 8;
+
+            for (int attempt = 0; ; attempt++)
             {
+                using SqlConnection db = new SqlConnection(CONNECTION_STR);
                 try
                 {
                     await db.OpenAsync();
@@ -451,12 +470,27 @@ namespace Prg_SendInvoice.CNNMANAGER
                     //await db.ExecuteAsync("SET ARITHABORT OFF");
                     return results;
                 }
-                catch (SqlException ex)
+                catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
+                                              && attempt < (ex.Number == 1205 ? maxDeadlockRetries : maxRetries))
                 {
+                    await Task.Delay(RetryDelayMs(attempt, ex.Number == 1205));
+                    continue;
+                }
+                catch (SqlException sqlEx)
+                {
+                    if (IsConnectionRelated(sqlEx))
+                    {
+                        ConnectedToSQLDB = false;
+                    }
+
+                    await LogSqlQueryAsync(sql, sqlEx);
+
                     throw; // Rethrow the exception to be handled by the caller
                 }
-                catch
+                catch (Exception ex)
                 {
+                    await LogSqlQueryAsync(sql, ex);
+
                     throw; // Rethrow the exception to be handled by the caller
                 }
                 finally

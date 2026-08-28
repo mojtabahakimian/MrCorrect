@@ -486,6 +486,12 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(TNUMBER.Text))
             {
                 Chshart();
+                var normalizedTNumber = NormalizeNumericText(TNUMBER.Text);
+                if (!double.TryParse(normalizedTNumber, out _))
+                {
+                    new Msgwin(false, "مقدار وارد شده برای شماره تفصیلی باید عددی باشد!").ShowDialog();
+                    return;
+                }
                 if (TNUMBERB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(TNUMBERT.Text))
@@ -493,11 +499,17 @@ namespace Wins.WinMenus.HESABDARI
                         new Msgwin(false, "پارامترها كافي نيست!").ShowDialog();
                         return;
                     }
-                    SHART += $"(TNUMBER BETWEEN {TNUMBER.Text} AND {TNUMBERT.Text})";
+                    var normalizedTNumberT = NormalizeNumericText(TNUMBERT.Text);
+                    if (!double.TryParse(normalizedTNumberT, out _))
+                    {
+                        new Msgwin(false, "مقدار وارد شده برای شماره تفصیلی باید عددی باشد!").ShowDialog();
+                        return;
+                    }
+                    SHART += $"(TNUMBER BETWEEN {normalizedTNumber} AND {normalizedTNumberT})";
                 }
                 else
                 {
-                    SHART += $"(TNUMBER {TNUMBERB.Text} {TNUMBER.Text})";
+                    SHART += $"(TNUMBER {TNUMBERB.Text} {normalizedTNumber})";
                 }
             }
 
@@ -631,7 +643,7 @@ namespace Wins.WinMenus.HESABDARI
 
         private static string NormalizeNumericText(string value)
         {
-            return value.Replace(",", string.Empty).Trim();
+            return value.FixPersianChars().Replace(",", string.Empty).Trim();
         }
 
         private static string GetComboValueOrText(ComboBox comboBox)

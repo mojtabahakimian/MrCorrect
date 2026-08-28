@@ -1758,9 +1758,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     #region AfterUpdate
-                    if (CURRENT_ROW_ITEMS.CODE != null && !string.IsNullOrEmpty((e.EditingElement as ComboBox).SelectedValue.ToStringNullSafe()))
+                    var VAHED_K_ComboBox = e.EditingElement as ComboBox;
+                    if (CURRENT_ROW_ITEMS.CODE != null && VAHED_K_ComboBox != null && !string.IsNullOrEmpty(VAHED_K_ComboBox.SelectedValue.ToStringNullSafe()))
                     {
-                        CURRENT_ROW_ITEMS.MEGHk = Convert.ToDouble(CURRENT_ROW_ITEMS.MEGH) * CL_HESABDARI.GETNESBAT(CURRENT_ROW_ITEMS.CODE, Convert.ToInt32((e.EditingElement as ComboBox).SelectedValue));
+                        CURRENT_ROW_ITEMS.MEGHk = Convert.ToDouble(CURRENT_ROW_ITEMS.MEGH) * CL_HESABDARI.GETNESBAT(CURRENT_ROW_ITEMS.CODE, Convert.ToInt32(VAHED_K_ComboBox.SelectedValue));
 
                         var TheCol = INVO_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "MEGHk").DisplayIndex;
                         var DGCInf = new DataGridCellInfo(INVO_LST_SUB.Items[CURRENT_ROW_INVO_LST_PISH2_INDEX], INVO_LST_SUB.Columns[TheCol]);
@@ -1768,11 +1769,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         if (CURRENT_ROW_ITEMS.MABL == 0)
                         {
-                            TheDGCell_MABL_K.IsTabStop = true;
+                            if (TheDGCell_MABL_K != null) TheDGCell_MABL_K.IsTabStop = true;
                         }
                         else
                         {
-                            TheDGCell_MABL_K.IsTabStop = true;
+                            if (TheDGCell_MABL_K != null) TheDGCell_MABL_K.IsTabStop = true;
                             CURRENT_ROW_ITEMS.MABL_K = Math.Round(Convert.ToDouble(CURRENT_ROW_ITEMS.MABL) * Convert.ToDouble(CURRENT_ROW_ITEMS.MEGHk));
                         }
                         CURRENT_ROW_ITEMS.N_MOIN = Math.Round(System.Convert.ToDouble(Convert.ToDouble(CURRENT_ROW_ITEMS.N_KOL) * Convert.ToDouble(CURRENT_ROW_ITEMS.MABL_K)) / 100) + Math.Round((Convert.ToDouble(CURRENT_ROW_ITEMS.MABL_K) - Math.Round(System.Convert.ToDouble(Convert.ToDouble(CURRENT_ROW_ITEMS.N_KOL) * Convert.ToDouble(CURRENT_ROW_ITEMS.MABL_K)) / 100)) * Convert.ToDouble(CURRENT_ROW_ITEMS.TKHN) / 100);

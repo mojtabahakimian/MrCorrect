@@ -173,6 +173,12 @@ namespace Prg_UI
                     if (isConnectionIssue)
                     {
                         CL_CCNNMANAGER.ConnectedToSQLDB = false;
+
+                        // توجه: نه همه‌ی مسیرهای اجرای کوئری در برنامه retry خودکار دارند (مثلاً
+                        // TransactionManagement/CL_ConcurrencyManager فقط deadlock را retry می‌کنند،
+                        // نه خطای اتصال)، پس اینجا نمی‌گوییم «برنامه چند بار تلاش کرد» چون ممکن است
+                        // اصلاً تلاش مجددی رخ نداده باشد. فقط به‌وضوح می‌گوییم ارتباط قطع شده است.
+                        userMessage = "ارتباط با سرور پایگاه داده قطع شده است.\n" + userMessage;
                     }
 
 
