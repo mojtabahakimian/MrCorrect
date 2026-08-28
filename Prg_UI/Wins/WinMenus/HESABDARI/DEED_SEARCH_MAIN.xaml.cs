@@ -486,11 +486,21 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(TNUMBER.Text))
             {
                 Chshart();
+                if (!double.TryParse(NormalizeNumericText(TNUMBER.Text), out _))
+                {
+                    new Msgwin(false, "مقدار وارد شده برای شماره تفصیلی باید عددی باشد!").ShowDialog();
+                    return;
+                }
                 if (TNUMBERB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(TNUMBERT.Text))
                     {
                         new Msgwin(false, "پارامترها كافي نيست!").ShowDialog();
+                        return;
+                    }
+                    if (!double.TryParse(NormalizeNumericText(TNUMBERT.Text), out _))
+                    {
+                        new Msgwin(false, "مقدار وارد شده برای شماره تفصیلی باید عددی باشد!").ShowDialog();
                         return;
                     }
                     SHART += $"(TNUMBER BETWEEN {TNUMBER.Text} AND {TNUMBERT.Text})";

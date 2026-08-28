@@ -2422,7 +2422,11 @@ namespace Functions
                     case 13:
                         //گرفتن شماره فاکتور و شماره حواله از فاکتور های فروش
                         //Get Parameters: Numbers > IsDirect > IsExport > IsfromAutomasion
-                        var RST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT NUMBER, NUMBER1 FROM dbo.HEAD_LST WHERE NUMBER={_NUM_} AND TAG=13").FirstOrDefault();
+                        if (_NUM_ == null || string.IsNullOrWhiteSpace(_NUM_.ToString()))
+                        {
+                            break;
+                        }
+                        var RST = dbms.DoGetDataSQL<HEAD_LST>("SELECT NUMBER, NUMBER1 FROM dbo.HEAD_LST WHERE NUMBER=@Num AND TAG=13", new { Num = Convert.ToDouble(_NUM_) }).FirstOrDefault();
                         if (RST != null && RST?.NUMBER1 != null)
                         {
                             var NUMBERTOOPEN = $"{RST.NUMBER1},{RST.NUMBER}";
