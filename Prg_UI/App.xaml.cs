@@ -243,6 +243,7 @@ namespace Prg_UI
 
                         connectionWindow.ShowDialog();
                     }
+                    catch { }
                     finally
                     {
                         _isHandlingSqlConnectionFailure = false;

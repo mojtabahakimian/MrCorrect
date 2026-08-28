@@ -452,11 +452,12 @@ namespace Prg_UI.Functions
             }
             return null;
         }
-        public static DataGridCell GetDataGridCell(DataGridCellInfo cellInfo)
+        public static DataGridCell? GetDataGridCell(DataGridCellInfo cellInfo)
         {
+            if (cellInfo.Column == null || cellInfo.Item == null) return null;
             var cellContent = cellInfo.Column.GetCellContent(cellInfo.Item);
             if (cellContent != null)
-                return (DataGridCell)cellContent.Parent;
+                return cellContent.Parent as DataGridCell;
 
             return null;
         }
