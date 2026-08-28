@@ -486,7 +486,8 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(TNUMBER.Text))
             {
                 Chshart();
-                if (!double.TryParse(NormalizeNumericText(TNUMBER.Text), out _))
+                var normalizedTNumber = NormalizeNumericText(TNUMBER.Text);
+                if (!double.TryParse(normalizedTNumber, out _))
                 {
                     new Msgwin(false, "مقدار وارد شده برای شماره تفصیلی باید عددی باشد!").ShowDialog();
                     return;
@@ -498,16 +499,17 @@ namespace Wins.WinMenus.HESABDARI
                         new Msgwin(false, "پارامترها كافي نيست!").ShowDialog();
                         return;
                     }
-                    if (!double.TryParse(NormalizeNumericText(TNUMBERT.Text), out _))
+                    var normalizedTNumberT = NormalizeNumericText(TNUMBERT.Text);
+                    if (!double.TryParse(normalizedTNumberT, out _))
                     {
                         new Msgwin(false, "مقدار وارد شده برای شماره تفصیلی باید عددی باشد!").ShowDialog();
                         return;
                     }
-                    SHART += $"(TNUMBER BETWEEN {TNUMBER.Text} AND {TNUMBERT.Text})";
+                    SHART += $"(TNUMBER BETWEEN {normalizedTNumber} AND {normalizedTNumberT})";
                 }
                 else
                 {
-                    SHART += $"(TNUMBER {TNUMBERB.Text} {TNUMBER.Text})";
+                    SHART += $"(TNUMBER {TNUMBERB.Text} {normalizedTNumber})";
                 }
             }
 
