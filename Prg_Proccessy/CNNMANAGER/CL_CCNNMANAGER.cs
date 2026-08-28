@@ -150,7 +150,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             18488   // The password must be changed before logging on for the first time
         };
 
-        public static bool IsNonRetriableAuthenticationError(SqlException? exception)
+        private static bool IsNonRetriableAuthenticationError(SqlException? exception)
         {
             if (exception is null)
             {
