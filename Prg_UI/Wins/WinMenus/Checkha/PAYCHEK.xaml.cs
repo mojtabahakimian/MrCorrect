@@ -125,6 +125,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public bool IsReadOnlyMode { get; set; } = false;
 
         // کلیدهای اصلی رکورد در زمان Load - برای استفاده در Save
+        private long? CurrentRecordID = null;
         private double? _original_N_SERI = null;
         private int? _original_BANK = null;
         private long? _original_DATE_S = null;
@@ -158,6 +159,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     SAYADI.Text = CheckExistData.FirstOrDefault()?.SAYADI;
 
                     // ✅ ذخیره کلید اولیه برای استفاده در Save
+                    CurrentRecordID = CheckExistData.FirstOrDefault()?.ID;
                     _original_N_SERI = CheckExistData.FirstOrDefault()?.N_SERI;
                     _original_BANK = CheckExistData.FirstOrDefault()?.BANK;
                     _original_DATE_S = CheckExistData.FirstOrDefault()?.DATE_S;
@@ -337,9 +339,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             #region After_Update
             if (!IsNull(this.N_SERI.Text) & !IsNull(this.BANK.SelectedValue))
             {
-                string excludeQuery = _original_N_SERI != null && _original_BANK != null
-                    ? $" AND NOT (N_SERI = '{_original_N_SERI}' AND BANK = {_original_BANK})"
-                    : "";
+                string excludeQuery = CurrentRecordID != null && CurrentRecordID > 0
+                    ? $" AND ID <> {CurrentRecordID}"
+                    : (_original_N_SERI != null && _original_BANK != null ? $" AND NOT (N_SERI = '{_original_N_SERI}' AND BANK = {_original_BANK})" : "");
 
                 var Filter = "N_SERI=" + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue + excludeQuery;
                 var rst = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE {Filter} ").ToList();
