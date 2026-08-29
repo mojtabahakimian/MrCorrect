@@ -125,6 +125,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public bool IsReadOnlyMode { get; set; } = false;
 
         // کلیدهای اصلی رکورد در زمان Load - برای استفاده در Save
+        private long? CurrentRecordID = null;
         private double? _original_N_SERI = null;
         private int? _original_BANK = null;
         private long? _original_DATE_S = null;
@@ -140,11 +141,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             DATE.Text = (THE_WIN as PGET_HED).DATE.Text.ToRawTarikh();
 
-            if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
+            if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null)
             {
-                bool MablisChanged = _original_MABL != null && _original_MABL != KhazanehRow.MABL;
-
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {(MablisChanged ? _original_MABL : KhazanehRow.MABL)}").ToList();
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK}").ToList();
                 if (CheckExistData.Count > 0)
                 {
                     DaftarShouldUpdate = true;
@@ -160,6 +159,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     SAYADI.Text = CheckExistData.FirstOrDefault()?.SAYADI;
 
                     // ✅ ذخیره کلید اولیه برای استفاده در Save
+                    CurrentRecordID = CheckExistData.FirstOrDefault()?.ID;
                     _original_N_SERI = CheckExistData.FirstOrDefault()?.N_SERI;
                     _original_BANK = CheckExistData.FirstOrDefault()?.BANK;
                     _original_DATE_S = CheckExistData.FirstOrDefault()?.DATE_S;
@@ -168,9 +168,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 else
                 {
                     DaftarShouldUpdate = false;
+                    N_SERI.Text = KhazanehRow.N_SERI?.ToString() ?? "";
+                    BANK.SelectedValue = KhazanehRow.BANK?.ToString();
 
-                    _original_N_SERI = null;
-                    _original_BANK = null;
+                    _original_N_SERI = KhazanehRow.N_SERI;
+                    _original_BANK = KhazanehRow.BANK;
                     _original_DATE_S = null;
                 }
             }
@@ -337,7 +339,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             #region After_Update
             if (!IsNull(this.N_SERI.Text) & !IsNull(this.BANK.SelectedValue))
             {
-                var Filter = "N_SERI=" + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue;
+                string excludeQuery = CurrentRecordID != null && CurrentRecordID > 0
+                    ? $" AND ID <> {CurrentRecordID}"
+                    : (_original_N_SERI != null && _original_BANK != null ? $" AND NOT (N_SERI = '{_original_N_SERI}' AND BANK = {_original_BANK})" : "");
+
+                var Filter = "N_SERI=" + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue + excludeQuery;
                 var rst = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE {Filter} ").ToList();
                 if (rst.Count == 0)
                 {
