@@ -150,11 +150,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
             DATE.Text = (THE_WIN as PGET_HED).DATE.Text.ToRawTarikh();
 
-            if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
+            if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null)
             {
-                bool MablisChanged = _original_MABL != null && _original_MABL != KhazanehRow.MABL;
-
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {(MablisChanged ? _original_MABL : KhazanehRow.MABL)} ORDER BY RADIF").ToList();
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} ORDER BY RADIF").ToList();
                 if (CheckExistData.Count > 0)
                 {
                     CurrentRecordID = CheckExistData.FirstOrDefault()?.ID; // Capture ID
@@ -206,8 +204,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 }
                 else
                 {
-                    _original_N_SERI = null;
-                    _original_BANK = null;
+                    N_SERI.Text = KhazanehRow.N_SERI?.ToString() ?? "";
+                    BANK.SelectedValue = KhazanehRow.BANK?.ToString();
+                    _original_N_SERI = KhazanehRow.N_SERI;
+                    _original_BANK = KhazanehRow.BANK;
                     _original_DATE_S = null;
                 }
             }
@@ -317,7 +317,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (SANDUGH?.SelectedValue is not null && !string.IsNullOrEmpty(DATE_S?.Text?.ToRawTarikh()))
                     return;
 
-                var rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = N'{N_SERI.Text}' AND BANK = {BANK.SelectedValue}")?.ToList();
+                string excludeQuery = CurrentRecordID != null && CurrentRecordID > 0
+                    ? $" AND ID <> {CurrentRecordID}"
+                    : (_original_N_SERI != null && _original_BANK != null ? $" AND NOT (N_SERI = '{_original_N_SERI}' AND BANK = {_original_BANK})" : "");
+
+                var rst = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = N'{N_SERI.Text}' AND BANK = {BANK.SelectedValue}{excludeQuery}")?.ToList();
 
                 if (rst?.Count > 0)
                 {

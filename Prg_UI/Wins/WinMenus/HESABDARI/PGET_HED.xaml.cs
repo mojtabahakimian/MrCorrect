@@ -3478,7 +3478,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     string _ServerFilter = null;
                     if (CURRENT_ITMES_ROW.N_SERI is not null && CURRENT_ITMES_ROW.N_SERI > 0)
                     {
-                        _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                        _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                     }
                     if (CURRENT_ITMES_ROW.FHES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
@@ -3635,7 +3635,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     string _ServerFilter = null;
                     if (CURRENT_ITMES_ROW.N_SERI is not null && CURRENT_ITMES_ROW.N_SERI > 0)
                     {
-                        _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                        _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                     }
                     if (CURRENT_ITMES_ROW.THES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
@@ -3655,7 +3655,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     string _ServerFilter = null;
                     if (CURRENT_ITMES_ROW.N_SERI is not null && CURRENT_ITMES_ROW.N_SERI > 0)
                     {
-                        _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                        _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                     }
                     if (CURRENT_ITMES_ROW.THES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
@@ -3805,9 +3805,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 CURRENT_ITMES_ROW.MABL = null;
                                             }
                                             string _serverfilter = null;
-                                            if (CURRENT_ITMES_ROW.N_SERI != null && CURRENT_ITMES_ROW.BANK != null && CURRENT_ITMES_ROW.MABL != null)
+                                            if (CURRENT_ITMES_ROW.N_SERI != null && CURRENT_ITMES_ROW.BANK != null)
                                             {
-                                                _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                                _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             }
                                             BAKCHEKP bAKCHEKP5 = new BAKCHEKP(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEKP5);
@@ -3860,7 +3860,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 CURRENT_ITMES_ROW.N_SERI = 0;
                                                 CURRENT_ITMES_ROW.BANK = 0;
                                             }
-                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(pAYCHEK);
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
@@ -3886,7 +3886,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 CURRENT_ITMES_ROW.N_SERI = 0;
                                                 CURRENT_ITMES_ROW.BANK = 0;
                                             }
-                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
@@ -3917,9 +3917,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 CURRENT_ITMES_ROW.MABL = null;
                                             }
                                             string _serverfilter = null;
-                                            if (CURRENT_ITMES_ROW.N_SERI != null && CURRENT_ITMES_ROW.BANK != null && CURRENT_ITMES_ROW.MABL != null)
+                                            if (CURRENT_ITMES_ROW.N_SERI != null && CURRENT_ITMES_ROW.BANK != null)
                                             {
-                                                _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                                _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             }
 
                                             bool mablechanged = false;
@@ -3957,9 +3957,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                                 CURRENT_ITMES_ROW.MABL = null;
                                             }
                                             string _serverfilter = null;
-                                            if (CURRENT_ITMES_ROW.N_SERI != null && CURRENT_ITMES_ROW.BANK != null && CURRENT_ITMES_ROW.MABL != null)
+                                            if (CURRENT_ITMES_ROW.N_SERI != null && CURRENT_ITMES_ROW.BANK != null)
                                             {
-                                                _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                                _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             }
                                             BAKCHEK bAKCHEK5 = new BAKCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(bAKCHEK5);
@@ -5673,9 +5673,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             if (CurrentData.NO_AM == 2 && (CurrentData.NAHVA == 2 || CurrentData.NAHVA == 1 || CurrentData.NAHVA == 6))
                             {
                                 string _serverfilter = null;
-                                if (CurrentData.N_SERI != null && CurrentData.BANK != null && CurrentData.MABL != null)
+                                if (CurrentData.N_SERI != null && CurrentData.BANK != null)
                                 {
-                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK;
                                 }
                                 PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, isReadOnly);
                                 pAYCHEK.ShowDialog();
@@ -5683,9 +5683,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             if ((CurrentData.NO_AM == 2 || CurrentData.NO_AM == 1) && CurrentData.NAHVA == 4)
                             {
                                 string _serverfilter = null;
-                                if (CurrentData.N_SERI != null && CurrentData.BANK != null && CurrentData.MABL != null)
+                                if (CurrentData.N_SERI != null && CurrentData.BANK != null)
                                 {
-                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK;
                                 }
                                 FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, isReadOnly);
                                 fORCHEK.ShowDialog();
@@ -5693,9 +5693,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             if (CurrentData.NO_AM == 1 && CurrentData.NAHVA == 5)
                             {
                                 string _serverfilter = null;
-                                if (CurrentData.N_SERI != null && CurrentData.BANK != null && CurrentData.MABL != null)
+                                if (CurrentData.N_SERI != null && CurrentData.BANK != null)
                                 {
-                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK;
                                 }
                                 BAKCHEKP bAKCHEKP = new BAKCHEKP(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, isReadOnly);
                                 bAKCHEKP.ShowDialog();
@@ -5703,9 +5703,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                             if (CurrentData.NO_AM == 2 && CurrentData.NAHVA == 5)
                             {
                                 string _serverfilter = null;
-                                if (CurrentData.N_SERI != null && CurrentData.BANK != null && CurrentData.MABL != null)
+                                if (CurrentData.N_SERI != null && CurrentData.BANK != null)
                                 {
-                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                                    _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK;
                                 }
                                 BAKCHEK bAKCHEK = new BAKCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, isReadOnly);
                                 bAKCHEK.ShowDialog();
