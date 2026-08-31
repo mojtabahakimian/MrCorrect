@@ -156,22 +156,37 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (CheckExistData.Count > 0)
                 {
                     DaftarShouldUpdate = true;
-                    N_SERI.Text = CheckExistData.FirstOrDefault()?.N_SERI.ToString();
-                    BANK.SelectedValue = CheckExistData.FirstOrDefault()?.BANK.ToString();
-                    SHOBEH.Text = CheckExistData.FirstOrDefault()?.SHOBEH?.ToString();
-                    DATE_S.Text = CheckExistData.FirstOrDefault()?.DATE_S.ToString();
-                    DATE.Text = CheckExistData.FirstOrDefault()?.DATE.ToString();
-                    MABL.Text = CheckExistData.FirstOrDefault()?.MABL.ToString();
-                    NAME_TAH.SelectedValue = CheckExistData.FirstOrDefault()?.NAME_TAH?.ToString();
-                    N_HESAB.Text = CheckExistData.FirstOrDefault()?.N_HESAB?.ToString();
-                    HES1.SelectedValue = CheckExistData.FirstOrDefault()?.HES1?.ToString();
-                    SAYADI.Text = CheckExistData.FirstOrDefault()?.SAYADI;
+                    var existRow = CheckExistData.FirstOrDefault();
+                    N_SERI.Text = existRow?.N_SERI.ToString();
+                    BANK.SelectedValue = existRow?.BANK.ToString();
+                    SHOBEH.Text = existRow?.SHOBEH?.ToString();
+                    DATE_S.Text = existRow?.DATE_S.ToString();
+                    DATE.Text = existRow?.DATE.ToString();
+                    MABL.Text = existRow?.MABL.ToString();
+                    NAME_TAH.SelectedValue = existRow?.NAME_TAH?.ToString();
+                    N_HESAB.Text = existRow?.N_HESAB?.ToString();
+                    HES1.SelectedValue = existRow?.HES1?.ToString();
+                    SAYADI.Text = existRow?.SAYADI;
+
+                    // بارگذاری N_KOL/N_MOIN/N_TAF از رکورد موجود
+                    // اگر HES1 پر باشد از HES1 می‌آید، وگرنه از BANKHA (معادل DefaultValue در Access)
+                    if (!string.IsNullOrWhiteSpace(existRow?.HES1) && existRow.HES1.Trim() != "911-1-1")
+                    {
+                        this.N_KOL = existRow.N_KOL?.ToString();
+                        this.N_MOIN = existRow.N_MOIN?.ToString();
+                        this.N_TAF = existRow.N_TAF?.ToString();
+                    }
+                    else
+                    {
+                        // Default مثل Access: از BANKHA
+                        ApplyDefaultNKolFromBankha();
+                    }
 
                     // ✅ ذخیره کلید اولیه برای استفاده در Save
-                    CurrentRecordID = CheckExistData.FirstOrDefault()?.ID;
-                    _original_N_SERI = CheckExistData.FirstOrDefault()?.N_SERI;
-                    _original_BANK = CheckExistData.FirstOrDefault()?.BANK;
-                    _original_DATE_S = CheckExistData.FirstOrDefault()?.DATE_S;
+                    CurrentRecordID = existRow?.ID;
+                    _original_N_SERI = existRow?.N_SERI;
+                    _original_BANK = existRow?.BANK;
+                    _original_DATE_S = existRow?.DATE_S;
                     _original_MABL = KhazanehRow.MABL;
                 }
                 else
@@ -179,6 +194,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     DaftarShouldUpdate = false;
                     N_SERI.Text = KhazanehRow.N_SERI?.ToString() ?? "";
                     BANK.SelectedValue = KhazanehRow.BANK?.ToString();
+
+                    // رکورد جدید: Default از BANKHA مثل Access DefaultValue
+                    ApplyDefaultNKolFromBankha();
 
                     _original_N_SERI = KhazanehRow.N_SERI;
                     _original_BANK = KhazanehRow.BANK;
@@ -250,6 +268,29 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                 this.Title += " (فقط خواندنی)";
             }
+        }
+
+        /// <summary>
+        /// معادل DefaultValue در فرم Access:
+        ///   N_KOL  = [Forms]![Baseknow]![BANKHA]
+        ///   N_MOIN = FIRSTM(BANKHA)
+        ///   N_TAF  = FIRSTT(BANKHA, N_MOIN)
+        /// وقتی HES1 خالی است این مقادیر را پر می‌کند.
+        /// </summary>
+        private void ApplyDefaultNKolFromBankha()
+        {
+            try
+            {
+                if (Baseknow.BANKHA is null) return;
+                double bankha = Baseknow.BANKHA.Value;
+
+                this.N_KOL = bankha.ToString();
+                var moin = CL_HESABDARI.FIRSTM(bankha);
+                this.N_MOIN = moin?.ToString();
+                var taf = CL_HESABDARI.FIRSTT(bankha, moin ?? 0);
+                this.N_TAF = taf?.ToString();
+            }
+            catch { }
         }
 
         private void Fill_ComboBoxes()
@@ -566,9 +607,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 }
                 else
                 {
-                    this.N_KOL = null;
-                    this.N_MOIN = null;
-                    this.N_TAF = null;
+                    // HES1 خالی است: از BANKHA پر کن (معادل DefaultValue Access)
+                    ApplyDefaultNKolFromBankha();
                 }
 
                 var KhazanehRow = activeLstRow;
@@ -642,7 +682,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                      HES2 = NULL, HES3 = NULL
                                  WHERE ID = {_id_}");
                         }
-          
+
                     }
                     else
                     {
@@ -707,9 +747,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                this.N_KOL = null;
-                this.N_MOIN = null;
-                this.N_TAF = null;
+                // HES1 پاک شد: fallback به BANKHA مثل Access DefaultValue
+                ApplyDefaultNKolFromBankha();
             }
         }
 
