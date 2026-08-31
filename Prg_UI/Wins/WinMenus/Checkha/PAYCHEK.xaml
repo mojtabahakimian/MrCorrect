@@ -92,9 +92,9 @@
                         <DataTrigger Binding="{Binding SelectedItem, ElementName=BANK}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False" />
                         </DataTrigger>
-                        <!--<DataTrigger Binding="{Binding SelectedItem, ElementName=HES1}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding SelectedItem, ElementName=HES1}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False" />
-                        </DataTrigger>-->
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding Text, ElementName=N_SERI}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False" />
                         </DataTrigger>
