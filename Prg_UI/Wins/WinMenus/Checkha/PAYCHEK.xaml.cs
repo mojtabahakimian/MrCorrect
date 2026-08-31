@@ -7,6 +7,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Syncfusion.PMML;
 using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
@@ -137,9 +138,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             #region On_Open
             Fill_ComboBoxes();
             MABL.Text = MABL_CHEK_ARG;
-            var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
+            var pgetHed = THE_WIN as PGET_HED;
+            PGET_LST KhazanehRow = null;
+            if (pgetHed?.PGET_LST_SUB != null && INDEX_DG >= 0 && INDEX_DG < pgetHed.PGET_LST_SUB.Items.Count)
+            {
+                KhazanehRow = pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+            }
 
-            DATE.Text = (THE_WIN as PGET_HED).DATE.Text.ToRawTarikh();
+            if (pgetHed?.DATE != null)
+            {
+                DATE.Text = pgetHed.DATE.Text.ToRawTarikh();
+            }
 
             if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null)
             {
@@ -245,7 +254,12 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void Fill_ComboBoxes()
         {
-            string NAME_TAH_DISPLAY = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).NAME_THES;
+            var pgetHed = THE_WIN as PGET_HED;
+            string NAME_TAH_DISPLAY = null;
+            if (pgetHed?.PGET_LST_SUB != null && INDEX_DG >= 0 && INDEX_DG < pgetHed.PGET_LST_SUB.Items.Count)
+            {
+                NAME_TAH_DISPLAY = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST)?.NAME_THES;
+            }
 
 
             HES1.ItemsSource = dbms.DoGetDataSQL<QueryT2>("SELECT hes, hes + N' - ' +  ISNULL(NAME, N'') AS Expr1 FROM CUST_HESAB WHERE (dbo.GETKOL(HES) = " + Baseknow.BANKHA + ")").ToList();
@@ -371,11 +385,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     this.HES1.SelectedValue = rst.FirstOrDefault().HES1;
                     this.SAYADI.Text = rst.FirstOrDefault().SAYADI;
 
-                    if (THE_WIN is PGET_HED KhazanehRadif)
+                    if (THE_WIN is PGET_HED khazanehWin && khazanehWin.CURRENT_ITMES_ROW != null)
                     {
-                        //بروز رسانی در دیتاگرید برای ذخیره
-                        KhazanehRadif.CURRENT_ITMES_ROW.N_SERI = rst.FirstOrDefault().N_SERI;
-                        KhazanehRadif.CURRENT_ITMES_ROW.BANK = rst.FirstOrDefault().BANK;
+                        khazanehWin.CURRENT_ITMES_ROW.N_SERI = rst.FirstOrDefault().N_SERI;
+                        khazanehWin.CURRENT_ITMES_ROW.BANK = rst.FirstOrDefault().BANK;
+                        DaftarShouldUpdate = true;
                     }
                 }
             }
@@ -453,7 +467,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
+            var pgetWin = THE_WIN as PGET_HED;
+            if (pgetWin?.CURRENT_ITMES_ROW != null)
+            {
+                pgetWin.CmdSaveRecord(pgetWin.CURRENT_ITMES_ROW);
+            }
+
+            PGET_LST activeLstRow = null;
+            if (pgetWin?.PGET_LST_SUB != null && INDEX_DG >= 0 && INDEX_DG < pgetWin.PGET_LST_SUB.Items.Count)
+            {
+                activeLstRow = pgetWin.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+            }
 
             //Click
             can = false;
@@ -476,7 +500,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         }
                         //rst.Close();
                     }
-                    if (((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES == Baseknow.APA)
+                    if (activeLstRow?.FHES == Baseknow.APA)
                     {
                         if (Convert.ToInt32(this.KIND.SelectedValue) != 1 || IsNull(this.KIND))
                         {
@@ -487,7 +511,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     {
                         this.KIND.SelectedValue = 0;
                     }
-                    this.MABL.Text = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL.ToString();
+                    if (activeLstRow?.MABL != null)
+                    {
+                        this.MABL.Text = activeLstRow.MABL.ToString();
+                    }
                     if (this.NAME_TAH.SelectedValue == "")
                     {
                         this.NAME_TAH.SelectedValue = " ";
@@ -510,7 +537,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             else
             {
 
-                if (((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES == Baseknow.APA)
+                if (activeLstRow?.FHES == Baseknow.APA)
                 {
                     if (Convert.ToInt32(this.KIND.SelectedValue) != 1 || IsNull(this.KIND))
                     {
@@ -521,9 +548,12 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     this.KIND.SelectedValue = 0;
                 }
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.Text);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Left("چك " + N_SERI.Text + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(this.BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
+                if (activeLstRow != null)
+                {
+                    activeLstRow.N_SERI = Convert.ToDouble(this.N_SERI.Text);
+                    activeLstRow.BANK = Convert.ToInt32(this.BANK.SelectedValue);
+                    activeLstRow.SHARH = Strings.Left("چك " + N_SERI.Text + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(this.BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
+                }
 
                 if (!string.IsNullOrWhiteSpace(HES1.SelectedValue?.ToString()))
                 {
@@ -541,7 +571,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     this.N_TAF = null;
                 }
 
-                var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
+                var KhazanehRow = activeLstRow;
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT TOP 1 * FROM PAY_GETP WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()} ORDER BY RADIF").ToList();
 
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
@@ -550,15 +580,20 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 50 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 50) : SHOBEH.SelectedValue.ToStringNullSafe();
 
 
+                var _KIND_VAL_ = KIND.SelectedValue != null ? KIND.SelectedValue.ToString() : "0";
+                var _HES1_VAL_ = HES1.SelectedValue != null ? HES1.SelectedValue.ToString() : "";
+                var _N_KOL_VAL_ = string.IsNullOrWhiteSpace(N_KOL) ? "NULL" : N_KOL;
+                var _N_MOIN_VAL_ = string.IsNullOrWhiteSpace(N_MOIN) ? "NULL" : N_MOIN;
+                var _N_TAF_VAL_ = string.IsNullOrWhiteSpace(N_TAF) ? "NULL" : N_TAF;
+
                 try
                 {
                     if (DaftarShouldUpdate)
                     {
-                        //dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{_N_HESAB_}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
-                        //                                   WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
-
-                        // حالت ویرایش: UPDATE با کلید اصلی (نه کلید جدید کاربر)
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET
+                        if (_original_N_SERI != null)
+                        {
+                            // حالت ویرایش: UPDATE با کلید اصلی (نه کلید جدید کاربر)
+                            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET
                                      N_SERI   = {N_SERI.Text},
                                      BANK     = {BANK.SelectedValue},
                                      DATE_S   = {DATE_S.Text.ToRawTarikh()},
@@ -567,12 +602,12 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                      MABL     = {MABL.Text},
                                      NAME_TAH = N'{_NAME_TAH_}',
                                      N_HESAB  = N'{_N_HESAB_}',
-                                     KIND     = {KIND.SelectedValue},
-                                     HES1     = N'{HES1.SelectedValue}',
+                                     KIND     = {_KIND_VAL_},
+                                     HES1     = N'{_HES1_VAL_}',
                                      SAYADI   = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}',
-                                     N_KOL    = {(N_KOL is null ? "NULL" : N_KOL)},
-                                     N_MOIN   = {(N_MOIN is null ? "NULL" : N_MOIN)},
-                                     N_TAF    = {(N_TAF is null ? "NULL" : N_TAF)},
+                                     N_KOL    = {_N_KOL_VAL_},
+                                     N_MOIN   = {_N_MOIN_VAL_},
+                                     N_TAF    = {_N_TAF_VAL_},
                                      N_S = NULL, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL,
                                      N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL,
                                      NUMBER = NULL, TAG = NULL, ANBAR = NULL,
@@ -581,11 +616,38 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                  WHERE N_SERI = {_original_N_SERI}
                                    AND BANK   = {_original_BANK}
                                    AND DATE_S = {_original_DATE_S}");
+                        }
+                        else
+                        {
+                            var _id_ = CheckExistData.FirstOrDefault().ID;
+                            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET
+                                     N_SERI   = {N_SERI.Text},
+                                     BANK     = {BANK.SelectedValue},
+                                     DATE_S   = {DATE_S.Text.ToRawTarikh()},
+                                     DATE     = {DATE.Text.ToRawTarikh()},
+                                     SHOBEH   = N'{_SHOBEH_}',
+                                     MABL     = {MABL.Text},
+                                     NAME_TAH = N'{_NAME_TAH_}',
+                                     N_HESAB  = N'{_N_HESAB_}',
+                                     KIND     = {_KIND_VAL_},
+                                     HES1     = N'{_HES1_VAL_}',
+                                     SAYADI   = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}',
+                                     N_KOL    = {_N_KOL_VAL_},
+                                     N_MOIN   = {_N_MOIN_VAL_},
+                                     N_TAF    = {_N_TAF_VAL_},
+                                     N_S = NULL, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL,
+                                     N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL,
+                                     NUMBER = NULL, TAG = NULL, ANBAR = NULL,
+                                     RADIF = NULL, CUST_NO = DEFAULT, VAZ = NULL,
+                                     HES2 = NULL, HES3 = NULL
+                                 WHERE ID = {_id_}");
+                        }
+          
                     }
                     else
                     {
                         dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETP       (N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,          N_HESAB, N_S,  N_KOL,  N_MOIN,  N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO,                KIND, VAZ,                   HES1, HES2, HES3, SAYADI)
-				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',N'{_N_HESAB_}',NULL,{N_KOL},{N_MOIN},{N_TAF},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{KIND.SelectedValue},NULL,N'{HES1.SelectedValue}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
+				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',N'{_N_HESAB_}',NULL,{_N_KOL_VAL_},{_N_MOIN_VAL_},{_N_TAF_VAL_},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{_KIND_VAL_},NULL,N'{_HES1_VAL_}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
                     }
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627)
@@ -593,10 +655,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     new Msgwin(false, "اطلاعات تکراری است").ShowDialog(); return;
                 }
 
-
-
-                (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
-                (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
+                if (THE_WIN is PGET_HED pgetHedWindow)
+                {
+                    if (pgetHedWindow.PGET_LST_SUB != null && INDEX_DG >= 0 && INDEX_DG < pgetHedWindow.PGET_LST_SUB.Items.Count)
+                    {
+                        if (pgetHedWindow.PGET_LST_SUB.Items[INDEX_DG] is PGET_LST itemToSave)
+                        {
+                            pgetHedWindow.CmdSaveRecord(itemToSave);
+                        }
+                    }
+                    pgetHedWindow.SANAD();
+                }
 
                 this.Close();
             }
@@ -605,7 +674,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         private void _Exit_Click(object sender, RoutedEventArgs e)
         {
             can = true;
-            (THE_WIN as PGET_HED).PAYCHEK_EXIT_BTN = true;
+            if (THE_WIN is PGET_HED pgetHedWin)
+            {
+                pgetHedWin.PAYCHEK_EXIT_BTN = true;
+            }
             this.Close();
         }
 
@@ -651,7 +723,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (!Tarikh.IsValidedDate(date_n_val))
                 {
                     DATE_S.Text = BEFOREDATEN;
-                    universControl.PopNotifyShow("مقدار تاریخ صحیح نیست.", (THE_WIN as HESABDARI.PGET_HED).Pop1, (THE_WIN as HESABDARI.PGET_HED).Pop1Text1, (THE_WIN as HESABDARI.PGET_HED).Pop_Border1);
+                    if (THE_WIN is PGET_HED pgetHedWin)
+                    {
+                        universControl.PopNotifyShow("مقدار تاریخ صحیح نیست.", pgetHedWin.Pop1, pgetHedWin.Pop1Text1, pgetHedWin.Pop_Border1);
+                    }
                     return;
                 }
             }
