@@ -370,6 +370,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     this.KIND.SelectedValue = rst.FirstOrDefault().KIND;
                     this.HES1.SelectedValue = rst.FirstOrDefault().HES1;
                     this.SAYADI.Text = rst.FirstOrDefault().SAYADI;
+
+                    if (THE_WIN is PGET_HED KhazanehRadif)
+                    {
+                        //بروز رسانی در دیتاگرید برای ذخیره
+                        KhazanehRadif.CURRENT_ITMES_ROW.N_SERI = rst.FirstOrDefault().N_SERI;
+                        KhazanehRadif.CURRENT_ITMES_ROW.BANK = rst.FirstOrDefault().BANK;
+                    }
                 }
             }
             //rst.Close();
