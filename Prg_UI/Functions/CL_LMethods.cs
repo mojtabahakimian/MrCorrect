@@ -2330,7 +2330,7 @@ namespace Prg_UI.Functions
             }
             public List<string> RestrictionMessages { get; set; } = new List<string>();
         }
-        public static string ResolveScopePermissionKey(byte tagCode, bool isOthery = false)
+        public static string ResolveScopePermissionKey(int tagCode, bool isOthery = false)
         {
             if (isOthery && tagCode == 0)
                 return "DPDEED"; // خزانه‌داری
