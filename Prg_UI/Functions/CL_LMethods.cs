@@ -2330,6 +2330,33 @@ namespace Prg_UI.Functions
             }
             public List<string> RestrictionMessages { get; set; } = new List<string>();
         }
+        public static string ResolveScopePermissionKey(byte tagCode, bool isOthery = false)
+        {
+            if (isOthery && tagCode == 0)
+                return "DPDEED"; // خزانه‌داری
+
+            if (tagCode == 0)
+                return "KALA_GARDESH_SKB"; // جستجوی عمومی در گردش کالا و اسناد
+
+            return tagCode switch
+            {
+                13 or 25 => "FRSKB",          // فاکتور های فروش
+                20 => "PFRSKB",                // پیش فاکتور
+                4 or 323 => "FRBSKB",          // فاکتور برگشت فروش
+                12 => "KHSKB",                 // فاکتور های خرید
+                15 => "KHMOST_SKB",            // فاکتور خرید رسید مستقیم
+                3 or 27 => "KHBSKB",           // برگشت خرید عادی و آزاد
+                1 or 24 => "RASSKB",           // رسید های خرید و سایر رسید ها
+                2 or 26 => "HAVSKB",           // حواله های فروش و سایر حواله ها
+                5 => "SEEENT",                 // انتقال از انبار به انبار
+                9 => "VRO_TOL_SKB",            // برگه ورود کالای ساخته شده
+                10 or 11 => "KHO_MAVA_SKB",    // برگه های خروج مواد اولیه و سایر مواد
+                14 => "FRSKB",                 // فاکتور خدمات
+                23 => "RASSKB",                // درخواست خرید ها
+                _ => "FRSKB"                   // پیش‌فرض
+            };
+        }
+
         private static RestrictionInfo GenerateRestrictedSqlQueryInfo(byte TAGCODE, string DEF_VALUE = " WHERE ", bool isOthery = false)
         {
             var info = new RestrictionInfo
@@ -2363,13 +2390,11 @@ namespace Prg_UI.Functions
             bool IsZirMajmoehChart = false;
             bool IsDateLimited = false;
 
-            if (TAGCODE == 0 && isOthery) //یعنی خزانه داری
+            string scopeKey = ResolveScopePermissionKey(TAGCODE, isOthery);
+            CanSeeAll = CL_HESABDARI.LETSGO(scopeKey);
+
+            if (TAGCODE != 0 || !isOthery)
             {
-                CanSeeAll = CL_HESABDARI.LETSGO("DPDEED"); // اجازه دیدن تمام اسناد دریافت/پرداخت
-            }
-            else
-            {
-                CanSeeAll = CL_HESABDARI.LETSGO("FRSKB"); //فاکتور فروش سایر کاربران را بتواند ببیند
                 IsDateLimited = !CL_HESABDARI.LETSGO("DECD"); //تاریخ قابل برگشت اعمال نشود
             }
 
