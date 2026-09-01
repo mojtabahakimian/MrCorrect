@@ -4074,7 +4074,7 @@ namespace AUTO_BAZ.Functions
             }
 
             double? _SANAD_NUMBER = null;
-            var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG = 12) ORDER BY NUMBER").ToList();
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG IN (12, 15)) ORDER BY NUMBER").ToList();
 
             var progressReporter = new ThrottledProgressReporter(
                 HFRST.Count,
@@ -4098,7 +4098,7 @@ namespace AUTO_BAZ.Functions
 
                 foreach (var row in dbms.DoGetDataSQL<InvoiceSumRow>(
                     $"SELECT NUMBER, SUM(MABL_K) AS Total FROM dbo.INVO_LST " +
-                    $"WHERE TAG = 1 AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
+                    $"WHERE TAG IN (1, 15) AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
                 {
                     if (row?.NUMBER != null && row.Total != null)
                     {
@@ -4108,7 +4108,7 @@ namespace AUTO_BAZ.Functions
 
                 foreach (var row in dbms.DoGetDataSQL<InvoiceSumRow>(
                     $"SELECT NUMBER, SUM(MABL) AS Total FROM dbo.PAY_GETP " +
-                    $"WHERE TAG = 1 AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
+                    $"WHERE TAG IN (1, 15) AND NUMBER BETWEEN {minNum} AND {maxNum} GROUP BY NUMBER"))
                 {
                     if (row?.NUMBER != null && row.Total != null)
                     {
@@ -4121,7 +4121,7 @@ namespace AUTO_BAZ.Functions
                 foreach (var row in dbms.DoGetDataSQL<QRE_BAZ_KHAREED>(
                     $"SELECT INVO_LST.NUMBER, INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, dbo.STUF_DEF.RADAH " +
                     $"FROM dbo.INVO_LST INNER JOIN dbo.STUF_DEF ON STUF_DEF.CODE = INVO_LST.CODE " +
-                    $"WHERE INVO_LST.TAG = 1 AND INVO_LST.NUMBER BETWEEN {minNum} AND {maxNum}"))
+                    $"WHERE INVO_LST.TAG IN (1, 15) AND INVO_LST.NUMBER BETWEEN {minNum} AND {maxNum}"))
                 {
                     if (row?.NUMBER == null || !wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
 
@@ -4138,7 +4138,7 @@ namespace AUTO_BAZ.Functions
                 {
                     foreach (var row in dbms.DoGetDataSQL<PAY_GETP_1>(
                         $"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, KIND, VAZ, HES1, HES2, HES3 " +
-                        $"FROM dbo.PAY_GETP WHERE TAG = 1 AND NUMBER BETWEEN {minNum} AND {maxNum}"))
+                        $"FROM dbo.PAY_GETP WHERE TAG IN (1, 15) AND NUMBER BETWEEN {minNum} AND {maxNum}"))
                     {
                         if (row?.NUMBER == null) { continue; }
 
@@ -4187,7 +4187,7 @@ namespace AUTO_BAZ.Functions
                 => Strings.Left(" فاكتورهاي  خريد  " + " مورخ " + Strings.Format(dateN, "####/##/##"), 255);
 
             static string BuildKhSingleSharhS(HEAD_LST_CSHARP row)
-                => Strings.Left(" فاكتور خريد شماره " + row.NUMBER1 + " مورخ " + Strings.Format(row.DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(row.CUST_NO), 255);
+                => Strings.Left(" فاكتور خريد شماره " + row.NUMBER1 + " مورخ " + Strings.Format(row.DATE_N, "####/##/##") + " فروشنده: " + GETTAFNAME(row.CUST_NO), 255);
 
             var khUsableIndexes = new List<int>();
             for (int khI = 0; khI < HFRST.Count; khI++) { if (khRowUsable[khI]) { khUsableIndexes.Add(khI); } }
@@ -4242,7 +4242,7 @@ namespace AUTO_BAZ.Functions
                     if (HFRST[khI].N_S != resolvedNs)
                     {
                         HFRST[khI].N_S = resolvedNs;
-                        khHeadUpdates.Add($"UPDATE HEAD_LST set n_s = {SqlNum(resolvedNs)} WHERE NUMBER = {SqlNum(HFRST[khI].NUMBER.Value)} AND TAG = 12;");
+                        khHeadUpdates.Add($"UPDATE HEAD_LST set n_s = {SqlNum(resolvedNs)} WHERE NUMBER = {SqlNum(HFRST[khI].NUMBER.Value)} AND TAG = {HFRST[khI].TAG};");
                     }
                 }
 
@@ -4304,7 +4304,7 @@ namespace AUTO_BAZ.Functions
                     {
                         var khI = khNewHeaderIndexes[k];
                         HFRST[khI].N_S = khReserved[k];
-                        dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {SqlNum(khReserved[k])} WHERE (NUMBER = {HFRST[khI].NUMBER} AND (TAG = 12)) ");
+                        dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {SqlNum(khReserved[k])} WHERE (NUMBER = {HFRST[khI].NUMBER} AND (TAG = {HFRST[khI].TAG})) ");
                     }
                 }
             }
