@@ -417,6 +417,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     int? defaultcolumnindex = PGET_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "NO_AM")?.DisplayIndex;
                     if (defaultcolumnindex is null || defaultcolumnindex < 0)
                     {
+                        defaultcolumnindex = PGET_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "NAHVA")?.DisplayIndex;
+                    }
+                    if (defaultcolumnindex is null || defaultcolumnindex < 0)
+                    {
                         datagridname_tbox_def_index_col = 0;
                     }
                     else
@@ -441,6 +445,41 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             this.Owner = PublicVRB.WINBASE;//#OWNER
         }
         public bool IsOpenedFromAutomation { get; } = false;
+        private void EnsureFocusOnCurrentCell()
+        {
+            try
+            {
+                if (CL_LMethods.IsValidIndex(PGET_LST_SUB, CURRENT_ROW_INDEX))
+                {
+                    PGET_LST_SUB.SelectedIndex = CURRENT_ROW_INDEX;
+                    var mablCol = PGET_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL");
+                    if (mablCol != null)
+                    {
+                        PGET_LST_SUB.CurrentCell = new DataGridCellInfo(PGET_LST_SUB.Items[CURRENT_ROW_INDEX], mablCol);
+                    }
+                    PGET_LST_SUB.Focus();
+                }
+            }
+            catch { }
+        }
+
+        private object? _lastChequeRowHandled = null;
+
+        private bool IsChequeRow(PGET_LST? row)
+        {
+            if (row == null) return false;
+            int noAm = row.NO_AM ?? 0;
+            int nahva = Convert.ToInt32(row.NAHVA ?? 0);
+
+            // دریافت: چک (2)، چک روز (6)، برگشتی (5)
+            if (noAm == 1 && (nahva == 2 || nahva == 6 || nahva == 5)) return true;
+
+            // پرداخت: چک (2)، چک روز (6)، واگذاری (4)، برگشتی (5)
+            if (noAm == 2 && (nahva == 2 || nahva == 6 || nahva == 4 || nahva == 5)) return true;
+
+            return false;
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -582,6 +621,25 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                             if (isLastColumn)
                             {
+                                var currentRow = DG.SelectedItem as PGET_LST;
+                                if (IsChequeRow(currentRow))
+                                {
+                                    if (_lastChequeRowHandled != currentRow)
+                                    {
+                                        // بار اول روی سطر چک Enter زده شده: نذار سطر به سطر بعدی بپرد تا پنجره مشخصات چک باز و بسته شود
+                                        _lastChequeRowHandled = currentRow;
+                                        return;
+                                    }
+                                }
+
+                                _lastChequeRowHandled = null;
+
+                                // اگر سطر فعلی ناقص است، اجازه رفتن به سطر بعد را نده
+                                if (currentRow != null && !ConstructorRowDetector.IsPristine(currentRow) && !BodyIsValid(currentRow, false))
+                                {
+                                    return;
+                                }
+
                                 // If it's the last column, move focus to the first cell of next row
                                 if (isLastRow)
                                 {
@@ -3747,6 +3805,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(gETCHEK);
+                                            EnsureFocusOnCurrentCell();
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3772,6 +3831,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(gETCHEK);
+                                            EnsureFocusOnCurrentCell();
 
                                             if (CURRENT_CELL_ROW != null)
                                             {
@@ -3863,6 +3923,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(pAYCHEK);
+                                            EnsureFocusOnCurrentCell();
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3888,6 +3949,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
+                                            await ShowDialogAfterCurrentDispatcherOperationAsync(pAYCHEK);
+                                            EnsureFocusOnCurrentCell();
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;

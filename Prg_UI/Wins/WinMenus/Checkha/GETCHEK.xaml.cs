@@ -462,6 +462,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
+            // Sync N_SERI and BANK to parent row BEFORE validation and save
+            if (THE_WIN is PGET_HED pgetHed && pgetHed.CURRENT_ITMES_ROW != null)
+            {
+                if (double.TryParse(N_SERI.Text, out double serialVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
+                }
+                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.BANK = bankVal;
+                }
+            }
+
             //Validations:
             (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
 
