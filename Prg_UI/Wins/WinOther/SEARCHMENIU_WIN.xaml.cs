@@ -1,4 +1,4 @@
-﻿using Functions;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
@@ -179,6 +179,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده فاکتور های فروش", WIN_NAME = WinNameType.HEAD_LST_FROOSH_AUTO_DETECT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "راس گیری", WIN_NAME = WinNameType.RAAS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "فاکتور خرید", WIN_NAME = WinNameType.HEAD_LST_KHAREED1_RASID });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "فاکتور خرید رسید مستقیم", WIN_NAME = WinNameType.HEAD_LST_KHAREED1_DIRECT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف فرمت گرید بندی مشتریان (فرمت رده بندی مشتری)", WIN_NAME = WinNameType.GRADE_FORMAT_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = false, CAPTION = "فروش روی نقشه ایران", WIN_NAME = CL_MenuManager.WinNameType.IRAN_SALES_MAP });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نبض فعالیت سازمان", WIN_NAME = CL_MenuManager.WinNameType.NABZEDARY });
