@@ -162,14 +162,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public ObservableCollection<PAY_GETP_MODEL> PAY_GETP_SUB_DATA { get; set; } = new ObservableCollection<PAY_GETP_MODEL>();
 
         /// <summary>
-        /// تگ هدر فاکتور خرید 12
+        /// تگ هدر فاکتور خرید: 15 برای مستقیم، 12 برای عادی
         /// </summary>
-        public byte FTAG { get; } = 12; //فاکتور
+        public byte FTAG => (byte)(IsDirectFactor ? 15 : 12); //فاکتور
 
         /// <summary>
-        /// تگ رسید انبار خرید 1 و سطر های اون
+        /// تگ رسید انبار خرید/سطرها: 15 برای مستقیم، 1 برای عادی
         /// </summary>
-        public byte HTAG { get; } = 1; //برگه رسید
+        public byte HTAG => (byte)(IsDirectFactor ? 15 : 1); //برگه رسید
 
         public int? ANBAR { get; set; }
 
@@ -1200,10 +1200,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             bool ghat = false;
 
-            if (Baseknow.SIGN ?? false)
-            {
-                ActivateChaps();
-            }
+            ActivateChaps();
 
             if (string.IsNullOrEmpty(N_S.Text))
             {
@@ -3587,9 +3584,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
-                this.Command100.IsEnabled = false;
-                this.Command106.IsEnabled = false;
-                this.Command108.IsEnabled = false;
+                this.Command100.IsEnabled = !(Baseknow.SIGN ?? false);
+                this.Command106.IsEnabled = !(Baseknow.SIGN ?? false);
+                this.Command108.IsEnabled = !(Baseknow.SIGN ?? false);
             }
         }
         private void SGN1_Click(object sender, RoutedEventArgs e)
@@ -5460,8 +5457,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //تیک مالیات هم مثل خود مبلغ مالیات باید ریست شود، وگرنه از فاکتور قبلی روی فاکتور جدید
             //تیک‌خورده می‌ماند در حالی که MBAA صفر شده. پیش‌فرضش از آخرین فاکتور خرید گرفته می‌شود،
             //همان کاری که Form_BeforeInsert در فاکتور فروش می‌کند (اغلب سازمان‌ها یا همیشه مشمول‌اند یا هیچ‌وقت)
-            TICMBAA.IsChecked = dbms.DoGetDataSQL<bool?>(
-                $"SELECT TOP 1 TICMBAA FROM dbo.HEAD_LST WHERE TAG = {FTAG} ORDER BY NUMBER DESC").FirstOrDefault() ?? false;
+            TICMBAA.IsChecked = IsDirectFactor || (dbms.DoGetDataSQL<bool?>(
+                $"SELECT TOP 1 TICMBAA FROM dbo.HEAD_LST WHERE TAG = {FTAG} ORDER BY NUMBER DESC").FirstOrDefault() ?? false);
             ApplyVatUiState();
 
             JF.Text = "0"; //جمع کل فاکتور
