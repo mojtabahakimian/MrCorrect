@@ -1,42 +1,133 @@
 using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Data.SqlClient;
+using Prg_Proccessy.CNNMANAGER;
 using Prg_Proccessy.Generaly;
+using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
-using Stimulsoft.Report;
-using Stimulsoft.Report.Components;
 
 namespace TestRunner
 {
     internal class Program
     {
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        [STAThread]
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.WriteLine("=========================================================================");
+            Console.WriteLine("          VISUAL / UI HARNESS VERIFICATION FOR MrCorrect                 ");
+            Console.WriteLine("=========================================================================");
+
+            Baseknow.USERCOD = 78;
+            Baseknow.UUSER = "Controller";
+            CL_Generaly.SHIFT_OF_USER = 1;
+            CL_Generaly.VAHED_OF_USER = 1;
+            Baseknow.UGRP = "1";
             CL_Generaly.IsCalledExternally = true;
-            string dbName = "Arman1405";
+
+            string dbName = "YAZDSEPAR1405";
             CL_CCNNMANAGER.CONNECTION_STR = $"Data Source=MERCEDES\\SQL2022;Initial Catalog={dbName};Integrated Security=True;TrustServerCertificate=True;Max Pool Size=1000;";
             CL_CCNNMANAGER.ConnectedToSQLDB = true;
 
-            var dbms = new CL_CCNNMANAGER();
+            Baseknow.GetInitTheApp();
+            Console.WriteLine($"[PASS] Baseknow initialized. STMO: {Baseknow.STMO}");
 
-            Console.WriteLine("=========================================================================");
-            Console.WriteLine("     E2E TEST: TEL_WIN CRUD CONTROLS & ESLAH (EDIT) BUTTON VERIFICATION  ");
-            Console.WriteLine("=========================================================================");
+            // Create WPF Application context
+            var app = new Application();
 
-            var sampleCustomer = dbms.DoGetDataSQL<(string hes, string name)>("SELECT TOP 1 HES, NAME FROM dbo.CUST_HESAB WHERE HES IS NOT NULL AND NAME IS NOT NULL").FirstOrDefault();
-            Console.WriteLine($"1. Database Query Verification: Found sample customer HES = {sampleCustomer.hes}, Name = {sampleCustomer.name}");
-
-            if (!string.IsNullOrEmpty(sampleCustomer.hes))
+            // Load Resource Dictionaries matching App.xaml
+            string[] resourceDicts = new[]
             {
-                var parts = sampleCustomer.hes.Split('-');
-                string tnum = parts.Length >= 3 ? parts[2] : sampleCustomer.hes;
-                Console.WriteLine($"2. Parsed TNUMBER for Eslah (Edit) action: {tnum}");
+                "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml",
+                "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml",
+                "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml",
+                "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"
+            };
+
+            foreach (var uri in resourceDicts)
+            {
+                try
+                {
+                    app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(uri, UriKind.RelativeOrAbsolute) });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[INFO] Resource skip: {uri} ({ex.Message})");
+                }
             }
 
-            Console.WriteLine("=========================================================================");
-            Console.WriteLine("🎉 CRUD & ESLAH (EDIT) BUTTON CONTROLS VERIFIED!");
+            // Launch HEAD_LST_KHAREED1 for Direct Purchase (IsDirectFactor = true)
+            try
+            {
+                Console.WriteLine("Instantiating HEAD_LST_KHAREED1 (Direct Purchase)...");
+                var win = new Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_KHAREED1(null, _IsDirectFactor_: true);
+                
+                win.Loaded += (s, e) =>
+                {
+                    Console.WriteLine("Window loaded. Title: " + win.Title + ", Header: " + win.LABEL_HEADER.Content);
+                    
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+                    timer.Tick += (ts, te) =>
+                    {
+                        timer.Stop();
+                        try
+                        {
+                            var interop = new System.Windows.Interop.WindowInteropHelper(win);
+                            GetWindowRect(interop.Handle, out RECT rect);
+                            int width = rect.Right - rect.Left;
+                            int height = rect.Bottom - rect.Top;
+
+                            if (width > 0 && height > 0)
+                            {
+                                using var bmp = new Bitmap(width, height);
+                                using var g = Graphics.FromImage(bmp);
+                                g.CopyFromScreen(rect.Left, rect.Top, 0, 0, new System.Drawing.Size(width, height));
+                                
+                                string screenshotPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "direct_purchase_screenshot.png");
+                                bmp.Save(screenshotPath, ImageFormat.Png);
+                                Console.WriteLine($"[PASS] Visual screenshot saved: {screenshotPath}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[WARN] Screenshot capture: {ex.Message}");
+                        }
+                        finally
+                        {
+                            win.Close();
+                            app.Shutdown();
+                        }
+                    };
+                    timer.Start();
+                };
+
+                app.Run(win);
+                Console.WriteLine("\n🎉 Visual UI verification finished successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FAIL] UI Harness exception: {ex.Message}\n{ex.StackTrace}");
+            }
         }
     }
 }

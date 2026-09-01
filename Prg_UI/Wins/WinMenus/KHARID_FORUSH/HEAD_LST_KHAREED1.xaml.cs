@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
@@ -2795,6 +2795,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ErrosMessages.Add(new MsgModel { MessageText_U = "واحد فروش مشخص نشده است ....!" });
             }
 
+            if (IsDirectFactor)
+            {
+                if (string.IsNullOrEmpty(CMB_MOIN_HAZ.SelectedValue.ToStringNullSafe()) || string.IsNullOrEmpty(MOIN_HAZ.Text))
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "مركز هزينه مشخص نشده است ....!" });
+                }
+            }
+
             //POSHTEFACTOR
             if (string.IsNullOrEmpty(MOIN_VAR.Text) && Convert.ToInt64(MABL_VAR.Text) > 0) //معین واریزی
             {
@@ -3014,24 +3022,24 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                 // 1. قفل گذاری روی جدول برای اطمینان از خواندن صحیح MAX
                                 db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
 
-                                // 2. دریافت حداکثر شماره فاکتور (TAG = 12)
+                                // 2. دریافت حداکثر شماره فاکتور (TAG = 12 یا 15)
                                 var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();
                                 if (rst_11 == 0 || rst_11 == null)
                                 {
-                                    newNumber1 = Baseknow.STHFR; // شماره شروع
+                                    newNumber1 = IsDirectFactor ? (Baseknow.STMO ?? 1) : Baseknow.STHFR; // شماره شروع
                                 }
                                 else
                                 {
                                     newNumber1 = Convert.ToDouble(rst_11 + 1);
                                 }
 
-                                // 3. دریافت حداکثر شماره رسید انبار (TAG = 1) (اگر فاکتور مستقیم است)
+                                // 3. دریافت حداکثر شماره رسید انبار (TAG = 1 یا 15) (اگر فاکتور مستقیم است)
                                 if (IsDirectFactor)
                                 {
                                     var rst_12 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={HTAG}))", null, transaction).FirstOrDefault();
                                     if (rst_12 == 0 || rst_12 == null)
                                     {
-                                        newNumber = Baseknow.STHFR; // شماره شروع
+                                        newNumber = Baseknow.STMO ?? 1; // شماره شروع
                                     }
                                     else
                                     {
