@@ -898,21 +898,29 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void CalculateSumForCurrentColumn(SfDataGrid _DG_)
         {
-            // Ensure rows are selected
-            if (_DG_.SelectedItems == null || _DG_.SelectedItems.Count == 0)
+            if (_DG_ == null || _DG_.View == null)
             {
                 return;
             }
 
             // Detect the current column
-            var currentColumn = _DG_.CurrentColumn;
+            var currentColumn = _DG_.CurrentColumn ?? _DG_.SelectionController?.CurrentCellManager?.CurrentCell?.GridColumn;
             if (currentColumn == null)
             {
                 return;
             }
 
-            string columnName = currentColumn.MappingName; // Get the column name
+            string columnName = currentColumn.MappingName;
             if (string.IsNullOrEmpty(columnName))
+            {
+                return;
+            }
+
+            var itemsToSum = (_DG_.SelectedItems != null && _DG_.SelectedItems.Count > 0)
+                ? _DG_.SelectedItems.OfType<object>().ToList()
+                : _DG_.View.Records.Select(r => r.Data).ToList();
+
+            if (itemsToSum.Count == 0)
             {
                 return;
             }
@@ -920,12 +928,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             decimal sum = 0;
             bool isNumericColumn = false;
 
-            // Iterate through the selected rows
-            foreach (var selectedItem in _DG_.SelectedItems)
+            foreach (var item in itemsToSum)
             {
-                // Get the cell value for the detected column
-                var cellValue = GetCellValue(selectedItem, columnName);
-
+                var cellValue = GetCellValue(item, columnName);
                 if (cellValue != null && decimal.TryParse(cellValue.ToStringNullSafe(), out decimal numericValue))
                 {
                     sum += numericValue;
@@ -936,9 +941,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (isNumericColumn)
             {
                 string formattedSum = sum.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
-
-                new Msgwin(false, $"جمع سطر های انتخاب شده در ستون [{currentColumn.HeaderText}] برار است با : {formattedSum}").ShowDialog();
-
+                new Msgwin(false, $"جمع سطر های انتخاب شده در ستون [{currentColumn.HeaderText}] برابر است با : {formattedSum}").ShowDialog();
             }
         }
         private object GetCellValue(object record, string columnName)
@@ -1057,7 +1060,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     return false;
             }
         }
-                #endregion
+        #endregion
 
         private void BTN_ISEND_Click(object sender, RoutedEventArgs e)
         {

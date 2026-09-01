@@ -559,10 +559,13 @@ namespace Functions
                     colMeta.Add((col, col.MappingName, comboLookup));
                 }
 
-                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.OfType<object>().Where(x => x != System.Windows.Data.CollectionView.NewItemPlaceholder));
+                var selectedSet = dataGrid.SelectedItems != null && dataGrid.SelectedItems.Count > 0
+                    ? new HashSet<object>(dataGrid.SelectedItems.OfType<object>().Where(x => x != System.Windows.Data.CollectionView.NewItemPlaceholder))
+                    : null;
+
                 var orderedRecords = dataGrid.View.Records
                     .Select(r => r.Data)
-                    .Where(d => selectedSet.Contains(d))
+                    .Where(d => selectedSet == null || selectedSet.Contains(d))
                     .ToList();
 
                 if (orderedRecords.Count == 0 || colMeta.Count == 0) return;
