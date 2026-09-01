@@ -1,4 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
+using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
@@ -317,24 +317,34 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             //Click
 
-            N_SERI_ON = N_SERI.Text;
+            N_SERI_ON = !string.IsNullOrEmpty(N_SERI.Text) ? N_SERI.Text : N_SERI.SelectedValue?.ToString();
             BANK_ON = BANK.SelectedValue?.ToString();
             DATE_S_ON = DATE_S.SelectedValue?.ToString();
             MABL_ON = MABL.Text;
 
             DateTime dt;
             dt = DateTime.Now;
-            CL_HESABDARI.TR("PAY_GETP", $"N_SERI = N'{this.N_SERI.Text}' AND BANK = N'{this.BANK.SelectedValue?.ToString()}' AND DATE_S = N'{this.DATE_S.Text.ToRawTarikh()}'", dt, 1);
+            CL_HESABDARI.TR("PAY_GETP", $"N_SERI = {this.N_SERI_ON} AND BANK = {this.BANK_ON} AND DATE_S = {this.DATE_S_ON}", dt, 1);
             can = false;
-            if (!IsNull(this.N_SERI.Text) && !IsNull(this.BANK.SelectedValue))
+            if (!IsNull(this.N_SERI_ON) && !IsNull(this.BANK_ON) && !IsNull(this.DATE_S_ON))
             {
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
+                var rawDate = DATE.Text.ToRawTarikh();
+                var dateParam = string.IsNullOrEmpty(rawDate) ? "NULL" : rawDate;
+                var mablVal = string.IsNullOrEmpty(MABL.Text) ? "0" : MABL.Text.Replace(",", "");
+                var vazVal = VAZ.SelectedValue is null || string.IsNullOrWhiteSpace(VAZ.SelectedValue.ToString()) ? "NULL" : VAZ.SelectedValue.ToString();
 
                 dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP
-                    SET N_SERI = N'{N_SERI.Text}', BANK = N'{BANK.SelectedValue}', DATE_S = N'{DATE_S.SelectedValue}', DATE = N'{DATE.Text}', SHOBEH = N'{SHOBEH.Text}', MABL = N'{MABL.Text}', NAME_TAH = N'{_NAME_TAH_}',
-                    N_HESAB = N'{N_HESAB.Text}', VAZ = {(VAZ.SelectedValue is null ? "NULL" : VAZ.SelectedValue)}
-                    WHERE N_SERI = N'{N_SERI_ON}' AND BANK = N'{BANK_ON}' AND DATE_S = N'{DATE_S_ON}' AND MABL = N'{MABL_ON}'");
-
+                    SET N_SERI = {N_SERI_ON}, 
+                        BANK = {BANK_ON}, 
+                        DATE_S = {DATE_S_ON}, 
+                        DATE = {dateParam}, 
+                        SHOBEH = N'{SHOBEH.Text}', 
+                        MABL = {mablVal}, 
+                        NAME_TAH = N'{_NAME_TAH_}',
+                        N_HESAB = N'{N_HESAB.Text}', 
+                        VAZ = {vazVal}
+                    WHERE N_SERI = {N_SERI_ON} AND BANK = {BANK_ON} AND DATE_S = {DATE_S_ON}");
             }
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
             (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
