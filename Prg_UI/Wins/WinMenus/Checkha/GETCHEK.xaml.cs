@@ -725,12 +725,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (isNewRadif)
                 {
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
-                    msgwin1.Show();
+                    msgwin1.ShowDialog();
                 }
 
 
                 (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
                 (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
+                (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
 
                 this.Close();
 

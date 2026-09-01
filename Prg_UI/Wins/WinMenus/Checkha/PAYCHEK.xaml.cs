@@ -511,6 +511,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             var pgetWin = THE_WIN as PGET_HED;
             if (pgetWin?.CURRENT_ITMES_ROW != null)
             {
+                if (double.TryParse(N_SERI.Text, out double serialVal))
+                {
+                    pgetWin.CURRENT_ITMES_ROW.N_SERI = serialVal;
+                }
+                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
+                {
+                    pgetWin.CURRENT_ITMES_ROW.BANK = bankVal;
+                }
                 pgetWin.CmdSaveRecord(pgetWin.CURRENT_ITMES_ROW);
             }
 
@@ -705,6 +713,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         }
                     }
                     pgetHedWindow.SANAD();
+                    pgetHedWindow.MoveToNextRowFromLastCell();
                 }
 
                 this.Close();

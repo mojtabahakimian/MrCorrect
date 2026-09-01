@@ -369,6 +369,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (pgetHed != null && pgetHed.CURRENT_ITMES_ROW != null)
             {
+                if (N_SERI.SelectedValue != null && double.TryParse(N_SERI.SelectedValue.ToString(), out double serialVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
+                }
+                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.BANK = bankVal;
+                }
                 pgetHed.CmdSaveRecord(pgetHed.CURRENT_ITMES_ROW);
             }
 
@@ -455,7 +463,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     _ = pgetHed.CmdSaveRecord(parentItem);
                 }
                 pgetHed.SANAD();
-
+                pgetHed.MoveToNextRowFromLastCell();
             }
 
             this.Close();

@@ -445,6 +445,39 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             this.Owner = PublicVRB.WINBASE;//#OWNER
         }
         public bool IsOpenedFromAutomation { get; } = false;
+        public void MoveToNextRowFromLastCell()
+        {
+            try
+            {
+                var DG = PGET_LST_SUB;
+                if (DG == null || DG.Items.Count == 0) return;
+
+                int nextIndex = CURRENT_ROW_INDEX + 1;
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (nextIndex < DG.Items.Count)
+                        {
+                            DG.SelectedIndex = nextIndex;
+                            var targetCol = DG.Columns.FirstOrDefault(c => c.SortMemberPath == "NO_AM")
+                                          ?? DG.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible && !c.IsReadOnly);
+
+                            if (DG.SelectedItem != null && targetCol != null)
+                            {
+                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, targetCol);
+                                DG.Focus();
+                                DG.BeginEdit();
+                            }
+                        }
+                    }
+                    catch { }
+                }), System.Windows.Threading.DispatcherPriority.Input);
+            }
+            catch { }
+        }
+
         private void EnsureFocusOnCurrentCell()
         {
             try
@@ -617,22 +650,17 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
                             //با فعال بودن حساب ارزی , مسیر Enter تا ستون نوع ارز ادامه پیدا میکند
                             bool isLastColumn = DG.CurrentColumn?.SortMemberPath == (ARZ_IS_ACTIVE ? "ARZKIND2" : "MABL");
-                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
 
                             if (isLastColumn)
                             {
                                 var currentRow = DG.SelectedItem as PGET_LST;
+
                                 if (IsChequeRow(currentRow))
                                 {
-                                    if (_lastChequeRowHandled != currentRow)
-                                    {
-                                        // بار اول روی سطر چک Enter زده شده: نذار سطر به سطر بعدی بپرد تا پنجره مشخصات چک باز و بسته شود
-                                        _lastChequeRowHandled = currentRow;
-                                        return;
-                                    }
+                                    // For cheque rows in edit mode, commit current cell edit so CellEditEnding fires and opens the Cheque window.
+                                    DG.CommitEdit(DataGridEditingUnit.Cell, true);
+                                    return;
                                 }
-
-                                _lastChequeRowHandled = null;
 
                                 // اگر سطر فعلی ناقص است، اجازه رفتن به سطر بعد را نده
                                 if (currentRow != null && !ConstructorRowDetector.IsPristine(currentRow) && !BodyIsValid(currentRow, false))
@@ -640,32 +668,28 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                     return;
                                 }
 
-                                // If it's the last column, move focus to the first cell of next row
-                                if (isLastRow)
+                                // Move focus to the first cell of next row
+                                if (DG.Items.Count > DG.SelectedIndex + 1)
                                 {
-                                    // Make sure next row exists before trying to select it
-                                    if (DG.Items.Count > DG.SelectedIndex + 1)
+                                    DG.SelectedIndex++;
+                                    var targetCol = DG.Columns.FirstOrDefault(c => c.SortMemberPath == "NO_AM")
+                                                  ?? DG.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible && !c.IsReadOnly);
+
+                                    // Verify the new selection is valid
+                                    if (DG.SelectedItem != null && targetCol != null)
                                     {
-                                        DG.SelectedIndex++;
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, targetCol);
 
-                                        // Verify the new selection is valid
-                                        if (DG.SelectedItem != null && DG.Columns.Count > PGET_LST_SUB_DEF_INDEX_COL)
+                                        Dispatcher.BeginInvoke(new Action(() =>
                                         {
-                                            DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[PGET_LST_SUB_DEF_INDEX_COL]);
-
-                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            if (DG.SelectedItem != null)
                                             {
-                                                if (DG.SelectedItem != null)
-                                                {
-                                                    DG.BeginEdit();
-                                                }
-                                            }), DispatcherPriority.Background);
-
-
-                                        }
+                                                DG.BeginEdit();
+                                            }
+                                        }), DispatcherPriority.Background);
                                     }
-                                    return;
                                 }
+                                return;
                             }
                         }
                     }
@@ -3746,6 +3770,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 ENTERED_VALUE_ROW = ENTERED_VALUE_ROW.ToString().RemoveQut();
                 if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()) || !long.TryParse(ENTERED_VALUE_ROW.ToString(), out _))
                 {
+                    if (e.Row.IsNewItem && (CURRENT_ITMES_ROW.MABL is null || CURRENT_ITMES_ROW.MABL == 0))
+                    {
+                        PGET_HED_SUB_CANCEL_EDIT();
+                        return;
+                    }
                     RestoreFocusCell(e);
                     universControl.PopNotifyShow("مبلغ صحیح وارد نشده", Pop1, Pop1Text1, Pop_Border1);
                     return;
@@ -3805,7 +3834,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(gETCHEK);
-                                            EnsureFocusOnCurrentCell();
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3831,12 +3859,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             }
                                             GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(gETCHEK);
-                                            EnsureFocusOnCurrentCell();
-
-                                            if (CURRENT_CELL_ROW != null)
-                                            {
-                                                CURRENT_CELL_ROW.Focus();
-                                            }
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3923,7 +3945,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX, default, WAS_ROW_ITEM?.MABL);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(pAYCHEK);
-                                            EnsureFocusOnCurrentCell();
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -3950,7 +3971,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK;
                                             PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
                                             await ShowDialogAfterCurrentDispatcherOperationAsync(pAYCHEK);
-                                            EnsureFocusOnCurrentCell();
                                             if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
@@ -4235,6 +4255,12 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (THE_ROW_ITEM.MABL == 0)
                 {
+                    if (e.Row.IsNewItem)
+                    {
+                        PGET_HED_SUB_CANCEL_EDIT();
+                        return;
+                    }
+
                     Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
                     msgwin.ShowDialog(); //ShowDialog نه Show ، تا قبل از ادامه اجرای کد کاربر پیام را ببیند
 
