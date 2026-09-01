@@ -1,4 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
+using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
@@ -628,7 +628,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 50 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 50) : SHOBEH.SelectedValue.ToStringNullSafe();
 
 
-                var _KIND_VAL_ = KIND.SelectedValue != null ? KIND.SelectedValue.ToString() : "0";
+                var _KIND_VAL_ = KIND.SelectedValue != null && !string.IsNullOrWhiteSpace(KIND.SelectedValue.ToString()) ? KIND.SelectedValue.ToString() : "0";
                 var _HES1_VAL_ = HES1.SelectedValue != null ? HES1.SelectedValue.ToString() : "";
                 var _N_KOL_VAL_ = string.IsNullOrWhiteSpace(N_KOL) ? "NULL" : N_KOL;
                 var _N_MOIN_VAL_ = string.IsNullOrWhiteSpace(N_MOIN) ? "NULL" : N_MOIN;

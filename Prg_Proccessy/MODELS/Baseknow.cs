@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_SendInvoice.CNNMANAGER;
@@ -136,6 +136,7 @@ namespace Prg_Proccessy.MODELS
         public static double? WAR { get; set; }
         public static bool? FRUP { get; set; }
         public static int? STHKH { get; set; }
+        public static int? STMO { get; set; }
         //
         public static int NAME_CODE { get; set; } = 0;
         public static string TFTEL { get; set; }
@@ -474,6 +475,7 @@ namespace Prg_Proccessy.MODELS
                     if (item.STTOL != null) STTOL = item.STTOL;
                     if (item.ECONM != null) ECONM = item.ECONM;
                     if (item.STKHS != null) STKHS = item.STKHS;
+                    if (item.STMO != null) STMO = item.STMO;
 
                     if (item.IT1 != null) IT1 = item.IT1;
                     if (item.IT2 != null) IT2 = item.IT2;

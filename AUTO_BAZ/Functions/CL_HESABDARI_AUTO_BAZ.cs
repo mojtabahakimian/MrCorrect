@@ -1,4 +1,4 @@
-﻿using AUTO_BAZ.HelperWins;
+using AUTO_BAZ.HelperWins;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
@@ -4183,53 +4183,64 @@ namespace AUTO_BAZ.Functions
             var khExistingHeaderDates = new Dictionary<double, long?>();
             var khNeedsNewHeader = new bool[HFRST.Count];
 
-            static string BuildKhDailySharhS(long dateN)
-                => Strings.Left(" فاكتورهاي  خريد  " + " مورخ " + Strings.Format(dateN, "####/##/##"), 255);
+            static string BuildKhDailySharhS(long dateN, byte tag = 12)
+                => tag == 15
+                    ? Strings.Left(" فاكتورهاي خريد كالاي مصرف مستقيم مورخ " + Strings.Format(dateN, "####/##/##"), 255)
+                    : Strings.Left(" فاكتورهاي  خريد  " + " مورخ " + Strings.Format(dateN, "####/##/##"), 255);
 
             static string BuildKhSingleSharhS(HEAD_LST_CSHARP row)
-                => Strings.Left(" فاكتور خريد شماره " + row.NUMBER1 + " مورخ " + Strings.Format(row.DATE_N, "####/##/##") + " فروشنده: " + GETTAFNAME(row.CUST_NO), 255);
+                => row.TAG == 15
+                    ? Strings.Left("فاكتور خريد كالاي مصرف مستقيم  شماره " + row.NUMBER + " مورخ " + Strings.Format(row.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(row.CUST_NO), 255)
+                    : Strings.Left(" فاكتور خريد شماره " + row.NUMBER1 + " مورخ " + Strings.Format(row.DATE_N, "####/##/##") + " فروشنده: " + GETTAFNAME(row.CUST_NO), 255);
 
             var khUsableIndexes = new List<int>();
             for (int khI = 0; khI < HFRST.Count; khI++) { if (khRowUsable[khI]) { khUsableIndexes.Add(khI); } }
 
             if (khIsDailyMode)
             {
-                var khDailyNs = new Dictionary<long, double>();
-                var khDates = khUsableIndexes.Select(khI => Convert.ToInt64(HFRST[khI].DATE_N)).Distinct().ToList();
+                var khDailyNs = new Dictionary<(long Date, int NoS), double>();
+                var khDailyKeys = khUsableIndexes
+                    .Select(khI => (Date: Convert.ToInt64(HFRST[khI].DATE_N), NoS: HFRST[khI].TAG == 15 ? 15 : 1))
+                    .Distinct()
+                    .ToList();
 
-                if (khDates.Count > 0)
+                if (khDailyKeys.Count > 0)
                 {
-                    var khMinDate = khDates.Min();
-                    var khMaxDate = khDates.Max();
+                    var khMinDate = khDailyKeys.Min(k => k.Date);
+                    var khMaxDate = khDailyKeys.Max(k => k.Date);
                     foreach (var found in dbms.DoGetDataSQL<QRE10>(
-                        $"SELECT BASE, n_s, date_s, no_s FROM dbo.deed_hed WHERE no_s = 1 AND date_s BETWEEN {khMinDate} AND {khMaxDate}"))
+                        $"SELECT BASE, n_s, date_s, no_s FROM dbo.deed_hed WHERE no_s IN (1, 15) AND date_s BETWEEN {khMinDate} AND {khMaxDate}"))
                     {
-                        if (found?.DATE_S != null && found.N_S != null && !khDailyNs.ContainsKey(found.DATE_S.Value))
+                        if (found?.DATE_S != null && found.N_S != null && found.NO_S != null)
                         {
-                            khDailyNs[found.DATE_S.Value] = found.N_S.Value;
+                            var key = (found.DATE_S.Value, Convert.ToInt32(found.NO_S.Value));
+                            if (!khDailyNs.ContainsKey(key))
+                            {
+                                khDailyNs[key] = found.N_S.Value;
+                            }
                         }
                     }
 
-                    var khMissingDates = khDates.Where(d => !khDailyNs.ContainsKey(d)).ToList();
-                    if (khMissingDates.Count > 0)
+                    var khMissingKeys = khDailyKeys.Where(k => !khDailyNs.ContainsKey(k)).ToList();
+                    if (khMissingKeys.Count > 0)
                     {
-                        var khHeaderRequests = khMissingDates.Select(d =>
+                        var khHeaderRequests = khMissingKeys.Select(k =>
                         {
                             // نمونه‌برداری فقط از ردیف‌های سالم؛ ردیف کنارگذاشته‌شده نباید شرح سند را تعیین کند.
-                            var sample = HFRST[khUsableIndexes.First(khI => Convert.ToInt64(HFRST[khI].DATE_N) == d)];
+                            var sample = HFRST[khUsableIndexes.First(khI => Convert.ToInt64(HFRST[khI].DATE_N) == k.Date && (HFRST[khI].TAG == 15 ? 15 : 1) == k.NoS)];
                             return new SanadHeaderRequest
                             {
-                                DATE_S = d,
-                                SHARH_S = BuildKhDailySharhS(d),
+                                DATE_S = k.Date,
+                                SHARH_S = BuildKhDailySharhS(k.Date, (byte)(sample.TAG ?? 12)),
                                 GHATEI = 0,
-                                NO_S = 1,
+                                NO_S = (short)k.NoS,
                                 OKF = -1,
                                 USER_NAME = sample.USER_NAME
                             };
                         }).ToList();
 
                         var khNewNs = ReserveSanadNumbersBatch(khHeaderRequests);
-                        for (int k = 0; k < khMissingDates.Count; k++) { khDailyNs[khMissingDates[k]] = khNewNs[k]; }
+                        for (int k = 0; k < khMissingKeys.Count; k++) { khDailyNs[khMissingKeys[k]] = khNewNs[k]; }
                     }
                 }
 
@@ -4238,7 +4249,7 @@ namespace AUTO_BAZ.Functions
                 var khHeadUpdates = new List<string>();
                 foreach (var khI in khUsableIndexes)
                 {
-                    var resolvedNs = khDailyNs[Convert.ToInt64(HFRST[khI].DATE_N)];
+                    var resolvedNs = khDailyNs[(Convert.ToInt64(HFRST[khI].DATE_N), HFRST[khI].TAG == 15 ? 15 : 1)];
                     if (HFRST[khI].N_S != resolvedNs)
                     {
                         HFRST[khI].N_S = resolvedNs;
@@ -4294,7 +4305,7 @@ namespace AUTO_BAZ.Functions
                         DATE_S = Convert.ToInt64(HFRST[khI].DATE_N),
                         SHARH_S = BuildKhSingleSharhS(HFRST[khI]),
                         GHATEI = 0,
-                        NO_S = 1,
+                        NO_S = (short)(HFRST[khI].TAG == 15 ? 15 : 1),
                         OKF = -1,
                         USER_NAME = HFRST[khI].USER_NAME
                     }).ToList();
@@ -4400,38 +4411,76 @@ namespace AUTO_BAZ.Functions
                 double KHMAVAV = 0d, KHNIM = 0d, KHSAKHT = 0d, KHSAY = 0d, BAZAR = 0d;
                 var HS = new double[8];
 
+                var deedTag = hRow.TAG == 15 ? 15 : 12;
                 var batchQueries = new List<string>
                 {
-                    $"DELETE FROM DEED_DTL WHERE (NUMBER = {hRow.NUMBER}) AND (TAG = 12)"
+                    $"DELETE FROM DEED_DTL WHERE (NUMBER = {hRow.NUMBER}) AND (TAG = {deedTag})"
                 };
 
-                if (invoiceLines.TryGetValue(hRow.NUMBER ?? 0d, out var lines))
+                if (hRow.TAG == 15)
                 {
-                    foreach (var line in lines)
+                    // فاکتور خرید مستقیم (TAG 15): کالا مستقیم به مرکز هزینه می‌رود
+                    if (JAMF != 0d)
                     {
-                        if (line.MABL_K != 0)
+                        double? MKOL = null, MMOIN = null, MTAF = null, MTAF2 = null, MTAF3 = null, MTAF4 = null;
+                        if (!IsNull(hRow.MOIN_HAZ))
                         {
-                            long.TryParse(line.CODE, out var codeLong);
-                            CREATHES(Baseknow.MOGODIA, line.ANBAR, codeLong, line.NAME);
-                            var sharhLine = Strings.Right("خريدفاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
+                            GETTAF3(hRow.MOIN_HAZ, ref MKOL, ref MMOIN, ref MTAF, ref MTAF2, ref MTAF3, ref MTAF4);
+                        }
+
+                        if (MKOL.HasValue && MMOIN.HasValue && MTAF.HasValue)
+                        {
+                            string HES_T2M = (Convert.ToDouble(MTAF2) == 0 || MTAF2 is null) ? "NULL" : MTAF2.ToString();
+                            string HES_T3M = (Convert.ToDouble(MTAF3) == 0 || MTAF3 is null) ? "NULL" : MTAF3.ToString();
+                            string HES_T4M = (Convert.ToDouble(MTAF4) == 0 || MTAF4 is null) ? "NULL" : MTAF4.ToString();
+                            var sharhBedDirect = Strings.Right("رسيدش. " + hRow.NUMBER + "-" + hRow.FNUMCO + " " + hRow.MOLAH + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
                             var arzdVal = IsNull(hRow.ARZD) ? "1" : SqlNum(hRow.ARZD);
 
-                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
-                                $"VALUES({max_ns},{Baseknow.MOGODIA},{line.ANBAR},{line.CODE},N'{Baseknow.MOGODIA + "-" + line.ANBAR + "-" + line.CODE}',N'{SqlText(sharhLine)}',{Math.Round((double)line.MABL_K)},{hRow.NUMBER},12,{arzdVal})");
+                            // مرکز هزینه (بدهکار)
+                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
+                                $"VALUES({max_ns},{N(MKOL)},{N(MMOIN)},{N(MTAF)},{HES_T2M},{HES_T3M},{HES_T4M},N'{SqlText(hRow.MOIN_HAZ)}',N'{SqlText(sharhBedDirect)}',{JAMF},{hRow.NUMBER},15,{arzdVal})");
 
-                            switch (line.RADAH)
+                            // کل بستانکاری شخص بابت فاکتور (بستانکار)
+                            string HES_T2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                            string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                            string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                            var sharhBesDirect = Strings.Right("رسيدش. " + hRow.NUMBER + "-" + hRow.FNUMCO + " " + hRow.MOLAH + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
+
+                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD, RADIF) " +
+                                $"VALUES({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhBesDirect)}',{JAMF},{hRow.NUMBER},15,{arzdVal},{hRow.NUMBER})");
+                        }
+                    }
+                }
+                else
+                {
+                    if (invoiceLines.TryGetValue(hRow.NUMBER ?? 0d, out var lines))
+                    {
+                        foreach (var line in lines)
+                        {
+                            if (line.MABL_K != 0)
                             {
-                                case 1: KHMAVAV += Math.Round((double)line.MABL_K); break;
-                                case 2: KHNIM += Math.Round((double)line.MABL_K); break;
-                                case 3: KHSAKHT += Math.Round((double)line.MABL_K); break;
-                                case 4: BAZAR += Math.Round((double)line.MABL_K); break;
-                                case 5: HS[1] += Math.Round((double)line.MABL_K); break;
-                                case 6: HS[2] += Math.Round((double)line.MABL_K); break;
-                                case 7: HS[3] += Math.Round((double)line.MABL_K); break;
-                                case 8: HS[4] += Math.Round((double)line.MABL_K); break;
-                                case 9: HS[5] += Math.Round((double)line.MABL_K); break;
-                                case 10: HS[6] += Math.Round((double)line.MABL_K); break;
-                                default: KHSAY += Math.Round((double)line.MABL_K); break;
+                                long.TryParse(line.CODE, out var codeLong);
+                                CREATHES(Baseknow.MOGODIA, line.ANBAR, codeLong, line.NAME);
+                                var sharhLine = Strings.Right("خريدفاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
+                                var arzdVal = IsNull(hRow.ARZD) ? "1" : SqlNum(hRow.ARZD);
+
+                                batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
+                                    $"VALUES({max_ns},{Baseknow.MOGODIA},{line.ANBAR},{line.CODE},N'{Baseknow.MOGODIA + "-" + line.ANBAR + "-" + line.CODE}',N'{SqlText(sharhLine)}',{Math.Round((double)line.MABL_K)},{hRow.NUMBER},12,{arzdVal})");
+
+                                switch (line.RADAH)
+                                {
+                                    case 1: KHMAVAV += Math.Round((double)line.MABL_K); break;
+                                    case 2: KHNIM += Math.Round((double)line.MABL_K); break;
+                                    case 3: KHSAKHT += Math.Round((double)line.MABL_K); break;
+                                    case 4: BAZAR += Math.Round((double)line.MABL_K); break;
+                                    case 5: HS[1] += Math.Round((double)line.MABL_K); break;
+                                    case 6: HS[2] += Math.Round((double)line.MABL_K); break;
+                                    case 7: HS[3] += Math.Round((double)line.MABL_K); break;
+                                    case 8: HS[4] += Math.Round((double)line.MABL_K); break;
+                                    case 9: HS[5] += Math.Round((double)line.MABL_K); break;
+                                    case 10: HS[6] += Math.Round((double)line.MABL_K); break;
+                                    default: KHSAY += Math.Round((double)line.MABL_K); break;
+                                }
                             }
                         }
                     }
@@ -4487,7 +4536,7 @@ namespace AUTO_BAZ.Functions
                     }
                 }
 
-                if (JAMF != 0d)
+                if (JAMF != 0d && hRow.TAG != 15)
                 {
                     var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
                     var sharhBes = Strings.Right("فاكتور خريد  شماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##") + " " + hRow.MOLAH, 255);

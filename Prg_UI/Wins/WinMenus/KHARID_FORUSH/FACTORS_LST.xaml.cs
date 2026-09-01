@@ -1,4 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
+using MaterialDesignThemes.Wpf;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using System.Linq;
@@ -145,6 +145,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 case 12:
                 case 13:
                 case 14:
+                case 15:
                 case 20:
                 case 27:
                     NUMBER_FAC_COLUMN.IsHidden = false; //Show
@@ -206,6 +207,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 case 12:
                     WINTILENAME.Content = "فاکتور های خرید";
                     NUMBER_HAV_COLUMN.HeaderText = "شماره رسید انبار ها";
+                    break;
+
+                case 15:
+                    WINTILENAME.Content = "فاکتور های خرید رسید مستقیم";
+                    NUMBER_HAV_COLUMN.HeaderText = "شماره فاکتور/رسید";
                     break;
 
                 case 11:
@@ -356,6 +362,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         {
                             //OpenWindow(typeof(HEAD_LST_KHAREED1), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور خرید از قبل باز شده ابتدا آنرا ببندید.");
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this, currentRow.NUMBER);
+                        }
+                        break;
+
+                    case 15: // فاکتور خرید رسید مستقیم
+                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
+                        {
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_DIRECT, this, currentRow.NUMBER);
                         }
                         break;
 

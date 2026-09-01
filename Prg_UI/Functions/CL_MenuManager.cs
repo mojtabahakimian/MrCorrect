@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualBasic;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
@@ -2414,6 +2414,17 @@ namespace Functions
                               Thewindowthis,
                               Convert.ToDouble(_NUM_),
                               false,
+                              false,
+                              _isCalledFromAutomasion_    // FromAutomation
+                              );
+                        break;
+
+                    case 15:
+                        CL_MenuManager.OpenWinMenu(
+                              CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_DIRECT,
+                              Thewindowthis,
+                              Convert.ToDouble(_NUM_),
+                              true,
                               false,
                               _isCalledFromAutomasion_    // FromAutomation
                               );
