@@ -302,7 +302,18 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
-            (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
+            if (THE_WIN is PGET_HED pgetHed && pgetHed.CURRENT_ITMES_ROW != null)
+            {
+                if (double.TryParse(N_SERI.Text, out double serialVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
+                }
+                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.BANK = bankVal;
+                }
+                pgetHed.CmdSaveRecord(pgetHed.CURRENT_ITMES_ROW);
+            }
 
             //Click
 
@@ -326,6 +337,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             }
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
+            (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
             this.Close();
         }
 

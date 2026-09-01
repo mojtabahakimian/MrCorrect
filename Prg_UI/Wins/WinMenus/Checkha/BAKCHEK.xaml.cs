@@ -432,7 +432,18 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
+            if (THE_WIN is PGET_HED pgetHed && pgetHed.CURRENT_ITMES_ROW != null)
+            {
+                if (N_SERI.SelectedValue != null && double.TryParse(N_SERI.SelectedValue.ToString(), out double serialVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
+                }
+                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.BANK = bankVal;
+                }
+                pgetHed.CmdSaveRecord(pgetHed.CURRENT_ITMES_ROW);
+            }
             if (!IsNull(N_SERI.SelectedValue))
             {
                 SE_N_SERI = N_SERI.SelectedValue.ToStringNullSafe();
@@ -475,6 +486,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
 
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
+            (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
 
             this.Close();
         }

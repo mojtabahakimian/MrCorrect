@@ -462,6 +462,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
+            // Sync N_SERI and BANK to parent row BEFORE validation and save
+            if (THE_WIN is PGET_HED pgetHed && pgetHed.CURRENT_ITMES_ROW != null)
+            {
+                if (double.TryParse(N_SERI.Text, out double serialVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
+                }
+                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
+                {
+                    pgetHed.CURRENT_ITMES_ROW.BANK = bankVal;
+                }
+            }
+
             //Validations:
             (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
 
@@ -712,12 +725,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (isNewRadif)
                 {
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
-                    msgwin1.Show();
+                    msgwin1.ShowDialog();
                 }
 
 
                 (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
                 (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
+                (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
 
                 this.Close();
 

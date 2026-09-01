@@ -199,21 +199,17 @@ namespace Prg_UI.HelperWins
         {
             this.Topmost = true;
 
-
-            //this.Activate();
-            //this.Focus();
-            //Keyboard.Focus(this);
-
-            //ForceWindowToForeground();
-
-            //if (MsgTextNote.Visibility == Visibility.Visible && MsgTextNote.IsEnabled)
-            //{
-            //    MsgTextNote.Focus();
-            //}
-            //else if (MsgTextBig.Visibility == Visibility.Visible && MsgTextBig.IsEnabled)
-            //{
-            //    MsgTextBig.Focus();
-            //}
+            this.Activate();
+            if (Btn_SeeOK.Visibility == Visibility.Visible)
+            {
+                Btn_SeeOK.Focus();
+                Keyboard.Focus(Btn_SeeOK);
+            }
+            else if (Btn_yes.Visibility == Visibility.Visible)
+            {
+                Btn_yes.Focus();
+                Keyboard.Focus(Btn_yes);
+            }
         }
         /// <summary>
         /// Force the window to come to foreground even if system focus rules are strict.
@@ -242,28 +238,22 @@ namespace Prg_UI.HelperWins
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            e.Handled = true;
-
-            UIElement? uie = e.OriginalSource as UIElement;
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
+                e.Handled = true;
                 try
                 {
-                    if (Btn_yes.IsFocused)
+                    if (Btn_yes.Visibility == Visibility.Visible && Btn_yes.IsFocused)
                     {
                         Btn_yes_Click(null, null);
                     }
-                    else if (Btn_SeeOK.IsFocused)
-                    {
-                        Btn_SeeOK_Click(null, null);
-                    }
-                    else if (Btn_no.IsFocused)
+                    else if (Btn_no.Visibility == Visibility.Visible && Btn_no.IsFocused)
                     {
                         Btn_no_Click(null, null);
                     }
                     else
                     {
-                        CL_LMethods.SendKey_US(Key.Tab);
+                        Btn_SeeOK_Click(null, null);
                     }
                 }
                 catch { }
