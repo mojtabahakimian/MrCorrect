@@ -186,14 +186,6 @@ namespace Prg_UI.Wins
         }
         public USER_LOGIN()
         {
-            CL_Generaly.IsCalledExternally = true;
-            CL_Generaly.SectionName = "PGET_HED";
-            Baseknow.USERCOD = 78;
-            Baseknow.UUSER = "Controller";
-            CL_Generaly.SHIFT_OF_USER = 1;
-            CL_Generaly.VAHED_OF_USER = 1;
-            Baseknow.UGRP = "1";
-
             if (CL_Generaly.IsCalledExternally)
             {
                 this.Hide();
