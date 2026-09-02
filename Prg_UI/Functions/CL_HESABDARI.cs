@@ -2835,11 +2835,22 @@ namespace Prg_Proccessy.FUNCTIONS
                 TheWind = (Window)System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
             }
 
+            Action<Window?> safeCloseWindow = (targetWin) =>
+            {
+                if (targetWin != null)
+                {
+                    targetWin.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try { targetWin.Close(); } catch { }
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+            };
+
             if (!string.IsNullOrEmpty(WIN_NAME) && File.Exists(CL_Generaly.FILEACCESSPATH)) //Filey
             {
                 if (!CL_LMethods.IsAllowedOpen(Baseknow.USERCOD.ToString(), WIN_NAME)) //Not Allowed to open
                 {
-                    TheWind?.Close();
+                    safeCloseWindow(TheWind);
                     Msgwin msgwin = new Msgwin(false, "شماره اجازه دسترسی به این بخش را ندارید !"); msgwin.ShowDialog();
                     return false;
                 }
@@ -2879,13 +2890,13 @@ VALUES
                     }
                     catch (Exception)
                     {
-                        TheWind?.Close();
+                        safeCloseWindow(TheWind);
                         new Msgwin(false, "این کاربری اطلاعات آن ناقص است خطا در انجام عملیات.").ShowDialog();
                         return false;
                     }
 
 
-                    TheWind?.Close();
+                    safeCloseWindow(TheWind);
                     new Msgwin(false, "دسترسی به فرم فعال شد، ولی هنوز تنظیمات مجوز کامل نیست. بعد از تنظیم مجوزها در تعیین سطح دسترسی دوباره وارد شوید.").ShowDialog();
                     return false;
                 }
@@ -2894,7 +2905,7 @@ VALUES
                 {
                     if (RST.SEE != true) //SEE : دیدن | مشاهده داده
                     {
-                        TheWind?.Close();
+                        safeCloseWindow(TheWind);
                         Msgwin msgwin = new Msgwin(false, "شماره اجازه دسترسی به این بخش را ندارید !"); msgwin.ShowDialog();
                         return false;
                     }
@@ -2930,7 +2941,7 @@ VALUES
                 }
                 else
                 {
-                    TheWind?.Close();
+                    safeCloseWindow(TheWind);
                     Msgwin msgwin = new Msgwin(false, "تنظیم پیاده سازی مربوط به دسترسی انجام نشده با پشتیبانی در ارتباط باشید"); msgwin.ShowDialog();
                     return false;
                 }

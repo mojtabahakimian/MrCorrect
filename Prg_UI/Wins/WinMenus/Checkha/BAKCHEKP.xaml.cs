@@ -330,21 +330,40 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
                 var rawDate = DATE.Text.ToRawTarikh();
-                var dateParam = string.IsNullOrEmpty(rawDate) ? "NULL" : rawDate;
-                var mablVal = string.IsNullOrEmpty(MABL.Text) ? "0" : MABL.Text.Replace(",", "");
-                var vazVal = VAZ.SelectedValue is null || string.IsNullOrWhiteSpace(VAZ.SelectedValue.ToString()) ? "NULL" : VAZ.SelectedValue.ToString();
+                long? dateVal = long.TryParse(rawDate, out long parsedDate) ? parsedDate : (long?)null;
+                double.TryParse(string.IsNullOrEmpty(MABL.Text) ? "0" : MABL.Text.Replace(",", ""), out double mablVal);
+                double? vazVal = VAZ.SelectedValue is null || string.IsNullOrWhiteSpace(VAZ.SelectedValue.ToString()) || !double.TryParse(VAZ.SelectedValue.ToString(), out double parsedVaz) ? null : parsedVaz;
 
-                dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP
-                    SET N_SERI = {N_SERI_ON}, 
-                        BANK = {BANK_ON}, 
-                        DATE_S = {DATE_S_ON}, 
-                        DATE = {dateParam}, 
-                        SHOBEH = N'{SHOBEH.Text}', 
-                        MABL = {mablVal}, 
-                        NAME_TAH = N'{_NAME_TAH_}',
-                        N_HESAB = N'{N_HESAB.Text}', 
-                        VAZ = {vazVal}
-                    WHERE N_SERI = {N_SERI_ON} AND BANK = {BANK_ON} AND DATE_S = {DATE_S_ON}");
+                double.TryParse(N_SERI_ON, out double nSeriVal);
+                int.TryParse(BANK_ON, out int bankVal);
+                long.TryParse(DATE_S_ON.ToRawTarikh(), out long dateSVal);
+
+                dbms.DoExecuteSQL(@"UPDATE dbo.PAY_GETP
+                    SET N_SERI = @N_SERI,
+                        BANK = @BANK,
+                        DATE_S = @DATE_S,
+                        DATE = @DATE,
+                        SHOBEH = @SHOBEH,
+                        MABL = @MABL,
+                        NAME_TAH = @NAME_TAH,
+                        N_HESAB = @N_HESAB,
+                        VAZ = @VAZ
+                    WHERE N_SERI = @WHERE_N_SERI AND BANK = @WHERE_BANK AND DATE_S = @WHERE_DATE_S",
+                    new
+                    {
+                        N_SERI = nSeriVal,
+                        BANK = bankVal,
+                        DATE_S = dateSVal,
+                        DATE = dateVal,
+                        SHOBEH = SHOBEH.Text ?? "",
+                        MABL = mablVal,
+                        NAME_TAH = _NAME_TAH_ ?? "",
+                        N_HESAB = N_HESAB.Text ?? "",
+                        VAZ = vazVal,
+                        WHERE_N_SERI = nSeriVal,
+                        WHERE_BANK = bankVal,
+                        WHERE_DATE_S = dateSVal
+                    });
             }
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
             (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
