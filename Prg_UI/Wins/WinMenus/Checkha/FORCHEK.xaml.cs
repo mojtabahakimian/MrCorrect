@@ -369,7 +369,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (pgetHed != null && pgetHed.CURRENT_ITMES_ROW != null)
             {
-                if (N_SERI.SelectedValue != null && double.TryParse(N_SERI.SelectedValue.ToString(), out double serialVal))
+                if (N_SERI.SelectedValue != null && double.TryParse(N_SERI.SelectedValue.ToString(), out double serialVal) && N_SERI.Text != "0")
                 {
                     pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
                 }

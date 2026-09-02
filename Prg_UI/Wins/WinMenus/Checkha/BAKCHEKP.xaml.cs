@@ -304,7 +304,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             if (THE_WIN is PGET_HED pgetHed && pgetHed.CURRENT_ITMES_ROW != null)
             {
-                if (double.TryParse(N_SERI.Text, out double serialVal))
+                if (double.TryParse(N_SERI.Text, out double serialVal) && N_SERI.Text != "0")
                 {
                     pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
                 }
