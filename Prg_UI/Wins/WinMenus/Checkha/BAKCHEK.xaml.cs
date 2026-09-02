@@ -299,6 +299,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     : " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
 
 
+                // حفظ حساب واگذاری قبلی (HES2) قبل از به روزرسانی PAY_GETD
+                string previousHes2 = rst?.FirstOrDefault()?.HES2;
+
                 if (rst.Count > 0)
                 {
                     rst.FirstOrDefault().N_KOL2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;
@@ -327,15 +330,24 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
                     msgwin.ShowDialog();
 
-                    CL_HESABDARI.GETTAF3(this.HES1.SelectedValue.ToString(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                    // اگر چک قبلاً واگذار شده باشد، برای "از حساب" (FHES) از حساب واگذاری قبلی (previousHes2) استفاده می‌کنیم.
+                    // اگر خالی بود، از this.HES1 استفاده می‌کنیم.
+                    string targetHesForFrom = !string.IsNullOrEmpty(previousHes2)
+                        ? previousHes2
+                        : (this.HES1.SelectedValue != null ? this.HES1.SelectedValue.ToString() : "");
 
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = (Convert.ToInt32(CKOL) == 0) ? null : (int)CKOL;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = (Convert.ToInt32(CMOIN) == 0) ? null : (int)CMOIN;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = (Convert.ToInt32(CTAF) == 0) ? null : (int)CTAF;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T2 = (Convert.ToInt32(CTAF2) == 0) ? null : (int)CTAF2;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T3 = (Convert.ToInt32(CTAF3) == 0) ? null : (int)CTAF3;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T4 = (Convert.ToInt32(CTAF4) == 0) ? null : (int)CTAF4;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = this.HES1.SelectedValue.ToString();
+                    if (!string.IsNullOrEmpty(targetHesForFrom))
+                    {
+                        CL_HESABDARI.GETTAF3(targetHesForFrom, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = (Convert.ToInt32(CKOL) == 0) ? null : (int)CKOL;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = (Convert.ToInt32(CMOIN) == 0) ? null : (int)CMOIN;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = (Convert.ToInt32(CTAF) == 0) ? null : (int)CTAF;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T2 = (Convert.ToInt32(CTAF2) == 0) ? null : (int)CTAF2;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T3 = (Convert.ToInt32(CTAF3) == 0) ? null : (int)CTAF3;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T4 = (Convert.ToInt32(CTAF4) == 0) ? null : (int)CTAF4;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = targetHesForFrom;
+                    }
                 }
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.SelectedValue);
@@ -432,18 +444,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            if (THE_WIN is PGET_HED pgetHed && pgetHed.CURRENT_ITMES_ROW != null)
-            {
-                if (N_SERI.SelectedValue != null && double.TryParse(N_SERI.SelectedValue.ToString(), out double serialVal))
-                {
-                    pgetHed.CURRENT_ITMES_ROW.N_SERI = serialVal;
-                }
-                if (BANK.SelectedValue != null && int.TryParse(BANK.SelectedValue.ToString(), out int bankVal))
-                {
-                    pgetHed.CURRENT_ITMES_ROW.BANK = bankVal;
-                }
-                pgetHed.CmdSaveRecord(pgetHed.CURRENT_ITMES_ROW);
-            }
             if (!IsNull(N_SERI.SelectedValue))
             {
                 SE_N_SERI = N_SERI.SelectedValue.ToStringNullSafe();
@@ -460,35 +460,36 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 SE_HES1 = HES1.SelectedValue?.ToString();
                 SE_SANDUGH = SANDUGH.SelectedValue.ToStringNullSafe();
                 SE_VAZ = VAZ.SelectedValue.ToStringNullSafe();
-
             }
             else
             {
                 return;
             }
 
-            //Click
-            DateTime dt;
-            dt = DateTime.Now;
+            DateTime dt = DateTime.Now;
             CL_HESABDARI.TR("PAY_GETD", "N_SERI = " + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh(), dt, 1);
             can = false;
-            if (!IsNull(this.N_SERI.SelectedValue) && !IsNull(this.BANK.SelectedValue))
-            {
-                var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
-                string updateWhere = CurrentPayGetdId.HasValue && CurrentPayGetdId > 0
-                    ? $"WHERE ID = {CurrentPayGetdId.Value}"
-                    : $"WHERE N_SERI = {SE_N_SERI} AND BANK = {SE_BANK} AND DATE_S = {SE_DATE_S}";
 
-                dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
-                 SET N_SERI = {SE_N_SERI} , DATE_S = {SE_DATE_S} , SHOBEH = N'{SE_SHOBEH}' , DATE = {SE_DATE} , NAME_TAH = N'{_NAME_TAH_}' , N_HESAB = N'{SE_N_HESAB}' , MABL = {SE_MABL} , N_KOL = {(string.IsNullOrEmpty(SE_KOL) ? "NULL" : SE_KOL)} , N_MOIN = {(string.IsNullOrEmpty(SE_MOIN) ? "NULL" : SE_MOIN)} , N_TAF = {(string.IsNullOrEmpty(SE_TAF) ? "NULL" : SE_TAF)} , BANK = {SE_BANK} , HES1 = N'{(string.IsNullOrEmpty(SE_HES1) ? "NULL" : SE_HES1)}' , SANDUGH = {SE_SANDUGH} , VAZ = {SE_VAZ}
-                 {updateWhere}
-                 ");
-            }
-
-            (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
-            (THE_WIN as PGET_HED).MoveToNextRowFromLastCell();
+            var pgetHed = THE_WIN as PGET_HED;
 
             this.Close();
+
+            if (pgetHed != null)
+            {
+                pgetHed.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (INDEX_DG >= 0 && INDEX_DG < pgetHed.PGET_LST_SUB.Items.Count)
+                    {
+                        var parentItem = pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+                        if (parentItem != null)
+                        {
+                            _ = pgetHed.CmdSaveRecord(parentItem);
+                        }
+                    }
+                    pgetHed.SANAD();
+                    pgetHed.MoveToNextRowFromLastCell();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
         }
 
         private bool HeaderIsValid(bool _DisplayMsg_ = true)
