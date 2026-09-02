@@ -4994,6 +4994,16 @@ namespace AUTO_BAZ.Functions
             }
 
             // ───────────────────────────────────────────────────────────────────────────────
+            // بررسی وجود ستون‌های ارزی قبل از شروع حلقه
+            // ───────────────────────────────────────────────────────────────────────────────
+            string arzColumns = "";
+            bool hasArzd = cnnManager.SqlQuery<int?>("SELECT 1 WHERE COL_LENGTH('dbo.DEED_DTL', 'ARZD') IS NOT NULL AND COL_LENGTH('dbo.PGET_LST', 'ARZD') IS NOT NULL").FirstOrDefault() == 1;
+            bool hasArzkind2 = cnnManager.SqlQuery<int?>("SELECT 1 WHERE COL_LENGTH('dbo.DEED_DTL', 'ARZKIND2') IS NOT NULL AND COL_LENGTH('dbo.PGET_LST', 'ARZKIND2') IS NOT NULL").FirstOrDefault() == 1;
+
+            if (hasArzd) arzColumns += ", ARZD";
+            if (hasArzkind2) arzColumns += ", ARZKIND2";
+
+            // ───────────────────────────────────────────────────────────────────────────────
             // مرحله ۳ (موازی): کار هر سند کاملاً مستقل از بقیه است و هیچ قفل سراسری ندارد.
             // ───────────────────────────────────────────────────────────────────────────────
             var progressReporter = new ThrottledProgressReporter(
@@ -5030,13 +5040,14 @@ namespace AUTO_BAZ.Functions
             // با پارامتری کردن، فقط دو Plan ساخته و بین همه‌ی Thread ها بازاستفاده می‌شود.
             var txPrefix = useExternal ? string.Empty : "SET DEADLOCK_PRIORITY LOW; SET XACT_ABORT ON; BEGIN TRANSACTION;";
             var txSuffix = useExternal ? string.Empty : "COMMIT TRANSACTION;";
+
             //اضافه شدن ستون نوع ارز به خزانه در صورت فعال بودن نرخ ارز
-            const string detailInsertSql =
-                         "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD, ARZKIND2, MHAZ_NO) " +
-                         "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, ARZD, ARZKIND2, MHAZ_NO " +
+            string detailInsertSql =
+                         $"INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, MHAZ_NO{arzColumns}) " +
+                         $"SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, @Ns, THES, MHAZ_NO{arzColumns} " +
                 "FROM dbo.PGET_LST WHERE ID = @TreasuryId;" +
-                         "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD, ARZKIND2, MHAZ_NO) " +
-                         "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, ARZD, ARZKIND2, MHAZ_NO " +
+                         $"INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, MHAZ_NO{arzColumns}) " +
+                         $"SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, @Ns, FHES, MHAZ_NO{arzColumns} " +
                 "FROM dbo.PGET_LST WHERE ID = @TreasuryId;";
 
             // حالت الف) هدر سند در مرحله ۲ ساخته شده؛ اینجا فقط شماره‌اش روی ردیف خزانه ثبت
