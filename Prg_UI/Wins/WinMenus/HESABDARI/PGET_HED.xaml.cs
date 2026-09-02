@@ -1313,6 +1313,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             nAHVAColumn.ItemsSource = dbms.DoGetDataSQL<TCOD_DPSKIND>("SELECT TCOD_DPSKIND.CODE, TCOD_DPSKIND.NAMES FROM TCOD_DPSKIND ORDER BY TCOD_DPSKIND.CODE, TCOD_DPSKIND.NAMES").ToList();
             nAHVAColumn.DisplayMemberPath = "NAMES";
             nAHVAColumn.SelectedValuePath = "CODE";
+            /*
+             * CODE	NAMES
+             * 1	نقد
+             * 2	چک
+             * 3	سایر
+             * 4	واگذاری چک
+             * 5	برگشت چک
+             * 6	چک غیر تجاری
+             * */
 
             ////از حساب
             //FHES_COLUMN.ItemsSource = KHAZANEH_DATA.Select(item => new { item.NAME_FHES, item.FHES }).ToList();
@@ -3050,6 +3059,34 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 }
                 #endregion
                 CURRENT_ITMES_ROW.NAHVA = Convert.ToInt32((e.EditingElement as ComboBox).SelectedValue);
+                if (CURRENT_ITMES_ROW.NAHVA == 3)
+                {
+                    CURRENT_ITMES_ROW.N_SERI = null;
+                    CURRENT_ITMES_ROW.BANK = null;
+
+                    CURRENT_ITMES_ROW.FHES = null;
+                    CURRENT_ITMES_ROW.NAME_FHES = null;
+                    CURRENT_ITMES_ROW.FHES_K = null;
+                    CURRENT_ITMES_ROW.FHES_M = null;
+                    CURRENT_ITMES_ROW.FHES_T = null;
+                    CURRENT_ITMES_ROW.FHES_T2 = null;
+                    CURRENT_ITMES_ROW.FHES_T3 = null;
+                    CURRENT_ITMES_ROW.FHES_T4 = null;
+
+                    CURRENT_ITMES_ROW.THES = null;
+                    CURRENT_ITMES_ROW.NAME_THES = null;
+                    CURRENT_ITMES_ROW.THES_K = null;
+                    CURRENT_ITMES_ROW.THES_M = null;
+                    CURRENT_ITMES_ROW.THES_T = null;
+                    CURRENT_ITMES_ROW.THES_T2 = null;
+                    CURRENT_ITMES_ROW.THES_T3 = null;
+                    CURRENT_ITMES_ROW.THES_T4 = null;
+                }
+                else if (CURRENT_ITMES_ROW.NAHVA == 1)
+                {
+                    CURRENT_ITMES_ROW.N_SERI = null;
+                    CURRENT_ITMES_ROW.BANK = null;
+                }
                 #region NAHVA_AfterUpdate
                 switch (CURRENT_ITMES_ROW.NO_AM)
                 {
@@ -3348,31 +3385,31 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                                 default:
                                     {
+                                        CURRENT_ITMES_ROW.FHES_K = null;
+                                        CURRENT_ITMES_ROW.FHES_M = null;
+                                        CURRENT_ITMES_ROW.FHES_T = null;
+                                        CURRENT_ITMES_ROW.FHES = null;
                                         this.fHES_KColumn.IsReadOnly = false;
                                         this.fHES_MColumn.IsReadOnly = false;
-                                        //this.FHES_K.TabStop = true;
                                         SetIsTabStopCell("FHES_K", true, row_index);
                                         this.fHES_TColumn.IsReadOnly = false;
-                                        //this.FHES_T.TabStop = true;
                                         SetIsTabStopCell("FHES_T", true, row_index);
-                                        //this.FHES_M.TabStop = true;
                                         SetIsTabStopCell("FHES_M", true, row_index);
-                                        //this.FHES.TabStop = true;
                                         SetIsTabStopCell("FHES", true, row_index);
                                         this.FHES_COLUMN.IsReadOnly = false;
                                         break;
                                     }
                             }
+                            CURRENT_ITMES_ROW.THES_K = null;
+                            CURRENT_ITMES_ROW.THES_M = null;
+                            CURRENT_ITMES_ROW.THES_T = null;
+                            CURRENT_ITMES_ROW.THES = null;
                             this.tHES_KColumn.IsReadOnly = false;
                             this.tHES_MColumn.IsReadOnly = false;
-                            //this.THES_K.TabStop = true;
                             SetIsTabStopCell("THES_K", true, row_index);
                             this.tHES_TColumn.IsReadOnly = false;
-                            //this.THES_T.TabStop = true;
                             SetIsTabStopCell("THES_T", true, row_index);
-                            //this.THES_M.TabStop = true;
                             SetIsTabStopCell("THES_M", true, row_index);
-                            //this.THES.TabStop = true;
                             SetIsTabStopCell("THES", true, row_index);
                             this.tHESColumn.IsReadOnly = false;
                             //return;
@@ -3755,9 +3792,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 var The_Cell = CL_LMethods.GetCell(PGET_LST_SUB, CURRENT_ROW_INDEX, CDI);
                 if (CURRENT_ITMES_ROW.NAHVA == 2 && CURRENT_ITMES_ROW.NO_AM == 2)
                 {
-                    if (!(The_Cell is null))
+                    if (!(The_Cell is null) && (CURRENT_ITMES_ROW.MABL is null || CURRENT_ITMES_ROW.MABL == 0))
                     {
-                        FocusCell(CURRENT_ROW_INDEX, "MABL"); // برای اینکه از روی یک سلول بره سلول بعدی 
+                        FocusCell(CURRENT_ROW_INDEX, "MABL");
                     }
                 }
                 #endregion
@@ -4224,7 +4261,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 if (IsReallyNull == true)
                 {
-                    if (ConstructorRowDetector.IsPristine(THE_ROW_ITEM))
+                    if ((THE_ROW_ITEM?.NO_AM is null || THE_ROW_ITEM.NO_AM == 0) || ConstructorRowDetector.IsPristine(THE_ROW_ITEM))
                     {
                         PGET_HED_SUB_CANCEL_EDIT();
                         return;
@@ -4233,7 +4270,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     {
                         // سطر نیمه‌پر که کاربر شروع به پرکردن آن کرده را در حالت ویرایش نگه می‌دارد
                         e.Cancel = true;
-                        ReEnterRowEdit(THE_ROW_ITEM, "MABL");
+                        //ReEnterRowEdit(THE_ROW_ITEM, null);
                         return;
                     }
                 }
@@ -4268,7 +4305,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                     // این شاخه e.Cancel نمی‌گذاشت و سطرِ ذخیره‌نشده به‌شکل یک سطر عادی داخل گرید کامیت می‌شد
                     e.Cancel = true;
-                    ReEnterRowEdit(THE_ROW_ITEM, "MABL");
+                    ReEnterRowEdit(THE_ROW_ITEM, null);
                     return;
                 }
                 if (!this.NewRecord && Baseknow.WAR == 1)
