@@ -299,6 +299,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     : " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
 
 
+                // حفظ حساب واگذاری قبلی (HES2) قبل از به روزرسانی PAY_GETD
+                string previousHes2 = rst?.FirstOrDefault()?.HES2;
+
                 if (rst.Count > 0)
                 {
                     rst.FirstOrDefault().N_KOL2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;
@@ -327,15 +330,24 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
                     msgwin.ShowDialog();
 
-                    CL_HESABDARI.GETTAF3(this.HES1.SelectedValue.ToString(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                    // اگر چک قبلاً واگذار شده باشد، برای "از حساب" (FHES) از حساب واگذاری قبلی (previousHes2) استفاده می‌کنیم.
+                    // اگر خالی بود، از this.HES1 استفاده می‌کنیم.
+                    string targetHesForFrom = !string.IsNullOrEmpty(previousHes2)
+                        ? previousHes2
+                        : (this.HES1.SelectedValue != null ? this.HES1.SelectedValue.ToString() : "");
 
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = (Convert.ToInt32(CKOL) == 0) ? null : (int)CKOL;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = (Convert.ToInt32(CMOIN) == 0) ? null : (int)CMOIN;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = (Convert.ToInt32(CTAF) == 0) ? null : (int)CTAF;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T2 = (Convert.ToInt32(CTAF2) == 0) ? null : (int)CTAF2;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T3 = (Convert.ToInt32(CTAF3) == 0) ? null : (int)CTAF3;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T4 = (Convert.ToInt32(CTAF4) == 0) ? null : (int)CTAF4;
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = this.HES1.SelectedValue.ToString();
+                    if (!string.IsNullOrEmpty(targetHesForFrom))
+                    {
+                        CL_HESABDARI.GETTAF3(targetHesForFrom, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = (Convert.ToInt32(CKOL) == 0) ? null : (int)CKOL;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = (Convert.ToInt32(CMOIN) == 0) ? null : (int)CMOIN;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = (Convert.ToInt32(CTAF) == 0) ? null : (int)CTAF;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T2 = (Convert.ToInt32(CTAF2) == 0) ? null : (int)CTAF2;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T3 = (Convert.ToInt32(CTAF3) == 0) ? null : (int)CTAF3;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T4 = (Convert.ToInt32(CTAF4) == 0) ? null : (int)CTAF4;
+                        ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = targetHesForFrom;
+                    }
                 }
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.SelectedValue);
