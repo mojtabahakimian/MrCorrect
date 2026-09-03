@@ -431,6 +431,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         khazanehWin.CURRENT_ITMES_ROW.N_SERI = rst.FirstOrDefault().N_SERI;
                         khazanehWin.CURRENT_ITMES_ROW.BANK = rst.FirstOrDefault().BANK;
                         DaftarShouldUpdate = true;
+
+                        // از این پس رکورد جاری همان چک موجود است؛ کلید آن را نگه دار
+                        // تا ذخیره‌سازی، همان رکورد را به‌روز کند (نه کلید ناقص قبلی)
+                        CurrentRecordID = rst.FirstOrDefault().ID;
+                        _original_N_SERI = rst.FirstOrDefault().N_SERI;
+                        _original_BANK = rst.FirstOrDefault().BANK;
+                        _original_DATE_S = rst.FirstOrDefault().DATE_S;
                     }
                 }
             }
@@ -636,12 +643,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                 try
                 {
-                    if (DaftarShouldUpdate)
-                    {
-                        if (_original_N_SERI != null)
-                        {
-                            // حالت ویرایش: UPDATE با کلید اصلی (نه کلید جدید کاربر)
-                            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET
+                    string _SET_ = $@"SET
                                      N_SERI   = {N_SERI.Text},
                                      BANK     = {BANK.SelectedValue},
                                      DATE_S   = {DATE_S.Text.ToRawTarikh()},
@@ -660,37 +662,36 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                      N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL,
                                      NUMBER = NULL, TAG = NULL, ANBAR = NULL,
                                      RADIF = NULL, CUST_NO = DEFAULT, VAZ = NULL,
-                                     HES2 = NULL, HES3 = NULL
-                                 WHERE N_SERI = {_original_N_SERI}
+                                     HES2 = NULL, HES3 = NULL";
+
+                    // تعیین رکورد هدف برای ویرایش: ID رکورد بارگذاری‌شده، سپس کلید اولیه
+                    // (فقط وقتی هر سه جزء آن موجود است)، سپس رکورد موجود با کلید جاری
+                    string _updateWhere_ = null;
+                    if (DaftarShouldUpdate)
+                    {
+                        if (CurrentRecordID > 0)
+                        {
+                            _updateWhere_ = $"WHERE ID = {CurrentRecordID}";
+                        }
+                        else if (_original_N_SERI != null && _original_BANK != null && _original_DATE_S != null)
+                        {
+                            _updateWhere_ = $@"WHERE N_SERI = {_original_N_SERI}
                                    AND BANK   = {_original_BANK}
-                                   AND DATE_S = {_original_DATE_S}");
+                                   AND DATE_S = {_original_DATE_S}";
                         }
                         else
                         {
-                            var _id_ = CheckExistData.FirstOrDefault().ID;
-                            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET
-                                     N_SERI   = {N_SERI.Text},
-                                     BANK     = {BANK.SelectedValue},
-                                     DATE_S   = {DATE_S.Text.ToRawTarikh()},
-                                     DATE     = {DATE.Text.ToRawTarikh()},
-                                     SHOBEH   = N'{_SHOBEH_}',
-                                     MABL     = {MABL.Text},
-                                     NAME_TAH = N'{_NAME_TAH_}',
-                                     N_HESAB  = N'{_N_HESAB_}',
-                                     KIND     = {_KIND_VAL_},
-                                     HES1     = N'{_HES1_VAL_}',
-                                     SAYADI   = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}',
-                                     N_KOL    = {_N_KOL_VAL_},
-                                     N_MOIN   = {_N_MOIN_VAL_},
-                                     N_TAF    = {_N_TAF_VAL_},
-                                     N_S = NULL, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL,
-                                     N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL,
-                                     NUMBER = NULL, TAG = NULL, ANBAR = NULL,
-                                     RADIF = NULL, CUST_NO = DEFAULT, VAZ = NULL,
-                                     HES2 = NULL, HES3 = NULL
-                                 WHERE ID = {_id_}");
+                            var _existId_ = CheckExistData.FirstOrDefault()?.ID;
+                            if (_existId_ > 0)
+                            {
+                                _updateWhere_ = $"WHERE ID = {_existId_}";
+                            }
                         }
+                    }
 
+                    if (_updateWhere_ != null)
+                    {
+                        dbms.DoExecuteSQL($"UPDATE dbo.PAY_GETP {_SET_} {_updateWhere_}");
                     }
                     else
                     {
