@@ -3425,9 +3425,12 @@ namespace AUTO_BAZ.Functions
 
                                     if (porsantFound)
                                     {
-                                        // mablk می‌تواند NULL باشد (N_MOIN فاکتورهای قدیمی خالی است)؛
-                                        // پیش از این (double)null یک InvalidOperationException می‌داد و
-                                        // کل صدور سند آن دسته را می‌خواباند.
+                                        // INVO_LST.N_MOIN در دیتابیس nullable است (default صفر دارد ولی
+                                        // داده‌ی قدیمی می‌تواند NULL باشد)، پس mablk هم می‌تواند NULL شود؛
+                                        // آن‌وقت (double)null یک InvalidOperationException می‌داد که تا
+                                        // بیرونی‌ترین catch بالا می‌رفت و کل این اجرای صدور سند را
+                                        // ناموفق اعلام می‌کرد — در حالی که DEED_DTL همان فاکتور از قبل
+                                        // پاک شده بود. با ISNULL در کوئری و این ?? دیگر ممکن نیست.
                                         double mablk = porsantLines[rst1_EOF].mablk ?? 0;
                                         prs = (long)(prs + CL_PORSANT_RULE.PatternLineShare(mablk, porsantEntry.Porsant));
                                         MBK = (long)(MBK + mablk);
