@@ -108,6 +108,14 @@
                             <Binding Path="DARSAD" StringFormat="{}{0:0.###}"/>
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
+                    <!-- مبنای فاکتور = جمع اقلام − تخفیف (+ ارزش افزوده اگر گزینه ۶۲ سازمان فعال باشد).
+                         برای سطرهای بدون‌الگو مبلغ پورسانت از همین عدد × درصد ساخته می‌شود؛ برای سطرهای
+                         دارای الگو مبلغ از نرخ تک‌تک کالاها می‌آید و این ستون فقط جهت اطلاع است. -->
+                    <syncfusion:GridTextColumn HeaderText="مبنای فاکتور" MappingName="NET_BASE" Width="140">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="NET_BASE" StringFormat="{}{0:N0}"/>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
                     <syncfusion:GridTextColumn HeaderText="پورسانت (وضعیت فعلی)" MappingName="OLD_PURSANT" Width="150">
                         <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="OLD_PURSANT" StringFormat="{}{0:N0}"/>
