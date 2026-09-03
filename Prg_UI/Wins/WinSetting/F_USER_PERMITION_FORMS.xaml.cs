@@ -2832,6 +2832,14 @@ namespace Wins.WinSetting
 
                 if (ROW?.USERCO == null) //INSERT
                 {
+                    var existCheck = dbms.DoGetDataSQL<int?>($"SELECT USERCO FROM dbo.BLOCKNON_HES WHERE USERCO = {USERY.IDD} AND HES = N'{ROW.HES}'").FirstOrDefault();
+                    if (existCheck != null)
+                    {
+                        UNBLOCKED_SUB_CANCEL_EDIT();
+                        new Msgwin(false, " این حساب برای حسابهای مجاز تکراری وارد شده!").ShowDialog();
+                        return;
+                    }
+
                     USERCO = dbms.DoGetDataSQL<int?>(@$"INSERT INTO dbo.BLOCKNON_HES(USERCO, HES) OUTPUT INSERTED.USERCO VALUES({USERY.IDD},N'{ROW.HES}')").FirstOrDefault();
                     if (USERCO != null)
                     {
@@ -2840,6 +2848,17 @@ namespace Wins.WinSetting
                 }
                 else //UPDATE
                 {
+                    if (BLOCKNON_HES_WAS_ROW_ITEM != null && BLOCKNON_HES_WAS_ROW_ITEM.HES != ROW.HES)
+                    {
+                        var existCheck = dbms.DoGetDataSQL<int?>($"SELECT USERCO FROM dbo.BLOCKNON_HES WHERE USERCO = {USERY.IDD} AND HES = N'{ROW.HES}'").FirstOrDefault();
+                        if (existCheck != null)
+                        {
+                            UNBLOCKED_SUB_CANCEL_EDIT();
+                            new Msgwin(false, " این حساب برای حسابهای مجاز تکراری وارد شده!").ShowDialog();
+                            return;
+                        }
+                    }
+
                     dbms.DoExecuteSQL($@"UPDATE dbo.BLOCKNON_HES SET HES = N'{ROW.HES}' WHERE USERCO = {USERY.IDD} AND HES = N'{BLOCKNON_HES_WAS_ROW_ITEM.HES}'");
                 }
 
