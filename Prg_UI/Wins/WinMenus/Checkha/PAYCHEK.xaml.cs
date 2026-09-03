@@ -657,20 +657,28 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                      RADIF = NULL, CUST_NO = DEFAULT, VAZ = NULL,
                                      HES2 = NULL, HES3 = NULL";
 
-                    // تعیین رکورد هدف برای ویرایش: اول ID، بعد کلید اولیه (فقط اگر کامل باشد)
+                    // تعیین رکورد هدف برای ویرایش: ID رکورد بارگذاری‌شده، سپس کلید اولیه
+                    // (فقط وقتی هر سه جزء آن موجود است)، سپس رکورد موجود با کلید جاری
                     string _updateWhere_ = null;
                     if (DaftarShouldUpdate)
                     {
-                        var _existId_ = CurrentRecordID > 0 ? CurrentRecordID : CheckExistData.FirstOrDefault()?.ID;
-                        if (_existId_ > 0)
+                        if (CurrentRecordID > 0)
                         {
-                            _updateWhere_ = $"WHERE ID = {_existId_}";
+                            _updateWhere_ = $"WHERE ID = {CurrentRecordID}";
                         }
                         else if (_original_N_SERI != null && _original_BANK != null && _original_DATE_S != null)
                         {
                             _updateWhere_ = $@"WHERE N_SERI = {_original_N_SERI}
                                    AND BANK   = {_original_BANK}
                                    AND DATE_S = {_original_DATE_S}";
+                        }
+                        else
+                        {
+                            var _existId_ = CheckExistData.FirstOrDefault()?.ID;
+                            if (_existId_ > 0)
+                            {
+                                _updateWhere_ = $"WHERE ID = {_existId_}";
+                            }
                         }
                     }
 
