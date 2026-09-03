@@ -3611,6 +3611,18 @@ WHERE TAG = 1
 
                 ReGetdata();
                 Summer();
+
+                if (TryGetLongFromText(this.NUMBER.Text, out var numToSync) && numToSync > 0)
+                {
+                    try
+                    {
+                        CL_HESABDARI.GENSANADKHAREED(numToSync, numToSync);
+                    }
+                    catch (Exception ex)
+                    {
+                        AUTO_BAZ.Functions.CL_LMethods.LogWriter.WriteLog($"GENSANADKHAREED error after deleting receipt line for {numToSync}: {ex.Message}");
+                    }
+                }
             }
             else
             {
