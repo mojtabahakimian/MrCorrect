@@ -431,6 +431,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         khazanehWin.CURRENT_ITMES_ROW.N_SERI = rst.FirstOrDefault().N_SERI;
                         khazanehWin.CURRENT_ITMES_ROW.BANK = rst.FirstOrDefault().BANK;
                         DaftarShouldUpdate = true;
+
+                        // از این پس رکورد جاری همان چک موجود است؛ کلید آن را نگه دار
+                        // تا ذخیره‌سازی، همان رکورد را به‌روز کند (نه کلید ناقص قبلی)
+                        CurrentRecordID = rst.FirstOrDefault().ID;
+                        _original_N_SERI = rst.FirstOrDefault().N_SERI;
+                        _original_BANK = rst.FirstOrDefault().BANK;
+                        _original_DATE_S = rst.FirstOrDefault().DATE_S;
                     }
                 }
             }
