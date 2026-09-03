@@ -34,6 +34,28 @@ namespace TestRunner
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            // تست رگرسیون اصلاح پورسانت فاکتور فروش؛ هارنس بصری را اجرا نمی‌کند.
+            //   TestRunner.exe porsant           فقط قاعده‌ی محاسبه (بدون دیتابیس)
+            //   TestRunner.exe porsant --apply   چرخه‌ی کامل روی دیتابیس (روی داده می‌نویسد)
+            if (args != null && args.Any(a => string.Equals(a, "porsant", StringComparison.OrdinalIgnoreCase)))
+            {
+                bool applyOnDatabase = args.Any(a => string.Equals(a, "--apply", StringComparison.OrdinalIgnoreCase));
+
+                if (applyOnDatabase)
+                {
+                    Baseknow.USERCOD = 78;
+                    Baseknow.UUSER = "Controller";
+                    CL_Generaly.IsCalledExternally = true;
+                    CL_CCNNMANAGER.CONNECTION_STR = "Data Source=MERCEDES\\SQL2022;Initial Catalog=YAZDSEPAR1405;Integrated Security=True;TrustServerCertificate=True;Max Pool Size=1000;";
+                    CL_CCNNMANAGER.ConnectedToSQLDB = true;
+                    Baseknow.GetInitTheApp();
+                }
+
+                Environment.ExitCode = PorsantCorrectionTest.Run(applyOnDatabase);
+                return;
+            }
+
             Console.WriteLine("=========================================================================");
             Console.WriteLine("          VISUAL / UI HARNESS VERIFICATION FOR MrCorrect                 ");
             Console.WriteLine("=========================================================================");

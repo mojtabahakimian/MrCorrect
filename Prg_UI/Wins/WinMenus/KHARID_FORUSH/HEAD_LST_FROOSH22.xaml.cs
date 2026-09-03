@@ -7820,7 +7820,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             double patternAmount = 0;
 
             var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>(
-                "SELECT CODE ,MABL_K - N_MOIN AS MABLK FROM INVO_LST WHERE TAG = " + hTAG + " AND NUMBER = " + this.NUMBER.Text).ToList();
+                "SELECT CODE ,ISNULL(MABL_K, 0) - ISNULL(N_MOIN, 0) AS MABLK FROM INVO_LST WHERE TAG = " + hTAG + " AND NUMBER = " + this.NUMBER.Text).ToList();
 
             for (int I = 0; I < ROWS.Count; I++)
             {
@@ -7829,7 +7829,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 // با نرخِ خالی هم Count==1 می‌داد و (double)null یک InvalidOperationException می‌داد.
                 if (RST2.Count == 1 && RST2[0].HasValue)
                 {
-                    patternAmount += Math.Round((double)(ROWS[I].MABLK * RST2[0].Value / 100));
+                    // گِردکردن از قاعده‌ی واحد پورسانت می‌آید تا عددِ فرم با عددی که
+                    // صدور سند می‌نویسد یکی باشد (Math.Round پیش‌فرض C# روی مقادیر
+                    // دقیقاً نیم، جوابی غیر از ROUND در SQL Server می‌دهد).
+                    patternAmount += AUTO_BAZ.Functions.CL_PORSANT_RULE.PatternLineShare(ROWS[I].MABLK, RST2[0]);
                 }
                 else
                 {

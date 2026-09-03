@@ -78,7 +78,7 @@
             <!-- توضیح کوتاه -->
             <TextBlock Grid.Row="0" Margin="10,10,10,4" TextWrapping="Wrap" Foreground="{StaticResource MaterialDesignBody}"
                        FlowDirection="RightToLeft"
-                       Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی مقدار درست طبق درصد/الگوی همان سطر."/>
+                       Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی همان مبلغی که صدور سند حسابداری برای این سطر می‌نویسد. سطرهای «نیاز به بررسی دستی» با دکمه‌ی اصلاح درست نمی‌شوند؛ ستون هشدار دلیلش را می‌گوید."/>
 
             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Grid.Row="1"
                 ItemsSource="{Binding AUDIT_DATA}" FilterRowPosition="Top"
@@ -123,6 +123,7 @@
                             <Binding Path="DIFF" StringFormat="{}{0:N0}"/>
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="وضعیت" MappingName="STATUS_TEXT" Width="120"/>
                     <syncfusion:GridTextColumn HeaderText="هشدار" MappingName="WARNING" ColumnSizer="Star"/>
                 </syncfusion:SfDataGrid.Columns>
 

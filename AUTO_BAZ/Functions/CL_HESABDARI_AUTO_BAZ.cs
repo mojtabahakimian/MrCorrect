@@ -2117,7 +2117,7 @@ namespace AUTO_BAZ.Functions
                 if (invoiceVisitors.Any(kv => kv.Value.Any(v => v.PORID != null && v.PORID.Value != 0)))
                 {
                     foreach (var row in dbms.DoGetDataSQL<InvoicePorsantLineRow>(
-                        "SELECT NUMBER, CODE AS code, MABL_K - N_MOIN AS mablk " +
+                        "SELECT NUMBER, CODE AS code, ISNULL(MABL_K, 0) - ISNULL(N_MOIN, 0) AS mablk " +
                         $"FROM dbo.INVO_LST WHERE TAG = 2 AND NUMBER BETWEEN {minNum} AND {maxNum}"))
                     {
                         if (row?.NUMBER == null || !wantedInvoices.Contains(row.NUMBER.Value)) { continue; }
@@ -3381,8 +3381,12 @@ namespace AUTO_BAZ.Functions
                             // عمداً سهمی از پورسانت نمی‌گیرد، این طراحی است نه باگ. اگر الگو ندارد،
                             // مبلغ = درصد × مبنای فاکتور. در هر دو حالت، تیک «مبلغ ثابت» (STAT=1)
                             // اولویت دارد و چیزی بازنویسی نمی‌شود؛ فقط درصدِ نمایشی بازسازی می‌شود.
-                            double PORSANT_BASE = (JAMF ?? 0) - (HFRST[HFRST_EOF].TAKHFIF ?? 0)
-                                                  + (Baseknow.PorsantBaseIncludesVat ? (HFRST[HFRST_EOF].MBAA ?? 0) : 0);
+                            // قاعده و گِردکردن از CL_PORSANT_RULE می‌آید تا پنجره‌ی «کنترل پورسانت
+                            // فاکتور فروش» دقیقاً همین عدد را «آنچه باید باشد» نشان دهد؛ پیش از این
+                            // هر کدام فرمول خودشان را داشتند و اصلاحِ کاربر با اولین صدور سند
+                            // برمی‌گشت و همان فاکتورها دوباره مغایر می‌شدند.
+                            double PORSANT_BASE = CL_PORSANT_RULE.PorsantBase(
+                                JAMF ?? 0, HFRST[HFRST_EOF].TAKHFIF, HFRST[HFRST_EOF].MBAA);
 
                             // شرط قبلی (bool)!STAT بود؛ برای سطرهایی که STAT آنها در دیتابیس NULL است
                             // این عبارت InvalidOperationException پرتاب می‌کرد.
@@ -3421,8 +3425,12 @@ namespace AUTO_BAZ.Functions
 
                                     if (porsantFound)
                                     {
-                                        prs = (long)(prs + Math.Round((double)(porsantLines[rst1_EOF].mablk * porsantEntry.Porsant.Value / 100)));
-                                        MBK = (long)(MBK + porsantLines[rst1_EOF].mablk);
+                                        // mablk می‌تواند NULL باشد (N_MOIN فاکتورهای قدیمی خالی است)؛
+                                        // پیش از این (double)null یک InvalidOperationException می‌داد و
+                                        // کل صدور سند آن دسته را می‌خواباند.
+                                        double mablk = porsantLines[rst1_EOF].mablk ?? 0;
+                                        prs = (long)(prs + CL_PORSANT_RULE.PatternLineShare(mablk, porsantEntry.Porsant));
+                                        MBK = (long)(MBK + mablk);
                                     }
                                     else
                                     {
@@ -3444,7 +3452,7 @@ namespace AUTO_BAZ.Functions
                             else
                             {
                                 //الگو ندارد: مبلغ از روی درصد و مبنای کل فاکتور ساخته می‌شود
-                                double _PURSANT_ = Math.Round(PORSANT_BASE * (PRST[PRST_EOF].DARSAD ?? 0) / 100);
+                                double _PURSANT_ = CL_PORSANT_RULE.ByDarsad(PORSANT_BASE, PRST[PRST_EOF].DARSAD);
                                 if (_PURSANT_ != PRST[PRST_EOF].PURSANT)
                                 {
                                     PRST[PRST_EOF].PURSANT = _PURSANT_;
