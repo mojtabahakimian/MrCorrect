@@ -157,42 +157,38 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             confirm.ShowDialog();
             if (confirm.DialogResult != true) return;
 
-            List<PorsantAuditRow> changedInvoices;
-            try
-            {
-                changedInvoices = dbms.DoGetDataSQL<PorsantAuditRow>(
-                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=@pNUMBER, @TAG=@pTAG, @FromDate=@pFromDate, @ToDate=@pToDate, @PREVIEW_ONLY=@pPreview",
-                    new
-                    {
-                        pNUMBER = (double?)null,
-                        pTAG = (double?)2,
-                        pFromDate = (long?)null,
-                        pToDate = (long?)null,
-                        pPreview = false
-                    }).ToList();
-            }
-            catch (Exception ex)
-            {
-                new Msgwin(false, "اصلاح پورسانت انجام نشد.\n" + ex.Message).ShowDialog();
-                return;
-            }
-
-            // اصلاح دیتابیس انجام شد؛ حالا برای هر فاکتوری که واقعاً تغییر کرد، سند را دوباره صادر می‌کنیم
+            var targetInvoices = AUDIT_DATA.Select(x => x.NUMBER).Where(n => n.HasValue).Select(n => n.Value).Distinct().ToList();
             var succeeded = new List<double>();
             var failed = new List<(double Number, string Error)>();
 
-            foreach (var invNumber in changedInvoices.Select(x => x.NUMBER).Where(n => n.HasValue).Select(n => n.Value).Distinct())
+            foreach (var invNumber in targetInvoices)
             {
                 try
                 {
-                    var (sanadNumber, isSuccessfully) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADFROOSH(Convert.ToInt64(invNumber), Convert.ToInt64(invNumber), false);
-                    if (isSuccessfully)
+                    using (var ts = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required))
                     {
-                        succeeded.Add(invNumber);
-                    }
-                    else
-                    {
-                        failed.Add((invNumber, "صدور سند ناموفق بود"));
+                        dbms.DoExecuteSQL(
+                            @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=@pNUMBER, @TAG=@pTAG, @FromDate=@pFromDate, @ToDate=@pToDate, @PREVIEW_ONLY=@pPreview",
+                            new
+                            {
+                                pNUMBER = (double?)invNumber,
+                                pTAG = (double?)2,
+                                pFromDate = (long?)null,
+                                pToDate = (long?)null,
+                                pPreview = false
+                            });
+
+                        var (sanadNumber, isSuccessfully) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADFROOSH(Convert.ToInt64(invNumber), Convert.ToInt64(invNumber), false);
+
+                        if (isSuccessfully)
+                        {
+                            ts.Complete();
+                            succeeded.Add(invNumber);
+                        }
+                        else
+                        {
+                            failed.Add((invNumber, "صدور سند ناموفق بود"));
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -202,11 +198,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             }
 
             var resultMsg = new StringBuilder();
-            resultMsg.AppendLine($"مبلغ پورسانت {changedInvoices.Select(x => x.NUMBER).Distinct().Count()} فاکتور اصلاح شد.");
-            resultMsg.AppendLine($"سند {succeeded.Count} فاکتور با موفقیت دوباره صادر شد.");
+            if (succeeded.Count > 0)
+            {
+                resultMsg.AppendLine($"اصلاح پورسانت و صدور مجدد سند برای {succeeded.Count} فاکتور با موفقیت انجام شد.");
+            }
             if (failed.Count > 0)
             {
-                resultMsg.AppendLine($"صدور سند {failed.Count} فاکتور ناموفق بود؛ مبلغ پورسانت آنها اصلاح شده ولی سند دستی نیاز به بررسی دارد:");
+                resultMsg.AppendLine($"عملیات برای {failed.Count} فاکتور ناموفق بود و تغییرات آن‌ها بازگردانده شد:");
                 foreach (var f in failed.Take(20))
                 {
                     resultMsg.AppendLine($"  فاکتور {f.Number}: {f.Error}");
@@ -215,7 +213,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 
             new Msgwin(false, resultMsg.ToString()).ShowDialog();
 
-            // بازخوانی فهرست تا وضعیت نهایی (که باید خالی یا نزدیک به خالی باشد) نشان داده شود
+            // بازخوانی فهرست تا وضعیت نهایی نشان داده شود
             LoadAudit(showEmptyMessage: false);
         }
 

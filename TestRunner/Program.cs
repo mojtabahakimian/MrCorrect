@@ -52,6 +52,9 @@ namespace TestRunner
             Baseknow.GetInitTheApp();
             Console.WriteLine($"[PASS] Baseknow initialized. STMO: {Baseknow.STMO}");
 
+            // Run Porsant Correction Regression Test
+            RunCommissionCorrectionRegressionTest();
+
             // Create WPF Application context
             var app = new Application();
 
@@ -80,11 +83,11 @@ namespace TestRunner
             try
             {
                 Console.WriteLine("Instantiating HEAD_LST_KHAREED1 (Direct Purchase)...");
-                var win = new Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_KHAREED1(null, _IsDirectFactor_: true);
+                var win = new Wins.WinMenus.KHARID_FORUSH.HEAD_LST_KHAREED1(null, _IsDirectFactor_: true);
                 
                 win.Loaded += (s, e) =>
                 {
-                    Console.WriteLine("Window loaded. Title: " + win.Title + ", Header: " + win.LABEL_HEADER.Content);
+                    Console.WriteLine("Window loaded. Title: " + win.Title);
                     
                     var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
                     timer.Tick += (ts, te) =>
@@ -127,6 +130,116 @@ namespace TestRunner
             catch (Exception ex)
             {
                 Console.WriteLine($"[FAIL] UI Harness exception: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        private static void RunCommissionCorrectionRegressionTest()
+        {
+            Console.WriteLine("\n-------------------------------------------------------------------------");
+            Console.WriteLine(" Running Regression Test: Porsant Audit & Correction Integrity ");
+            Console.WriteLine("-------------------------------------------------------------------------");
+
+            var dbms = new CL_CCNNMANAGER();
+
+            try
+            {
+                // Ensure migration is executed
+                ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
+
+                // 1. Audit before correction
+                var initialAudit = dbms.DoGetDataSQL<Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT.CONTROL_PORSANT_FROOSH.PorsantAuditRow>(
+                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=NULL, @TAG=2, @FromDate=NULL, @ToDate=NULL, @PREVIEW_ONLY=1"
+                ).ToList();
+
+                Console.WriteLine($"[TEST] Initial discrepant invoice rows found: {initialAudit.Count}");
+
+                double testInvoiceNumber = 999999123;
+                bool createdTestData = false;
+                double? originalPursant = null;
+
+                if (initialAudit.Count == 0)
+                {
+                    // Create simulated invoice & visitor row for test
+                    Console.WriteLine("[TEST] No existing discrepancies in DB. Creating a simulated discrepant invoice record...");
+                    dbms.DoExecuteSQL(@"
+                        DELETE FROM dbo.VISITOR_DTL WHERE NUMBER = 999999123 AND TAG = 2;
+                        DELETE FROM dbo.INVO_LST WHERE NUMBER = 999999123 AND TAG = 2;
+                        DELETE FROM dbo.HEAD_LST WHERE NUMBER = 999999123 AND TAG = 2;
+
+                        INSERT INTO dbo.HEAD_LST (NUMBER, TAG, DATE_N, CUST_NO, TAKHFIF)
+                        VALUES (999999123, 2, 14050101, 'TEST_CUST', 0);
+
+                        INSERT INTO dbo.INVO_LST (NUMBER, TAG, CODE, MEGH, MEGHK, MABL, MABL_K, N_MOIN)
+                        VALUES (999999123, 2, 'TEST_ITEM', 1, 1, 1000000, 1000000, 0);
+
+                        INSERT INTO dbo.VISITOR_DTL (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, STAT)
+                        VALUES (999999123, 2, 'TEST_VISITOR', 5.0, 1000, 0);
+                    ");
+                    createdTestData = true;
+
+                    initialAudit = dbms.DoGetDataSQL<Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT.CONTROL_PORSANT_FROOSH.PorsantAuditRow>(
+                        @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=999999123, @TAG=2, @FromDate=NULL, @ToDate=NULL, @PREVIEW_ONLY=1"
+                    ).ToList();
+                }
+
+                if (initialAudit.Count == 0)
+                {
+                    throw new Exception("Failed to produce or detect a discrepant invoice row for testing.");
+                }
+
+                var targetRow = initialAudit.First();
+                testInvoiceNumber = targetRow.NUMBER ?? testInvoiceNumber;
+                originalPursant = targetRow.OLD_PURSANT;
+
+                Console.WriteLine($"[TEST] Target Invoice Number: {testInvoiceNumber}");
+                Console.WriteLine($"[TEST] OLD_PURSANT: {targetRow.OLD_PURSANT:N0}, NEW_PURSANT: {targetRow.NEW_PURSANT:N0}, DIFF: {targetRow.DIFF:N0}");
+
+                if (Math.Abs(targetRow.DIFF) < 0.5)
+                {
+                    throw new Exception($"Expected discrepancy DIFF != 0, but got DIFF = {targetRow.DIFF}");
+                }
+
+                // 2. Execute Correction
+                Console.WriteLine("[TEST] Executing Correction (PREVIEW_ONLY = 0)...");
+                using (var ts = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required))
+                {
+                    dbms.DoExecuteSQL(
+                        @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=@pNUMBER, @TAG=@pTAG, @FromDate=NULL, @ToDate=NULL, @PREVIEW_ONLY=0",
+                        new { pNUMBER = (double?)testInvoiceNumber, pTAG = (double?)2 }
+                    );
+                    ts.Complete();
+                }
+
+                // 3. Reload Audit
+                Console.WriteLine("[TEST] Reloading Audit after correction...");
+                var postAudit = dbms.DoGetDataSQL<Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT.CONTROL_PORSANT_FROOSH.PorsantAuditRow>(
+                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=@pNUMBER, @TAG=2, @FromDate=NULL, @ToDate=NULL, @PREVIEW_ONLY=1",
+                    new { pNUMBER = (double?)testInvoiceNumber }
+                ).ToList();
+
+                if (postAudit.Count > 0)
+                {
+                    var remainingDiscrepancy = postAudit.First();
+                    throw new Exception($"Corrected invoice {testInvoiceNumber} still appeared as discrepant! DIFF: {remainingDiscrepancy.DIFF}");
+                }
+
+                Console.WriteLine($"[PASS] Corrected invoice {testInvoiceNumber} is no longer listed as discrepant (discrepancy = 0).");
+                Console.WriteLine("[PASS] Regression test completed successfully!");
+
+                // Clean up test data if created
+                if (createdTestData)
+                {
+                    dbms.DoExecuteSQL(@"
+                        DELETE FROM dbo.VISITOR_DTL WHERE NUMBER = 999999123 AND TAG = 2;
+                        DELETE FROM dbo.INVO_LST WHERE NUMBER = 999999123 AND TAG = 2;
+                        DELETE FROM dbo.HEAD_LST WHERE NUMBER = 999999123 AND TAG = 2;
+                    ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FAIL] Regression test error: {ex.Message}");
+                throw;
             }
         }
     }
