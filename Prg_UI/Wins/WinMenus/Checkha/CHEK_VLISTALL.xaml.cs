@@ -169,12 +169,12 @@ namespace Wins.WinMenus.Checkha
             else
             {
 
-                var currentCell = SFDATAGRID_SUB.SelectionController.CurrentCellManager.CurrentCell;
+                if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox || Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase) return; //Focused on PopupFilter or text input
+
+                var currentCell = SFDATAGRID_SUB?.SelectionController?.CurrentCellManager?.CurrentCell;
                 if (currentCell != null && !currentCell.IsEditing)
                 {
                     var ROW = SFDATAGRID_SUB.SelectedItem as NAZDBANK_D_MODEL;
-
-                    if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox) return; //Focused on PopupFilter
 
                     if (ROW != null && ROW?.N_SERI != null)
                     {
