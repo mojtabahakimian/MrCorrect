@@ -183,6 +183,7 @@ namespace Wins.WinMenus.Checkha
         {
             NowIsReady = true;
         }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
@@ -193,6 +194,11 @@ namespace Wins.WinMenus.Checkha
             }
             else
             {
+                if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox || Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase) return;
+
+                var currentCell = SFDATAGRID_SUB?.SelectionController?.CurrentCellManager?.CurrentCell;
+                if (currentCell != null && currentCell.IsEditing) return;
+
                 //اعلام وصول تک سطر
                 if ((e.Key is Key.OemComma && Keyboard.Modifiers == ModifierKeys.None) || (e.Key is Key.Oem5 && Keyboard.Modifiers == ModifierKeys.None)) //پ
                 {
