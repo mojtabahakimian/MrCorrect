@@ -1,5 +1,5 @@
+using AUTO_BAZ.Functions;
 using MaterialDesignThemes.Wpf;
-using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.HelperWins;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
     /// درست (الگو → جمع نرخ کالا، بدون‌الگو → درصد × مبنای فاکتور) نمی‌خواند را
     /// فهرست می‌کند و با تایید کاربر اصلاح می‌کند و سند حسابداری همان فاکتورها را
     /// دوباره صادر می‌کند.
+    ///
+    /// همه‌ی محاسبه‌ها از CL_PORSANT_RULE می‌آید — همان قاعده‌ای که خودِ صدور سند
+    /// (GENSANADFROOSH) استفاده می‌کند. پیش از این، این پنجره از پروسیجر جداگانه‌ی
+    /// dbo.RecalcVisitorPorsant_ByDarsad استفاده می‌کرد که فرمولش با صدور سند فرق
+    /// داشت؛ نتیجه این بود که اصلاح انجام می‌شد، بلافاصله صدور سند مبلغ دیگری
+    /// می‌نوشت و همان سطرها دوباره مغایر برمی‌گشتند.
     /// </summary>
     public partial class CONTROL_PORSANT_FROOSH : Window
     {
@@ -44,32 +50,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         #endregion
 
-        private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        public ObservableCollection<CL_PORSANT_RULE.PorsantAuditRow> AUDIT_DATA { get; set; }
+            = new ObservableCollection<CL_PORSANT_RULE.PorsantAuditRow>();
 
-        /// <summary>یک سطر گزارش: وضعیت فعلیِ پورسانتِ یک فاکتور در برابر آنچه باید باشد.</summary>
-        public class PorsantAuditRow
-        {
-            public long? ID { get; set; }
-            public double? NUMBER { get; set; }
-            public double? TAG { get; set; }
-            public string? CUST_NO { get; set; }
-            public long? DATE_N { get; set; }
-            public string? CUST_NAME { get; set; }
-            public int? PORID { get; set; }
-            public bool HAS_PATTERN { get; set; }
-            public double? DARSAD { get; set; }
-            public double? OLD_PURSANT { get; set; }
-            public double? NEW_PURSANT { get; set; }
-            public double? NET_BASE { get; set; }
-            public double? PATTERN_AMOUNT { get; set; }
-            public string? WARNING { get; set; }
-
-            public double DIFF => (NEW_PURSANT ?? 0) - (OLD_PURSANT ?? 0);
-            public string HAS_PATTERN_TEXT => HAS_PATTERN ? "دارد" : "ندارد";
-        }
-
-        public ObservableCollection<PorsantAuditRow> AUDIT_DATA { get; set; } = new ObservableCollection<PorsantAuditRow>();
         public bool NowIsReady { get; private set; }
+
+        /// <summary>تعداد سطرهایی که «اصلاح و صدور مجدد» واقعاً می‌تواند درستشان کند.</summary>
+        private int FixableCount => AUDIT_DATA.Count(x => x.CAN_FIX);
 
         public CONTROL_PORSANT_FROOSH()
         {
@@ -87,39 +74,22 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             LoadAudit(showEmptyMessage: true);
         }
 
-        /// <summary>
-        /// اجرای dbo.RecalcVisitorPorsant_ByDarsad در حالت پیش‌نمایش و پر کردن گرید.
-        /// </summary>
+        /// <summary>خواندن مغایرت‌ها از دیتابیس و پر کردن گرید.</summary>
         private void LoadAudit(bool showEmptyMessage)
         {
-            AUDIT_DATA.Clear();
-            List<PorsantAuditRow> rows;
+            List<CL_PORSANT_RULE.PorsantAuditRow> rows;
             try
             {
-                rows = dbms.DoGetDataSQL<PorsantAuditRow>(
-                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=@pNUMBER, @TAG=@pTAG, @FromDate=@pFromDate, @ToDate=@pToDate, @PREVIEW_ONLY=@pPreview",
-                    new
-                    {
-                        pNUMBER = (double?)null,
-                        pTAG = (double?)2,
-                        pFromDate = (long?)null,
-                        pToDate = (long?)null,
-                        pPreview = true
-                    }).ToList();
+                rows = CL_PORSANT_RULE.Audit();
             }
             catch (Exception ex)
             {
-                new Msgwin(false, "خطا در محاسبه‌ی پورسانت‌های نادرست. اگر تازه نصب/به‌روزرسانی کرده‌اید، ابتدا برنامه را یک‌بار ببندید و دوباره باز کنید تا مهاجرت‌های پایگاه‌داده اجرا شوند.\n" + ex.Message).ShowDialog();
+                new Msgwin(false, "خطا در محاسبه‌ی پورسانت‌های نادرست.\n" + ex.Message).ShowDialog();
                 this.Close();
                 return;
             }
 
-            foreach (var item in rows)
-            {
-                AUDIT_DATA.Add(item);
-            }
-
-            UpdateSummary();
+            ShowRows(rows);
 
             if (AUDIT_DATA.Count == 0 && showEmptyMessage)
             {
@@ -128,13 +98,35 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             }
         }
 
+        /// <summary>نشاندن یک فهرستِ از پیش خوانده‌شده در گرید (بدون رفت‌وبرگشت دوباره به دیتابیس).</summary>
+        private void ShowRows(IEnumerable<CL_PORSANT_RULE.PorsantAuditRow> rows)
+        {
+            AUDIT_DATA.Clear();
+            foreach (var item in rows)
+            {
+                AUDIT_DATA.Add(item);
+            }
+
+            UpdateSummary();
+        }
+
         private void UpdateSummary()
         {
-            SummaryLabel.Content = AUDIT_DATA.Count == 0
-                ? "هیچ مغایرتی نمانده است."
-                : $"{AUDIT_DATA.Count} سطر پورسانت نادرست، در {AUDIT_DATA.Select(x => x.NUMBER).Distinct().Count()} فاکتور.";
+            if (AUDIT_DATA.Count == 0)
+            {
+                SummaryLabel.Content = "هیچ مغایرتی نمانده است.";
+            }
+            else
+            {
+                var invoices = AUDIT_DATA.Select(x => x.NUMBER).Distinct().Count();
+                var manual = AUDIT_DATA.Count - FixableCount;
 
-            FixButton.IsEnabled = AUDIT_DATA.Count > 0;
+                SummaryLabel.Content = manual == 0
+                    ? $"{AUDIT_DATA.Count} سطر پورسانت نادرست، در {invoices} فاکتور."
+                    : $"{AUDIT_DATA.Count} سطر پورسانت نادرست، در {invoices} فاکتور — {manual} سطر نیاز به بررسی دستی دارد و اصلاح خودکار نمی‌شود.";
+            }
+
+            FixButton.IsEnabled = FixableCount > 0;
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -143,80 +135,96 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
         }
 
         /// <summary>
-        /// دکمه‌ی اصلاح: با تاییدِ کاربر، مبلغ پورسانتِ همه‌ی سطرهای فهرست‌شده را درست می‌کند
-        /// و سند حسابداری فاکتورهایی که واقعاً تغییر کردند را دوباره صادر می‌کند.
+        /// دکمه‌ی اصلاح: با تاییدِ کاربر، مبلغ پورسانتِ سطرهای قابل اصلاح را در یک
+        /// تراکنش درست می‌کند، سند حسابداری همان فاکتورها را دوباره صادر می‌کند و
+        /// در پایان فهرست را از دیتابیس بازمی‌خواند. پیام موفقیت فقط برای فاکتورهایی
+        /// داده می‌شود که همین بازخوانی ثابت کند مغایرتشان واقعاً رفته است.
         /// </summary>
         private void FixButton_Click(object sender, RoutedEventArgs e)
         {
-            if (AUDIT_DATA.Count == 0) return;
+            var targets = AUDIT_DATA.Where(x => x.CAN_FIX).ToList();
+            if (targets.Count == 0) return;
 
-            var invoiceCount = AUDIT_DATA.Select(x => x.NUMBER).Distinct().Count();
+            var invoiceCount = targets.Select(x => x.NUMBER).Distinct().Count();
             var confirm = new Msgwin(true,
-                $"مبلغ پورسانت {AUDIT_DATA.Count} سطر (در {invoiceCount} فاکتور) اصلاح و سند حسابداری همان فاکتورها دوباره صادر می‌شود.\n" +
+                $"مبلغ پورسانت {targets.Count} سطر (در {invoiceCount} فاکتور) اصلاح و سند حسابداری همان فاکتورها دوباره صادر می‌شود.\n" +
                 "این عملیات مبلغ پورسانتِ ذخیره‌شده و سند حسابداری را تغییر می‌دهد. آیا ادامه می‌دهید؟");
             confirm.ShowDialog();
             if (confirm.DialogResult != true) return;
 
-            List<PorsantAuditRow> changedInvoices;
+            CL_PORSANT_RULE.PorsantFixResult result;
+
+            FixButton.IsEnabled = false;
+            RefreshButton.IsEnabled = false;
+            Mouse.OverrideCursor = Cursors.Wait;
             try
             {
-                changedInvoices = dbms.DoGetDataSQL<PorsantAuditRow>(
-                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=@pNUMBER, @TAG=@pTAG, @FromDate=@pFromDate, @ToDate=@pToDate, @PREVIEW_ONLY=@pPreview",
-                    new
-                    {
-                        pNUMBER = (double?)null,
-                        pTAG = (double?)2,
-                        pFromDate = (long?)null,
-                        pToDate = (long?)null,
-                        pPreview = false
-                    }).ToList();
+                result = CL_PORSANT_RULE.FixAndReissue(targets);
             }
             catch (Exception ex)
             {
                 new Msgwin(false, "اصلاح پورسانت انجام نشد.\n" + ex.Message).ShowDialog();
+                LoadAudit(showEmptyMessage: false);
                 return;
             }
-
-            // اصلاح دیتابیس انجام شد؛ حالا برای هر فاکتوری که واقعاً تغییر کرد، سند را دوباره صادر می‌کنیم
-            var succeeded = new List<double>();
-            var failed = new List<(double Number, string Error)>();
-
-            foreach (var invNumber in changedInvoices.Select(x => x.NUMBER).Where(n => n.HasValue).Select(n => n.Value).Distinct())
+            finally
             {
-                try
-                {
-                    var (sanadNumber, isSuccessfully) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADFROOSH(Convert.ToInt64(invNumber), Convert.ToInt64(invNumber), false);
-                    if (isSuccessfully)
-                    {
-                        succeeded.Add(invNumber);
-                    }
-                    else
-                    {
-                        failed.Add((invNumber, "صدور سند ناموفق بود"));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    failed.Add((invNumber, ex.Message));
-                }
+                Mouse.OverrideCursor = null;
+                RefreshButton.IsEnabled = true;
             }
 
-            var resultMsg = new StringBuilder();
-            resultMsg.AppendLine($"مبلغ پورسانت {changedInvoices.Select(x => x.NUMBER).Distinct().Count()} فاکتور اصلاح شد.");
-            resultMsg.AppendLine($"سند {succeeded.Count} فاکتور با موفقیت دوباره صادر شد.");
+            // فهرست تازه‌ای که خودِ عملیات از دیتابیس خوانده؛ همین معیار موفقیت است
+            ShowRows(result.Remaining);
+
+            new Msgwin(false, BuildResultMessage(result)).ShowDialog();
+        }
+
+        /// <summary>
+        /// گزارش نتیجه بر اساس وضعیتی که از دیتابیس بازخوانی شده، نه بر اساس
+        /// تعداد سطرهایی که قرار بود اصلاح شوند.
+        /// </summary>
+        private static string BuildResultMessage(CL_PORSANT_RULE.PorsantFixResult result)
+        {
+            var msg = new StringBuilder();
+            var failed = result.Failed.ToList();
+
+            if (result.SucceededInvoices > 0)
+            {
+                msg.AppendLine($"پورسانت {result.SucceededInvoices} فاکتور اصلاح شد و سند حسابداری همان فاکتورها دوباره صادر شد.");
+            }
+
             if (failed.Count > 0)
             {
-                resultMsg.AppendLine($"صدور سند {failed.Count} فاکتور ناموفق بود؛ مبلغ پورسانت آنها اصلاح شده ولی سند دستی نیاز به بررسی دارد:");
-                foreach (var f in failed.Take(20))
+                msg.AppendLine($"{failed.Count} فاکتور اصلاح نشد و همچنان در فهرست می‌ماند:");
+                foreach (var item in failed.Take(20))
                 {
-                    resultMsg.AppendLine($"  فاکتور {f.Number}: {f.Error}");
+                    var reason = !string.IsNullOrEmpty(item.Error)
+                        ? item.Error
+                        : (item.RowsUpdated == 0
+                            ? "هیچ سطری به‌روزرسانی نشد"
+                            : "پس از صدور مجدد سند، مبلغ پورسانت دوباره با قاعده نخواند");
+
+                    msg.AppendLine($"  فاکتور {item.NUMBER}: {reason}");
+                }
+
+                if (failed.Count > 20)
+                {
+                    msg.AppendLine($"  ... و {failed.Count - 20} فاکتور دیگر.");
                 }
             }
 
-            new Msgwin(false, resultMsg.ToString()).ShowDialog();
+            if (result.Outcomes.Count == 0)
+            {
+                msg.AppendLine("هیچ سطر قابل اصلاحی وجود نداشت.");
+            }
 
-            // بازخوانی فهرست تا وضعیت نهایی (که باید خالی یا نزدیک به خالی باشد) نشان داده شود
-            LoadAudit(showEmptyMessage: false);
+            var manual = result.Remaining.Count(r => !r.CAN_FIX);
+            if (manual > 0)
+            {
+                msg.AppendLine($"{manual} سطر نیاز به بررسی دستی دارد (ستون «هشدار» را ببینید) و با این عملیات اصلاح نمی‌شود.");
+            }
+
+            return msg.ToString();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

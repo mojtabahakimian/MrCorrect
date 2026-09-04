@@ -76,9 +76,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             try
             {
-                var mismatchCount = dbms.DoGetDataSQL<CONTROL_PORSANT_FROOSH.PorsantAuditRow>(
-                    @"EXEC dbo.RecalcVisitorPorsant_ByDarsad @NUMBER=NULL, @TAG=2, @FromDate=NULL, @ToDate=NULL, @PREVIEW_ONLY=1")
-                    .Count();
+                // همان منبعی که خودِ پنجره استفاده می‌کند: CL_PORSANT_RULE، یعنی دقیقاً
+                // قاعده‌ای که صدور سند حسابداری هنگام نوشتن مبلغ پورسانت اجرا می‌کند.
+                var mismatchCount = AUTO_BAZ.Functions.CL_PORSANT_RULE.Audit().Count;
 
                 if (mismatchCount > 0)
                 {
@@ -86,10 +86,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
                     new CONTROL_PORSANT_FROOSH().Show();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // اگر پروسیجر dbo.RecalcVisitorPorsant_ByDarsad هنوز روی این دیتابیس ساخته نشده،
-                // این بخش از کنترل اسناد را بی‌صدا رد می‌کنیم؛ نباید کل «کنترل اسناد و دفاتر چک» را بخواباند.
+                // نباید کل «کنترل اسناد و دفاتر چک» را بخواباند، ولی بی‌صدا هم رد نمی‌شود:
+                // بی‌صدا بودنش باعث شده بود خطای واقعی این بخش هیچ‌وقت دیده نشود.
+                AUTO_BAZ.Functions.CL_LMethods.LogWriter.WriteLog("خطا در کنترل پورسانت فاکتور فروش: " + ex.Message);
             }
         }
         private static void CheckReceivableDocuments()
