@@ -2140,9 +2140,13 @@ namespace AUTO_BAZ.Functions
                         var key = (row.PORID, SqlKey(row.CODE));
                         if (porsantKala.TryGetValue(key, out var existing))
                         {
-                            // کد قبلی فقط وقتی مقدار را می‌پذیرفت که «دقیقاً یک» ردیف برگردد.
-                            // پس تکراری یعنی «الگو ندارد» و باید مثل نبودن رفتار کند.
-                            existing.Duplicate = true;
+                            // تکراری فقط وقتی «الگو ندارد» است که نرخ‌ها با هم نخوانند. دو سطر
+                            // با نرخ یکسان همان یک نرخ را می‌دهد؛ پیش از این چنین کالایی بی‌صدا
+                            // از پورسانت حذف می‌شد و مبلغِ الگو بی‌دلیل کمتر درمی‌آمد.
+                            if (!Nullable.Equals(existing.Porsant, row.PORSANT))
+                            {
+                                existing.Duplicate = true;
+                            }
                         }
                         else
                         {
@@ -3409,7 +3413,6 @@ namespace AUTO_BAZ.Functions
                             {
                                 //الگو دارد: مبلغ از جمع (نرخ کالا × مبلغ کالا) کالاهایی ساخته می‌شود که در الگو نرخ دارند
                                 long prs = 0L;
-                                long MBK = 0L;
                                 var porsantLines = invoicePorsantLines.TryGetValue(HFRST[HFRST_EOF].NUMBER ?? 0d, out var porsantLineRows)
                                     ? porsantLineRows
                                     : EmptyQre18;
@@ -3433,7 +3436,6 @@ namespace AUTO_BAZ.Functions
                                         // پاک شده بود. با ISNULL در کوئری و این ?? دیگر ممکن نیست.
                                         double mablk = porsantLines[rst1_EOF].mablk ?? 0;
                                         prs = (long)(prs + CL_PORSANT_RULE.PatternLineShare(mablk, porsantEntry.Porsant));
-                                        MBK = (long)(MBK + mablk);
                                     }
                                     else
                                     {
@@ -3448,7 +3450,13 @@ namespace AUTO_BAZ.Functions
                                 }
 
                                 PRST[PRST_EOF].PURSANT = prs;
-                                PRST[PRST_EOF].DARSAD = MBK > 0L ? prs / (double)MBK * 100 : 0;
+                                // درصدِ سطر همه‌جای برنامه یعنی «پورسانت ÷ مبنای کل فاکتور»؛ فرم فاکتور و
+                                // dbo.CalculateVisitorPorsant هم همین را می‌نویسند. اینجا مخرج فقط کالاهای
+                                // دارای نرخ (MBK) بود، یعنی سطری که مثلاً ۸۰ هزار تومان پورسانت گرفته بود
+                                // در فرم «۲٪» نشان می‌داد؛ و چون فرم موقع ذخیره مبلغ را از همین درصد و مبنای
+                                // کل فاکتور می‌سازد، مبلغ به ۲٪ کلِ فاکتور می‌پرید و صدور سند دوباره به ۸۰
+                                // هزار برمی‌گرداند — رفت‌وبرگشتی که هیچ‌وقت تمام نمی‌شد.
+                                PRST[PRST_EOF].DARSAD = PORSANT_BASE != 0 ? prs / PORSANT_BASE * 100 : 0;
                                 dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {prs} , DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{SqlText(PRST[PRST_EOF].CUST_NO)}' AND (TAG = 2) ");
                                 //PRST.update();
                             }

@@ -93,8 +93,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 
             if (AUDIT_DATA.Count == 0 && showEmptyMessage)
             {
-                new Msgwin(false, "هیچ فاکتوری با پورسانت نادرست پیدا نشد.").ShowDialog();
-                this.Close();
+                // پنجره بسته نمی‌شود: کاربر ممکن است بخواهد ریز محاسبه‌ی یک فاکتور مشخص را
+                // ببیند («چرا پورسانتِ این فاکتور این‌قدر کم شد؟»)، و آن فاکتور دقیقاً به این
+                // دلیل در فهرست نیست که مبلغش با قاعده می‌خواند.
+                new Msgwin(false,
+                    "هیچ فاکتوری با پورسانت نادرست پیدا نشد.\n" +
+                    "برای دیدن ریز محاسبه‌ی پورسانت یک فاکتور، شماره‌اش را در پایین وارد کنید و «این مبلغ از کجا آمده؟» را بزنید.")
+                    .ShowDialog();
             }
         }
 
@@ -132,6 +137,92 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             LoadAudit(showEmptyMessage: true);
+        }
+
+        /// <summary>
+        /// «این مبلغ از کجا آمده؟» — ریز محاسبه‌ی سطرِ انتخاب‌شده: مبنای هر قلم، نرخِ همان
+        /// قلم در الگو، سهمش از پورسانت، و مهم‌تر از همه فهرست اقلامی که در الگو نرخ ندارند
+        /// و هیچ پورسانتی نمی‌دهند. پرتکرارترین شکایت («۲٪ گفتیم ولی مبلغ خیلی کمتر است»)
+        /// دقیقاً همین است و تا امروز هیچ‌جای برنامه جوابش را نشان نمی‌داد.
+        /// </summary>
+        private void WhyButton_Click(object sender, RoutedEventArgs e)
+        {
+            // اگر کاربر شماره‌ی فاکتور نوشته باشد، همان فاکتور بررسی می‌شود — حتی اگر در این
+            // فهرست نباشد. فاکتوری که مبلغش دقیقاً همان چیزی است که قاعده می‌گوید، مغایرت
+            // ندارد و اینجا فهرست نمی‌شود؛ ولی پرسشِ «چرا این‌قدر کم شد؟» درست درباره‌ی همین
+            // فاکتورهاست.
+            if (!string.IsNullOrWhiteSpace(InvoiceNumberBox.Text))
+            {
+                ExplainInvoiceByNumber(InvoiceNumberBox.Text.Trim());
+                return;
+            }
+
+            var row = SYNCFUSION_DG.SelectedItem as CL_PORSANT_RULE.PorsantAuditRow;
+            if (row is null)
+            {
+                new Msgwin(false, "ابتدا یک سطر را انتخاب کنید یا شماره فاکتور را وارد کنید.").ShowDialog();
+                return;
+            }
+
+            ExplainRow(row);
+        }
+
+        /// <summary>ریز محاسبه‌ی همه‌ی سطرهای پورسانتِ یک فاکتور، با شماره‌ی واردشده‌ی کاربر.</summary>
+        private void ExplainInvoiceByNumber(string text)
+        {
+            if (!double.TryParse(text, out double number))
+            {
+                new Msgwin(false, "شماره فاکتور را درست وارد کنید.").ShowDialog();
+                return;
+            }
+
+            List<CL_PORSANT_RULE.PorsantAuditRow> rows;
+            try
+            {
+                rows = CL_PORSANT_RULE.InspectInvoice(number);
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خواندن اطلاعات این فاکتور ممکن نشد.\n" + ex.Message).ShowDialog();
+                return;
+            }
+
+            if (rows.Count == 0)
+            {
+                new Msgwin(false, $"برای فاکتور {number:0} هیچ سطر پورسانتی پیدا نشد (یا فاکتور سربرگ فروش ندارد).").ShowDialog();
+                return;
+            }
+
+            foreach (var row in rows)
+            {
+                ExplainRow(row);
+            }
+        }
+
+        /// <summary>متن «این مبلغ از کجا آمده؟» برای یک سطر پورسانت.</summary>
+        private void ExplainRow(CL_PORSANT_RULE.PorsantAuditRow row)
+        {
+            if (!row.HAS_PATTERN)
+            {
+                new Msgwin(false,
+                    $"فاکتور {row.NUMBER:0} الگوی پورسانت ندارد؛ مبلغ = درصد سطر × مبنای فاکتور.\n" +
+                    $"مبنای فاکتور: {row.NET_BASE:N0}\nدرصد: {row.DARSAD:0.###}\nمبلغ درست: {row.NEW_PURSANT:N0}").ShowDialog();
+                return;
+            }
+
+            try
+            {
+                var breakdown = CL_PORSANT_RULE.GetPatternBreakdown(row.NUMBER ?? 0, row.TAG ?? 2, row.PORID ?? 0);
+                var report = $"ویزیتور: {row.CUST_NAME} ({row.CUST_NO})\n" +
+                             $"پورسانت ثبت‌شده در حال حاضر: {row.OLD_PURSANT ?? 0:N0}\n\n" +
+                             breakdown.BuildReport(row.NET_BASE);
+
+                new Msgwin(false, report).ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خواندن ریز محاسبه‌ی الگو ممکن نشد.\n" + ex.Message).ShowDialog();
+            }
         }
 
         /// <summary>

@@ -131,6 +131,9 @@
                             <Binding Path="DIFF" StringFormat="{}{0:N0}"/>
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
+                    <!-- پوشش الگو: چند درصد از اقلام فاکتور اصلاً در الگو نرخ دارند. هر چه کمتر از
+                         ۱۰۰٪ باشد، مبلغِ الگو همان‌قدر از درصدِ اسمیِ الگو کمتر درمی‌آید. -->
+                    <syncfusion:GridTextColumn HeaderText="پوشش الگو" MappingName="COVERAGE_TEXT" Width="150"/>
                     <syncfusion:GridTextColumn HeaderText="وضعیت" MappingName="STATUS_TEXT" Width="120"/>
                     <syncfusion:GridTextColumn HeaderText="هشدار" MappingName="WARNING" ColumnSizer="Star"/>
                 </syncfusion:SfDataGrid.Columns>
@@ -143,15 +146,25 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Label x:Name="SummaryLabel" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold" FlowDirection="RightToLeft" Content="..."/>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" FlowDirection="RightToLeft">
+                    <Label x:Name="SummaryLabel" VerticalAlignment="Center" FontWeight="Bold" Content="..."/>
+                    <Label Content="شماره فاکتور:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    <TextBox x:Name="InvoiceNumberBox" Width="90" VerticalAlignment="Center" FlowDirection="LeftToRight"
+                             ToolTip="شماره فاکتور فروش برای دیدن ریز محاسبه‌ی پورسانت آن"/>
+                </StackPanel>
 
-                <Button x:Name="RefreshButton" Grid.Column="1" Content="بروزرسانی فهرست" Click="RefreshButton_Click"
+                <Button x:Name="WhyButton" Grid.Column="1" Content="این مبلغ از کجا آمده؟" Click="WhyButton_Click"
                         Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15"
                         FontSize="10" Height="35" Margin="0,0,10,0" Padding="14,4"/>
 
-                <Button x:Name="FixButton" Grid.Column="2" Content="اصلاح پورسانت و صدور مجدد سند"
+                <Button x:Name="RefreshButton" Grid.Column="2" Content="بروزرسانی فهرست" Click="RefreshButton_Click"
+                        Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15"
+                        FontSize="10" Height="35" Margin="0,0,10,0" Padding="14,4"/>
+
+                <Button x:Name="FixButton" Grid.Column="3" Content="اصلاح پورسانت و صدور مجدد سند"
                         Click="FixButton_Click"
                         Style="{StaticResource GerdC}"
                         BorderBrush="{x:Null}" FontSize="10" Height="35" Width="200"
