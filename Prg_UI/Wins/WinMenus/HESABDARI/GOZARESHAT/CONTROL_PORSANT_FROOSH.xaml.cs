@@ -1,4 +1,5 @@
 using AUTO_BAZ.Functions;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_UI.HelperWins;
 using System;
@@ -320,6 +321,70 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+        }
+
+        /// <summary>
+        /// Ctrl+L روی جدول: جمعِ سطرهای انتخاب‌شده. برخلاف پنجره‌های دیگر که فقط ستونِ
+        /// جاری را جمع می‌زنند، اینجا هر سه ستونِ مبلغ با هم داده می‌شود — چون کلِ کاربردِ
+        /// این جمع، دیدنِ «مجموع اختلافِ پورسانت» است و کاربر ناچار می‌شد دو بار جمع بگیرد
+        /// و خودش تفریق کند.
+        /// </summary>
+        private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
+            {
+                ShowSelectionSums();
+                e.Handled = true;
+            }
+        }
+
+        private void SumSelected_Click(object sender, RoutedEventArgs e) => ShowSelectionSums();
+
+        private void ShowSelectionSums()
+        {
+            // اگر چیزی انتخاب نشده باشد، جمعِ کلِ فهرست داده می‌شود (نه هیچ‌چیز)؛ کاربر
+            // معمولاً همین را می‌خواهد و Ctrl+A هم دقیقاً همین نتیجه را می‌دهد.
+            var rows = SYNCFUSION_DG.SelectedItems?.OfType<CL_PORSANT_RULE.PorsantAuditRow>().ToList();
+            bool wholeList = rows is null || rows.Count == 0;
+
+            if (wholeList)
+            {
+                rows = AUDIT_DATA.ToList();
+            }
+
+            if (rows.Count == 0)
+            {
+                new Msgwin(false, "سطری برای جمع زدن وجود ندارد.").ShowDialog();
+                return;
+            }
+
+            double oldSum = rows.Sum(r => r.OLD_PURSANT ?? 0);
+            double newSum = rows.Sum(r => r.NEW_PURSANT);
+            double diffSum = rows.Sum(r => r.DIFF);
+            var invoices = rows.Select(r => r.NUMBER).Distinct().Count();
+
+            var title = wholeList
+                ? $"جمع کل فهرست ({rows.Count} سطر در {invoices} فاکتور):"
+                : $"جمع {rows.Count} سطر انتخاب‌شده (در {invoices} فاکتور):";
+
+            new Msgwin(false,
+                $"{title}\n\n" +
+                $"پورسانت وضعیت فعلی: {oldSum:N0}\n" +
+                $"پورسانت باید باشد: {newSum:N0}\n" +
+                $"اختلاف (باید باشد − فعلی): {diffSum:N0}").ShowDialog();
+        }
+
+        /// <summary>خروجی اکسل از همان چیزی که در جدول دیده می‌شود (با فیلتر و ترتیب فعلی).</summary>
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ControlPorsantFroosh");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
         }
     }
 }

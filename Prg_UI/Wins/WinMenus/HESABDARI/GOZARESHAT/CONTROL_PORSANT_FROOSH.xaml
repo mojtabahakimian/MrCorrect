@@ -43,6 +43,20 @@
         <Style TargetType="syncfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
         </Style>
+
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="جمع سطرهای انتخاب‌شده (Ctrl+L)" Click="SumSelected_Click">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Sigma" FontSize="14"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
 
     <Grid x:Name="mygrid" Margin="8,8,8,0">
@@ -78,9 +92,11 @@
             <!-- توضیح کوتاه -->
             <TextBlock Grid.Row="0" Margin="10,10,10,4" TextWrapping="Wrap" Foreground="{StaticResource MaterialDesignBody}"
                        FlowDirection="RightToLeft"
-                       Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی همان مبلغی که صدور سند حسابداری برای این سطر می‌نویسد. سطرهای «نیاز به بررسی دستی» با دکمه‌ی اصلاح درست نمی‌شوند؛ ستون هشدار دلیلش را می‌گوید."/>
+                       Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی همان مبلغی که صدور سند حسابداری برای این سطر می‌نویسد. سطرهای «نیاز به بررسی دستی» با دکمه‌ی اصلاح درست نمی‌شوند؛ ستون هشدار دلیلش را می‌گوید. برای جمعِ سطرهای انتخاب‌شده Ctrl+L و برای خروجی اکسل روی جدول راست‌کلیک کنید (Ctrl+A همه را انتخاب می‌کند)."/>
 
             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Grid.Row="1"
+                ContextMenu="{StaticResource DataGridContextMenu}"
+                PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown"
                 ItemsSource="{Binding AUDIT_DATA}" FilterRowPosition="Top"
                 AutoGenerateColumns="False"
                 SelectionUnit="Row"
