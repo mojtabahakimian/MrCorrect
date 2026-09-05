@@ -2861,7 +2861,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ErrosMessages.Add(new MsgModel { MessageText_U = "واحد فروش مشخص نشده است ....!" });
             }
 
-            if (IsDirectFactor)
+            //مرکز هزینه فاکتور رسید مستقیم
+            //فیلدهای MOIN_HAZ/CMB_MOIN_HAZ داخل سربرگ «پشت فاکتور» (Page58) هستند و آن سربرگ تا
+            //وقتی NUMBER1 برابر "0" است (یعنی تا اولین ذخیره) غیرفعال می‌ماند. پس اجباری‌کردن آن
+            //روی رکورد جدید یعنی خطایی که کاربر هیچ راهی برای رفعش ندارد و اولین فاکتور رسید
+            //مستقیم اصلا ثبت نمی‌شود. از ذخیره دوم به بعد که فیلد در دسترس است کنترل می‌شود.
+            if (IsDirectFactor && NUMBER1.Text != "0")
             {
                 if (string.IsNullOrEmpty(CMB_MOIN_HAZ.SelectedValue.ToStringNullSafe()) || string.IsNullOrEmpty(MOIN_HAZ.Text))
                 {
@@ -4662,7 +4667,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (Convert.ToDouble(MABL_HAZ.Text) != 0 && (IsNull(this.MOIN_HAZ.Text) || MOIN_HAZ.Text == "0"))
             {
-                var RST = dbms.DoGetDataSQL<string?>("SELECT RTRIM(CAST(N_KOL AS nvarchar)) + '-' + RTRIM(CAST(NUMBER AS nvarchar)) + '-' + RTRIM(CAST(TNUMBER AS nvarchar)) AS hes FROM dbo.TDETA_HES WHERE (N_KOL = " + Baseknow.HKHARID + ") AND (NUMBER = 1)").FirstOrDefault();
+                var RST = dbms.DoGetDataSQL<string?>("SELECT RTRIM(CAST(N_KOL AS nvarchar)) + '-' + RTRIM(CAST(NUMBER AS nvarchar)) + '-' + RTRIM(CAST(TNUMBER AS nvarchar)) AS hes FROM dbo.TDETA_HES WHERE (N_KOL = " + Baseknow.HKHARID + $") AND (NUMBER = {HTAG})").FirstOrDefault();
                 if (RST != null)
                 {
                     MOIN_HAZ.Text = RST;
