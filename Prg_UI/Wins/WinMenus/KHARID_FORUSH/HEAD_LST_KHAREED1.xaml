@@ -396,6 +396,12 @@
                         </ComboBox.ItemsPanel>
                     </ComboBox>
 
+                    <!--فاکتور رسید مستقیمی که اصلا رسید انبار ندارد (مثل قبض برق): سطر کالا/رسید انبار
+                        ثبت نمی‌شود و مبلغ فاکتور از طریق «خدمات - مرکز هزینه» در پشت فاکتور می‌آید.-->
+                    <CheckBox x:Name="BE_RASID" Content="بدون رسید انبار" FlowDirection="RightToLeft" FontSize="10"
+                              HorizontalAlignment="Right" Width="140" Height="25" Margin="0,11,675,0" VerticalAlignment="Top"
+                              Visibility="Collapsed" Click="BE_RASID_Click"
+                              ToolTip="اگر این فاکتور رسید انبار ندارد (مثل قبض برق) این گزینه را بزنید؛ سطر کالا ثبت نمی‌شود و مبلغ از قسمت خدمات پشت فاکتور وارد می‌شود."/>
 
                     <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,93,79" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
 
