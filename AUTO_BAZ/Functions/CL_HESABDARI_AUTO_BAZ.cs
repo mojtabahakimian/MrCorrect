@@ -4457,7 +4457,7 @@ namespace AUTO_BAZ.Functions
 
                             // مرکز هزینه (بدهکار)
                             batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
-                                $"VALUES({max_ns},{N(MKOL)},{N(MMOIN)},{N(MTAF)},{HES_T2M},{HES_T3M},{HES_T4M},N'{SqlText(hRow.MOIN_HAZ)}',N'{SqlText(sharhBedDirect)}',{JAMF},{hRow.NUMBER},15,{arzdVal})");
+                                $"VALUES({max_ns},{N(MKOL)},{N(MMOIN)},{N(MTAF)},{HES_T2M},{HES_T3M},{HES_T4M},N'{SqlText(hRow.MOIN_HAZ)}',N'{SqlText(sharhBedDirect)}',{JAMF},{hRow.NUMBER},{deedTag},{arzdVal})");
 
                             // کل بستانکاری شخص بابت فاکتور (بستانکار)
                             string HES_T2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
@@ -4466,7 +4466,7 @@ namespace AUTO_BAZ.Functions
                             var sharhBesDirect = Strings.Right("رسيدش. " + hRow.NUMBER + "-" + hRow.FNUMCO + " " + hRow.MOLAH + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
 
                             batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD, RADIF) " +
-                                $"VALUES({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhBesDirect)}',{JAMF},{hRow.NUMBER},15,{arzdVal},{hRow.NUMBER})");
+                                $"VALUES({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhBesDirect)}',{JAMF},{hRow.NUMBER},{deedTag},{arzdVal},{hRow.NUMBER})");
                         }
                     }
                 }
@@ -4484,7 +4484,7 @@ namespace AUTO_BAZ.Functions
                                 var arzdVal = IsNull(hRow.ARZD) ? "1" : SqlNum(hRow.ARZD);
 
                                 batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
-                                    $"VALUES({max_ns},{Baseknow.MOGODIA},{line.ANBAR},{line.CODE},N'{Baseknow.MOGODIA + "-" + line.ANBAR + "-" + line.CODE}',N'{SqlText(sharhLine)}',{Math.Round((double)line.MABL_K)},{hRow.NUMBER},12,{arzdVal})");
+                                    $"VALUES({max_ns},{Baseknow.MOGODIA},{line.ANBAR},{line.CODE},N'{Baseknow.MOGODIA + "-" + line.ANBAR + "-" + line.CODE}',N'{SqlText(sharhLine)}',{Math.Round((double)line.MABL_K)},{hRow.NUMBER},{deedTag},{arzdVal})");
 
                                 switch (line.RADAH)
                                 {
@@ -4510,6 +4510,14 @@ namespace AUTO_BAZ.Functions
                 // حساب خدمات همین‌جا نگه داشته می‌شود تا هر دو طرف با هم صادر یا حذف شوند.
                 var hazArticlePosted = false;
 
+                // آرتیکل ماليات بر ارزش افزوده فقط یک طرف (بدهکار حساب ماليات) دارد و طرف
+                // بستانکارش داخل آرتیکل «بستانکاری فروشنده بابت فاکتور» با مبلغ JAMF + MBAA
+                // نهفته است. آن آرتیکل فقط وقتی صادر می‌شود که JAMF غیرصفر و فاکتور غیرمستقیم
+                // باشد؛ پس برای فاکتور رسید مستقیم (TAG=15) هیچ‌وقت صادر نمی‌شد و سند به اندازه‌ی
+                // مبلغ مالیات از تراز خارج می‌ماند. این پرچم می‌گوید طرف بستانکار مالیات قبلا
+                // صادر شده یا نه، تا پایین‌تر یک‌بار (و فقط یک‌بار) صادر شود.
+                var custBesIncludesMbaa = false;
+
                 if ((hRow.MABL_HAZ ?? 0d) != 0d)
                 {
                     if (!IsNull(hRow.MOIN_HAZ))
@@ -4532,7 +4540,7 @@ namespace AUTO_BAZ.Functions
                         string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
                         string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.MOIN_HAZ)}',N'{SqlText(sharhHaz)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.MOIN_HAZ)}',N'{SqlText(sharhHaz)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},{deedTag},{arzdVal})");
                         hazArticlePosted = true;
                     }
                 }
@@ -4544,14 +4552,14 @@ namespace AUTO_BAZ.Functions
                         var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
                         var sharhApa = Strings.Right("چك " + ch.N_SERI + "بانك " + GETBANK(Convert.ToDouble(ch.BANK)) + " " + ch.SHOBEH + " مورخ " + Strings.Format(ch.DATE_S, "####/##/##"), 255);
 
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,hes ,SHARH,BES ,N_SERI,BANK,NUMBER,TAG ,ARZD) VALUES ({max_ns},{GETKOL(Baseknow.APA)},{GETMOIN(Baseknow.APA)},{GETTAF(Baseknow.APA)},N'{Baseknow.APA}',N'{SqlText(sharhApa)}',{N(ch.MABL)},{N(ch.N_SERI)},{N(ch.BANK)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,hes ,SHARH,BES ,N_SERI,BANK,NUMBER,TAG ,ARZD) VALUES ({max_ns},{GETKOL(Baseknow.APA)},{GETMOIN(Baseknow.APA)},{GETTAF(Baseknow.APA)},N'{Baseknow.APA}',N'{SqlText(sharhApa)}',{N(ch.MABL)},{N(ch.N_SERI)},{N(ch.BANK)},{hRow.NUMBER},{deedTag},{arzdVal})");
 
                         var sharhCust = Strings.Right("ف.خ." + hRow.NUMBER1 + " - " + "چك " + ch.N_SERI + "بانك " + GETBANK(Convert.ToDouble(ch.BANK)) + " " + ch.SHOBEH + " مورخ " + Strings.Format(ch.DATE_S, "####/##/##"), 255);
                         string HES_T2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
                         string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                         string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes ,SHARH,BED ,NUMBER,TAG ,ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhCust)}',{N(ch.MABL)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes ,SHARH,BED ,NUMBER,TAG ,ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhCust)}',{N(ch.MABL)},{hRow.NUMBER},{deedTag},{arzdVal})");
                     }
                 }
 
@@ -4565,33 +4573,34 @@ namespace AUTO_BAZ.Functions
                     string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, hes, BES, NUMBER, TAG, ARZD, RADIF) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(sharhBes)}',N'{hRow.CUST_NO}',{besVal},{hRow.NUMBER},12,{arzdVal},{hRow.NUMBER})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, hes, BES, NUMBER, TAG, ARZD, RADIF) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(sharhBes)}',N'{hRow.CUST_NO}',{besVal},{hRow.NUMBER},{deedTag},{arzdVal},{hRow.NUMBER})");
+                    custBesIncludesMbaa = true; //besVal شامل MBAA است
 
                     if (KHMAVAV != 0d)
                     {
                         var sharhKharid = Strings.Right("خريد مواد اوليه فاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},1,1,N'{Baseknow.KHARID + "-1-1"}',N'{SqlText(sharhKharid)}',{N(KHMAVAV)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},1,1,N'{Baseknow.KHARID + "-1-1"}',N'{SqlText(sharhKharid)}',{N(KHMAVAV)},{hRow.NUMBER},{deedTag},{arzdVal})");
                     }
                     if (KHNIM != 0d)
                     {
                         var sharhNim = Strings.Right("خريد نيمه ساخته فاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.KHARID},2,1,N'{Baseknow.KHARID + "-2-1"}',N'{SqlText(sharhNim)}',{N(KHNIM)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.KHARID},2,1,N'{Baseknow.KHARID + "-2-1"}',N'{SqlText(sharhNim)}',{N(KHNIM)},{hRow.NUMBER},{deedTag},{arzdVal})");
                     }
                     if (KHSAKHT != 0d)
                     {
                         var sharhSakht = Strings.Right("خريد ساخته شده فاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.KHARID},3,1,N'{Baseknow.KHARID + "-3-1"}',N'{SqlText(sharhSakht)}',{N(KHSAKHT)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.KHARID},3,1,N'{Baseknow.KHARID + "-3-1"}',N'{SqlText(sharhSakht)}',{N(KHSAKHT)},{hRow.NUMBER},{deedTag},{arzdVal})");
                     }
                     if (BAZAR != 0d)
                     {
                         var sharhBazar = Strings.Right("خريد بازرگاني  فاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},4,1,N'{Baseknow.KHARID + "-4-1"}',N'{SqlText(sharhBazar)}',{N(BAZAR)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},4,1,N'{Baseknow.KHARID + "-4-1"}',N'{SqlText(sharhBazar)}',{N(BAZAR)},{hRow.NUMBER},{deedTag},{arzdVal})");
                     }
                     if (KHSAY != 0d)
                     {
                         CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
                         var sharhSay = Strings.Right("خريد ساير فاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
-                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},11,1,N'{Baseknow.KHARID + "-11-1"}',N'{SqlText(sharhSay)}',{N(KHSAY)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},11,1,N'{Baseknow.KHARID + "-11-1"}',N'{SqlText(sharhSay)}',{N(KHSAY)},{hRow.NUMBER},{deedTag},{arzdVal})");
                     }
                     for (long K = 1L; K <= 6L; K++)
                     {
@@ -4601,13 +4610,13 @@ namespace AUTO_BAZ.Functions
                             CREATHES(Baseknow.KHARID, K + 4L, 1, GETGRPKALA(Convert.ToInt32(INP1)));
                             var sharhGrp = Strings.Right("خريد " + GETGRPKALA(Convert.ToInt32(K + 4L)) + " فاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
                             HS[7] += HS[(int)K];
-                            batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},{K + 4L},1,N'{Baseknow.KHARID + "-" + (K + 4L) + "-1"}',N'{SqlText(sharhGrp)}',{N(HS[(int)K])},{hRow.NUMBER},12,{arzdVal})");
+                            batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.KHARID},{K + 4L},1,N'{Baseknow.KHARID + "-" + (K + 4L) + "-1"}',N'{SqlText(sharhGrp)}',{N(HS[(int)K])},{hRow.NUMBER},{deedTag},{arzdVal})");
                         }
                     }
 
                     var sharhPkharid = Strings.Right("خريدفاكتورشماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ " + Strings.Format(hRow.DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(hRow.CUST_NO), 255);
                     var besPk = N(KHSAY + KHSAKHT + KHNIM + KHMAVAV + BAZAR + HS[7]);
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.PKHARID},1,1,N'{Baseknow.PKHARID + "-1-1"}',N'{SqlText(sharhPkharid)}',{besPk},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.PKHARID},1,1,N'{Baseknow.PKHARID + "-1-1"}',N'{SqlText(sharhPkharid)}',{besPk},{hRow.NUMBER},{deedTag},{arzdVal})");
                 }
 
                 if (hazArticlePosted)
@@ -4618,7 +4627,7 @@ namespace AUTO_BAZ.Functions
                     string HES_T2T_H2 = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2T},{HES_T2T_H2},{HES_T4T},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhHazBes)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2T},{HES_T2T_H2},{HES_T4T},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhHazBes)}',{N(hRow.MABL_HAZ)},{hRow.NUMBER},{deedTag},{arzdVal})");
                 }
 
                 if ((hRow.M_NAGHD ?? 0d) != 0d)
@@ -4629,7 +4638,7 @@ namespace AUTO_BAZ.Functions
                     string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhNaghdCust)}',{N(hRow.M_NAGHD)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhNaghdCust)}',{N(hRow.M_NAGHD)},{hRow.NUMBER},{deedTag},{arzdVal})");
                 }
 
                 if ((hRow.MABL_HAV ?? 0d) != 0d)
@@ -4640,7 +4649,7 @@ namespace AUTO_BAZ.Functions
                     string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhHavCust)}',{N(hRow.MABL_HAV)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhHavCust)}',{N(hRow.MABL_HAV)},{hRow.NUMBER},{deedTag},{arzdVal})");
 
                     if (!IsNull(hRow.MOIN_HAV))
                     {
@@ -4657,7 +4666,7 @@ namespace AUTO_BAZ.Functions
                             string HES_T3T_H = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
                             string HES_T4T_H = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T_H},{HES_T3T_H},{HES_T4T_H},N'{SqlText(hRow.MOIN_HAV)}',N'{SqlText(sharhHavMoin)}',{N(hRow.MABL_HAV)},{hRow.NUMBER},12,{arzdVal})");
+                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T_H},{HES_T3T_H},{HES_T4T_H},N'{SqlText(hRow.MOIN_HAV)}',N'{SqlText(sharhHavMoin)}',{N(hRow.MABL_HAV)},{hRow.NUMBER},{deedTag},{arzdVal})");
                         }
                     }
                     else
@@ -4674,7 +4683,7 @@ namespace AUTO_BAZ.Functions
                     string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhVarCust)}',{N(hRow.MABL_VAR)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhVarCust)}',{N(hRow.MABL_VAR)},{hRow.NUMBER},{deedTag},{arzdVal})");
 
                     if (!IsNull(hRow.MOIN_VAR))
                     {
@@ -4691,7 +4700,7 @@ namespace AUTO_BAZ.Functions
                             string HES_T3T_V = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
                             string HES_T4T_V = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T_V},{HES_T3T_V},{HES_T4T_V},N'{SqlText(hRow.MOIN_VAR)}',N'{SqlText(sharhVarMoin)}',{N(hRow.MABL_VAR)},{hRow.NUMBER},12,{arzdVal})");
+                            batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T_V},{HES_T3T_V},{HES_T4T_V},N'{SqlText(hRow.MOIN_VAR)}',N'{SqlText(sharhVarMoin)}',{N(hRow.MABL_VAR)},{hRow.NUMBER},{deedTag},{arzdVal})");
                         }
                     }
                     else
@@ -4705,7 +4714,7 @@ namespace AUTO_BAZ.Functions
                     var arzdVal = IsNull(hRow.ARZD) ? "1" : N(hRow.ARZD);
                     var sharhNaghdSan = Strings.Right("مبلغ نقد فاكتور خريد  شماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.SANDOGH},{hRow.DEPATMAN},{hRow.SHIFT},N'{Baseknow.SANDOGH + "-" + hRow.DEPATMAN + "-" + hRow.SHIFT}',N'{SqlText(sharhNaghdSan)}',{N(hRow.M_NAGHD)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({max_ns},{Baseknow.SANDOGH},{hRow.DEPATMAN},{hRow.SHIFT},N'{Baseknow.SANDOGH + "-" + hRow.DEPATMAN + "-" + hRow.SHIFT}',N'{SqlText(sharhNaghdSan)}',{N(hRow.M_NAGHD)},{hRow.NUMBER},{deedTag},{arzdVal})");
                 }
 
                 if ((hRow.TAKHFIF ?? 0d) != 0d)
@@ -4716,10 +4725,10 @@ namespace AUTO_BAZ.Functions
                     string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                     string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
-                    batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhTakhCust)}',{N(hRow.TAKHFIF)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{hRow.CUST_NO}',N'{SqlText(sharhTakhCust)}',{N(hRow.TAKHFIF)},{hRow.NUMBER},{deedTag},{arzdVal})");
 
                     var sharhTakhKh = Strings.Right("مبلغ تخفيف فاكتور خريد  شماره " + hRow.NUMBER1 + "-" + hRow.FNUMCO + " مورخ" + Strings.Format(hRow.DATE_N, "####/##/##"), 255);
-                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.TKHARID},1,1,N'{Baseknow.TKHARID + "-1-1"}',N'{SqlText(sharhTakhKh)}',{N(hRow.TAKHFIF)},{hRow.NUMBER},12,{arzdVal})");
+                    batchQueries.Add($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({max_ns},{Baseknow.TKHARID},1,1,N'{Baseknow.TKHARID + "-1-1"}',N'{SqlText(sharhTakhKh)}',{N(hRow.TAKHFIF)},{hRow.NUMBER},{deedTag},{arzdVal})");
                 }
 
                 if ((hRow.MBAA ?? 0d) != 0d)
@@ -4741,7 +4750,18 @@ namespace AUTO_BAZ.Functions
                         string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
                         string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
 
-                        batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.HMBAA)}',N'{SqlText(sharhMbaa)}',{N(hRow.MBAA)},{hRow.NUMBER},12,{arzdVal})");
+                        batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({max_ns},{N(HKOL)},{N(HMOIN)},{N(HTAF)},{HES_T2T},{HES_T3T},{HES_T4T},N'{SqlText(hRow.HMBAA)}',N'{SqlText(sharhMbaa)}',{N(hRow.MBAA)},{hRow.NUMBER},{deedTag},{arzdVal})");
+
+                        if (!custBesIncludesMbaa)
+                        {
+                            //طرف بستانکار مالیات (حساب فروشنده). حساب فروشنده بالاتر اعتبارسنجی شده
+                            //و اگر تفکیک نمی‌شد، تولید سند این فاکتور همان‌جا متوقف شده بود.
+                            string HES_T2C = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                            string HES_T3C = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                            string HES_T4C = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                            batchQueries.Add($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({max_ns},{N(CKOL)},{N(CMOIN)},{N(CTAF)},{HES_T2C},{HES_T3C},{HES_T4C},N'{SqlText(hRow.CUST_NO)}',N'{SqlText(sharhMbaa)}',{N(hRow.MBAA)},{hRow.NUMBER},{deedTag},{arzdVal})");
+                        }
                     }
                 }
 
