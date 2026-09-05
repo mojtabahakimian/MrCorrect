@@ -179,7 +179,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.N_SERI.IsReadOnly = false;
                 this.SANDUGH.SelectedIndex = 0;
                 this.SANDUGH.Refreshy();
-                this.VAZ.SelectedIndex = 0;
+                this.VAZ.SelectedValue = 1;
             }
             else
             {
@@ -214,9 +214,18 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     this.SANDUGH.SelectedValue = row.SANDUGH.Value;
                 }
-                if (row.VAZ.HasValue)
+                else
+                {
+                    this.SANDUGH.SelectedIndex = 0;
+                }
+
+                if (row.VAZ.HasValue && row.VAZ.Value > 0)
                 {
                     this.VAZ.SelectedValue = Convert.ToInt32(row.VAZ.Value);
+                }
+                else
+                {
+                    this.VAZ.SelectedValue = 1;
                 }
             }
 
@@ -308,9 +317,23 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     rst.FirstOrDefault().N_MOIN2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M;
                     rst.FirstOrDefault().N_TAF2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T;
                     rst.FirstOrDefault().HES2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES;
-                    rst.FirstOrDefault().VAZ = Convert.ToDouble(this.VAZ.SelectedValue);
-                    rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
-                    dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL2 = {rst.FirstOrDefault().N_KOL2} , N_MOIN2 = {rst.FirstOrDefault().N_MOIN2} , N_TAF2 = {rst.FirstOrDefault().N_TAF2} , HES2 = N'{rst.FirstOrDefault().HES2}' ,VAZ = {rst.FirstOrDefault().VAZ} , SANDUGH = {rst.FirstOrDefault().SANDUGH} {_where}");
+
+                    double finalVaz = 1;
+                    if (this.VAZ.SelectedValue != null && double.TryParse(this.VAZ.SelectedValue.ToString(), out double parsedVaz) && parsedVaz > 0)
+                    {
+                        finalVaz = parsedVaz;
+                    }
+                    rst.FirstOrDefault().VAZ = finalVaz;
+
+                    int? finalSandugh = null;
+                    if (this.SANDUGH.SelectedValue != null && int.TryParse(this.SANDUGH.SelectedValue.ToString(), out int parsedSandugh))
+                    {
+                        finalSandugh = parsedSandugh;
+                    }
+                    rst.FirstOrDefault().SANDUGH = finalSandugh;
+
+                    string sqlSandugh = finalSandugh.HasValue ? finalSandugh.Value.ToString() : "NULL";
+                    dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL2 = {rst.FirstOrDefault().N_KOL2} , N_MOIN2 = {rst.FirstOrDefault().N_MOIN2} , N_TAF2 = {rst.FirstOrDefault().N_TAF2} , HES2 = N'{rst.FirstOrDefault().HES2}' ,VAZ = {rst.FirstOrDefault().VAZ} , SANDUGH = {sqlSandugh} {_where}");
                 }
                 if (rst?.FirstOrDefault()?.KIND == 0)
                 {

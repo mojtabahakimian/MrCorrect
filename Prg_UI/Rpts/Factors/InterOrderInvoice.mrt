@@ -375,7 +375,7 @@
 							<Name>Text15</Name>
 							<Page isRef="7" />
 							<Parent isRef="8" />
-							<Text>{Today}</Text>
+							<Text>{Format("{0:####/##/##}", DataSource1.DATE_N)}</Text>
 							<TextBrush>Black</TextBrush>
 							<TextFormat Ref="16" type="DateFormat" isKey="true" />
 							<Type>Expression</Type>

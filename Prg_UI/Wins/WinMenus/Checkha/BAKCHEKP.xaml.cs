@@ -139,7 +139,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.KOL.Text = rst.FirstOrDefault().N_KOL.ToString();
                 this.MOIN.Text = rst.FirstOrDefault().N_MOIN.ToString();
                 this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
-                this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ.ToString();
+                var vazVal = rst.FirstOrDefault().VAZ;
+                if (vazVal.HasValue && vazVal.Value > 0)
+                {
+                    this.VAZ.SelectedValue = Convert.ToInt32(vazVal.Value);
+                }
+                else
+                {
+                    this.VAZ.SelectedValue = 1;
+                }
 
                 this.BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>($"SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS INNER JOIN PAY_GETP ON TCOD_BANKS.CODE = PAY_GETP.BANK WHERE (PAY_GETP.N_SERI = N'{this.N_SERI.SelectedValue}') ORDER BY TCOD_BANKS.NAMES").ToList();
                 this.BANK.SelectedValuePath = "CODE";
