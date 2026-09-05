@@ -183,8 +183,20 @@ namespace Wins.WinMenus.KHARID_FORUSH
             set
             {
                 _isDirectFactor = value;
+
+                //گزینه «بدون رسید انبار» فقط برای فاکتور رسید مستقیم معنی دارد؛ در فاکتور
+                //غیرمستقیم اساسا رسید انبار از قبل صادر شده و انتخاب می‌شود.
+                BE_RASID.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                if (!value) { BE_RASID.IsChecked = false; }
             }
         }
+
+        /// <summary>
+        /// فاکتور رسید مستقیمی که هیچ رسید انباری ندارد (نمونه: قبض برق).
+        /// در این حالت سطر کالا (رسید انبار) ثبت نمی‌شود و مبلغ فاکتور از طریق
+        /// «مبلغ خدمات / مرکز هزینه» در پشت فاکتور وارد می‌شود.
+        /// </summary>
+        public bool IsWithoutRasid => IsDirectFactor && BE_RASID.IsChecked == true;
 
         private bool _isExporty;
         /// <summary>
@@ -782,7 +794,49 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 INVO_LST_SUB.IsReadOnly = false;
             }
 
+            ApplyBeRasidUiState();
+
             SecurityAllCheck();
+        }
+
+        /// <summary>
+        /// اعمال وضعیت «بدون رسید انبار» روی فرم. سطرهای کالای فاکتور رسید مستقیم
+        /// همان سطرهای رسید انبار هستند (INVO_LST با TAG=15)؛ پس وقتی کاربر گفته این
+        /// فاکتور رسید انبار ندارد، شبکه سطرها قفل می‌شود و مبلغ فاکتور فقط از راه
+        /// «مبلغ خدمات / مرکز هزینه» در پشت فاکتور ثبت می‌شود.
+        /// </summary>
+        private void ApplyBeRasidUiState()
+        {
+            if (!IsDirectFactor) { return; }
+
+            //فقط محدود می‌کند؛ باز کردن دوباره سطرها با برداشتن تیک انجام می‌شود تا این متد
+            //محدودیت‌های دسترسی کاربر (SETSECURITYSUB) را خنثی نکند.
+            if (IsWithoutRasid)
+            {
+                INVO_LST_SUB.IsReadOnly = true;
+                INVO_LST_SUB.CanUserAddRows = false;
+            }
+        }
+
+        private void BE_RASID_Click(object sender, RoutedEventArgs e)
+        {
+            if (BE_RASID.IsChecked == true && INVO_LST_FACTOR22_DATA.Count > 0)
+            {
+                BE_RASID.IsChecked = false;
+                new Msgwin(false, "این فاکتور سطر کالا (رسید انبار) دارد؛ برای «بدون رسید انبار» ابتدا سطرهای کالا را حذف کنید.").ShowDialog();
+                return;
+            }
+
+            if (BE_RASID.IsChecked == true)
+            {
+                ApplyBeRasidUiState();
+                universControl.PopNotifyShow("مبلغ این فاکتور را از سربرگ «پشت فاکتور» در فیلدهای خدمات و مرکز هزینه وارد کنید.", Pop1, Pop1Text1, Pop_Border1);
+            }
+            else
+            {
+                INVO_LST_SUB.CanUserAddRows = true;
+                DataGridActivation(); //بازگشت به حالت عادی + اعمال مجدد دسترسی‌ها
+            }
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1391,6 +1445,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ESLAH.Visibility = Visibility.Visible;
             }
 
+            ApplyBeRasidUiState();
         }
 
         public void INVO_LST_SUB_ReGetData()
@@ -2679,7 +2734,18 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ نمی تواند خالی باشد" });
             }
 
-            if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0" || NUMBER.SelectedValue == null)  //واحد
+            //شماره رسید انبار
+            //در فاکتور رسید مستقیم، کمبوباکس رسیدها اصلا پر نمی‌شود و شماره رسید هنگام ذخیره
+            //به‌صورت خودکار گرفته می‌شود؛ پس اجباری‌کردن انتخاب آن، ثبت هر فاکتور رسید مستقیم
+            //جدیدی را غیرممکن می‌کرد. فقط برای رکورد ذخیره‌شده باید شماره معتبر داشته باشیم.
+            if (IsDirectFactor)
+            {
+                if (NUMBER1.Text != "0" && (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0"))
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "شماره رسید صحیح انتخاب نشده !" });
+                }
+            }
+            else if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0" || NUMBER.SelectedValue == null)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "شماره رسید صحیح انتخاب نشده !" });
             }
@@ -2795,7 +2861,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ErrosMessages.Add(new MsgModel { MessageText_U = "واحد فروش مشخص نشده است ....!" });
             }
 
-            if (IsDirectFactor)
+            //مرکز هزینه فاکتور رسید مستقیم
+            //فیلدهای MOIN_HAZ/CMB_MOIN_HAZ داخل سربرگ «پشت فاکتور» (Page58) هستند و آن سربرگ تا
+            //وقتی NUMBER1 برابر "0" است (یعنی تا اولین ذخیره) غیرفعال می‌ماند. پس اجباری‌کردن آن
+            //روی رکورد جدید یعنی خطایی که کاربر هیچ راهی برای رفعش ندارد و اولین فاکتور رسید
+            //مستقیم اصلا ثبت نمی‌شود. از ذخیره دوم به بعد که فیلد در دسترس است کنترل می‌شود.
+            if (IsDirectFactor && NUMBER1.Text != "0")
             {
                 if (string.IsNullOrEmpty(CMB_MOIN_HAZ.SelectedValue.ToStringNullSafe()) || string.IsNullOrEmpty(MOIN_HAZ.Text))
                 {
@@ -3057,7 +3128,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                       VALUES ({newNumber}, {newNumber1}, {FTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
 
                                 // 5. درج رکورد رسید انبار (HTAG = 1) (اگر فاکتور مستقیم است)
-                                if (IsDirectFactor)
+                                //در فاکتور رسید مستقیم، سربرگ فاکتور و سربرگ رسید یک رکورد واحد با TAG=15 هستند
+                                //(FTAG == HTAG)؛ درج دوباره همان (NUMBER,TAG) خطای کلید تکراری می‌داد و ثبت را
+                                //به کلی از کار می‌انداخت. پس فقط وقتی تگ رسید با تگ فاکتور فرق دارد درج می‌شود.
+                                if (IsDirectFactor && HTAG != FTAG)
                                 {
                                     db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
                                       VALUES ({newNumber}, {newNumber1}, {HTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
@@ -5417,6 +5491,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_KIND.SelectedIndex = 0; CUST_KIND.Items.Refresh(); //نوع مشتری 
 
             OKF.IsChecked = false; //تایید فاکتور
+
+            BE_RASID.IsChecked = false; //بدون رسید انبار (برای فاکتور جدید از حالت پیش‌فرض شروع شود)
 
             SGN1usid.Text = null; SGN1usid.Tag = null; SGN1.IsChecked = false;
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false;
