@@ -1353,8 +1353,11 @@ namespace AUTO_BAZ
                                                 {
                                                     MIAN = MBKM / MOGUDI;
                                                 }
-                                                rst3Filter_.AVRAGE2 = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                if (rst3Filter_ != null)
+                                                {
+                                                    rst3Filter_.AVRAGE2 = MIAN;
+                                                    pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                }
                                                 break;
                                             }
                                         case 4: // برگشت فروش
@@ -1374,8 +1377,11 @@ namespace AUTO_BAZ
                                                 {
                                                     MIAN = MBKM / MOGUDI;
                                                 }
-                                                rst3Filter_.AVRAGE2 = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                if (rst3Filter_ != null)
+                                                {
+                                                    rst3Filter_.AVRAGE2 = MIAN;
+                                                    pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                }
                                                 break;
                                             }
                                         case 5: // انتقالي خروج
@@ -1409,8 +1415,11 @@ namespace AUTO_BAZ
                                                 {
                                                     MIAN = MBKM / MOGUDI;
                                                 }
-                                                rst3Filter_.AVRAGE2 = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                if (rst3Filter_ != null)
+                                                {
+                                                    rst3Filter_.AVRAGE2 = MIAN;
+                                                    pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
+                                                }
                                                 break;
                                             }
                                         case 10: // مواد خروج
@@ -1791,10 +1800,13 @@ namespace AUTO_BAZ
                                                         if (MBKM == 0d) { MIAN = 0d; }
                                                         else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
                                                         else { MIAN = MBKM / MOGUDI; }
-                                                        rst3Filter.AVRAGE2 = MIAN;
-                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                    AVRAGE2 = {N(MIAN)}
-                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        if (rst3Filter != null)
+                                                        {
+                                                            rst3Filter.AVRAGE2 = MIAN;
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                        AVRAGE2 = {N(MIAN)}
+                                                                                        WHERE ID = {rst3Filter.id}");
+                                                        }
                                                         break;
                                                     }
                                                 case 4: // برگشت فروش
@@ -1804,10 +1816,13 @@ namespace AUTO_BAZ
                                                         if (MBKM == 0d) { MIAN = 0d; }
                                                         else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
                                                         else { MIAN = MBKM / MOGUDI; }
-                                                        rst3Filter.AVRAGE2 = MIAN;
-                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                    AVRAGE2 = {N(MIAN)}
-                                                                                    WHERE ID = {rst3Filter.id}");
+                                                        if (rst3Filter != null)
+                                                        {
+                                                            rst3Filter.AVRAGE2 = MIAN;
+                                                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                                        AVRAGE2 = {N(MIAN)}
+                                                                                        WHERE ID = {rst3Filter.id}");
+                                                        }
                                                         break;
                                                     }
                                                 case 5: // انتقالي خروج
