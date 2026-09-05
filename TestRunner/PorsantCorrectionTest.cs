@@ -106,6 +106,48 @@ namespace TestRunner
                 Check("جمع الگو ردیف‌به‌ردیف گِرد می‌شود (2+3+4=9)", perLine == 9);
                 Check("و با گِردکردنِ یک‌جا (8) فرق دارد", atEnd == 8 && perLine != atEnd);
 
+                // ── ریز محاسبه‌ی الگو: کالای بدون نرخ و کالای با نرخ‌های ناهم‌خوان سهمی نمی‌گیرند
+                // (سطر تکراری با نرخِ یکسان اما باید نرخ بدهد؛ پیش از این هر تکراری کالا را
+                // بی‌صدا از پورسانت می‌انداخت).
+                var breakdown = new CL_PORSANT_RULE.PatternBreakdown { NUMBER = 5449, TAG = 2, PORID = 7 };
+                breakdown.Lines.Add(new CL_PORSANT_RULE.PatternItemLine { CODE = "1", NET = 1_000_000, RATE = 2, RATE_ROWS = 1 });
+                breakdown.Lines.Add(new CL_PORSANT_RULE.PatternItemLine { CODE = "2", NET = 3_000_000, RATE = null, RATE_ROWS = 0 });
+                breakdown.Lines.Add(new CL_PORSANT_RULE.PatternItemLine { CODE = "3", NET = 500_000, RATE = 2, RATE_ROWS = 2, CONFLICT = true });
+                breakdown.Lines.Add(new CL_PORSANT_RULE.PatternItemLine { CODE = "4", NET = 500_000, RATE = 2, RATE_ROWS = 2 });
+
+                Check("سطر تکراری با نرخ یکسان همچنان نرخ می‌گیرد",
+                    breakdown.Lines.Single(l => l.CODE == "4").HAS_RATE);
+                Check("سطر تکراری با نرخ‌های ناهم‌خوان نرخ نمی‌گیرد",
+                    !breakdown.Lines.Single(l => l.CODE == "3").HAS_RATE);
+                Check("مبلغ الگو فقط از کالاهای دارای نرخ ساخته می‌شود (20000 + 10000)",
+                    breakdown.Amount == 30_000);
+                Check("مبنای پوشش‌داده‌شده فقط کالاهای دارای نرخ است",
+                    breakdown.CoveredBase == 1_500_000 && breakdown.TotalBase == 5_000_000);
+                Check("اقلام بدون نرخ (اعم از نبودِ نرخ و نرخ ناهم‌خوان) شمرده می‌شوند",
+                    breakdown.MissingLines.Count == 2 && breakdown.ConflictCount == 1);
+
+                // درصدِ سطرِ دارای الگو = مبلغ ÷ مبنای کل فاکتور. این همان چیزی است که
+                // صدور سند هم می‌نویسد؛ تقسیم بر «جمع کالاهای دارای نرخ» سطر را ۲٪ نشان
+                // می‌داد در حالی که مبلغش ۰.۶٪ کل فاکتور بود.
+                Check("درصد مؤثر روی مبنای کل فاکتور حساب می‌شود",
+                    Math.Abs(breakdown.EffectiveDarsad(5_000_000) - 0.6) < 0.000001);
+                Check("مبنای صفر درصد را صفر می‌کند (بدون تقسیم بر صفر)",
+                    breakdown.EffectiveDarsad(0) == 0);
+
+                // ── پوشش الگو در سطر گزارش کنترل
+                var covered = new CL_PORSANT_RULE.PorsantAuditRow
+                {
+                    PORID = 7,
+                    PATTERN_MBK = 1_500_000,
+                    NO_RATE_ITEMS = 2,
+                    NO_RATE_BASE = 3_500_000
+                };
+                Check("پوشش الگو = مبنای دارای نرخ ÷ کل مبنای اقلام",
+                    Math.Abs(covered.PATTERN_COVERAGE - 30) < 0.000001);
+
+                var noPattern = new CL_PORSANT_RULE.PorsantAuditRow { PORID = null };
+                Check("سطر بدون الگو پوشش ۱۰۰ دارد", noPattern.PATTERN_COVERAGE == 100);
+
                 // ── تعریف مغایرت: اختلاف کمتر از یک ریال مغایرت نیست
                 var row = new CL_PORSANT_RULE.PorsantAuditRow { OLD_PURSANT = 19_000, NEW_PURSANT = 19_000 };
                 Check("اختلاف صفر یعنی بدون مغایرت", Math.Abs(row.DIFF) < CL_PORSANT_RULE.TOLERANCE);

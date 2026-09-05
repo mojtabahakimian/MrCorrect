@@ -7826,9 +7826,28 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
 
         /// <summary>
-        /// نمایش پیام‌های تشخیصیِ dbo.CalculateVisitorPorsant به کاربر (بدون تکرار و
-        /// بدون متوقف‌کردن ذخیره). پیام‌های صرفاً اطلاعیِ «شناسایی ویزیتور» نمایش داده
-        /// نمی‌شوند تا فقط چیزی که روی مبلغ اثر دارد به چشم بیاید.
+        /// پیام‌های خودِ رویه که «گفتنی» هستند: هر چیزی جز گزارشِ روتینِ پایانِ محاسبه و
+        /// چرخه‌ی شناسایی ویزیتور. عمداً فهرستِ «چه چیزی را نشان نده» است، نه «چه چیزی را
+        /// نشان بده»: اگر روزی متنِ رویه عوض شود یا نسخه‌ی قدیمی‌تری روی دیتابیس مشتری
+        /// نصب باشد، پیامِ ناشناخته باید دیده شود، نه اینکه دوباره بی‌صدا دور ریخته شود.
+        /// </summary>
+        private static readonly string[] PORSANT_PROC_NOISE =
+        {
+            "پیام:",              // چرخه‌ی شناسایی ویزیتور
+            "محاسبه پورسانت",     // گزارش موفقیت پایانی
+            "روش شناسایی",
+            "مبلغ کل",
+            "پورسانت کل",
+            "درصد نهایی"
+        };
+
+        /// <summary>پنجره‌ی پیامِ پورسانتِ باز از ذخیره‌ی قبلی؛ نباید روی هم تلنبار شوند.</summary>
+        private MsgListwin? _porsantMsgWin;
+
+        /// <summary>
+        /// نمایش پیام‌های تشخیصیِ dbo.CalculateVisitorPorsant به کاربر، بدون تکرار و بدون
+        /// متوقف‌کردن ذخیره. تا امروز این پیام‌ها خوانده و دور ریخته می‌شدند؛ یعنی وقتی
+        /// پورسانتِ الگو کمتر از انتظار درمی‌آمد، هیچ توضیحی به کاربر نمی‌رسید.
         /// </summary>
         private void ShowPorsantProcMessages(List<string> msgs)
         {
@@ -7837,7 +7856,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var important = msgs
                 .Select(m => (m ?? string.Empty).Trim())
                 .Where(m => m.Length > 0)
-                .Where(m => m.StartsWith("تذکر") || m.StartsWith("هشدار") || m.StartsWith("خطا") || m.StartsWith("توجه"))
+                .Where(m => !PORSANT_PROC_NOISE.Any(noise => m.StartsWith(noise, StringComparison.Ordinal)))
                 .Distinct()
                 .ToList();
 
@@ -7849,7 +7868,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 list.Add(new MsgModel { MessageText_U = $"... و {important.Count - 30} پیام دیگر." });
             }
 
-            new MsgListwin(false, list).Show();
+            // پنجره‌ی ذخیره‌ی قبلی بسته می‌شود: پیامِ کهنه‌ی یک ذخیره‌ی دیگر، بدتر از نبودنش است.
+            try { _porsantMsgWin?.Close(); } catch { /* بسته شده بود */ }
+
+            _porsantMsgWin = new MsgListwin(false, list);
+            _porsantMsgWin.Closed += (_, _) => _porsantMsgWin = null;
+            _porsantMsgWin.Show();
         }
 
         /// <summary>

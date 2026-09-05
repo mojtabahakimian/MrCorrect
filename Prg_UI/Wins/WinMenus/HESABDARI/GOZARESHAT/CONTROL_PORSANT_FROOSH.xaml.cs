@@ -344,13 +344,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             // اگر چیزی انتخاب نشده باشد، جمعِ کلِ فهرست داده می‌شود (نه هیچ‌چیز)؛ کاربر
             // معمولاً همین را می‌خواهد و Ctrl+A هم دقیقاً همین نتیجه را می‌دهد.
-            var rows = SYNCFUSION_DG.SelectedItems?.OfType<CL_PORSANT_RULE.PorsantAuditRow>().ToList();
-            bool wholeList = rows is null || rows.Count == 0;
+            var selected = SYNCFUSION_DG.SelectedItems?.OfType<CL_PORSANT_RULE.PorsantAuditRow>().ToList()
+                           ?? new List<CL_PORSANT_RULE.PorsantAuditRow>();
 
-            if (wholeList)
-            {
-                rows = AUDIT_DATA.ToList();
-            }
+            bool wholeList = selected.Count == 0;
+            var rows = wholeList ? AUDIT_DATA.ToList() : selected;
 
             if (rows.Count == 0)
             {

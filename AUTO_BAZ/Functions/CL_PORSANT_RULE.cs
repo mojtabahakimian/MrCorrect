@@ -230,8 +230,10 @@ RATE AS
     SELECT PORID, CODE, MIN(PORSANT) AS PORSANT
     FROM dbo.VISITORS_PORSANT_KALA
     GROUP BY PORID, CODE
-    HAVING MIN(PORSANT) IS NOT NULL
-           AND MIN(ISNULL(PORSANT, -1)) = MAX(ISNULL(PORSANT, -1))
+    -- COUNT(PORSANT) ستون‌های NULL را نمی‌شمارد؛ برابری‌اش با COUNT(*) یعنی هیچ سطری
+    -- بی‌نرخ نیست، و MIN = MAX یعنی همه یک نرخ دارند. (ISNULL با عددِ نگهبان اینجا کار
+    -- نمی‌کند: اگر خودِ نرخ همان عدد باشد، سطرِ NULL هم «هم‌نرخ» شمرده می‌شد.)
+    HAVING COUNT(PORSANT) = COUNT(*) AND MIN(PORSANT) = MAX(PORSANT)
 ),
 PAT AS
 (
@@ -410,7 +412,7 @@ FROM dbo.INVO_LST AS il
         SELECT CODE,
                MIN(PORSANT) AS PORSANT,
                COUNT(*) AS RATE_ROWS,
-               CAST(CASE WHEN MIN(ISNULL(PORSANT, -1)) <> MAX(ISNULL(PORSANT, -1)) THEN 1 ELSE 0 END AS BIT) AS CONFLICT
+               CAST(CASE WHEN COUNT(PORSANT) <> COUNT(*) OR MIN(PORSANT) <> MAX(PORSANT) THEN 1 ELSE 0 END AS BIT) AS CONFLICT
         FROM dbo.VISITORS_PORSANT_KALA
         WHERE PORID = @pPorid
         GROUP BY CODE
