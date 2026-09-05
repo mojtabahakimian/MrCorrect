@@ -978,10 +978,30 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
                 if (row?.ID == null || row.ID == 0) // Insert
                 {
-                    string insertSql = @"
+                    // این کالا از قبل در همین الگو هست؟ سطر تکراری در VISITORS_PORSANT_KALA
+                    // پورسانتِ همان کالا را خراب می‌کند (نرخ‌های ناهم‌خوان یعنی «بدون نرخ»)،
+                    // پس به‌جای درج دوباره، همان سطر موجود به‌روزرسانی می‌شود.
+                    var existingId = dbms.DoGetDataSQL<long?>(
+                        "SELECT TOP (1) ID FROM VISITORS_PORSANT_KALA WHERE PORID = @PORID AND CODE = @CODE ORDER BY ID",
+                        new { row.PORID, row.CODE }).FirstOrDefault();
+
+                    if (existingId.HasValue)
+                    {
+                        row.ID = existingId.Value;
+                        dbms.DoExecuteSQL(
+                            "UPDATE VISITORS_PORSANT_KALA SET PORSANT = @PORSANT WHERE ID = @ID",
+                            new { row.PORSANT, ID = row.ID });
+                    }
+                    else
+                    {
+                        // شناسه‌ی سطر تازه همین‌جا برگردانده و روی شیء نشانده می‌شود؛ بدون این،
+                        // ویرایش دوباره‌ی همان سطر پیش از رفرش گرید یک سطر تکراری دیگر می‌ساخت.
+                        string insertSql = @"
                         INSERT INTO VISITORS_PORSANT_KALA (PORID, CODE, PORSANT)
+                        OUTPUT INSERTED.ID
                         VALUES (@PORID, @CODE, @PORSANT)";
-                    dbms.DoExecuteSQL(insertSql, row);
+                        row.ID = dbms.DoGetDataSQL<long>(insertSql, row).FirstOrDefault();
+                    }
                 }
                 else // Update
                 {
@@ -1190,10 +1210,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                     }
                     else
                     {
-                        // درج با استفاده از درصد وارد شده
+                        // درج با استفاده از درصد وارد شده. شرط NOT EXISTS در خودِ کوئری است
+                        // چون بررسی درون حافظه روی رشته‌ی خام انجام می‌شود و اختلاف فاصله/حروف
+                        // می‌توانست سطر تکراری بسازد؛ سطر تکراری با نرخ ناهم‌خوان یعنی آن کالا
+                        // در محاسبه‌ی پورسانت «بدون نرخ» شمرده می‌شود.
                         string insertSql = @"
                             INSERT INTO VISITORS_PORSANT_KALA (PORID, CODE, PORSANT) 
-                            VALUES (@PORID, @CODE, @PORSANT)";
+                            SELECT @PORID, @CODE, @PORSANT
+                            WHERE NOT EXISTS (SELECT 1 FROM VISITORS_PORSANT_KALA WHERE PORID = @PORID AND CODE = @CODE)";
 
                         dbms.DoExecuteSQL(insertSql, new
                         {

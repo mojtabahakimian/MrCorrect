@@ -1,4 +1,5 @@
 using AUTO_BAZ.Functions;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_UI.HelperWins;
 using System;
@@ -93,8 +94,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 
             if (AUDIT_DATA.Count == 0 && showEmptyMessage)
             {
-                new Msgwin(false, "هیچ فاکتوری با پورسانت نادرست پیدا نشد.").ShowDialog();
-                this.Close();
+                // پنجره بسته نمی‌شود: کاربر ممکن است بخواهد ریز محاسبه‌ی یک فاکتور مشخص را
+                // ببیند («چرا پورسانتِ این فاکتور این‌قدر کم شد؟»)، و آن فاکتور دقیقاً به این
+                // دلیل در فهرست نیست که مبلغش با قاعده می‌خواند.
+                new Msgwin(false,
+                    "هیچ فاکتوری با پورسانت نادرست پیدا نشد.\n" +
+                    "برای دیدن ریز محاسبه‌ی پورسانت یک فاکتور، شماره‌اش را در پایین وارد کنید و «این مبلغ از کجا آمده؟» را بزنید.")
+                    .ShowDialog();
             }
         }
 
@@ -132,6 +138,92 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             LoadAudit(showEmptyMessage: true);
+        }
+
+        /// <summary>
+        /// «این مبلغ از کجا آمده؟» — ریز محاسبه‌ی سطرِ انتخاب‌شده: مبنای هر قلم، نرخِ همان
+        /// قلم در الگو، سهمش از پورسانت، و مهم‌تر از همه فهرست اقلامی که در الگو نرخ ندارند
+        /// و هیچ پورسانتی نمی‌دهند. پرتکرارترین شکایت («۲٪ گفتیم ولی مبلغ خیلی کمتر است»)
+        /// دقیقاً همین است و تا امروز هیچ‌جای برنامه جوابش را نشان نمی‌داد.
+        /// </summary>
+        private void WhyButton_Click(object sender, RoutedEventArgs e)
+        {
+            // اگر کاربر شماره‌ی فاکتور نوشته باشد، همان فاکتور بررسی می‌شود — حتی اگر در این
+            // فهرست نباشد. فاکتوری که مبلغش دقیقاً همان چیزی است که قاعده می‌گوید، مغایرت
+            // ندارد و اینجا فهرست نمی‌شود؛ ولی پرسشِ «چرا این‌قدر کم شد؟» درست درباره‌ی همین
+            // فاکتورهاست.
+            if (!string.IsNullOrWhiteSpace(InvoiceNumberBox.Text))
+            {
+                ExplainInvoiceByNumber(InvoiceNumberBox.Text.Trim());
+                return;
+            }
+
+            var row = SYNCFUSION_DG.SelectedItem as CL_PORSANT_RULE.PorsantAuditRow;
+            if (row is null)
+            {
+                new Msgwin(false, "ابتدا یک سطر را انتخاب کنید یا شماره فاکتور را وارد کنید.").ShowDialog();
+                return;
+            }
+
+            ExplainRow(row);
+        }
+
+        /// <summary>ریز محاسبه‌ی همه‌ی سطرهای پورسانتِ یک فاکتور، با شماره‌ی واردشده‌ی کاربر.</summary>
+        private void ExplainInvoiceByNumber(string text)
+        {
+            if (!double.TryParse(text, out double number))
+            {
+                new Msgwin(false, "شماره فاکتور را درست وارد کنید.").ShowDialog();
+                return;
+            }
+
+            List<CL_PORSANT_RULE.PorsantAuditRow> rows;
+            try
+            {
+                rows = CL_PORSANT_RULE.InspectInvoice(number);
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خواندن اطلاعات این فاکتور ممکن نشد.\n" + ex.Message).ShowDialog();
+                return;
+            }
+
+            if (rows.Count == 0)
+            {
+                new Msgwin(false, $"برای فاکتور {number:0} هیچ سطر پورسانتی پیدا نشد (یا فاکتور سربرگ فروش ندارد).").ShowDialog();
+                return;
+            }
+
+            foreach (var row in rows)
+            {
+                ExplainRow(row);
+            }
+        }
+
+        /// <summary>متن «این مبلغ از کجا آمده؟» برای یک سطر پورسانت.</summary>
+        private void ExplainRow(CL_PORSANT_RULE.PorsantAuditRow row)
+        {
+            if (!row.HAS_PATTERN)
+            {
+                new Msgwin(false,
+                    $"فاکتور {row.NUMBER:0} الگوی پورسانت ندارد؛ مبلغ = درصد سطر × مبنای فاکتور.\n" +
+                    $"مبنای فاکتور: {row.NET_BASE:N0}\nدرصد: {row.DARSAD:0.###}\nمبلغ درست: {row.NEW_PURSANT:N0}").ShowDialog();
+                return;
+            }
+
+            try
+            {
+                var breakdown = CL_PORSANT_RULE.GetPatternBreakdown(row.NUMBER ?? 0, row.TAG ?? 2, row.PORID ?? 0);
+                var report = $"ویزیتور: {row.CUST_NAME} ({row.CUST_NO})\n" +
+                             $"پورسانت ثبت‌شده در حال حاضر: {row.OLD_PURSANT ?? 0:N0}\n\n" +
+                             breakdown.BuildReport(row.NET_BASE);
+
+                new Msgwin(false, report).ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خواندن ریز محاسبه‌ی الگو ممکن نشد.\n" + ex.Message).ShowDialog();
+            }
         }
 
         /// <summary>
@@ -229,6 +321,68 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+        }
+
+        /// <summary>
+        /// Ctrl+L روی جدول: جمعِ سطرهای انتخاب‌شده. برخلاف پنجره‌های دیگر که فقط ستونِ
+        /// جاری را جمع می‌زنند، اینجا هر سه ستونِ مبلغ با هم داده می‌شود — چون کلِ کاربردِ
+        /// این جمع، دیدنِ «مجموع اختلافِ پورسانت» است و کاربر ناچار می‌شد دو بار جمع بگیرد
+        /// و خودش تفریق کند.
+        /// </summary>
+        private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
+            {
+                ShowSelectionSums();
+                e.Handled = true;
+            }
+        }
+
+        private void SumSelected_Click(object sender, RoutedEventArgs e) => ShowSelectionSums();
+
+        private void ShowSelectionSums()
+        {
+            // اگر چیزی انتخاب نشده باشد، جمعِ کلِ فهرست داده می‌شود (نه هیچ‌چیز)؛ کاربر
+            // معمولاً همین را می‌خواهد و Ctrl+A هم دقیقاً همین نتیجه را می‌دهد.
+            var selected = SYNCFUSION_DG.SelectedItems?.OfType<CL_PORSANT_RULE.PorsantAuditRow>().ToList()
+                           ?? new List<CL_PORSANT_RULE.PorsantAuditRow>();
+
+            bool wholeList = selected.Count == 0;
+            var rows = wholeList ? AUDIT_DATA.ToList() : selected;
+
+            if (rows.Count == 0)
+            {
+                new Msgwin(false, "سطری برای جمع زدن وجود ندارد.").ShowDialog();
+                return;
+            }
+
+            double oldSum = rows.Sum(r => r.OLD_PURSANT ?? 0);
+            double newSum = rows.Sum(r => r.NEW_PURSANT);
+            double diffSum = rows.Sum(r => r.DIFF);
+            var invoices = rows.Select(r => r.NUMBER).Distinct().Count();
+
+            var title = wholeList
+                ? $"جمع کل فهرست ({rows.Count} سطر در {invoices} فاکتور):"
+                : $"جمع {rows.Count} سطر انتخاب‌شده (در {invoices} فاکتور):";
+
+            new Msgwin(false,
+                $"{title}\n\n" +
+                $"پورسانت وضعیت فعلی: {oldSum:N0}\n" +
+                $"پورسانت باید باشد: {newSum:N0}\n" +
+                $"اختلاف (باید باشد − فعلی): {diffSum:N0}").ShowDialog();
+        }
+
+        /// <summary>خروجی اکسل از همان چیزی که در جدول دیده می‌شود (با فیلتر و ترتیب فعلی).</summary>
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ControlPorsantFroosh");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
         }
     }
 }

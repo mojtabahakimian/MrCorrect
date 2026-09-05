@@ -7711,13 +7711,33 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 // STAT نال هم یعنی «مبلغ ثابت نیست». مقایسه قبلی (STAT == false) روی bool?
                 // برای رکوردهای قدیمیِ NULL نتیجه false می‌داد و آن سطرها هرگز بازمحاسبه نمی‌شدند.
-                if (visitor.STAT == true || !visitor.DARSAD.HasValue)
+                if (visitor.STAT == true)
                 {
                     continue;
                 }
 
-                // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
-                visitor.PURSANT = Math.Round(porsantBase * visitor.DARSAD.Value / 100);
+                if (visitor.PORID.HasValue)
+                {
+                    // سطرِ دارای الگو را نباید با «درصد × مبنای فاکتور» بازمحاسبه کرد؛ مبلغش از
+                    // نرخ تک‌تک کالاهای الگو ساخته می‌شود (همان کاری که صدور سند می‌کند). این خط
+                    // پیش از این مبلغِ الگو را با درصدِ سطر بازنویسی می‌کرد و عدد فرم با عددِ سند
+                    // یکی درنمی‌آمد.
+                    var breakdown = AUTO_BAZ.Functions.CL_PORSANT_RULE.GetPatternBreakdown(
+                        Convert.ToDouble(NUMBER.Text), hTAG, visitor.PORID.Value);
+
+                    visitor.PURSANT = breakdown.Amount;
+                    visitor.DARSAD = breakdown.EffectiveDarsad(porsantBase);
+                }
+                else
+                {
+                    if (!visitor.DARSAD.HasValue)
+                    {
+                        continue;
+                    }
+
+                    // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
+                    visitor.PURSANT = Math.Round(porsantBase * visitor.DARSAD.Value / 100);
+                }
 
                 try
                 {
@@ -7806,9 +7826,62 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
 
         /// <summary>
-        /// اگر سطر «الگوی پرداخت پورسانت» داشته باشد، درصدِ سطر را از روی نرخ کالاهای همان الگو
-        /// (VISITORS_PORSANT_KALA) تعیین می‌کند؛ به شکلی که درصدِ به‌دست‌آمده روی مبنای فاکتور
-        /// دقیقاً همان مبلغ الگو را بازتولید کند. اگر الگو نداشته باشد، درصدِ واردشده دست‌نخورده می‌ماند.
+        /// پیام‌های خودِ رویه که «گفتنی» هستند: هر چیزی جز گزارشِ روتینِ پایانِ محاسبه و
+        /// چرخه‌ی شناسایی ویزیتور. عمداً فهرستِ «چه چیزی را نشان نده» است، نه «چه چیزی را
+        /// نشان بده»: اگر روزی متنِ رویه عوض شود یا نسخه‌ی قدیمی‌تری روی دیتابیس مشتری
+        /// نصب باشد، پیامِ ناشناخته باید دیده شود، نه اینکه دوباره بی‌صدا دور ریخته شود.
+        /// </summary>
+        private static readonly string[] PORSANT_PROC_NOISE =
+        {
+            "پیام:",              // چرخه‌ی شناسایی ویزیتور
+            "محاسبه پورسانت",     // گزارش موفقیت پایانی
+            "روش شناسایی",
+            "مبلغ کل",            // عنوانِ نسخه‌های قدیمی‌تر رویه
+            "مبلغ مشمول الگو",
+            "مبنای کل فاکتور",
+            "پورسانت کل",
+            "درصد نهایی"
+        };
+
+        /// <summary>پنجره‌ی پیامِ پورسانتِ باز از ذخیره‌ی قبلی؛ نباید روی هم تلنبار شوند.</summary>
+        private MsgListwin? _porsantMsgWin;
+
+        /// <summary>
+        /// نمایش پیام‌های تشخیصیِ dbo.CalculateVisitorPorsant به کاربر، بدون تکرار و بدون
+        /// متوقف‌کردن ذخیره. تا امروز این پیام‌ها خوانده و دور ریخته می‌شدند؛ یعنی وقتی
+        /// پورسانتِ الگو کمتر از انتظار درمی‌آمد، هیچ توضیحی به کاربر نمی‌رسید.
+        /// </summary>
+        private void ShowPorsantProcMessages(List<string> msgs)
+        {
+            if (msgs is null || msgs.Count == 0) { return; }
+
+            var important = msgs
+                .Select(m => (m ?? string.Empty).Trim())
+                .Where(m => m.Length > 0)
+                .Where(m => !PORSANT_PROC_NOISE.Any(noise => m.StartsWith(noise, StringComparison.Ordinal)))
+                .Distinct()
+                .ToList();
+
+            if (important.Count == 0) { return; }
+
+            var list = important.Take(30).Select(m => new MsgModel { MessageText_U = m }).ToList();
+            if (important.Count > 30)
+            {
+                list.Add(new MsgModel { MessageText_U = $"... و {important.Count - 30} پیام دیگر." });
+            }
+
+            // پنجره‌ی ذخیره‌ی قبلی بسته می‌شود: پیامِ کهنه‌ی یک ذخیره‌ی دیگر، بدتر از نبودنش است.
+            try { _porsantMsgWin?.Close(); } catch { /* بسته شده بود */ }
+
+            _porsantMsgWin = new MsgListwin(false, list);
+            _porsantMsgWin.Closed += (_, _) => _porsantMsgWin = null;
+            _porsantMsgWin.Show();
+        }
+
+        /// <summary>
+        /// اگر سطر «الگوی پرداخت پورسانت» داشته باشد، مبلغ و درصدِ سطر را از روی نرخ کالاهای
+        /// همان الگو (VISITORS_PORSANT_KALA) تعیین می‌کند: مبلغ = جمع سهم کالاهای دارای نرخ،
+        /// و درصد = همان مبلغ روی مبنای کل فاکتور. اگر الگو نداشته باشد، سطر دست‌نخورده می‌ماند.
         /// </summary>
         private void ApplyPorsantPatternDarsad(VISITOR_DTL rowItem, double porsantBase)
         {
@@ -7817,32 +7890,24 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
-            double patternAmount = 0;
+            // ریز محاسبه از قاعده‌ی واحد پورسانت می‌آید (همان چیزی که صدور سند حساب می‌کند):
+            // یک کوئری به‌جای یک کوئری به ازای هر قلم، و کالاهای بدون نرخ در *یک* پیام —
+            // نه یک پنجره‌ی پیام برای هر قلم که کاربر ناچار بود پشت‌سرهم ببندد.
+            var breakdown = AUTO_BAZ.Functions.CL_PORSANT_RULE.GetPatternBreakdown(
+                Convert.ToDouble(this.NUMBER.Text), hTAG, rowItem.PORID.Value);
 
-            var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>(
-                "SELECT CODE ,ISNULL(MABL_K, 0) - ISNULL(N_MOIN, 0) AS MABLK FROM INVO_LST WHERE TAG = " + hTAG + " AND NUMBER = " + this.NUMBER.Text).ToList();
+            // مبلغ همان چیزی است که صدور سند هم می‌نویسد؛ درصد فقط نمایشی است و روی
+            // مبنای کل فاکتور (نه فقط کالاهای دارای الگو) حساب می‌شود.
+            rowItem.PURSANT = breakdown.Amount;
+            rowItem.DARSAD = breakdown.EffectiveDarsad(porsantBase);
 
-            for (int I = 0; I < ROWS.Count; I++)
+            // چرا مبلغِ الگو از درصدِ اسمیِ الگو کمتر است: کالاهایی که در الگو نرخ ندارند
+            // هیچ پورسانتی نمی‌دهند. تا امروز این توضیح هیچ‌جا به کاربر نمی‌رسید و فقط یک
+            // عدد کوچکِ بی‌دلیل روی فرم می‌نشست.
+            if (breakdown.MissingLines.Any(l => l.NET != 0))
             {
-                var RST2 = dbms.DoGetDataSQL<double?>("SELECT     PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE     (PORID = " + rowItem.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
-                // شرط قبلی فقط «ردیف پیدا شد» را چک می‌کرد؛ PORSANT خودش nullable است، پس ردیفی
-                // با نرخِ خالی هم Count==1 می‌داد و (double)null یک InvalidOperationException می‌داد.
-                if (RST2.Count == 1 && RST2[0].HasValue)
-                {
-                    // گِردکردن از قاعده‌ی واحد پورسانت می‌آید تا عددِ فرم با عددی که
-                    // صدور سند می‌نویسد یکی باشد (Math.Round پیش‌فرض C# روی مقادیر
-                    // دقیقاً نیم، جوابی غیر از ROUND در SQL Server می‌دهد).
-                    patternAmount += AUTO_BAZ.Functions.CL_PORSANT_RULE.PatternLineShare(ROWS[I].MABLK, RST2[0]);
-                }
-                else
-                {
-                    new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
-                }
+                new Msgwin(false, breakdown.BuildReport(porsantBase)).ShowDialog();
             }
-
-            // تقسیم بر مبنای کل فاکتور (نه فقط کالاهای دارای الگو) تا مبلغِ نهایی
-            // که از روی همین درصد ساخته می‌شود با مبلغ الگو یکی دربیاید
-            rowItem.DARSAD = porsantBase != 0 ? patternAmount / porsantBase * 100 : 0;
         }
 
         private bool IsRowValid(INVO_LST_FACTOR22 TheRow)
@@ -8164,6 +8229,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //{
             //    List<MsgModel> ErrosMessages = new List<MsgModel>();
             var msgs = CL_HESABDARI.RunCalculateVisitorPorsant(Convert.ToInt64(NUMBER.Text), hTAG);
+
+            // پیام‌های خودِ رویه («این کالا در الگو نرخ ندارد»، «مبلغ ثابت است»، «الگوی
+            // پیش‌فرض ویزیتور پیدا نشد» و…) تا امروز خوانده و بی‌صدا دور ریخته می‌شدند؛
+            // یعنی وقتی پورسانتِ الگو کمتر از انتظار درمی‌آمد، هیچ توضیحی به کاربر نمی‌رسید.
+            ShowPorsantProcMessages(msgs);
             //    //foreach (var matn in msgs)
             //    //{
             //    //    var normalized = matn
@@ -10818,13 +10888,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             ? (FINAL_CROW_ITEM.PURSANT ?? 0) / porsantBase * 100
                             : 0;
                     }
+                    else if (!IsNull(FINAL_CROW_ITEM.PORID))
+                    {
+                        // اگر الگوی پورسانت انتخاب شده باشد، مبلغ و درصدِ سطر هر دو از روی نرخ
+                        // تک‌تک کالاها به دست می‌آید. مبلغ مستقیم از خودِ الگو برداشته می‌شود، نه
+                        // دوباره از روی درصد؛ رفت‌وبرگشتِ مبلغ→درصد→مبلغ چند ریال جابه‌جا می‌کرد
+                        // و همان چند ریال سطر را برای همیشه در فهرست کنترل مغایر نگه می‌داشت.
+                        ApplyPorsantPatternDarsad(FINAL_CROW_ITEM, porsantBase);
+                    }
                     else
                     {
-                        // اگر الگوی پورسانت انتخاب شده باشد، درصدِ سطر از روی نرخ تک‌تک کالاها به دست می‌آید.
-                        // این محاسبه قبلاً *بعد از* ذخیره انجام می‌شد و هرگز در دیتابیس نمی‌نشست؛
-                        // یعنی گرید یک عدد نشان می‌داد و دیتابیس عدد دیگری داشت.
-                        ApplyPorsantPatternDarsad(FINAL_CROW_ITEM, porsantBase);
-
                         // درصد ملاک است: مبلغ همیشه از روی درصدِ همین سطر و مبنای همین فاکتور محاسبه می‌شود
                         FINAL_CROW_ITEM.PURSANT = Math.Round(porsantBase * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
                     }

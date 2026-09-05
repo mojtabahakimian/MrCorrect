@@ -43,6 +43,16 @@
         <Style TargetType="syncfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
         </Style>
+
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="جمع سطرهای انتخاب‌شده (Ctrl+L)" Click="SumSelected_Click"/>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
 
     <Grid x:Name="mygrid" Margin="8,8,8,0">
@@ -78,9 +88,11 @@
             <!-- توضیح کوتاه -->
             <TextBlock Grid.Row="0" Margin="10,10,10,4" TextWrapping="Wrap" Foreground="{StaticResource MaterialDesignBody}"
                        FlowDirection="RightToLeft"
-                       Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی همان مبلغی که صدور سند حسابداری برای این سطر می‌نویسد. سطرهای «نیاز به بررسی دستی» با دکمه‌ی اصلاح درست نمی‌شوند؛ ستون هشدار دلیلش را می‌گوید."/>
+                       Text="این فهرست فاکتورهای فروشی است که مبلغ پورسانتِ ثبت‌شده‌ی آنها با درصد/الگوی تعریف‌شده نمی‌خواند. ستون «وضعیت فعلی» یعنی همین حالا در دیتابیس چه چیزی ذخیره شده؛ ستون «باید باشد» یعنی همان مبلغی که صدور سند حسابداری برای این سطر می‌نویسد. سطرهای «نیاز به بررسی دستی» با دکمه‌ی اصلاح درست نمی‌شوند؛ ستون هشدار دلیلش را می‌گوید. برای جمعِ سطرهای انتخاب‌شده Ctrl+L و برای خروجی اکسل روی جدول راست‌کلیک کنید (Ctrl+A همه را انتخاب می‌کند)."/>
 
             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Grid.Row="1"
+                ContextMenu="{StaticResource DataGridContextMenu}"
+                PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown"
                 ItemsSource="{Binding AUDIT_DATA}" FilterRowPosition="Top"
                 AutoGenerateColumns="False"
                 SelectionUnit="Row"
@@ -131,6 +143,9 @@
                             <Binding Path="DIFF" StringFormat="{}{0:N0}"/>
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
+                    <!-- پوشش الگو: چند درصد از اقلام فاکتور اصلاً در الگو نرخ دارند. هر چه کمتر از
+                         ۱۰۰٪ باشد، مبلغِ الگو همان‌قدر از درصدِ اسمیِ الگو کمتر درمی‌آید. -->
+                    <syncfusion:GridTextColumn HeaderText="پوشش الگو" MappingName="COVERAGE_TEXT" Width="150"/>
                     <syncfusion:GridTextColumn HeaderText="وضعیت" MappingName="STATUS_TEXT" Width="120"/>
                     <syncfusion:GridTextColumn HeaderText="هشدار" MappingName="WARNING" ColumnSizer="Star"/>
                 </syncfusion:SfDataGrid.Columns>
@@ -143,15 +158,25 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Label x:Name="SummaryLabel" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold" FlowDirection="RightToLeft" Content="..."/>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" FlowDirection="RightToLeft">
+                    <Label x:Name="SummaryLabel" VerticalAlignment="Center" FontWeight="Bold" Content="..."/>
+                    <Label Content="شماره فاکتور:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    <TextBox x:Name="InvoiceNumberBox" Width="90" VerticalAlignment="Center" FlowDirection="LeftToRight"
+                             ToolTip="شماره فاکتور فروش برای دیدن ریز محاسبه‌ی پورسانت آن"/>
+                </StackPanel>
 
-                <Button x:Name="RefreshButton" Grid.Column="1" Content="بروزرسانی فهرست" Click="RefreshButton_Click"
+                <Button x:Name="WhyButton" Grid.Column="1" Content="این مبلغ از کجا آمده؟" Click="WhyButton_Click"
                         Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15"
                         FontSize="10" Height="35" Margin="0,0,10,0" Padding="14,4"/>
 
-                <Button x:Name="FixButton" Grid.Column="2" Content="اصلاح پورسانت و صدور مجدد سند"
+                <Button x:Name="RefreshButton" Grid.Column="2" Content="بروزرسانی فهرست" Click="RefreshButton_Click"
+                        Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15"
+                        FontSize="10" Height="35" Margin="0,0,10,0" Padding="14,4"/>
+
+                <Button x:Name="FixButton" Grid.Column="3" Content="اصلاح پورسانت و صدور مجدد سند"
                         Click="FixButton_Click"
                         Style="{StaticResource GerdC}"
                         BorderBrush="{x:Null}" FontSize="10" Height="35" Width="200"
