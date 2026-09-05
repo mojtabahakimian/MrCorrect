@@ -22,5 +22,7 @@ namespace Prg_Proccessy.SQLMODELS
         public int? N_MOIN { get; set; }
         public int? N_TAF { get; set; }
         public string? HES1 { get; set; }
+        public double? VAZ { get; set; }
+        public int? SANDUGH { get; set; }
     }
 }

@@ -71,7 +71,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         #endregion
         public string? N_SERI_FILTER { get; set; }
         private Visual VL_WIN { get; set; }
-        public BACK_CHK_SERCH(string _n_seri , Visual _vl_win)
+        public BACK_CHK_SERCH(string _n_seri, Visual _vl_win)
         {
             N_SERI_FILTER = _n_seri;
             VL_WIN = _vl_win;
@@ -116,6 +116,18 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                             //Forms["BAKCHEK"]["TAF"] = this.N_TAF;
                             (VL_WIN as BAKCHEK).HES1.SelectedValue = ITMSELECTED.HES1;
                             //Forms["BAKCHEK"]["HES1"] = this.HES1;
+                            if (ITMSELECTED.SANDUGH.HasValue)
+                            {
+                                (VL_WIN as BAKCHEK).SANDUGH.SelectedValue = ITMSELECTED.SANDUGH.Value;
+                            }
+                            if (ITMSELECTED.VAZ.HasValue && ITMSELECTED.VAZ > 0)
+                            {
+                                (VL_WIN as BAKCHEK).VAZ.SelectedValue = Convert.ToInt32(ITMSELECTED.VAZ.Value);
+                            }
+                            else
+                            {
+                                (VL_WIN as BAKCHEK).VAZ.SelectedValue = 1;
+                            }
                             this.Close();
                         }
                         //DoCmd.Close();
@@ -133,8 +145,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             if (N_SERI_FILTER is not null)
             {
-            SUB_BACK_CHK_SERCH.ItemsSource = dbms.DoGetDataSQL<BACK_CHK_SERCH_Model>($@"SELECT dbo.PAY_GETD.N_SERI, dbo.PAY_GETD.BANK, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.DATE_S, dbo.PAY_GETD.DATE, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.MABL, dbo.PAY_GETD.NAME_TAH, 
-                                                               dbo.PAY_GETD.N_HESAB, dbo.PAY_GETD.RADIF, dbo.PAY_GETD.N_KOL, dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.HES1
+                SUB_BACK_CHK_SERCH.ItemsSource = dbms.DoGetDataSQL<BACK_CHK_SERCH_Model>($@"SELECT dbo.PAY_GETD.N_SERI, dbo.PAY_GETD.BANK, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.DATE_S, dbo.PAY_GETD.DATE, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.MABL, dbo.PAY_GETD.NAME_TAH, 
+                                                               dbo.PAY_GETD.N_HESAB, dbo.PAY_GETD.RADIF, dbo.PAY_GETD.N_KOL, dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.HES1, dbo.PAY_GETD.VAZ, dbo.PAY_GETD.SANDUGH
                                                                FROM            dbo.PAY_GETD LEFT OUTER JOIN
                                                                                         dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE
                                                                WHERE        (dbo.PAY_GETD.N_KOL3 IS NULL) AND (dbo.PAY_GETD.N_KOL2 IS NULL)  AND (dbo.PAY_GETD.{N_SERI_FILTER})").ToList();

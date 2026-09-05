@@ -4717,63 +4717,115 @@ VALUES
         }
         public static bool Khisok(string HES)
         {
-            bool KhisokRet = default;
+            bool KhisokRet = true;
             int i;
-            object a = default, fs;
-            if (Strings.Mid(Baseknow.OPTIONSS, 64, 1) == "5")
+
+            if (string.IsNullOrEmpty(HES)) return true;
+
+            string safeHes = HES.Replace("'", "''");
+
+            try
             {
-                dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "frsnd" + Baseknow.USERCOD + "')   DROP view " + "frsnd" + Baseknow.USERCOD);
-                dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "frinv" + Baseknow.USERCOD + "')   DROP view " + "frinv" + Baseknow.USERCOD);
-
-                dbms.DoExecuteSQL("create  view frsnd" + Baseknow.USERCOD + " as SELECT     SUM(BES - BED) AS Expr2, NUMBER FROM dbo.DEED_DTL WHERE     (TAG = 12) AND (HES = N'" + HES + "') GROUP BY NUMBER");
-                // DoCmd.RunSQL ("create  view frinv" & Forms![BASEKNOW]![USERCOD] & " as SELECT     dbo.INVO_LST.NUMBER, SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS Expr1, dbo.HEAD_LST.MBAA FROM         dbo.INVO_LST INNER JOIN    dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG - 11 WHERE     (dbo.HEAD_LST.TAG = 12) AND (dbo.HEAD_LST.CUST_NO = N'" & HES & "') GROUP BY dbo.INVO_LST.NUMBER, dbo.HEAD_LST.MBAA HAVING      (SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) <> 0)")
-                dbms.DoExecuteSQL("create  view frinv" + Baseknow.USERCOD + " as SELECT     dbo.HEAD_LST.NUMBER,dbo.JAMFACTPRS.mab - dbo.HEAD_LST.M_NAGHD - dbo.HEAD_LST.MABL_VAR - dbo.HEAD_LST.MABL_HAV + dbo.HEAD_LST.MABL_HAZ - ISNULL(dbo.jamchkfact.mabch,0) AS Expr1 FROM         dbo.HEAD_LST INNER JOIN dbo.JAMFACTPRS ON dbo.HEAD_LST.NUMBER = dbo.JAMFACTPRS.NUMBER AND dbo.HEAD_LST.TAG = dbo.JAMFACTPRS.TAG + 11 LEFT OUTER JOIN dbo.jamchkfact ON dbo.JAMFACTPRS.NUMBER = dbo.jamchkfact.NUMBER WHERE     (dbo.HEAD_LST.TAG = 12) AND (dbo.HEAD_LST.CUST_NO = N'" + HES + "') GROUP BY dbo.HEAD_LST.NUMBER,dbo.JAMFACTPRS.mab - dbo.HEAD_LST.M_NAGHD - dbo.HEAD_LST.MABL_VAR - dbo.HEAD_LST.MABL_HAV + dbo.HEAD_LST.MABL_HAZ - ISNULL(dbo.jamchkfact.mabch,0) HAVING      (dbo.JAMFACTPRS.mab - dbo.HEAD_LST.M_NAGHD - dbo.HEAD_LST.MABL_VAR - dbo.HEAD_LST.MABL_HAV + dbo.HEAD_LST.MABL_HAZ - ISNULL(dbo.jamchkfact.mabch,0) <> 0)");
-                // RST.Open "SELECT     dbo.frinv" & Forms![BASEKNOW]![USERCOD] & ".NUMBER, dbo.frsnd" & Forms![BASEKNOW]![USERCOD] & ".Expr2 FROM   dbo.frsnd" & Forms![BASEKNOW]![USERCOD] & " RIGHT OUTER JOIN  dbo.frinv" & Forms![BASEKNOW]![USERCOD] & " ON dbo.frsnd" & Forms![BASEKNOW]![USERCOD] & ".NUMBER = dbo.frinv" & Forms![BASEKNOW]![USERCOD] & ".NUMBER WHERE     (dbo.frinv" & Forms![BASEKNOW]![USERCOD] & ".Expr1 + dbo.frinv" & Forms![BASEKNOW]![USERCOD] & ".MBAA > 0) AND (dbo.frsnd" & Forms![BASEKNOW]![USERCOD] & ".Expr2 IS NULL) OR (round(dbo.frinv" & Forms![BASEKNOW]![USERCOD] & ".Expr1 + dbo.frinv" & Forms![BASEKNOW]![USERCOD] & ".MBAA - dbo.frsnd" & Forms![BASEKNOW]![USERCOD] & ".Expr2,0) <> 0)", CurrentProject.Connection, adOpenKeyset, adLockOptimistic
-                var rst = dbms.DoGetDataSQL<QRE19>("SELECT     dbo.frinv" + Baseknow.USERCOD + ".NUMBER, dbo.frsnd" + Baseknow.USERCOD + ".Expr2 FROM   dbo.frsnd" + Baseknow.USERCOD + " RIGHT OUTER JOIN  dbo.frinv" + Baseknow.USERCOD + " ON dbo.frsnd" + Baseknow.USERCOD + ".NUMBER = dbo.frinv" + Baseknow.USERCOD + ".NUMBER WHERE     (dbo.frinv" + Baseknow.USERCOD + ".Expr1 > 0) AND (dbo.frsnd" + Baseknow.USERCOD + ".Expr2 IS NULL) OR (round(dbo.frinv" + Baseknow.USERCOD + ".Expr1 - dbo.frsnd" + Baseknow.USERCOD + ".Expr2,0) <> 0)").ToList();
-                if (rst.Count > 0)
+                string optionChar = "";
+                if (!string.IsNullOrEmpty(Baseknow.OPTIONSS) && Baseknow.OPTIONSS.Length >= 64)
                 {
-                    //string path = @"c:\errorkh.txt";
-                    //File.AppendAllLines(path, new[] { DateTime.Now.ToString() });
+                    optionChar = Baseknow.OPTIONSS.Substring(63, 1);
+                }
 
-                    string _Pathfile_ = @"C:\CORRECT\errorkh.txt";
-                    string directory = Path.GetDirectoryName(_Pathfile_);
-                    if (!Directory.Exists(directory))
+                if (optionChar == "5")
+                {
+                    string viewNameSnd = "khsnd_New" + Baseknow.USERCOD;
+                    string viewNameInv = "khinv_New" + Baseknow.USERCOD;
+
+                    // 1. Drop previous views if exist
+                    dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{viewNameSnd}') DROP VIEW {viewNameSnd}");
+                    dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{viewNameInv}') DROP VIEW {viewNameInv}");
+
+                    // 2. Create voucher view (checks voucher balance for supplier account and ensures total voucher is balanced)
+                    string sqlCreateSnd = $"CREATE VIEW {viewNameSnd} AS " +
+                                          $"SELECT SUM(T1.BES - T1.BED) AS Expr2, T1.NUMBER " +
+                                          $"FROM dbo.DEED_DTL AS T1 " +
+                                          $"WHERE (T1.TAG IN (12, 15)) AND (T1.HES = N'{safeHes}') " +
+                                          $"GROUP BY T1.NUMBER " +
+                                          $"HAVING ROUND((SELECT SUM(T2.BED - T2.BES) FROM dbo.DEED_DTL T2 WHERE T2.NUMBER = T1.NUMBER AND T2.TAG = T1.TAG), 0) = 0";
+
+                    dbms.DoExecuteSQL(sqlCreateSnd);
+
+                    // 3. Create invoice view (calculates net credit amount for supplier from purchase invoices TAG 12 & 15)
+                    string sqlCreateInv = $"CREATE VIEW {viewNameInv} AS " +
+                                          $"SELECT H.NUMBER, " +
+                                          $"( " +
+                                          $"  (ISNULL(MAX(DTL.NetTotal), 0) + MAX(H.MABL_HAZ) + MAX(H.MBAA) - MAX(H.TAKHFIF)) " +
+                                          $"  - " +
+                                          $"  (MAX(H.M_NAGHD) + MAX(H.MABL_VAR) + MAX(H.MABL_HAV) + ISNULL(MAX(CHK.mabch), 0)) " +
+                                          $") AS Expr1 " +
+                                          $"FROM dbo.HEAD_LST H " +
+                                          $"INNER JOIN ( " +
+                                          $"    SELECT NUMBER, CASE WHEN TAG = 1 THEN 12 ELSE TAG END AS HEAD_TAG, SUM(MABL_K) as NetTotal " +
+                                          $"    FROM dbo.INVO_LST " +
+                                          $"    WHERE TAG IN (1, 15) " +
+                                          $"    GROUP BY NUMBER, CASE WHEN TAG = 1 THEN 12 ELSE TAG END " +
+                                          $") DTL ON H.NUMBER = DTL.NUMBER AND H.TAG = DTL.HEAD_TAG " +
+                                          $"LEFT OUTER JOIN dbo.jamchkfact CHK ON H.NUMBER = CHK.NUMBER AND H.TAG = CHK.TAG " +
+                                          $"WHERE (H.TAG IN (12, 15)) AND (H.CUST_NO = N'{safeHes}') " +
+                                          $"GROUP BY H.NUMBER " +
+                                          $"HAVING ( " +
+                                          $"  (ISNULL(MAX(DTL.NetTotal), 0) + MAX(H.MABL_HAZ) + MAX(H.MBAA) - MAX(H.TAKHFIF)) " +
+                                          $"  - " +
+                                          $"  (MAX(H.M_NAGHD) + MAX(H.MABL_VAR) + MAX(H.MABL_HAV) + ISNULL(MAX(CHK.mabch), 0)) " +
+                                          $") <> 0";
+
+                    dbms.DoExecuteSQL(sqlCreateInv);
+
+                    // 4. Compare invoice amounts against vouchers
+                    string sqlCheck = $"SELECT I.NUMBER, S.Expr2 " +
+                                      $"FROM {viewNameSnd} S " +
+                                      $"RIGHT OUTER JOIN {viewNameInv} I ON S.NUMBER = I.NUMBER " +
+                                      $"WHERE (I.Expr1 > 0) AND ((S.Expr2 IS NULL) OR (ROUND(I.Expr1 - S.Expr2, 0) <> 0))";
+
+                    var rst = dbms.DoGetDataSQL<QRE19>(sqlCheck).ToList();
+
+                    if (rst.Count > 0)
                     {
-                        Directory.CreateDirectory(directory);
-                    }
-                    using (StreamWriter writer = new StreamWriter(_Pathfile_, true))
-                    {
-                        for (i = 0; i <= rst.Count; i++)
+                        string _Pathfile_ = @"C:\CORRECT\errorkh.txt";
+                        string directory = Path.GetDirectoryName(_Pathfile_);
+
+                        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                        using (StreamWriter writer = new StreamWriter(_Pathfile_, true))
                         {
-                            writer.WriteLine("شماره رسید: " + rst[i].NUMBER.ToStringNullSafe());
-                            /////////////////////////////////////////////////////////////////////////CHECK MATTER
-                            //a.writeline(rst.Fields("NUMBER"));
-                            GENSANADKHAREED(rst[i].NUMBER, (long)rst[i].NUMBER);
-                            //rst.MoveNext();
+                            for (i = 0; i < rst.Count; i++)
+                            {
+                                if (rst[i]?.NUMBER != null)
+                                {
+                                    writer.WriteLine("شماره رسید: " + rst[i].NUMBER.ToStringNullSafe());
+                                    GENSANADKHAREED(rst[i].NUMBER, Convert.ToInt64(rst[i].NUMBER));
+                                }
+                            }
                         }
+                        KhisokRet = false;
                     }
-                    KhisokRet = false;
-                }
-                else
-                {
-                    KhisokRet = true;
-                }
-                //rst.Requery();
-                //rst.Requery();
-                //rst.Requery();
-                //rst.Requery();
-                if (rst.Count > 0)
-                {
-                    KhisokRet = false;
+                    else
+                    {
+                        KhisokRet = true;
+                    }
+
+                    try
+                    {
+                        dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{viewNameSnd}') DROP VIEW {viewNameSnd}");
+                        dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{viewNameInv}') DROP VIEW {viewNameInv}");
+                    }
+                    catch { }
                 }
                 else
                 {
                     KhisokRet = true;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                KhisokRet = true;
+                AUTO_BAZ.Functions.CL_LMethods.LogWriter.WriteLog($"Khisok exception for account {HES}: {ex.Message}");
+                KhisokRet = false;
             }
 
             return KhisokRet;
