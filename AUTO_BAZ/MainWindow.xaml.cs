@@ -1154,7 +1154,8 @@ namespace AUTO_BAZ
             //    اگر tartib یک کد NULL باشد، در ORDER BY صعودی جلوتر از همه می‌نشیند و
             //    مهم‌تر اینکه «NULL + 0.5» باز هم NULL می‌شود — یعنی همان ترفندِ نیم‌واحدِ
             //    پایین بی‌صدا از کار می‌افتاد و ردیف ورود دوباره جلوتر از خروج می‌افتاد.
-            //    با ISNULL(...,0) هر دو حالت قطعی می‌شوند: خروج روی 0 و ورود روی 0٫5.
+            //    با ISNULL(...,0) ترتیب در هر دو حالت قطعی می‌ماند: با tartib واقعی
+            //    مثلاً ۱۴ و ۱۴٫۵، و با tartib خالی ۰ و ۰٫۵.
             //    (Safir هم در 14-s05-gate.sql همین ISNULL(tc.tartib, 0) را دارد، یعنی
             //     NULL بودنِ tartib روی این خانواده دیتابیس یک حالت واقعی است.)
             var transferInTartib = anbar.HasValue
@@ -1883,26 +1884,67 @@ namespace AUTO_BAZ
                         // انبار بعدی روی دیتابیس نشسته است.
                         // (کالاهای مختلف همچنان کاملاً موازی پیش می‌روند.)
                         // ─────────────────────────────────────────────────────────────────────
-                        var groupedByCode = rst
-                            .Where(r => rst3Lookup.Contains((r.CODE?.Trim(), r.ANBAR ?? 0))   // دارای فاکتور
-                                        || rst6CodeLookup.Contains(r.CODE?.Trim()))          // یا دارای انبارگردانی
-                            .GroupBy(x => x.CODE)
-                            .ToList();
-                        LogWriter.WriteLog($"groupedByCode.Count = {groupedByCode.Count}");
-
                         // ─────────────────────────────────────────────────────────────────────
                         // یال‌های وابستگیِ حواله‌ی انتقالی (انبار مبدأ → انبار مقصد) به ازای هر کالا.
-                        // یک بار برای کل اجرا خوانده می‌شود و مبنای ترتیب‌دهی انبارهای هر کالاست
-                        // (نگاه کنید OrderAnbarsForTransferDependencies).
+                        // یک بار برای کل اجرا خوانده می‌شود و دو کار می‌کند: ترتیب‌دهی انبارهای هر
+                        // کالا (OrderAnbarsForTransferDependencies) و شناساندن انبارهای مقصد به
+                        // فیلترِ پایین.
+                        //
+                        // مقایسه‌ی کلید بی‌توجه به بزرگی/کوچکی حرف است چون این کلیدها از
+                        // INVO_LST.CODE می‌آیند ولی با STUF_FSK.CODE مقایسه می‌شوند و collation
+                        // دیتابیس (Arabic_CI_AS) هم به حرف حساس نیست؛ مقایسه‌ی پیش‌فرض دات‌نت
+                        // ordinal است و می‌توانست جایی که SQL «برابر» می‌بیند «نابرابر» ببیند.
                         // ─────────────────────────────────────────────────────────────────────
                         var transferEdgesByCode = dbms.DoGetDataSQL<transfer_edge_model>(
                             @"SELECT DISTINCT i.CODE, i.ANBAR AS Src, CAST(i.ANBARF AS INT) AS Dst
                               FROM dbo.INVO_LST i
                               WHERE i.TAG = 5 AND i.ANBARF IS NOT NULL AND i.ANBAR <> CAST(i.ANBARF AS INT)")
                             .Where(e => e.CODE != null && e.Src.HasValue && e.Dst.HasValue)
-                            .GroupBy(e => e.CODE!.Trim())
-                            .ToDictionary(g => g.Key, g => g.Select(e => (Src: e.Src!.Value, Dst: e.Dst!.Value)).ToList());
+                            .GroupBy(e => e.CODE!.Trim(), StringComparer.OrdinalIgnoreCase)
+                            .ToDictionary(g => g.Key,
+                                          g => g.Select(e => (Src: e.Src!.Value, Dst: e.Dst!.Value)).ToList(),
+                                          StringComparer.OrdinalIgnoreCase);
                         LogWriter.WriteLog($"transferEdgesByCode.Count = {transferEdgesByCode.Count}");
+
+                        // ─────────────────────────────────────────────────────────────────────
+                        // ⚠️ تغییر رفتار (عمدی): انبارِ مقصدِ حواله‌ی انتقالی هم «دارای تراکنش»
+                        // شمرده می‌شود.
+                        //
+                        // فیلتر پایین تا امروز فقط rst3Lookup را می‌دید که از «SELECT CODE, ANBAR
+                        // FROM INVO_LST» ساخته می‌شود — و ردیف حواله‌ی انتقالی ANBAR اش انبارِ
+                        // *مبدأ* است، مقصد فقط در ANBARF می‌نشیند. پس انبار مقصدی که خودش هیچ
+                        // ردیف INVO_LST ای ندارد (کالا وارد شده ولی هنوز از آنجا خارج/فروخته
+                        // نشده) اصلاً وارد groupedByCode نمی‌شد: نه case 6 اش اجرا می‌شد، نه
+                        // AVRAGE2 آن حواله نوشته می‌شد، نه مانده‌ی آن انبار بازسازی می‌شد.
+                        //
+                        // این دقیقاً همان چیزی را بی‌اثر می‌کرد که مرتب‌سازی توپولوژیک و پردازش
+                        // ادغام‌شده برایش اضافه شده‌اند. کلیدها از همان یال‌های بالا می‌آیند، پس
+                        // کوئری تازه‌ای زده نمی‌شود.
+                        //
+                        // اثرش: کالا/انبارهایی که تا امروز از بازسازی جا می‌ماندند حالا پردازش
+                        // می‌شوند، یعنی روی همان ردیف‌ها UPDATE تازه اجرا می‌شود. اگر خواستید
+                        // رفتار قبلی برگردد، فقط شرطِ transferDestLookup را از فیلتر بردارید.
+                        // ─────────────────────────────────────────────────────────────────────
+                        var transferDestLookup = new Dictionary<string, HashSet<int>>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var kv in transferEdgesByCode)
+                        {
+                            var dests = new HashSet<int>();
+                            foreach (var e in kv.Value) { dests.Add(e.Dst); }
+                            transferDestLookup[kv.Key] = dests;
+                        }
+
+                        bool IsTransferDestination(string? code, int anbar)
+                            => code != null
+                               && transferDestLookup.TryGetValue(code.Trim(), out var dests)
+                               && dests.Contains(anbar);
+
+                        var groupedByCode = rst
+                            .Where(r => rst3Lookup.Contains((r.CODE?.Trim(), r.ANBAR ?? 0))   // دارای فاکتور
+                                        || rst6CodeLookup.Contains(r.CODE?.Trim())            // یا دارای انبارگردانی
+                                        || IsTransferDestination(r.CODE, r.ANBAR ?? 0))       // یا مقصدِ حواله‌ی انتقالی
+                            .GroupBy(x => x.CODE)
+                            .ToList();
+                        LogWriter.WriteLog($"groupedByCode.Count = {groupedByCode.Count}");
 
                         var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(groupedByCode.Count);
                         CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, groupedByCode.Count, dbParallelOptions, groupIndex =>
