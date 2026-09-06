@@ -10345,9 +10345,76 @@ namespace AUTO_BAZ.Functions
             }
 
             // ── رزرو دسته‌ای شماره سند (NO_S = 3) — همان الگوی بخش‌های خواهر ────────────
+            //
+            // هر دو حالت «سند روزانه» (SNDKH = true) و «تک‌سندی» پشتیبانی می‌شوند، چون
+            // پنج تابع دیگرِ همین فایل (فروش، خرید، خروج سایر، برگشت فروش ۱ و ۲) هم همین
+            // را دارند و Safir هم برای همین سرویس دارد. اگر شرکت روی سند روزانه باشد و
+            // این یکی تک‌سندی بماند، فقط همین نوع برگه از الگوی بقیه بیرون می‌افتد.
+            var isDailyMode = (bool)Baseknow.SNDKH;
+            var dailyNs = new Dictionary<long, double>();
+
+            if (isDailyMode)
+            {
+                var usableIdx = Enumerable.Range(0, HEDRST.Count).Where(k => usable[k]).ToList();
+                var dates = usableIdx.Select(k => HEDRST[k].DATE_N.Value).Distinct().ToList();
+
+                if (dates.Count > 0)
+                {
+                    foreach (var row in dbms.DoGetDataSQL<QRE10>(
+                        $"SELECT BASE, n_s, date_s, no_s FROM dbo.deed_hed WHERE no_s = 3 AND date_s BETWEEN {dates.Min()} AND {dates.Max()}"))
+                    {
+                        if (row?.DATE_S != null && row.N_S != null && !dailyNs.ContainsKey(row.DATE_S.Value))
+                        {
+                            dailyNs[row.DATE_S.Value] = row.N_S.Value;
+                        }
+                    }
+
+                    var missingDates = dates.Where(d => !dailyNs.ContainsKey(d)).ToList();
+                    if (missingDates.Count > 0)
+                    {
+                        var dailyRequests = missingDates.Select(d =>
+                        {
+                            var sample = HEDRST[usableIdx.First(k => HEDRST[k].DATE_N.Value == d)];
+                            return new SanadHeaderRequest
+                            {
+                                DATE_S = d,
+                                SHARH_S = BuildSharhS(sample),
+                                GHATEI = 0,
+                                NO_S = 3,
+                                OKF = 1,
+                                USER_NAME = sample.USER_NAME
+                            };
+                        }).ToList();
+
+                        var newNs = ReserveSanadNumbersBatch(dailyRequests);
+                        for (int k = 0; k < missingDates.Count; k++) { dailyNs[missingDates[k]] = newNs[k]; }
+                    }
+                }
+
+                var headUpdates = new List<string>();
+                foreach (var k in usableIdx)
+                {
+                    var resolved = dailyNs[HEDRST[k].DATE_N.Value];
+                    if (HEDRST[k].N_S != resolved)
+                    {
+                        HEDRST[k].N_S = resolved;
+                        headUpdates.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(resolved)} WHERE NUMBER = {SqlNum(HEDRST[k].NUMBER)} AND TAG = 26");
+                    }
+                }
+                const int headChunk = 500;
+                for (int off = 0; off < headUpdates.Count; off += headChunk)
+                {
+                    var sbh = new StringBuilder();
+                    foreach (var q in headUpdates.Skip(off).Take(headChunk)) { sbh.Append(q).Append(';').Append('\n'); }
+                    if (sbh.Length > 0) { dbms.DoExecuteSQL(sbh.ToString()); }
+                }
+            }
+
             var existingHeaderNumbers = new HashSet<double>();
-            var candidateNumbers = HEDRST.Where((h, i) => usable[i] && h.N_S != null && h.N_S.Value != 0)
-                                         .Select(h => h.N_S.Value).Distinct().ToList();
+            var candidateNumbers = isDailyMode
+                ? new List<double>()
+                : HEDRST.Where((h, i) => usable[i] && h.N_S != null && h.N_S.Value != 0)
+                        .Select(h => h.N_S.Value).Distinct().ToList();
             if (candidateNumbers.Count > 0)
             {
                 foreach (var found in dbms.DoGetDataSQL<double?>(
@@ -10366,7 +10433,7 @@ namespace AUTO_BAZ.Functions
             var newHeaderIndexes = new List<int>();
             for (int i = 0; i < HEDRST.Count; i++)
             {
-                if (!usable[i]) { continue; }
+                if (!usable[i] || isDailyMode) { continue; }   // در حالت روزانه شماره‌ها بالا حل شده‌اند
                 var ns = HEDRST[i].N_S;
                 var exists = ns != null && ns.Value != 0 && existingHeaderNumbers.Contains(ns.Value);
                 var owns = exists && claimedNumbers.Add(ns.Value);
@@ -10405,7 +10472,9 @@ namespace AUTO_BAZ.Functions
 
                 try
                 {
-                    if (!needsNewHeader[ROW])
+                    // در حالت روزانه سربرگ سند بین چند برگه مشترک است و نباید به‌ازای هر
+                    // برگه بازنویسی شود (وگرنه شرح و تاریخِ آخرین برگه روی همه می‌نشیند).
+                    if (!isDailyMode && !needsNewHeader[ROW])
                     {
                         dbms.DoExecuteSQL(
                             $"UPDATE dbo.DEED_HED SET DATE_S = {SqlNum(hRow.DATE_N)}, SHARH_S = N'{SqlText(BuildSharhS(hRow))}', " +
@@ -10665,17 +10734,22 @@ namespace AUTO_BAZ.Functions
                     ExecuteWithDeadlockRetry(() => dbms.DoExecuteSQL(sb.ToString()));
 
                     // ── کنترل تراز، بعد از نوشتن ─────────────────────────────────────
-                    // این تابع تازه است و روی داده‌ی واقعی آزموده نشده؛ ضمناً چند فرضِ
-                    // مدل‌سازی دارد (مثلاً اینکه مبالغ سربرگ روی ردیف TAG = 27 هستند).
-                    // اگر هر کدام از آن فرض‌ها روی یک دیتابیس غلط باشد، نشانه‌اش همین‌جا
-                    // پیدا می‌شود: سندی که بدهکار و بستانکارش برابر نیست. به‌جای خراب‌کردن
-                    // بی‌صدا، در لاگ ثبت و اجرا «ناموفق» علامت می‌خورد.
+                    // این تابع تازه است و روی داده‌ی واقعی آزموده نشده؛ ضمناً یک فرضِ
+                    // مدل‌سازی دارد که از روی سورس قطعی نشد: اینکه مبالغ سربرگ روی ردیف
+                    // HEAD_LST با TAG = 26 نشسته‌اند (مبنا Safir؛ خودِ فرم آن‌ها را روی ۲۷
+                    // می‌نویسد). اگر آن فرض غلط باشد همه‌ی مبالغ صفر خوانده می‌شوند و سند
+                    // ناتراز درمی‌آید — که دقیقاً همین‌جا دیده می‌شود.
+                    //
+                    // ⚠️ دامنه عمداً (NUMBER, TAG = 27) است و نه N_S: در حالت سند روزانه
+                    //    چند برگه یک N_S مشترک دارند، پس جمع بر اساس N_S همیشه ناتراز
+                    //    گزارش می‌داد. ردیف‌های همین برگه دقیقاً همان دامنه‌ای است که
+                    //    DELETE بالا هم دارد و باید به‌تنهایی تراز باشد.
                     var diff = dbms.DoGetDataSQL<double?>(
-                        $"SELECT SUM(BED) - SUM(BES) FROM dbo.DEED_DTL WHERE N_S = {SqlNum(max_ns)}").FirstOrDefault();
+                        $"SELECT SUM(BED) - SUM(BES) FROM dbo.DEED_DTL WHERE NUMBER = {SqlNum(num)} AND TAG = 27").FirstOrDefault();
                     if (diff.HasValue && Math.Abs(diff.Value) > 0.5)
                     {
                         IsSuccessfully = false;
-                        LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: ⚠️ سند {max_ns} (برگه {num}) ناتراز است — اختلاف {diff.Value}. بازسازی این برگه را بررسی کنید.");
+                        LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: ⚠️ برگه {num} (سند {max_ns}) ناتراز است — اختلاف {diff.Value}. بازسازی این برگه را بررسی کنید.");
                     }
                 }
                 catch (Exception ex)
