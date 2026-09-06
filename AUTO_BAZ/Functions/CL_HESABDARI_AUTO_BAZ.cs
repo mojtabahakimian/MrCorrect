@@ -336,11 +336,10 @@ namespace AUTO_BAZ.Functions
             public string? NAME { get; set; }
             public double? GHT { get; set; }
         }
-        /// <summary>سربرگ «برگشت خرید آزاد». عمداً از ردیف HEAD_LST با TAG = 27 خوانده
-        /// می‌شود و نه ۲۶: فرم HEAD_LST_KH_BACK_AZAD ردیف ۲۶ را با همه‌ی مبالغ صفر درج
-        /// می‌کند (خط ۲۵۹۷) و فقط ردیف ۲۷ را با مبالغ واقعی به‌روز می‌کند (خط ۲۷۰۰،
-        /// «WHERE ... AND TAG = {FTAG}» با FTAG = 27). خواندن از ۲۶ یعنی همه‌ی مبالغ صفر
-        /// و سندِ ناتراز.</summary>
+        /// <summary>سربرگ «برگشت خرید آزاد» — از ردیف HEAD_LST با TAG = 26 خوانده می‌شود،
+        /// مطابق سرویس PurchaseReturnFreeRebuildService پروژه‌ی Safir که ملاک این پورت است.
+        /// (خودِ فرم HEAD_LST_KH_BACK_AZAD مبالغ را روی ردیف TAG = 27 می‌نویسد؛ اختلاف در
+        /// توضیح بالای GENSANADBARGASHTKHARIDAZAD ثبت شده و کنترل تراز آن را می‌گیرد.)</summary>
         public class QRE_BKAZ_HEAD
         {
             public double? NUMBER { get; set; }
@@ -10204,31 +10203,20 @@ namespace AUTO_BAZ.Functions
         //
         //  ⚠️ دو جا عمداً از Safir پیروی نشده و دلیلش اینجاست:
         //
-        //   ۱. سربرگ از TAG = 27 خوانده می‌شود، نه ۲۶ (Safir از ۲۶ می‌خواند).
-        //      شواهدِ راستی‌آزمایی‌شده در HEAD_LST_KH_BACK_AZAD.xaml.cs:
-        //        • خط ۲۰۶ و ۲۱۱: FTAG = 27 «هدر برگشت خرید آزاد»،
-        //          HTAG26 = 26 «سایر حواله انبار» — یعنی دو نوع برگه‌ی متفاوت.
-        //        • خط ۲۷۰۰..۲۷۲۰: تنها جایی که MBAA/TAKHFIF/M_NAGHD/MABL_HAV/MABL_VAR/
-        //          MABL_HAZ/HMBAA نوشته می‌شوند، «WHERE NUMBER = ... AND TAG = {FTAG}»
-        //          است، یعنی روی ردیف ۲۷.
-        //        • خط ۲۷۴۳: تنها چیزی که فرم روی یک ردیفِ TAG = 26 می‌نویسد CUST_NO و
-        //          CUST_KIND است، آن هم با کلید NUMBER1 (شماره‌ی حواله‌ی سایر)، نه NUMBER.
-        //        • جستجو در کل Prg_UI: هیچ کدی مبالغ بالا را روی HEAD_LST با TAG = 26
-        //          نمی‌نویسد.
+        //   ۱. سربرگ از TAG = 26 خوانده می‌شود و N_S هم روی همان ردیف نوشته می‌شود —
+        //      عیناً مثل Safir، به تصریح صاحب پروژه («ملاک و مبنا Safir است»).
         //
-        //      ⚠️ آنچه اثبات *نشده*: اینکه اصلاً ردیف HEAD_LST با TAG = 26 و همان NUMBER
-        //      وجود دارد یا نه. Safir فرض می‌کند وجود دارد (حتی وجود جفتِ ۲۷ را چک
-        //      می‌کند)، و اگر روی دیتابیس شما آن ردیف هم مبالغ را داشته باشد، انتخاب Safir
-        //      هم درست است. تنها کوئری زیر این را قطعی می‌کند:
+        //      ⚠️ این نقطه‌ای است که خودِ فرم HEAD_LST_KH_BACK_AZAD جور دیگری عمل می‌کند:
+        //      آنجا FTAG = 27 است (خط ۲۰۶) و مبالغ سربرگ و N_S هر دو روی ردیف ۲۷ نوشته
+        //      می‌شوند (خط ۲۷۰۰ و ۳۴۶۹). اگر روی این دیتابیس ردیف TAG = 26 مبالغ را
+        //      نداشته باشد، همه‌ی ردیف‌های تخفیف/نقد/ارزش‌افزوده/خدمات ساخته نمی‌شوند.
+        //      برای همین «کنترل تراز» پایین اضافه شده: اگر چنین باشد، همان اجرای اول
+        //      سند ناتراز را در لاگ گزارش می‌کند و اجرا ناموفق علامت می‌خورد.
+        //      کوئری قطعی‌کننده:
         //          SELECT NUMBER, TAG, TAKHFIF, MBAA, M_NAGHD, MABL_HAV, MABL_VAR, MABL_HAZ
         //          FROM dbo.HEAD_LST WHERE TAG IN (26, 27)
         //            AND NUMBER IN (SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 27)
         //          ORDER BY NUMBER, TAG;
-        //      (تصمیم صاحب پروژه: از ۲۷ خوانده شود.)
-        //
-        //      شماره‌ی سند (N_S) هم روی همان ردیف ۲۷ نوشته می‌شود — عیناً مثل خط ۳۴۶۹
-        //      خودِ فرم. Safir آن را روی ردیف ۲۶ می‌نویسد؛ اگر هر دو مسیر روی یک دیتابیس
-        //      اجرا شوند، هرکدام «سند موجود» را جای دیگری می‌بیند.
         //
         //   ۲. شرطِ ساختِ ردیفِ موجودی، همان مقداری است که پست می‌شود
         //      (Round(MEGHk × AVRAGE))، نه یک نرخِ جداگانه. فرم آنجا LASTAVRAGE() را صدا
@@ -10256,7 +10244,7 @@ namespace AUTO_BAZ.Functions
             var HEDRST = dbms.DoGetDataSQL<QRE_BKAZ_HEAD>(
                 "SELECT NUMBER, DATE_N, N_S, USER_NAME, CUST_NO, FNUMCO, DEPATMAN, SHIFT, " +
                 "MABL_HAZ, MOIN_HAZ, MBAA, HMBAA, TAKHFIF, M_NAGHD, MABL_HAV, MOIN_HAV, MABL_VAR, MOIN_VAR " +
-                $"FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER >= {NUMBER} AND NUMBER <= {NUMBER2} ORDER BY NUMBER")
+                $"FROM dbo.HEAD_LST WHERE TAG = 26 AND NUMBER >= {NUMBER} AND NUMBER <= {NUMBER2} ORDER BY NUMBER")
                 .Where(h => h?.NUMBER != null).ToList();
 
             LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: شروع بازسازی از {NUMBER} تا {NUMBER2} - تعداد برگه‌ها: {HEDRST.Count}");
@@ -10278,12 +10266,27 @@ namespace AUTO_BAZ.Functions
 
             // ── تاریخ نامعتبر رد می‌شود: قید CK_DEED_HED روی DATE_S حداقل 10101 است، پس
             //    ساختن سند برای چنین برگه‌ای فقط استثنا تولید می‌کند.
+            // ردیف همراه با TAG = 27 باید موجود باشد: ردیف‌های سند با TAG = 27 نوشته
+            // می‌شوند و قید FK_DEED_DTL_HEAD_LST دقیقاً همان (NUMBER, TAG) را می‌خواهد.
+            // بدون این بررسی، برگه به‌جای رد شدن با یک هشدار، خطای FK می‌داد.
+            var pairedNumbers = new HashSet<double>();
+            foreach (var n in dbms.DoGetDataSQL<double?>(
+                $"SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER BETWEEN {NUMBER} AND {NUMBER2}"))
+            {
+                if (n.HasValue) { pairedNumbers.Add(n.Value); }
+            }
+
             var usable = new bool[HEDRST.Count];
             for (int i = 0; i < HEDRST.Count; i++)
             {
                 if (HEDRST[i].DATE_N == null || HEDRST[i].DATE_N.Value < 10101)
                 {
                     LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} تاریخ نامعتبر دارد و رد شد.");
+                    continue;
+                }
+                if (!pairedNumbers.Contains(HEDRST[i].NUMBER.Value))
+                {
+                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} ردیف همراه TAG = 27 ندارد و رد شد.");
                     continue;
                 }
                 usable[i] = true;
@@ -10387,7 +10390,7 @@ namespace AUTO_BAZ.Functions
                 {
                     var i = newHeaderIndexes[k];
                     HEDRST[i].N_S = reserved[k];
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG = 27");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG = 26");
                 }
             }
 
@@ -10655,7 +10658,7 @@ namespace AUTO_BAZ.Functions
                                     MBAA, bed: false, what: "معين ارزش افزوده");
                     }
 
-                    batchQueries.Add($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG = 27");
+                    batchQueries.Add($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG = 26");
 
                     var sb = new StringBuilder();
                     foreach (var q in batchQueries) { sb.Append(q).Append(';').Append('\n'); }
