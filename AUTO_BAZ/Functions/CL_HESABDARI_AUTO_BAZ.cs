@@ -1,4 +1,4 @@
-using AUTO_BAZ.HelperWins;
+﻿using AUTO_BAZ.HelperWins;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
@@ -4781,6 +4781,47 @@ namespace AUTO_BAZ.Functions
                 progressReporter.ReportOne();
             }
         }
+        /// <summary>
+        /// آیا شیء dbo.MANF_JAMK روی این دیتابیس وجود دارد؟
+        ///
+        /// یک بار در طول عمر برنامه پرسیده می‌شود (نه به‌ازای هر برگه)، چون ساخته/حذف‌شدن
+        /// یک شیء دیتابیس وسط یک اجرای بازسازی سناریوی واقعی نیست. عمداً مستقل از
+        /// LookupCacheEnabled است: این یک «وجود شیء» است نه یک مقدار داده، و بازسازی
+        /// هرگز به آن نمی‌نویسد.
+        /// </summary>
+        private static bool? _manfJamkExists;
+        private static readonly object _manfJamkLock = new object();
+        public static bool ManfJamkExists()
+        {
+            var cached = _manfJamkExists;
+            if (cached.HasValue) { return cached.Value; }
+
+            lock (_manfJamkLock)
+            {
+                if (_manfJamkExists.HasValue) { return _manfJamkExists.Value; }
+                bool exists;
+                try
+                {
+                    exists = dbms.DoGetDataSQL<int>(
+                        "SELECT 1 WHERE OBJECT_ID(N'dbo.MANF_JAMK') IS NOT NULL").Any();
+                }
+                catch (Exception ex)
+                {
+                    // اگر خودِ این پرسش شکست خورد، محافظه‌کارانه رفتار قبلی حفظ می‌شود.
+                    LogWriter.WriteLog($"ManfJamkExists: {ex.Message}");
+                    exists = true;
+                }
+
+                if (!exists)
+                {
+                    LogWriter.WriteLog("dbo.MANF_JAMK روی این دیتابیس نیست — بهای تمام‌شده‌ی برگشت فروش مستقیم از HEAD_MANF/DTL_MANF خوانده می‌شود.");
+                }
+
+                _manfJamkExists = exists;
+                return exists;
+            }
+        }
+
         public static string GETGRPKALA(int CC)
         {
             var rst = dbms.DoGetDataSQL<string>("SELECT     NAMES  FROM dbo.TCOD_STUFGROUP WHERE     (CODE = " + System.Convert.ToString(CC) + ")").ToList();
@@ -8377,7 +8418,35 @@ namespace AUTO_BAZ.Functions
                     //DoEvents();
                 }
 
-                var JST = dbms.DoGetDataSQL<QRE_BAZ_16>("SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, [SumOfMABLK]+[IMBIBE_MANF]+[IMBIBE_SAR] AS GHT FROM (INVO_LST INNER JOIN MANF_JAMK ON INVO_LST.CODE = MANF_JAMK.CODE) INNER JOIN STUF_DEF ON INVO_LST.CODE = STUF_DEF.CODE WHERE (((INVO_LST.NUMBER)=" + HFRST[ROW].NUMBER1 + ") AND ((INVO_LST.TAG)=2))").ToList();
+                // ⚠️ dbo.MANF_JAMK یک شیء قدیمیِ دیتابیس است که هیچ‌کدام از مخزن‌های این
+                //    برنامه (MrCorrect، AUTO_BAZ، ScriptSqly) آن را نمی‌سازند. چون INNER JOIN
+                //    است، اگر روی یک دیتابیس نباشد یا خالی باشد، این کوئری صفر ردیف می‌دهد و
+                //    کل شاخه‌ی بهای تمام‌شده‌ی برگشت فروش بی‌صدا حذف می‌شود — نه خطایی، نه لاگی.
+                //
+                //    وقتی شیء هست، عیناً همان کوئری قبلی اجرا می‌شود تا اعداد امروز تغییر نکند.
+                //    وقتی نیست، معادلش مستقیم از HEAD_MANF/DTL_MANF ساخته می‌شود (همان کاری که
+                //    پروژه‌ی Safir در SaleReturnRebuildService انجام می‌دهد). چون MANF_JAMK
+                //    به‌ازای هر کالا یک ردیف می‌دهد، معادلِ مستقیم هم با آخرین FNUMB هر کالا
+                //    یک ردیف می‌سازد.
+                var JST = dbms.DoGetDataSQL<QRE_BAZ_16>(
+                    ManfJamkExists()
+                        ? "SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, [SumOfMABLK]+[IMBIBE_MANF]+[IMBIBE_SAR] AS GHT FROM (INVO_LST INNER JOIN MANF_JAMK ON INVO_LST.CODE = MANF_JAMK.CODE) INNER JOIN STUF_DEF ON INVO_LST.CODE = STUF_DEF.CODE WHERE (((INVO_LST.NUMBER)=" + HFRST[ROW].NUMBER1 + ") AND ((INVO_LST.TAG)=2))"
+                        : "SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME,"
+                          + " M.SumOfMABLK + M.IMBIBE_MANF + M.IMBIBE_SAR AS GHT"
+                          + " FROM dbo.INVO_LST"
+                          + " INNER JOIN dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE"
+                          + " INNER JOIN ("
+                          // جمع ردیف‌های فرمول عمداً زیرپرسشِ اسکالر است و نه JOIN: اگر
+                          // (CODE, FNUMB) در HEAD_MANF یکتا نباشد، JOIN ردیف‌های DTL_MANF را
+                          // چند برابر می‌کرد و SumOfMABLK بزرگ‌تر از واقع درمی‌آمد.
+                          + "   SELECT X.CODE,"
+                          + "          (SELECT SUM(D.MABLK) FROM dbo.DTL_MANF D WHERE D.FNUMB = X.FNUMB) AS SumOfMABLK,"
+                          + "          MIN(H.IMBIBE_MANF) AS IMBIBE_MANF, MIN(H.IMBIBE_SAR) AS IMBIBE_SAR"
+                          + "   FROM (SELECT CODE, MAX(FNUMB) AS FNUMB FROM dbo.HEAD_MANF GROUP BY CODE) X"
+                          + "   INNER JOIN dbo.HEAD_MANF H ON H.CODE = X.CODE AND H.FNUMB = X.FNUMB"
+                          + "   GROUP BY X.CODE, X.FNUMB"
+                          + " ) AS M ON M.CODE = dbo.INVO_LST.CODE"
+                          + " WHERE (dbo.INVO_LST.NUMBER = " + HFRST[ROW].NUMBER1 + ") AND (dbo.INVO_LST.TAG = 2)").ToList();
                 if (HFRST[ROW].MABL_HAZ != 0)
                 {
                     if (IsNull(HFRST[ROW].MOIN_HAZ))
