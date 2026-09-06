@@ -10205,10 +10205,30 @@ namespace AUTO_BAZ.Functions
         //  ⚠️ دو جا عمداً از Safir پیروی نشده و دلیلش اینجاست:
         //
         //   ۱. سربرگ از TAG = 27 خوانده می‌شود، نه ۲۶ (Safir از ۲۶ می‌خواند).
-        //      شاهد: همان فرم ردیف ۲۶ را با «M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ,
-        //      TAKHFIF» همه صفر درج می‌کند و فقط ردیف ۲۷ را با مبالغ واقعی به‌روز می‌کند.
-        //      خواندن از ۲۶ یعنی هیچ ردیفِ تخفیف/نقد/ارزش‌افزوده/خدمات ساخته نشود و سند
-        //      ناتراز بماند. (تصمیم صاحب پروژه.)
+        //      شواهدِ راستی‌آزمایی‌شده در HEAD_LST_KH_BACK_AZAD.xaml.cs:
+        //        • خط ۲۰۶ و ۲۱۱: FTAG = 27 «هدر برگشت خرید آزاد»،
+        //          HTAG26 = 26 «سایر حواله انبار» — یعنی دو نوع برگه‌ی متفاوت.
+        //        • خط ۲۷۰۰..۲۷۲۰: تنها جایی که MBAA/TAKHFIF/M_NAGHD/MABL_HAV/MABL_VAR/
+        //          MABL_HAZ/HMBAA نوشته می‌شوند، «WHERE NUMBER = ... AND TAG = {FTAG}»
+        //          است، یعنی روی ردیف ۲۷.
+        //        • خط ۲۷۴۳: تنها چیزی که فرم روی یک ردیفِ TAG = 26 می‌نویسد CUST_NO و
+        //          CUST_KIND است، آن هم با کلید NUMBER1 (شماره‌ی حواله‌ی سایر)، نه NUMBER.
+        //        • جستجو در کل Prg_UI: هیچ کدی مبالغ بالا را روی HEAD_LST با TAG = 26
+        //          نمی‌نویسد.
+        //
+        //      ⚠️ آنچه اثبات *نشده*: اینکه اصلاً ردیف HEAD_LST با TAG = 26 و همان NUMBER
+        //      وجود دارد یا نه. Safir فرض می‌کند وجود دارد (حتی وجود جفتِ ۲۷ را چک
+        //      می‌کند)، و اگر روی دیتابیس شما آن ردیف هم مبالغ را داشته باشد، انتخاب Safir
+        //      هم درست است. تنها کوئری زیر این را قطعی می‌کند:
+        //          SELECT NUMBER, TAG, TAKHFIF, MBAA, M_NAGHD, MABL_HAV, MABL_VAR, MABL_HAZ
+        //          FROM dbo.HEAD_LST WHERE TAG IN (26, 27)
+        //            AND NUMBER IN (SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 27)
+        //          ORDER BY NUMBER, TAG;
+        //      (تصمیم صاحب پروژه: از ۲۷ خوانده شود.)
+        //
+        //      شماره‌ی سند (N_S) هم روی همان ردیف ۲۷ نوشته می‌شود — عیناً مثل خط ۳۴۶۹
+        //      خودِ فرم. Safir آن را روی ردیف ۲۶ می‌نویسد؛ اگر هر دو مسیر روی یک دیتابیس
+        //      اجرا شوند، هرکدام «سند موجود» را جای دیگری می‌بیند.
         //
         //   ۲. شرطِ ساختِ ردیفِ موجودی، همان مقداری است که پست می‌شود
         //      (Round(MEGHk × AVRAGE))، نه یک نرخِ جداگانه. فرم آنجا LASTAVRAGE() را صدا
@@ -10640,6 +10660,20 @@ namespace AUTO_BAZ.Functions
                     var sb = new StringBuilder();
                     foreach (var q in batchQueries) { sb.Append(q).Append(';').Append('\n'); }
                     ExecuteWithDeadlockRetry(() => dbms.DoExecuteSQL(sb.ToString()));
+
+                    // ── کنترل تراز، بعد از نوشتن ─────────────────────────────────────
+                    // این تابع تازه است و روی داده‌ی واقعی آزموده نشده؛ ضمناً چند فرضِ
+                    // مدل‌سازی دارد (مثلاً اینکه مبالغ سربرگ روی ردیف TAG = 27 هستند).
+                    // اگر هر کدام از آن فرض‌ها روی یک دیتابیس غلط باشد، نشانه‌اش همین‌جا
+                    // پیدا می‌شود: سندی که بدهکار و بستانکارش برابر نیست. به‌جای خراب‌کردن
+                    // بی‌صدا، در لاگ ثبت و اجرا «ناموفق» علامت می‌خورد.
+                    var diff = dbms.DoGetDataSQL<double?>(
+                        $"SELECT SUM(BED) - SUM(BES) FROM dbo.DEED_DTL WHERE N_S = {SqlNum(max_ns)}").FirstOrDefault();
+                    if (diff.HasValue && Math.Abs(diff.Value) > 0.5)
+                    {
+                        IsSuccessfully = false;
+                        LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: ⚠️ سند {max_ns} (برگه {num}) ناتراز است — اختلاف {diff.Value}. بازسازی این برگه را بررسی کنید.");
+                    }
                 }
                 catch (Exception ex)
                 {
