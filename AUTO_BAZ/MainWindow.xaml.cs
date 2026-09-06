@@ -1163,7 +1163,11 @@ namespace AUTO_BAZ
                 : "CAST(ISNULL(TG_SRC.tartib, 0) AS FLOAT) + 0.5";
             var transferInSrcJoin = anbar.HasValue
                 ? string.Empty
-                : " INNER JOIN dbo.TAGCOD AS TG_SRC ON dbo.HEAD_LST.TAG = TG_SRC.CODE";
+                // LEFT و نه INNER: این JOIN فقط برای گرفتنِ tartibِ مبدأ است و نباید
+                // هیچ ردیفی را حذف کند. با INNER، ردیف انتقالیِ ورود در حالت ادغام‌شده
+                // به وجودِ ردیفِ کد ۵ در TAGCOD وابسته می‌شد — شرطی که شاخه‌ی این ردیف
+                // تا امروز نداشت. ISNULL بالا مقدارِ نبودِ تطابق را هم پوشش می‌دهد.
+                : " LEFT JOIN dbo.TAGCOD AS TG_SRC ON dbo.HEAD_LST.TAG = TG_SRC.CODE";
 
             parts.Add(
                 " SELECT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, "
