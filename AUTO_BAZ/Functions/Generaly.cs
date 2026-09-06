@@ -44,6 +44,7 @@ namespace AUTO_BAZ.Functions
                 winy.PRGR_C9.Value = 0;
                 winy.PRGR_C10.Value = 0;
                 winy.PRGR_C11.Value = 0;
+                winy.PRGR_C12.Value = 0;
                 winy.TOGHER_PROGRESS.Value = 0;
                 winy.COUNTER_TXBL.Content = $"0%";
             });
@@ -115,6 +116,7 @@ namespace AUTO_BAZ.Functions
         private static bool _c9;
         private static bool _c10;
         private static bool _c11;
+        private static bool _c12;
 
         public static bool C00
         {
@@ -272,6 +274,20 @@ namespace AUTO_BAZ.Functions
                 return _c11;
             }
         }
+
+        public static bool C12
+        {
+            get
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    var winy = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                    _c12 = Convert.ToBoolean(winy.c12.IsChecked);
+                }));
+                return _c12;
+            }
+        }
+
 
 
         //private static MainWindow mainWindow;

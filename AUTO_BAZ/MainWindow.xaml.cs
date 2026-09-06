@@ -337,7 +337,8 @@ namespace AUTO_BAZ
                 (c8, PRGR_C8),
                 (c9, PRGR_C9),
                 (c10, PRGR_C10),
-                (c11, PRGR_C11)
+                (c11, PRGR_C11),
+                (c12, PRGR_C12)
             };
 
             // Load From Saved Data List
@@ -466,6 +467,7 @@ namespace AUTO_BAZ
             Properties.Settings.Default.IsC9 = c9.IsChecked ?? false;
             Properties.Settings.Default.IsC10 = c10.IsChecked ?? false;
             Properties.Settings.Default.IsC11 = c11.IsChecked ?? false;
+            Properties.Settings.Default.IsC12 = c12.IsChecked ?? false;
             Properties.Settings.Default.UseSmartThrottling = chkUseSmartThrottling.IsChecked ?? false;
 
             //Properties.Settings.Default.IsDefacc = defacc.IsChecked ?? false;
@@ -490,6 +492,7 @@ namespace AUTO_BAZ
                 c9.IsChecked = Properties.Settings.Default.IsC9;
                 c10.IsChecked = Properties.Settings.Default.IsC10;
                 c11.IsChecked = Properties.Settings.Default.IsC11;
+                c12.IsChecked = Properties.Settings.Default.IsC12;
                 UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
                 chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
@@ -507,6 +510,8 @@ namespace AUTO_BAZ
                 c9.IsChecked = CHKITEMS[9];
                 c10.IsChecked = CHKITEMS[10];
                 c11.IsChecked = CHKITEMS[11];
+                // ⚠️ با طول بررسی می‌شود: فراخوان‌های قدیمی ممکن است آرایه‌ی ۱۲تایی بدهند.
+                c12.IsChecked = CHKITEMS.Length > 12 && CHKITEMS[12];
                 UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
                 chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
@@ -732,6 +737,7 @@ namespace AUTO_BAZ
                     if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
                     if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
                     if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
+                    if (Generaly.C12) { tasks.Add(C12_TASK()); } //سند برگشت خرید آزاد
 
                     // Start all tasks concurrently
                     var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
@@ -2728,6 +2734,35 @@ namespace AUTO_BAZ
             Dispatcher.Invoke(new Action(() => { c11.Foreground = Generaly.PutThisColor(); }));
         }
 
+        /// <summary>
+        /// سند «برگشت خرید آزاد» — سربرگ HEAD_LST.TAG = 27، اقلام INVO_LST.TAG = 26.
+        ///
+        /// تا پیش از این هیچ بخشی این نوع برگه را بازسازی نمی‌کرد، در حالی که بازسازی نرخ
+        /// میانگین (C0) خودش «case 26» را دارد؛ یعنی نرخ اقلام به‌روز می‌شد ولی سند
+        /// حسابداری‌شان با نرخ قدیمی می‌ماند.
+        /// </summary>
+        public async Task C12_TASK()
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    Int64 HF1 = 1;
+                    Int64 HF2 = 9999999999;
+                    CL_HESABDARI_AUTO_BAZ.GENSANADBARGASHTKHARIDAZAD(HF1, HF2);
+                }
+                catch (Exception er)
+                {
+                    AnyErrorHappend = true;
+                    ERTRACKLIST.Add(new ErrorSectionModel { ErrorHappend = true, SectionName = "خطا در سند برگشت خرید آزاد" });
+
+                    ExpectionLogWriter.WriteLog(er, "سند برگشت خرید آزاد خطا");
+                }
+
+            });
+            Dispatcher.Invoke(new Action(() => { c12.Foreground = Generaly.PutThisColor(); }));
+        }
+
         private void C0_Click(object sender, RoutedEventArgs e)
         {
             SaveCheckBoxesState();
@@ -2793,6 +2828,10 @@ namespace AUTO_BAZ
             SaveCheckBoxesState();
         }
         private void c11_Click(object sender, RoutedEventArgs e)
+        {
+            SaveCheckBoxesState();
+        }
+        private void c12_Click(object sender, RoutedEventArgs e)
         {
             SaveCheckBoxesState();
         }
