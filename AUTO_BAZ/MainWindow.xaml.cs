@@ -1126,12 +1126,44 @@ namespace AUTO_BAZ
                 + " AND (dbo.HEAD_LST.DATE_N > " + dt + ")");
 
             // ── انتقالیِ ورود: همان ردیف حواله، این بار به نام انبار مقصد ───────
+            //
+            // ⚠️ tartib این شاخه در دو حالت فرق می‌کند و این عمدی است:
+            //
+            //   • حالت معمول (anbar مشخص): ردیفِ TAG = 6 فقط در کوئریِ انبارِ *مقصد*
+            //     ظاهر می‌شود و ردیفِ TAG = 5 فقط در کوئریِ انبارِ *مبدأ*؛ این دو هرگز
+            //     در یک نتیجه کنار هم نمی‌آیند، پس ترتیبشان نسبت به هم بی‌معناست و
+            //     tartib طبیعیِ TAGCOD (کد ۶) درست است — همان چیزی که تا امروز بوده.
+            //     وابستگیِ «مبدأ قبل از مقصد» را در این حالت ترتیبِ خودِ انبارها تأمین
+            //     می‌کند (OrderAnbarsForTransferDependencies) نه ترتیبِ داخل کوئری.
+            //
+            //   • حالت ادغام‌شده (anbar = null، کالای چرخه‌دار): هر دو ردیف در یک نتیجه
+            //     هستند و DATE_N شان هم لزوماً یکی است (هر دو از سربرگ یک حواله می‌آیند).
+            //     پس ترتیبشان را فقط tartib تعیین می‌کند. اگر TAGCOD.tartib کد ۶ کوچک‌تر
+            //     از کد ۵ باشد — که طبق مستندات پروژه‌ی Safir همین‌طور است (۱۰ در برابر
+            //     ۱۴) — مقصد *همیشه* قبل از مبدأ پردازش می‌شود و علامتِ touchedByCase5
+            //     هیچ‌وقت به‌موقع ست نمی‌شود؛ یعنی دقیقاً همان مقدار کهنه‌ای خوانده
+            //     می‌شود که قرار بود رفع شود.
+            //     برای همین اینجا tartib از روی کدِ *مبدأ* (TAGCOD کد ۵) ساخته می‌شود
+            //     به‌علاوه‌ی نیم واحد، تا ردیف ورود بلافاصله بعد از ردیف خروجِ خودش
+            //     بنشیند — بدون اینکه جای هیچ رویداد دیگری در آن روز عوض شود.
+            //
+            // ⚠️ این مقدار تأییدنشده است: عددهای TAGCOD.tartib روی دیتابیس شما خوانده
+            //    نشده‌اند. اگر روی این دیتابیس tartib کد ۶ از کد ۵ بزرگ‌تر باشد، این
+            //    شاخه بی‌اثر است و چیزی خراب نمی‌کند (ترتیب همچنان مبدأ سپس مقصد).
+            var transferInTartib = anbar.HasValue
+                ? "dbo.TAGCOD.tartib"
+                : "CAST(TG_SRC.tartib AS FLOAT) + 0.5";
+            var transferInSrcJoin = anbar.HasValue
+                ? string.Empty
+                : " INNER JOIN dbo.TAGCOD AS TG_SRC ON dbo.HEAD_LST.TAG = TG_SRC.CODE";
+
             parts.Add(
                 " SELECT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, "
-                + INVO_COLS + ", dbo.TAGCOD.BARGAH, dbo.TAGCOD.tartib"
+                + INVO_COLS + ", dbo.TAGCOD.BARGAH, " + transferInTartib + " AS tartib"
                 + " FROM dbo.INVO_LST"
                 + " INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG"
                 + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1 = dbo.TAGCOD.CODE"
+                + transferInSrcJoin
                 + " WHERE (dbo.INVO_LST.CODE = '" + c + "')"
                 + ANB("dbo.INVO_LST.ANBARF")
                 + " AND (dbo.HEAD_LST.DATE_N > " + dt + ") AND (dbo.INVO_LST.TAG = 5)");
@@ -1157,6 +1189,17 @@ namespace AUTO_BAZ
                 + " AND ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * -1 <> 0)"
                 + " AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL))");
 
+            // ⚠️ ریسکِ تأییدنشده روی هر دو شاخه‌ی BACK_HEAD زیر: Join با
+            //    (il.TAG = bh.ta AND il.NUMBER = bh.NUMBER1) است، یعنی اگر یک فاکتور
+            //    *چند* برگه‌ی برگشتِ جدا داشته باشد، همان ردیفِ INVO_LST به‌ازای هر برگه
+            //    یک بار در نتیجه می‌آید و case 3/4 چند بار روی همان MEGH_MAR اجرا می‌شود
+            //    — یعنی برگشت چند برابر حساب می‌شود. ساختار BACK_HEAD و اینکه آیا چنین
+            //    حالتی در داده‌ی واقعی رخ می‌دهد، در این بررسی خوانده نشده است.
+            //    این دو شاخه فقط وقتی فعال می‌شوند که HEAD_LST_FBK/KBK وجود نداشته
+            //    باشند؛ پیش از فعال‌کردنشان روی یک دیتابیس، این کوئری را اجرا کنید:
+            //        SELECT NUMBER1, ta, COUNT(*) FROM dbo.BACK_HEAD
+            //        GROUP BY NUMBER1, ta HAVING COUNT(*) > 1;
+            //    هر سطری که برگردد یعنی این شاخه‌ها به تفکیکِ برگه‌ی برگشت نیاز دارند.
             if (useBackHeadSaleReturn)
             {
                 // برگشت فروش (BACK_HEAD.ta = 2 ⇒ TAG = 4) در تاریخ واقعیِ خودِ برگشت.
@@ -1215,7 +1258,12 @@ namespace AUTO_BAZ
                     + " AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0)");
             }
 
-            return "SELECT " + COLS + " FROM (" + string.Join(" UNION ", parts) + ") AS AVGSRC ORDER BY DATE_N, tartib, ID";
+            // ⚠️ NUMBER به‌عنوان تای‌برکِ آخر، بعد از ID: برای ردیف‌های INVO_LST که ID
+            //    یکتا دارند هرگز به آن نمی‌رسد و بی‌اثر است؛ ولی شاخه‌ی انبارگردانی برای
+            //    *همه‌ی* ردیف‌هایش «0 AS id» می‌دهد، پس چند برگه‌ی انبارگردانیِ هم‌روز و
+            //    هم‌علامت بدون این تای‌برک ترتیب نامعین داشتند — همان چیزی که کلِ این
+            //    تغییر قرار بود ببندد. NUMBER اینجا GRD_NUM است و صعودی.
+            return "SELECT " + COLS + " FROM (" + string.Join(" UNION ", parts) + ") AS AVGSRC ORDER BY DATE_N, tartib, ID, NUMBER";
         }
 
         /// <summary>گریز ساده‌ی تک‌کوتیشن برای درج امنِ کد کالا در متن SQL.</summary>
@@ -1869,8 +1917,10 @@ namespace AUTO_BAZ
                                 // هیچ ترتیبِ خطیِ ثابتی هر دو طرف را درست نمی‌کند. به‌جای حدس زدن،
                                 // کاردکسِ همه‌ی انبارهای این کالا یک‌جا خوانده و در یک جریان زمانیِ
                                 // واحد پردازش می‌شود؛ هر انبار مانده‌ی متحرکِ مستقل خودش را دارد.
-                                // چون رویدادها به ترتیب زمانیِ واقعی می‌آیند، case 5 هر حواله همیشه
-                                // قبل از case 6 متناظرش پردازش می‌شود.
+                                //
+                                // «مبدأ قبل از مقصد» در این حالت را ترتیبِ انبارها تأمین نمی‌کند
+                                // (چرخه است، ترتیبی وجود ندارد) بلکه tartib شاخه‌ی انتقالیِ ورود
+                                // تأمین می‌کند — نگاه کنید توضیح آن شاخه در BuildAvgRebuildSourceSql.
                                 // ─────────────────────────────────────────────────────────────
                                 LogWriter.WriteLog($"کالا {codeKey}: چرخه‌ی وابستگی حواله انتقالی — پردازش ادغام‌شده");
 
