@@ -1117,7 +1117,7 @@ namespace AUTO_BAZ
             // ── اصلی: همه‌ی برگه‌های خودِ این انبار ─────────────────────────────
             parts.Add(
                 " SELECT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
-                + INVO_COLS + ", dbo.TAGCOD.BARGAH, dbo.TAGCOD.tartib"
+                + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
                 + " FROM dbo.INVO_LST"
                 + " INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG"
                 + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE"
@@ -1150,9 +1150,16 @@ namespace AUTO_BAZ
             // ⚠️ این مقدار تأییدنشده است: عددهای TAGCOD.tartib روی دیتابیس شما خوانده
             //    نشده‌اند. اگر روی این دیتابیس tartib کد ۶ از کد ۵ بزرگ‌تر باشد، این
             //    شاخه بی‌اثر است و چیزی خراب نمی‌کند (ترتیب همچنان مبدأ سپس مقصد).
+            // ⚠️ ISNULL روی هر tartib ای که از TAGCOD می‌آید ضروری است، نه آرایشی:
+            //    اگر tartib یک کد NULL باشد، در ORDER BY صعودی جلوتر از همه می‌نشیند و
+            //    مهم‌تر اینکه «NULL + 0.5» باز هم NULL می‌شود — یعنی همان ترفندِ نیم‌واحدِ
+            //    پایین بی‌صدا از کار می‌افتاد و ردیف ورود دوباره جلوتر از خروج می‌افتاد.
+            //    با ISNULL(...,0) هر دو حالت قطعی می‌شوند: خروج روی 0 و ورود روی 0٫5.
+            //    (Safir هم در 14-s05-gate.sql همین ISNULL(tc.tartib, 0) را دارد، یعنی
+            //     NULL بودنِ tartib روی این خانواده دیتابیس یک حالت واقعی است.)
             var transferInTartib = anbar.HasValue
-                ? "dbo.TAGCOD.tartib"
-                : "CAST(TG_SRC.tartib AS FLOAT) + 0.5";
+                ? "ISNULL(dbo.TAGCOD.tartib, 0)"
+                : "CAST(ISNULL(TG_SRC.tartib, 0) AS FLOAT) + 0.5";
             var transferInSrcJoin = anbar.HasValue
                 ? string.Empty
                 : " INNER JOIN dbo.TAGCOD AS TG_SRC ON dbo.HEAD_LST.TAG = TG_SRC.CODE";
@@ -1236,7 +1243,7 @@ namespace AUTO_BAZ
             {
                 parts.Add(
                     " SELECT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
-                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, dbo.TAGCOD.tartib"
+                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
                     + " FROM dbo.INVO_LST"
                     + " INNER JOIN dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag"
                     + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE"
@@ -1249,7 +1256,7 @@ namespace AUTO_BAZ
             {
                 parts.Add(
                     " SELECT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
-                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, dbo.TAGCOD.tartib"
+                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
                     + " FROM dbo.INVO_LST"
                     + " INNER JOIN dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag"
                     + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE"
@@ -1773,8 +1780,11 @@ namespace AUTO_BAZ
                     // با خطای «Invalid object name» می‌افتاد. BACK_HEAD هم روی نسخه‌های قدیمی
                     // ممکن است نباشد. با این پرچم‌ها کوئری فقط شاخه‌های موجود را می‌سازد.
                     // ─────────────────────────────────────────────────────────────────────
+                    // OBJECT_ID با نامِ کاملِ dbo. پرسیده می‌شود نه sys.tables با نامِ تنها:
+                    // کوئری‌های زیر همه‌شان dbo. را صریح می‌نویسند، پس جدولی به همین نام در
+                    // اسکیمای دیگر «موجود» شمرده می‌شد ولی کوئری روی dbo باز هم می‌افتاد.
                     bool TableExists(string name) =>
-                        dbms.DoGetDataSQL<int>($"SELECT 1 FROM sys.tables WHERE name = '{name}'").Any();
+                        dbms.DoGetDataSQL<int>($"SELECT 1 WHERE OBJECT_ID(N'dbo.{name}', N'U') IS NOT NULL").Any();
 
                     var hasFbk = TableExists("HEAD_LST_FBK");
                     var hasKbk = TableExists("HEAD_LST_KBK");
