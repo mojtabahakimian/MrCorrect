@@ -10244,7 +10244,7 @@ namespace AUTO_BAZ.Functions
             var HEDRST = dbms.DoGetDataSQL<QRE_BKAZ_HEAD>(
                 "SELECT NUMBER, DATE_N, N_S, USER_NAME, CUST_NO, FNUMCO, DEPATMAN, SHIFT, " +
                 "MABL_HAZ, MOIN_HAZ, MBAA, HMBAA, TAKHFIF, M_NAGHD, MABL_HAV, MOIN_HAV, MABL_VAR, MOIN_VAR " +
-                $"FROM dbo.HEAD_LST WHERE TAG = 26 AND NUMBER >= {NUMBER} AND NUMBER <= {NUMBER2} ORDER BY NUMBER")
+                $"FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER >= {NUMBER} AND NUMBER <= {NUMBER2} ORDER BY NUMBER")
                 .Where(h => h?.NUMBER != null).ToList();
 
             LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: شروع بازسازی از {NUMBER} تا {NUMBER2} - تعداد برگه‌ها: {HEDRST.Count}");
@@ -10266,12 +10266,13 @@ namespace AUTO_BAZ.Functions
 
             // ── تاریخ نامعتبر رد می‌شود: قید CK_DEED_HED روی DATE_S حداقل 10101 است، پس
             //    ساختن سند برای چنین برگه‌ای فقط استثنا تولید می‌کند.
-            // ردیف همراه با TAG = 27 باید موجود باشد: ردیف‌های سند با TAG = 27 نوشته
-            // می‌شوند و قید FK_DEED_DTL_HEAD_LST دقیقاً همان (NUMBER, TAG) را می‌خواهد.
-            // بدون این بررسی، برگه به‌جای رد شدن با یک هشدار، خطای FK می‌داد.
+            // ردیف همراه با TAG = 26 (حواله) باید موجود باشد. سربرگ از ردیف ۲۷ خوانده
+            // می‌شود، پس قید FK_DEED_DTL_HEAD_LST — که برای ردیف‌های سند با TAG = 27 همان
+            // (NUMBER, 27) را می‌خواهد — خودبه‌خود برقرار است؛ این بررسی برای آن نیست.
+            // برای این است که برگه‌ای بدون حواله‌ی متناظر، سندِ بی‌قلم تولید نکند.
             var pairedNumbers = new HashSet<double>();
             foreach (var n in dbms.DoGetDataSQL<double?>(
-                $"SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER BETWEEN {NUMBER} AND {NUMBER2}"))
+                $"SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 26 AND NUMBER BETWEEN {NUMBER} AND {NUMBER2}"))
             {
                 if (n.HasValue) { pairedNumbers.Add(n.Value); }
             }
@@ -10286,7 +10287,7 @@ namespace AUTO_BAZ.Functions
                 }
                 if (!pairedNumbers.Contains(HEDRST[i].NUMBER.Value))
                 {
-                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} ردیف همراه TAG = 27 ندارد و رد شد.");
+                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} ردیف همراه TAG = 26 ندارد و رد شد.");
                     continue;
                 }
                 usable[i] = true;
@@ -10398,7 +10399,7 @@ namespace AUTO_BAZ.Functions
                     if (HEDRST[k].N_S != resolved)
                     {
                         HEDRST[k].N_S = resolved;
-                        headUpdates.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(resolved)} WHERE NUMBER = {SqlNum(HEDRST[k].NUMBER)} AND TAG = 26");
+                        headUpdates.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(resolved)} WHERE NUMBER = {SqlNum(HEDRST[k].NUMBER)} AND TAG IN (26, 27)");
                     }
                 }
                 const int headChunk = 500;
@@ -10457,7 +10458,7 @@ namespace AUTO_BAZ.Functions
                 {
                     var i = newHeaderIndexes[k];
                     HEDRST[i].N_S = reserved[k];
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG = 26");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG IN (26, 27)");
                 }
             }
 
@@ -10727,7 +10728,9 @@ namespace AUTO_BAZ.Functions
                                     MBAA, bed: false, what: "معين ارزش افزوده");
                     }
 
-                    batchQueries.Add($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG = 26");
+                    // ⚠️ بدون TOP (1): با «TAG IN (26, 27)» دو ردیف مقصدند و TOP (1) فقط
+                    //    یکی‌شان را — آن هم نامعین — به‌روز می‌کرد.
+                    batchQueries.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG IN (26, 27)");
 
                     var sb = new StringBuilder();
                     foreach (var q in batchQueries) { sb.Append(q).Append(';').Append('\n'); }
