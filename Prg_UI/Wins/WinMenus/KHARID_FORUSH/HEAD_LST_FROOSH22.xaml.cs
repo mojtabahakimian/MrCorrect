@@ -7736,7 +7736,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
 
                     // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
-                    visitor.PURSANT = Math.Round(porsantBase * visitor.DARSAD.Value / 100);
+                    // گِردکردن از قاعده‌ی واحد می‌آید: Math.Round پیش‌فرض C# «نیم به زوج» است و
+                    // مقداری مثل ۱۱٬۹۵۳٬۸۳۰٫۵ را به ۱۱٬۹۵۳٬۸۳۰ می‌برد، ولی صدور سند و گزارش‌ها
+                    // «نیم به بالا» (۱۱٬۹۵۳٬۸۳۱) حساب می‌کنند. همین یک ریال، سطر را برای همیشه
+                    // در فهرست «کنترل پورسانت فاکتور فروش» مغایر نگه می‌داشت.
+                    visitor.PURSANT = AUTO_BAZ.Functions.CL_PORSANT_RULE.RoundMoney(porsantBase * visitor.DARSAD.Value / 100);
                 }
 
                 try
@@ -10642,7 +10646,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(tozihdata.FirstOrDefault().Replace("%", ""));
                             if (TryGetPorsantBase(out double tafPorsantBase))
                             {
-                                CURRENT_ROW_VISITOR.PURSANT = Math.Round(tafPorsantBase * CURRENT_ROW_VISITOR.DARSAD.Value / 100);
+                                CURRENT_ROW_VISITOR.PURSANT = AUTO_BAZ.Functions.CL_PORSANT_RULE.RoundMoney(tafPorsantBase * CURRENT_ROW_VISITOR.DARSAD.Value / 100);
                             }
                             if ((bool)CURRENT_ROW_VISITOR.STAT)
                             {
@@ -10662,7 +10666,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(rst.FirstOrDefault());
                         if (TryGetPorsantBase(out double custPorsantBase))
                         {
-                            CURRENT_ROW_VISITOR.PURSANT = Math.Round(custPorsantBase * CURRENT_ROW_VISITOR.DARSAD.Value / 100);
+                            CURRENT_ROW_VISITOR.PURSANT = AUTO_BAZ.Functions.CL_PORSANT_RULE.RoundMoney(custPorsantBase * CURRENT_ROW_VISITOR.DARSAD.Value / 100);
                         }
                         if ((bool)CURRENT_ROW_VISITOR.STAT)
                         {
@@ -10686,7 +10690,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     //DARSAD_AfterUpdate
                     if (TryGetPorsantBase(out double darsadPorsantBase))
                     {
-                        CURRENT_ROW_VISITOR.PURSANT = Math.Round(darsadPorsantBase * (CURRENT_ROW_VISITOR.DARSAD ?? 0) / 100);
+                        CURRENT_ROW_VISITOR.PURSANT = AUTO_BAZ.Functions.CL_PORSANT_RULE.RoundMoney(darsadPorsantBase * (CURRENT_ROW_VISITOR.DARSAD ?? 0) / 100);
                     }
                     if (Convert.ToBoolean(CURRENT_ROW_VISITOR.STAT))
                     {
@@ -10899,7 +10903,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     else
                     {
                         // درصد ملاک است: مبلغ همیشه از روی درصدِ همین سطر و مبنای همین فاکتور محاسبه می‌شود
-                        FINAL_CROW_ITEM.PURSANT = Math.Round(porsantBase * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
+                        // (گِردکردن «نیم به بالا»، هم‌قاعده با صدور سند — نه Math.Round پیش‌فرض C#)
+                        FINAL_CROW_ITEM.PURSANT = AUTO_BAZ.Functions.CL_PORSANT_RULE.RoundMoney(porsantBase * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100);
                     }
                 }
 
