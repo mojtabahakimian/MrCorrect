@@ -4746,7 +4746,7 @@ VALUES
                                           $"SELECT SUM(T1.BES - T1.BED) AS Expr2, T1.NUMBER " +
                                           $"FROM dbo.DEED_DTL AS T1 " +
                                           $"WHERE (T1.TAG IN (12, 15)) AND (T1.HES = N'{safeHes}') " +
-                                          $"GROUP BY T1.NUMBER " +
+                                          $"GROUP BY T1.NUMBER, T1.TAG " +
                                           $"HAVING ROUND((SELECT SUM(T2.BED - T2.BES) FROM dbo.DEED_DTL T2 WHERE T2.NUMBER = T1.NUMBER AND T2.TAG = T1.TAG), 0) = 0";
 
                     dbms.DoExecuteSQL(sqlCreateSnd);
@@ -4766,7 +4766,12 @@ VALUES
                                           $"    WHERE TAG IN (1, 15) " +
                                           $"    GROUP BY NUMBER, CASE WHEN TAG = 1 THEN 12 ELSE TAG END " +
                                           $") DTL ON H.NUMBER = DTL.NUMBER AND H.TAG = DTL.HEAD_TAG " +
-                                          $"LEFT OUTER JOIN dbo.jamchkfact CHK ON H.NUMBER = CHK.NUMBER AND H.TAG = CHK.TAG " +
+                                          $"LEFT OUTER JOIN ( " +
+                                          $"    SELECT NUMBER, SUM(MABL) AS mabch " +
+                                          $"    FROM dbo.PAY_GETP " +
+                                          $"    WHERE TAG IN (1, 12, 15) " +
+                                          $"    GROUP BY NUMBER " +
+                                          $") CHK ON H.NUMBER = CHK.NUMBER " +
                                           $"WHERE (H.TAG IN (12, 15)) AND (H.CUST_NO = N'{safeHes}') " +
                                           $"GROUP BY H.NUMBER " +
                                           $"HAVING ( " +
