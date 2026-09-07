@@ -343,6 +343,9 @@ namespace AUTO_BAZ.Functions
         public class QRE_BKAZ_HEAD
         {
             public double? NUMBER { get; set; }
+            /// <summary>شماره‌ی «سایر حواله انبار» (TAG = 26) که این برگه از آن برگشت خورده.
+            /// اقلام کالا با همین شماره در INVO_LST نشسته‌اند، نه با NUMBER.</summary>
+            public double? NUMBER1 { get; set; }
             public long? DATE_N { get; set; }
             public double? N_S { get; set; }
             public string? USER_NAME { get; set; }
@@ -362,7 +365,8 @@ namespace AUTO_BAZ.Functions
             public string? MOIN_VAR { get; set; }
         }
 
-        /// <summary>یک قلم کالای برگشت خرید آزاد (INVO_LST با TAG = 26).</summary>
+        /// <summary>یک قلم کالای برگشت خرید آزاد (INVO_LST با TAG = 26).
+        /// ⚠️ NUMBER اینجا شماره‌ی حواله (HEAD_LST.NUMBER1) است، نه شماره‌ی برگه.</summary>
         public class QRE_BKAZ_LINE
         {
             public double? NUMBER { get; set; }
@@ -10242,7 +10246,7 @@ namespace AUTO_BAZ.Functions
             bool isDefaccChecked = Generaly.defacc;
 
             var HEDRST = dbms.DoGetDataSQL<QRE_BKAZ_HEAD>(
-                "SELECT NUMBER, DATE_N, N_S, USER_NAME, CUST_NO, FNUMCO, DEPATMAN, SHIFT, " +
+                "SELECT NUMBER, NUMBER1, DATE_N, N_S, USER_NAME, CUST_NO, FNUMCO, DEPATMAN, SHIFT, " +
                 "MABL_HAZ, MOIN_HAZ, MBAA, HMBAA, TAKHFIF, M_NAGHD, MABL_HAV, MOIN_HAV, MABL_VAR, MOIN_VAR " +
                 $"FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER >= {NUMBER} AND NUMBER <= {NUMBER2} ORDER BY NUMBER")
                 .Where(h => h?.NUMBER != null).ToList();
@@ -10294,6 +10298,11 @@ namespace AUTO_BAZ.Functions
                     LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} تاریخ نامعتبر دارد و رد شد.");
                     continue;
                 }
+                if (!HEDRST[i].NUMBER1.HasValue || HEDRST[i].NUMBER1.Value <= 0d)
+                {
+                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} شماره‌ی حواله (NUMBER1) ندارد، پس قلمی هم ندارد و رد شد.");
+                    continue;
+                }
                 usable[i] = true;
             }
 
@@ -10301,16 +10310,43 @@ namespace AUTO_BAZ.Functions
             var maxNum = SqlNum(HEDRST.Max(h => h.NUMBER.Value));
             var wanted = new HashSet<double>(HEDRST.Where((h, i) => usable[i]).Select(h => h.NUMBER.Value));
 
+            // ─────────────────────────────────────────────────────────────────────────
+            // ⚠️ اقلام کالا با شماره‌ی حواله (NUMBER1) کلید می‌خورند، نه شماره‌ی برگه.
+            //
+            //    این یک انحراف عمدی از رفرنس است. SANAD در فرم، اقلام را با
+            //    «INVO_LST.NUMBER = NUMBER.Text» می‌خواند (خطوط 3119 و 3280) ولی همان فرم
+            //    هرگز ردیفی در INVO_LST درج نمی‌کند و NUMBER آن را هم بازنویسی نمی‌کند —
+            //    تنها نوشتنش UPDATE ای است روی «WHERE id = …» (خط 1988). گرید اقلام هم
+            //    آن‌ها را با «NUMBER = NUMBER1.SelectedValue» می‌خواند (خط 1318) و
+            //    SumOfMEGH_MAR هم با NUMBER1 (خط 3819). یعنی اقلام روی شماره‌ی حواله
+            //    می‌مانند و شماره‌ی برگه از دنباله‌ی مستقلِ TAG = 27 می‌آید (خط 2585).
+            //
+            //    تا وقتی این دو شماره تصادفاً یکی باشند تفاوتی دیده نمی‌شود؛ به‌محض اینکه
+            //    یک حواله جا بیفتد و دنباله‌ها واگرا شوند، خواندن با NUMBER یا هیچ قلمی
+            //    پیدا نمی‌کند (سند بدون کالا) یا اقلامِ حواله‌ی برگه‌ی دیگری را برمی‌دارد.
+            //    پس رفرنس اینجا عمداً دنبال نمی‌شود.
+            //
+            //    چک‌ها (PAY_GETD با TAG = 27) برعکس، به خودِ برگه تعلق دارند و هم‌چنان با
+            //    NUMBER کلید می‌خورند — همان‌طور که رفرنس در خط 3227 می‌خواند.
+            // ─────────────────────────────────────────────────────────────────────────
+            var wantedNotes = new HashSet<double>(
+                HEDRST.Where((h, i) => usable[i]).Select(h => h.NUMBER1!.Value));
+
             // ── پیش‌خوانی: اقلام، چک‌ها و جمع فاکتور، هرکدام یک کوئری برای کل بازه ──
             var linesMap = new Dictionary<double, List<QRE_BKAZ_LINE>>();
-            foreach (var line in dbms.DoGetDataSQL<QRE_BKAZ_LINE>(
-                "SELECT L.NUMBER, L.CODE, L.MEGHk, L.MABL_K, L.AVRAGE, L.ANBAR, S.RADAH, S.NAME AS NAM " +
-                "FROM dbo.INVO_LST L INNER JOIN dbo.STUF_DEF S ON L.CODE = S.CODE " +
-                $"WHERE L.TAG = 26 AND L.NUMBER BETWEEN {minNum} AND {maxNum}"))
+            if (wantedNotes.Count > 0)
             {
-                if (line?.NUMBER == null || !wanted.Contains(line.NUMBER.Value)) { continue; }
-                if (!linesMap.TryGetValue(line.NUMBER.Value, out var list)) { linesMap[line.NUMBER.Value] = list = new List<QRE_BKAZ_LINE>(); }
-                list.Add(line);
+                var minNote = SqlNum(wantedNotes.Min());
+                var maxNote = SqlNum(wantedNotes.Max());
+                foreach (var line in dbms.DoGetDataSQL<QRE_BKAZ_LINE>(
+                    "SELECT L.NUMBER, L.CODE, L.MEGHk, L.MABL_K, L.AVRAGE, L.ANBAR, S.RADAH, S.NAME AS NAM " +
+                    "FROM dbo.INVO_LST L INNER JOIN dbo.STUF_DEF S ON L.CODE = S.CODE " +
+                    $"WHERE L.TAG = 26 AND L.NUMBER BETWEEN {minNote} AND {maxNote}"))
+                {
+                    if (line?.NUMBER == null || !wantedNotes.Contains(line.NUMBER.Value)) { continue; }
+                    if (!linesMap.TryGetValue(line.NUMBER.Value, out var list)) { linesMap[line.NUMBER.Value] = list = new List<QRE_BKAZ_LINE>(); }
+                    list.Add(line);
+                }
             }
 
             var chequeMap = new Dictionary<double, List<QRE_BKAZ_CHK>>();
@@ -10323,10 +10359,11 @@ namespace AUTO_BAZ.Functions
                 list.Add(chk);
             }
 
-            // جمع فاکتور از خودِ اقلام ساخته می‌شود، نه با یک کوئری دیگر: عیناً همان
-            // «SELECT Sum(MABL_K) FROM INVO_LST WHERE NUMBER = n AND TAG = 26» کد اصلی.
-            double JamfOf(double num) =>
-                linesMap.TryGetValue(num, out var ls) ? ls.Sum(l => l.MABL_K ?? 0d) : 0d;
+            // جمع فاکتور از خودِ اقلام ساخته می‌شود، نه با یک کوئری دیگر: همان
+            // «SELECT Sum(MABL_K) FROM INVO_LST WHERE TAG = 26 AND NUMBER = …» کد اصلی،
+            // با همان اصلاح کلید که بالا توضیح داده شد (noteNum و نه num).
+            double JamfOf(double noteNum) =>
+                linesMap.TryGetValue(noteNum, out var ls) ? ls.Sum(l => l.MABL_K ?? 0d) : 0d;
 
             // ── پیش‌ساخت حساب‌های «کالا در انبار» و «عملکرد ۹۹۹۹۹» ─────────────────────
             if (isDefaccChecked)
@@ -10497,7 +10534,9 @@ namespace AUTO_BAZ.Functions
 
                     var dateText = Strings.Format(hRow.DATE_N, "####/##/##");
                     var sellerName = GETTAFNAME(hRow.CUST_NO);
-                    var JAMF = JamfOf(num);
+                    // شماره‌ی حواله‌ی این برگه؛ کلیدِ اقلام. usable بودن تضمین کرده مقدار دارد.
+                    var noteNum = hRow.NUMBER1 ?? 0d;
+                    var JAMF = JamfOf(noteNum);
                     var MBAA = hRow.MBAA ?? 0d;
 
                     var batchQueries = new List<string>
@@ -10627,7 +10666,7 @@ namespace AUTO_BAZ.Functions
                     double KHMAVAV = 0, KHNIM = 0, KHSAKHT = 0, BAZAR = 0, KHSAY = 0;
                     var HS = new double[8];
 
-                    if (linesMap.TryGetValue(num, out var lines))
+                    if (linesMap.TryGetValue(noteNum, out var lines))
                     {
                         foreach (var line in lines)
                         {
