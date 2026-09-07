@@ -3116,7 +3116,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             if (true)
             {
-                var JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(MABL_K) FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + NUMBER.Text + ") AND ((INVO_LST.TAG)=26))").FirstOrDefault();
+                var refNumber = NUMBER1.SelectedValue ?? 0;
+                var JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(MABL_K) FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + refNumber + ") AND ((INVO_LST.TAG)=26))").FirstOrDefault();
                 if (JST0 != null)
                 {
                     JAMF = JST0.Value;
@@ -3277,7 +3278,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             KHSAKHT = 0;
             KHSAY = 0;
 
-            var JSTQ = dbms.DoGetDataSQL<QVIS5>($"SELECT dbo.INVO_LST.CODE, dbo.INVO_LST.MEGHK, dbo.INVO_LST.MABL_k, dbo.INVO_LST.avrage, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.RADAH, dbo.STUF_DEF.name as nam FROM dbo.INVO_LST INNER JOIN dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = {NUMBER.Text}) AND (dbo.INVO_LST.TAG = 26)").ToList();
+            var refNumberQ = NUMBER1.SelectedValue ?? 0;
+            var JSTQ = dbms.DoGetDataSQL<QVIS5>($"SELECT dbo.INVO_LST.CODE, dbo.INVO_LST.MEGHK, dbo.INVO_LST.MABL_k, dbo.INVO_LST.avrage, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.RADAH, dbo.STUF_DEF.name as nam FROM dbo.INVO_LST INNER JOIN dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = {refNumberQ}) AND (dbo.INVO_LST.TAG = 26)").ToList();
             foreach (var row in JSTQ)
             {
                 if (Math.Round((double)(row.MEGHK * CL_HESABDARI.LASTAVRAGE(row.CODE, (long)row.ANBAR, Convert.ToInt64(DATE_N.Text.ToRawTarikh())))) != 0)
