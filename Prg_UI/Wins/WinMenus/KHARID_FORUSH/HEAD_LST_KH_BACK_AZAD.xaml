@@ -278,8 +278,8 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <Label Content="موجودی:" Margin="0,0,500,81"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="44" Height="25" VerticalAlignment="Bottom"/>
-                    <TextBox x:Name="MOGU" IsReadOnly="True" Margin="0,0,549,80"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="94"  Padding="3" Height="27" VerticalAlignment="Bottom" IsTabStop="False" />
+                    <Label Content="موجودی:" Margin="535,0,0,81"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="44" Height="25" VerticalAlignment="Bottom"/>
+                    <TextBox x:Name="MOGU" IsReadOnly="True" Margin="436,0,0,80"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" TextAlignment="Right"  Visibility="Visible"  Padding="3" Height="27" VerticalAlignment="Bottom" IsTabStop="False" HorizontalAlignment="Left" Width="94" />
                     <Label Content="جمع مرجوعات:" Margin="365,0,0,81" Width="auto" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="25" VerticalAlignment="Bottom"/>
                     <TextBox x:Name="TEDADM" IsReadOnly="True" Height="27" Margin="267,0,0,81"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="97"  Padding="3" Text="0" IsTabStop="False" />
                     <Label Content="ارجاع به:" Margin="0,0,310,15"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="26" VerticalAlignment="Bottom"/>
