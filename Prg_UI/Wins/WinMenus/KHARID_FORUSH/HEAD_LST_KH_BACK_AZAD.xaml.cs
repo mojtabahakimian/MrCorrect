@@ -162,6 +162,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             public int NUMBER { get; set; }
             public int htag { get; set; }
+            public double? NUMBER1 { get; set; }
             public double MABL_HAZ { get; set; }
             public double MABL_VAR { get; set; }
             public double MABL_HAV { get; set; }
@@ -907,7 +908,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
 
                 //مستقیما از فاکتور خرید
-                var _FNUMCO_ = dbms.DoGetDataSQL<double?>($"SELECT FNUMCO FROM dbo.HEAD_LST WHERE NUMBER1 = {NUMBER1.SelectedValue} AND TAG = 26").FirstOrDefault();
+                var _FNUMCO_ = dbms.DoGetDataSQL<double?>($"SELECT FNUMCO FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER1.SelectedValue} AND TAG = 26").FirstOrDefault();
                 if (_FNUMCO_ != null)
                 {
                     FNUMCO.Text = _FNUMCO_.ToStringNullSafe();
@@ -2777,7 +2778,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = 3)", dt, 1);
 
-                        CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {HTAG26})", dt, 1); CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = 1)", dt, 1);
+                        var refRemittanceTr = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : NUMBER.Text;
+                        CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + refRemittanceTr + $") AND (TAG = {HTAG26})", dt, 1); CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = 1)", dt, 1);
 
                         CL_HESABDARI.TR("PAY_GETD", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); CL_HESABDARI.TR("PAY_GETD", "(NUMBER = " + NUMBER.Text + $") AND (TAG = 3)", dt, 1);
 
@@ -2834,7 +2836,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 #region SABEGHEH
                 var dt = DateTime.Now;
                 CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1);
-                CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {HTAG26})", dt, 1);
+                var refRemittanceTrDel = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : (NUMBER1.Text != "0" ? NUMBER1.Text : NUMBER.Text);
+                CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + refRemittanceTrDel + $") AND (TAG = {HTAG26})", dt, 1);
                 CL_HESABDARI.TR("PAY_GETP", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1);
                 #endregion
 
@@ -3114,9 +3117,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             //Start .................................................................
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            var refRemittanceSanad = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : HEDRST?.NUMBER1?.ToString();
             if (true)
             {
-                var JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(MABL_K) FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + NUMBER.Text + ") AND ((INVO_LST.TAG)=26))").FirstOrDefault();
+                var JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(MABL_K) FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + refRemittanceSanad + ") AND ((INVO_LST.TAG)=26))").FirstOrDefault();
                 if (JST0 != null)
                 {
                     JAMF = JST0.Value;
@@ -3277,7 +3281,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             KHSAKHT = 0;
             KHSAY = 0;
 
-            var JSTQ = dbms.DoGetDataSQL<QVIS5>($"SELECT dbo.INVO_LST.CODE, dbo.INVO_LST.MEGHK, dbo.INVO_LST.MABL_k, dbo.INVO_LST.avrage, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.RADAH, dbo.STUF_DEF.name as nam FROM dbo.INVO_LST INNER JOIN dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = {NUMBER.Text}) AND (dbo.INVO_LST.TAG = 26)").ToList();
+            var JSTQ = dbms.DoGetDataSQL<QVIS5>($"SELECT dbo.INVO_LST.CODE, dbo.INVO_LST.MEGHK, dbo.INVO_LST.MABL_k, dbo.INVO_LST.avrage, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.RADAH, dbo.STUF_DEF.name as nam FROM dbo.INVO_LST INNER JOIN dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = {refRemittanceSanad}) AND (dbo.INVO_LST.TAG = 26)").ToList();
             foreach (var row in JSTQ)
             {
                 if (Math.Round((double)(row.MEGHK * CL_HESABDARI.LASTAVRAGE(row.CODE, (long)row.ANBAR, Convert.ToInt64(DATE_N.Text.ToRawTarikh())))) != 0)
@@ -3634,7 +3638,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
 
 
-            var rst03 = dbms.DoGetDataSQL<double?>("SELECT  SUM(dbo.STUF_DEF.VAZN * dbo.INVO_LST.MEGHk) AS Weight FROM   dbo.INVO_LST INNER JOIN   dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE     (dbo.INVO_LST.TAG = " + HTAG26 /*TAG = 9 */ + ") AND (dbo.INVO_LST.NUMBER = " + NUMBER.Text + ")").ToList();
+            var refRemittancePrint = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : headLst?.NUMBER1?.ToString();
+            var rst03 = dbms.DoGetDataSQL<double?>("SELECT  SUM(dbo.STUF_DEF.VAZN * dbo.INVO_LST.MEGHk) AS Weight FROM   dbo.INVO_LST INNER JOIN   dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE     (dbo.INVO_LST.TAG = " + HTAG26 /*TAG = 9 */ + ") AND (dbo.INVO_LST.NUMBER = " + refRemittancePrint + ")").ToList();
             if (rst03.Count > 0)
             {
                 if (!IsNull(rst03.FirstOrDefault()))
