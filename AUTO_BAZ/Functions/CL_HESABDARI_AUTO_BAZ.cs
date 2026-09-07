@@ -10266,16 +10266,25 @@ namespace AUTO_BAZ.Functions
 
             // ── تاریخ نامعتبر رد می‌شود: قید CK_DEED_HED روی DATE_S حداقل 10101 است، پس
             //    ساختن سند برای چنین برگه‌ای فقط استثنا تولید می‌کند.
-            // ردیف همراه با TAG = 26 (حواله) باید موجود باشد. سربرگ از ردیف ۲۷ خوانده
-            // می‌شود، پس قید FK_DEED_DTL_HEAD_LST — که برای ردیف‌های سند با TAG = 27 همان
-            // (NUMBER, 27) را می‌خواهد — خودبه‌خود برقرار است؛ این بررسی برای آن نیست.
-            // برای این است که برگه‌ای بدون حواله‌ی متناظر، سندِ بی‌قلم تولید نکند.
-            var pairedNumbers = new HashSet<double>();
-            foreach (var n in dbms.DoGetDataSQL<double?>(
-                $"SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 26 AND NUMBER BETWEEN {NUMBER} AND {NUMBER2}"))
-            {
-                if (n.HasValue) { pairedNumbers.Add(n.Value); }
-            }
+            //
+            // ⚠️ اینجا عمداً بررسیِ «وجودِ ردیف همراه با TAG = 26 روی همین NUMBER» انجام
+            //    نمی‌شود. دو نسخه‌ی قبلی چنین شرطی داشتند و هر دو بی‌پایه بودند:
+            //
+            //    ۱) برای قید FK لازم نیست. ردیف‌های سند با (NUMBER, TAG = 27) نوشته می‌شوند و
+            //       FK_DEED_DTL_HEAD_LST همان (NUMBER, 27) را می‌خواهد — یعنی دقیقاً همان
+            //       سربرگی که خودِ کوئری بالا از HEAD_LST با TAG = 27 برداشته است. پس قید
+            //       بدون هیچ شرطی برقرار است.
+            //
+            //    ۲) کلیدِ فرضی‌اش اثبات نشده است. شماره‌ی سربرگ ۲۷ از دنباله‌ی مستقلِ خودش
+            //       می‌آید (HEAD_LST_KH_BACK_AZAD.xaml.cs:2585 → «Max(NUMBER) WHERE TAG = 27»)
+            //       و حواله‌ی متناظر در ستون NUMBER1 نگهداری می‌شود، نه با برابریِ NUMBER.
+            //       اگر این دو شماره یکی نباشند، شرط بالا هر برگه را رد می‌کرد و C12 هیچ
+            //       سندی تولید نمی‌کرد. رفرنس (SANAD در همان فرم) هم چنین بررسی‌ای ندارد.
+            //
+            //    برگه‌ای که قلم دارد ولی ناتراز درمی‌آید را کنترل ترازِ انتهای همین تابع
+            //    می‌گیرد و لاگ می‌کند. برگه‌ای که هیچ سطری تولید نمی‌کند (همه‌ی مبالغ صفر)
+            //    اصلاً سندی نمی‌سازد، پس چیزی هم خراب نمی‌کند — کنترل تراز آن را نمی‌بیند
+            //    چون SUM روی صفر ردیف NULL است، نه صفر.
 
             var usable = new bool[HEDRST.Count];
             for (int i = 0; i < HEDRST.Count; i++)
@@ -10283,11 +10292,6 @@ namespace AUTO_BAZ.Functions
                 if (HEDRST[i].DATE_N == null || HEDRST[i].DATE_N.Value < 10101)
                 {
                     LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} تاریخ نامعتبر دارد و رد شد.");
-                    continue;
-                }
-                if (!pairedNumbers.Contains(HEDRST[i].NUMBER.Value))
-                {
-                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} ردیف همراه TAG = 26 ندارد و رد شد.");
                     continue;
                 }
                 usable[i] = true;
@@ -10399,7 +10403,7 @@ namespace AUTO_BAZ.Functions
                     if (HEDRST[k].N_S != resolved)
                     {
                         HEDRST[k].N_S = resolved;
-                        headUpdates.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(resolved)} WHERE NUMBER = {SqlNum(HEDRST[k].NUMBER)} AND TAG IN (26, 27)");
+                        headUpdates.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(resolved)} WHERE NUMBER = {SqlNum(HEDRST[k].NUMBER)} AND TAG = 27");
                     }
                 }
                 const int headChunk = 500;
@@ -10458,7 +10462,7 @@ namespace AUTO_BAZ.Functions
                 {
                     var i = newHeaderIndexes[k];
                     HEDRST[i].N_S = reserved[k];
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG IN (26, 27)");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG = 27");
                 }
             }
 
@@ -10728,20 +10732,26 @@ namespace AUTO_BAZ.Functions
                                     MBAA, bed: false, what: "معين ارزش افزوده");
                     }
 
-                    // ⚠️ بدون TOP (1): با «TAG IN (26, 27)» دو ردیف مقصدند و TOP (1) فقط
-                    //    یکی‌شان را — آن هم نامعین — به‌روز می‌کرد.
-                    batchQueries.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG IN (26, 27)");
+                    // ⚠️ مقصد فقط ردیف (NUMBER, TAG = 27) است — عیناً همان چیزی که رفرنس
+                    //    می‌نویسد (HEAD_LST_KH_BACK_AZAD.xaml.cs:3469). ردیف TAG = 26 عمداً
+                    //    دست‌نخورده می‌ماند: N_S آن در کل کدبیس هیچ نویسنده‌ای ندارد و اگر
+                    //    شماره‌ی سربرگ ۲۷ با شماره‌ی یک «سایر حواله»‌ی بی‌ربط یکی باشد،
+                    //    نوشتن روی آن سندِ اشتباه را به آن حواله می‌چسباند.
+                    //    (NUMBER, TAG) کلید اصلیِ HEAD_LST است، پس اینجا دقیقاً یک ردیف
+                    //    هدف است و TOP (1) هم لازم نیست.
+                    batchQueries.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG = 27");
 
                     var sb = new StringBuilder();
                     foreach (var q in batchQueries) { sb.Append(q).Append(';').Append('\n'); }
                     ExecuteWithDeadlockRetry(() => dbms.DoExecuteSQL(sb.ToString()));
 
                     // ── کنترل تراز، بعد از نوشتن ─────────────────────────────────────
-                    // این تابع تازه است و روی داده‌ی واقعی آزموده نشده؛ ضمناً یک فرضِ
-                    // مدل‌سازی دارد که از روی سورس قطعی نشد: اینکه مبالغ سربرگ روی ردیف
-                    // HEAD_LST با TAG = 26 نشسته‌اند (مبنا Safir؛ خودِ فرم آن‌ها را روی ۲۷
-                    // می‌نویسد). اگر آن فرض غلط باشد همه‌ی مبالغ صفر خوانده می‌شوند و سند
-                    // ناتراز درمی‌آید — که دقیقاً همین‌جا دیده می‌شود.
+                    // این تابع تازه است و روی داده‌ی واقعی آزموده نشده، پس تراز هر برگه
+                    // بعد از نوشتن راستی‌آزمایی می‌شود.
+                    //
+                    // (فرضِ مدل‌سازیِ قبلی — «مبالغ سربرگ روی ردیف TAG = 26 است» — کنار
+                    //  گذاشته شد: UPDATE مبالغ در HEAD_LST_KH_BACK_AZAD.xaml.cs:2700 صریحاً
+                    //  «WHERE NUMBER = … AND TAG = 27» است، پس سربرگ از ۲۷ خوانده می‌شود.)
                     //
                     // ⚠️ دامنه عمداً (NUMBER, TAG = 27) است و نه N_S: در حالت سند روزانه
                     //    چند برگه یک N_S مشترک دارند، پس جمع بر اساس N_S همیشه ناتراز
