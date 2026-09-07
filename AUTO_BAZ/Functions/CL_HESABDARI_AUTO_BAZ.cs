@@ -1,4 +1,4 @@
-using AUTO_BAZ.HelperWins;
+﻿using AUTO_BAZ.HelperWins;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
@@ -141,6 +141,14 @@ namespace AUTO_BAZ.Functions
             _bankNameCache.Clear();
             _kalaGroupCache.Clear();
             _missingPorsantPatternLogged.Clear();
+
+            // ⚠️ «وجود dbo.MANF_JAMK» هم اینجا باطل می‌شود، نه فقط کش‌های داده.
+            //    دلیلش این است که کاربر می‌تواند وسط اجرای برنامه دیتابیس را عوض کند
+            //    (MainWindow.BtnCNNConf_Click → WinConnectionChoose، که CONNECTION_STR را
+            //    بازنویسی می‌کند). اگر این پرچم برای عمرِ فرایند کش می‌ماند، بازسازیِ بعدی
+            //    روی دیتابیس تازه با پاسخِ دیتابیس قبلی تصمیم می‌گرفت — یا کوئری روی شیئی
+            //    که نیست اجرا می‌شد، یا مسیر جایگزین روی دیتابیسی که شیء را دارد.
+            lock (_manfJamkLock) { _manfJamkExists = null; }
         }
 
         /// <summary>
@@ -328,6 +336,60 @@ namespace AUTO_BAZ.Functions
             public string? NAME { get; set; }
             public double? GHT { get; set; }
         }
+        /// <summary>سربرگ «برگشت خرید آزاد» — از ردیف HEAD_LST با TAG = 26 خوانده می‌شود،
+        /// مطابق سرویس PurchaseReturnFreeRebuildService پروژه‌ی Safir که ملاک این پورت است.
+        /// (خودِ فرم HEAD_LST_KH_BACK_AZAD مبالغ را روی ردیف TAG = 27 می‌نویسد؛ اختلاف در
+        /// توضیح بالای GENSANADBARGASHTKHARIDAZAD ثبت شده و کنترل تراز آن را می‌گیرد.)</summary>
+        public class QRE_BKAZ_HEAD
+        {
+            public double? NUMBER { get; set; }
+            /// <summary>شماره‌ی «سایر حواله انبار» (TAG = 26) که این برگه از آن برگشت خورده.
+            /// اقلام کالا با همین شماره در INVO_LST نشسته‌اند، نه با NUMBER.</summary>
+            public double? NUMBER1 { get; set; }
+            public long? DATE_N { get; set; }
+            public double? N_S { get; set; }
+            public string? USER_NAME { get; set; }
+            public string? CUST_NO { get; set; }
+            public double? FNUMCO { get; set; }
+            public int? DEPATMAN { get; set; }
+            public int? SHIFT { get; set; }
+            public double? MABL_HAZ { get; set; }
+            public string? MOIN_HAZ { get; set; }
+            public double? MBAA { get; set; }
+            public string? HMBAA { get; set; }
+            public double? TAKHFIF { get; set; }
+            public double? M_NAGHD { get; set; }
+            public double? MABL_HAV { get; set; }
+            public string? MOIN_HAV { get; set; }
+            public double? MABL_VAR { get; set; }
+            public string? MOIN_VAR { get; set; }
+        }
+
+        /// <summary>یک قلم کالای برگشت خرید آزاد (INVO_LST با TAG = 26).
+        /// ⚠️ NUMBER اینجا شماره‌ی حواله (HEAD_LST.NUMBER1) است، نه شماره‌ی برگه.</summary>
+        public class QRE_BKAZ_LINE
+        {
+            public double? NUMBER { get; set; }
+            public string? CODE { get; set; }
+            public double? MEGHk { get; set; }
+            public double? MABL_K { get; set; }
+            public double? AVRAGE { get; set; }
+            public int? ANBAR { get; set; }
+            public double? RADAH { get; set; }
+            public string? NAM { get; set; }
+        }
+
+        /// <summary>چک دریافتیِ پیوستِ برگه‌ی برگشت خرید آزاد (PAY_GETD با TAG = 27).</summary>
+        public class QRE_BKAZ_CHK
+        {
+            public double? NUMBER { get; set; }
+            public double? N_SERI { get; set; }
+            public double? BANK { get; set; }
+            public long? DATE_S { get; set; }
+            public string? SHOBEH { get; set; }
+            public double? MABL { get; set; }
+        }
+
         public class QRE_BAZ_15
         {
             public double? MABL_K { get; set; }
@@ -4781,6 +4843,47 @@ namespace AUTO_BAZ.Functions
                 progressReporter.ReportOne();
             }
         }
+        /// <summary>
+        /// آیا شیء dbo.MANF_JAMK روی این دیتابیس وجود دارد؟
+        ///
+        /// یک بار در طول عمر برنامه پرسیده می‌شود (نه به‌ازای هر برگه)، چون ساخته/حذف‌شدن
+        /// یک شیء دیتابیس وسط یک اجرای بازسازی سناریوی واقعی نیست. عمداً مستقل از
+        /// LookupCacheEnabled است: این یک «وجود شیء» است نه یک مقدار داده، و بازسازی
+        /// هرگز به آن نمی‌نویسد.
+        /// </summary>
+        private static bool? _manfJamkExists;
+        private static readonly object _manfJamkLock = new object();
+        public static bool ManfJamkExists()
+        {
+            var cached = _manfJamkExists;
+            if (cached.HasValue) { return cached.Value; }
+
+            lock (_manfJamkLock)
+            {
+                if (_manfJamkExists.HasValue) { return _manfJamkExists.Value; }
+                bool exists;
+                try
+                {
+                    exists = dbms.DoGetDataSQL<int>(
+                        "SELECT 1 WHERE OBJECT_ID(N'dbo.MANF_JAMK') IS NOT NULL").Any();
+                }
+                catch (Exception ex)
+                {
+                    // اگر خودِ این پرسش شکست خورد، محافظه‌کارانه رفتار قبلی حفظ می‌شود.
+                    LogWriter.WriteLog($"ManfJamkExists: {ex.Message}");
+                    exists = true;
+                }
+
+                if (!exists)
+                {
+                    LogWriter.WriteLog("dbo.MANF_JAMK روی این دیتابیس نیست — بهای تمام‌شده‌ی برگشت فروش مستقیم از HEAD_MANF/DTL_MANF خوانده می‌شود.");
+                }
+
+                _manfJamkExists = exists;
+                return exists;
+            }
+        }
+
         public static string GETGRPKALA(int CC)
         {
             var rst = dbms.DoGetDataSQL<string>("SELECT     NAMES  FROM dbo.TCOD_STUFGROUP WHERE     (CODE = " + System.Convert.ToString(CC) + ")").ToList();
@@ -8377,7 +8480,35 @@ namespace AUTO_BAZ.Functions
                     //DoEvents();
                 }
 
-                var JST = dbms.DoGetDataSQL<QRE_BAZ_16>("SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, [SumOfMABLK]+[IMBIBE_MANF]+[IMBIBE_SAR] AS GHT FROM (INVO_LST INNER JOIN MANF_JAMK ON INVO_LST.CODE = MANF_JAMK.CODE) INNER JOIN STUF_DEF ON INVO_LST.CODE = STUF_DEF.CODE WHERE (((INVO_LST.NUMBER)=" + HFRST[ROW].NUMBER1 + ") AND ((INVO_LST.TAG)=2))").ToList();
+                // ⚠️ dbo.MANF_JAMK یک شیء قدیمیِ دیتابیس است که هیچ‌کدام از مخزن‌های این
+                //    برنامه (MrCorrect، AUTO_BAZ، ScriptSqly) آن را نمی‌سازند. چون INNER JOIN
+                //    است، اگر روی یک دیتابیس نباشد یا خالی باشد، این کوئری صفر ردیف می‌دهد و
+                //    کل شاخه‌ی بهای تمام‌شده‌ی برگشت فروش بی‌صدا حذف می‌شود — نه خطایی، نه لاگی.
+                //
+                //    وقتی شیء هست، عیناً همان کوئری قبلی اجرا می‌شود تا اعداد امروز تغییر نکند.
+                //    وقتی نیست، معادلش مستقیم از HEAD_MANF/DTL_MANF ساخته می‌شود (همان کاری که
+                //    پروژه‌ی Safir در SaleReturnRebuildService انجام می‌دهد). چون MANF_JAMK
+                //    به‌ازای هر کالا یک ردیف می‌دهد، معادلِ مستقیم هم با آخرین FNUMB هر کالا
+                //    یک ردیف می‌سازد.
+                var JST = dbms.DoGetDataSQL<QRE_BAZ_16>(
+                    ManfJamkExists()
+                        ? "SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, [SumOfMABLK]+[IMBIBE_MANF]+[IMBIBE_SAR] AS GHT FROM (INVO_LST INNER JOIN MANF_JAMK ON INVO_LST.CODE = MANF_JAMK.CODE) INNER JOIN STUF_DEF ON INVO_LST.CODE = STUF_DEF.CODE WHERE (((INVO_LST.NUMBER)=" + HFRST[ROW].NUMBER1 + ") AND ((INVO_LST.TAG)=2))"
+                        : "SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME,"
+                          + " M.SumOfMABLK + M.IMBIBE_MANF + M.IMBIBE_SAR AS GHT"
+                          + " FROM dbo.INVO_LST"
+                          + " INNER JOIN dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE"
+                          + " INNER JOIN ("
+                          // جمع ردیف‌های فرمول عمداً زیرپرسشِ اسکالر است و نه JOIN: اگر
+                          // (CODE, FNUMB) در HEAD_MANF یکتا نباشد، JOIN ردیف‌های DTL_MANF را
+                          // چند برابر می‌کرد و SumOfMABLK بزرگ‌تر از واقع درمی‌آمد.
+                          + "   SELECT X.CODE,"
+                          + "          (SELECT SUM(D.MABLK) FROM dbo.DTL_MANF D WHERE D.FNUMB = X.FNUMB) AS SumOfMABLK,"
+                          + "          MIN(H.IMBIBE_MANF) AS IMBIBE_MANF, MIN(H.IMBIBE_SAR) AS IMBIBE_SAR"
+                          + "   FROM (SELECT CODE, MAX(FNUMB) AS FNUMB FROM dbo.HEAD_MANF GROUP BY CODE) X"
+                          + "   INNER JOIN dbo.HEAD_MANF H ON H.CODE = X.CODE AND H.FNUMB = X.FNUMB"
+                          + "   GROUP BY X.CODE, X.FNUMB"
+                          + " ) AS M ON M.CODE = dbo.INVO_LST.CODE"
+                          + " WHERE (dbo.INVO_LST.NUMBER = " + HFRST[ROW].NUMBER1 + ") AND (dbo.INVO_LST.TAG = 2)").ToList();
                 if (HFRST[ROW].MABL_HAZ != 0)
                 {
                     if (IsNull(HFRST[ROW].MOIN_HAZ))
@@ -10060,6 +10191,640 @@ namespace AUTO_BAZ.Functions
 
 
         }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        //  سند «برگشت خرید آزاد» — سربرگ HEAD_LST.TAG = 27، اقلام INVO_LST.TAG = 26،
+        //  ردیف‌های سند DEED_DTL.TAG = 27، نوع سند NO_S = 3.
+        //
+        //  چرا اضافه شد: تا امروز هیچ‌کدام از بخش‌های C1..C11 این نوع برگه را بازسازی
+        //  نمی‌کرد — «TAG = 26» و «TAG = 27» در کل پروژه‌ی AUTO_BAZ هیچ‌جا نبود. در حالی
+        //  که بازسازی نرخ میانگین (C0) خودش «case 26: برگشت خريد» را دارد، یعنی نرخ این
+        //  اقلام به‌روز می‌شد ولی سند حسابداری‌شان با نرخ قدیمی سرِ جایش می‌ماند.
+        //
+        //  مبنای پورت: معماری و ساختار از سرویس PurchaseReturnFreeRebuildService پروژه‌ی
+        //  Safir، و محتوای ردیف‌های حساب از تابع SANAD() فرم
+        //  Prg_UI/Wins/WinMenus/KHARID_FORUSH/HEAD_LST_KH_BACK_AZAD.xaml.cs (خط ۳۰۷۲).
+        //
+        //  ⚠️ دو جا عمداً از Safir پیروی نشده و دلیلش اینجاست:
+        //
+        //   ۱. سربرگ از TAG = 26 خوانده می‌شود و N_S هم روی همان ردیف نوشته می‌شود —
+        //      عیناً مثل Safir، به تصریح صاحب پروژه («ملاک و مبنا Safir است»).
+        //
+        //      ⚠️ این نقطه‌ای است که خودِ فرم HEAD_LST_KH_BACK_AZAD جور دیگری عمل می‌کند:
+        //      آنجا FTAG = 27 است (خط ۲۰۶) و مبالغ سربرگ و N_S هر دو روی ردیف ۲۷ نوشته
+        //      می‌شوند (خط ۲۷۰۰ و ۳۴۶۹). اگر روی این دیتابیس ردیف TAG = 26 مبالغ را
+        //      نداشته باشد، همه‌ی ردیف‌های تخفیف/نقد/ارزش‌افزوده/خدمات ساخته نمی‌شوند.
+        //      برای همین «کنترل تراز» پایین اضافه شده: اگر چنین باشد، همان اجرای اول
+        //      سند ناتراز را در لاگ گزارش می‌کند و اجرا ناموفق علامت می‌خورد.
+        //      کوئری قطعی‌کننده:
+        //          SELECT NUMBER, TAG, TAKHFIF, MBAA, M_NAGHD, MABL_HAV, MABL_VAR, MABL_HAZ
+        //          FROM dbo.HEAD_LST WHERE TAG IN (26, 27)
+        //            AND NUMBER IN (SELECT NUMBER FROM dbo.HEAD_LST WHERE TAG = 27)
+        //          ORDER BY NUMBER, TAG;
+        //
+        //   ۲. شرطِ ساختِ ردیفِ موجودی، همان مقداری است که پست می‌شود
+        //      (Round(MEGHk × AVRAGE))، نه یک نرخِ جداگانه. فرم آنجا LASTAVRAGE() را صدا
+        //      می‌زند ولی مبلغ را از AVRAGE می‌سازد؛ اگر آن دو یکی نباشند یا ردیفِ صفر
+        //      ثبت می‌شود یا مبلغی واقعی با تجمیعِ گروهِ کالایش حذف می‌شود و سند ناتراز
+        //      می‌گردد. LASTAVRAGE هم در AUTO_BAZ وجود ندارد (در Prg_UI/CL_HESABDARI است
+        //      و به dbo.KA_KH وابسته). Safir هم همین انتخاب را کرده.
+        // ═══════════════════════════════════════════════════════════════════════════════
+        public static (double?, bool) GENSANADBARGASHTKHARIDAZAD(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            bool isDefaccChecked = Generaly.defacc;
+
+            var HEDRST = dbms.DoGetDataSQL<QRE_BKAZ_HEAD>(
+                "SELECT NUMBER, NUMBER1, DATE_N, N_S, USER_NAME, CUST_NO, FNUMCO, DEPATMAN, SHIFT, " +
+                "MABL_HAZ, MOIN_HAZ, MBAA, HMBAA, TAKHFIF, M_NAGHD, MABL_HAV, MOIN_HAV, MABL_VAR, MOIN_VAR " +
+                $"FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER >= {NUMBER} AND NUMBER <= {NUMBER2} ORDER BY NUMBER")
+                .Where(h => h?.NUMBER != null).ToList();
+
+            LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: شروع بازسازی از {NUMBER} تا {NUMBER2} - تعداد برگه‌ها: {HEDRST.Count}");
+
+            var progressReporter = new ThrottledProgressReporter(
+                HEDRST.Count,
+                InternalCalling && auto_run != null ? auto_run.Dispatcher : null,
+                value =>
+                {
+                    auto_run.PRGR_C12.Value = Math.Max(auto_run.PRGR_C12.Value, value);
+                    auto_run.UpdateOverallProgressBar();
+                });
+
+            if (HEDRST.Count == 0)
+            {
+                progressReporter.Complete();
+                return (SANAD_NUMBER, IsSuccessfully);
+            }
+
+            // ── تاریخ نامعتبر رد می‌شود: قید CK_DEED_HED روی DATE_S حداقل 10101 است، پس
+            //    ساختن سند برای چنین برگه‌ای فقط استثنا تولید می‌کند.
+            //
+            // ⚠️ اینجا عمداً بررسیِ «وجودِ ردیف همراه با TAG = 26 روی همین NUMBER» انجام
+            //    نمی‌شود. دو نسخه‌ی قبلی چنین شرطی داشتند و هر دو بی‌پایه بودند:
+            //
+            //    ۱) برای قید FK لازم نیست. ردیف‌های سند با (NUMBER, TAG = 27) نوشته می‌شوند و
+            //       FK_DEED_DTL_HEAD_LST همان (NUMBER, 27) را می‌خواهد — یعنی دقیقاً همان
+            //       سربرگی که خودِ کوئری بالا از HEAD_LST با TAG = 27 برداشته است. پس قید
+            //       بدون هیچ شرطی برقرار است.
+            //
+            //    ۲) کلیدِ فرضی‌اش اثبات نشده است. شماره‌ی سربرگ ۲۷ از دنباله‌ی مستقلِ خودش
+            //       می‌آید (HEAD_LST_KH_BACK_AZAD.xaml.cs:2585 → «Max(NUMBER) WHERE TAG = 27»)
+            //       و حواله‌ی متناظر در ستون NUMBER1 نگهداری می‌شود، نه با برابریِ NUMBER.
+            //       اگر این دو شماره یکی نباشند، شرط بالا هر برگه را رد می‌کرد و C12 هیچ
+            //       سندی تولید نمی‌کرد. رفرنس (SANAD در همان فرم) هم چنین بررسی‌ای ندارد.
+            //
+            //    برگه‌ای که قلم دارد ولی ناتراز درمی‌آید را کنترل ترازِ انتهای همین تابع
+            //    می‌گیرد و لاگ می‌کند. برگه‌ای که هیچ سطری تولید نمی‌کند (همه‌ی مبالغ صفر)
+            //    اصلاً سندی نمی‌سازد، پس چیزی هم خراب نمی‌کند — کنترل تراز آن را نمی‌بیند
+            //    چون SUM روی صفر ردیف NULL است، نه صفر.
+
+            var usable = new bool[HEDRST.Count];
+            for (int i = 0; i < HEDRST.Count; i++)
+            {
+                if (HEDRST[i].DATE_N == null || HEDRST[i].DATE_N.Value < 10101)
+                {
+                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} تاریخ نامعتبر دارد و رد شد.");
+                    continue;
+                }
+                if (!HEDRST[i].NUMBER1.HasValue || HEDRST[i].NUMBER1.Value <= 0d)
+                {
+                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {HEDRST[i].NUMBER} شماره‌ی حواله (NUMBER1) ندارد، پس قلمی هم ندارد و رد شد.");
+                    continue;
+                }
+                usable[i] = true;
+            }
+
+            var minNum = SqlNum(HEDRST.Min(h => h.NUMBER.Value));
+            var maxNum = SqlNum(HEDRST.Max(h => h.NUMBER.Value));
+            var wanted = new HashSet<double>(HEDRST.Where((h, i) => usable[i]).Select(h => h.NUMBER.Value));
+
+            // ─────────────────────────────────────────────────────────────────────────
+            // ⚠️ اقلام کالا با شماره‌ی حواله (NUMBER1) کلید می‌خورند، نه شماره‌ی برگه.
+            //
+            //    این یک انحراف عمدی از رفرنس است. SANAD در فرم، اقلام را با
+            //    «INVO_LST.NUMBER = NUMBER.Text» می‌خواند (خطوط 3119 و 3280) ولی همان فرم
+            //    هرگز ردیفی در INVO_LST درج نمی‌کند و NUMBER آن را هم بازنویسی نمی‌کند —
+            //    تنها نوشتنش UPDATE ای است روی «WHERE id = …» (خط 1988). گرید اقلام هم
+            //    آن‌ها را با «NUMBER = NUMBER1.SelectedValue» می‌خواند (خط 1318) و
+            //    SumOfMEGH_MAR هم با NUMBER1 (خط 3819). یعنی اقلام روی شماره‌ی حواله
+            //    می‌مانند و شماره‌ی برگه از دنباله‌ی مستقلِ TAG = 27 می‌آید (خط 2585).
+            //
+            //    تا وقتی این دو شماره تصادفاً یکی باشند تفاوتی دیده نمی‌شود؛ به‌محض اینکه
+            //    یک حواله جا بیفتد و دنباله‌ها واگرا شوند، خواندن با NUMBER یا هیچ قلمی
+            //    پیدا نمی‌کند (سند بدون کالا) یا اقلامِ حواله‌ی برگه‌ی دیگری را برمی‌دارد.
+            //    پس رفرنس اینجا عمداً دنبال نمی‌شود.
+            //
+            //    چک‌ها (PAY_GETD با TAG = 27) برعکس، به خودِ برگه تعلق دارند و هم‌چنان با
+            //    NUMBER کلید می‌خورند — همان‌طور که رفرنس در خط 3227 می‌خواند.
+            // ─────────────────────────────────────────────────────────────────────────
+            var wantedNotes = new HashSet<double>(
+                HEDRST.Where((h, i) => usable[i]).Select(h => h.NUMBER1!.Value));
+
+            // ── پیش‌خوانی: اقلام، چک‌ها و جمع فاکتور، هرکدام یک کوئری برای کل بازه ──
+            var linesMap = new Dictionary<double, List<QRE_BKAZ_LINE>>();
+            if (wantedNotes.Count > 0)
+            {
+                var minNote = SqlNum(wantedNotes.Min());
+                var maxNote = SqlNum(wantedNotes.Max());
+                foreach (var line in dbms.DoGetDataSQL<QRE_BKAZ_LINE>(
+                    "SELECT L.NUMBER, L.CODE, L.MEGHk, L.MABL_K, L.AVRAGE, L.ANBAR, S.RADAH, S.NAME AS NAM " +
+                    "FROM dbo.INVO_LST L INNER JOIN dbo.STUF_DEF S ON L.CODE = S.CODE " +
+                    $"WHERE L.TAG = 26 AND L.NUMBER BETWEEN {minNote} AND {maxNote}"))
+                {
+                    if (line?.NUMBER == null || !wantedNotes.Contains(line.NUMBER.Value)) { continue; }
+                    if (!linesMap.TryGetValue(line.NUMBER.Value, out var list)) { linesMap[line.NUMBER.Value] = list = new List<QRE_BKAZ_LINE>(); }
+                    list.Add(line);
+                }
+            }
+
+            var chequeMap = new Dictionary<double, List<QRE_BKAZ_CHK>>();
+            foreach (var chk in dbms.DoGetDataSQL<QRE_BKAZ_CHK>(
+                "SELECT NUMBER, N_SERI, BANK, DATE_S, SHOBEH, MABL FROM dbo.PAY_GETD " +
+                $"WHERE TAG = 27 AND NUMBER BETWEEN {minNum} AND {maxNum}"))
+            {
+                if (chk?.NUMBER == null || !wanted.Contains(chk.NUMBER.Value)) { continue; }
+                if (!chequeMap.TryGetValue(chk.NUMBER.Value, out var list)) { chequeMap[chk.NUMBER.Value] = list = new List<QRE_BKAZ_CHK>(); }
+                list.Add(chk);
+            }
+
+            // جمع فاکتور از خودِ اقلام ساخته می‌شود، نه با یک کوئری دیگر: همان
+            // «SELECT Sum(MABL_K) FROM INVO_LST WHERE TAG = 26 AND NUMBER = …» کد اصلی،
+            // با همان اصلاح کلید که بالا توضیح داده شد (noteNum و نه num).
+            double JamfOf(double noteNum) =>
+                linesMap.TryGetValue(noteNum, out var ls) ? ls.Sum(l => l.MABL_K ?? 0d) : 0d;
+
+            // ── پیش‌ساخت حساب‌های «کالا در انبار» و «عملکرد ۹۹۹۹۹» ─────────────────────
+            if (isDefaccChecked)
+            {
+                var accountsToEnsure = new HashSet<(double? Kol, double? Moin, long Code, string? Name)>();
+                foreach (var kv in linesMap)
+                {
+                    foreach (var l in kv.Value)
+                    {
+                        if (string.IsNullOrEmpty(l.CODE) || !l.ANBAR.HasValue) { continue; }
+                        if (!long.TryParse(l.CODE, out var codeLong)) { continue; }
+                        accountsToEnsure.Add((Baseknow.MOGODIA, l.ANBAR.Value, codeLong, l.NAM));
+                        accountsToEnsure.Add((Baseknow.AMALKARD, 99999d, codeLong, l.NAM));
+                    }
+                }
+                foreach (var acc in accountsToEnsure)
+                {
+                    try { CREATHES(acc.Kol, acc.Moin, acc.Code, string.IsNullOrEmpty(acc.Name) ? " " : acc.Name); }
+                    catch (Exception ex) { LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: پیش‌ساخت حساب {acc.Kol}-{acc.Moin}-{acc.Code}: {ex.Message}"); }
+                }
+            }
+
+            // ── رزرو دسته‌ای شماره سند (NO_S = 3) — همان الگوی بخش‌های خواهر ────────────
+            //
+            // هر دو حالت «سند روزانه» (SNDKH = true) و «تک‌سندی» پشتیبانی می‌شوند، چون
+            // پنج تابع دیگرِ همین فایل (فروش، خرید، خروج سایر، برگشت فروش ۱ و ۲) هم همین
+            // را دارند و Safir هم برای همین سرویس دارد. اگر شرکت روی سند روزانه باشد و
+            // این یکی تک‌سندی بماند، فقط همین نوع برگه از الگوی بقیه بیرون می‌افتد.
+            var isDailyMode = (bool)Baseknow.SNDKH;
+            var dailyNs = new Dictionary<long, double>();
+
+            if (isDailyMode)
+            {
+                var usableIdx = Enumerable.Range(0, HEDRST.Count).Where(k => usable[k]).ToList();
+                var dates = usableIdx.Select(k => HEDRST[k].DATE_N.Value).Distinct().ToList();
+
+                if (dates.Count > 0)
+                {
+                    foreach (var row in dbms.DoGetDataSQL<QRE10>(
+                        $"SELECT BASE, n_s, date_s, no_s FROM dbo.deed_hed WHERE no_s = 3 AND date_s BETWEEN {dates.Min()} AND {dates.Max()}"))
+                    {
+                        if (row?.DATE_S != null && row.N_S != null && !dailyNs.ContainsKey(row.DATE_S.Value))
+                        {
+                            dailyNs[row.DATE_S.Value] = row.N_S.Value;
+                        }
+                    }
+
+                    var missingDates = dates.Where(d => !dailyNs.ContainsKey(d)).ToList();
+                    if (missingDates.Count > 0)
+                    {
+                        var dailyRequests = missingDates.Select(d =>
+                        {
+                            var sample = HEDRST[usableIdx.First(k => HEDRST[k].DATE_N.Value == d)];
+                            return new SanadHeaderRequest
+                            {
+                                DATE_S = d,
+                                SHARH_S = BuildSharhS(sample),
+                                GHATEI = 0,
+                                NO_S = 3,
+                                OKF = 1,
+                                USER_NAME = sample.USER_NAME
+                            };
+                        }).ToList();
+
+                        var newNs = ReserveSanadNumbersBatch(dailyRequests);
+                        for (int k = 0; k < missingDates.Count; k++) { dailyNs[missingDates[k]] = newNs[k]; }
+                    }
+                }
+
+                var headUpdates = new List<string>();
+                foreach (var k in usableIdx)
+                {
+                    var resolved = dailyNs[HEDRST[k].DATE_N.Value];
+                    if (HEDRST[k].N_S != resolved)
+                    {
+                        HEDRST[k].N_S = resolved;
+                        headUpdates.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(resolved)} WHERE NUMBER = {SqlNum(HEDRST[k].NUMBER)} AND TAG = 27");
+                    }
+                }
+                const int headChunk = 500;
+                for (int off = 0; off < headUpdates.Count; off += headChunk)
+                {
+                    var sbh = new StringBuilder();
+                    foreach (var q in headUpdates.Skip(off).Take(headChunk)) { sbh.Append(q).Append(';').Append('\n'); }
+                    if (sbh.Length > 0) { dbms.DoExecuteSQL(sbh.ToString()); }
+                }
+            }
+
+            var existingHeaderNumbers = new HashSet<double>();
+            var candidateNumbers = isDailyMode
+                ? new List<double>()
+                : HEDRST.Where((h, i) => usable[i] && h.N_S != null && h.N_S.Value != 0)
+                        .Select(h => h.N_S.Value).Distinct().ToList();
+            if (candidateNumbers.Count > 0)
+            {
+                foreach (var found in dbms.DoGetDataSQL<double?>(
+                    $"SELECT N_S FROM dbo.DEED_HED WHERE NO_S = 3 AND N_S BETWEEN {SqlNum(candidateNumbers.Min())} AND {SqlNum(candidateNumbers.Max())}"))
+                {
+                    if (found.HasValue) { existingHeaderNumbers.Add(found.Value); }
+                }
+            }
+
+            string BuildSharhS(QRE_BKAZ_HEAD h) => Strings.Right(
+                " فاكتور برگشت خرید (آزاد) شماره " + h.NUMBER + " مورخ " + Strings.Format(h.DATE_N, "####/##/##")
+                + " فروشنده: " + GETTAFNAME(h.CUST_NO), 100);
+
+            var needsNewHeader = new bool[HEDRST.Count];
+            var claimedNumbers = new HashSet<double>();
+            var newHeaderIndexes = new List<int>();
+            for (int i = 0; i < HEDRST.Count; i++)
+            {
+                if (!usable[i] || isDailyMode) { continue; }   // در حالت روزانه شماره‌ها بالا حل شده‌اند
+                var ns = HEDRST[i].N_S;
+                var exists = ns != null && ns.Value != 0 && existingHeaderNumbers.Contains(ns.Value);
+                var owns = exists && claimedNumbers.Add(ns.Value);
+                if (!owns) { needsNewHeader[i] = true; newHeaderIndexes.Add(i); }
+            }
+
+            if (newHeaderIndexes.Count > 0)
+            {
+                var requests = newHeaderIndexes.Select(i => new SanadHeaderRequest
+                {
+                    DATE_S = Convert.ToInt64(HEDRST[i].DATE_N),
+                    SHARH_S = BuildSharhS(HEDRST[i]),
+                    GHATEI = 0,
+                    NO_S = 3,
+                    OKF = 1,
+                    USER_NAME = HEDRST[i].USER_NAME
+                }).ToList();
+
+                var reserved = ReserveSanadNumbersBatch(requests);
+                for (int k = 0; k < newHeaderIndexes.Count; k++)
+                {
+                    var i = newHeaderIndexes[k];
+                    HEDRST[i].N_S = reserved[k];
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(reserved[k])} WHERE NUMBER = {SqlNum(HEDRST[i].NUMBER)} AND TAG = 27");
+                }
+            }
+
+            var parallelOptions = BuildDbAwareParallelOptions(HEDRST.Count, UseSmartThrottlingByDefault);
+            ExecuteWithPreferredLoop(0, HEDRST.Count, parallelOptions, ROW =>
+            {
+                if (!usable[ROW]) { progressReporter.ReportOne(); return; }
+
+                var hRow = HEDRST[ROW];
+                var num = hRow.NUMBER.Value;
+                double? max_ns = hRow.N_S;
+
+                try
+                {
+                    // در حالت روزانه سربرگ سند بین چند برگه مشترک است و نباید به‌ازای هر
+                    // برگه بازنویسی شود (وگرنه شرح و تاریخِ آخرین برگه روی همه می‌نشیند).
+                    if (!isDailyMode && !needsNewHeader[ROW])
+                    {
+                        dbms.DoExecuteSQL(
+                            $"UPDATE dbo.DEED_HED SET DATE_S = {SqlNum(hRow.DATE_N)}, SHARH_S = N'{SqlText(BuildSharhS(hRow))}', " +
+                            $"GHATEI = 0, NO_S = 3, OKF = 1, USER_NAME = N'{SqlText(hRow.USER_NAME)}' WHERE NO_S = 3 AND N_S = {SqlNum(max_ns)}");
+                    }
+
+                    SANAD_NUMBER = max_ns;
+
+                    double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null;
+                    if (!string.IsNullOrEmpty(hRow.CUST_NO))
+                    {
+                        GETTAF3(hRow.CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                    }
+                    string CT2 = NullIfZero(CTAF2), CT3 = NullIfZero(CTAF3), CT4 = NullIfZero(CTAF4);
+
+                    var dateText = Strings.Format(hRow.DATE_N, "####/##/##");
+                    var sellerName = GETTAFNAME(hRow.CUST_NO);
+                    // شماره‌ی حواله‌ی این برگه؛ کلیدِ اقلام. usable بودن تضمین کرده مقدار دارد.
+                    var noteNum = hRow.NUMBER1 ?? 0d;
+                    var JAMF = JamfOf(noteNum);
+                    var MBAA = hRow.MBAA ?? 0d;
+
+                    var batchQueries = new List<string>
+                    {
+                        $"DELETE FROM dbo.DEED_DTL WHERE NUMBER = {SqlNum(num)} AND TAG = 27"
+                    };
+
+                    void AddCust(string sharh, double amount, bool bed, string radif = null)
+                    {
+                        var col = bed ? "BED" : "BES";
+                        var radifCol = radif == null ? "" : ", RADIF";
+                        var radifVal = radif == null ? "" : ", " + radif;
+                        batchQueries.Add(
+                            $"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, {col}, NUMBER, TAG{radifCol}) " +
+                            $"VALUES ({SqlNum(max_ns)}, {SqlNum(CKOL)}, {SqlNum(CMOIN)}, {SqlNum(CTAF)}, {CT2}, {CT3}, {CT4}, " +
+                            $"N'{SqlText(hRow.CUST_NO)}', N'{SqlText(sharh)}', {SqlNum(amount)}, {SqlNum(num)}, 27{radifVal})");
+                    }
+
+                    void AddAcc(double? kol, double? moin, double? taf, string t2, string t3, string t4,
+                                string hes, string sharh, double amount, bool bed)
+                    {
+                        var col = bed ? "BED" : "BES";
+                        batchQueries.Add(
+                            $"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, {col}, NUMBER, TAG) " +
+                            $"VALUES ({SqlNum(max_ns)}, {SqlNum(kol)}, {SqlNum(moin)}, {SqlNum(taf)}, {t2}, {t3}, {t4}, " +
+                            $"N'{SqlText(hes)}', N'{SqlText(sharh)}', {SqlNum(amount)}, {SqlNum(num)}, 27)");
+                    }
+
+                    void AddSimple(double? kol, double? moin, double? taf, string hes, string sharh, double amount, bool bed)
+                        => AddAcc(kol, moin, taf, "NULL", "NULL", "NULL", hes, sharh, amount, bed);
+
+                    // حسابِ روبه‌روی سطرهای «خدمات/حواله/واریزی/ارزش‌افزوده» از یک کد حساب
+                    // متنی روی سربرگ می‌آید و آن کد می‌تواند خالی یا نامعتبر باشد.
+                    // DEED_DTL.HES_K از نوع INT NOT NULL است، پس درج NULL کل دستور دسته را
+                    // می‌اندازد و آن برگه بدون سند می‌ماند. عیناً مثل GENSANADFROOSH که در
+                    // همین حالت هشدار می‌دهد و از آن سطر می‌گذرد، اینجا هم سطر رد و در لاگ
+                    // ثبت می‌شود تا بقیه‌ی برگه سالم صادر شود.
+                    bool TryAddByHes(string hesCode, string sharh, double amount, bool bed, string what)
+                    {
+                        double? k = null, m = null, t = null, t2 = null, t3 = null, t4 = null;
+                        if (!string.IsNullOrWhiteSpace(hesCode))
+                        {
+                            GETTAF3(hesCode, ref k, ref m, ref t, ref t2, ref t3, ref t4);
+                        }
+
+                        if (k is null || m is null || t is null)
+                        {
+                            LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: برگه {num} - حساب {what} («{hesCode}») قابل تفکیک نبود؛ این سطر صادر نشد و سند ناقص است.");
+                            return false;
+                        }
+
+                        AddAcc(k, m, t, NullIfZero(t2), NullIfZero(t3), NullIfZero(t4), hesCode, sharh, amount, bed);
+                        return true;
+                    }
+
+                    // ۱) كل بدهكاري شخص بابت فاكتور
+                    if (JAMF + MBAA > 0)
+                    {
+                        AddCust(Strings.Right("فاكتور برگشت خريد (آزاد) شماره " + num + " مورخ" + dateText, 255),
+                                JAMF + MBAA, bed: true, radif: SqlNum(num));
+                    }
+
+                    // ۲) و ۳) خدمات: بدهکار شخص، بستانکار حساب خدمات
+                    if ((hRow.MABL_HAZ ?? 0d) != 0)
+                    {
+                        AddCust(Strings.Right("خدمات فاكتور برگشت خريد (آزاد)  شماره " + num + "-" + hRow.FNUMCO + " مورخ" + dateText, 255),
+                                hRow.MABL_HAZ.Value, bed: true);
+
+                        TryAddByHes(hRow.MOIN_HAZ,
+                                    Strings.Right("خدمات فاكتور برگشت خريد (آزاد) شماره " + num + " - " + GETTAFNAME(hRow.MOIN_HAZ), 255),
+                                    hRow.MABL_HAZ.Value, bed: false, what: "معين خدمات");
+                    }
+
+                    // ۴) چكهاي دريافتي: بدهکار اسناد دریافتنی، بستانکار شخص
+                    if (chequeMap.TryGetValue(num, out var cheques))
+                    {
+                        foreach (var chk in cheques)
+                        {
+                            var bankName = GETBANK(chk.BANK ?? 0d);
+                            var chkDate = Strings.Format(chk.DATE_S, "####/##/##");
+                            var s1 = Strings.Right("چك " + chk.N_SERI + "بانك " + bankName + " " + chk.SHOBEH + " مورخ " + chkDate, 255);
+
+                            batchQueries.Add(
+                                "INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, N_SERI, BANK, SHARH, BED, NUMBER, TAG) " +
+                                $"VALUES ({SqlNum(max_ns)}, {SqlNum(GETKOL(Baseknow.ADA))}, {SqlNum(GETMOIN(Baseknow.ADA))}, {SqlNum(GETTAF(Baseknow.ADA))}, " +
+                                $"N'{SqlText(Baseknow.ADA)}', {SqlNum(chk.N_SERI)}, {SqlNum(chk.BANK)}, N'{SqlText(s1)}', {SqlNum(chk.MABL)}, {SqlNum(num)}, 27)");
+
+                            AddCust(Strings.Right("ف.ف." + num + " - " + "چك " + chk.N_SERI + "بانك " + bankName + " " + chk.SHOBEH + " مورخ " + chkDate, 255),
+                                    chk.MABL ?? 0d, bed: false);
+                        }
+                    }
+
+                    // ۵) مبلغ نقد: بستانکار شخص، بدهکار صندوق
+                    if ((hRow.M_NAGHD ?? 0d) != 0)
+                    {
+                        var sharh = Strings.Right("مبلغ نقد فاكتور برگشت خريد (آزاد) شماره " + num + " مورخ" + dateText, 255);
+                        AddCust(sharh, hRow.M_NAGHD.Value, bed: false);
+                        AddSimple(Baseknow.SANDOGH, hRow.DEPATMAN, hRow.SHIFT,
+                                  Baseknow.SANDOGH + "-" + hRow.DEPATMAN + "-" + hRow.SHIFT, sharh, hRow.M_NAGHD.Value, bed: true);
+                    }
+
+                    // ۶) تخفيف: بدهکار تخفیف خرید، بستانکار شخص
+                    if ((hRow.TAKHFIF ?? 0d) != 0)
+                    {
+                        var sharh = Strings.Right("مبلغ تخفيف فاكتور برگشت خريد (آزاد) شماره " + num + " مورخ" + dateText, 255);
+                        AddSimple(Baseknow.TKHARID, 1, 1, Baseknow.TKHARID + "-1-1", sharh, hRow.TAKHFIF.Value, bed: true);
+                        AddCust(sharh, hRow.TAKHFIF.Value, bed: false);
+                    }
+
+                    // ۷) حواله: بدهکار حساب حواله، بستانکار شخص
+                    if ((hRow.MABL_HAV ?? 0d) != 0)
+                    {
+                        var sharh = Strings.Right("مبلغ حواله فاكتور برگشت خريد (آزاد) شماره " + num + " مورخ" + dateText, 255);
+                        TryAddByHes(hRow.MOIN_HAV, sharh, hRow.MABL_HAV.Value, bed: true, what: "معين حواله");
+                        AddCust(sharh, hRow.MABL_HAV.Value, bed: false);
+                    }
+
+                    // ۸) واريزي: بدهکار حساب واریز، بستانکار شخص
+                    if ((hRow.MABL_VAR ?? 0d) != 0)
+                    {
+                        var sharh = Strings.Right("مبلغ واريزي فاكتور برگشت خريد (آزاد) شماره " + num + " مورخ" + dateText, 255);
+                        TryAddByHes(hRow.MOIN_VAR, sharh, hRow.MABL_VAR.Value, bed: true, what: "معين واريزي");
+                        AddCust(sharh, hRow.MABL_VAR.Value, bed: false);
+                    }
+
+                    // ۹) اقلام: بستانکار موجودی با نرخ تازه، و ردیف کنترلِ اختلاف با MABL_K
+                    double KHMAVAV = 0, KHNIM = 0, KHSAKHT = 0, BAZAR = 0, KHSAY = 0;
+                    var HS = new double[8];
+
+                    if (linesMap.TryGetValue(noteNum, out var lines))
+                    {
+                        foreach (var line in lines)
+                        {
+                            if (string.IsNullOrEmpty(line.CODE) || !long.TryParse(line.CODE, out var codeLong)) { continue; }
+
+                            var meghk = line.MEGHk ?? 0d;
+                            var avrage = line.AVRAGE ?? 0d;
+                            var mablK = line.MABL_K ?? 0d;
+                            var fresh = Math.Round(meghk * avrage);
+                            var sharh = Strings.Right("برگشت خريد (آزاد) فاكتور شماره " + num + " مورخ " + dateText + "فروشنده: " + sellerName, 255);
+
+                            if (fresh != 0d)
+                            {
+                                AddSimple(Baseknow.MOGODIA, line.ANBAR, codeLong,
+                                          Baseknow.MOGODIA + "-" + line.ANBAR + "-" + line.CODE, sharh, fresh, bed: false);
+
+                                switch ((int)(line.RADAH ?? -1))
+                                {
+                                    case 1: KHMAVAV += mablK; break;
+                                    case 2: KHNIM += mablK; break;
+                                    case 3: KHSAKHT += mablK; break;
+                                    case 4: BAZAR += mablK; break;
+                                    case 5: HS[1] += mablK; break;
+                                    case 6: HS[2] += mablK; break;
+                                    case 7: HS[3] += mablK; break;
+                                    case 8: HS[4] += mablK; break;
+                                    case 9: HS[5] += mablK; break;
+                                    case 10: HS[6] += mablK; break;
+                                    default: KHSAY += mablK; break;
+                                }
+                            }
+
+                            if (mablK != fresh)
+                            {
+                                if (!ISHESAB(Baseknow.AMALKARD, 99999, codeLong))
+                                {
+                                    try { CREATHES(Baseknow.AMALKARD, 99999, codeLong, string.IsNullOrEmpty(line.NAM) ? " " : line.NAM); }
+                                    catch (Exception ex)
+                                    {
+                                        LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: حساب عملکرد {Baseknow.AMALKARD}-99999-{line.CODE} ساخته نشد: {ex.Message}");
+                                    }
+                                }
+
+                                AddSimple(Baseknow.AMALKARD, 99999, codeLong,
+                                          Baseknow.AMALKARD + "-99999-" + line.CODE, sharh,
+                                          mablK > fresh ? mablK - fresh : fresh - mablK,
+                                          bed: !(mablK > fresh));
+                            }
+                        }
+                    }
+
+                    // ۱۰) كنترل خريد به تفکیک گروه کالا
+                    void AddKharid(double moin, double amount, string label)
+                    {
+                        if (amount == 0) { return; }
+                        var sharh = Strings.Right("برگشت خريد (آزاد) " + label + " فاكتورشماره " + num + "-" + hRow.FNUMCO
+                                                  + " مورخ " + dateText + "فروشنده: " + sellerName, 255);
+                        AddSimple(Baseknow.KHARID, moin, 2, Baseknow.KHARID + "-" + moin + "-2", sharh, amount, bed: false);
+                    }
+
+                    AddKharid(1, KHMAVAV, "مواد اوليه");
+                    AddKharid(2, KHNIM, "نيمه ساخته");
+                    AddKharid(3, KHSAKHT, "ساخته شده");
+                    AddKharid(4, BAZAR, "بازرگاني");
+
+                    if (KHSAY != 0)
+                    {
+                        if (!ISHESAB(Baseknow.KHARID, 11, 2))
+                        {
+                            try { CREATHES(Baseknow.KHARID, 11, 2, "برگشت ساير 2"); }
+                            catch (Exception ex) { LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: حساب {Baseknow.KHARID}-11-2 ساخته نشد: {ex.Message}"); }
+                        }
+                        AddKharid(11, KHSAY, "ساير");
+                    }
+
+                    for (int Y = 1; Y <= 6; Y++)
+                    {
+                        if (HS[Y] == 0) { continue; }
+                        if (!ISHESAB(Baseknow.KHARID, Y + 4, 2))
+                        {
+                            try { CREATHES(Baseknow.KHARID, Y + 4, 2, "برگشت " + GETGRPKALA(Y + 4)); }
+                            catch (Exception ex) { LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: حساب {Baseknow.KHARID}-{Y + 4}-2 ساخته نشد: {ex.Message}"); }
+                        }
+                        AddKharid(Y + 4, HS[Y], GETGRPKALA(Y + 4));
+                        HS[7] += HS[Y];
+                    }
+
+                    // ۱۱) پاياپاي خريد
+                    var totalKharid = KHSAY + KHSAKHT + KHNIM + KHMAVAV + BAZAR + HS[7];
+                    if (totalKharid > 0)
+                    {
+                        AddSimple(Baseknow.PKHARID, 1, 1, Baseknow.PKHARID + "-1-1",
+                                  Strings.Right("خريدفاكتورشماره " + num + "-" + hRow.FNUMCO + " مورخ " + dateText + "فروشنده: " + sellerName, 255),
+                                  totalKharid, bed: true);
+                    }
+
+                    // ۱۲) ماليات بر ارزش افزوده
+                    if (MBAA != 0)
+                    {
+                        TryAddByHes(hRow.HMBAA,
+                                    Strings.Right("% ماليات بر ارزش افزوده فاكتور خريد شماره " + num + " مورخ" + dateText, 255),
+                                    MBAA, bed: false, what: "معين ارزش افزوده");
+                    }
+
+                    // ⚠️ مقصد فقط ردیف (NUMBER, TAG = 27) است — عیناً همان چیزی که رفرنس
+                    //    می‌نویسد (HEAD_LST_KH_BACK_AZAD.xaml.cs:3469). ردیف TAG = 26 عمداً
+                    //    دست‌نخورده می‌ماند: N_S آن در کل کدبیس هیچ نویسنده‌ای ندارد و اگر
+                    //    شماره‌ی سربرگ ۲۷ با شماره‌ی یک «سایر حواله»‌ی بی‌ربط یکی باشد،
+                    //    نوشتن روی آن سندِ اشتباه را به آن حواله می‌چسباند.
+                    //    (NUMBER, TAG) کلید اصلیِ HEAD_LST است، پس اینجا دقیقاً یک ردیف
+                    //    هدف است و TOP (1) هم لازم نیست.
+                    batchQueries.Add($"UPDATE dbo.HEAD_LST SET N_S = {SqlNum(max_ns)} WHERE NUMBER = {SqlNum(num)} AND TAG = 27");
+
+                    var sb = new StringBuilder();
+                    foreach (var q in batchQueries) { sb.Append(q).Append(';').Append('\n'); }
+                    ExecuteWithDeadlockRetry(() => dbms.DoExecuteSQL(sb.ToString()));
+
+                    // ── کنترل تراز، بعد از نوشتن ─────────────────────────────────────
+                    // این تابع تازه است و روی داده‌ی واقعی آزموده نشده، پس تراز هر برگه
+                    // بعد از نوشتن راستی‌آزمایی می‌شود.
+                    //
+                    // (فرضِ مدل‌سازیِ قبلی — «مبالغ سربرگ روی ردیف TAG = 26 است» — کنار
+                    //  گذاشته شد: UPDATE مبالغ در HEAD_LST_KH_BACK_AZAD.xaml.cs:2700 صریحاً
+                    //  «WHERE NUMBER = … AND TAG = 27» است، پس سربرگ از ۲۷ خوانده می‌شود.)
+                    //
+                    // ⚠️ دامنه عمداً (NUMBER, TAG = 27) است و نه N_S: در حالت سند روزانه
+                    //    چند برگه یک N_S مشترک دارند، پس جمع بر اساس N_S همیشه ناتراز
+                    //    گزارش می‌داد. ردیف‌های همین برگه دقیقاً همان دامنه‌ای است که
+                    //    DELETE بالا هم دارد و باید به‌تنهایی تراز باشد.
+                    var diff = dbms.DoGetDataSQL<double?>(
+                        $"SELECT SUM(BED) - SUM(BES) FROM dbo.DEED_DTL WHERE NUMBER = {SqlNum(num)} AND TAG = 27").FirstOrDefault();
+                    if (diff.HasValue && Math.Abs(diff.Value) > 0.5)
+                    {
+                        IsSuccessfully = false;
+                        LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: ⚠️ برگه {num} (سند {max_ns}) ناتراز است — اختلاف {diff.Value}. بازسازی این برگه را بررسی کنید.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    IsSuccessfully = false;
+                    LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: خطا در برگه {num}: {ex.Message}");
+                    ExpectionLogWriter.WriteLog(ex, $"سند برگشت خرید آزاد - برگه {num}");
+                }
+                finally
+                {
+                    progressReporter.ReportOne();
+                }
+            });
+
+            progressReporter.Complete();
+            LogWriter.WriteLog($"GENSANADBARGASHTKHARIDAZAD: پایان - موفق = {IsSuccessfully}");
+            return (SANAD_NUMBER, IsSuccessfully);
+        }
+
+        /// <summary>سطوح تفصیلی خالی باید NULL درج شوند نه صفر — عیناً همان کاری که همه‌ی
+        /// توابع سند در این فایل می‌کنند.</summary>
+        private static string NullIfZero(double? v)
+            => (v is null || v.Value == 0d) ? "NULL" : SqlNum(v);
 
         public static (double?, bool) GENSANADANBARGARD(long NUMBER, long NUMBER2, bool InternalCalling = true)
         {

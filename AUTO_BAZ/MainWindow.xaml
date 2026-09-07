@@ -170,6 +170,7 @@
                         <CheckBox  x:Name="c9"        Margin="415,10,0,0" Cursor="Hand" Content="سند خدمات" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c9_Click"/>
                         <CheckBox  x:Name="c10"       Margin="415,54,0,0" Cursor="Hand" Content="سند انبار گردانی" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c10_Click"/>
                         <CheckBox  x:Name="c11"       Margin="415,100,0,0" Cursor="Hand" Content="سند وصولی اسناد دریافتنی" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c11_Click"/>
+                        <CheckBox  x:Name="c12"       Margin="415,146,0,0" Cursor="Hand" Content="سند برگشت خرید آزاد" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c12_Click"/>
                     </Grid>
                     <Label x:Name="LBL_C0"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center"  FontSize="7" VerticalContentAlignment="Center" Margin="0,56,5,0" HorizontalAlignment="Right" Width="40" Height="40" VerticalAlignment="Top">
 
@@ -378,6 +379,21 @@
                     </Label>
                     <Viewbox Margin="0,140,396,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
                         <ProgressBar x:Name="PRGR_C11"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
+                            <ProgressBar.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
+                                    <SkewTransform/>
+                                    <RotateTransform/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </ProgressBar.RenderTransform>
+                        </ProgressBar>
+                    </Viewbox>
+                    <Label x:Name="LBL_C12"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,192,401,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
+
+                    </Label>
+                    <Viewbox Margin="0,184,396,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
+                        <ProgressBar x:Name="PRGR_C12"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
                             <ProgressBar.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
