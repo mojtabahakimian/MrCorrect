@@ -351,7 +351,7 @@
               <Name>Text29</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>{FACTOR_DATA.NUMBER1}</Text>
+              <Text>{FACTOR_DATA.NUMBER}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
@@ -592,7 +592,7 @@
               <Name>Text37</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>{FACTOR_DATA.NUMBER}</Text>
+              <Text>{FACTOR_DATA.NUMBER1}</Text>
               <TextBrush>Black</TextBrush>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>

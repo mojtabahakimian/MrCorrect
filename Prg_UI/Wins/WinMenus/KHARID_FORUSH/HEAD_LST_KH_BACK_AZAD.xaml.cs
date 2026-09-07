@@ -184,8 +184,18 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (number_to_open != null)
             {
-                NUMBER.Text = number_to_open.ToString(); //شماره  حواله
                 IsOpenedFromAutomation = _isAutomasion_;
+
+                // بررسی اینکه عدد ورودی شماره حواله (NUMBER) است یا شماره فاکتور (NUMBER1)
+                var matched = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 NUMBER, NUMBER1 FROM HEAD_LST WHERE (NUMBER = {number_to_open} OR NUMBER1 = {number_to_open}) AND TAG = {FTAG}").FirstOrDefault();
+                if (matched != null)
+                {
+                    NUMBER.Text = matched.NUMBER1.ToStringNullSafe();
+                }
+                else
+                {
+                    NUMBER.Text = number_to_open.ToString();
+                }
             }
         }
 
@@ -457,7 +467,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             WhereCondition = _restrictionInfo.WhereClause;
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                WhereCondition = $" WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG} ";
+                WhereCondition = $" WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG} ";
             }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
@@ -677,7 +687,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             try
             {
-                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
                 record = itemtoadd;
 
                 return true;
@@ -689,7 +699,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void RefreshAfterUpdate()
         {
-            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
@@ -883,7 +893,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (!IsNumberSelectedNow) //Is Not IsNumberSelectedNow
             {
                 //از رسید انبار خرید
-                var HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (NUMBER1 = " + NUMBER.Text + " OR NUMBER = " + NUMBER.Text + $") AND TAG = {FTAG}").FirstOrDefault();
+                var HEADER = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER1 = " + NUMBER.Text + $" AND TAG = {FTAG}").FirstOrDefault();
 
                 if (HEADER == null)
                 {
@@ -2685,7 +2695,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void GetBalancePerson()
         {
             //کادر سبز و سند و مانده حساب
-            var SANAD_NUMBER = dbms.DoGetDataSQL<string>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
+            var SANAD_NUMBER = dbms.DoGetDataSQL<string>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
             if (SANAD_NUMBER != null)
             {
                 if (CUST_NO.SelectedValue != null)
@@ -2726,7 +2736,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)},
                     sgn2usid = {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)},
                     sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
-                    WHERE (NUMBER = {NUMBER1.SelectedValue} OR NUMBER1 = {NUMBER.Text}) AND TAG = {FTAG} ";
+                    WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG} ";
 
             _ = dbms.DoExecuteSQL(_qre);
 
@@ -2861,7 +2871,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     try
                     {
-                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}");
+                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG}");
 
                         SANAD();
 
@@ -2988,7 +2998,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ActivateChaps();
             // آبديت سربرگ
-            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN1usid= " + Baseknow.USERCOD + ",SGN1 =" + Interaction.IIf(this.SGN1.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = {this.NUMBER.Text} OR NUMBER = {this.NUMBER.Text})");
+            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN1usid= " + Baseknow.USERCOD + ",SGN1 =" + Interaction.IIf(this.SGN1.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = " + this.NUMBER.Text + " OR NUMBER = " + this.NUMBER1.SelectedValue + ")");
 
             WinSignActivator();
         }
@@ -3024,7 +3034,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ActivateChaps();
 
-            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN2usid= " + Baseknow.USERCOD + ",SGN2 =" + Interaction.IIf(this.SGN2.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = {this.NUMBER.Text} OR NUMBER = {this.NUMBER.Text})");
+            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN2usid= " + Baseknow.USERCOD + ",SGN2 =" + Interaction.IIf(this.SGN2.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = " + this.NUMBER.Text + " OR NUMBER = " + this.NUMBER1.SelectedValue + ")");
 
             WinSignActivator();
         }
@@ -3061,7 +3071,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ActivateChaps();
             // آبديت سربرگ
-            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN3usid= " + Baseknow.USERCOD + ",SGN3 =" + Interaction.IIf(this.SGN3.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = {this.NUMBER.Text} OR NUMBER = {this.NUMBER.Text})");
+            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN3usid= " + Baseknow.USERCOD + ",SGN3 =" + Interaction.IIf(this.SGN3.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = " + this.NUMBER.Text + " OR NUMBER = " + this.NUMBER1.SelectedValue + ")");
 
             WinSignActivator();
         }
@@ -3100,7 +3110,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             var LETSANAD = true;
 
             List<DEED_HED> SHRST = null;
-            var HEDRST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (TAG={FTAG}) AND (NUMBER >=" + NUMBER.Text + ") AND (NUMBER <=" + NUMBER.Text + ")").FirstOrDefault();
+            var HEDRST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (TAG={FTAG}) AND (NUMBER1 >=" + NUMBER.Text + ") AND (NUMBER1 <=" + NUMBER.Text + ")").FirstOrDefault();
             if (!IsNull(CUST_NO.SelectedValue))
             {
                 CL_HESABDARI.GETTAF3(CUST_NO.SelectedValue.ToStringNullSafe(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
@@ -3125,7 +3135,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             //Start .................................................................
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            var refRemittanceSanad = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : HEDRST?.NUMBER1?.ToString();
+            var refRemittanceSanad = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : HEDRST?.NUMBER.ToString();
             if (true)
             {
                 var JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(MABL_K) FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + refRemittanceSanad + ") AND ((INVO_LST.TAG)=26))").FirstOrDefault();
@@ -3478,7 +3488,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            dbms.DoExecuteSQL($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {HEDRST.N_S} WHERE NUMBER = {refRemittanceSanad} AND TAG = {FTAG}");
+            dbms.DoExecuteSQL($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {HEDRST.N_S} WHERE NUMBER1 = {NUMBER.Text} AND TAG = {FTAG}");
 
             #endregion
 
@@ -3618,7 +3628,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                    M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF,
                                                    MOIN_KHF, ANBARF, FNUMCO, MBAA
                                                    FROM HEAD_LST
-                                                   WHERE (NUMBER = {report["NUMBER_PARAM"]} OR NUMBER1 = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
+                                                   WHERE NUMBER = {report["NUMBER_PARAM"]} AND TAG = {FTAG}").FirstOrDefault();
 
             if (headLst != null)
             {
