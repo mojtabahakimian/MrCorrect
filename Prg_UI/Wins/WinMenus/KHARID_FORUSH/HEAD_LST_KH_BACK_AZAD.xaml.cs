@@ -457,14 +457,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
             WhereCondition = _restrictionInfo.WhereClause;
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+                WhereCondition = $" WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG} ";
             }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
-                x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
-                $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-                x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+                x => x.NUMBER1.ToString(), // property selector (used to find a record by return invoice NUMBER1)
+                $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER1", //All Record of The Table ordered by NUMBER1
+                x => $"SELECT * FROM HEAD_LST WHERE NUMBER1 = {x?.NUMBER1} AND TAG = {FTAG}", //On Change for One Record
                 Convert.ToDouble(NUMBER.Text)
                 );
 
@@ -599,7 +599,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             double requestedNumber = Convert.ToDouble(_navigationManager.NUMBER_TO_OPEN);
-            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {FTAG}").FirstOrDefault() != null;
+            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE (NUMBER1 = {requestedNumber} OR NUMBER = {requestedNumber}) AND TAG = {FTAG}").FirstOrDefault() != null;
             string message = recordExists ? GetAccessDeniedMessage() : "چنین شماره ای وجود ندارد";
             new Msgwin(false, message).ShowDialog();
             _navigationManager.ClearNumberToOpen();
@@ -632,8 +632,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     return;
                 }
 
-                NUMBER1.Text = HEADER_FAC.NUMBER1.ToString();
-                NUMBER.Text = HEADER_FAC.NUMBER.ToString();
+                NUMBER.Text = HEADER_FAC.NUMBER1.ToStringNullSafe();
+                if (NUMBER1.ItemsSource is List<QRE_LST_BARGASHT> bList)
+                {
+                    if (!bList.Any(item => item?.NUMBER == HEADER_FAC.NUMBER))
+                    {
+                        bList.Add(new QRE_LST_BARGASHT { NUMBER = HEADER_FAC.NUMBER });
+                    }
+                }
+                NUMBER1.SelectedValue = HEADER_FAC.NUMBER;
+                NUMBER1.Items.Refresh();
 
                 if (!string.IsNullOrEmpty(NUMBER.Text.ToStringNullSafe()))
                 {
@@ -669,7 +677,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             try
             {
-                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
                 record = itemtoadd;
 
                 return true;
@@ -681,7 +689,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void RefreshAfterUpdate()
         {
-            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
@@ -875,7 +883,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (!IsNumberSelectedNow) //Is Not IsNumberSelectedNow
             {
                 //از رسید انبار خرید
-                var HEADER = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {FTAG}").FirstOrDefault();
+                var HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (NUMBER1 = " + NUMBER.Text + " OR NUMBER = " + NUMBER.Text + $") AND TAG = {FTAG}").FirstOrDefault();
 
                 if (HEADER == null)
                 {
@@ -883,11 +891,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     this.Close(); return;
                 }
 
-                if (!((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Any(item => item?.NUMBER == HEADER.NUMBER1))
+                if (!((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Any(item => item?.NUMBER == HEADER.NUMBER))
                 {
-                    ((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Add(new QRE_LST_BARGASHT { NUMBER = HEADER.NUMBER1 });
+                    ((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Add(new QRE_LST_BARGASHT { NUMBER = HEADER.NUMBER });
                 }
-                NUMBER1.SelectedValue = HEADER.NUMBER1; NUMBER1.Items.Refresh();
+                NUMBER1.SelectedValue = HEADER.NUMBER; NUMBER1.Items.Refresh();
 
                 string? TheCustomer = HEADER?.CUST_NO;
                 var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + TheCustomer + "'").FirstOrDefault();
@@ -2583,7 +2591,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
                             //Fake Query for Lock Table
 
-                            var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();
+                            var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();
                             if (rst_11 == 0 || ReferenceEquals(rst_11, null))
                             {
                                 NUMBER.Text = Baseknow.STHFR.ToString();
@@ -2595,8 +2603,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                 NUMBER.UpdateLayout();
                             }
 
-                            db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
-                                                        VALUES ({NUMBER.Text},  {FTAG},    0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
+                            db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         TAG,     NUMBER1,       DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
+                                                        VALUES ({NUMBER1.SelectedValue},  {FTAG},  {NUMBER.Text},    0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
 
                             transaction.Commit();
                             db?.Close();
@@ -2677,7 +2685,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void GetBalancePerson()
         {
             //کادر سبز و سند و مانده حساب
-            var SANAD_NUMBER = dbms.DoGetDataSQL<string>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+            var SANAD_NUMBER = dbms.DoGetDataSQL<string>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
             if (SANAD_NUMBER != null)
             {
                 if (CUST_NO.SelectedValue != null)
@@ -2699,9 +2707,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             _qre = $@"UPDATE dbo.HEAD_LST
-                    SET NUMBER = {NUMBER.Text}, NUMBER1 = {NUMBER1.SelectedValue}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 
+                    SET NUMBER = {NUMBER1.SelectedValue}, NUMBER1 = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()},
                     N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
-                    FNUMCO = {FNUMCO.Text}, 
+                    FNUMCO = {FNUMCO.Text},
                     MABL_VAR = {MABL_VAR.Text},
                     MOIN_VAR = N'{CMB_MOIN_VAR.SelectedValue}',
                     MABL_HAV = {MABL_HAV.Text},
@@ -2710,15 +2718,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}',
                     TAKHFIF = {TAKHFIF.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
-                    SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)},
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}',
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},
                     USER_NAME = N'{USER_NAME.Text}',
-                    sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, 
-                    sgn2usid = {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, 
+                    sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)},
+                    sgn2usid = {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)},
                     sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
-                    WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+                    WHERE (NUMBER = {NUMBER1.SelectedValue} OR NUMBER1 = {NUMBER.Text}) AND TAG = {FTAG} ";
 
             _ = dbms.DoExecuteSQL(_qre);
 
@@ -2853,7 +2861,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     try
                     {
-                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG}");
+                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE (NUMBER1 = {NUMBER.Text} OR NUMBER = {NUMBER.Text}) AND TAG = {FTAG}");
 
                         SANAD();
 
@@ -2943,7 +2951,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void SGN1_Click(object sender, RoutedEventArgs e)
         {
-            if (Convert.ToDouble(NUMBER1.Text) <= 0) return;
+            if (NUMBER1.SelectedValue == null || Convert.ToDouble(NUMBER1.SelectedValue) <= 0) return;
 
             double MID;
             string SHARH;
@@ -2980,13 +2988,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ActivateChaps();
             // آبديت سربرگ
-            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN1usid= " + Baseknow.USERCOD + ",SGN1 =" + Interaction.IIf(this.SGN1.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND NUMBER = " + this.NUMBER.Text);
+            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN1usid= " + Baseknow.USERCOD + ",SGN1 =" + Interaction.IIf(this.SGN1.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = {this.NUMBER.Text} OR NUMBER = {this.NUMBER.Text})");
 
             WinSignActivator();
         }
         private void SGN2_Click(object sender, RoutedEventArgs e)
         {
-            if (Convert.ToDouble(NUMBER1.Text) <= 0) return;
+            if (NUMBER1.SelectedValue == null || Convert.ToDouble(NUMBER1.SelectedValue) <= 0) return;
 
             double MID;
             string SHARH;
@@ -3016,13 +3024,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ActivateChaps();
 
-            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN2usid= " + Baseknow.USERCOD + ",SGN2 =" + Interaction.IIf(this.SGN2.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND NUMBER = " + this.NUMBER.Text);
+            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN2usid= " + Baseknow.USERCOD + ",SGN2 =" + Interaction.IIf(this.SGN2.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = {this.NUMBER.Text} OR NUMBER = {this.NUMBER.Text})");
 
             WinSignActivator();
         }
         private void SGN3_Click(object sender, RoutedEventArgs e)
         {
-            if (Convert.ToDouble(NUMBER1.Text) <= 0) return;
+            if (NUMBER1.SelectedValue == null || Convert.ToDouble(NUMBER1.SelectedValue) <= 0) return;
 
             double MID;
             string SHARH;
@@ -3053,7 +3061,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ActivateChaps();
             // آبديت سربرگ
-            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN3usid= " + Baseknow.USERCOD + ",SGN3 =" + Interaction.IIf(this.SGN3.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND NUMBER = " + this.NUMBER.Text);
+            dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN3usid= " + Baseknow.USERCOD + ",SGN3 =" + Interaction.IIf(this.SGN3.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND (NUMBER1 = {this.NUMBER.Text} OR NUMBER = {this.NUMBER.Text})");
 
             WinSignActivator();
         }
@@ -3140,7 +3148,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     JAMCH = 0d;
                 }
             }
-            dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + NUMBER.Text + ") AND ((DEED_DTL.TAG)= 27))");
+            dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + refRemittanceSanad + ") AND ((DEED_DTL.TAG)= 27))");
 
             if (JAMF + Convert.ToDouble(MBAA.Text) > 0)
             {
@@ -3148,7 +3156,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, RADIF)
-                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {JAMF + Convert.ToDouble(MBAA.Text)}, {NUMBER.Text}, 27, {NUMBER.Text})");
+                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {JAMF + Convert.ToDouble(MBAA.Text)}, {refRemittanceSanad}, 27, {NUMBER.Text})");
             }
 
             if (MABL_HAZ.Text != "0")
@@ -3158,7 +3166,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var _SHARH_ = Strings.Right("خدمات فاكتور برگشت خريد (آزاد)  شماره " + NUMBER.Text + "-" + this.FNUMCO.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG)
-                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{_SHARH_}', {MABL_HAZ.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{_SHARH_}', {MABL_HAZ.Text}, {refRemittanceSanad}, 27)");
             }
 
             if (MABL_HAZ.Text != "0")
@@ -3171,7 +3179,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("خدمات فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " - " + CL_HESABDARI.GETTAFNAME(MOIN_HAZ.Text), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{MOIN_HAZ.Text}', N'{SHARH}', {MABL_HAZ.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{MOIN_HAZ.Text}', N'{SHARH}', {MABL_HAZ.Text}, {refRemittanceSanad}, 27)");
             }
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             if (JAMCH != 0d) // چكهاي دريافتي
@@ -3193,13 +3201,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         var N_SERI = row.N_SERI;
                         var BANK = row.BANK;
                         dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, N_SERI, BANK, SHARH, BED, NUMBER, TAG)
-                                 VALUES ({max_ns}, {HES_K}, {HES_M}, {HES_T}, '{hes}', {N_SERI}, {BANK}, N'{SHARH}', {BED}, {NUMBER.Text}, 27)");
+                                 VALUES ({max_ns}, {HES_K}, {HES_M}, {HES_T}, '{hes}', {N_SERI}, {BANK}, N'{SHARH}', {BED}, {refRemittanceSanad}, 27)");
 
                         // چكهاي دريافتي
                         SHARH = Strings.Right("ف.ف." + NUMBER.Text + " - " + "چك " + row.N_SERI + "بانك " + CL_HESABDARI.GETBANK(row.BANK) + " " + row.SHOBEH + " مورخ " + Strings.Format(row.DATE_S, "####/##/##"), 255);
                         var BES = row.MABL;
                         dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                                 VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {BES}, {NUMBER.Text}, 27)");
+                                 VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {BES}, {refRemittanceSanad}, 27)");
                     }
                 }
             }
@@ -3209,13 +3217,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 // مبلغ نقدشخص
                 var SHARH = Strings.Right("مبلغ نقد فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {M_NAGHD.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {M_NAGHD.Text}, {refRemittanceSanad}, 27)");
 
                 // مبلغ نقدصندوق
                 var hes = Baseknow.SANDOGH + "-" + DEPATMAN.SelectedValue + "-" + SHIFT.SelectedValue;
                 SHARH = Strings.Right("مبلغ نقد فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.SANDOGH}, {DEPATMAN.SelectedValue}, {SHIFT.SelectedValue}, N'{hes}', N'{SHARH}', {M_NAGHD.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.SANDOGH}, {DEPATMAN.SelectedValue}, {SHIFT.SelectedValue}, N'{hes}', N'{SHARH}', {M_NAGHD.Text}, {refRemittanceSanad}, 27)");
             }
 
             if (this.TAKHFIF.Text != "0")
@@ -3224,12 +3232,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var hes = Baseknow.TKHARID + "-1-1";
                 var SHARH = Strings.Right("مبلغ تخفيف فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.TKHARID}, 1, 1, N'{hes}', N'{SHARH}', {TAKHFIF.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.TKHARID}, 1, 1, N'{hes}', N'{SHARH}', {TAKHFIF.Text}, {refRemittanceSanad}, 27)");
 
                 // مبلغ تخفيف شخص
                 SHARH = Strings.Right("مبلغ تخفيف فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {TAKHFIF.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {TAKHFIF.Text}, {refRemittanceSanad}, 27)");
             }
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             if (this.MABL_HAV.Text != "0")
@@ -3242,7 +3250,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("مبلغ حواله فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG)
-                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{MOIN_HAV.Text}', N'{SHARH}', {MABL_HAV.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{MOIN_HAV.Text}', N'{SHARH}', {MABL_HAV.Text}, {refRemittanceSanad}, 27)");
             }
 
             if (this.MABL_HAV.Text != "0")
@@ -3251,7 +3259,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("مبلغ حواله فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {MABL_HAV.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {MABL_HAV.Text}, {refRemittanceSanad}, 27)");
             }
 
             if (this.MABL_VAR.Text != "0")
@@ -3264,7 +3272,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("مبلغ واريزي فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG)
-                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{MOIN_VAR.Text}', N'{SHARH}', {MABL_VAR.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{MOIN_VAR.Text}', N'{SHARH}', {MABL_VAR.Text}, {refRemittanceSanad}, 27)");
             }
 
             if (this.MABL_VAR.Text != "0")
@@ -3273,7 +3281,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("مبلغ واريزي فاكتور برگشت خريد (آزاد) شماره " + NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {MABL_VAR.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF}, {(CTAF2 is null ? "NULL" : CTAF2)}, {(CTAF3 is null ? "NULL" : CTAF3)}, {(CTAF4 is null ? "NULL" : CTAF4)}, N'{CUST_NO.SelectedValue}', N'{SHARH}', {MABL_VAR.Text}, {refRemittanceSanad}, 27)");
             }
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             KHMAVAV = 0;
@@ -3292,7 +3300,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     var BES = Math.Round((double)(row.MEGHK * row.avrage));
 
                     dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                             VALUES ({max_ns}, {Baseknow.MOGODIA}, {row.ANBAR}, {row.CODE}, N'{hes}', N'{SHARH}', {BES}, {NUMBER.Text}, 27)");
+                             VALUES ({max_ns}, {Baseknow.MOGODIA}, {row.ANBAR}, {row.CODE}, N'{hes}', N'{SHARH}', {BES}, {refRemittanceSanad}, 27)");
 
                     switch (row.RADAH)
                     {
@@ -3343,7 +3351,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     }
 
                     dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, {BEDorBES}, NUMBER, TAG)
-                             VALUES ({max_ns}, {Baseknow.AMALKARD}, 99999, {row.CODE}, N'{hes}', N'{SHARH}', {value}, {NUMBER.Text}, 27)");
+                             VALUES ({max_ns}, {Baseknow.AMALKARD}, 99999, {row.CODE}, N'{hes}', N'{SHARH}', {value}, {refRemittanceSanad}, 27)");
                 }
             }
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3355,7 +3363,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right(" برگشت خريد (آزاد) مواد اوليه فاكتورشماره " + this.NUMBER.Text + "-" + this.FNUMCO.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "فروشنده: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToStringNullSafe()), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.KHARID}, 1, 2, N'{hes}', N'{SHARH}', {KHMAVAV}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.KHARID}, 1, 2, N'{hes}', N'{SHARH}', {KHMAVAV}, {refRemittanceSanad}, 27)");
             }
 
             if (KHNIM != 0)
@@ -3366,7 +3374,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("برگشت خريد (آزاد) نيمه ساخته فاكتورشماره " + this.NUMBER.Text + "-" + this.FNUMCO.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "فروشنده: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToStringNullSafe()), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.KHARID}, 2, 2, N'{hes}', N'{SHARH}', {KHNIM}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.KHARID}, 2, 2, N'{hes}', N'{SHARH}', {KHNIM}, {refRemittanceSanad}, 27)");
             }
 
             if (KHSAKHT != 0)
@@ -3377,7 +3385,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("برگشت خريد (آزاد) ساخته شده فاكتورشماره " + this.NUMBER.Text + "-" + this.FNUMCO.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "فروشنده: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToStringNullSafe()), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.KHARID}, 3, 2, N'{hes}', N'{SHARH}', {KHSAKHT}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.KHARID}, 3, 2, N'{hes}', N'{SHARH}', {KHSAKHT}, {refRemittanceSanad}, 27)");
             }
 
             if (BAZAR != 0)
@@ -3388,7 +3396,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("برگشت خريد (آزاد) بازرگاني فاكتورشماره " + this.NUMBER.Text + "-" + this.FNUMCO.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "فروشنده: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToStringNullSafe()), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.KHARID}, 4, 2, N'{hes}', N'{SHARH}', {BAZAR}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.KHARID}, 4, 2, N'{hes}', N'{SHARH}', {BAZAR}, {refRemittanceSanad}, 27)");
             }
 
             if (KHSAY != 0)
@@ -3412,7 +3420,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("برگشت خريد (آزاد) ساير فاكتورشماره " + this.NUMBER.Text + "-" + this.FNUMCO.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "فروشنده: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToStringNullSafe()), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.KHARID}, 11, 2, N'{hes}', N'{SHARH}', {KHSAY}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.KHARID}, 11, 2, N'{hes}', N'{SHARH}', {KHSAY}, {refRemittanceSanad}, 27)");
             }
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             for (int Y = 1; Y <= 6; Y++)
@@ -3441,7 +3449,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     HS[7] = HS[7] + HS[Y];
 
                     dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG)
-                  VALUES ({max_ns}, {Baseknow.KHARID}, {HES_M}, 2, N'{hes}', N'{SHARH}', {BES}, {NUMBER.Text}, 27)");
+                  VALUES ({max_ns}, {Baseknow.KHARID}, {HES_M}, 2, N'{hes}', N'{SHARH}', {BES}, {refRemittanceSanad}, 27)");
                 }
             }
 
@@ -3453,7 +3461,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var BED = KHSAY + KHSAKHT + KHNIM + KHMAVAV + BAZAR + HS[7];
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG)
-                         VALUES ({max_ns}, {Baseknow.PKHARID}, 1, 1, N'{hes}', N'{SHARH}', {BED}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {Baseknow.PKHARID}, 1, 1, N'{hes}', N'{SHARH}', {BED}, {refRemittanceSanad}, 27)");
             }
 
             if (this.MBAA.Text != "0")
@@ -3466,11 +3474,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 var SHARH = Strings.Right("% ماليات بر ارزش افزوده فاكتور خريد شماره " + this.NUMBER.Text + " مورخ" + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##"), 255);
 
                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG)
-                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{HMBAA.Text}', N'{SHARH}', {MBAA.Text}, {NUMBER.Text}, 27)");
+                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {(HTAF2 is null ? "NULL" : HTAF2)}, {(HTAF3 is null ? "NULL" : HTAF3)}, {(HTAF4 is null ? "NULL" : HTAF4)}, N'{HMBAA.Text}', N'{SHARH}', {MBAA.Text}, {refRemittanceSanad}, 27)");
             }
 
             ///*-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            dbms.DoExecuteSQL($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {HEDRST.N_S} WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}");
+            dbms.DoExecuteSQL($"UPDATE TOP (1) dbo.HEAD_LST SET N_S = {HEDRST.N_S} WHERE NUMBER = {refRemittanceSanad} AND TAG = {FTAG}");
 
             #endregion
 
@@ -3575,7 +3583,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
-            report["NUMBER_PARAM"] = NUMBER.Text;
+            report["NUMBER_PARAM"] = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : NUMBER.Text;
             ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
             double JCHK = 0, JAMF = 0, HAZ = 0, NAGHD = 0, VAR = 0, HAV = 0, taf = 0, MBAA = 0;
@@ -3606,11 +3614,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             // Fetch HEAD_LST data
             var headLst = dbms.DoGetDataSQL<HeadLstData>($@"
-                                                   SELECT NUMBER, TAG AS htag, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, 
-                                                   M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, 
-                                                   MOIN_KHF, ANBARF, FNUMCO, MBAA 
-                                                   FROM HEAD_LST 
-                                                   WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+                                                   SELECT NUMBER, TAG AS htag, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH,
+                                                   M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF,
+                                                   MOIN_KHF, ANBARF, FNUMCO, MBAA
+                                                   FROM HEAD_LST
+                                                   WHERE (NUMBER = {report["NUMBER_PARAM"]} OR NUMBER1 = {NUMBER.Text}) AND TAG = {FTAG}").FirstOrDefault();
 
             if (headLst != null)
             {
@@ -3777,7 +3785,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
-            report["NUMBER_PARAM"] = NUMBER.Text;
+            report["NUMBER_PARAM"] = (NUMBER1.SelectedValue != null && NUMBER1.SelectedValue.ToString() != "0") ? NUMBER1.SelectedValue.ToString() : NUMBER.Text;
             ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
             (report.GetComponentByName("Text90") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
