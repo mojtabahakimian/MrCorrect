@@ -951,6 +951,10 @@ namespace Functions
             /// </summary>
             CONTROL_ASNAD_DAFATERCHECK_FORM11,
             /// <summary>
+            /// کنترل پورسانت فاکتور فروش
+            /// </summary>
+            CONTROL_PORSANT_FROOSH_WIN,
+            /// <summary>
             /// به حساب گذاشتن چک
             /// </summary>
             WIN_CHREC_HES_BEHESABCHECK,
@@ -1245,6 +1249,13 @@ namespace Functions
                 case WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11: /* کنترل اسناد و دفاتر چک */
                     CL_CONTORL_ASNAD.StartIntegrityChecks();
                     break;
+
+                // این پنجره تا امروز فقط وقتی باز می‌شد که «کنترل اسناد» مغایرتی پیدا کند؛
+                // یعنی وقتی همه‌ی فاکتورها درست بودند، هیچ راهی برای رسیدن به آن نبود —
+                // در حالی که ریز محاسبه‌ی «این مبلغ از کجا آمده؟» دقیقاً برای فاکتورهایی
+                // لازم است که مغایرت ندارند و کاربر فقط می‌خواهد بداند مبلغ چطور ساخته شده.
+                case WinNameType.CONTROL_PORSANT_FROOSH_WIN: /* کنترل پورسانت فاکتور فروش */
+                    CL_LMethods.OpenWindow(OWNERWIN, new CONTROL_PORSANT_FROOSH(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_LIST_KALA_CTRL5: /* لیست کالا ها کنترل 5 */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_LIST_KALA(), isModalDialog: false, allowMultipleInstances: false); break;
 
