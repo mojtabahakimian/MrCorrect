@@ -2910,6 +2910,38 @@ namespace Prg_UI.Functions
             return sb.ToString();
         }
 
+        /// <summary>
+        /// خواندن عدد صحیح از متنِ یک کنترل UI.
+        ///
+        /// چرا لازم است: کدهای قدیمی مستقیم Convert.ToInt64(TextBox.Text) می‌زدند و هر کدام از
+        /// این حالت‌ها فرم را با FormatException می‌انداخت: کادر خالی، ارقام فارسی/عربی،
+        /// جداکننده‌ی هزارگان که NumericTextBox خودش اضافه می‌کند، و علامت منفیِ محلی
+        /// (فرهنگ fa-IR منفی را با U+2212 می‌نویسد، نه خط تیره‌ی ASCII) — یعنی حتی مقداری که
+        /// خودِ برنامه یک خط بالاتر نوشته بود، موقع خواندن دوباره استثنا می‌داد.
+        ///
+        /// متن خالی صفر حساب می‌شود و اعشار مثل Convert قبلی «نیم به بالا» گِرد می‌شود.
+        /// </summary>
+        public static long ToInt64Safe(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) { return 0; }
+
+            var sb = new StringBuilder(s.Length);
+            foreach (var ch in NormalizeDigits(s))
+            {
+                if (char.IsDigit(ch) || ch == '.') { sb.Append(ch); }
+                else if (ch == '٫') { sb.Append('.'); }                    // ممیز فارسی
+                else if (sb.Length == 0 && (ch == '-' || ch == '−')) { sb.Append('-'); }
+                // جداکننده‌ی هزارگان (، و ٬ و فاصله) و نویسه‌های جهت‌دهی عمداً حذف می‌شوند
+            }
+
+            if (decimal.TryParse(sb.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            {
+                return (long)Math.Round(value, MidpointRounding.AwayFromZero);
+            }
+
+            return 0;
+        }
+
         public static string ReplacePerArab(string input, bool IsArabicy)
         {
             if (IsArabicy)

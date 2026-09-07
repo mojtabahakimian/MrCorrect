@@ -7747,20 +7747,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     // سطری که هنوز ID ندارد (تازه توسط dbo.CalculateVisitorPorsant درج شده)
                     // با کلید منطقی فاکتور بروزرسانی می‌شود تا از قلم نیفتد
+                    // همان کوتاه‌سازی TOZIH که در ثبت سطرِ پورسانت انجام می‌شود؛ توضیح بلندتر از
+                    // ستون نباید کل بروزرسانی را متوقف کند.
+                    const string tozihClamp = @"CASE WHEN COL_LENGTH('dbo.VISITOR_DTL','TOZIH') > 0
+                                                     THEN LEFT(@TOZIH, COL_LENGTH('dbo.VISITOR_DTL','TOZIH') / 2)
+                                                     ELSE @TOZIH END";
+
                     string sql = visitor.ID.HasValue
-                        ? @"UPDATE dbo.VISITOR_DTL SET 
-                            NUMBER = @NUMBER, 
-                            CUST_NO = @CUST_NO, 
+                        ? $@"UPDATE dbo.VISITOR_DTL SET
+                            NUMBER = @NUMBER,
+                            CUST_NO = @CUST_NO,
                             DARSAD = @DARSAD,
-                            PURSANT = @PURSANT, 
-                            TOZIH = @TOZIH, 
+                            PURSANT = @PURSANT,
+                            TOZIH = {tozihClamp},
                             STAT = @STAT,
                             PORID = @PORID
                             WHERE ID = @ID"
-                        : @"UPDATE dbo.VISITOR_DTL SET 
+                        : $@"UPDATE dbo.VISITOR_DTL SET
                             DARSAD = @DARSAD,
-                            PURSANT = @PURSANT, 
-                            TOZIH = @TOZIH, 
+                            PURSANT = @PURSANT,
+                            TOZIH = {tozihClamp},
                             STAT = @STAT,
                             PORID = @PORID
                             WHERE NUMBER = @NUMBER AND TAG = @TAG AND CUST_NO = @CUST_NO";
@@ -8536,26 +8542,30 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0") { return; }
 
-            NCHK.Text = PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0).ToString();
+            // همه‌ی خواندن‌ها از ToInt64Safe می‌گذرند و همه‌ی نوشتن‌ها با InvariantCulture انجام
+            // می‌شود. دلیلش: فاکتور خالی با تخفیفِ غیرصفر، جمع را منفی می‌کرد و منفی زیر فرهنگ
+            // فارسی با علامتی غیر از خط تیره‌ی ASCII نوشته می‌شد؛ خطِ بعد که همان مقدار را
+            // دوباره می‌خواند، فرم را با «input string was not in a correct format» می‌انداخت.
+            NCHK.Text = (PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0) ?? 0).ToString(CultureInfo.InvariantCulture);
 
-            JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
+            JJKOL.Text = SUM_OF_MABL_K.ToString(CultureInfo.InvariantCulture); //SMABLK //جمع فاکتور :
             HKH.Text = MABL_HAZ.Text; // هزینه خدمات
             NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
             JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
-            Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
+            Text117.Text = SUM_OF_MEGH_K.ToString(CultureInfo.InvariantCulture); //جمع مقادیر :
 
             //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
-            var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
-            GHABEL.Text = rghabel.ToString();
+            var rghabel = ToInt64Safe(JF.Text) + ToInt64Safe(HKH.Text) - ToInt64Safe(NTKHFIF.Text) + ToInt64Safe(MBAA.Text);
+            GHABEL.Text = rghabel.ToString(CultureInfo.InvariantCulture);
 
             //جمع مبالغ پرداختی
             //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
-            var RMP = Convert.ToInt64(M_NAGHD.Text) + Convert.ToInt64(MABL_VAR.Text) + Convert.ToInt64(MABL_HAV.Text) + Convert.ToInt64(NCHK.Text);
-            NPAR.Text = RMP.ToString();
+            var RMP = ToInt64Safe(M_NAGHD.Text) + ToInt64Safe(MABL_VAR.Text) + ToInt64Safe(MABL_HAV.Text) + ToInt64Safe(NCHK.Text);
+            NPAR.Text = RMP.ToString(CultureInfo.InvariantCulture);
 
 
             //=[GHABEL]-[NPAR]
-            MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+            MAN.Text = (rghabel - RMP).ToString(CultureInfo.InvariantCulture); //مانده
             MN.Text = MAN.Text; // مانده روی فاکتور
         }
 
@@ -10910,26 +10920,42 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 try
                 {
+                    // TOZIH با LEFT به طول واقعی ستون کوتاه می‌شود. بدون آن، توضیحی بلندتر از
+                    // ستون، کل ذخیره‌ی فاکتور را با «String or binary data would be truncated»
+                    // متوقف می‌کرد. طول از خود دیتابیس خوانده می‌شود تا با تغییر ستون هم بخواند
+                    // (COL_LENGTH برای nvarchar بایت برمی‌گرداند، و برای nvarchar(max) عدد ۱-).
+                    // مقادیر متنی هم پارامتری شدند: پیش از این یک آپاستروف در توضیح، دستور را
+                    // می‌شکست.
+                    const string tozihClamp = @"CASE WHEN COL_LENGTH('dbo.VISITOR_DTL','TOZIH') > 0
+                                                     THEN LEFT(@TOZIH, COL_LENGTH('dbo.VISITOR_DTL','TOZIH') / 2)
+                                                     ELSE @TOZIH END";
+
+                    var visitorParams = new
+                    {
+                        NUMBER = Convert.ToDouble(NUMBER.Text),
+                        TAG = (double)hTAG,
+                        CUST_NO = FINAL_CROW_ITEM?.CUST_NO,
+                        DARSAD = FINAL_CROW_ITEM?.DARSAD,
+                        PURSANT = FINAL_CROW_ITEM?.PURSANT,
+                        TOZIH = FINAL_CROW_ITEM?.TOZIH,
+                        STAT = Convert.ToByte(FINAL_CROW_ITEM.STAT),
+                        PORID = FINAL_CROW_ITEM?.PORID,
+                        ID = FINAL_CROW_ITEM?.ID
+                    };
+
                     if (FINAL_CROW_ITEM?.ID is null)
                     {
                         _id_ = dbms.DoGetDataSQL<long?>($@"INSERT INTO dbo.VISITOR_DTL(NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID)
                             OUTPUT INSERTED.ID
-                            VALUES({NUMBER.Text},
-                            {hTAG} ,
-                            N'{FINAL_CROW_ITEM.CUST_NO}' ,
-                            {FINAL_CROW_ITEM?.DARSAD} ,
-                            {FINAL_CROW_ITEM?.PURSANT} ,
-                            N'{FINAL_CROW_ITEM?.TOZIH}' ,
-                            {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
-                            {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID?.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)})").FirstOrDefault();
+                            VALUES(@NUMBER, @TAG, @CUST_NO, @DARSAD, @PURSANT, {tozihClamp}, @STAT, @PORID)", visitorParams).FirstOrDefault();
                     }
                     else
                     {
-                        dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
-                                         NUMBER = {NUMBER.Text}, CUST_NO = N'{FINAL_CROW_ITEM.CUST_NO}' , DARSAD = {FINAL_CROW_ITEM?.DARSAD} ,
-                                         PURSANT = {FINAL_CROW_ITEM?.PURSANT} , TOZIH = N'{FINAL_CROW_ITEM.TOZIH}' , STAT = {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
-                                         PORID = {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)}
-                                         WHERE ID = {FINAL_CROW_ITEM?.ID}");
+                        dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET
+                                         NUMBER = @NUMBER, CUST_NO = @CUST_NO , DARSAD = @DARSAD ,
+                                         PURSANT = @PURSANT , TOZIH = {tozihClamp} , STAT = @STAT,
+                                         PORID = @PORID
+                                         WHERE ID = @ID", visitorParams);
                     }
                 }
                 catch (SqlException ex)
