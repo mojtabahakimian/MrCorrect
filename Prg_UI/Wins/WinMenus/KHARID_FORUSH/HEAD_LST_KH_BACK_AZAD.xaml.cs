@@ -886,6 +886,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             GetResids();
 
             Form_Current();
+
+            AllowEdits = true;
         }
         private void ReGetDataMaster(bool IsNumberSelectedNow)
         {
@@ -2317,7 +2319,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (NewRecord)
                 {
-                    var RST = dbms.DoGetDataSQL<double?>($"SELECT HEAD_LST.NUMBER1 FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG})) GROUP BY HEAD_LST.NUMBER1 HAVING (((HEAD_LST.NUMBER1)= " + NUMBER1.SelectedValue + "))").FirstOrDefault();
+                    var RST = dbms.DoGetDataSQL<double?>($"SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG})) GROUP BY HEAD_LST.NUMBER HAVING (((HEAD_LST.NUMBER)= " + NUMBER1.SelectedValue + "))").FirstOrDefault();
                     if (RST != null)
                     {
                         ErrosMessages.Add(new MsgModel { MessageText_U = "براي اين فاكتور قبلا فاكتور مرجوعي صادر گرديده است . آن را جستجو نموده و مقدار مرجوعي را در همانجا ثبت نمائيد و در فيلد توضيحات تاريخ مرجوع دوم را درج نمائيد" });
