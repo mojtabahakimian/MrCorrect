@@ -597,7 +597,7 @@ namespace Wins.WinMenus.ANBAR
             }
             else
             {
-                var RST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE TAG = 27 and NUMBER =  " + this.NUMBER.Text).ToList();
+                var RST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE TAG = 27 and (NUMBER =  " + this.NUMBER.Text + " OR NUMBER1 = " + this.NUMBER.Text + ")").ToList();
                 if (RST.Count == 0)
                 {
                     //this.AllowAdditions = true;
@@ -1127,7 +1127,7 @@ namespace Wins.WinMenus.ANBAR
                 else
                 {
                     //فاکتور برگشت خرید آزاد از سایر حواله انبار
-                    AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER = {NUMBER.Text} ").Any();
+                    AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 27 AND (NUMBER = {NUMBER.Text} OR NUMBER1 = {NUMBER.Text}) ").Any();
                     if (AnyCrossAzadInvoiced)
                     {
                         universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت خرید آزاد) است و نمیتوان سطر های آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
