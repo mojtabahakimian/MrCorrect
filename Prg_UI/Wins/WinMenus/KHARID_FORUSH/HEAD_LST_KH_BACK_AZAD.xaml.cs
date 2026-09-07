@@ -2692,6 +2692,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             DataGridActivation();
             Page57.IsEnabled = true;
             ChangeIsHappend = false;
+            NewRecord = false;
         }
 
         private void GetBalancePerson()
