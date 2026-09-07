@@ -190,6 +190,17 @@ namespace AUTO_BAZ.Properties {
                 this["IsC11"] = value;
             }
         }
+                [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsC12 {
+            get {
+                return ((bool)(this["IsC12"]));
+            }
+            set {
+                this["IsC12"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

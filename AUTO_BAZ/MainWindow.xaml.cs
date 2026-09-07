@@ -76,6 +76,10 @@ namespace AUTO_BAZ
             public double? AVRAGE { get; set; }
             public long? ID { get; set; }
             public string? BARGAH { get; set; }
+
+            /// <summary>ترتیب عددیِ نوع برگه داخل یک روز (TAGCOD.tartib). مبنای ORDER BY است؛
+            /// BARGAH فقط برای سازگاری با شاخه‌ی قدیمی نگه داشته شده.</summary>
+            public double? tartib { get; set; }
         }
         public class rst4_model
         {
@@ -333,7 +337,8 @@ namespace AUTO_BAZ
                 (c8, PRGR_C8),
                 (c9, PRGR_C9),
                 (c10, PRGR_C10),
-                (c11, PRGR_C11)
+                (c11, PRGR_C11),
+                (c12, PRGR_C12)
             };
 
             // Load From Saved Data List
@@ -462,6 +467,7 @@ namespace AUTO_BAZ
             Properties.Settings.Default.IsC9 = c9.IsChecked ?? false;
             Properties.Settings.Default.IsC10 = c10.IsChecked ?? false;
             Properties.Settings.Default.IsC11 = c11.IsChecked ?? false;
+            Properties.Settings.Default.IsC12 = c12.IsChecked ?? false;
             Properties.Settings.Default.UseSmartThrottling = chkUseSmartThrottling.IsChecked ?? false;
 
             //Properties.Settings.Default.IsDefacc = defacc.IsChecked ?? false;
@@ -486,6 +492,7 @@ namespace AUTO_BAZ
                 c9.IsChecked = Properties.Settings.Default.IsC9;
                 c10.IsChecked = Properties.Settings.Default.IsC10;
                 c11.IsChecked = Properties.Settings.Default.IsC11;
+                c12.IsChecked = Properties.Settings.Default.IsC12;
                 UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
                 chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
@@ -503,6 +510,8 @@ namespace AUTO_BAZ
                 c9.IsChecked = CHKITEMS[9];
                 c10.IsChecked = CHKITEMS[10];
                 c11.IsChecked = CHKITEMS[11];
+                // ⚠️ با طول بررسی می‌شود: فراخوان‌های قدیمی ممکن است آرایه‌ی ۱۲تایی بدهند.
+                c12.IsChecked = CHKITEMS.Length > 12 && CHKITEMS[12];
                 UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
                 chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
@@ -728,6 +737,7 @@ namespace AUTO_BAZ
                     if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
                     if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
                     if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
+                    if (Generaly.C12) { tasks.Add(C12_TASK()); } //سند برگشت خرید آزاد
 
                     // Start all tasks concurrently
                     var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
@@ -1040,42 +1050,698 @@ namespace AUTO_BAZ
         {
             return "SELECT     TOP 100 PERCENT DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID,  MEGH_R , RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, ID, BARGAH FROM ( "
                  + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,  dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO,dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE WHERE  (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ") UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1 = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBARF = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ")  AND (dbo.INVO_LST.TAG = 5) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN       dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_FBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A,dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH  FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag INNER JOIN " + " dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) union " + " SELECT     TOP 100 PERCENT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK, 0 AS megh_mar,' ' AS mol, dbo.ANBGRD_LST.MABL, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK, 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no, 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage, 0 AS id, '17' AS Expr1 FROM   dbo.ANBGRD_LST INNER JOIN  dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM INNER JOIN  dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE " + " WHERE      (dbo.ANBGRD_LST.CODE = '" + code + "') AND (dbo.ANBGRD_HEAD.GRD_ANBAR = " + anbar + ") and ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * - 1 <> 0) AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL)) "
-                 + " ) AS AVGSRC ORDER BY DATE_N, BARGAH";
+                 + " ) AS AVGSRC ORDER BY DATE_N, BARGAH, ID";
         }
 
 
         /// <summary>
-        /// منبع تراکنش‌های «بازسازی نرخ میانگین» برای یک (کالا، انبار).
+        /// منبع تراکنش‌های «بازسازی نرخ میانگین» برای یک (کالا، انبار) — یا برای «همه‌ی
+        /// انبارهای یک کالا» وقتی <paramref name="anbar"/> برابر null باشد (پردازش
+        /// ادغام‌شده‌ی کالاهای چرخه‌دار؛ نگاه کنید OrderAnbarsForTransferDependencies).
         ///
         /// قبلاً همین SQL به شکل «DROP VIEW ← CREATE VIEW ← SELECT از VIEW ← DROP VIEW» اجرا می‌شد؛
-        /// یعنی ۴ رفت‌وبرگشت و دو دستور DDL به ازای هر کالا (برای ۲۴۹۱ کالا ≈ ۱۰ هزار دستور).
-        /// DDL روی کاتالوگ سیستم قفل Sch-M می‌گیرد و Recompile ایجاد می‌کند، پس در حلقه‌ی موازی
-        /// Thread ها پشت هم صف می‌کشیدند و موازی‌سازی عملاً بی‌اثر می‌شد.
-        ///
-        /// اینجا همان متن SQL داخل یک Derived Table قرار گرفته و همان ORDER BY بیرونی روی آن اعمال
-        /// می‌شود. VIEW در SQL Server مادی‌سازی نمی‌شود و هنگام اجرا در همان نقطه Inline می‌شود،
-        /// بنابراین درخت اجرا و در نتیجه مجموعه‌ی نتیجه و ترتیب آن دقیقاً همان قبل است.
-        ///
-        /// تنها تغییر در متن SQL: حذف ORDER BY داخل شاخه‌های UNION.
-        /// آن‌ها از ابتدا بی‌اثر بودند (UNION برای حذف تکراری‌ها خودش مرتب/هش می‌کند و ترتیب نهایی
-        /// را فقط ORDER BY بیرونی تعیین می‌کند) و داخل Derived Table نحو معتبری ندارند.
+        /// یعنی ۴ رفت‌وبرگشت و دو دستور DDL به ازای هر کالا. DDL روی کاتالوگ سیستم قفل Sch-M
+        /// می‌گیرد و Recompile ایجاد می‌کند، پس در حلقه‌ی موازی Thread ها پشت هم صف می‌کشیدند.
+        /// اینجا همان متن SQL داخل یک Derived Table قرار گرفته و ORDER BY بیرونی روی آن اعمال می‌شود.
         /// UNION (و نه UNION ALL) عیناً حفظ شده تا حذف رکوردهای تکراری مثل قبل انجام شود.
+        ///
+        /// ⚠️ ترتیب داخل یک روز: TAGCOD.BARGAH (متن) نیست — TAGCOD.tartib است، یک ستون عددی
+        /// که دقیقاً برای همین منظور در همین جدول وجود دارد. مقایسه‌ی متنیِ BARGAH به ترتیب
+        /// الفبای فارسی و به فاصله‌های ابتدایی وابسته است، نه به ترتیب واقعیِ کسب‌وکار؛ مثلاً
+        /// «انتقالی-ورود» (tartib=10) باید قبل از «برگشت خرید آزاد» (tartib=11) بیاید ولی این دو
+        /// به‌عنوان متن با هم می‌آمیزند.
+        ///
+        /// ⚠️ ID به‌عنوان تای‌برک نهایی: بدون آن، ترتیب ردیف‌های هم‌روز و هم‌tartib (چند فاکتور
+        /// فروش یا چند رسید خرید در یک روز) را SQL Server تضمین نمی‌کند. چون این پیمایش متوالی و
+        /// حالت‌مند است (هر ردیف روی میانگین متحرکِ ردیف قبلی بنا می‌شود)، یک تای نامعین در ابتدای
+        /// سال کل مسیر میانگین را تا انتهای سال منحرف می‌کند و نتیجه‌ی دو اجرای پیاپی فرق می‌کند.
+        /// ID شناسه‌ی IDENTITY است، پس صعودی = ترتیب واقعیِ درج.
+        ///
+        /// ⚠️ شاخه‌های BACK_HEAD (برگشت فروش ta=2 و برگشت خرید ta=1): قبلاً اصلاً وجود نداشتند و
+        /// برگشت‌ها فقط از HEAD_LST_FBK/HEAD_LST_KBK می‌آمدند؛ روی دیتابیس‌هایی که این دو جدول
+        /// پشتیبان را ندارند (رول‌آور سال مالی که هرگز اجرا نشده) هیچ برگشتی روی نرخ میانگین اثر
+        /// نمی‌گذاشت — case 3 و بخشی از case 4 کد داشتند ولی هرگز ردیفی به آن‌ها نمی‌رسید.
+        /// BACK_HEAD.DATE_N تاریخ واقعیِ خودِ برگشت است (همان منبعی که گزارش کارت کالا از آن
+        /// استفاده می‌کند)، پس برگشت در تاریخ خودش اثر می‌کند نه تاریخ سند اصلی.
+        ///
+        /// ⚠️ سنتینل tartib = 9999 روی شاخه‌ی برگشت فروش، فقط وقتی برگشت هم‌روزِ فروشِ اصلی باشد:
+        /// case 4 مقدار line.AVRAGE (نرخ منجمدِ لحظه‌ی فروش) را می‌خواند. tartib واقعیِ TAGCOD برای
+        /// کد ۴ برابر ۶ و برای کد ۲ برابر ۱۸ است، یعنی در حالت هم‌روز، برگشت پیش از خودِ فروش
+        /// پردازش می‌شد و line.AVRAGE هنوز صفر بود (MBKM با صفر جمع می‌شد ولی MOGUDI بدون مقابل
+        /// ارزشی رشد می‌کرد). با هل‌دادن به انتهای همان روز این حل می‌شود. وقتی تاریخ برگشت با
+        /// تاریخ فروش یکی نیست، line.AVRAGE از قبل درست است و سنتینل لازم نیست — و اگر بی‌دلیل
+        /// اعمال شود، ردیف بعد از رویدادهای نامرتبطِ همان روز می‌افتد و AVRAGE2 غلط می‌شود.
         ///
         /// ⚠️ شرط (ISNULL(INVO_LST.MEGH_MAR, 0) &lt;&gt; 0) روی شاخه‌های HEAD_LST_FBK / HEAD_LST_KBK:
         /// اقلام برگشتی رکورد مستقل در INVO_LST ندارند و مقدار مرجوعی در ستون MEGH_MAR همان
         /// ردیفِ فاکتور اصلی نگهداری می‌شود. Join فقط با سرِ سند (NUMBER1/dtag) انجام می‌شود،
         /// بنابراین بدون این شرط «همه‌ی» ردیف‌های فاکتور مرجع — حتی ردیف‌هایی که اصلاً برگشت
-        /// نخورده‌اند (MEGH_MAR = 0) — با TAG = 3/4 وارد جریان بازسازی می‌شدند و روی همان ردیف
-        /// AVRAGE2 نوشته می‌شد؛ ضمناً اگر در آن لحظه MOGUDI صفر بود، شاخه‌ی «MOGUDI == 0»
-        /// مقدار MBKM را صفر می‌کرد و نرخ میانگینِ تراکنش‌های بعدی هم منحرف می‌شد.
-        /// همین شرط در تولید سند حسابداری برگشت فروش هم اعمال شده است
-        /// (CL_HESABDARI_AUTO_BAZ: INVO_LST_TAKH.MEGH_MAR &lt;&gt; 0)، پس دو مسیر هم‌راستا می‌شوند.
+        /// نخورده‌اند — با TAG = 3/4 وارد جریان بازسازی می‌شدند. همین شرط روی دو شاخه‌ی
+        /// BACK_HEAD هم اعمال شده است.
         /// </summary>
-        private static string BuildAvgRebuildSourceSql(string? code, int anbar, string dt)
+        private static string BuildAvgRebuildSourceSql(
+            string? code, int? anbar, string dt,
+            bool hasFbk, bool hasKbk, bool useBackHeadSaleReturn, bool useBackHeadPurchaseReturn)
         {
-            return "SELECT     TOP 100 PERCENT DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID,  MEGH_R , RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, ID, BARGAH FROM ( "
-                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,  dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO,dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE WHERE  (dbo.INVO_LST.tag <> 20 and dbo.INVO_LST.tag <> 23) and (dbo.INVO_LST.CODE = '" + code + "') AND " + " (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ") UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1  = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBARF = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ")  AND (dbo.INVO_LST.TAG = 5) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN       dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_FBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A,dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH  FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag INNER JOIN " + " dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) union " + " SELECT     TOP 100 PERCENT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK, 0 AS megh_mar,' ' AS mol, dbo.ANBGRD_LST.MABL, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK, 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no, 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage, 0 AS id, '17' AS Expr1 FROM   dbo.ANBGRD_LST INNER JOIN  dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM INNER JOIN  dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE " + " WHERE      (dbo.ANBGRD_LST.CODE = '" + code + "') AND (dbo.ANBGRD_HEAD.GRD_ANBAR = " + anbar + ") and ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * - 1 <> 0) AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL)) "
-                 + " ) AS AVGSRC ORDER BY DATE_N, BARGAH";
+            var c = SqlText(code);
+
+            // anbar == null یعنی «همه‌ی انبارهای این کالا یک‌جا».
+            string ANB(string column) => anbar.HasValue ? $" AND ({column} = {anbar.Value})" : string.Empty;
+
+            const string COLS = "DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, "
+                              + "FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, "
+                              + "N_TAF, AVRAGE, ID, BARGAH, tartib";
+
+            const string INVO_COLS = "dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, "
+                                   + "dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, "
+                                   + "dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, "
+                                   + "dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, "
+                                   + "dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID";
+
+            var parts = new List<string>();
+
+            // ── اصلی: همه‌ی برگه‌های خودِ این انبار ─────────────────────────────
+            parts.Add(
+                " SELECT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
+                + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
+                + " FROM dbo.INVO_LST"
+                + " INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG"
+                + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE"
+                + " WHERE (dbo.INVO_LST.tag <> 20 AND dbo.INVO_LST.tag <> 23) AND (dbo.INVO_LST.CODE = '" + c + "')"
+                + ANB("dbo.INVO_LST.ANBAR")
+                + " AND (dbo.HEAD_LST.DATE_N > " + dt + ")");
+
+            // ── انتقالیِ ورود: همان ردیف حواله، این بار به نام انبار مقصد ───────
+            //
+            // ⚠️ tartib این شاخه در دو حالت فرق می‌کند و این عمدی است:
+            //
+            //   • حالت معمول (anbar مشخص): ردیفِ TAG = 6 فقط در کوئریِ انبارِ *مقصد*
+            //     ظاهر می‌شود و ردیفِ TAG = 5 فقط در کوئریِ انبارِ *مبدأ*؛ این دو هرگز
+            //     در یک نتیجه کنار هم نمی‌آیند، پس ترتیبشان نسبت به هم بی‌معناست و
+            //     tartib طبیعیِ TAGCOD (کد ۶) درست است — همان چیزی که تا امروز بوده.
+            //     وابستگیِ «مبدأ قبل از مقصد» را در این حالت ترتیبِ خودِ انبارها تأمین
+            //     می‌کند (OrderAnbarsForTransferDependencies) نه ترتیبِ داخل کوئری.
+            //
+            //   • حالت ادغام‌شده (anbar = null، کالای چرخه‌دار): هر دو ردیف در یک نتیجه
+            //     هستند و DATE_N شان هم لزوماً یکی است (هر دو از سربرگ یک حواله می‌آیند).
+            //     پس ترتیبشان را فقط tartib تعیین می‌کند. اگر TAGCOD.tartib کد ۶ کوچک‌تر
+            //     از کد ۵ باشد — که طبق مستندات پروژه‌ی Safir همین‌طور است (۱۰ در برابر
+            //     ۱۴) — مقصد *همیشه* قبل از مبدأ پردازش می‌شود و علامتِ touchedByCase5
+            //     هیچ‌وقت به‌موقع ست نمی‌شود؛ یعنی دقیقاً همان مقدار کهنه‌ای خوانده
+            //     می‌شود که قرار بود رفع شود.
+            //     برای همین اینجا tartib از روی کدِ *مبدأ* (TAGCOD کد ۵) ساخته می‌شود
+            //     به‌علاوه‌ی نیم واحد، تا ردیف ورود بلافاصله بعد از ردیف خروجِ خودش
+            //     بنشیند — بدون اینکه جای هیچ رویداد دیگری در آن روز عوض شود.
+            //
+            // ⚠️ این مقدار تأییدنشده است: عددهای TAGCOD.tartib روی دیتابیس شما خوانده
+            //    نشده‌اند. اگر روی این دیتابیس tartib کد ۶ از کد ۵ بزرگ‌تر باشد، این
+            //    شاخه بی‌اثر است و چیزی خراب نمی‌کند (ترتیب همچنان مبدأ سپس مقصد).
+            // ⚠️ ISNULL روی هر tartib ای که از TAGCOD می‌آید ضروری است، نه آرایشی:
+            //    اگر tartib یک کد NULL باشد، در ORDER BY صعودی جلوتر از همه می‌نشیند و
+            //    مهم‌تر اینکه «NULL + 0.5» باز هم NULL می‌شود — یعنی همان ترفندِ نیم‌واحدِ
+            //    پایین بی‌صدا از کار می‌افتاد و ردیف ورود دوباره جلوتر از خروج می‌افتاد.
+            //    با ISNULL(...,0) ترتیب در هر دو حالت قطعی می‌ماند: با tartib واقعی
+            //    مثلاً ۱۴ و ۱۴٫۵، و با tartib خالی ۰ و ۰٫۵.
+            //    (Safir هم در 14-s05-gate.sql همین ISNULL(tc.tartib, 0) را دارد، یعنی
+            //     NULL بودنِ tartib روی این خانواده دیتابیس یک حالت واقعی است.)
+            var transferInTartib = anbar.HasValue
+                ? "ISNULL(dbo.TAGCOD.tartib, 0)"
+                : "CAST(ISNULL(TG_SRC.tartib, 0) AS FLOAT) + 0.5";
+            var transferInSrcJoin = anbar.HasValue
+                ? string.Empty
+                // LEFT و نه INNER: این JOIN فقط برای گرفتنِ tartibِ مبدأ است و نباید
+                // هیچ ردیفی را حذف کند. با INNER، ردیف انتقالیِ ورود در حالت ادغام‌شده
+                // به وجودِ ردیفِ کد ۵ در TAGCOD وابسته می‌شد — شرطی که شاخه‌ی این ردیف
+                // تا امروز نداشت. ISNULL بالا مقدارِ نبودِ تطابق را هم پوشش می‌دهد.
+                : " LEFT JOIN dbo.TAGCOD AS TG_SRC ON dbo.HEAD_LST.TAG = TG_SRC.CODE";
+
+            parts.Add(
+                " SELECT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, "
+                + INVO_COLS + ", dbo.TAGCOD.BARGAH, " + transferInTartib + " AS tartib"
+                + " FROM dbo.INVO_LST"
+                + " INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG"
+                + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1 = dbo.TAGCOD.CODE"
+                + transferInSrcJoin
+                + " WHERE (dbo.INVO_LST.CODE = '" + c + "')"
+                + ANB("dbo.INVO_LST.ANBARF")
+                + " AND (dbo.HEAD_LST.DATE_N > " + dt + ") AND (dbo.INVO_LST.TAG = 5)");
+
+            // ── انبارگردانی (کسری = 17، اضافه = 18) ────────────────────────────
+            //    tartib اینجا هاردکد است چون TAG این شاخه واقعی نیست و خودِ همین کوئری
+            //    با CASE می‌سازدش؛ معادل عددیِ همان دو ردیف TAGCOD (کد ۱۷ ⇒ ۵، کد ۱۸ ⇒ ۱۳).
+            parts.Add(
+                " SELECT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,"
+                + " dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,"
+                + " (dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK,"
+                + " 0 AS megh_mar, ' ' AS mol, dbo.ANBGRD_LST.MABL,"
+                + " ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK,"
+                + " 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no,"
+                + " 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage,"
+                + " 0 AS id, '17' AS Expr1,"
+                + " CASE WHEN (dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) > 0 THEN 13 ELSE 5 END AS tartib"
+                + " FROM dbo.ANBGRD_LST"
+                + " INNER JOIN dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM"
+                + " INNER JOIN dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE"
+                + " WHERE (dbo.ANBGRD_LST.CODE = '" + c + "')"
+                + ANB("dbo.ANBGRD_HEAD.GRD_ANBAR")
+                + " AND ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * -1 <> 0)"
+                + " AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL))");
+
+            // ⚠️ ریسکِ تأییدنشده روی هر دو شاخه‌ی BACK_HEAD زیر: Join با
+            //    (il.TAG = bh.ta AND il.NUMBER = bh.NUMBER1) است، یعنی اگر یک فاکتور
+            //    *چند* برگه‌ی برگشتِ جدا داشته باشد، همان ردیفِ INVO_LST به‌ازای هر برگه
+            //    یک بار در نتیجه می‌آید و case 3/4 چند بار روی همان MEGH_MAR اجرا می‌شود
+            //    — یعنی برگشت چند برابر حساب می‌شود. ساختار BACK_HEAD و اینکه آیا چنین
+            //    حالتی در داده‌ی واقعی رخ می‌دهد، در این بررسی خوانده نشده است.
+            //    این دو شاخه فقط وقتی فعال می‌شوند که HEAD_LST_FBK/KBK وجود نداشته
+            //    باشند؛ پیش از فعال‌کردنشان روی یک دیتابیس، این کوئری را اجرا کنید:
+            //        SELECT NUMBER1, ta, COUNT(*) FROM dbo.BACK_HEAD
+            //        GROUP BY NUMBER1, ta HAVING COUNT(*) > 1;
+            //    هر سطری که برگردد یعنی این شاخه‌ها به تفکیکِ برگه‌ی برگشت نیاز دارند.
+            if (useBackHeadSaleReturn)
+            {
+                // برگشت فروش (BACK_HEAD.ta = 2 ⇒ TAG = 4) در تاریخ واقعیِ خودِ برگشت.
+                parts.Add(
+                    " SELECT dbo.BACK_HEAD.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
+                    + INVO_COLS + ", '' AS BARGAH,"
+                    + " CASE WHEN dbo.BACK_HEAD.DATE_N = HS.DATE_N THEN 9999 ELSE 6 END AS tartib"
+                    + " FROM dbo.BACK_HEAD"
+                    + " INNER JOIN dbo.INVO_LST ON dbo.INVO_LST.TAG = dbo.BACK_HEAD.ta AND dbo.INVO_LST.NUMBER = dbo.BACK_HEAD.NUMBER1"
+                    + " INNER JOIN dbo.HEAD_LST HS ON HS.NUMBER = dbo.INVO_LST.NUMBER AND HS.TAG = dbo.INVO_LST.TAG"
+                    + " WHERE (dbo.BACK_HEAD.ta = 2) AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0)"
+                    + " AND (dbo.INVO_LST.CODE = '" + c + "')"
+                    + ANB("dbo.INVO_LST.ANBAR")
+                    + " AND (dbo.BACK_HEAD.DATE_N > " + dt + ")");
+            }
+
+            if (useBackHeadPurchaseReturn)
+            {
+                // برگشت خرید (BACK_HEAD.ta = 1 ⇒ TAG = 3). اینجا سنتینل لازم نیست: case 3
+                // از نرخ منجمدِ ردیف (line.AVRAGE) استفاده نمی‌کند، فقط از MIAN جاری — که با
+                // هر ترتیبی در همان روز معتبر است. tartib واقعیِ TAGCOD برای کد ۳ = ۱۵.
+                parts.Add(
+                    " SELECT dbo.BACK_HEAD.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
+                    + INVO_COLS + ", '' AS BARGAH, 15 AS tartib"
+                    + " FROM dbo.BACK_HEAD"
+                    + " INNER JOIN dbo.INVO_LST ON dbo.INVO_LST.TAG = dbo.BACK_HEAD.ta AND dbo.INVO_LST.NUMBER = dbo.BACK_HEAD.NUMBER1"
+                    + " WHERE (dbo.BACK_HEAD.ta = 1) AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0)"
+                    + " AND (dbo.INVO_LST.CODE = '" + c + "')"
+                    + ANB("dbo.INVO_LST.ANBAR")
+                    + " AND (dbo.BACK_HEAD.DATE_N > " + dt + ")");
+            }
+
+            if (hasFbk)
+            {
+                parts.Add(
+                    " SELECT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
+                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
+                    + " FROM dbo.INVO_LST"
+                    + " INNER JOIN dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag"
+                    + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE"
+                    + " WHERE (dbo.INVO_LST.CODE = '" + c + "')"
+                    + ANB("dbo.INVO_LST.ANBAR")
+                    + " AND (dbo.HEAD_LST_FBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0)");
+            }
+
+            if (hasKbk)
+            {
+                parts.Add(
+                    " SELECT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
+                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
+                    + " FROM dbo.INVO_LST"
+                    + " INNER JOIN dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag"
+                    + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE"
+                    + " WHERE (dbo.INVO_LST.CODE = '" + c + "')"
+                    + ANB("dbo.INVO_LST.ANBAR")
+                    + " AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0)");
+            }
+
+            // ⚠️ NUMBER به‌عنوان تای‌برکِ آخر، بعد از ID: برای ردیف‌های INVO_LST که ID
+            //    یکتا دارند هرگز به آن نمی‌رسد و بی‌اثر است؛ ولی شاخه‌ی انبارگردانی برای
+            //    *همه‌ی* ردیف‌هایش «0 AS id» می‌دهد، پس چند برگه‌ی انبارگردانیِ هم‌روز و
+            //    هم‌علامت بدون این تای‌برک ترتیب نامعین داشتند — همان چیزی که کلِ این
+            //    تغییر قرار بود ببندد. NUMBER اینجا GRD_NUM است و صعودی.
+            return "SELECT " + COLS + " FROM (" + string.Join(" UNION ", parts) + ") AS AVGSRC ORDER BY DATE_N, tartib, ID, NUMBER";
+        }
+
+        /// <summary>گریز ساده‌ی تک‌کوتیشن برای درج امنِ کد کالا در متن SQL.</summary>
+        private static string SqlText(string? v) => (v ?? string.Empty).Replace("'", "''");
+
+        /// <summary>قالب‌بندی عدد مستقل از Culture برای درج در متن SQL.</summary>
+        private static string AvgN(double? v)
+            => v.HasValue ? v.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
+
+        /// <summary>مانده‌ی متحرکِ یک (کالا، انبار) در طول پیمایش کاردکس.</summary>
+        private sealed class AvgAnbarState
+        {
+            public double MBKM;
+            public double MIAN;
+            public double MOGUDI;
+        }
+
+        /// <summary>یک یالِ وابستگیِ حواله‌ی انتقالی: انبار مبدأ → انبار مقصد، برای یک کالا.</summary>
+        private sealed class transfer_edge_model
+        {
+            public string? CODE { get; set; }
+            public int? Src { get; set; }
+            public int? Dst { get; set; }
+        }
+
+        /// <summary>
+        /// انبارهای یک کالا را طوری مرتب می‌کند که مبدأ هر حواله‌ی انتقالی (TAG = 5) همیشه
+        /// قبل از مقصدش (TAG = 6 در انبار دیگر) پردازش شود — topological sort ساده‌ی Kahn روی
+        /// یال‌های مبدأ→مقصد. اگر انبارهای این کالا هیچ حواله‌ی انتقالی بینشان نداشته باشند
+        /// (اکثر کالاها) فوراً همان ترتیب ورودی برمی‌گردد، بدون سربار.
+        ///
+        /// چرا لازم است: گروه‌بندی بر اساس «کالا» فقط تضمین می‌کند انبارهای یک کالا سریال و روی
+        /// یک Thread پردازش شوند؛ ولی *ترتیبِ* آن‌ها همان ترتیب برگشتیِ کوئری (بدون ORDER BY)
+        /// است. اگر انبار مقصد زودتر از مبدأ بیفتد، case 6 مقدار MABL_K ای را می‌خواند که case 5
+        /// هنوز ننوشته است.
+        ///
+        /// اگر بین انبارهای این کالا چرخه باشد (هم از A به B و هم، در تاریخ دیگری، از B به A)،
+        /// HasCycle = true برمی‌گردد تا فراخوان‌کننده به‌جای ترتیب‌دادن، کاردکسِ همه‌ی انبارها را
+        /// در یک جریان زمانیِ مشترک ادغام کند.
+        /// </summary>
+        private static (List<THE_QUERY1> Ordered, bool HasCycle) OrderAnbarsForTransferDependencies(
+            List<THE_QUERY1> codeGroup, List<(int Src, int Dst)>? edges)
+        {
+            if (edges == null || edges.Count == 0 || codeGroup.Count <= 1) { return (codeGroup, false); }
+
+            var anbarSet = codeGroup.Where(r => r.ANBAR.HasValue).Select(r => r.ANBAR!.Value).ToHashSet();
+            var relevantEdges = edges.Where(e => anbarSet.Contains(e.Src) && anbarSet.Contains(e.Dst)).Distinct().ToList();
+            if (relevantEdges.Count == 0) { return (codeGroup, false); }
+
+            var indegree = anbarSet.ToDictionary(a => a, _ => 0);
+            var adjacency = anbarSet.ToDictionary(a => a, _ => new List<int>());
+            foreach (var (src, dst) in relevantEdges)
+            {
+                adjacency[src].Add(dst);
+                indegree[dst]++;
+            }
+
+            var queue = new Queue<int>(anbarSet.Where(a => indegree[a] == 0));
+            var orderedAnbars = new List<int>(anbarSet.Count);
+            while (queue.Count > 0)
+            {
+                var a = queue.Dequeue();
+                orderedAnbars.Add(a);
+                foreach (var next in adjacency[a])
+                {
+                    if (--indegree[next] == 0) { queue.Enqueue(next); }
+                }
+            }
+
+            if (orderedAnbars.Count < anbarSet.Count) { return (codeGroup, true); }
+
+            var rank = orderedAnbars.Select((a, i) => (a, i)).ToDictionary(x => x.a, x => x.i);
+            return (codeGroup.OrderBy(r => r.ANBAR.HasValue && rank.TryGetValue(r.ANBAR.Value, out var i) ? i : int.MaxValue).ToList(), false);
+        }
+
+        /// <summary>مانده‌ی اول دوره‌ی یک (کالا، انبار)؛ اگر نرخ اول دوره صفر بود، نرخ استاندارد
+        /// و بعد نرخ اولین ورود جایگزین می‌شود — عیناً همان ترتیبِ کد اصلی.</summary>
+        private static AvgAnbarState BuildAvgAnbarState(THE_QUERY1 row)
+        {
+            var st = new AvgAnbarState
+            {
+                MBKM = row.MABL_A ?? 0,
+                MIAN = row.FI_A ?? 0,
+                MOGUDI = row.MOGODI_A ?? 0
+            };
+
+            if (st.MIAN == 0d)
+            {
+                st.MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(row.CODE);
+                if (st.MIAN == 0d)
+                {
+                    st.MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(row.CODE);
+                }
+            }
+
+            return st;
+        }
+
+        /// <summary>
+        /// اجرای دسته‌ای UPDATE های انباشته‌شده.
+        ///
+        /// ⚠️ بدون BEGIN TRANSACTION: دقیقاً مثل قبل هر دستور جداگانه Commit می‌شود، پس نه قفل
+        /// طولانی‌مدت ایجاد می‌شود و نه رفتار در صورت خطا عوض می‌شود. همه‌ی این دستورها Idempotent
+        /// اند (مقدار ثابت SET می‌کنند)، بنابراین اگر دسته دوباره اجرا شود مشکلی نیست.
+        /// </summary>
+        private void FlushAvgPending(List<string> pending)
+        {
+            const int updateChunkSize = 200;
+            for (int off = 0; off < pending.Count; off += updateChunkSize)
+            {
+                var batch = new StringBuilder();
+                var endAt = Math.Min(off + updateChunkSize, pending.Count);
+                for (int k = off; k < endAt; k++) { batch.Append(pending[k]).AppendLine(";"); }
+                dbms.DoExecuteSQL(batch.ToString());
+            }
+        }
+
+        /// <summary>
+        /// پردازش یک ردیف کاردکس روی مانده‌ی متحرکِ یک انبار.
+        ///
+        /// از دو مسیر صدا زده می‌شود: حلقه‌ی سریالِ انبار‌به‌انبار (اکثر کالاها) و حلقه‌ی
+        /// ادغام‌شده‌ی کالاهای چرخه‌دار. فرمول هر Case دقیقاً همان کد اصلی است؛ فقط
+        /// MBKM/MIAN/MOGUDI محلی جایش را به <paramref name="st"/> داده است.
+        /// </summary>
+        private void ProcessAvgKardexRow(
+            string? code,
+            cm_model t,
+            AvgAnbarState st,
+            List<string> pending,
+            Dictionary<long, INVO_LST> rst3ById,
+            List<ANBGRD_LST> anbgrdRows,
+            HashSet<long> touchedByCase5)
+        {
+            // ⚠️ اگر ID مقدار نداشته باشد نباید کلید ۰ جستجو شود.
+            //
+            // ⚠️ اینجا نباید «اگر null بود continue» گذاشت: شاخه‌ی انبارگردانیِ کوئری منبع،
+            //    ستون id را «0 AS id» می‌دهد، پس ردیف‌های TAG = 17/18 هیچ‌وقت در rst3ById پیدا
+            //    نمی‌شوند. با continue کل «کسری/اضافه انبار» از بازسازی حذف می‌شد. این دو case
+            //    اصلاً line لازم ندارند.
+            INVO_LST? line = null;
+            if (t.ID.HasValue && rst3ById.TryGetValue(t.ID.Value, out var invoRow))
+            {
+                line = invoRow;
+            }
+
+            switch (t.TAG)
+            {
+                case 1: // خريد
+                    {
+                        st.MBKM = st.MBKM + (t.MABL_K ?? 0);
+                        st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        line.AVRAGE = st.MIAN;
+                        pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        break;
+                    }
+                case 22: // برگشت فروش سال قبل
+                    {
+                        if (st.MBKM <= 0d)
+                        {
+                            st.MBKM = (t.MABL ?? 0) * (t.MEGH_MAR ?? 0);
+                        }
+                        else
+                        {
+                            st.MBKM = st.MBKM + st.MIAN * (t.MEGH_MAR ?? 0);
+                        }
+                        st.MOGUDI = st.MOGUDI + (t.MEGH_MAR ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        line.AVRAGE = st.MIAN;
+                        pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        break;
+                    }
+                case 24: // برگشت فروش سال قبل
+                    {
+                        if (st.MBKM <= 0d)
+                        {
+                            st.MBKM = t.MABL_K ?? 0;
+                        }
+                        else
+                        {
+                            st.MBKM = st.MBKM + (t.MEGHk ?? 0) * st.MIAN;
+                        }
+                        st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        line.AVRAGE = st.MIAN;
+                        pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        break;
+                    }
+                case 2: // فروش
+                    {
+                        st.MBKM = st.MBKM - (t.MEGHk ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGHk ?? 0);
+                        line.AVRAGE = st.MIAN;
+                        pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        break;
+                    }
+                case 3: // برگشت خريد
+                    {
+                        st.MBKM = st.MBKM - (t.MEGH_MAR ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGH_MAR ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        if (line != null)
+                        {
+                            line.AVRAGE2 = st.MIAN;
+                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        }
+                        break;
+                    }
+                case 4: // برگشت فروش
+                    {
+                        st.MBKM = st.MBKM + (t.MEGH_MAR ?? 0) * (line?.AVRAGE ?? 0);
+                        st.MOGUDI = st.MOGUDI + (t.MEGH_MAR ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        if (line != null)
+                        {
+                            line.AVRAGE2 = st.MIAN;
+                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        }
+                        break;
+                    }
+                case 5: // انتقالي خروج
+                    {
+                        st.MBKM = st.MBKM - (t.MEGHk ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGHk ?? 0);
+                        line.AVRAGE = st.MIAN;
+                        line.MABL = st.MIAN;
+                        line.MABL_K = Math.Round(st.MIAN * (t.MEGHk ?? 0));
+                        // ⚠️ علامت‌گذاری برای case 6: از این لحظه به بعد مقدار زنده‌ی
+                        //    line.MABL_K معتبر است، نه t.MABL_K که عکسِ لحظه‌ی fetch است.
+                        touchedByCase5.Add(line.id);
+
+                        pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} ,
+                                                                 MABL = {AvgN(st.MIAN)} ,
+                                                                 MABL_K = {AvgN(line.MABL_K)}
+                                        WHERE ID = {line.id}");
+                        break;
+                    }
+                case 6: // انتقالي ورود
+                    {
+                        // ⚠️ اگر case 5 همین ردیف را در همین اجرا لمس کرده باشد، مقدار
+                        //    زنده‌ی line.MABL_K درست است و t.MABL_K عکسِ قدیمیِ لحظه‌ی
+                        //    خواندنِ کوئری. برای کالاهای بدون چرخه هر دو یکی‌اند (انبار
+                        //    مبدأ پیش از انبار مقصد flush شده)، ولی در پردازش ادغام‌شده‌ی
+                        //    کالاهای چرخه‌دار همه‌ی انبارها یک‌جا خوانده شده‌اند و فقط
+                        //    مقدار زنده معتبر است.
+                        var mablKForCase6 = (line != null && touchedByCase5.Contains(line.id))
+                            ? line.MABL_K
+                            : (t.MABL_K ?? 0);
+                        st.MBKM = st.MBKM + mablKForCase6;
+                        st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        if (line != null)
+                        {
+                            line.AVRAGE2 = st.MIAN;
+                            pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        }
+                        break;
+                    }
+                case 10: // مواد خروج
+                    {
+                        st.MBKM = st.MBKM - (t.MEGHk ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGHk ?? 0);
+                        line.AVRAGE = st.MIAN;
+                        line.MABL = st.MIAN;
+                        line.MABL_K = Math.Round(st.MIAN * (t.MEGHk ?? 0));
+
+                        pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} ,
+                                                                 MABL = {AvgN(st.MIAN)} ,
+                                                                 MABL_K = {AvgN(line.MABL_K)}
+                                        WHERE ID = {line.id}");
+                        break;
+                    }
+                case 11:    // موادساير خروج
+                    {
+                        st.MBKM = st.MBKM - (t.MEGHk ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGHk ?? 0);
+                        line.AVRAGE = st.MIAN;
+                        line.MABL = st.MIAN;
+                        line.MABL_K = Math.Round(st.MIAN * (t.MEGHk ?? 0));
+
+                        pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} ,
+                                                                 MABL = {AvgN(st.MIAN)} ,
+                                                                 MABL_K = {AvgN(line.MABL_K)}
+                                        WHERE ID = {line.id}");
+                        break;
+                    }
+                case 9:    // توليد
+                    {
+                        if (t.N_KOL != 0 & !IsNull(t.N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
+                        {
+                            List<THE_QUERY2> RST7 = dbms.DoGetDataSQL<THE_QUERY2>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + t.N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
+                            if (RST7.Count > 0)
+                            {
+                                line.MABL = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
+                                line.MABL_K = Math.Round(((RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0)) * (t.MEGHk ?? 0));
+                                pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                 MABL = {AvgN(line.MABL)} ,
+                                                                 MABL_K = {AvgN(line.MABL_K)}
+                                        WHERE ID = {line.id}");
+                            }
+                        }
+                        else
+                        {
+                            line.MABL = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(code, t.DATE_N ?? 0L);
+                            if (line.MABL == 0)
+                            {
+                                line.MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(code);
+                            }
+                            line.MABL_K = Math.Round(line.MABL * (t.MEGHk ?? 0));
+
+                            pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                 MABL = {AvgN(line.MABL)} ,
+                                                                 MABL_K = {AvgN(line.MABL_K)}
+                                        WHERE ID = {line.id}");
+                        }
+                        // ⚠️ عمداً line.MABL_K (مقدارِ تازه محاسبه‌شده) و نه t.MABL_K
+                        //    (مقدارِ قبل از بازسازی که هنگام خواندن کوئری در حافظه آمده) استفاده می‌شود.
+                        st.MBKM = st.MBKM + line.MABL_K;
+                        st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        line.AVRAGE = st.MIAN;
+                        pending.Add($@"UPDATE dbo.INVO_LST SET
+                                                                 AVRAGE = {AvgN(st.MIAN)}
+                                        WHERE ID = {line.id}");
+                        break;
+                    }
+
+                case 17: // كسري انبار
+                    {
+                        st.MBKM = st.MBKM + st.MIAN * (t.MEGHk ?? 0);
+                        st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
+                        if (st.MBKM == 0d)
+                        {
+                        }
+                        // st.MIAN = 0
+                        else if (st.MOGUDI == 0d)
+                        {
+                            // st.MIAN = 0
+                            st.MBKM = 0d;
+                        }
+                        else
+                        {
+                            st.MIAN = st.MBKM / st.MOGUDI;
+                        }
+                        // If st.MIAN < 0 Then
+                        // st.MIAN = 0
+                        // End If
+                        var grdRow = anbgrdRows.Where(x => x.CODE == t.CODE && x.GRD_NUM == t.NUMBER).FirstOrDefault();
+                        if (grdRow != null) { grdRow.MABL = st.MIAN; }
+                        // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
+                        //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
+                        //    انبارگردانی» می‌نوشت.
+                        pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {AvgN(st.MIAN)} WHERE CODE = '{t.CODE}' AND GRD_NUM = {AvgN(t.NUMBER)}");
+                        break;
+                    }
+                case 18: // اضافه انبار
+                    {
+                        // ⚠️ اینجا عمداً st.MIAN دوباره محاسبه نمی‌شود (برخلاف case 17)؛
+                        //    عیناً همان چیزی است که کد اصلی انجام می‌داد.
+                        st.MBKM = st.MBKM - (t.MEGHk ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGHk ?? 0);
+                        var grdRow = anbgrdRows.Where(x => x.CODE == t.CODE && x.GRD_NUM == t.NUMBER).FirstOrDefault();
+                        if (grdRow != null) { grdRow.MABL = st.MIAN; }
+                        pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {AvgN(st.MIAN)} WHERE CODE = '{t.CODE}' AND GRD_NUM = {AvgN(t.NUMBER)}");
+                        break;
+                    }
+                case 26: // برگشت خريد
+                    {
+                        st.MBKM = st.MBKM - (t.MEGHk ?? 0) * st.MIAN;
+                        st.MOGUDI = st.MOGUDI - (t.MEGHk ?? 0);
+                        line.AVRAGE = st.MIAN;
+
+                        pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
+                        break;
+                    }
+            }
         }
 
 
@@ -1116,6 +1782,55 @@ namespace AUTO_BAZ
                     var RST4 = dbms.DoGetDataSQL<rst4_model>("SELECT TCOD_STUFGROUP.CODE, TCOD_STUFGROUP.NAMES FROM TCOD_STUFGROUP WHERE (((TCOD_STUFGROUP.CODE)<>0)) ORDER BY TCOD_STUFGROUP.NAMES").ToList(); LogWriter.WriteLog($"RST4.Count = {RST4.Count}");
                     var rst3 = dbms.DoGetDataSQL<INVO_LST>("SELECT CODE,ANBAR,ID FROM INVO_LST").ToList(); LogWriter.WriteLog($"rst3.Count = {rst3.Count}");
                     var RST6 = dbms.DoGetDataSQL<ANBGRD_LST>("SELECT * FROM ANBGRD_LST").ToList(); LogWriter.WriteLog($"RST6.Count = {RST6.Count}");
+
+                    // ─────────────────────────────────────────────────────────────────────
+                    // جدول‌های اختیاریِ منبع کاردکس.
+                    //
+                    // HEAD_LST_FBK/HEAD_LST_KBK (پشتیبان سال قبل) روی همه‌ی دیتابیس‌ها نیستند —
+                    // شرکتی که رول‌آور سال مالی برایش اجرا نشده این دو را ندارد و کوئری منبع
+                    // با خطای «Invalid object name» می‌افتاد. BACK_HEAD هم روی نسخه‌های قدیمی
+                    // ممکن است نباشد. با این پرچم‌ها کوئری فقط شاخه‌های موجود را می‌سازد.
+                    // ─────────────────────────────────────────────────────────────────────
+                    // ⚠️ عمداً هیچ فیلترِ نوعِ شیء ندارد. دو نسخه‌ی قبلی این بررسی هر دو غلط
+                    //    بودند و به یک شکل: «sys.tables WHERE name = …» و بعد
+                    //    «OBJECT_ID(…, N'U')» هر دو فقط جدولِ فیزیکی را می‌بینند. روی این
+                    //    دیتابیس HEAD_LST_FBK و HEAD_LST_KBK و BACK_HEAD «ویو» هستند نه
+                    //    جدول، پس هر سه پرچم false می‌شد و همه‌ی شاخه‌های برگشت بی‌صدا از
+                    //    کوئری کاردکس حذف می‌شدند — یعنی برگشت‌های سال اصلاً روی نرخ میانگین
+                    //    اثر نمی‌گذاشتند. پیش از شرطی‌شدن، این شاخه‌ها بی‌قید در کوئری بودند،
+                    //    پس آن شرط یک رگرسیون بود نه محافظ.
+                    //
+                    //    نامِ dbo. صریح نوشته می‌شود (کوئری‌های زیر هم همین را می‌نویسند) ولی
+                    //    نوعِ شیء پرسیده نمی‌شود: چه جدول باشد چه ویو، SELECT از آن کار می‌کند.
+                    bool TableExists(string name) =>
+                        dbms.DoGetDataSQL<int>($"SELECT 1 WHERE OBJECT_ID(N'dbo.{name}') IS NOT NULL").Any();
+
+                    var hasFbk = TableExists("HEAD_LST_FBK");
+                    var hasKbk = TableExists("HEAD_LST_KBK");
+                    var hasBackHead = TableExists("BACK_HEAD");
+
+                    // ─────────────────────────────────────────────────────────────────────
+                    // منبع «برگشت» — BACK_HEAD یا HEAD_LST_FBK/KBK، نه هر دو.
+                    //
+                    // BACK_HEAD (ta = 2 برگشت فروش، ta = 1 برگشت خرید، DATE_N تاریخ واقعیِ
+                    // خودِ برگشت) همان منبعی است که گزارش کارت کالا از آن استفاده می‌کند.
+                    // HEAD_LST_FBK/HEAD_LST_KBK جدول‌های پشتیبان سال قبل‌اند و همان مفهوم را
+                    // به شکل دیگری نگه می‌دارند. روی دیتابیسی که هر دو وجود دارند، افزودن
+                    // هم‌زمانِ هر دو شاخه یک برگشت را دوبار روی نرخ میانگین اثر می‌دهد.
+                    //
+                    // پس BACK_HEAD فقط جایی به کار می‌رود که معادلِ پشتیبانش وجود ندارد —
+                    // دقیقاً همان حالتی که تا امروز باعث می‌شد case 3 (برگشت خرید) کد داشته
+                    // باشد ولی هیچ ردیفی به آن نرسد.
+                    //
+                    // ⚠️ اگر روی دیتابیس شما تأیید شد که این دو منبع هم‌پوشانی ندارند
+                    //    (یعنی FBK/KBK فقط برگشت‌های سال قبل و BACK_HEAD فقط سال جاری را
+                    //    نگه می‌دارند)، این دو شرط را به «hasBackHead» تنها تغییر دهید.
+                    // ─────────────────────────────────────────────────────────────────────
+                    var useBackHeadSaleReturn = hasBackHead && !hasFbk;
+                    var useBackHeadPurchaseReturn = hasBackHead && !hasKbk;
+
+                    LogWriter.WriteLog($"hasFbk = {hasFbk} , hasKbk = {hasKbk} , hasBackHead = {hasBackHead} , " +
+                                       $"useBackHeadSaleReturn = {useBackHeadSaleReturn} , useBackHeadPurchaseReturn = {useBackHeadPurchaseReturn}");
 
                     // ─────────────────────────────────────────────────────────────────────
                     // نگاشت ID → ردیف INVO_LST.
@@ -1187,9 +1902,64 @@ namespace AUTO_BAZ
                         // انبار بعدی روی دیتابیس نشسته است.
                         // (کالاهای مختلف همچنان کاملاً موازی پیش می‌روند.)
                         // ─────────────────────────────────────────────────────────────────────
+                        // ─────────────────────────────────────────────────────────────────────
+                        // یال‌های وابستگیِ حواله‌ی انتقالی (انبار مبدأ → انبار مقصد) به ازای هر کالا.
+                        // یک بار برای کل اجرا خوانده می‌شود و دو کار می‌کند: ترتیب‌دهی انبارهای هر
+                        // کالا (OrderAnbarsForTransferDependencies) و شناساندن انبارهای مقصد به
+                        // فیلترِ پایین.
+                        //
+                        // مقایسه‌ی کلید بی‌توجه به بزرگی/کوچکی حرف است چون این کلیدها از
+                        // INVO_LST.CODE می‌آیند ولی با STUF_FSK.CODE مقایسه می‌شوند و collation
+                        // دیتابیس (Arabic_CI_AS) هم به حرف حساس نیست؛ مقایسه‌ی پیش‌فرض دات‌نت
+                        // ordinal است و می‌توانست جایی که SQL «برابر» می‌بیند «نابرابر» ببیند.
+                        // ─────────────────────────────────────────────────────────────────────
+                        var transferEdgesByCode = dbms.DoGetDataSQL<transfer_edge_model>(
+                            @"SELECT DISTINCT i.CODE, i.ANBAR AS Src, CAST(i.ANBARF AS INT) AS Dst
+                              FROM dbo.INVO_LST i
+                              WHERE i.TAG = 5 AND i.ANBARF IS NOT NULL AND i.ANBAR <> CAST(i.ANBARF AS INT)")
+                            .Where(e => e.CODE != null && e.Src.HasValue && e.Dst.HasValue)
+                            .GroupBy(e => e.CODE!.Trim(), StringComparer.OrdinalIgnoreCase)
+                            .ToDictionary(g => g.Key,
+                                          g => g.Select(e => (Src: e.Src!.Value, Dst: e.Dst!.Value)).ToList(),
+                                          StringComparer.OrdinalIgnoreCase);
+                        LogWriter.WriteLog($"transferEdgesByCode.Count = {transferEdgesByCode.Count}");
+
+                        // ─────────────────────────────────────────────────────────────────────
+                        // ⚠️ تغییر رفتار (عمدی): انبارِ مقصدِ حواله‌ی انتقالی هم «دارای تراکنش»
+                        // شمرده می‌شود.
+                        //
+                        // فیلتر پایین تا امروز فقط rst3Lookup را می‌دید که از «SELECT CODE, ANBAR
+                        // FROM INVO_LST» ساخته می‌شود — و ردیف حواله‌ی انتقالی ANBAR اش انبارِ
+                        // *مبدأ* است، مقصد فقط در ANBARF می‌نشیند. پس انبار مقصدی که خودش هیچ
+                        // ردیف INVO_LST ای ندارد (کالا وارد شده ولی هنوز از آنجا خارج/فروخته
+                        // نشده) اصلاً وارد groupedByCode نمی‌شد: نه case 6 اش اجرا می‌شد، نه
+                        // AVRAGE2 آن حواله نوشته می‌شد، نه مانده‌ی آن انبار بازسازی می‌شد.
+                        //
+                        // این دقیقاً همان چیزی را بی‌اثر می‌کرد که مرتب‌سازی توپولوژیک و پردازش
+                        // ادغام‌شده برایش اضافه شده‌اند. کلیدها از همان یال‌های بالا می‌آیند، پس
+                        // کوئری تازه‌ای زده نمی‌شود.
+                        //
+                        // اثرش: کالا/انبارهایی که تا امروز از بازسازی جا می‌ماندند حالا پردازش
+                        // می‌شوند، یعنی روی همان ردیف‌ها UPDATE تازه اجرا می‌شود. اگر خواستید
+                        // رفتار قبلی برگردد، فقط شرطِ transferDestLookup را از فیلتر بردارید.
+                        // ─────────────────────────────────────────────────────────────────────
+                        var transferDestLookup = new Dictionary<string, HashSet<int>>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var kv in transferEdgesByCode)
+                        {
+                            var dests = new HashSet<int>();
+                            foreach (var e in kv.Value) { dests.Add(e.Dst); }
+                            transferDestLookup[kv.Key] = dests;
+                        }
+
+                        bool IsTransferDestination(string? code, int anbar)
+                            => code != null
+                               && transferDestLookup.TryGetValue(code.Trim(), out var dests)
+                               && dests.Contains(anbar);
+
                         var groupedByCode = rst
                             .Where(r => rst3Lookup.Contains((r.CODE?.Trim(), r.ANBAR ?? 0))   // دارای فاکتور
-                                        || rst6CodeLookup.Contains(r.CODE?.Trim()))          // یا دارای انبارگردانی
+                                        || rst6CodeLookup.Contains(r.CODE?.Trim())            // یا دارای انبارگردانی
+                                        || IsTransferDestination(r.CODE, r.ANBAR ?? 0))       // یا مقصدِ حواله‌ی انتقالی
                             .GroupBy(x => x.CODE)
                             .ToList();
                         LogWriter.WriteLog($"groupedByCode.Count = {groupedByCode.Count}");
@@ -1200,375 +1970,81 @@ namespace AUTO_BAZ
                             var codeGroup = groupedByCode[groupIndex];
                             currentCode = codeGroup.Key;
 
-                            // انبارهای این کالا سریال پردازش می‌شوند (به دلیل وابستگی حواله انتقالی)
-                            foreach (var rRow in codeGroup)
+                            var codeKey = (codeGroup.Key ?? string.Empty).Trim();
+                            var anbarRows = codeGroup.ToList();
+                            transferEdgesByCode.TryGetValue(codeKey, out var codeEdges);
+                            var (orderedAnbars, hasCycle) = OrderAnbarsForTransferDependencies(anbarRows, codeEdges);
+
+                            // ردیف‌هایی که case 5 (انتقالیِ خروج) در همین اجرا MABL_K شان را نوشته
+                            // است؛ case 6 باید مقدار زنده را بخواند نه عکسِ لحظه‌ی fetch.
+                            // محدود به همین کالاست، چون انبارهای یک کالا روی یک Thread می‌مانند.
+                            var touchedByCase5 = new HashSet<long>();
+
+                            if (hasCycle)
                             {
-                                double MIAN;
-                                double MBKM;
-                                var MOGUDI = default(double);
+                                // ─────────────────────────────────────────────────────────────
+                                // چرخه‌ی وابستگی (هم از A به B و هم از B به A انتقال داده شده):
+                                // هیچ ترتیبِ خطیِ ثابتی هر دو طرف را درست نمی‌کند. به‌جای حدس زدن،
+                                // کاردکسِ همه‌ی انبارهای این کالا یک‌جا خوانده و در یک جریان زمانیِ
+                                // واحد پردازش می‌شود؛ هر انبار مانده‌ی متحرکِ مستقل خودش را دارد.
+                                //
+                                // «مبدأ قبل از مقصد» در این حالت را ترتیبِ انبارها تأمین نمی‌کند
+                                // (چرخه است، ترتیبی وجود ندارد) بلکه tartib شاخه‌ی انتقالیِ ورود
+                                // تأمین می‌کند — نگاه کنید توضیح آن شاخه در BuildAvgRebuildSourceSql.
+                                // ─────────────────────────────────────────────────────────────
+                                LogWriter.WriteLog($"کالا {codeKey}: چرخه‌ی وابستگی حواله انتقالی — پردازش ادغام‌شده");
 
-                                MBKM = rRow.MABL_A ?? 0;
-                                MIAN = rRow.FI_A ?? 0;
-                                if (MIAN == 0d)
+                                var states = new Dictionary<int, AvgAnbarState>();
+                                foreach (var r in anbarRows)
                                 {
-                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE(rRow.CODE);
-                                    if (MIAN == 0d)
-                                    {
-                                        MIAN = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rRow.CODE);
-                                    }
+                                    if (r.ANBAR.HasValue) { states[r.ANBAR.Value] = BuildAvgAnbarState(r); }
                                 }
-                                MOGUDI = rRow.MOGODI_A ?? 0;
 
-                                // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT + DROP VIEW.
-                                var RST2 = dbms.DoGetDataSQL<cm_model>(
-                                    BuildAvgRebuildSourceSql(rRow.CODE, rRow.ANBAR ?? 0, this.DT)).ToList();
+                                var mergedKardex = dbms.DoGetDataSQL<cm_model>(
+                                    BuildAvgRebuildSourceSql(codeGroup.Key, null, this.DT, hasFbk, hasKbk, useBackHeadSaleReturn, useBackHeadPurchaseReturn)).ToList();
 
-                                // UPDATE ها انباشته می‌شوند تا به‌جای یک رفت‌وبرگشت برای هر تراکنش،
-                                // دسته‌ای اجرا شوند. ترتیب اجرا دقیقاً ترتیب تولید است، پس اگر یک ID
-                                // چند بار به‌روزرسانی شود (مثلاً TAG=2 و بعد TAG=4) نتیجه‌ی نهایی عوض نمی‌شود.
-                                var pending = new List<string>(RST2.Count);
-
-                                for (int eof = 0; eof < RST2.Count; eof++) //while (!RST2.EOF)
+                                var pendingMerged = new List<string>(mergedKardex.Count);
+                                for (int eof = 0; eof < mergedKardex.Count; eof++)
                                 {
                                     if (IsCancelRequestedBgWorker) { return; }
                                     Interlocked.Increment(ref processedRows);
                                     uiProgress.ReportOne();
 
-                                    // ⚠️ اگر ID مقدار نداشته باشد نباید کلید ۰ جستجو شود: کد قبلی
-                                    //    «x.id == RST2[eof].ID» بود و مقایسه با null همیشه false می‌داد،
-                                    //    یعنی نتیجه null می‌شد. با «?? 0» رفتار برای ID خالی عوض می‌شد.
-                                    //
-                                    // ⚠️ اینجا نباید «اگر null بود continue» گذاشت: شاخه‌ی انبارگردانیِ
-                                    //    کوئری منبع، ستون id را «0 AS id» می‌دهد، پس ردیف‌های TAG = 17/18
-                                    //    هیچ‌وقت در rst3ById پیدا نمی‌شوند. با continue کل «کسری/اضافه
-                                    //    انبار» از بازسازی حذف می‌شد (نه MBKM/MOGUDI اصلاح می‌شد و نه
-                                    //    ANBGRD_LST.MABL نوشته می‌شد). این دو case اصلاً rst3Filter_ لازم ندارند.
-                                    INVO_LST? rst3Filter_ = null;
-                                    if (RST2[eof].ID.HasValue && rst3ById.TryGetValue(RST2[eof].ID.Value, out var invoRow))
-                                    {
-                                        rst3Filter_ = invoRow;
-                                    }
+                                    var anbarKey = (int)(mergedKardex[eof].ANBAR ?? 0);
+                                    if (!states.TryGetValue(anbarKey, out var stMerged)) { continue; }
 
-                                    switch (RST2[eof].TAG)
-                                    {
-                                        case 1: // خريد
-                                            {
-                                                MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 22: // برگشت فروش سال قبل
-                                            {
-                                                if (MBKM <= 0d)
-                                                {
-                                                    MBKM = (RST2[eof].MABL ?? 0) * (RST2[eof].MEGH_MAR ?? 0);
-                                                }
-                                                else
-                                                {
-                                                    MBKM = MBKM + MIAN * (RST2[eof].MEGH_MAR ?? 0);
-                                                }
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 24: // برگشت فروش سال قبل
-                                            {
-                                                if (MBKM <= 0d)
-                                                {
-                                                    MBKM = RST2[eof].MABL_K ?? 0;
-                                                }
-                                                else
-                                                {
-                                                    MBKM = MBKM + (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                }
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 2: // فروش
-                                            {
-                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 3: // برگشت خريد
-                                            {
-                                                MBKM = MBKM - (RST2[eof].MEGH_MAR ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGH_MAR ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                if (rst3Filter_ != null)
-                                                {
-                                                    rst3Filter_.AVRAGE2 = MIAN;
-                                                    pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                }
-                                                break;
-                                            }
-                                        case 4: // برگشت فروش
-                                            {
-                                                MBKM = MBKM + (RST2[eof].MEGH_MAR ?? 0) * (rst3Filter_?.AVRAGE ?? 0);
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGH_MAR ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                if (rst3Filter_ != null)
-                                                {
-                                                    rst3Filter_.AVRAGE2 = MIAN;
-                                                    pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                }
-                                                break;
-                                            }
-                                        case 5: // انتقالي خروج
-                                            {
-                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                rst3Filter_.MABL = MIAN;
-                                                rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
-
-                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
-                                                                                         MABL = {N(MIAN)} ,
-                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
-                                                                WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 6: // انتقالي ورود
-                                            {
-                                                MBKM = MBKM + (RST2[eof].MABL_K ?? 0);
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                if (rst3Filter_ != null)
-                                                {
-                                                    rst3Filter_.AVRAGE2 = MIAN;
-                                                    pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE2 = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                }
-                                                break;
-                                            }
-                                        case 10: // مواد خروج
-                                            {
-                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                rst3Filter_.MABL = MIAN;
-                                                rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
-
-                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
-                                                                                         MABL = {N(MIAN)} ,
-                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
-                                                                WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 11:    // موادساير خروج
-                                            {
-                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                rst3Filter_.MABL = MIAN;
-                                                rst3Filter_.MABL_K = Math.Round(MIAN * (RST2[eof].MEGHk ?? 0));
-
-                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} ,
-                                                                                         MABL = {N(MIAN)} ,
-                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
-                                                                WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                        case 9:    // توليد
-                                            {
-                                                if (RST2[eof].N_KOL != 0 & !IsNull(RST2[eof].N_KOL) & Strings.Mid(Baseknow.OPTIONSS, 56, 1) == "5")
-                                                {
-                                                    List<THE_QUERY2> RST7 = dbms.DoGetDataSQL<THE_QUERY2>("SELECT  dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, SUM(dbo.DTL_MANF.MABLK) AS MABLKs FROM         dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.FNUMB = " + RST2[eof].N_KOL + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR").ToList();
-                                                    if (RST7.Count > 0)
-                                                    {
-                                                        rst3Filter_.MABL = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
-                                                        rst3Filter_.MABL_K = Math.Round(((RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0)) * (RST2[eof].MEGHk ?? 0));
-                                                        pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                         MABL = {N(rst3Filter_.MABL)} ,
-                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
-                                                                WHERE ID = {rst3Filter_.id}");
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rRow.CODE, RST2[eof].DATE_N ?? 0L);
-                                                    if (rst3Filter_.MABL == 0)
-                                                    {
-                                                        rst3Filter_.MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rRow.CODE);
-                                                    }
-                                                    rst3Filter_.MABL_K = Math.Round(rst3Filter_.MABL * (RST2[eof].MEGHk ?? 0));
-
-                                                    pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                         MABL = {N(rst3Filter_.MABL)} ,
-                                                                                         MABL_K = {N(rst3Filter_.MABL_K)}
-                                                                WHERE ID = {rst3Filter_.id}");
-                                                }
-                                                // ⚠️ عمداً rst3Filter_.MABL_K (مقدارِ تازه محاسبه‌شده) و نه RST2[eof].MABL_K
-                                                //    (مقدارِ قبل از بازسازی که هنگام خواندن کوئری در حافظه آمده) استفاده می‌شود.
-                                                MBKM = MBKM + rst3Filter_.MABL_K;
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                rst3Filter_.AVRAGE = MIAN;
-                                                pending.Add($@"UPDATE dbo.INVO_LST SET
-                                                                                         AVRAGE = {N(MIAN)}
-                                                                WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-
-                                        case 17: // كسري انبار
-                                            {
-                                                MBKM = MBKM + MIAN * (RST2[eof].MEGHk ?? 0);
-                                                MOGUDI = MOGUDI + (RST2[eof].MEGHk ?? 0);
-                                                if (MBKM == 0d)
-                                                {
-                                                }
-                                                // MIAN = 0
-                                                else if (MOGUDI == 0d)
-                                                {
-                                                    // MIAN = 0
-                                                    MBKM = 0d;
-                                                }
-                                                else
-                                                {
-                                                    MIAN = MBKM / MOGUDI;
-                                                }
-                                                // If MIAN < 0 Then
-                                                // MIAN = 0
-                                                // End If
-                                                var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
-                                                if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
-                                                // ⚠️ شرط CODE جا افتاده بود: ANBGRD_LST به ازای هر (GRD_NUM, CODE) یک ردیف
-                                                //    دارد، پس این UPDATE نرخ همین کالا را روی «همه‌ی کالاهای آن برگه‌ی
-                                                //    انبارگردانی» می‌نوشت.
-                                                pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
-                                                break;
-                                            }
-                                        case 18: // اضافه انبار
-                                            {
-                                                // ⚠️ اینجا عمداً MIAN دوباره محاسبه نمی‌شود (برخلاف case 17)؛
-                                                //    عیناً همان چیزی است که کد اصلی انجام می‌داد.
-                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                                var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
-                                                if (RST6Filter != null) { RST6Filter.MABL = MIAN; }
-                                                pending.Add($@"UPDATE dbo.ANBGRD_LST SET MABL = {N(MIAN)} WHERE CODE = '{RST2[eof].CODE}' AND GRD_NUM = {N(RST2[eof].NUMBER)}");
-                                                break;
-                                            }
-                                        case 26: // برگشت خريد
-                                            {
-                                                MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
-                                                MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
-                                                rst3Filter_.AVRAGE = MIAN;
-
-                                                pending.Add($@"UPDATE dbo.INVO_LST SET AVRAGE = {N(MIAN)} WHERE ID = {rst3Filter_.id}");
-                                                break;
-                                            }
-                                    }
+                                    ProcessAvgKardexRow(codeGroup.Key, mergedKardex[eof], stMerged, pendingMerged, rst3ById, RST6, touchedByCase5);
                                 }
 
-                                // ⚠️ بدون BEGIN TRANSACTION: دقیقاً مثل قبل هر دستور جداگانه Commit می‌شود،
-                                //    پس نه قفل طولانی‌مدت ایجاد می‌شود و نه رفتار در صورت خطا عوض می‌شود.
-                                //    همه‌ی این دستورها Idempotent اند (مقدار ثابت SET می‌کنند)، بنابراین
-                                //    اگر DoExecuteSQL به دلیل خطای گذرا دسته را دوباره اجرا کند مشکلی نیست.
-                                //
-                                //    اجرای این دسته «پیش از رفتن به انبار بعدیِ همین کالا» انجام می‌شود،
-                                //    پس MABL_K حواله‌ی انتقالی برای انبار مقصد آماده است.
-                                const int updateChunkSize = 200;
-                                for (int off = 0; off < pending.Count; off += updateChunkSize)
+                                FlushAvgPending(pendingMerged);
+                                return;
+                            }
+
+                            // انبارهای این کالا سریال و به ترتیبِ وابستگیِ حواله‌ی انتقالی پردازش
+                            // می‌شوند: مبدأ همیشه قبل از مقصد، و آپدیت هر انبار پیش از شروع انبار
+                            // بعدی روی دیتابیس نشسته است. (کالاهای مختلف همچنان کاملاً موازی‌اند.)
+                            foreach (var rRow in orderedAnbars)
+                            {
+                                var st = BuildAvgAnbarState(rRow);
+
+                                // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT + DROP VIEW.
+                                var RST2 = dbms.DoGetDataSQL<cm_model>(
+                                    BuildAvgRebuildSourceSql(rRow.CODE, rRow.ANBAR ?? 0, this.DT, hasFbk, hasKbk, useBackHeadSaleReturn, useBackHeadPurchaseReturn)).ToList();
+
+                                // UPDATE ها انباشته می‌شوند تا به‌جای یک رفت‌وبرگشت برای هر تراکنش،
+                                // دسته‌ای اجرا شوند. ترتیب اجرا دقیقاً ترتیب تولید است.
+                                var pending = new List<string>(RST2.Count);
+
+                                for (int eof = 0; eof < RST2.Count; eof++)
                                 {
-                                    var batch = new StringBuilder();
-                                    var endAt = Math.Min(off + updateChunkSize, pending.Count);
-                                    for (int k = off; k < endAt; k++) { batch.Append(pending[k]).AppendLine(";"); }
-                                    dbms.DoExecuteSQL(batch.ToString());
+                                    if (IsCancelRequestedBgWorker) { return; }
+                                    Interlocked.Increment(ref processedRows);
+                                    uiProgress.ReportOne();
+
+                                    ProcessAvgKardexRow(rRow.CODE, RST2[eof], st, pending, rst3ById, RST6, touchedByCase5);
                                 }
+
+                                FlushAvgPending(pending);
                             }
                         });
                     }
@@ -2266,6 +2742,35 @@ namespace AUTO_BAZ
             Dispatcher.Invoke(new Action(() => { c11.Foreground = Generaly.PutThisColor(); }));
         }
 
+        /// <summary>
+        /// سند «برگشت خرید آزاد» — سربرگ HEAD_LST.TAG = 27، اقلام INVO_LST.TAG = 26.
+        ///
+        /// تا پیش از این هیچ بخشی این نوع برگه را بازسازی نمی‌کرد، در حالی که بازسازی نرخ
+        /// میانگین (C0) خودش «case 26» را دارد؛ یعنی نرخ اقلام به‌روز می‌شد ولی سند
+        /// حسابداری‌شان با نرخ قدیمی می‌ماند.
+        /// </summary>
+        public async Task C12_TASK()
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    Int64 HF1 = 1;
+                    Int64 HF2 = 9999999999;
+                    CL_HESABDARI_AUTO_BAZ.GENSANADBARGASHTKHARIDAZAD(HF1, HF2);
+                }
+                catch (Exception er)
+                {
+                    AnyErrorHappend = true;
+                    ERTRACKLIST.Add(new ErrorSectionModel { ErrorHappend = true, SectionName = "خطا در سند برگشت خرید آزاد" });
+
+                    ExpectionLogWriter.WriteLog(er, "سند برگشت خرید آزاد خطا");
+                }
+
+            });
+            Dispatcher.Invoke(new Action(() => { c12.Foreground = Generaly.PutThisColor(); }));
+        }
+
         private void C0_Click(object sender, RoutedEventArgs e)
         {
             SaveCheckBoxesState();
@@ -2331,6 +2836,10 @@ namespace AUTO_BAZ
             SaveCheckBoxesState();
         }
         private void c11_Click(object sender, RoutedEventArgs e)
+        {
+            SaveCheckBoxesState();
+        }
+        private void c12_Click(object sender, RoutedEventArgs e)
         {
             SaveCheckBoxesState();
         }
