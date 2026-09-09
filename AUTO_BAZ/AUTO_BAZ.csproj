@@ -7,6 +7,12 @@
     <UseWPF>true</UseWPF>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <ApplicationIcon>Assets\icon_autobaz.ico</ApplicationIcon>
+    <!-- تا امروز نسخه‌ای نداشت و AUTO_BAZ.exe همیشه 1.0.0.0 گزارش می‌شد؛
+         یعنی از روی خودِ فایل نمی‌شد فهمید کدام بیلد است. با update_version.bat
+         هم‌شماره نگه داشته می‌شود. -->
+    <Version>1.0.0.459</Version>
+    <FileVersion>1.0.0.459</FileVersion>
+    <AssemblyVersion>1.0.0.459</AssemblyVersion>
 	<UseWindowsForms>true</UseWindowsForms>
 	  
 	 <!--<IsExe>false</IsExe>

@@ -35,6 +35,90 @@ namespace TestRunner
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+            if (args != null && args.Any(a => string.Equals(a, "test-autobaz-morvarid", StringComparison.OrdinalIgnoreCase)))
+            {
+                Console.WriteLine("[INFO] Initializing environment for Morvarid_1404_6Month_2...");
+                Baseknow.USERCOD = 78;
+                Baseknow.UUSER = "Controller";
+                CL_Generaly.SHIFT_OF_USER = 1;
+                CL_Generaly.VAHED_OF_USER = 1;
+                Baseknow.UGRP = "1";
+                CL_Generaly.IsCalledExternally = true;
+                CL_Generaly.General_Servername = @"MERCEDES\SQL2022";
+                CL_Generaly.General_DBname = "Morvarid_1404_6Month_2";
+
+                string targetDb = "Morvarid_1404_6Month_2";
+                CL_CCNNMANAGER.CONNECTION_STR = $"Data Source=MERCEDES\\SQL2022;Initial Catalog={targetDb};Integrated Security=True;TrustServerCertificate=True;Max Pool Size=1000;";
+                CL_CCNNMANAGER.ConnectedToSQLDB = true;
+                Baseknow.GetInitTheApp();
+                Console.WriteLine($"[PASS] Baseknow initialized. STMO: {Baseknow.STMO}");
+
+                var thread = new Thread(() =>
+                {
+                    var appInstance = Application.Current ?? new Application();
+                    var resourceUris = new[]
+                    {
+                        "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml",
+                        "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml",
+                        "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.LightBlue.xaml",
+                        "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.LightBlue.xaml",
+                        "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ObsoleteBrushes.xaml"
+                    };
+                    foreach (var u in resourceUris)
+                    {
+                        try { appInstance.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(u, UriKind.RelativeOrAbsolute) }); } catch { }
+                    }
+
+                    var main = new AUTO_BAZ.MainWindow();
+                    main.Loaded += async (s, e) =>
+                    {
+                        try
+                        {
+                            Console.WriteLine("[INFO] Running C0_TASK (Rebuild average rate)...");
+                            await main.C0_TASK();
+                            Console.WriteLine("[PASS] C0_TASK completed successfully.");
+
+                            Console.WriteLine("[INFO] Running C1_TASK (Sales invoice deeds)...");
+                            await main.C1_TASK();
+                            Console.WriteLine("[PASS] C1_TASK completed successfully.");
+
+                            Console.WriteLine("[INFO] Running C8_TASK (Sales return deeds)...");
+                            await main.C8_TASK();
+                            Console.WriteLine("[PASS] C8_TASK completed successfully.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[ERROR] Task execution failed: {ex.Message}");
+                        }
+                        finally
+                        {
+                            main.Close();
+                            System.Windows.Threading.Dispatcher.ExitAllFrames();
+                        }
+                    };
+                    main.Show();
+                    System.Windows.Threading.Dispatcher.Run();
+                });
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Start();
+                thread.Join();
+
+                // Check MOGHA_ANBAR for the 3 codes
+                using var cnn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+                cnn.Open();
+                using var cmd = cnn.CreateCommand();
+                cmd.CommandText = "SELECT CODE, MABLK, MAND, mab, tafBED, TAFBES FROM dbo.MOGHA_ANBAR(14040631, 6, 115) WHERE CODE IN ('5677', '5666', '5662') ORDER BY CODE";
+                using var r = cmd.ExecuteReader();
+                Console.WriteLine("=========================================================================");
+                Console.WriteLine("          POST-RUN VERIFICATION: dbo.MOGHA_ANBAR(14040631, 6, 115)       ");
+                Console.WriteLine("=========================================================================");
+                while (r.Read())
+                {
+                    Console.WriteLine($"CODE: {r["CODE"]} | MABLK: {r["MABLK"]} | MAND: {r["MAND"]} | mab: {r["mab"]} | tafBED: {r["tafBED"]} | TAFBES: {r["TAFBES"]}");
+                }
+                return;
+            }
+
             // تست رگرسیون اصلاح پورسانت فاکتور فروش؛ هارنس بصری را اجرا نمی‌کند.
             //   TestRunner.exe porsant           فقط قاعده‌ی محاسبه (بدون دیتابیس)
             //   TestRunner.exe porsant --apply   چرخه‌ی کامل روی دیتابیس (روی داده می‌نویسد)
@@ -102,11 +186,11 @@ namespace TestRunner
             try
             {
                 Console.WriteLine("Instantiating HEAD_LST_KHAREED1 (Direct Purchase)...");
-                var win = new Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_KHAREED1(null, _IsDirectFactor_: true);
+                var win = new Wins.WinMenus.KHARID_FORUSH.HEAD_LST_KHAREED1(null, _IsDirectFactor_: true);
                 
                 win.Loaded += (s, e) =>
                 {
-                    Console.WriteLine("Window loaded. Title: " + win.Title + ", Header: " + win.LABEL_HEADER.Content);
+                    Console.WriteLine("Window loaded. Title: " + win.Title);
                     
                     var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
                     timer.Tick += (ts, te) =>
