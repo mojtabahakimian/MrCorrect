@@ -281,17 +281,29 @@ namespace Prg_Proccessy.AUDIT
             if (tagMatch.Success && int.TryParse(tagMatch.Groups[1].Value, out var t)) tag = t;
 
             string? key = null;
-            var keyMatch = RxKey.Match(scope);
-            if (keyMatch.Success)
+
+            if (st.Action == AuditAction.Insert)
             {
-                var raw = keyMatch.Groups[2].Value;
-                var value = NormalizeValue(raw, parameters);
-                if (value != null)
+                // در INSERT کلید داخل WHERE نیست، در VALUES است و جایگاهش با
+                // فهرست ستون‌ها مشخص می‌شود. بدون این، رویدادِ «ایجاد سند»
+                // شماره‌ی سند را نداشت و جستجوی چرخه‌ی عمر یک فاکتور،
+                // لحظه‌ی ساخته شدنش را نشان نمی‌داد.
+                key = BuildInsertKey(segment, parameters, ref tag);
+            }
+            else
+            {
+                var keyMatch = RxKey.Match(scope);
+                if (keyMatch.Success)
                 {
-                    key = keyMatch.Groups[1].Value + "=" + value;
-                    if (tag.HasValue) key += ";TAG=" + tag.Value;
+                    var value = NormalizeValue(keyMatch.Groups[2].Value, parameters);
+                    if (value != null)
+                    {
+                        key = keyMatch.Groups[1].Value + "=" + value;
+                        if (tag.HasValue) key += ";TAG=" + tag.Value;
+                    }
                 }
             }
+
             if (key is null && tag.HasValue) key = "TAG=" + tag.Value;
 
             var label = DescribeTable(st.Table, tag);
@@ -397,6 +409,97 @@ namespace Prg_Proccessy.AUDIT
             {
                 return null;
             }
+        }
+
+        /// <summary>ستون‌های کلیدی به ترتیب اولویت، برای تشخیص کلید در INSERT.</summary>
+        private static readonly string[] KeyColumnPriority =
+            { "N_S", "NUMBER", "NUMBER1", "IDH", "IDD", "CODE", "ID" };
+
+        /// <summary>
+        /// استخراج کلید رکورد از یک <c>INSERT ... (ستون‌ها) VALUES (مقادیر)</c>.
+        ///
+        /// ستون و مقدار با جایگاه به هم نگاشت می‌شوند. اگر دستور از نوع
+        /// <c>INSERT ... SELECT</c> باشد یا فهرست ستون نداشته باشد، کلیدی
+        /// قابل استخراج نیست و null برمی‌گردد.
+        /// </summary>
+        private static string? BuildInsertKey(string segment, object? parameters, ref int? tag)
+        {
+            try
+            {
+                // فهرست ستون‌ها: اولین پرانتز بعد از نام جدول.
+                var open = segment.IndexOf('(');
+                if (open < 0) return null;
+
+                var close = MatchingParen(segment, open);
+                if (close < 0) return null;
+
+                var columns = SplitTopLevel(segment.Substring(open + 1, close - open - 1), ',');
+                if (columns.Count == 0) return null;
+
+                // VALUES بعد از فهرست ستون‌ها (ممکن است OUTPUT بینشان باشد).
+                var rest = segment.Substring(close + 1);
+                var valuesAt = IndexOfKeyword(rest, "VALUES");
+                if (valuesAt < 0) return null;   // INSERT ... SELECT
+
+                var vOpen = rest.IndexOf('(', valuesAt);
+                if (vOpen < 0) return null;
+
+                var vClose = MatchingParen(rest, vOpen);
+                if (vClose < 0) return null;
+
+                var values = SplitTopLevel(rest.Substring(vOpen + 1, vClose - vOpen - 1), ',');
+                if (values.Count != columns.Count) return null;   // نگاشت جایگاهی مطمئن نیست
+
+                string? Lookup(string wanted)
+                {
+                    for (var i = 0; i < columns.Count; i++)
+                    {
+                        var col = columns[i].Trim().Trim('[', ']', ' ');
+                        if (!col.Equals(wanted, StringComparison.OrdinalIgnoreCase)) continue;
+                        return NormalizeValue(values[i].Trim(), parameters);
+                    }
+                    return null;
+                }
+
+                if (!tag.HasValue)
+                {
+                    var t = Lookup("TAG");
+                    if (t != null && int.TryParse(t, out var parsed)) tag = parsed;
+                }
+
+                foreach (var candidate in KeyColumnPriority)
+                {
+                    var v = Lookup(candidate);
+                    if (string.IsNullOrEmpty(v)) continue;
+                    return tag.HasValue ? $"{candidate}={v};TAG={tag.Value}" : $"{candidate}={v}";
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>جای پرانتز بسته‌ی متناظر، با در نظر گرفتن رشته‌ها.</summary>
+        private static int MatchingParen(string text, int openIndex)
+        {
+            var depth = 0;
+            var inQuote = false;
+            for (var i = openIndex; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (inQuote) { if (c == '\'') inQuote = false; continue; }
+                if (c == '\'') { inQuote = true; continue; }
+                if (c == '(') depth++;
+                else if (c == ')')
+                {
+                    depth--;
+                    if (depth == 0) return i;
+                }
+            }
+            return -1;
         }
 
         /// <summary>
