@@ -204,9 +204,18 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.NAME_TAH.Text = row.NAME_TAH ?? "";
                 this.N_HESAB.Text = row.N_HESAB ?? "";
                 this.MABL.Text = row.MABL?.ToString() ?? "";
-                this.KOL.Text = row.N_KOL?.ToString() ?? "";
-                this.MOIN.Text = row.N_MOIN?.ToString() ?? "";
-                this.TAF.Text = row.N_TAF?.ToString() ?? "";
+                if (row.N_KOL2.HasValue && row.N_KOL2.Value > 0)
+                {
+                    this.KOL.Text = row.N_KOL2?.ToString() ?? "";
+                    this.MOIN.Text = row.N_MOIN2?.ToString() ?? "";
+                    this.TAF.Text = row.N_TAF2?.ToString() ?? "";
+                }
+                else
+                {
+                    this.KOL.Text = row.N_KOL?.ToString() ?? "";
+                    this.MOIN.Text = row.N_MOIN?.ToString() ?? "";
+                    this.TAF.Text = row.N_TAF?.ToString() ?? "";
+                }
                 this.BANK.SelectedValue = row.BANK;
                 this.HES1.SelectedValue = row.HES1;
                 this.N_SERI.IsReadOnly = true;
@@ -353,11 +362,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
                     msgwin.ShowDialog();
 
-                    // اگر چک قبلاً واگذار شده باشد، برای "از حساب" (FHES) از حساب واگذاری قبلی (previousHes2) استفاده می‌کنیم.
-                    // اگر خالی بود، از this.HES1 استفاده می‌کنیم.
-                    string targetHesForFrom = !string.IsNullOrEmpty(previousHes2)
-                        ? previousHes2
-                        : (this.HES1.SelectedValue != null ? this.HES1.SelectedValue.ToString() : "");
+                    // اگر چک قبلاً واگذار شده باشد، بستانکار (از حساب - FHES) باید حساب شخصی باشد که چک به او واگذار شده است (HES1).
+                    string targetHesForFrom = (this.HES1.SelectedValue != null && !string.IsNullOrEmpty(this.HES1.SelectedValue.ToString()))
+                        ? this.HES1.SelectedValue.ToString()
+                        : (rst?.FirstOrDefault()?.HES1 ?? "");
+
+                    if (string.IsNullOrEmpty(targetHesForFrom) && !string.IsNullOrEmpty(previousHes2))
+                    {
+                        targetHesForFrom = previousHes2;
+                    }
 
                     if (!string.IsNullOrEmpty(targetHesForFrom))
                     {
@@ -370,6 +383,23 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T3 = (Convert.ToInt32(CTAF3) == 0) ? null : (int)CTAF3;
                         ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T4 = (Convert.ToInt32(CTAF4) == 0) ? null : (int)CTAF4;
                         ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = targetHesForFrom;
+                    }
+
+                    // بدهکار (به حساب - THES) باید حساب صاحب اولیه چک (CUST_NO) باشد.
+                    var parentLst = (THE_WIN as PGET_HED)?.PGET_LST_SUB?.Items[INDEX_DG] as PGET_LST;
+                    if (parentLst != null && string.IsNullOrEmpty(parentLst.THES) && !string.IsNullOrEmpty(rst?.FirstOrDefault()?.CUST_NO))
+                    {
+                        string targetHesForTo = rst.FirstOrDefault().CUST_NO;
+                        double? TKOL = null, TMOIN = null, TTAF = null, TTAF2 = null, TTAF3 = null, TTAF4 = null;
+                        CL_HESABDARI.GETTAF3(targetHesForTo, ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
+
+                        parentLst.THES_K = (Convert.ToInt32(TKOL) == 0) ? null : (int)TKOL;
+                        parentLst.THES_M = (Convert.ToInt32(TMOIN) == 0) ? null : (int)TMOIN;
+                        parentLst.THES_T = (Convert.ToInt32(TTAF) == 0) ? null : (int)TTAF;
+                        parentLst.THES_T2 = (Convert.ToInt32(TTAF2) == 0) ? null : (int)TTAF2;
+                        parentLst.THES_T3 = (Convert.ToInt32(TTAF3) == 0) ? null : (int)TTAF3;
+                        parentLst.THES_T4 = (Convert.ToInt32(TTAF4) == 0) ? null : (int)TTAF4;
+                        parentLst.THES = targetHesForTo;
                     }
                 }
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
