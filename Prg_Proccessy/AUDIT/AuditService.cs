@@ -393,10 +393,32 @@ namespace Prg_Proccessy.AUDIT
             catch (Exception) { }
         }
 
+        /// <summary>زمان آخرین تلاش برای ساخت ساختار، برای فاصله‌گذاری بین تلاش‌ها.</summary>
+        private static long _lastSchemaAttemptTicks;
+        private const int SchemaRetryIntervalMs = 5 * 60 * 1000;
+
         private static async Task FlushAsync(List<AuditEvent> batch)
         {
             if (!_schemaReady)
             {
+                // تلاش دوباره برای ساخت ساختار فقط هر چند دقیقه یک بار.
+                //
+                // اگر کاربرِ SQL دسترسی CREATE TABLE نداشته باشد، ساخت ساختار
+                // هر بار شکست می‌خورد. بدون این فاصله‌گذاری، هر چرخه‌ی تخلیه
+                // (کمتر از یک ثانیه) دوازده دستور DDL را دوباره می‌فرستاد و
+                // دوازده استثنا تولید می‌کرد — تا ابد. یعنی یک تنظیم اشتباهِ
+                // دسترسی، به کوبیدن مداوم دیتابیس تبدیل می‌شد.
+                var now = Environment.TickCount64;
+                var last = Interlocked.Read(ref _lastSchemaAttemptTicks);
+
+                if (last != 0 && now - last < SchemaRetryIntervalMs)
+                {
+                    TrySpill(batch);
+                    return;
+                }
+
+                Interlocked.Exchange(ref _lastSchemaAttemptTicks, now);
+
                 _schemaReady = await AuditSchema.EnsureCreatedAsync(_connectionString!).ConfigureAwait(false);
                 if (!_schemaReady)
                 {
@@ -423,9 +445,14 @@ namespace Prg_Proccessy.AUDIT
                     {
                         using var db = new SqlConnection(_connectionString);
                         await db.OpenAsync().ConfigureAwait(false);
+
                         await InsertEventsAsync(db, chunk).ConfigureAwait(false);
-                        await InsertLegacyAsync(db, chunk).ConfigureAwait(false);
                         ok = true;
+
+                        // نوشتن در جدول‌های قدیمی عمداً بعد از ok انجام می‌شود:
+                        // اگر شکست بخورد نباید باعث تلاش دوباره‌ی همین تکه شود،
+                        // چون آن‌وقت ردیف‌های جریان اصلی تکراری درج می‌شدند.
+                        await InsertLegacyAsync(db, chunk).ConfigureAwait(false);
                     }
                     catch (Exception)
                     {

@@ -151,7 +151,14 @@ namespace Prg_Proccessy.AUDIT
                     // رویه‌ی ذخیره‌شده: نوشتن داخل رویه از دید این لایه پنهان
                     // است، ولی خودِ «اجرای رویه» رویداد مهمی است — مثل
                     // SP_PAY2_FINALIZE_RUN که لیست حقوق را نهایی می‌کند.
-                    ObserveProcedure(sql, formName);
+                    //
+                    // شرط IndexOf لازم است: بدون آن، هر SELECT ساده هم یک
+                    // Regex اضافه اجرا می‌کرد و این متد روی مسیر تمام خواندن‌های
+                    // نرم‌افزار قرار دارد.
+                    if (sql.IndexOf("EXEC", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        ObserveProcedure(sql, formName);
+                    }
                     return;
                 }
 

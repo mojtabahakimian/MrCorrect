@@ -223,11 +223,14 @@ namespace Prg_Proccessy.AUDIT
                       INSERT INTO [dbo].[SYS_AUDIT_EVENT]
                           ([SESSION_ID], [SEQ], [USER_ID], [USER_NAME], [AT_CLIENT], [AT_SERVER],
                            [CATEGORY], [SEVERITY], [ACTION], [FORM_NAME], [TITLE])
+                      -- AT_SERVER ستون NOT NULL است و ADATE در جدول قدیمیِ
+                      -- AMALIAT می‌تواند NULL باشد؛ بدون ISNULL کل انتقال با
+                      -- خطای NOT NULL شکست می‌خورد.
                       SELECT NULL, NULL,
                              TRY_CAST(a.[USERID] AS INT),
                              LEFT(a.[USERNAME], 50),
                              a.[ADATE],
-                             a.[ADATE],
+                             ISNULL(a.[ADATE], SYSDATETIME()),
                              1, 1, 'OPEN_FORM',
                              LEFT(a.[AMALID], 64),
                              N'باز کردن فرم ' + ISNULL(a.[AMALID], N'')
@@ -245,7 +248,7 @@ namespace Prg_Proccessy.AUDIT
                       SELECT NULL, NULL,
                              LEFT(u.[UserName], 50),
                              u.[ActionDateTime],
-                             u.[ActionDateTime],
+                             ISNULL(u.[ActionDateTime], SYSDATETIME()),
                              2, 3,
                              LEFT(u.[ActionType], 24),
                              LEFT(u.[TableName], 48),

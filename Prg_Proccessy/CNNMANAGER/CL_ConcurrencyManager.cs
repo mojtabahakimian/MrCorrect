@@ -249,6 +249,20 @@ namespace Prg_Proccessy.CNNMANAGER
                 // می‌کرد و نوشتن‌های واقعی بی‌صدا از سابقه می‌افتادند.
                 if (!Prg_Proccessy.AUDIT.AuditSqlSniffer.LooksLikeWrite(sql)) return;
 
+                // تراکنش خارجی: Commit و Rollback این کلاس برای تراکنش خارجی
+                // عمداً استثنا پرتاب می‌کنند، پس صف هرگز با committed=true
+                // تخلیه نمی‌شود و Dispose آن را دور می‌ریخت — یعنی تمام
+                // نوشتن‌های این مسیر (AUTO_BAZ) از سابقه غایب می‌شدند.
+                //
+                // اینجا فوراً ثبت می‌شود. معامله‌اش این است که اگر تراکنشِ
+                // بیرونی rollback شود، چند ردیف سابقه‌ی بی‌پشتوانه می‌ماند؛
+                // برای یک سیستم سابقه، «کمِ اضافه» از «گمِ کامل» بهتر است.
+                if (_isExternalTransaction)
+                {
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
+                    return;
+                }
+
                 if (_pendingAudit.Count < 200)
                 {
                     _pendingAudit.Add((sql, parameters));
