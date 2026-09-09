@@ -1146,35 +1146,32 @@ namespace AUTO_BAZ
 
             // ── انتقالیِ ورود: همان ردیف حواله، این بار به نام انبار مقصد ───────
             //
-            // ⚠️ tartib این شاخه در دو حالت فرق می‌کند و این عمدی است:
+            // ⚠️ tartib این شاخه دست‌کاری *نمی‌شود* — یک بار شد و پس گرفته شد.
             //
-            //   • حالت معمول (anbar مشخص): ردیفِ TAG = 6 فقط در کوئریِ انبارِ *مقصد*
-            //     ظاهر می‌شود و ردیفِ TAG = 5 فقط در کوئریِ انبارِ *مبدأ*؛ این دو هرگز
-            //     در یک نتیجه کنار هم نمی‌آیند، پس ترتیبشان نسبت به هم بی‌معناست و
-            //     tartib طبیعیِ TAGCOD (کد ۶) درست است — همان چیزی که تا امروز بوده.
-            //     وابستگیِ «مبدأ قبل از مقصد» را در این حالت ترتیبِ خودِ انبارها تأمین
-            //     می‌کند (OrderAnbarsForTransferDependencies) نه ترتیبِ داخل کوئری.
+            // تشخیصِ درست بود: در حالت ادغام‌شده، TAG = 6 (tartib ۱۰) پیش از
+            // TAG = 5 (tartib ۱۴) پردازش می‌شود، پس touchedByCase5 به‌موقع ست
+            // نمی‌شود و case 6 مقدارِ ذخیره‌شده‌ی MABL_K را می‌خواند نه مقدارِ
+            // همین دور.
             //
-            //   • حالت ادغام‌شده (anbar = null، کالای چرخه‌دار): هر دو ردیف در یک نتیجه
-            //     هستند و DATE_N شان هم لزوماً یکی است (هر دو از سربرگ یک حواله می‌آیند).
-            //     پس ترتیبشان را فقط tartib تعیین می‌کند. اگر TAGCOD.tartib کد ۶ کوچک‌تر
-            //     از کد ۵ باشد — که طبق مستندات پروژه‌ی Safir همین‌طور است (۱۰ در برابر
-            //     ۱۴) — مقصد *همیشه* قبل از مبدأ پردازش می‌شود و علامتِ touchedByCase5
-            //     هیچ‌وقت به‌موقع ست نمی‌شود؛ یعنی دقیقاً همان مقدار کهنه‌ای خوانده
-            //     می‌شود که قرار بود رفع شود.
-            //     برای همین اینجا tartib از روی کدِ *مبدأ* (TAGCOD کد ۵) ساخته می‌شود
-            //     به‌علاوه‌ی نیم واحد، تا ردیف ورود بلافاصله بعد از ردیف خروجِ خودش
-            //     بنشیند — بدون اینکه جای هیچ رویداد دیگری در آن روز عوض شود.
-            var transferInTartib = anbar.HasValue
-                ? (hasTartib ? "ISNULL(dbo.TAGCOD.tartib, 0)" : "10")
-                : (hasTartib ? "CAST(ISNULL(TG_SRC.tartib, 0) AS FLOAT) + 0.5" : "14.5");
-            var transferInSrcJoin = (anbar.HasValue || !hasTartib)
-                ? string.Empty
-                // LEFT و نه INNER: این JOIN فقط برای گرفتنِ tartibِ مبدأ است و نباید
-                // هیچ ردیفی را حذف کند. با INNER، ردیف انتقالیِ ورود در حالت ادغام‌شده
-                // به وجودِ ردیفِ کد ۵ در TAGCOD وابسته می‌شد — شرطی که شاخه‌ی این ردیف
-                // تا امروز نداشت. ISNULL بالا مقدارِ نبودِ تطابق را هم پوشش می‌دهد.
-                : " LEFT JOIN dbo.TAGCOD AS TG_SRC ON dbo.HEAD_LST.TAG = TG_SRC.CODE";
+            // ولی نتیجه‌گیری غلط بود. «tartib مبدأ + ۰٫۵» ترتیبِ رویدادها را
+            // عوض می‌کند، نه فقط تازگیِ یک عدد را — و روی کد ۳۳۶۵ / انبار ۸۰۹
+            // (انبار موقت یزد) در ۱۴۰۵/۰۵/۰۶ فاجعه می‌سازد:
+            //
+            //   tag=5  خروجِ ۳۸٫۵ از موجودیِ ۱۳٫۵  →  MOGUDI = -24.999999999999993
+            //   tag=6  ورودِ ۲۵                     →  MOGUDI = 7.105427357601002e-15
+            //                                          MBKM   = -2.05
+            //                                          MIAN   = -288,311,948,083,200
+            //
+            // موجودی به‌جای صفر روی یک باقیمانده‌ی اعشاری می‌نشیند، مقایسه‌ی
+            // «MOGUDI == 0» آن را صفر نمی‌بیند، و خط بعد همان را می‌کند مخرجِ
+            // تقسیم. آن عدد از راه SMABL به ده‌ها کالای دیگر سرایت می‌کند —
+            // همان چیزی که در کارت کالای ۳۳۶۵ به‌صورت مبلغ‌های نجومی دیده شد.
+            //
+            // با tartib طبیعی این مسیر طی نمی‌شود. کهنه‌بودنِ MABL_K در case 6
+            // مسئله‌ی کوچک‌تری است و ارزشِ این ریسک را ندارد.
+            // نگهبانِ واقعی، تلورانسِ صفر در ApplyAvgRecalc است.
+            var transferInTartib = hasTartib ? "ISNULL(dbo.TAGCOD.tartib, 0)" : "10";
+            var transferInSrcJoin = string.Empty;
 
             parts.Add(
                 " SELECT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, "
@@ -1361,6 +1358,46 @@ namespace AUTO_BAZ
             return (codeGroup.OrderBy(r => r.ANBAR.HasValue && rank.TryGetValue(r.ANBAR.Value, out var i) ? i : int.MaxValue).ToList(), false);
         }
 
+        /// <summary>
+        /// آستانه‌ی «عملاً صفر» برای مقدار و مبلغ.
+        ///
+        /// ── چرا لازم است ──
+        /// کد اصلی «MOGUDI == 0» را دقیق مقایسه می‌کند. مقدارها double اند و از
+        /// جمع و تفریقِ صدها تراکنش ساخته می‌شوند، پس جایی که از نظر حسابداری
+        /// باید دقیقاً صفر باشند، در عمل یک باقیمانده‌ی ریز می‌ماند. آن مقایسه
+        /// باقیمانده را صفر نمی‌بیند و خط بعد همان را می‌کند مخرجِ تقسیم.
+        ///
+        /// مورد واقعی — کد ۳۳۶۵، انبار موقت یزد، ۱۴۰۵/۰۵/۰۶:
+        ///   MOGUDI = 7.105427357601002e-15 ، MBKM = -2.05
+        ///   MIAN   = -288,311,948,083,200
+        /// همان عددی که در کارت کالا به‌صورت مبلغ‌های نجومی دیده شد و از راه
+        /// SMABL به کالاهای دیگر سرایت کرد.
+        ///
+        /// ۱e-6 کیلوگرم یعنی یک میلی‌گرم؛ هیچ کاردکسی این را نمی‌شمارد، پس روی
+        /// داده‌ی سالم هیچ نتیجه‌ای عوض نمی‌شود.
+        /// </summary>
+        private const double AvgZeroEpsilon = 1e-6;
+
+        /// <summary>
+        /// قاعده‌ی مشترکِ بازمحاسبه‌ی نرخ — همان منطقِ کد اصلی، فقط با آستانه
+        /// به‌جای مقایسه‌ی دقیقِ صفر. نگاه کنید <see cref="AvgZeroEpsilon"/>.
+        /// </summary>
+        private static void ApplyAvgRecalc(AvgAnbarState st)
+        {
+            if (Math.Abs(st.MBKM) < AvgZeroEpsilon)
+            {
+                // MIAN دست‌نخورده می‌ماند
+            }
+            else if (Math.Abs(st.MOGUDI) < AvgZeroEpsilon)
+            {
+                st.MBKM = 0d;   // MIAN دست‌نخورده می‌ماند
+            }
+            else
+            {
+                st.MIAN = st.MBKM / st.MOGUDI;
+            }
+        }
+
         /// <summary>مانده‌ی اول دوره‌ی یک (کالا، انبار)؛ اگر نرخ اول دوره صفر بود، نرخ استاندارد
         /// و بعد نرخ اولین ورود جایگزین می‌شود — عیناً همان ترتیبِ کد اصلی.</summary>
         private static AvgAnbarState BuildAvgAnbarState(THE_QUERY1 row)
@@ -1437,19 +1474,7 @@ namespace AUTO_BAZ
                     {
                         st.MBKM = st.MBKM + (t.MABL_K ?? 0);
                         st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         line.AVRAGE = st.MIAN;
                         pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
                         break;
@@ -1465,19 +1490,7 @@ namespace AUTO_BAZ
                             st.MBKM = st.MBKM + st.MIAN * (t.MEGH_MAR ?? 0);
                         }
                         st.MOGUDI = st.MOGUDI + (t.MEGH_MAR ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         line.AVRAGE = st.MIAN;
                         pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
                         break;
@@ -1493,19 +1506,7 @@ namespace AUTO_BAZ
                             st.MBKM = st.MBKM + (t.MEGHk ?? 0) * st.MIAN;
                         }
                         st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         line.AVRAGE = st.MIAN;
                         pending.Add($"UPDATE dbo.INVO_LST SET AVRAGE = {AvgN(st.MIAN)} WHERE ID = {line.id}");
                         break;
@@ -1522,19 +1523,7 @@ namespace AUTO_BAZ
                     {
                         st.MBKM = st.MBKM - (t.MEGH_MAR ?? 0) * st.MIAN;
                         st.MOGUDI = st.MOGUDI - (t.MEGH_MAR ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         if (line != null)
                         {
                             line.AVRAGE2 = st.MIAN;
@@ -1547,19 +1536,7 @@ namespace AUTO_BAZ
                         var returnRate = (line != null && (line.AVRAGE ?? 0) > 0) ? line.AVRAGE!.Value : st.MIAN;
                         st.MBKM = st.MBKM + (t.MEGH_MAR ?? 0) * returnRate;
                         st.MOGUDI = st.MOGUDI + (t.MEGH_MAR ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         if (line != null)
                         {
                             line.AVRAGE2 = st.MIAN;
@@ -1597,19 +1574,7 @@ namespace AUTO_BAZ
                             : (t.MABL_K ?? 0);
                         st.MBKM = st.MBKM + mablKForCase6;
                         st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         if (line != null)
                         {
                             line.AVRAGE2 = st.MIAN;
@@ -1678,19 +1643,7 @@ namespace AUTO_BAZ
                         //    (مقدارِ قبل از بازسازی که هنگام خواندن کوئری در حافظه آمده) استفاده می‌شود.
                         st.MBKM = st.MBKM + line.MABL_K;
                         st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         line.AVRAGE = st.MIAN;
                         pending.Add($@"UPDATE dbo.INVO_LST SET
                                                                  AVRAGE = {AvgN(st.MIAN)}
@@ -1702,19 +1655,7 @@ namespace AUTO_BAZ
                     {
                         st.MBKM = st.MBKM + st.MIAN * (t.MEGHk ?? 0);
                         st.MOGUDI = st.MOGUDI + (t.MEGHk ?? 0);
-                        if (st.MBKM == 0d)
-                        {
-                        }
-                        // st.MIAN = 0
-                        else if (st.MOGUDI == 0d)
-                        {
-                            // st.MIAN = 0
-                            st.MBKM = 0d;
-                        }
-                        else
-                        {
-                            st.MIAN = st.MBKM / st.MOGUDI;
-                        }
+                        ApplyAvgRecalc(st);
                         // If st.MIAN < 0 Then
                         // st.MIAN = 0
                         // End If
