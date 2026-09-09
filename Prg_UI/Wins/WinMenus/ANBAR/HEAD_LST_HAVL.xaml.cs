@@ -1975,6 +1975,15 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN1usid= " + Baseknow.USERCOD + ",SGN1 =" + Interaction.IIf(SGN1.IsChecked == true, 1, 0) + $" WHERE TAG = 2 AND NUMBER = " + NUMBER.Text);
+            // ثبت سابقه‌ی امضا. ستون‌های SGN فقط وضعیت نهایی را نگه می‌دارند؛
+            // بدون این رویداد معلوم نمی‌شود چه کسی و در چه زمانی امضا زده یا برداشته است.
+            try
+            {
+                Prg_Proccessy.AUDIT.Audit.Sign("HEAD_LST", "NUMBER=" + NUMBER.Text + ";TAG=2", 1,
+                    SGN1.IsChecked == true, this.GetType().Name,
+                    (SGN1.IsChecked == true ? "امضای " : "برداشتن امضای ") + "حواله فروش" + " " + "NUMBER=" + NUMBER.Text + ";TAG=2" + " (امضای 1)");
+            }
+            catch { }
         }
 
         private void SGN2_Click(object sender, RoutedEventArgs e)

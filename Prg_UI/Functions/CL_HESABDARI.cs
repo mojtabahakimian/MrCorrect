@@ -1630,9 +1630,9 @@ namespace Prg_Proccessy.FUNCTIONS
 
             try
             {
-                var dbm = new CL_CCNNMANAGER();
-                dbm.DoExecuteSQL("INSERT INTO AMALIAT (USERID, USERNAME, ADATE, AMALID) VALUES (@UserId, @UserName, GETDATE(), @FormName)",
-                    new { UserId = Baseknow.USERCOD, UserName = Baseknow.UUSER, FormName = frm });
+                // پیش از این یک درج همزمان روی نخ فراخوان بود؛ حالا از همان
+                // صف پس‌زمینه‌ی سابقه عبور می‌کند و جدول AMALIAT همچنان پر می‌شود.
+                Prg_Proccessy.AUDIT.Audit.Form(frm);
             }
             catch { }
 
@@ -8753,27 +8753,20 @@ VALUES
             return input;
         }
 
+        /// <summary>
+        /// ثبت باز شدن یک فرم.
+        ///
+        /// پیش از این، این متد در هر بار باز شدن هر فرم یک کانکشن جدید باز
+        /// می‌کرد و به‌صورت همزمان روی نخ رابط کاربری در جدول AMALIAT درج
+        /// می‌کرد. حالا فقط یک رویداد در صف حافظه گذاشته می‌شود و نوشتن
+        /// دسته‌ای روی نخ پس‌زمینه انجام می‌گیرد. جدول AMALIAT حذف نشده و
+        /// همچنان پر می‌شود.
+        /// </summary>
         public static void AMALIYAT_USER(string frm)
         {
             try
             {
-                using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
-                {
-                    db.Open();
-
-                    string username = "MCR | " + Baseknow.UUSER;
-                    string _FRM_ = frm;
-
-                    var sql = "INSERT INTO AMALIAT (USERID,USERNAME,ADATE,AMALID) VALUES (@UserId, @Username, GETDATE(), @AmalId)";
-                    var parameters = new
-                    {
-                        UserId = Baseknow.USERCOD,
-                        Username = TruncateString(username, 49),
-                        AmalId = TruncateString(_FRM_, 49)
-                    };
-
-                    db.Execute(sql, parameters);
-                }
+                Prg_Proccessy.AUDIT.Audit.Form(frm);
             }
             catch { }
         }

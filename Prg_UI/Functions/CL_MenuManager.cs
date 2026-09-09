@@ -1113,6 +1113,10 @@ namespace Functions
             /// صورت‌حساب هوشمند مشتریان
             /// </summary>
             F_MENU_KOL_MOIN_DATE_AI,
+            /// <summary>
+            /// سوابق و ردیابی فعالیت کاربران
+            /// </summary>
+            WIN_AUDIT_TRAIL,
         }
         #endregion
 
@@ -1133,6 +1137,8 @@ namespace Functions
                 //Mojtaba{
 
                 case WinNameType.WIN_SANAD_AMALKARD: /*سند عملکرد از Ctrl + F1*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_AMALKARD(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.WIN_AUDIT_TRAIL: /*سوابق و ردیابی فعالیت کاربران*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_AUDIT_TRAIL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_ENHESAR: /*تعریف انحصار*/ CL_LMethods.OpenWindow(OWNERWIN, new ENHESAR_WIN(_PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null, _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])), isModalDialog: false, allowMultipleInstances: false); break;
 

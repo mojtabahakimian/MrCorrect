@@ -1915,6 +1915,18 @@ namespace Prg_UI.Functions
                 // Add window to tracking system
                 RegisterWindowTracking(newWindow);
 
+                // ثبت سابقه‌ی باز شدن فرم.
+                //
+                // این تنها مسیر باز شدن پنجره‌ها در نرم‌افزار است، پس یک قلاب
+                // اینجا تمام فرم‌ها را پوشش می‌دهد — از جمله فرم‌هایی که در
+                // سازنده‌ی خودشان AMALIYAT_USER را صدا نمی‌زنند. فرم‌هایی که
+                // آن را صدا می‌زنند دوباره ثبت نمی‌شوند چون Audit.Form
+                // رویداد تکراری در بازه‌ی کوتاه را نادیده می‌گیرد.
+                //
+                // عمداً بعد از بازگشتِ زودهنگامِ «پنجره از قبل باز است» قرار
+                // گرفته تا فوکوس دوباره روی یک پنجره‌ی باز، «باز کردن» شمرده نشود.
+                try { Prg_Proccessy.AUDIT.Audit.Form(newWindow.GetType().Name); } catch { }
+
                 // Display window with proper focus handling
                 ShowWindowWithFocus(owner, newWindow, isModalDialog);
             }
@@ -2234,6 +2246,15 @@ namespace Prg_UI.Functions
 
         public static void CleanupBeforeExiting()
         {
+            // تخلیه‌ی صف سابقه پیش از بسته شدن، با تایم‌اوت کوتاه تا بستن
+            // برنامه را نگه ندارد. رویدادهایی که در این فرصت نوشته نشوند روی
+            // دیسک محلی می‌مانند و در اجرای بعدی منتقل می‌شوند.
+            try
+            {
+                Prg_Proccessy.AUDIT.Audit.Logout(Baseknow.UUSER);
+                Prg_Proccessy.AUDIT.AuditService.ShutdownAsync(2500).GetAwaiter().GetResult();
+            }
+            catch (Exception) { }
 
             try { ProcLoader.DisposeAll(); } catch (Exception) { }
 

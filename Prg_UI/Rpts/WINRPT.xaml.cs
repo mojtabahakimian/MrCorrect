@@ -87,6 +87,19 @@ namespace Rpts
             #region MyRegion
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
+            // پیش از این فقط نام کلاس «WINRPT» ثبت می‌شد و معلوم نبود کدام
+            // گزارش باز شده. حالا عنوان واقعی گزارش هم ثبت می‌شود.
+            //
+            // این رویداد «پیش‌نمایش» است، نه «چاپ». خودِ فرمان چاپ داخل کنترل
+            // نمایشگر Stimulsoft اجرا می‌شود و کد نرم‌افزار آن را در دست ندارد؛
+            // برای تفکیک قطعی چاپ از پیش‌نمایش باید رویداد چاپِ همان کنترل
+            // وصل شود — شرح در Doc/AUDIT_TRAIL.md.
+            try
+            {
+                Prg_Proccessy.AUDIT.Audit.Print(_RerportTitle_, isPreview: true, formName: this.GetType().Name);
+            }
+            catch { }
+
             //
             //var report = new StiReport();
 

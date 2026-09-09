@@ -1,0 +1,445 @@
+using System;
+using System.Collections.Concurrent;
+using System.Globalization;
+using System.Text.Json;
+using System.Threading;
+
+namespace Prg_Proccessy.AUDIT
+{
+    /// <summary>
+    /// نقطه‌ی ورود ثبت سابقه. تمام کد نرم‌افزار فقط با این کلاس کار می‌کند.
+    ///
+    /// هیچ‌کدام از متدهای اینجا استثنا پرتاب نمی‌کنند و هیچ‌کدام منتظر
+    /// دیتابیس نمی‌مانند؛ کار کاربر تحت هیچ شرایطی نباید به‌خاطر سابقه
+    /// کند یا متوقف شود.
+    /// </summary>
+    public static class Audit
+    {
+        private static readonly PersianCalendar _persian = new();
+
+        /// <summary>
+        /// جلوگیری از تکرار رویداد «باز شدن فرم». کاربر ممکن است یک فرم را
+        /// در چند ثانیه چند بار باز و بسته کند؛ بدون این کنترل، پرحجم‌ترین
+        /// دسته‌ی رویدادها بی‌دلیل چند برابر می‌شود.
+        /// اندازه‌ی این دیکشنری ذاتاً محدود است (به تعداد فرم‌های نرم‌افزار).
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, long> _lastFormOpen = new(StringComparer.OrdinalIgnoreCase);
+        private const int FormDedupWindowMs = 15_000;
+
+        /// <summary>شناسه‌ی جدید برای گروه‌کردن رویدادهای یک عملیات چندمرحله‌ای.</summary>
+        public static Guid NewCorrelation() => Guid.NewGuid();
+
+        // ── ناوبری ───────────────────────────────────────────────────────
+
+        /// <summary>ثبت باز شدن یک فرم.</summary>
+        public static void Form(string? formName, string? persianTitle = null)
+        {
+            if (string.IsNullOrWhiteSpace(formName)) return;
+
+            try
+            {
+                var now = Environment.TickCount64;
+                if (_lastFormOpen.TryGetValue(formName, out var last) &&
+                    now - last < FormDedupWindowMs)
+                {
+                    return;
+                }
+                _lastFormOpen[formName] = now;
+
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Navigation,
+                    Action = AuditAction.OpenForm,
+                    FormName = formName,
+                    Title = persianTitle ?? ("باز کردن فرم " + formName),
+                    Legacy = AuditLegacyTarget.Amaliat,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── تغییر داده ───────────────────────────────────────────────────
+
+        public static void Insert(string entity, string? entityKey, string? persianTitle = null,
+                                  string? formName = null, object? newValue = null, Guid? correlationId = null)
+            => Data(AuditAction.Insert, entity, entityKey, persianTitle, formName, null, newValue, correlationId);
+
+        public static void Update(string entity, string? entityKey, string? persianTitle = null,
+                                  string? formName = null, object? oldValue = null, object? newValue = null,
+                                  Guid? correlationId = null)
+            => Data(AuditAction.Update, entity, entityKey, persianTitle, formName, oldValue, newValue, correlationId);
+
+        /// <summary>
+        /// ثبت حذف. حذف همیشه حساس است، پس به‌عنوان رویداد بحرانی ثبت
+        /// می‌شود و حتی در صورت پر بودن صف هم از بین نمی‌رود.
+        /// </summary>
+        public static void Delete(string entity, string? entityKey, string? persianTitle = null,
+                                  string? formName = null, object? oldValue = null, Guid? correlationId = null)
+            => Data(AuditAction.Delete, entity, entityKey, persianTitle, formName, oldValue, null, correlationId);
+
+        public static void Data(string action, string entity, string? entityKey, string? persianTitle,
+                                string? formName, object? oldValue, object? newValue, Guid? correlationId = null)
+        {
+            try
+            {
+                var isDelete = string.Equals(action, AuditAction.Delete, StringComparison.OrdinalIgnoreCase);
+
+                var oldJson = ToJson(oldValue);
+                var newJson = ToJson(newValue);
+
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Data,
+                    Severity = isDelete ? AuditSeverity.Sensitive : AuditSeverity.Notable,
+                    Action = action,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = persianTitle ?? BuildDataTitle(action, entity, entityKey),
+                    Detail = BuildDiffDetail(oldJson, newJson),
+                    CorrelationId = correlationId,
+                    IsCritical = isDelete,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── عملیات کاری ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// ثبت امضا یا برداشتن امضا. تا امروز فقط وضعیت نهایی در ستون‌های
+        /// SGN1..SGN4 می‌ماند و معلوم نیست چه کسی و کِی امضا زده یا برداشته.
+        /// </summary>
+        public static void Sign(string entity, string? entityKey, int slot, bool signed,
+                                string? formName = null, string? persianTitle = null)
+        {
+            try
+            {
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Business,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = signed ? AuditAction.Sign : AuditAction.Unsign,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = persianTitle ??
+                            (signed ? $"امضای {DescribeEntity(entity, entityKey)} (امضای {slot})"
+                                    : $"برداشتن امضای {DescribeEntity(entity, entityKey)} (امضای {slot})"),
+                    Detail = "{\"slot\":" + slot + ",\"signed\":" + (signed ? "true" : "false") + "}",
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        /// <summary>ثبت تبدیل یک سند به سند دیگر، مثل تبدیل پیش‌فاکتور به فاکتور یا حواله.</summary>
+        public static void ConvertDoc(string fromEntity, string? fromKey, string toEntity, string? toKey,
+                                   string? formName = null, Guid? correlationId = null)
+        {
+            try
+            {
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Business,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = AuditAction.Convert,
+                    Entity = fromEntity,
+                    EntityKey = fromKey,
+                    FormName = formName,
+                    Title = $"تبدیل {DescribeEntity(fromEntity, fromKey)} به {DescribeEntity(toEntity, toKey)}",
+                    Detail = JsonSerializer.Serialize(new { from = fromEntity, fromKey, to = toEntity, toKey }),
+                    CorrelationId = correlationId,
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        /// <summary>ثبت تایید یا نهایی‌سازی، مثل تایید بارگیری.</summary>
+        public static void Confirm(string entity, string? entityKey, string persianTitle,
+                                   string? formName = null, Guid? correlationId = null)
+        {
+            try
+            {
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Business,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = AuditAction.Confirm,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = persianTitle,
+                    CorrelationId = correlationId,
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── چاپ و خروجی ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// ثبت چاپ یا پیش‌نمایش. باید روی خودِ فرمان چاپ صدا زده شود، نه
+        /// موقع باز شدن پنجره‌ی گزارش؛ وگرنه معلوم نمی‌شود کاربر واقعاً چاپ
+        /// گرفته یا فقط گزارش را دیده است.
+        /// </summary>
+        public static void Print(string? reportName, string? entity = null, string? entityKey = null,
+                                 bool isPreview = false, string? formName = null, int? copies = null)
+        {
+            try
+            {
+                var what = string.IsNullOrWhiteSpace(reportName) ? "گزارش" : reportName!;
+                var title = isPreview
+                    ? $"پیش‌نمایش {what}"
+                    : $"چاپ {what}" + (copies is > 1 ? $" ({copies} نسخه)" : string.Empty);
+
+                if (!string.IsNullOrWhiteSpace(entityKey))
+                    title += " — " + DescribeEntity(entity, entityKey);
+
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Report,
+                    Severity = isPreview ? AuditSeverity.Normal : AuditSeverity.Notable,
+                    Action = isPreview ? AuditAction.Preview : AuditAction.Print,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName ?? reportName,
+                    Title = title,
+                    IsCritical = !isPreview,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        /// <summary>ثبت خروجی گرفتن (اکسل، PDF و ...). از نظر نشت اطلاعات حساس است.</summary>
+        public static void Export(string format, string? what, string? entity = null,
+                                  string? entityKey = null, string? formName = null, int? rowCount = null)
+        {
+            try
+            {
+                var title = $"خروجی {format} از {what ?? "گزارش"}" +
+                            (rowCount is > 0 ? $" ({rowCount} ردیف)" : string.Empty);
+
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Report,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = AuditAction.Export,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = title,
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── ورود و خروج ──────────────────────────────────────────────────
+
+        public static void Login(string? userName, string? formName = null)
+            => Auth(AuditAction.Login, $"ورود کاربر {userName}", true, formName);
+
+        public static void LoginFailed(string? userName, string? reason = null, string? formName = null)
+            => Auth(AuditAction.LoginFailed,
+                    $"ورود ناموفق {userName}" + (string.IsNullOrWhiteSpace(reason) ? "" : $" — {reason}"),
+                    false, formName);
+
+        public static void Logout(string? userName, string? formName = null)
+            => Auth(AuditAction.Logout, $"خروج کاربر {userName}", true, formName);
+
+        private static void Auth(string action, string title, bool success, string? formName)
+        {
+            try
+            {
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Auth,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = action,
+                    FormName = formName,
+                    Title = title,
+                    IsSuccess = success,
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── امنیتی ───────────────────────────────────────────────────────
+
+        /// <summary>ثبت رویداد امنیتی: تغییر رمز، تغییر سطح دسترسی، مشاهده‌ی خود سوابق.</summary>
+        public static void Security(string action, string persianTitle, string? entity = null,
+                                    string? entityKey = null, string? formName = null, string? detail = null)
+        {
+            try
+            {
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Security,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = action,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = persianTitle,
+                    Detail = detail,
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── مسیر عمومی ───────────────────────────────────────────────────
+
+        /// <summary>
+        /// ثبت یک رویداد دلخواه. برای مواردی که متد اختصاصی ندارند.
+        /// جدول‌های سابقه‌ی قدیمی هم از همین مسیر پر می‌شوند.
+        /// </summary>
+        public static void Write(AuditEventDraft draft)
+        {
+            try
+            {
+                if (!AuditService.IsRunning) return;
+
+                var session = AuditService.CurrentSession;
+                var now = DateTime.Now;
+
+                AuditService.Enqueue(new AuditEvent
+                {
+                    SessionId = session?.SessionId ?? Guid.Empty,
+                    Seq = AuditService.NextSeq(),
+
+                    // هویت در همین لحظه و روی همین نخ خوانده می‌شود، نه بعداً
+                    // روی نخ پس‌زمینه؛ وگرنه اگر کاربر عوض شود رویداد به نام
+                    // شخص اشتباه ثبت می‌شود.
+                    UserId = session?.UserId,
+                    UserName = session?.UserName,
+
+                    AtClient = now,
+                    DateS = ToPersianDateNumber(now),
+                    TimeS = ToTimeNumber(now),
+
+                    Category = draft.Category,
+                    Severity = draft.Severity,
+                    Action = draft.Action,
+                    Entity = draft.Entity,
+                    EntityKey = draft.EntityKey,
+                    FormName = draft.FormName,
+                    Title = draft.Title,
+                    Detail = draft.Detail,
+                    IsSuccess = draft.IsSuccess,
+                    ErrorMessage = draft.ErrorMessage,
+                    DurationMs = draft.DurationMs,
+                    CorrelationId = draft.CorrelationId,
+                    IsCritical = draft.IsCritical,
+                    Legacy = draft.Legacy,
+                    LegacyOldValue = draft.LegacyOldValue,
+                    LegacyNewValue = draft.LegacyNewValue,
+                });
+            }
+            catch (Exception) { }
+        }
+
+        // ── کمکی‌ها ──────────────────────────────────────────────────────
+
+        /// <summary>تاریخ شمسی عددی، مثل 14050517.</summary>
+        public static int ToPersianDateNumber(DateTime value)
+        {
+            try
+            {
+                return _persian.GetYear(value) * 10000
+                     + _persian.GetMonth(value) * 100
+                     + _persian.GetDayOfMonth(value);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>ساعت عددی، مثل 142530.</summary>
+        public static int ToTimeNumber(DateTime value)
+            => value.Hour * 10000 + value.Minute * 100 + value.Second;
+
+        /// <summary>تبدیل تاریخ شمسی عددی به میلادی، برای فیلتر بازه در گزارش.</summary>
+        public static DateTime? FromPersianDateNumber(int value)
+        {
+            try
+            {
+                if (value < 10000000) return null;
+                var y = value / 10000;
+                var m = (value / 100) % 100;
+                var d = value % 100;
+                if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+                return _persian.ToDateTime(y, m, d, 0, 0, 0, 0);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private static string DescribeEntity(string? entity, string? key)
+        {
+            if (string.IsNullOrWhiteSpace(entity)) return key ?? string.Empty;
+            return string.IsNullOrWhiteSpace(key) ? entity! : $"{entity} {key}";
+        }
+
+        private static string BuildDataTitle(string action, string entity, string? key)
+        {
+            var verb = action switch
+            {
+                AuditAction.Insert => "ثبت",
+                AuditAction.Update => "ویرایش",
+                AuditAction.Delete => "حذف",
+                _ => action,
+            };
+            return $"{verb} {DescribeEntity(entity, key)}";
+        }
+
+        private static string? ToJson(object? value)
+        {
+            if (value is null) return null;
+            if (value is string s) return s;
+            try { return JsonSerializer.Serialize(value); }
+            catch (Exception) { return null; }
+        }
+
+        private static string? BuildDiffDetail(string? oldJson, string? newJson)
+        {
+            if (oldJson is null && newJson is null) return null;
+            try
+            {
+                return JsonSerializer.Serialize(new { old = oldJson, @new = newJson });
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
+
+    /// <summary>پیش‌نویس رویداد. فقط برای پر کردن مقادیر اختیاری استفاده می‌شود.</summary>
+    public sealed class AuditEventDraft
+    {
+        public AuditCategory Category { get; set; } = AuditCategory.Business;
+        public AuditSeverity Severity { get; set; } = AuditSeverity.Normal;
+        public string Action { get; set; } = string.Empty;
+        public string? Entity { get; set; }
+        public string? EntityKey { get; set; }
+        public string? FormName { get; set; }
+        public string? Title { get; set; }
+        public string? Detail { get; set; }
+        public bool IsSuccess { get; set; } = true;
+        public string? ErrorMessage { get; set; }
+        public int? DurationMs { get; set; }
+        public Guid? CorrelationId { get; set; }
+        public bool IsCritical { get; set; }
+        public AuditLegacyTarget Legacy { get; set; } = AuditLegacyTarget.None;
+        public string? LegacyOldValue { get; set; }
+        public string? LegacyNewValue { get; set; }
+    }
+}
