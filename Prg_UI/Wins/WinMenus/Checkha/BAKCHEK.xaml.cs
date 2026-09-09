@@ -208,7 +208,28 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.MOIN.Text = row.N_MOIN?.ToString() ?? "";
                 this.TAF.Text = row.N_TAF?.ToString() ?? "";
                 this.BANK.SelectedValue = row.BANK;
-                this.HES1.SelectedValue = row.HES1;
+
+                string hes1Value = !string.IsNullOrWhiteSpace(row.HES1)
+                    ? row.HES1
+                    : ((row.N_KOL.HasValue && row.N_KOL.Value > 0 && row.N_MOIN.HasValue && row.N_TAF.HasValue) ? $"{row.N_KOL}-{row.N_MOIN}-{row.N_TAF}" : null);
+
+                if (!string.IsNullOrWhiteSpace(hes1Value))
+                {
+                    var hes1List = HES1.ItemsSource as List<BACK_QRE_2> ?? new List<BACK_QRE_2>();
+                    if (!hes1List.Any(x => string.Equals(x.hes?.Trim(), hes1Value.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    {
+                        string name = CL_HESABDARI.GETHESNAME(hes1Value);
+                        hes1List.Insert(0, new BACK_QRE_2 { hes = hes1Value, Expr1 = hes1Value + " - " + name });
+                        HES1.ItemsSource = null;
+                        HES1.ItemsSource = hes1List;
+                    }
+                    this.HES1.SelectedValue = hes1Value;
+                }
+                else
+                {
+                    this.HES1.SelectedValue = row.HES1;
+                }
+
                 this.N_SERI.IsReadOnly = true;
                 if (row.SANDUGH.HasValue)
                 {
@@ -353,13 +374,26 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
                     msgwin.ShowDialog();
 
-                    // اگر چک قبلاً واگذار شده باشد، برای "از حساب" (FHES) از حساب واگذاری قبلی (previousHes2) استفاده می‌کنیم.
-                    // اگر خالی بود، از this.HES1 استفاده می‌کنیم.
-                    string targetHesForFrom = !string.IsNullOrEmpty(previousHes2)
-                        ? previousHes2
-                        : (this.HES1.SelectedValue != null ? this.HES1.SelectedValue.ToString() : "");
+                    // اگر چک قبلاً واگذار شده باشد، طرف بستانکار ("از حساب" - FHES) کد حسابی قرار می‌گیرد که چک به او واگذار شده بود
+                    var dbRow = rst?.FirstOrDefault();
+                    string targetHesForFrom = dbRow?.HES1;
 
-                    if (!string.IsNullOrEmpty(targetHesForFrom))
+                    if (string.IsNullOrWhiteSpace(targetHesForFrom) && dbRow?.N_KOL.HasValue == true && dbRow.N_KOL.Value > 0 && dbRow.N_MOIN.HasValue && dbRow.N_TAF.HasValue)
+                    {
+                        targetHesForFrom = $"{dbRow.N_KOL}-{dbRow.N_MOIN}-{dbRow.N_TAF}";
+                    }
+
+                    if (string.IsNullOrWhiteSpace(targetHesForFrom) && this.HES1.SelectedValue != null)
+                    {
+                        targetHesForFrom = this.HES1.SelectedValue.ToString();
+                    }
+
+                    if (string.IsNullOrWhiteSpace(targetHesForFrom) && !string.IsNullOrWhiteSpace(previousHes2))
+                    {
+                        targetHesForFrom = previousHes2;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(targetHesForFrom))
                     {
                         CL_HESABDARI.GETTAF3(targetHesForFrom, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
 
