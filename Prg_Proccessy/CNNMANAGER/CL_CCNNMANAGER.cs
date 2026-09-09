@@ -264,6 +264,10 @@ namespace Prg_SendInvoice.CNNMANAGER
                 {
                     db.Open();
                     var results = db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
+                    // این متد فقط خواندن نیست: دستورهای INSERT ... OUTPUT INSERTED.id
+                    // هم از همین‌جا اجرا می‌شوند. برای دستورهای خواندنی، Observe
+                    // با سه IndexOf بلافاصله برمی‌گردد.
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
                     return results;
                 }
                 //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
@@ -325,6 +329,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 {
                     db.Open();
                     var result = db.Execute(sql, parameters, commandTimeout: 3600);
+                    // ثبت خودکار سابقه‌ی INSERT/UPDATE/DELETE. فقط بعد از
+                    // موفقیت دستور، تا عملیاتی که شکست خورده در سابقه نیفتد.
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
                     return result;
                 }
                 catch (SqlException ex)
@@ -406,6 +413,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 {
                     await db.OpenAsync();
                     var result = await db.ExecuteAsync(sql, parameters, commandTimeout: 3600);
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
                     return result;
                 }
                 catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
@@ -468,6 +476,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     await db.ExecuteAsync("SET ARITHABORT ON");
                     var results = await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600);
                     //await db.ExecuteAsync("SET ARITHABORT OFF");
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
                     return results;
                 }
                 catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))

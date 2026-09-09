@@ -2344,15 +2344,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 this.Command24.IsEnabled = false;
             }
             dbms.DoExecuteSQL($"UPDATE PGET_HED SET SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} , SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} , SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} , OKF = {Convert.ToByte((bool)OKF.IsChecked)}, sgn1usid = {(sgn1usid.Tag is null ? "NULL" : sgn1usid.Tag)} , sgn2usid = {(sgn2usid.Tag is null ? "NULL" : sgn2usid.Tag)} , sgn3usid = {(sgn3usid.Tag is null ? "NULL" : sgn3usid.Tag)} WHERE ID = {ID.Text}");
-            // ثبت سابقه‌ی امضا. ستون‌های SGN فقط وضعیت نهایی را نگه می‌دارند؛
-            // بدون این رویداد معلوم نمی‌شود چه کسی و در چه زمانی امضا زده یا برداشته است.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Sign("PGET_HED", "ID=" + ID.Text, 1,
-                    SGN1.IsChecked == true, this.GetType().Name,
-                    (SGN1.IsChecked == true ? "امضای " : "برداشتن امضای ") + "سند خزانه" + " " + "ID=" + ID.Text + " (امضای 1)");
-            }
-            catch { }
         }
 
         private void SGN2_Click(object sender, RoutedEventArgs e)
@@ -2426,15 +2417,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
 
             dbms.DoExecuteSQL($"UPDATE PGET_HED SET SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} , SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} , SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} , OKF = {Convert.ToByte((bool)OKF.IsChecked)}, sgn1usid = {(sgn1usid.Tag is null ? "NULL" : sgn1usid.Tag)} , sgn2usid = {(sgn2usid.Tag is null ? "NULL" : sgn2usid.Tag)} , sgn3usid = {(sgn3usid.Tag is null ? "NULL" : sgn3usid.Tag)} WHERE ID = {ID.Text}");
-            // ثبت سابقه‌ی امضا. ستون‌های SGN فقط وضعیت نهایی را نگه می‌دارند؛
-            // بدون این رویداد معلوم نمی‌شود چه کسی و در چه زمانی امضا زده یا برداشته است.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Sign("PGET_HED", "ID=" + ID.Text, 2,
-                    SGN2.IsChecked == true, this.GetType().Name,
-                    (SGN2.IsChecked == true ? "امضای " : "برداشتن امضای ") + "سند خزانه" + " " + "ID=" + ID.Text + " (امضای 2)");
-            }
-            catch { }
 
         }
 
@@ -2559,15 +2541,6 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             }
 
             dbms.DoExecuteSQL($"UPDATE PGET_HED SET SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} , SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} , SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} , OKF = {Convert.ToByte((bool)OKF.IsChecked)}, sgn1usid = {(sgn1usid.Tag is null ? "NULL" : sgn1usid.Tag)} , sgn2usid = {(sgn2usid.Tag is null ? "NULL" : sgn2usid.Tag)} , sgn3usid = {(sgn3usid.Tag is null ? "NULL" : sgn3usid.Tag)} WHERE ID = {ID.Text}");
-            // ثبت سابقه‌ی امضا. ستون‌های SGN فقط وضعیت نهایی را نگه می‌دارند؛
-            // بدون این رویداد معلوم نمی‌شود چه کسی و در چه زمانی امضا زده یا برداشته است.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Sign("PGET_HED", "ID=" + ID.Text, 3,
-                    SGN3.IsChecked == true, this.GetType().Name,
-                    (SGN3.IsChecked == true ? "امضای " : "برداشتن امضای ") + "سند خزانه" + " " + "ID=" + ID.Text + " (امضای 3)");
-            }
-            catch { }
 
         }
 

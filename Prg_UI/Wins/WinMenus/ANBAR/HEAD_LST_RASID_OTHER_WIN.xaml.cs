@@ -2407,15 +2407,6 @@ namespace Wins.WinMenus.ANBAR
             }
 
             dbms.DoExecuteSQL($"UPDATE HEAD_LST SET SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} , SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} , OKF = {Convert.ToByte((bool)OKF.IsChecked)}, sgn1usid = {(sgn1usid.Tag is null ? "NULL" : sgn1usid.Tag)} , sgn2usid = {(sgn2usid.Tag is null ? "NULL" : sgn2usid.Tag)} WHERE NUMBER = {NUMBER.Text} AND TAG = 24");
-            // ثبت سابقه‌ی امضا. ستون‌های SGN فقط وضعیت نهایی را نگه می‌دارند؛
-            // بدون این رویداد معلوم نمی‌شود چه کسی و در چه زمانی امضا زده یا برداشته است.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Sign("HEAD_LST", "NUMBER=" + NUMBER.Text + ";TAG=24", 1,
-                    SGN1.IsChecked == true, this.GetType().Name,
-                    (SGN1.IsChecked == true ? "امضای " : "برداشتن امضای ") + "سایر رسید انبار" + " " + "NUMBER=" + NUMBER.Text + ";TAG=24" + " (امضای 1)");
-            }
-            catch { }
         }
 
         private void SGN2_Click(object sender, RoutedEventArgs e)

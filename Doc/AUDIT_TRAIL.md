@@ -131,15 +131,59 @@ EXEC dbo.SP_SYS_AUDIT_BACKFILL;
 
 ## قلاب‌ها
 
-| رویداد | محل |
+| رویداد | محل | پوشش |
+|---|---|---|
+| **INSERT / UPDATE / DELETE** | `AuditSqlSniffer` در ۶ متد مرکزی دسترسی به داده | خودکار، همه‌ی مسیرها |
+| **امضا** | همان sniffer (تشخیص `SET SGN<n> = <0/1>`) | هر ۶۳ نقطه در ۲۲ فایل |
+| باز شدن فرم | `CL_LMethods.OpenWindow` — تنها مسیر باز شدن پنجره‌ها | ۲۶۲ فراخوانی |
+| باز شدن فرم (قدیمی) | `CL_HESABDARI.AMALIYAT_USER` — شیم روی `Audit.Form` | ۲۰۵ فراخوانی |
+| حذف (سطح نیت کاربر) | `Functions.AuditLogger` — شیم، بدون تغییر نقاط فراخوانی | ۹۶ فراخوانی |
+| گزارش | `Rpts/WINRPT` — با عنوان واقعی گزارش | — |
+| ورود / ورود ناموفق / خروج | `USER_LOGIN`، `CL_LMethods.CleanupBeforeExiting` | — |
+| مشاهده‌ی خود سوابق | `WIN_AUDIT_TRAIL` | — |
+
+### تشخیص خودکار DML (`AuditSqlSniffer`)
+
+قلاب در ۶ متد مرکزی گذاشته شده و **بعد از موفقیت** دستور اجرا می‌شود، تا
+عملیات شکست‌خورده در سابقه نیفتد:
+
+| کلاس | متد |
 |---|---|
-| باز شدن فرم | `CL_LMethods.OpenWindow` — تنها مسیر باز شدن پنجره‌ها (۲۶۲ فراخوانی) |
-| باز شدن فرم (قدیمی) | `CL_HESABDARI.AMALIYAT_USER` — حالا شیم روی `Audit.Form` |
-| حذف / تغییر داده | `Functions.AuditLogger` — شیم، هر ۹۶ نقطه بدون تغییر |
-| امضا | ۹ نقطه‌ی `UPDATE ... SGN` در `DEED_HEAD`، `PGET_HED`، `HEAD_LST_HAVL`، `HEAD_LST_RASID_OTHER_WIN`، `paymentformorder` |
-| گزارش | `Rpts/WINRPT` — با عنوان واقعی گزارش |
-| ورود / ورود ناموفق / خروج | `USER_LOGIN`، `CL_LMethods.CleanupBeforeExiting` |
-| مشاهده‌ی خود سوابق | `WIN_AUDIT_TRAIL` |
+| `CL_CCNNMANAGER` | `DoExecuteSQL`، `DoExecuteSQLAsync` |
+| `CL_CCNNMANAGER` | `DoGetDataSQL`، `DoGetDataSQLAsync` — چون `INSERT ... OUTPUT INSERTED.id` هم از این مسیر می‌گذرد |
+| `TransactionManagement` | `ExecuteSqlCommandCtc`، `ExecuteSqlCommandCtcAsync` |
+| `CL_ConcurrencyManager` | `ExecuteSqlCommand` (هر دو حالت تراکنشی و مستقل) |
+
+چون این متدها **متن نهایی دستور** را می‌بینند (بعد از جای‌گذاری مقادیر)، هم نام
+جدول و هم مقادیری مثل `TAG` و شماره‌ی سند قابل استخراج‌اند. مثلاً از
+`UPDATE HEAD_LST SET SGN1 = 1 WHERE TAG = 20 AND NUMBER = 1234` این خط ساخته
+می‌شود:
+
+> **امضای پیش‌فاکتور NUMBER=1234;TAG=20 (امضای ۱)**
+
+نکات پیاده‌سازی:
+
+* **هزینه:** برای دستورهای خواندنی سه `IndexOf` و خروج فوری. برای دستورهای
+  نوشتنی چند Regex از پیش کامپایل‌شده — در برابر رفت‌وبرگشت خودِ آن دستور به
+  دیتابیس ناچیز است.
+* **کلید رکورد فقط از بخش `WHERE`** خوانده می‌شود؛ وگرنه در
+  `UPDATE X SET CODE='A' WHERE ID=5` مقدار جدیدِ `CODE` به‌جای شناسه برداشته
+  می‌شود.
+* **`DELETE d FROM dbo.X`**: اول الگوی `FROM`‌دار امتحان می‌شود تا نام مستعار
+  به‌جای نام جدول ثبت نشود.
+* **بدون حلقه‌ی بی‌پایان:** جدول‌های `SYS_AUDIT_*` در لیست استثنا هستند و خودِ
+  موتور هم مستقیم با Dapper می‌نویسد، نه از این متدها.
+* **متن خام SQL ذخیره نمی‌شود** — فقط جدول، عملیات و کلید. تا داده‌ی حساس یا
+  کوئری داخل سابقه نیفتد.
+* **شیر خاموشی:** `AuditSqlSniffer.Enabled = false` تشخیص خودکار را فوراً
+  متوقف می‌کند، اگر حجم مشکل‌ساز شد.
+
+### چرا حذف دو ردیف می‌سازد
+حذف یک پیش‌فاکتور هم یک ردیف «نیت کاربر» از `AuditLogger` می‌سازد
+(«حذف پیش فاکتور ۱۲۳۴»، با برچسب فارسی) و هم ردیف‌های «اثر واقعی» از sniffer
+(`DELETE FROM HEAD_LST`، `DELETE FROM INVO_LST`). این عمدی است: ردیف اول
+می‌گوید کاربر چه خواست، ردیف‌های بعدی می‌گویند دقیقاً چه چیزی پاک شد. ردیف نیت
+با برچسب فارسی در ستون موجودیت شناخته می‌شود و ردیف اثر با نام خام جدول.
 
 ### سه ایراد واقعی که در همین مسیر رفع شد
 1. `AuditLogger.GetIPAddresses()` یک `Dns.GetHostEntry` **مسدودکننده** بود که

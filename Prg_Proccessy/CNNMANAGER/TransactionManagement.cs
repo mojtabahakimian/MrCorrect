@@ -29,7 +29,12 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    return _connection.Execute(sql, parameters, _transaction, commandTimeout: 3600);
+                    var affected = _connection.Execute(sql, parameters, _transaction, commandTimeout: 3600);
+                    // نوشتن‌های داخل تراکنش هم باید در سابقه بیایند. خودِ ثبت
+                    // سابقه بیرون از این تراکنش و روی نخ پس‌زمینه انجام می‌شود،
+                    // پس نه قفل اضافه می‌کند نه می‌تواند باعث rollback شود.
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
+                    return affected;
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
@@ -86,7 +91,9 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    return await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 3600);
+                    var affected = await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 3600);
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
+                    return affected;
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {

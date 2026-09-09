@@ -706,15 +706,6 @@ namespace Wins.WinMenus.HESABDARI
             SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
 
             dbms.DoExecuteSQL($"UPDATE dbo.payorder SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE IDD = {IDD.Text}");
-            // ثبت سابقه‌ی امضا. ستون‌های SGN فقط وضعیت نهایی را نگه می‌دارند؛
-            // بدون این رویداد معلوم نمی‌شود چه کسی و در چه زمانی امضا زده یا برداشته است.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Sign("payorder", "IDD=" + IDD.Text, 1,
-                    SGN1.IsChecked == true, this.GetType().Name,
-                    (SGN1.IsChecked == true ? "امضای " : "برداشتن امضای ") + "درخواست پرداخت" + " " + "IDD=" + IDD.Text + " (امضای 1)");
-            }
-            catch { }
 
             if (Convert.ToBoolean(this.SGN1.IsChecked) || Convert.ToBoolean(this.SGN2.IsChecked) || Convert.ToBoolean(this.SGN3.IsChecked))
             {

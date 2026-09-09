@@ -139,6 +139,7 @@ namespace Prg_Proccessy.CNNMANAGER
                         {
                             db.Open();
                             var result = db.Execute(sql, parameters, commandTimeout: 3600);
+                            Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
                             return result;
                         }
                         catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
@@ -169,7 +170,11 @@ namespace Prg_Proccessy.CNNMANAGER
                         _connection.Query($"SELECT 1 FROM {_TableName_} WITH (TABLOCKX, HOLDLOCK)", parameters, transaction: _transaction);
                     }
 
-                    return _connection.Execute(sql, parameters, transaction: _transaction, commandTimeout: 3600);
+                    var affected = _connection.Execute(sql, parameters, transaction: _transaction, commandTimeout: 3600);
+                    // ثبت سابقه بیرون از این تراکنش و روی نخ پس‌زمینه انجام
+                    // می‌شود، پس نه قفل اضافه می‌کند نه می‌تواند باعث rollback شود.
+                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
+                    return affected;
                 }
                 catch (Exception ex)
                 {
