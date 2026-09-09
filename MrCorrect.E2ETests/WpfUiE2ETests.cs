@@ -40,12 +40,45 @@ namespace MrCorrect.E2ETests
 
             string treeDumpPath = Path.Combine(artifactDir, "ui_automation_tree_dump.txt");
             string startupMsgPath = Path.Combine(artifactDir, "startup_message_text.txt");
+            string diagPath = Path.Combine(artifactDir, "runtime_diagnostics.txt");
             string step1Screenshot = Path.Combine(artifactDir, "1_login_window_launched.png");
             string step2Screenshot = Path.Combine(artifactDir, "2_window_interacted.png");
             string step3Screenshot = Path.Combine(artifactDir, "3_workflow_completed.png");
 
             string exePath = FindWpfExecutable();
             Assert.True(File.Exists(exePath), $"WPF executable not found at path: {exePath}");
+
+            // Diagnostic reporting: OS, Architecture, .NET Runtime, Target Framework, Microsoft.Data.SqlClient assembly details
+            var diag = new StringBuilder();
+            diag.AppendLine($"[RUNTIME DIAGNOSTICS - {DateTime.UtcNow:o}]");
+            diag.AppendLine($"OS Description: {RuntimeInformation.OSDescription}");
+            diag.AppendLine($"OS Architecture: {RuntimeInformation.OSArchitecture}");
+            diag.AppendLine($"Process Architecture: {RuntimeInformation.ProcessArchitecture}");
+            diag.AppendLine($".NET Runtime Version: {Environment.Version}");
+            diag.AppendLine($"Executable Path: {exePath}");
+
+            string exeDir = Path.GetDirectoryName(exePath) ?? "";
+            string sqlClientPath = Path.Combine(exeDir, "Microsoft.Data.SqlClient.dll");
+            if (File.Exists(sqlClientPath))
+            {
+                var fi = new FileInfo(sqlClientPath);
+                diag.AppendLine($"Microsoft.Data.SqlClient.dll Path: {sqlClientPath}");
+                diag.AppendLine($"Microsoft.Data.SqlClient.dll Size: {fi.Length} bytes");
+                try
+                {
+                    var assemblyName = AssemblyName.GetAssemblyName(sqlClientPath);
+                    diag.AppendLine($"Microsoft.Data.SqlClient.dll Assembly Version: {assemblyName.Version}");
+                }
+                catch (Exception ex)
+                {
+                    diag.AppendLine($"Microsoft.Data.SqlClient.dll Assembly Read Error: {ex.Message}");
+                }
+            }
+            else
+            {
+                diag.AppendLine("Microsoft.Data.SqlClient.dll NOT FOUND in executable directory!");
+            }
+            File.WriteAllText(diagPath, diag.ToString(), Encoding.UTF8);
 
             try
             {
@@ -382,25 +415,34 @@ namespace MrCorrect.E2ETests
         private static string FindWpfExecutable()
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string[] possiblePaths = new[]
-            {
-                Path.Combine(baseDir, "MrCorrect.exe"),
-                Path.Combine(baseDir, "..", "..", "..", "..", "Prg_UI", "bin", "Debug", "net8.0-windows7.0", "win-x64", "MrCorrect.exe"),
-                Path.Combine(baseDir, "..", "..", "..", "..", "Prg_UI", "bin", "Release", "net8.0-windows7.0", "win-x64", "MrCorrect.exe"),
-                Path.Combine(baseDir, "..", "..", "..", "..", "Prg_UI", "bin", "Debug", "net8.0-windows7.0", "MrCorrect.exe"),
-                Path.Combine(baseDir, "..", "..", "..", "..", "Prg_UI", "bin", "Release", "net8.0-windows7.0", "MrCorrect.exe")
-            };
 
-            foreach (var path in possiblePaths)
+            // Search upwards for repository root containing MrCorrect.sln
+            DirectoryInfo? dir = new DirectoryInfo(baseDir);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "MrCorrect.sln")))
             {
-                string fullPath = Path.GetFullPath(path);
-                if (File.Exists(fullPath))
+                dir = dir.Parent;
+            }
+
+            if (dir != null)
+            {
+                string[] candidates = new[]
                 {
-                    return fullPath;
+                    Path.Combine(dir.FullName, "Prg_UI", "bin", "Debug", "net8.0-windows7.0", "win-x64", "MrCorrect.exe"),
+                    Path.Combine(dir.FullName, "Prg_UI", "bin", "Release", "net8.0-windows7.0", "win-x64", "MrCorrect.exe"),
+                    Path.Combine(dir.FullName, "Prg_UI", "bin", "Debug", "net8.0-windows7.0", "MrCorrect.exe"),
+                    Path.Combine(dir.FullName, "Prg_UI", "bin", "Release", "net8.0-windows7.0", "MrCorrect.exe"),
+                };
+
+                foreach (var candidate in candidates)
+                {
+                    if (File.Exists(candidate))
+                    {
+                        return Path.GetFullPath(candidate);
+                    }
                 }
             }
 
-            return Path.GetFullPath(possiblePaths[0]);
+            return Path.Combine(baseDir, "MrCorrect.exe");
         }
 
         public void Dispose()
