@@ -4,6 +4,7 @@ using Prg_Proccessy.AUDIT;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.HelperWins;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -66,8 +67,35 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             this.DataContext = this;
         }
 
+        /// <summary>
+        /// نام فرم در جدول TFORMS. برای فعال شدن این پنجره باید یک ردیف با
+        /// همین نام در TFORMS و دسترسی متناظر در SAL_CHEK ساخته شود.
+        /// </summary>
+        private const string PermissionFormName = "AUDITTRAIL";
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // این پنجره فعالیت همه‌ی کاربران را به‌همراه IP، نام کامپیوتر و
+            // ورودهای ناموفق نشان می‌دهد، پس باید مجوزدار باشد.
+            // LETSGO وقتی ردیف دسترسی وجود نداشته باشد false برمی‌گرداند
+            // (fail-closed)، پس تا وقتی مدیر دسترسی را تعریف نکرده، هیچ‌کس
+            // نمی‌تواند سوابق بقیه را ببیند.
+            if (!CL_HESABDARI.LETSGO(PermissionFormName))
+            {
+                Prg_Proccessy.AUDIT.Audit.Security(
+                    AuditAction.AuditViewed,
+                    "تلاش برای مشاهده‌ی سوابق بدون دسترسی",
+                    formName: this.GetType().Name);
+
+                new Msgwin(false,
+                    $"دسترسی مشاهده‌ی سوابق برای شما تعریف نشده است.\n" +
+                    $"مدیر سیستم باید فرم «{PermissionFormName}» را در TFORMS و دسترسی آن را در SAL_CHEK تعریف کند.")
+                    .ShowDialog();
+
+                this.Close();
+                return;
+            }
+
             FillStaticCombos();
 
             // بازه‌ی پیش‌فرض: از ابتدای امروز.
@@ -172,15 +200,32 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     _lastLogId = null;
                 }
 
-                var from = ParseShamsi(TXT_FROM.Text) ?? DateTime.Today;
-                var to = (ParseShamsi(TXT_TO.Text) ?? DateTime.Today).AddDays(1);
+                // تاریخ نامعتبر نباید بی‌صدا به «امروز» تبدیل شود: کاربر
+                // «1404/1/1» را می‌بیند ولی نتیجه‌ی امروز را می‌گیرد و فکر
+                // می‌کند رکوردی وجود ندارد.
+                var from = ParseShamsi(TXT_FROM.Text);
+                var to = ParseShamsi(TXT_TO.Text);
+
+                if (from is null || to is null)
+                {
+                    LBL_STATUS.Text = "تاریخ نامعتبر است. قالب درست: 1405/05/17";
+                    return;
+                }
+                if (from > to)
+                {
+                    LBL_STATUS.Text = "«از تاریخ» بزرگ‌تر از «تا تاریخ» است.";
+                    return;
+                }
+
+                var fromDate = from.Value;
+                var toDate = to.Value.AddDays(1);
 
                 var args = new
                 {
                     Take = PageSize,
                     UserId = (CMB_USER.SelectedValue as int?),
-                    From = from,
-                    To = to,
+                    From = fromDate,
+                    To = toDate,
                     Category = (CMB_CATEGORY.SelectedValue as byte?),
                     Action = string.IsNullOrWhiteSpace(CMB_ACTION.SelectedValue as string)
                              ? null : (string?)CMB_ACTION.SelectedValue,
@@ -227,6 +272,10 @@ SELECT TOP (@Take)
             catch (Exception ex)
             {
                 LBL_STATUS.Text = "خطا در خواندن سوابق: " + ex.Message;
+
+                // اگر قبلاً صفحه‌ای خوانده شده بود، کاربر باید بتواند ادامه
+                // را دوباره امتحان کند؛ وگرنه دکمه برای همیشه غیرفعال می‌ماند.
+                BTN_MORE.IsEnabled = _lastLogId.HasValue;
             }
             finally
             {

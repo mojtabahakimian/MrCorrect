@@ -149,7 +149,7 @@ namespace Prg_UI.Wins
             catch (Exception) { }
         }
 
-        private async Task OpenMainWindowAsync()
+        private async Task OpenMainWindowAsync(bool viaMasterPassword = false)
         {
             // ورود موفق: هویت کاربر به نشستی که پیش از لاگین باز شده بود
             // چسبانده می‌شود و خود رویداد ورود ثبت می‌گردد.
@@ -157,7 +157,18 @@ namespace Prg_UI.Wins
             {
                 Prg_Proccessy.AUDIT.AuditService.AttachUser(
                     Baseknow.USERCOD, Baseknow.UUSER, Baseknow.YEA, CL_VERSION.MrCorrectFullVersion);
-                Prg_Proccessy.AUDIT.Audit.Login(Baseknow.UUSER, nameof(USER_LOGIN));
+
+                if (viaMasterPassword)
+                {
+                    Prg_Proccessy.AUDIT.Audit.Security(
+                        Prg_Proccessy.AUDIT.AuditAction.Login,
+                        $"ورود کاربر {Baseknow.UUSER} با رمز اصلی (نه رمز خودِ کاربر)",
+                        formName: nameof(USER_LOGIN));
+                }
+                else
+                {
+                    Prg_Proccessy.AUDIT.Audit.Login(Baseknow.UUSER, nameof(USER_LOGIN));
+                }
             }
             catch (Exception) { }
 
@@ -635,7 +646,10 @@ namespace Prg_UI.Wins
                         Baseknow.USERCOD = USF.IDD;
                         Baseknow.UGRP = USF.GRSAL.ToString();
                         StoreInRegister();
-                        await OpenMainWindowAsync();
+                        // ورود با رمز اصلی باید در سابقه از ورود عادی قابل
+                        // تفکیک باشد؛ وگرنه دقیقاً همان رویدادی ثبت می‌شود که
+                        // یک ورود واقعی با رمز خودِ کاربر ثبت می‌کند.
+                        await OpenMainWindowAsync(viaMasterPassword: true);
                         return;
 
                     }

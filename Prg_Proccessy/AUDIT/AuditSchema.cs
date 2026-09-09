@@ -121,6 +121,23 @@ namespace Prg_Proccessy.AUDIT
                           SET (OPTIMIZE_FOR_SEQUENTIAL_KEY = ON);
               END",
 
+            // ── ثبت فرم گزارش در TFORMS ─────────────────────────────────
+            // فرم مشاهده‌ی سوابق باید مجوزدار باشد، وگرنه هر کاربری می‌تواند
+            // فعالیت بقیه را به‌همراه IP و نام کامپیوترشان ببیند. اینجا فقط
+            // خودِ فرم ثبت می‌شود؛ دسترسی به هیچ‌کس داده نمی‌شود و مدیر باید
+            // آن را در SAL_CHEK به افراد مورد نظر بدهد — همان الگوی CRMALL.
+            @"IF OBJECT_ID(N'[dbo].[TFORMS]', N'U') IS NOT NULL
+                 AND NOT EXISTS (SELECT 1 FROM [dbo].[TFORMS] WHERE FORMNAME = N'AUDITTRAIL')
+              BEGIN
+                  INSERT INTO [dbo].[TFORMS] (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+                  VALUES (N'AUDITTRAIL',
+                          N'سوابق و ردیابی فعالیت کاربران',
+                          3,
+                          ISNULL((SELECT TOP 1 GRP FROM [dbo].[TFORMS] WHERE FORMNAME = N'USERS'), 16),
+                          (SELECT ISNULL(MAX(IDH), 0) + 1 FROM [dbo].[TFORMS]),
+                          GETDATE());
+              END",
+
             // ── نمای خط زمانی: رویداد + اطلاعات نشست، یکجا ───────────────
             @"CREATE OR ALTER VIEW [dbo].[VW_SYS_AUDIT_TIMELINE]
               AS

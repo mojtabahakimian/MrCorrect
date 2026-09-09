@@ -231,7 +231,16 @@ namespace Prg_Proccessy.AUDIT
         internal static void Enqueue(AuditEvent evt)
         {
             var channel = _channel;
-            if (channel is null || !_running) return;
+
+            // موتور هنوز راه نیفتاده یا در حال بسته شدن است. رویداد عادی
+            // معنایی ندارد، ولی رویداد حساس — حذف، امضا، ورود ناموفق — باید
+            // بماند: روی دیسک محلی می‌نشیند و در اجرای بعدی منتقل می‌شود.
+            // بدون این، نوشتنی که پیش از لاگین یا حین خروج رخ دهد بی‌رد گم می‌شد.
+            if (channel is null || !_running)
+            {
+                if (evt.IsCritical) TrySpill(new[] { evt });
+                return;
+            }
 
             if (channel.Writer.TryWrite(evt))
             {
@@ -296,19 +305,38 @@ namespace Prg_Proccessy.AUDIT
             catch (Exception) { }
 
             // تخلیه‌ی نهایی هنگام بسته شدن برنامه.
+            //
+            // تا وقتی صف خالی نشده ادامه می‌دهد. نسخه‌ی قبلی فقط یک دسته
+            // می‌خواند و هر چه بیشتر بود بی‌صدا دور ریخته می‌شد — حتی
+            // رویدادهای حساس مثل حذف و امضا، بدون هیچ ردی.
             try
             {
-                batch.Clear();
-                while (batch.Count < BatchMaxRows && reader.TryRead(out var last))
+                while (true)
                 {
-                    batch.Add(last);
-                }
-                if (batch.Count > 0)
-                {
+                    batch.Clear();
+                    while (batch.Count < BatchMaxRows && reader.TryRead(out var last))
+                    {
+                        batch.Add(last);
+                    }
+                    if (batch.Count == 0) break;
+
                     await FlushAsync(batch).ConfigureAwait(false);
                 }
-                await CloseSessionRowAsync().ConfigureAwait(false);
             }
+            catch (Exception)
+            {
+                // اگر تخلیه نیمه‌کاره ماند، باقی‌مانده روی دیسک محلی می‌رود تا
+                // در اجرای بعدی منتقل شود.
+                try
+                {
+                    var leftovers = new List<AuditEvent>();
+                    while (reader.TryRead(out var rest)) leftovers.Add(rest);
+                    if (leftovers.Count > 0) TrySpill(leftovers);
+                }
+                catch (Exception) { }
+            }
+
+            try { await CloseSessionRowAsync().ConfigureAwait(false); }
             catch (Exception) { }
         }
 
@@ -324,34 +352,55 @@ namespace Prg_Proccessy.AUDIT
                 }
             }
 
-            for (var attempt = 0; attempt <= FlushRetries; attempt++)
+            // تلاش مجدد در سطح هر تکه انجام می‌شود، نه کل دسته.
+            //
+            // اگر کل دسته دوباره تلاش شود، تکه‌هایی که قبلاً با موفقیت درج
+            // شده‌اند دوباره درج می‌شوند و چون جدول کلید طبیعی ندارد، ردیف
+            // تکراری برای همیشه می‌ماند. با این ساختار، هر تکه یا یک بار
+            // نوشته می‌شود یا اصلاً نوشته نمی‌شود.
+            var index = 0;
+            while (index < batch.Count)
             {
-                try
-                {
-                    using var db = new SqlConnection(_connectionString);
-                    await db.OpenAsync().ConfigureAwait(false);
+                var chunk = batch.GetRange(index, Math.Min(InsertChunkRows, batch.Count - index));
+                var ok = false;
 
-                    for (var i = 0; i < batch.Count; i += InsertChunkRows)
+                for (var attempt = 0; attempt <= FlushRetries && !ok; attempt++)
+                {
+                    try
                     {
-                        var chunk = batch.GetRange(i, Math.Min(InsertChunkRows, batch.Count - i));
+                        using var db = new SqlConnection(_connectionString);
+                        await db.OpenAsync().ConfigureAwait(false);
                         await InsertEventsAsync(db, chunk).ConfigureAwait(false);
                         await InsertLegacyAsync(db, chunk).ConfigureAwait(false);
+                        ok = true;
                     }
+                    catch (Exception)
+                    {
+                        if (attempt >= FlushRetries) break;
+                        try { await Task.Delay(250 * (attempt + 1)).ConfigureAwait(false); } catch { }
+                    }
+                }
 
-                    Interlocked.Add(ref _written, batch.Count);
-                    await ReplayOneSpillFileAsync(db).ConfigureAwait(false);
+                if (!ok)
+                {
+                    // دیتابیس در دسترس نیست. این تکه و هر چه بعد از آن مانده
+                    // روی دیسک محلی نگه داشته می‌شود؛ تکه‌های نوشته‌شده دوباره
+                    // ذخیره نمی‌شوند تا ردیف تکراری ایجاد نشود.
+                    TrySpill(batch.GetRange(index, batch.Count - index));
                     return;
                 }
-                catch (Exception)
-                {
-                    if (attempt >= FlushRetries) break;
-                    try { await Task.Delay(250 * (attempt + 1)).ConfigureAwait(false); } catch { }
-                }
+
+                Interlocked.Add(ref _written, chunk.Count);
+                index += chunk.Count;
             }
 
-            // دیتابیس در دسترس نیست. دسته روی دیسک محلی نگه داشته می‌شود تا
-            // بعداً منتقل شود؛ هیچ رویدادی بی‌صدا گم نمی‌شود.
-            TrySpill(batch);
+            try
+            {
+                using var db = new SqlConnection(_connectionString);
+                await db.OpenAsync().ConfigureAwait(false);
+                await ReplayOneSpillFileAsync(db).ConfigureAwait(false);
+            }
+            catch (Exception) { }
         }
 
         private static async Task InsertEventsAsync(SqlConnection db, List<AuditEvent> rows)
@@ -588,13 +637,35 @@ namespace Prg_Proccessy.AUDIT
                     if (e != null) rows.Add(e);
                 }
 
-                for (var i = 0; i < rows.Count; i += InsertChunkRows)
+                // اگر درج تکه‌ی دوم شکست بخورد، فایل نباید دست‌نخورده بماند:
+                // در چرخه‌ی بعدی از اول خوانده می‌شود و تکه‌ی اول دوباره درج
+                // می‌گردد. پس فایل با باقی‌مانده بازنویسی می‌شود.
+                var done = 0;
+                try
                 {
-                    var chunk = rows.GetRange(i, Math.Min(InsertChunkRows, rows.Count - i));
-                    await InsertEventsAsync(db, chunk).ConfigureAwait(false);
+                    for (var i = 0; i < rows.Count; i += InsertChunkRows)
+                    {
+                        var chunk = rows.GetRange(i, Math.Min(InsertChunkRows, rows.Count - i));
+                        await InsertEventsAsync(db, chunk).ConfigureAwait(false);
+                        done += chunk.Count;
+                    }
                 }
-
-                File.Delete(file);
+                finally
+                {
+                    if (done >= rows.Count)
+                    {
+                        File.Delete(file);
+                    }
+                    else if (done > 0)
+                    {
+                        var remaining = new StringBuilder();
+                        for (var i = done; i < rows.Count; i++)
+                        {
+                            remaining.AppendLine(JsonSerializer.Serialize(rows[i]));
+                        }
+                        File.WriteAllText(file, remaining.ToString(), Encoding.UTF8);
+                    }
+                }
             }
             catch (Exception)
             {

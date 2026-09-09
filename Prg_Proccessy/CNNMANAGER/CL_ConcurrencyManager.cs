@@ -16,6 +16,15 @@ namespace Prg_Proccessy.CNNMANAGER
         private string SQLCNN = null;
 
         /// <summary>
+        /// دستورهای نوشتنی تراکنش که هنوز commit نشده‌اند.
+        ///
+        /// اگر بلافاصله بعد از Execute ثبت شوند، rollback بعدی (که در
+        /// <see cref="Dispose"/> هم به‌صورت خودکار رخ می‌دهد) ردیف‌هایی در
+        /// سابقه جا می‌گذارد که هرگز در دیتابیس نوشته نشده‌اند.
+        /// </summary>
+        private readonly List<(string Sql, object Parameters)> _pendingAudit = new();
+
+        /// <summary>
         /// Ignore Transaction way go like CNNMANAGER Open then Close immediately
         /// </summary>
         public bool OnceStartCloseQuery { get; set; } = false;
@@ -91,7 +100,10 @@ namespace Prg_Proccessy.CNNMANAGER
                     try
                     {
                         db.Open();
-                        return db.Query<T>(sql, parameters, commandTimeout: 3600);
+                        var rows = db.Query<T>(sql, parameters, commandTimeout: 3600);
+                        // «INSERT ... OUTPUT INSERTED.id» هم از مسیر Query می‌گذرد.
+                        Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
+                        return rows;
                     }
                     catch (Exception ex)
                     {
@@ -114,7 +126,9 @@ namespace Prg_Proccessy.CNNMANAGER
                         _connection.Query($"SELECT 1 FROM {_TableName_} WITH (TABLOCKX, HOLDLOCK)", parameters, transaction: _transaction);
                     }
 
-                    return _connection.Query<T>(sql, parameters, transaction: _transaction, commandTimeout: 3600);
+                    var rows = _connection.Query<T>(sql, parameters, transaction: _transaction, commandTimeout: 3600);
+                    QueueAudit(sql, parameters);
+                    return rows;
                 }
                 catch (Exception ex)
                 {
@@ -139,7 +153,7 @@ namespace Prg_Proccessy.CNNMANAGER
                         {
                             db.Open();
                             var result = db.Execute(sql, parameters, commandTimeout: 3600);
-                            Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
+                            Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
                             return result;
                         }
                         catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
@@ -171,9 +185,8 @@ namespace Prg_Proccessy.CNNMANAGER
                     }
 
                     var affected = _connection.Execute(sql, parameters, transaction: _transaction, commandTimeout: 3600);
-                    // ثبت سابقه بیرون از این تراکنش و روی نخ پس‌زمینه انجام
-                    // می‌شود، پس نه قفل اضافه می‌کند نه می‌تواند باعث rollback شود.
-                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql);
+                    // فقط صف می‌شود؛ ثبت واقعی هنگام Commit انجام می‌گیرد.
+                    QueueAudit(sql, parameters);
                     return affected;
                 }
                 catch (Exception ex)
@@ -211,9 +224,11 @@ namespace Prg_Proccessy.CNNMANAGER
             try
             {
                 _transaction.Commit();
+                FlushAudit(committed: true);
             }
             catch (Exception ex)
             {
+                FlushAudit(committed: false);
                 LogError(ex, "Commit Transaction Exception");
                 throw;
             }
@@ -221,6 +236,39 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 _transaction.Dispose();
                 _transaction = null;
+            }
+        }
+
+        /// <summary>نگه‌داشتن دستور تا زمان Commit. سقف دارد تا تراکنش بزرگ حافظه نگیرد.</summary>
+        private void QueueAudit(string sql, object parameters)
+        {
+            try
+            {
+                if (_pendingAudit.Count < 200)
+                {
+                    _pendingAudit.Add((sql, parameters));
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>ثبت سابقه‌ی دستورهای تراکنشِ commit‌شده و خالی کردن صف.</summary>
+        private void FlushAudit(bool committed)
+        {
+            try
+            {
+                if (committed)
+                {
+                    foreach (var item in _pendingAudit)
+                    {
+                        Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(item.Sql, item.Parameters);
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                _pendingAudit.Clear();
             }
         }
 
@@ -245,6 +293,8 @@ namespace Prg_Proccessy.CNNMANAGER
             }
             finally
             {
+                // عمداً چیزی ثبت نمی‌شود: این دستورها هرگز در دیتابیس ننشستند.
+                FlushAudit(committed: false);
                 _transaction.Dispose();
                 _transaction = null;
             }
@@ -279,6 +329,9 @@ namespace Prg_Proccessy.CNNMANAGER
         {
             if (_disposed)
                 return;
+
+            // Dispose بدون Commit یعنی rollback؛ صف سابقه باید دور ریخته شود.
+            FlushAudit(committed: false);
 
             try
             {

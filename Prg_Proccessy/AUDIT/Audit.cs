@@ -133,6 +133,38 @@ namespace Prg_Proccessy.AUDIT
             catch (Exception) { }
         }
 
+        /// <summary>
+        /// ثبت وضعیت کامل امضاها.
+        ///
+        /// در این نرم‌افزار یک کلیک روی هر خانه‌ی امضا، دستوری می‌سازد که
+        /// <b>همه‌ی</b> خانه‌ها را با هم می‌نویسد
+        /// (<c>SET SGN1=0, SGN2=0, SGN3=1</c>). پس از روی خودِ دستور نمی‌توان
+        /// فهمید کدام خانه عوض شده؛ آنچه قابل ثبت و درست است، وضعیت کاملِ آن
+        /// لحظه است. تغییر واقعی از مقایسه‌ی دو رویداد پشت‌سرهم روی همان سند
+        /// به‌دست می‌آید و در گزارش هم همین‌طور دیده می‌شود.
+        /// </summary>
+        public static void SignState(string entity, string? entityKey, bool anySigned,
+                                     string persianTitle, IReadOnlyDictionary<int, bool> slots,
+                                     string? formName = null)
+        {
+            try
+            {
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Business,
+                    Severity = AuditSeverity.Sensitive,
+                    Action = anySigned ? AuditAction.Sign : AuditAction.Unsign,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = persianTitle,
+                    Detail = JsonSerializer.Serialize(slots),
+                    IsCritical = true,
+                });
+            }
+            catch (Exception) { }
+        }
+
         /// <summary>ثبت تبدیل یک سند به سند دیگر، مثل تبدیل پیش‌فاکتور به فاکتور یا حواله.</summary>
         public static void ConvertDoc(string fromEntity, string? fromKey, string toEntity, string? toKey,
                                    string? formName = null, Guid? correlationId = null)
@@ -302,7 +334,10 @@ namespace Prg_Proccessy.AUDIT
         {
             try
             {
-                if (!AuditService.IsRunning) return;
+                // عمداً اینجا روی IsRunning بازگشت زودهنگام نمی‌کنیم: تصمیم
+                // درباره‌ی رویدادهای حساسِ خارج از بازه‌ی کارِ موتور با
+                // AuditService.Enqueue است که آن‌ها را روی دیسک نگه می‌دارد.
+                if (!AuditService.IsRunning && !draft.IsCritical) return;
 
                 var session = AuditService.CurrentSession;
                 var now = DateTime.Now;

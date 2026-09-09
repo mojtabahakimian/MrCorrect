@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using Dapper;
 
 namespace Prg_Proccessy.AUDIT
 {
@@ -13,18 +16,22 @@ namespace Prg_Proccessy.AUDIT
     /// دستور از OUTPUT بدون INTO استفاده می‌کنند و SQL Server وجود تریگر روی
     /// آن جدول‌ها را ممنوع می‌کند (خطای ۳۳۴).
     ///
-    /// پس تشخیص در همان سه متد مرکزی دسترسی به داده انجام می‌شود. چون این
-    /// متدها متن نهایی دستور را می‌بینند (بعد از جای‌گذاری مقادیر)، مقادیری
-    /// مثل TAG و شماره‌ی سند هم قابل استخراج‌اند.
-    ///
-    /// هزینه: برای دستورهای خواندنی سه IndexOf ساده و خروج فوری. برای
-    /// دستورهای نوشتنی چند Regex از پیش کامپایل‌شده — در برابر رفت‌وبرگشت
-    /// خودِ آن دستور به دیتابیس ناچیز است.
+    /// محدودیت‌هایی که باید بدانید:
+    ///   • یک دستور ممکن است چند statement داشته باشد؛ همه‌ی آن‌ها تشخیص داده
+    ///     می‌شوند، ولی تا سقف <see cref="MaxStatementsPerCommand"/>.
+    ///   • مقدار کلید رکورد وقتی دستور پارامتری باشد از خودِ شیء پارامترها
+    ///     خوانده می‌شود؛ اگر قابل استخراج نبود، کلید خالی می‌ماند و هرگز
+    ///     مقدار بی‌معنی مثل «CODE=@CODE» ذخیره نمی‌شود.
+    ///   • این لایه فقط می‌گوید «چه جدولی، چه عملیاتی، روی چه کلیدی». مقدار
+    ///     قبل و بعدِ فیلدها را نمی‌دهد؛ برای آن باید به جدول‌های TR_ مراجعه شود.
     /// </summary>
     public static class AuditSqlSniffer
     {
         /// <summary>شیر اصلی. اگر حجم سابقه مشکل‌ساز شد، با false کردن این، تشخیص خودکار خاموش می‌شود.</summary>
         public static bool Enabled { get; set; } = true;
+
+        /// <summary>سقف تعداد statement از یک دستور، تا یک اسکریپت طولانی سیل رویداد راه نیندازد.</summary>
+        private const int MaxStatementsPerCommand = 8;
 
         private static readonly RegexOptions Opts =
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
@@ -35,29 +42,28 @@ namespace Prg_Proccessy.AUDIT
         private static readonly Regex RxUpdate =
             new(@"\bUPDATE\s+(?:TOP\s*\([^)]*\)\s*)?(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?\s+SET\b", Opts);
 
-        // دو الگو برای DELETE: اول شکل FROM‌دار، چون «DELETE d FROM dbo.X»
-        // با الگوی ساده نام مستعار (d) را به‌جای نام جدول می‌گیرد.
+        // «DELETE d FROM dbo.X» با الگوی ساده نام مستعار را جدول می‌گیرد،
+        // پس اول شکل FROM‌دار امتحان می‌شود.
         private static readonly Regex RxDeleteFrom =
-            new(@"\bDELETE\b[^;]{0,120}?\bFROM\s+(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
+            new(@"\bDELETE\b(?:\s+TOP\s*\([^)]*\))?[^;]{0,80}?\bFROM\s+(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
 
-        private static readonly Regex RxDelete =
-            new(@"\bDELETE\s+(?:TOP\s*\([^)]*\)\s*)?(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
+        private static readonly Regex RxDeleteBare =
+            new(@"\bDELETE\s+(?:TOP\s*\([^)]*\)\s*)?(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]{2,})\]?", Opts);
 
         /// <summary>ستون‌های کلیدی رایج، به ترتیب اولویت.</summary>
         private static readonly Regex RxKey =
-            new(@"\b(N_S|NUMBER1|NUMBER|IDH|IDD|CODE|N_SERI|ID)\s*=\s*N?'?([^'\s,)]+)'?", Opts);
+            new(@"\b(N_S|NUMBER1|NUMBER|IDH|IDD|CODE|N_SERI|ID)\s*=\s*(N?'[^']*'|@[A-Za-z_][A-Za-z0-9_]*|[0-9.]+)", Opts);
 
         private static readonly Regex RxTag =
             new(@"\bTAG\s*=\s*(\d{1,3})\b", Opts);
 
-        /// <summary>امضا: SGN1 = 1 یا SGN2 =0 و مانند آن.</summary>
+        /// <summary>امضا: SGN1 = 1 و مانند آن. عمداً SGN1usid را نمی‌گیرد.</summary>
         private static readonly Regex RxSign =
-            new(@"\bSGN(\d)\s*=\s*(\d)", Opts);
+            new(@"\bSGN(\d)\s*=\s*(\d)\b", Opts);
 
         /// <summary>
         /// جدول‌هایی که ثبت نمی‌شوند. خودِ جدول‌های سابقه حتماً باید اینجا
-        /// باشند تا حلقه‌ی بی‌پایان ایجاد نشود، و جدول‌های پرترافیکِ بی‌ارزش
-        /// هم برای کنترل حجم کنار گذاشته شده‌اند.
+        /// باشند تا حلقه‌ی بی‌پایان ایجاد نشود.
         /// </summary>
         private static readonly HashSet<string> Excluded = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -65,7 +71,6 @@ namespace Prg_Proccessy.AUDIT
             "UserState", "PAY2_SEC_AUDIT", "CC_RUNLOG", "SMS_SENDS",
         };
 
-        /// <summary>نام فارسی جدول‌ها، فقط برای خوانا شدن ستون شرح.</summary>
         private static readonly Dictionary<string, string> TableLabels = new(StringComparer.OrdinalIgnoreCase)
         {
             ["DEED_HED"] = "سند حسابداری",
@@ -77,6 +82,7 @@ namespace Prg_Proccessy.AUDIT
             ["PAY_GETP"] = "چک پرداختی",
             ["STUF_DEF"] = "کالا",
             ["STUF_FSK"] = "موجودی کالا",
+            ["STUF_STK"] = "موجودی انبار",
             ["CUST_HESAB"] = "حساب مشتری",
             ["payorder"] = "درخواست پرداخت",
             ["SALA_DTL"] = "کاربر",
@@ -86,7 +92,6 @@ namespace Prg_Proccessy.AUDIT
             ["TAKHPERS"] = "تخفیف مشتری",
         };
 
-        /// <summary>نام فارسی نوع برگه بر اساس TAG در HEAD_LST.</summary>
         private static readonly Dictionary<int, string> TagLabels = new()
         {
             [1] = "فاکتور خرید",
@@ -99,11 +104,19 @@ namespace Prg_Proccessy.AUDIT
             [26] = "سایر حواله انبار",
         };
 
+        private sealed class Statement
+        {
+            public int Start;
+            public string Action = string.Empty;
+            public string Table = string.Empty;
+        }
+
         /// <summary>
         /// بررسی یک دستور SQL و در صورت نوشتنی بودن، ثبت رویداد.
-        /// هرگز استثنا پرتاب نمی‌کند و هرگز کار فراخوان را کند نمی‌کند.
+        /// هرگز استثنا پرتاب نمی‌کند.
         /// </summary>
-        public static void Observe(string? sql, string? formName = null)
+        /// <param name="parameters">شیء پارامترهای Dapper، برای استخراج مقدار واقعی کلید رکورد.</param>
+        public static void Observe(string? sql, object? parameters = null, string? formName = null)
         {
             if (!Enabled || !AuditService.IsRunning) return;
             if (string.IsNullOrEmpty(sql)) return;
@@ -116,81 +129,172 @@ namespace Prg_Proccessy.AUDIT
                 var hasDelete = sql.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0;
                 if (!hasInsert && !hasUpdate && !hasDelete) return;
 
-                string? action = null;
-                Match? m = null;
-
-                if (hasUpdate)
+                // همه‌ی statementهای نوشتنی، نه فقط اولی. یک دستور واحد ممکن
+                // است هم UPDATE هدر و هم چند INSERT ردیف داشته باشد؛ نسخه‌ی
+                // قبلی فقط اولی را می‌دید و بقیه بی‌صدا گم می‌شدند.
+                var statements = new List<Statement>();
+                if (hasUpdate) Collect(statements, RxUpdate, sql, AuditAction.Update);
+                if (hasInsert) Collect(statements, RxInsert, sql, AuditAction.Insert);
+                if (hasDelete)
                 {
-                    var candidate = RxUpdate.Match(sql);
-                    if (candidate.Success) { m = candidate; action = AuditAction.Update; }
-                }
-                if (m is null && hasInsert)
-                {
-                    var candidate = RxInsert.Match(sql);
-                    if (candidate.Success) { m = candidate; action = AuditAction.Insert; }
-                }
-                if (m is null && hasDelete)
-                {
-                    // اول شکل FROM‌دار، بعد شکل ساده.
-                    var candidate = RxDeleteFrom.Match(sql);
-                    if (!candidate.Success) candidate = RxDelete.Match(sql);
-                    if (candidate.Success) { m = candidate; action = AuditAction.Delete; }
+                    Collect(statements, RxDeleteFrom, sql, AuditAction.Delete);
+                    if (statements.Count == 0) Collect(statements, RxDeleteBare, sql, AuditAction.Delete);
                 }
 
-                if (m is null || action is null) return;
+                if (statements.Count == 0) return;
 
-                var table = m.Groups[1].Value;
-                if (string.IsNullOrEmpty(table) || Excluded.Contains(table)) return;
+                statements.Sort((a, b) => a.Start.CompareTo(b.Start));
 
-                // کلید رکورد فقط از بخش WHERE خوانده می‌شود. اگر کل دستور را
-                // جستجو کنیم، در «UPDATE X SET CODE='A' WHERE ID=5» مقدار جدیدِ
-                // CODE به‌جای شناسه‌ی رکورد برداشته می‌شود.
-                var whereAt = sql.LastIndexOf("WHERE", StringComparison.OrdinalIgnoreCase);
-                var scope = whereAt >= 0 ? sql.Substring(whereAt) : sql;
-
-                int? tag = null;
-                var tagMatch = RxTag.Match(scope);
-                if (tagMatch.Success && int.TryParse(tagMatch.Groups[1].Value, out var t)) tag = t;
-
-                string? key = null;
-                var keyMatch = RxKey.Match(scope);
-                if (keyMatch.Success)
+                var count = Math.Min(statements.Count, MaxStatementsPerCommand);
+                for (var i = 0; i < count; i++)
                 {
-                    key = keyMatch.Groups[1].Value + "=" + keyMatch.Groups[2].Value;
-                    if (tag.HasValue) key += ";TAG=" + tag.Value;
-                }
-                else if (tag.HasValue)
-                {
-                    key = "TAG=" + tag.Value;
-                }
+                    var st = statements[i];
+                    if (Excluded.Contains(st.Table)) continue;
 
-                var label = DescribeTable(table, tag);
+                    // دامنه‌ی هر statement تا شروع statement بعدی است، وگرنه
+                    // کلیدِ statement بعدی به این یکی نسبت داده می‌شود.
+                    var end = (i + 1 < statements.Count) ? statements[i + 1].Start : sql.Length;
+                    var segment = sql.Substring(st.Start, end - st.Start);
 
-                // امضا یک رویداد کاری است، نه صرفاً یک UPDATE.
-                // این مسیر هر ۶۳ نقطه‌ی امضای نرم‌افزار را یکجا پوشش می‌دهد.
-                if (action == AuditAction.Update)
-                {
-                    var sign = RxSign.Match(sql);
-                    if (sign.Success
-                        && int.TryParse(sign.Groups[1].Value, out var slot)
-                        && int.TryParse(sign.Groups[2].Value, out var value))
-                    {
-                        Audit.Sign(table, key, slot, value != 0, formName,
-                                   (value != 0 ? "امضای " : "برداشتن امضای ")
-                                   + label + (key is null ? "" : " " + key)
-                                   + $" (امضای {slot})");
-                        return;
-                    }
+                    Emit(st, segment, parameters, formName);
                 }
-
-                Audit.Data(action, table, key,
-                           persianTitle: VerbOf(action) + " " + label + (key is null ? "" : " " + key),
-                           formName: formName,
-                           oldValue: null, newValue: null);
             }
             catch (Exception)
             {
                 // تشخیص سابقه تحت هیچ شرایطی نباید دستور اصلی کاربر را خراب کند.
+            }
+        }
+
+        private static void Collect(List<Statement> into, Regex rx, string sql, string action)
+        {
+            foreach (Match match in rx.Matches(sql))
+            {
+                if (!match.Success) continue;
+                var table = match.Groups[1].Value;
+                if (string.IsNullOrEmpty(table)) continue;
+                into.Add(new Statement { Start = match.Index, Action = action, Table = table });
+                if (into.Count >= MaxStatementsPerCommand * 2) break;
+            }
+        }
+
+        private static void Emit(Statement st, string segment, object? parameters, string? formName)
+        {
+            // کلید رکورد فقط از بخش WHERE همین statement خوانده می‌شود. اگر
+            // کل دستور جستجو شود، در «UPDATE X SET CODE='A' WHERE ID=5» مقدار
+            // جدیدِ CODE به‌جای شناسه‌ی رکورد برداشته می‌شود.
+            var whereAt = segment.LastIndexOf("WHERE", StringComparison.OrdinalIgnoreCase);
+            var scope = whereAt >= 0 ? segment.Substring(whereAt) : segment;
+
+            int? tag = null;
+            var tagMatch = RxTag.Match(scope);
+            if (tagMatch.Success && int.TryParse(tagMatch.Groups[1].Value, out var t)) tag = t;
+
+            string? key = null;
+            var keyMatch = RxKey.Match(scope);
+            if (keyMatch.Success)
+            {
+                var raw = keyMatch.Groups[2].Value;
+                var value = NormalizeValue(raw, parameters);
+                if (value != null)
+                {
+                    key = keyMatch.Groups[1].Value + "=" + value;
+                    if (tag.HasValue) key += ";TAG=" + tag.Value;
+                }
+            }
+            if (key is null && tag.HasValue) key = "TAG=" + tag.Value;
+
+            var label = DescribeTable(st.Table, tag);
+            var suffix = key is null ? string.Empty : " " + key;
+
+            Audit.Data(st.Action, st.Table, key,
+                       persianTitle: VerbOf(st.Action) + " " + label + suffix,
+                       formName: formName,
+                       oldValue: null, newValue: null);
+
+            // امضا: یک UPDATE امضا معمولاً همه‌ی خانه‌ها را با هم می‌نویسد
+            // (SGN1=0, SGN2=0, SGN3=1). گرفتن فقط اولین تطبیق — کاری که
+            // نسخه‌ی قبلی می‌کرد — خانه و جهت را اشتباه گزارش می‌کرد. پس
+            // وضعیت کاملِ همه‌ی خانه‌ها ثبت می‌شود و تغییر واقعی از مقایسه‌ی
+            // دو رویداد پشت‌سرهم به‌دست می‌آید.
+            if (st.Action == AuditAction.Update)
+            {
+                EmitSignState(st, segment, key, label, formName);
+            }
+        }
+
+        private static void EmitSignState(Statement st, string segment, string? key, string label, string? formName)
+        {
+            var slots = new SortedDictionary<int, bool>();
+            foreach (Match sign in RxSign.Matches(segment))
+            {
+                if (int.TryParse(sign.Groups[1].Value, out var slot)
+                    && int.TryParse(sign.Groups[2].Value, out var value))
+                {
+                    slots[slot] = value != 0;
+                }
+            }
+            if (slots.Count == 0) return;
+
+            var parts = new List<string>(slots.Count);
+            var anySigned = false;
+            foreach (var kv in slots)
+            {
+                parts.Add($"{kv.Key}:{(kv.Value ? "بله" : "خیر")}");
+                if (kv.Value) anySigned = true;
+            }
+
+            var suffix = key is null ? string.Empty : " " + key;
+            Audit.SignState(st.Table, key, anySigned,
+                            $"وضعیت امضای {label}{suffix} — {string.Join("، ", parts)}",
+                            slots, formName);
+        }
+
+        /// <summary>
+        /// تبدیل مقدار خام داخل SQL به مقدار قابل ذخیره.
+        /// اگر پارامتر Dapper باشد (@CODE) مقدار واقعی از شیء پارامترها خوانده
+        /// می‌شود؛ اگر قابل استخراج نبود null برمی‌گرداند تا به‌جای کلید،
+        /// چیز بی‌معنی ذخیره نشود.
+        /// </summary>
+        private static string? NormalizeValue(string raw, object? parameters)
+        {
+            if (string.IsNullOrEmpty(raw)) return null;
+
+            if (raw[0] == '@')
+                return ResolveParameter(parameters, raw.Substring(1));
+
+            var value = raw;
+            if (value.Length > 1 && (value[0] == 'N' || value[0] == 'n') && value[1] == '\'')
+                value = value.Substring(1);
+            value = value.Trim('\'');
+
+            value = value.Trim();
+            return value.Length == 0 || value.Length > 60 ? null : value;
+        }
+
+        private static readonly ConcurrentDictionary<string, PropertyInfo?> _propCache = new();
+
+        private static string? ResolveParameter(object? parameters, string name)
+        {
+            if (parameters is null || string.IsNullOrEmpty(name)) return null;
+
+            try
+            {
+                if (parameters is DynamicParameters dyn)
+                {
+                    var v = dyn.Get<object?>(name);
+                    return v?.ToString();
+                }
+
+                var type = parameters.GetType();
+                var prop = _propCache.GetOrAdd(
+                    type.FullName + "|" + name,
+                    _ => type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+
+                return prop?.GetValue(parameters)?.ToString();
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
 
