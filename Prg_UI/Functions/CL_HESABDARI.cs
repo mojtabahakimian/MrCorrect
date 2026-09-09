@@ -8753,10 +8753,26 @@ VALUES
             return input;
         }
 
+
+        /// <summary>
+        /// سیستم جدید لاگ وقایع (بدون توقف کاربر)
+        /// </summary>
+        public static void ACTIVITY_LOG(string actionType, string entityName, string description)
+        {
+            try
+            {
+                Prg_UI.Core.ActivityLogger.Instance.Log(actionType, entityName, description);
+            }
+            catch { }
+        }
+
         public static void AMALIYAT_USER(string frm)
         {
             try
             {
+                // Send to the new Async Activity Logger
+                Prg_UI.Core.ActivityLogger.Instance.Log("OpenForm", frm, $"کاربر فرم {frm} را باز کرد");
+
                 using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                 {
                     db.Open();
