@@ -204,9 +204,18 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.NAME_TAH.Text = row.NAME_TAH ?? "";
                 this.N_HESAB.Text = row.N_HESAB ?? "";
                 this.MABL.Text = row.MABL?.ToString() ?? "";
-                this.KOL.Text = row.N_KOL?.ToString() ?? "";
-                this.MOIN.Text = row.N_MOIN?.ToString() ?? "";
-                this.TAF.Text = row.N_TAF?.ToString() ?? "";
+                if (row.N_KOL2.HasValue && row.N_KOL2.Value > 0)
+                {
+                    this.KOL.Text = row.N_KOL2?.ToString() ?? "";
+                    this.MOIN.Text = row.N_MOIN2?.ToString() ?? "";
+                    this.TAF.Text = row.N_TAF2?.ToString() ?? "";
+                }
+                else
+                {
+                    this.KOL.Text = row.N_KOL?.ToString() ?? "";
+                    this.MOIN.Text = row.N_MOIN?.ToString() ?? "";
+                    this.TAF.Text = row.N_TAF?.ToString() ?? "";
+                }
                 this.BANK.SelectedValue = row.BANK;
                 this.HES1.SelectedValue = row.HES1;
                 this.N_SERI.IsReadOnly = true;
