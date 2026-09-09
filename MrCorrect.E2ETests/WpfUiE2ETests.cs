@@ -60,37 +60,40 @@ namespace MrCorrect.E2ETests
                 AutomationElement? activeWindow = GetActiveWindow();
                 Assert.NotNull(activeWindow);
 
-                // 3. Classify and handle initial window state
+                // 3. Classify initial window state
                 WindowType windowType = ClassifyWindow(activeWindow);
 
-                // If Msgwin dialog appears at startup (e.g. database notice or config warning), dismiss it and re-detect
-                if (windowType == WindowType.Msgwin)
+                // If Msgwin dialog(s) appear at startup, log message text, dump tree, dismiss it and re-detect
+                while (windowType == WindowType.Msgwin)
                 {
                     string msgNote = GetMsgwinNote(activeWindow);
-                    File.WriteAllText(startupMsgPath, $"[STARTUP MSGWIN DETECTED]\nText: {msgNote}\n", Encoding.UTF8);
+                    File.AppendAllText(startupMsgPath, $"[{DateTime.UtcNow:o}] MSGWIN DETECTED: {msgNote}\n", Encoding.UTF8);
 
-                    // Dump Msgwin tree
-                    using (var writer = new StreamWriter(treeDumpPath, false, Encoding.UTF8))
+                    using (var writer = new StreamWriter(treeDumpPath, true, Encoding.UTF8))
                     {
-                        writer.WriteLine($"=== UIA3 AUTOMATION TREE DUMP FOR MSGWIN ===");
+                        writer.WriteLine($"\n=== UIA3 AUTOMATION TREE DUMP FOR MSGWIN ({msgNote}) ===");
                         DumpAutomationTree(activeWindow, writer, 0);
                     }
 
                     CaptureScreen(step1Screenshot);
 
-                    // Dismiss Msgwin by clicking Btn_SeeOK ("تایید") or Btn_yes ("بله")
                     var seeOkBtn = FindButton(activeWindow, "Btn_SeeOK", "تایید") ?? FindButton(activeWindow, "Btn_yes", "بله");
                     if (seeOkBtn != null && seeOkBtn.IsEnabled)
                     {
                         seeOkBtn.Click();
                         Thread.Sleep(1500);
                     }
+                    else
+                    {
+                        break;
+                    }
 
-                    // Re-detect active top-level window after dismissing Msgwin
                     activeWindow = GetActiveWindow();
-                    Assert.NotNull(activeWindow);
+                    if (activeWindow == null) break;
                     windowType = ClassifyWindow(activeWindow);
                 }
+
+                Assert.NotNull(activeWindow);
 
                 // 4. Dump complete UIA3 Automation Tree of main target window
                 using (var writer = new StreamWriter(treeDumpPath, true, Encoding.UTF8))
@@ -154,9 +157,16 @@ namespace MrCorrect.E2ETests
             return Retry.WhileNull(
                 () =>
                 {
-                    if (_app == null) return null;
+                    if (_app == null || _app.HasExited) return null;
+
+                    // 1. Try process top-level windows
                     var windows = _app.GetAllTopLevelWindows(_automation);
-                    return windows.FirstOrDefault(w => w.IsAvailable);
+                    var active = windows.FirstOrDefault(w => w.IsAvailable);
+                    if (active != null) return active;
+
+                    // 2. Fallback: Search desktop children by process ID
+                    var desktopWindows = _automation.GetDesktop().FindAllChildren(cf => cf.ByProcessId(_app.ProcessId));
+                    return desktopWindows.FirstOrDefault(w => w.IsAvailable);
                 },
                 TimeSpan.FromSeconds(30),
                 TimeSpan.FromMilliseconds(500)
