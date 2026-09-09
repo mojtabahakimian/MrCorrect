@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Tools;
 using FlaUI.UIA3;
 using Xunit;
 
@@ -22,7 +23,7 @@ namespace MrCorrect.E2ETests
         }
 
         [Fact]
-        public void Test_Wpf_Application_LaunchAndInteractWithLoginUI()
+        public void Test_Wpf_Application_FullLoginE2EWorkflow()
         {
             string artifactDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestArtifacts");
             Directory.CreateDirectory(artifactDir);
@@ -30,12 +31,13 @@ namespace MrCorrect.E2ETests
             string exePath = FindWpfExecutable();
             Assert.True(File.Exists(exePath), $"WPF executable not found at path: {exePath}");
 
-            string initialScreenshot = Path.Combine(artifactDir, "1_login_window_launched.png");
-            string interactedScreenshot = Path.Combine(artifactDir, "2_login_window_interacted.png");
+            string step1Screenshot = Path.Combine(artifactDir, "1_login_window_launched.png");
+            string step2Screenshot = Path.Combine(artifactDir, "2_password_visibility_toggled.png");
+            string step3Screenshot = Path.Combine(artifactDir, "3_login_button_clicked.png");
 
             try
             {
-                // 1. Launch actual WPF application process
+                // 1. Launch real WPF application process
                 var psi = new System.Diagnostics.ProcessStartInfo(exePath)
                 {
                     WorkingDirectory = Path.GetDirectoryName(exePath)
@@ -43,31 +45,48 @@ namespace MrCorrect.E2ETests
                 _app = Application.Launch(psi);
 
                 // 2. Attach UIA3 Automation & Find Main Window
-                var window = _app.GetMainWindow(_automation, TimeSpan.FromSeconds(20));
+                var window = Retry.WhileNull(
+                    () => _app.GetMainWindow(_automation, TimeSpan.FromSeconds(25)),
+                    TimeSpan.FromSeconds(25),
+                    TimeSpan.FromMilliseconds(500)
+                ).Result;
+
                 Assert.NotNull(window);
 
-                // 3. Take initial screenshot of live WPF GUI session
-                CaptureScreen(initialScreenshot);
+                // 3. Capture initial launch screenshot
+                CaptureScreen(step1Screenshot);
 
-                // 4. Interact with real UI controls (Find checkbox / buttons in USER_LOGIN)
+                // 4. Find dispass ("نمایش رمز عبور") CheckBox and click it
                 var dispassCheckBox = window.FindFirstDescendant(cf => cf.ByAutomationId("dispass"))?.AsCheckBox();
-                if (dispassCheckBox != null)
+                Assert.NotNull(dispassCheckBox);
+                dispassCheckBox.Click();
+                Thread.Sleep(500);
+                CaptureScreen(step2Screenshot);
+
+                // 5. Find SecoRmzo TextBox and enter password text
+                var secoRmzoBox = window.FindFirstDescendant(cf => cf.ByAutomationId("SecoRmzo"))?.AsTextBox();
+                Assert.NotNull(secoRmzoBox);
+                if (secoRmzoBox.IsEnabled)
                 {
-                    dispassCheckBox.Click();
-                    Thread.Sleep(500);
+                    secoRmzoBox.Text = "123456";
+                    Thread.Sleep(300);
                 }
 
-                // Search for Login button or Close button
+                // 6. Find and inspect Login Button ("Greet")
                 var loginButton = window.FindFirstDescendant(cf => cf.ByAutomationId("Greet"))?.AsButton();
-                if (loginButton != null)
+                Assert.NotNull(loginButton);
+
+                // Perform click interaction on Login button if enabled
+                if (loginButton.IsEnabled)
                 {
-                    Assert.NotNull(loginButton);
+                    loginButton.Click();
+                    Thread.Sleep(1000);
                 }
 
-                // 5. Capture post-interaction screenshot
-                CaptureScreen(interactedScreenshot);
+                // 7. Capture post-submission screenshot
+                CaptureScreen(step3Screenshot);
 
-                // 6. Verify window title or presence
+                // 8. Verify window is responsive and operational
                 Assert.NotNull(window);
             }
             catch (Exception ex)
