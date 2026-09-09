@@ -1046,11 +1046,19 @@ namespace AUTO_BAZ
         /// همین شرط در تولید سند حسابداری برگشت فروش هم اعمال شده است
         /// (CL_HESABDARI_AUTO_BAZ: INVO_LST_TAKH.MEGH_MAR &lt;&gt; 0)، پس دو مسیر هم‌راستا می‌شوند.
         /// </summary>
-        private static string BuildAvgRebuildSourceSqlAllTags(string? code, int anbar, string dt)
+        private static string BuildAvgRebuildSourceSqlAllTags(string? code, int anbar, string dt, bool hasTartib)
         {
-            return "SELECT     TOP 100 PERCENT DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID,  MEGH_R , RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, ID, BARGAH FROM ( "
-                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,  dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO,dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE WHERE  (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ") UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1 = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBARF = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ")  AND (dbo.INVO_LST.TAG = 5) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH FROM         dbo.INVO_LST INNER JOIN       dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE " + " WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_FBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) UNION " + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A,dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH  FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag INNER JOIN " + " dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) union " + " SELECT     TOP 100 PERCENT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK, 0 AS megh_mar,' ' AS mol, dbo.ANBGRD_LST.MABL, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK, 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no, 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage, 0 AS id, '17' AS Expr1 FROM   dbo.ANBGRD_LST INNER JOIN  dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM INNER JOIN  dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE " + " WHERE      (dbo.ANBGRD_LST.CODE = '" + code + "') AND (dbo.ANBGRD_HEAD.GRD_ANBAR = " + anbar + ") and ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * - 1 <> 0) AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL)) "
-                 + " ) AS AVGSRC ORDER BY DATE_N, BARGAH, ID";
+            string TagTartib(string tagTable, string tagCol) => hasTartib
+                ? $"ISNULL({tagTable}.tartib, 0)"
+                : $"(CASE {tagCol} WHEN 1 THEN 4 WHEN 2 THEN 18 WHEN 3 THEN 15 WHEN 4 THEN 6 WHEN 5 THEN 14 WHEN 6 THEN 10 WHEN 7 THEN 3 WHEN 8 THEN 17 WHEN 9 THEN 9 WHEN 10 THEN 19 WHEN 11 THEN 20 WHEN 12 THEN 2 WHEN 17 THEN 5 WHEN 18 THEN 13 WHEN 20 THEN 16 WHEN 22 THEN 7 WHEN 24 THEN 8 WHEN 26 THEN 11 WHEN 27 THEN 12 ELSE 25 END)";
+
+            return "SELECT     TOP 100 PERCENT DATE_N, TAG, NUMBER, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID,  MEGH_R , RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, ID, BARGAH, tartib FROM ( "
+                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,  dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO,dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH, " + TagTartib("dbo.TAGCOD", "dbo.HEAD_LST.TAG") + " AS tartib FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE WHERE  (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ") UNION "
+                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST.DATE_N, 6 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBARF AS ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH, " + TagTartib("dbo.TAGCOD", "6") + " AS tartib FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG + 1 = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBARF = " + anbar + ") AND (dbo.HEAD_LST.DATE_N > " + dt + ")  AND (dbo.INVO_LST.TAG = 5) UNION "
+                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF,dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL,dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE , dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH, CASE WHEN dbo.HEAD_LST_FBK.DATE_N = HS.DATE_N THEN 9999 ELSE " + TagTartib("dbo.TAGCOD", "dbo.HEAD_LST_FBK.htag") + " END AS tartib FROM         dbo.INVO_LST INNER JOIN       dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag INNER JOIN dbo.HEAD_LST HS ON HS.NUMBER = dbo.INVO_LST.NUMBER AND HS.TAG = dbo.INVO_LST.TAG INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_FBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) UNION "
+                 + " SELECT     TOP 100 PERCENT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.INVO_LST.FROM_A,dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID, dbo.TAGCOD.BARGAH, " + TagTartib("dbo.TAGCOD", "dbo.HEAD_LST_KBK.htag") + " AS tartib FROM         dbo.INVO_LST INNER JOIN   dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag INNER JOIN  dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE WHERE     (dbo.INVO_LST.CODE = '" + code + "') AND (dbo.INVO_LST.ANBAR = " + anbar + ") AND (dbo.HEAD_LST_KBK.DATE_N > " + dt + ") AND (ISNULL(dbo.INVO_LST.MEGH_MAR, 0) <> 0) union "
+                 + " SELECT     TOP 100 PERCENT dbo.ANBGRD_HEAD.GRD_DATE, dbo.UIIF(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3, N'>', 0, 18, 17) AS TAG,dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_HEAD.GRD_ANBAR, 1 AS radif, dbo.ANBGRD_LST.CODE,(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEG, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) AS MEGK, 0 AS megh_mar,' ' AS mol, dbo.ANBGRD_LST.MABL, ABS(dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * dbo.ANBGRD_LST.MABL AS MABLK, 0 AS froma, '' AS nrasid, 0 AS MEGH_R, dbo.STUF_DEF.RADAH, 0 AS sanadno, '  ' AS cust_no, 0 AS anbarf, dbo.STUF_DEF.VAHED, 0 AS n_kol, 0 AS n_moin, 0 AS n_taf, dbo.ANBGRD_LST.MABL AS avrage, 0 AS id, '17' AS Expr1, CASE WHEN (dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) > 0 THEN 13 ELSE 5 END AS tartib FROM   dbo.ANBGRD_LST INNER JOIN  dbo.ANBGRD_HEAD ON dbo.ANBGRD_LST.GRD_NUM = dbo.ANBGRD_HEAD.GRD_NUM INNER JOIN  dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE WHERE      (dbo.ANBGRD_LST.CODE = '" + code + "') AND (dbo.ANBGRD_HEAD.GRD_ANBAR = " + anbar + ") and ((dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM3) * - 1 <> 0) AND (dbo.ANBGRD_HEAD.GRD_DATE > " + dt + ") AND (NOT (dbo.ANBGRD_HEAD.N_S IS NULL)) "
+                 + " ) AS AVGSRC ORDER BY DATE_N, tartib, ID, NUMBER";
         }
 
 
@@ -1101,7 +1109,8 @@ namespace AUTO_BAZ
         /// </summary>
         private static string BuildAvgRebuildSourceSql(
             string? code, int? anbar, string dt,
-            bool hasFbk, bool hasKbk, bool useBackHeadSaleReturn, bool useBackHeadPurchaseReturn)
+            bool hasFbk, bool hasKbk, bool useBackHeadSaleReturn, bool useBackHeadPurchaseReturn,
+            bool hasTartib)
         {
             var c = SqlText(code);
 
@@ -1118,12 +1127,16 @@ namespace AUTO_BAZ
                                    + "dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K, "
                                    + "dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.N_TAF, dbo.INVO_LST.AVRAGE, dbo.INVO_LST.ID";
 
+            string TagTartib(string tagTable, string tagCol) => hasTartib
+                ? $"ISNULL({tagTable}.tartib, 0)"
+                : $"(CASE {tagCol} WHEN 1 THEN 4 WHEN 2 THEN 18 WHEN 3 THEN 15 WHEN 4 THEN 6 WHEN 5 THEN 14 WHEN 6 THEN 10 WHEN 7 THEN 3 WHEN 8 THEN 17 WHEN 9 THEN 9 WHEN 10 THEN 19 WHEN 11 THEN 20 WHEN 12 THEN 2 WHEN 17 THEN 5 WHEN 18 THEN 13 WHEN 20 THEN 16 WHEN 22 THEN 7 WHEN 24 THEN 8 WHEN 26 THEN 11 WHEN 27 THEN 12 ELSE 25 END)";
+
             var parts = new List<string>();
 
             // ── اصلی: همه‌ی برگه‌های خودِ این انبار ─────────────────────────────
             parts.Add(
                 " SELECT dbo.HEAD_LST.DATE_N, dbo.INVO_LST.TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
-                + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
+                + INVO_COLS + ", dbo.TAGCOD.BARGAH, " + TagTartib("dbo.TAGCOD", "dbo.HEAD_LST.TAG") + " AS tartib"
                 + " FROM dbo.INVO_LST"
                 + " INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG"
                 + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST.TAG = dbo.TAGCOD.CODE"
@@ -1152,22 +1165,10 @@ namespace AUTO_BAZ
             //     برای همین اینجا tartib از روی کدِ *مبدأ* (TAGCOD کد ۵) ساخته می‌شود
             //     به‌علاوه‌ی نیم واحد، تا ردیف ورود بلافاصله بعد از ردیف خروجِ خودش
             //     بنشیند — بدون اینکه جای هیچ رویداد دیگری در آن روز عوض شود.
-            //
-            // ⚠️ این مقدار تأییدنشده است: عددهای TAGCOD.tartib روی دیتابیس شما خوانده
-            //    نشده‌اند. اگر روی این دیتابیس tartib کد ۶ از کد ۵ بزرگ‌تر باشد، این
-            //    شاخه بی‌اثر است و چیزی خراب نمی‌کند (ترتیب همچنان مبدأ سپس مقصد).
-            // ⚠️ ISNULL روی هر tartib ای که از TAGCOD می‌آید ضروری است، نه آرایشی:
-            //    اگر tartib یک کد NULL باشد، در ORDER BY صعودی جلوتر از همه می‌نشیند و
-            //    مهم‌تر اینکه «NULL + 0.5» باز هم NULL می‌شود — یعنی همان ترفندِ نیم‌واحدِ
-            //    پایین بی‌صدا از کار می‌افتاد و ردیف ورود دوباره جلوتر از خروج می‌افتاد.
-            //    با ISNULL(...,0) ترتیب در هر دو حالت قطعی می‌ماند: با tartib واقعی
-            //    مثلاً ۱۴ و ۱۴٫۵، و با tartib خالی ۰ و ۰٫۵.
-            //    (Safir هم در 14-s05-gate.sql همین ISNULL(tc.tartib, 0) را دارد، یعنی
-            //     NULL بودنِ tartib روی این خانواده دیتابیس یک حالت واقعی است.)
             var transferInTartib = anbar.HasValue
-                ? "ISNULL(dbo.TAGCOD.tartib, 0)"
-                : "CAST(ISNULL(TG_SRC.tartib, 0) AS FLOAT) + 0.5";
-            var transferInSrcJoin = anbar.HasValue
+                ? (hasTartib ? "ISNULL(dbo.TAGCOD.tartib, 0)" : "10")
+                : (hasTartib ? "CAST(ISNULL(TG_SRC.tartib, 0) AS FLOAT) + 0.5" : "14.5");
+            var transferInSrcJoin = (anbar.HasValue || !hasTartib)
                 ? string.Empty
                 // LEFT و نه INNER: این JOIN فقط برای گرفتنِ tartibِ مبدأ است و نباید
                 // هیچ ردیفی را حذف کند. با INNER، ردیف انتقالیِ ورود در حالت ادغام‌شده
@@ -1252,11 +1253,14 @@ namespace AUTO_BAZ
 
             if (hasFbk)
             {
+                var fbkTartib = "CASE WHEN dbo.HEAD_LST_FBK.DATE_N = HS.DATE_N THEN 9999 ELSE "
+                    + TagTartib("dbo.TAGCOD", "dbo.HEAD_LST_FBK.htag") + " END";
                 parts.Add(
                     " SELECT dbo.HEAD_LST_FBK.DATE_N, 4 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
-                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
+                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, " + fbkTartib + " AS tartib"
                     + " FROM dbo.INVO_LST"
                     + " INNER JOIN dbo.HEAD_LST_FBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_FBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_FBK.dtag"
+                    + " INNER JOIN dbo.HEAD_LST HS ON HS.NUMBER = dbo.INVO_LST.NUMBER AND HS.TAG = dbo.INVO_LST.TAG"
                     + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST_FBK.htag = dbo.TAGCOD.CODE"
                     + " WHERE (dbo.INVO_LST.CODE = '" + c + "')"
                     + ANB("dbo.INVO_LST.ANBAR")
@@ -1267,7 +1271,7 @@ namespace AUTO_BAZ
             {
                 parts.Add(
                     " SELECT dbo.HEAD_LST_KBK.DATE_N, 3 AS TAG, dbo.INVO_LST.NUMBER, dbo.INVO_LST.ANBAR, "
-                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, ISNULL(dbo.TAGCOD.tartib, 0) AS tartib"
+                    + INVO_COLS + ", dbo.TAGCOD.BARGAH, " + TagTartib("dbo.TAGCOD", "dbo.HEAD_LST_KBK.htag") + " AS tartib"
                     + " FROM dbo.INVO_LST"
                     + " INNER JOIN dbo.HEAD_LST_KBK ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST_KBK.NUMBER1 AND dbo.INVO_LST.TAG = dbo.HEAD_LST_KBK.dtag"
                     + " INNER JOIN dbo.TAGCOD ON dbo.HEAD_LST_KBK.htag = dbo.TAGCOD.CODE"
@@ -1540,7 +1544,8 @@ namespace AUTO_BAZ
                     }
                 case 4: // برگشت فروش
                     {
-                        st.MBKM = st.MBKM + (t.MEGH_MAR ?? 0) * (line?.AVRAGE ?? 0);
+                        var returnRate = (line != null && (line.AVRAGE ?? 0) > 0) ? line.AVRAGE!.Value : st.MIAN;
+                        st.MBKM = st.MBKM + (t.MEGH_MAR ?? 0) * returnRate;
                         st.MOGUDI = st.MOGUDI + (t.MEGH_MAR ?? 0);
                         if (st.MBKM == 0d)
                         {
@@ -1780,7 +1785,7 @@ namespace AUTO_BAZ
                         rcount = Convert.ToInt64(Text23.Text);
                     }));
                     var RST4 = dbms.DoGetDataSQL<rst4_model>("SELECT TCOD_STUFGROUP.CODE, TCOD_STUFGROUP.NAMES FROM TCOD_STUFGROUP WHERE (((TCOD_STUFGROUP.CODE)<>0)) ORDER BY TCOD_STUFGROUP.NAMES").ToList(); LogWriter.WriteLog($"RST4.Count = {RST4.Count}");
-                    var rst3 = dbms.DoGetDataSQL<INVO_LST>("SELECT CODE,ANBAR,ID FROM INVO_LST").ToList(); LogWriter.WriteLog($"rst3.Count = {rst3.Count}");
+                    var rst3 = dbms.DoGetDataSQL<INVO_LST>("SELECT CODE, ANBAR, ID, AVRAGE, AVRAGE2, MABL_K FROM INVO_LST").ToList(); LogWriter.WriteLog($"rst3.Count = {rst3.Count}");
                     var RST6 = dbms.DoGetDataSQL<ANBGRD_LST>("SELECT * FROM ANBGRD_LST").ToList(); LogWriter.WriteLog($"RST6.Count = {RST6.Count}");
 
                     // ─────────────────────────────────────────────────────────────────────
@@ -1805,9 +1810,13 @@ namespace AUTO_BAZ
                     bool TableExists(string name) =>
                         dbms.DoGetDataSQL<int>($"SELECT 1 WHERE OBJECT_ID(N'dbo.{name}') IS NOT NULL").Any();
 
+                    bool ColumnExists(string table, string column) =>
+                        dbms.DoGetDataSQL<int>($"SELECT 1 WHERE COLUMNPROPERTY(OBJECT_ID(N'dbo.{table}'), '{column}', 'ColumnId') IS NOT NULL").Any();
+
                     var hasFbk = TableExists("HEAD_LST_FBK");
                     var hasKbk = TableExists("HEAD_LST_KBK");
                     var hasBackHead = TableExists("BACK_HEAD");
+                    var hasTartib = ColumnExists("TAGCOD", "tartib");
 
                     // ─────────────────────────────────────────────────────────────────────
                     // منبع «برگشت» — BACK_HEAD یا HEAD_LST_FBK/KBK، نه هر دو.
@@ -1829,7 +1838,7 @@ namespace AUTO_BAZ
                     var useBackHeadSaleReturn = hasBackHead && !hasFbk;
                     var useBackHeadPurchaseReturn = hasBackHead && !hasKbk;
 
-                    LogWriter.WriteLog($"hasFbk = {hasFbk} , hasKbk = {hasKbk} , hasBackHead = {hasBackHead} , " +
+                    LogWriter.WriteLog($"hasFbk = {hasFbk} , hasKbk = {hasKbk} , hasBackHead = {hasBackHead} , hasTartib = {hasTartib} , " +
                                        $"useBackHeadSaleReturn = {useBackHeadSaleReturn} , useBackHeadPurchaseReturn = {useBackHeadPurchaseReturn}");
 
                     // ─────────────────────────────────────────────────────────────────────
@@ -2001,7 +2010,7 @@ namespace AUTO_BAZ
                                 }
 
                                 var mergedKardex = dbms.DoGetDataSQL<cm_model>(
-                                    BuildAvgRebuildSourceSql(codeGroup.Key, null, this.DT, hasFbk, hasKbk, useBackHeadSaleReturn, useBackHeadPurchaseReturn)).ToList();
+                                    BuildAvgRebuildSourceSql(codeGroup.Key, null, this.DT, hasFbk, hasKbk, useBackHeadSaleReturn, useBackHeadPurchaseReturn, hasTartib)).ToList();
 
                                 var pendingMerged = new List<string>(mergedKardex.Count);
                                 for (int eof = 0; eof < mergedKardex.Count; eof++)
@@ -2029,7 +2038,7 @@ namespace AUTO_BAZ
 
                                 // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT + DROP VIEW.
                                 var RST2 = dbms.DoGetDataSQL<cm_model>(
-                                    BuildAvgRebuildSourceSql(rRow.CODE, rRow.ANBAR ?? 0, this.DT, hasFbk, hasKbk, useBackHeadSaleReturn, useBackHeadPurchaseReturn)).ToList();
+                                    BuildAvgRebuildSourceSql(rRow.CODE, rRow.ANBAR ?? 0, this.DT, hasFbk, hasKbk, useBackHeadSaleReturn, useBackHeadPurchaseReturn, hasTartib)).ToList();
 
                                 // UPDATE ها انباشته می‌شوند تا به‌جای یک رفت‌وبرگشت برای هر تراکنش،
                                 // دسته‌ای اجرا شوند. ترتیب اجرا دقیقاً ترتیب تولید است.
@@ -2088,7 +2097,7 @@ namespace AUTO_BAZ
                                         else
                                         {
                                             // یک رفت‌وبرگشت به‌جای DROP VIEW + CREATE VIEW + SELECT (و بدون شیء مشترک بین کاربران).
-                                            var RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rRow.CODE, rRow.ANBAR ?? 0, this.DT)).ToList();
+                                            var RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rRow.CODE, rRow.ANBAR ?? 0, this.DT, hasTartib)).ToList();
                                             for (int f = 0; f < RST2.Count; f++)
                                             {
                                                 if (IsCancelRequestedBgWorker) { return; }
@@ -2205,7 +2214,7 @@ namespace AUTO_BAZ
                                         MIAN = rRow.FI_A ?? 0;
                                         MOGUDI = rRow.MOGODI_A ?? 0;
 
-                                        var RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rRow.CODE, rRow.ANBAR ?? 0, this.DT)).ToList();
+                                        var RST2 = dbms.DoGetDataSQL<cm_model>(BuildAvgRebuildSourceSqlAllTags(rRow.CODE, rRow.ANBAR ?? 0, this.DT, hasTartib)).ToList();
                                         for (int e = 0; e < RST2.Count; e++)
                                         {
                                             if (IsCancelRequestedBgWorker) { return; }
@@ -2287,7 +2296,8 @@ namespace AUTO_BAZ
                                                     }
                                                 case 4: // برگشت فروش
                                                     {
-                                                        MBKM = MBKM + (RST2[e].MEGH_MAR ?? 0) * (rst3Filter?.AVRAGE ?? 0);
+                                                        var returnRate = (rst3Filter != null && (rst3Filter.AVRAGE ?? 0) > 0) ? rst3Filter.AVRAGE!.Value : MIAN;
+                                                        MBKM = MBKM + (RST2[e].MEGH_MAR ?? 0) * returnRate;
                                                         MOGUDI = MOGUDI + (RST2[e].MEGH_MAR ?? 0);
                                                         if (MBKM == 0d) { MIAN = 0d; }
                                                         else if (MOGUDI == 0d) { MIAN = 0d; MBKM = 0d; }
