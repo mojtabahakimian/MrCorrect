@@ -18,7 +18,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 
 		<!-- نسخه فایل اجرایی (در Properties فایل exe نمایش داده می‌شود) -->
-		<FileVersion>1.0.0.458</FileVersion>
+		<FileVersion>1.0.0.459</FileVersion>
 
 		<!-- عنوان برنامه که در برخی متادیتاهای ویندوز استفاده می‌شود -->
 		<Title>MrCorrect</Title>
@@ -642,7 +642,11 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AUTO_BAZ\AUTO_BAZ.csproj" />
 		<ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
-		<ProjectReference Include="..\..\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj" />
+		<!-- ساب‌ماژولِ خودِ همین مخزن، نه یک کلونِ کنارِ آن. مسیر قبلی
+		     ..\..\ScriptSqly بود که به C:\prg\ScriptSqly می‌رسید — پوشه‌ای که
+		     MrCorrect ردیابی‌اش نمی‌کند، پس روی هر کلونِ تازه وجود نداشت و
+		     restore با «Unable to find project information» می‌افتاد. -->
+		<ProjectReference Include="..\External\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
