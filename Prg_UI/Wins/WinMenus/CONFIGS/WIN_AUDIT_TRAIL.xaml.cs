@@ -265,9 +265,25 @@ SELECT TOP (@Take)
                 if (page.Count > 0) _lastLogId = page[page.Count - 1].LOG_ID;
 
                 BTN_MORE.IsEnabled = page.Count == PageSize;
-                LBL_STATUS.Text = page.Count == 0 && Rows.Count == 0
-                    ? "رکوردی یافت نشد."
-                    : $"{Rows.Count:N0} رکورد نمایش داده شد" + (BTN_MORE.IsEnabled ? " (رکورد بیشتری هست)" : " (پایان نتایج)");
+
+                if (page.Count == 0 && Rows.Count == 0)
+                {
+                    // «رکوردی یافت نشد» وقتی ساختار اصلاً ساخته نشده گمراه‌کننده
+                    // است؛ مدیر باید بفهمد مشکل از دسترسی دیتابیس است نه از فیلتر.
+                    LBL_STATUS.Text = AuditService.SchemaReady
+                        ? "رکوردی یافت نشد."
+                        : "رکوردی یافت نشد — ساختار جدول‌های سابقه ساخته نشده است. " +
+                          "کاربر SQL باید دسترسی ایجاد جدول داشته باشد، یا مایگریشن ScriptSqly اجرا شود.";
+                }
+                else
+                {
+                    LBL_STATUS.Text =
+                        $"{Rows.Count:N0} رکورد نمایش داده شد" +
+                        (BTN_MORE.IsEnabled ? " (رکورد بیشتری هست)" : " (پایان نتایج)") +
+                        (AuditService.DroppedCount > 0
+                            ? $"  |  ⚠ {AuditService.DroppedCount:N0} رویداد در این نشست به‌دلیل پر شدن صف ثبت نشد"
+                            : string.Empty);
+                }
             }
             catch (Exception ex)
             {
@@ -410,6 +426,7 @@ SELECT TOP (@Take)
             AuditAction.PasswordChange => "تغییر رمز",
             AuditAction.PermissionChange => "تغییر دسترسی",
             AuditAction.AuditViewed => "مشاهده سوابق",
+            AuditAction.ExecProcedure => "اجرای رویه",
             _ => ACTION ?? string.Empty,
         };
 

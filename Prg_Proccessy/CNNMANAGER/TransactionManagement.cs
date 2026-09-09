@@ -162,6 +162,11 @@ namespace Prg_Proccessy.CNNMANAGER
         {
             try
             {
+                // SELECTها نباید وارد صف شوند: مسیر SqlQueryCtc هم از اینجا
+                // می‌گذرد و بدون این غربال، یک تراکنش پرخوانش سقف صف را پر
+                // می‌کرد و نوشتن‌های واقعی بی‌صدا از سابقه می‌افتادند.
+                if (!Prg_Proccessy.AUDIT.AuditSqlSniffer.LooksLikeWrite(sql)) return;
+
                 if (_pendingAudit.Count < 200)
                 {
                     _pendingAudit.Add((sql, parameters));

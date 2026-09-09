@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Dapper;
@@ -112,6 +113,23 @@ namespace Prg_Proccessy.AUDIT
         }
 
         /// <summary>
+        /// آیا این دستور احتمالاً نوشتنی است؟ فقط یک غربال ارزان با چند
+        /// IndexOf؛ تشخیص دقیق در <see cref="Observe"/> انجام می‌شود.
+        ///
+        /// مسیرهای تراکنشی از این استفاده می‌کنند تا صفِ «تا زمان commit»
+        /// با SELECT پر نشود. بدون این غربال، یک تراکنش که چند ده SELECT
+        /// می‌زند سقف صف را پر می‌کرد و نوشتن‌های واقعی از سابقه می‌افتادند.
+        /// </summary>
+        public static bool LooksLikeWrite(string? sql)
+        {
+            if (string.IsNullOrEmpty(sql)) return false;
+            return sql.IndexOf("INSERT", StringComparison.OrdinalIgnoreCase) >= 0
+                || sql.IndexOf("UPDATE", StringComparison.OrdinalIgnoreCase) >= 0
+                || sql.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0
+                || sql.IndexOf("EXEC", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
         /// بررسی یک دستور SQL و در صورت نوشتنی بودن، ثبت رویداد.
         /// هرگز استثنا پرتاب نمی‌کند.
         /// </summary>
@@ -127,7 +145,15 @@ namespace Prg_Proccessy.AUDIT
                 var hasInsert = sql.IndexOf("INSERT", StringComparison.OrdinalIgnoreCase) >= 0;
                 var hasUpdate = sql.IndexOf("UPDATE", StringComparison.OrdinalIgnoreCase) >= 0;
                 var hasDelete = sql.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0;
-                if (!hasInsert && !hasUpdate && !hasDelete) return;
+
+                if (!hasInsert && !hasUpdate && !hasDelete)
+                {
+                    // رویه‌ی ذخیره‌شده: نوشتن داخل رویه از دید این لایه پنهان
+                    // است، ولی خودِ «اجرای رویه» رویداد مهمی است — مثل
+                    // SP_PAY2_FINALIZE_RUN که لیست حقوق را نهایی می‌کند.
+                    ObserveProcedure(sql, formName);
+                    return;
+                }
 
                 // همه‌ی statementهای نوشتنی، نه فقط اولی. یک دستور واحد ممکن
                 // است هم UPDATE هدر و هم چند INSERT ردیف داشته باشد؛ نسخه‌ی
@@ -163,6 +189,37 @@ namespace Prg_Proccessy.AUDIT
             {
                 // تشخیص سابقه تحت هیچ شرایطی نباید دستور اصلی کاربر را خراب کند.
             }
+        }
+
+        private static readonly Regex RxExec =
+            new(@"\bEXEC(?:UTE)?\s+(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
+
+        /// <summary>
+        /// رویه‌های ذخیره‌شده‌ای که خودشان داده می‌نویسند. آنچه داخل رویه رخ
+        /// می‌دهد از این لایه دیده نمی‌شود، ولی «چه کسی چه رویه‌ای را کِی
+        /// اجرا کرد» خودش برای بررسی حیاتی است.
+        ///
+        /// رویه‌های صرفاً گزارشی عمداً اینجا نیستند تا سابقه شلوغ نشود.
+        /// </summary>
+        private static readonly HashSet<string> WritingProcedures = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "SP_PAY2_FINALIZE_RUN",
+            "SP_PAY2_FINALIZE_SETTLE",
+            "SP_PAY2_CLOSE_PERIOD",
+            "SP_PAY2_REVERT_RUN",
+            "SP_SYS_AUDIT_PURGE",
+            "SP_SYS_AUDIT_BACKFILL",
+        };
+
+        private static void ObserveProcedure(string sql, string? formName)
+        {
+            var m = RxExec.Match(sql);
+            if (!m.Success) return;
+
+            var name = m.Groups[1].Value;
+            if (!WritingProcedures.Contains(name)) return;
+
+            Audit.Security(AuditAction.ExecProcedure, $"اجرای رویه‌ی {name}", entity: name, formName: formName);
         }
 
         private static void Collect(List<Statement> into, Regex rx, string sql, string action)
@@ -281,6 +338,10 @@ namespace Prg_Proccessy.AUDIT
             {
                 if (parameters is DynamicParameters dyn)
                 {
+                    // بررسی وجود پیش از Get: متد Get وقتی پارامتر نباشد استثنا
+                    // پرتاب می‌کند و پرتاب استثنا در مسیر داغِ هر نوشتن،
+                    // هزینه‌ی واقعی دارد — حتی وقتی گرفته می‌شود.
+                    if (!dyn.ParameterNames.Contains(name, StringComparer.OrdinalIgnoreCase)) return null;
                     var v = dyn.Get<object?>(name);
                     return v?.ToString();
                 }

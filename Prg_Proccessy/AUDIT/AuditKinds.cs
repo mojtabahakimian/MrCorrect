@@ -67,6 +67,9 @@ namespace Prg_Proccessy.AUDIT
         public const string PasswordChange = "PASSWORD_CHANGE";
         public const string PermissionChange = "PERMISSION_CHANGE";
         public const string AuditViewed = "AUDIT_VIEWED";
+
+        /// <summary>اجرای رویه‌ی ذخیره‌شده‌ای که داده می‌نویسد.</summary>
+        public const string ExecProcedure = "EXEC_PROC";
     }
 
     /// <summary>

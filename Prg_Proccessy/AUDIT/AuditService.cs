@@ -67,6 +67,16 @@ namespace Prg_Proccessy.AUDIT
         /// <summary>تعداد رویدادهای نوشته‌شده روی دیتابیس.</summary>
         public static int WrittenCount => Volatile.Read(ref _written);
 
+        /// <summary>
+        /// آیا ساختار جدول‌های سابقه آماده است.
+        ///
+        /// اگر کاربرِ SQL دسترسی CREATE TABLE نداشته باشد، ساخت ساختار شکست
+        /// می‌خورد و سیستم سابقه بی‌صدا غیرفعال می‌ماند — چون قرار نیست کار
+        /// کاربر متوقف شود. این پرچم به فرم گزارش اجازه می‌دهد همین وضعیت را
+        /// به مدیر نشان دهد، به‌جای اینکه «رکوردی یافت نشد» گمراه‌کننده باشد.
+        /// </summary>
+        public static bool SchemaReady => _schemaReady;
+
         /// <summary>شماره‌ی ترتیبی بعدی در این نشست.</summary>
         internal static int NextSeq() => Interlocked.Increment(ref _seq);
 
@@ -254,7 +264,50 @@ namespace Prg_Proccessy.AUDIT
             Interlocked.Increment(ref _dropped);
             if (evt.IsCritical)
             {
-                TrySpill(new[] { evt });
+                AppendCriticalSpill(evt);
+            }
+        }
+
+        private static readonly object _criticalSpillLock = new();
+        private static bool _spillDirReady;
+
+        /// <summary>
+        /// نگه‌داشتن یک رویداد حساس روی دیسک وقتی صف پر است.
+        ///
+        /// عمداً به یک فایل واحد append می‌شود و نه یک فایل تازه به‌ازای هر
+        /// رویداد: اگر دیتابیس قطع باشد و کاربر حذف گروهی انجام دهد، ساختن
+        /// فایل جدید و شمردن فایل‌های موجود برای هر ردیف، همان کندی‌ای را
+        /// می‌سازد که کل این طراحی برای پرهیز از آن است. append یک syscall است.
+        /// </summary>
+        private static void AppendCriticalSpill(AuditEvent evt)
+        {
+            try
+            {
+                var dir = SpillDirectory;
+
+                lock (_criticalSpillLock)
+                {
+                    if (!_spillDirReady)
+                    {
+                        Directory.CreateDirectory(dir);
+                        _spillDirReady = true;
+                    }
+
+                    var file = Path.Combine(dir, "critical.jsonl");
+
+                    // سقف اندازه تا در قطعی طولانی دیسک پر نشود.
+                    try
+                    {
+                        var info = new FileInfo(file);
+                        if (info.Exists && info.Length > 8 * 1024 * 1024) return;
+                    }
+                    catch (Exception) { }
+
+                    File.AppendAllText(file, JsonSerializer.Serialize(evt) + Environment.NewLine, Encoding.UTF8);
+                }
+            }
+            catch (Exception)
+            {
             }
         }
 
@@ -588,9 +641,18 @@ namespace Prg_Proccessy.AUDIT
 
         // ── نگه‌داری موقت روی دیسک وقتی دیتابیس در دسترس نیست ─────────────
 
+        /// <summary>
+        /// محل نگه‌داری موقت رویدادها وقتی دیتابیس در دسترس نیست.
+        ///
+        /// عمداً LocalApplicationData است نه CommonApplicationData:
+        /// ProgramData به‌صورت پیش‌فرض برای همه‌ی کاربران آن ماشین خواندنی
+        /// است و این فایل‌ها نام کاربر، IP، نام کامپیوتر و شماره‌ی اسناد را
+        /// به‌صورت متن ساده دارند. LocalApplicationData به پروفایل همان
+        /// کاربر محدود است.
+        /// </summary>
         private static string SpillDirectory =>
             Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "MrCorrect", "AuditSpill");
 
         private static void TrySpill(IReadOnlyCollection<AuditEvent> rows)
@@ -628,6 +690,20 @@ namespace Prg_Proccessy.AUDIT
 
                 var file = Directory.EnumerateFiles(dir, "*.jsonl").FirstOrDefault();
                 if (file is null) return;
+
+                // فایل رویدادهای حساس همچنان در حال append شدن است. پیش از
+                // خواندن، زیر همان قفل به یک نام تازه منتقل می‌شود تا
+                // نوشتن‌های همزمان روی فایل جدید بروند و چیزی گم نشود.
+                if (Path.GetFileName(file).Equals("critical.jsonl", StringComparison.OrdinalIgnoreCase))
+                {
+                    var rotated = Path.Combine(dir, $"critical_{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}.jsonl");
+                    lock (_criticalSpillLock)
+                    {
+                        if (!File.Exists(file)) return;
+                        File.Move(file, rotated);
+                    }
+                    file = rotated;
+                }
 
                 var rows = new List<AuditEvent>();
                 foreach (var line in File.ReadLines(file))
