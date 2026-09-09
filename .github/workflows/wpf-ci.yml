@@ -23,14 +23,14 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore MrCorrect.sln -r win-x64
+      run: dotnet restore MrCorrect.sln
 
-    - name: Build Solution (Debug win-x64)
-      run: dotnet build MrCorrect.sln --configuration Debug -r win-x64 --no-restore
+    - name: Build Solution (Debug)
+      run: dotnet build MrCorrect.sln --configuration Debug --no-restore
 
     - name: Run FlaUI Automated WPF GUI E2E Test
       run: |
-        dotnet test MrCorrect.E2ETests/MrCorrect.E2ETests.csproj --configuration Debug -r win-x64 --no-build --logger "trx;LogFileName=e2e-test-results.trx"
+        dotnet test MrCorrect.E2ETests/MrCorrect.E2ETests.csproj --configuration Debug --no-build --logger "trx;LogFileName=e2e-test-results.trx"
 
     - name: Upload Test Results & Screenshots Artifacts
       if: always()
