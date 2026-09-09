@@ -112,6 +112,20 @@ namespace Rpts
             ////MyReport.Render();
             RenderReportWithRetry(MyReport);
 
+            string reportTitle = _RerportTitle_ ?? "گزارش";
+            Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("PREVIEW", $"پیش‌نمایش گزارش: {reportTitle}", reportTitle, "WINRPT");
+
+            if (MyReport != null)
+            {
+                MyReport.Printed += (s, ev) =>
+                {
+                    Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("PRINT", $"چاپ گزارش: {reportTitle}", reportTitle, "WINRPT");
+                };
+                MyReport.Exported += (s, ev) =>
+                {
+                    Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("EXPORT", $"خروجی گزارش: {reportTitle}", reportTitle, "WINRPT");
+                };
+            }
 
             TheReportViewer.Report = MyReport;
 

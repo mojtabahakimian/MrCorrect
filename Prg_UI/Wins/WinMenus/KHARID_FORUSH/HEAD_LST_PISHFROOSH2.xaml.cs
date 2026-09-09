@@ -2612,6 +2612,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         transaction.Commit();
                         NUMBER.Text = num.ToString();
                         db?.Close();
+
+                        try
+                        {
+                            Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("DOC_INSERT", $"ثبت اولیه پیش‌فاکتور شماره {num}", "پیش‌فاکتور فروش", "HEAD_LST_PISHFROOSH2", docNumber: num, docTag: 20);
+                        }
+                        catch { }
                     }
                     //Here Save
                     RefreshAfterInsert();
@@ -2644,6 +2650,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                      sgn2usid = {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, 
                                      sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
                                      WHERE NUMBER={NUMBER.Text} AND TAG={TAG}");
+
+                try
+                {
+                    double.TryParse(NUMBER.Text, out double docNumUpd);
+                    Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("DOC_UPDATE", $"ویرایش پیش‌فاکتور شماره {NUMBER.Text}", "پیش‌فاکتور فروش", "HEAD_LST_PISHFROOSH2", docNumber: docNumUpd, docTag: 20);
+                }
+                catch { }
             }
         }
 
@@ -2805,7 +2818,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     {
                         try
                         {
+                            double.TryParse(NUMBER.Text, out double docNumDel);
                             dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {TAG}");
+                            Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("DOC_DELETE", $"حذف پیش‌فاکتور شماره {NUMBER.Text}", "پیش‌فاکتور فروش", "HEAD_LST_PISHFROOSH2", docNumber: docNumDel, docTag: 20, severity: 3);
                             RefreshAfterDelete();
                         }
                         catch (SqlException ex)
@@ -5772,6 +5787,20 @@ namespace Wins.WinMenus.KHARID_FORUSH
             this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = mid; // If Not Me.OKF Then Me.OKF = True
 
+            try
+            {
+                bool isSigned1 = Convert.ToBoolean(SGN1.IsChecked ?? false);
+                double.TryParse(NUMBER.Text, out double docNum1);
+                Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log(
+                    isSigned1 ? "SIGN_1" : "UNSIGN_1",
+                    isSigned1 ? "امضای مرحله ۱ پیش‌فاکتور" : "حذف امضای مرحله ۱ پیش‌فاکتور",
+                    "پیش‌فاکتور فروش",
+                    "HEAD_LST_PISHFROOSH2",
+                    docNumber: docNum1,
+                    docTag: 20
+                );
+            }
+            catch { }
         }
         private void SGN2_Click(object sender, RoutedEventArgs e)
         {
@@ -5815,6 +5844,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
             Form_Current();
             this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = mid; // If Not Me.OKF Then Me.OKF = True
+
+            try
+            {
+                bool isSigned2 = Convert.ToBoolean(SGN2.IsChecked ?? false);
+                double.TryParse(NUMBER.Text, out double docNum2);
+                Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log(
+                    isSigned2 ? "SIGN_2" : "UNSIGN_2",
+                    isSigned2 ? "امضای مرحله ۲ پیش‌فاکتور" : "حذف امضای مرحله ۲ پیش‌فاکتور",
+                    "پیش‌فاکتور فروش",
+                    "HEAD_LST_PISHFROOSH2",
+                    docNumber: docNum2,
+                    docTag: 20
+                );
+            }
+            catch { }
         }
         private void SGN3_Click(object sender, RoutedEventArgs e)
         {
@@ -5858,6 +5902,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
             Form_Current();
             this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = mid; // If Not Me.OKF Then Me.OKF = True
+
+            try
+            {
+                bool isSigned3 = Convert.ToBoolean(SGN3.IsChecked ?? false);
+                double.TryParse(NUMBER.Text, out double docNum3);
+                Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log(
+                    isSigned3 ? "SIGN_3" : "UNSIGN_3",
+                    isSigned3 ? "امضای مرحله ۳ پیش‌فاکتور" : "حذف امضای مرحله ۳ پیش‌فاکتور",
+                    "پیش‌فاکتور فروش",
+                    "HEAD_LST_PISHFROOSH2",
+                    docNumber: docNum3,
+                    docTag: 20
+                );
+            }
+            catch { }
         }
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

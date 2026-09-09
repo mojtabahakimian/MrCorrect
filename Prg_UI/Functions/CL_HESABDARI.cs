@@ -8753,27 +8753,31 @@ VALUES
             return input;
         }
 
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _formCaptionCache = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
+
         public static void AMALIYAT_USER(string frm)
         {
             try
             {
-                using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                if (string.IsNullOrWhiteSpace(frm)) return;
+
+                string moduleTitle = _formCaptionCache.GetOrAdd(frm, formName =>
                 {
-                    db.Open();
-
-                    string username = "MCR | " + Baseknow.UUSER;
-                    string _FRM_ = frm;
-
-                    var sql = "INSERT INTO AMALIAT (USERID,USERNAME,ADATE,AMALID) VALUES (@UserId, @Username, GETDATE(), @AmalId)";
-                    var parameters = new
+                    try
                     {
-                        UserId = Baseknow.USERCOD,
-                        Username = TruncateString(username, 49),
-                        AmalId = TruncateString(_FRM_, 49)
-                    };
+                        var formInfo = dbms.DoGetDataSQL<TFORMS>(
+                            "SELECT CAPTION FROM TFORMS WHERE FORMNAME = @FORMNAME",
+                            new { FORMNAME = formName }).FirstOrDefault();
+                        if (formInfo != null && !string.IsNullOrWhiteSpace(formInfo.CAPTION))
+                        {
+                            return formInfo.CAPTION;
+                        }
+                    }
+                    catch { }
+                    return formName;
+                });
 
-                    db.Execute(sql, parameters);
-                }
+                Prg_Proccessy.FUNCTIONS.CL_AuditEngine.Log("OPEN_FORM", "ورود به فرم", moduleTitle, frm);
             }
             catch { }
         }

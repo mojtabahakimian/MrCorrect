@@ -1,0 +1,132 @@
+<Window x:Class="Prg_UI.Wins.WinSetting.WIN_SYS_AUDIT_EXPLORER"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="سامانه بازرسی و ردگیری سوابق سیستم (Audit Trail)"
+        Height="720" Width="1280"
+        WindowStartupLocation="CenterScreen"
+        FlowDirection="RightToLeft"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Loaded="Window_Loaded">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Title -->
+        <Border Grid.Row="0" Background="#1E88E5" CornerRadius="6" Padding="15,10" Margin="0,0,0,15">
+            <DockPanel>
+                <TextBlock Text="سامانه بازرسی و ردگیری سوابق و خط زمانی کاربران (Audit Trail Explorer)"
+                           Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                <Button x:Name="BTN_CLOSE" Content="خروج" Click="BTN_CLOSE_Click" DockPanel.Dock="Right"
+                        HorizontalAlignment="Right" Background="#D32F2F" Foreground="White" Width="90"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Search / Filter Panel -->
+        <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="6" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Row 1: Mode Switch & User Filter -->
+                <RadioButton x:Name="RAD_USER_MODE" Content="کارنامه روزانه کاربر" IsChecked="True" Checked="FilterMode_Changed"
+                             Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,15,10" FontWeight="Bold"/>
+
+                <TextBlock Text="کاربر:" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,5,10"/>
+                <ComboBox x:Name="CMB_USERS" Grid.Row="0" Grid.Column="2" Width="180" Margin="0,0,15,10" DisplayMemberPath="SAL_NAME" SelectedValuePath="IDD"/>
+
+                <TextBlock Text="تاریخ شمسی:" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" Margin="5,0,5,10"/>
+                <TextBox x:Name="TXT_PERSIAN_DATE" Grid.Row="0" Grid.Column="4" Width="120" Margin="0,0,15,10" ToolTip="مثال: 14050619"/>
+
+                <TextBlock Text="نوع اکشن:" Grid.Row="0" Grid.Column="5" VerticalAlignment="Center" Margin="5,0,5,10"/>
+                <ComboBox x:Name="CMB_ACTION_TYPE" Grid.Row="0" Grid.Column="6" Width="150" Margin="0,0,0,10">
+                    <ComboBoxItem Content="همه اکشن‌ها" IsSelected="True" Tag=""/>
+                    <ComboBoxItem Content="ورود به فرم (OPEN_FORM)" Tag="OPEN_FORM"/>
+                    <ComboBoxItem Content="چاپ / پیش‌نمایش (PRINT/PREVIEW)" Tag="PRINT"/>
+                    <ComboBoxItem Content="امضای الکترونیک (SIGN)" Tag="SIGN_1"/>
+                    <ComboBoxItem Content="ثبت سند (DOC_INSERT)" Tag="DOC_INSERT"/>
+                    <ComboBoxItem Content="ویرایش سند (DOC_UPDATE)" Tag="DOC_UPDATE"/>
+                    <ComboBoxItem Content="حذف سند (DOC_DELETE)" Tag="DOC_DELETE"/>
+                    <ComboBoxItem Content="تبدیل سند (CONVERT)" Tag="CONVERT"/>
+                </ComboBox>
+
+                <!-- Row 2: Doc History Mode -->
+                <RadioButton x:Name="RAD_DOC_MODE" Content="سرگذشت سند" Checked="FilterMode_Changed"
+                             Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,15,0" FontWeight="Bold"/>
+
+                <TextBlock Text="شماره سند:" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                <TextBox x:Name="TXT_DOC_NUMBER" Grid.Row="1" Grid.Column="2" Width="180" Margin="0,0,15,0" IsEnabled="False"/>
+
+                <TextBlock Text="تگ سند:" Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                <ComboBox x:Name="CMB_DOC_TAG" Grid.Row="1" Grid.Column="4" Width="120" Margin="0,0,15,0" IsEnabled="False">
+                    <ComboBoxItem Content="همه تگ‌ها" IsSelected="True" Tag=""/>
+                    <ComboBoxItem Content="پیش‌فاکتور (20)" Tag="20"/>
+                    <ComboBoxItem Content="فاکتور فروش (13)" Tag="13"/>
+                    <ComboBoxItem Content="حواله انبار (2)" Tag="2"/>
+                    <ComboBoxItem Content="رسید انبار (1)" Tag="1"/>
+                    <ComboBoxItem Content="فاکتور خرید (12)" Tag="12"/>
+                    <ComboBoxItem Content="خرید مستقیم (15)" Tag="15"/>
+                </ComboBox>
+
+                <StackPanel Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="BTN_SEARCH" Content="جستجو و بازرسی" Click="BTN_SEARCH_Click"
+                            Background="#2E7D32" Foreground="White" Width="130" Margin="5,0"/>
+                    <Button x:Name="BTN_CLEAR" Content="پاکسازی" Click="BTN_CLEAR_Click"
+                            Background="#757575" Foreground="White" Width="90"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Audit Trail DataGrid -->
+        <DataGrid x:Name="DG_AUDIT" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True"
+                  GridLinesVisibility="All" Background="White" RowHeaderWidth="0" FontSize="13"
+                  SelectionMode="Single" SelectionChanged="DG_AUDIT_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="شناسه" Binding="{Binding LogId}" Width="70"/>
+                <DataGridTextColumn Header="تاریخ شمسی" Binding="{Binding PersianDate}" Width="90"/>
+                <DataGridTextColumn Header="زمان" Binding="{Binding LogTime}" Width="80"/>
+                <DataGridTextColumn Header="کد کاربر" Binding="{Binding UserId}" Width="70"/>
+                <DataGridTextColumn Header="نام کاربر" Binding="{Binding UserName}" Width="120"/>
+                <DataGridTextColumn Header="بخش / فرم" Binding="{Binding ModuleTitle}" Width="150"/>
+                <DataGridTextColumn Header="نوع اکشن" Binding="{Binding ActionType}" Width="110"/>
+                <DataGridTextColumn Header="شرح عملیات" Binding="{Binding ActionCaption}" Width="220"/>
+                <DataGridTextColumn Header="ردیابی سند" Binding="{Binding DocTrackingKey}" Width="100"/>
+                <DataGridTextColumn Header="IP کلاینت" Binding="{Binding ClientIP}" Width="110"/>
+                <DataGridTextColumn Header="نام کامپیوتر" Binding="{Binding MachineName}" Width="120"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Footer / Details Panel -->
+        <Border Grid.Row="3" Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="جزئیات مکمل (JSON):" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,10,0"/>
+                <TextBox x:Name="TXT_DETAILS_JSON" Grid.Column="1" IsReadOnly="True" Height="40" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                <TextBlock x:Name="TXT_RECORD_COUNT" Grid.Column="2" Text="تعداد رکوردها: 0" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,0,0" Foreground="#1565C0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
