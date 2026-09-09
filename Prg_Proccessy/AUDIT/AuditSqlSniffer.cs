@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dapper;
 
@@ -57,6 +58,32 @@ namespace Prg_Proccessy.AUDIT
 
         private static readonly Regex RxTag =
             new(@"\bTAG\s*=\s*(\d{1,3})\b", Opts);
+
+        /// <summary>
+        /// آیا مقادیر جدیدِ فیلدها در ستون DETAIL ذخیره شود؟
+        ///
+        /// مقدارِ «بعد» بدون هیچ هزینه‌ای در دسترس است، چون بخش SET همین
+        /// دستوری است که همین الان اجرا شده. مقدارِ «قبل» در دسترس نیست و
+        /// گرفتنش یک SELECT پیش از هر UPDATE می‌خواهد — که خلاف قید «نباید
+        /// کندی ایجاد شود» است. برای مقدار قبل باید به جدول‌های TR_ مراجعه شود.
+        ///
+        /// اگر سیاست سازمان اجازه‌ی نگه‌داری مقادیر کسب‌وکار در سابقه را
+        /// نمی‌دهد، با false کردن این، فقط نام ستون‌های تغییرکرده ثبت می‌شود.
+        /// </summary>
+        public static bool CaptureNewValues { get; set; } = true;
+
+        /// <summary>
+        /// ستون‌هایی که مقدارشان هرگز ذخیره نمی‌شود. نام ستون ثبت می‌شود ولی
+        /// مقدار با *** جایگزین می‌گردد. PSAL_NAME ستون رمز عبور کاربران است.
+        /// </summary>
+        private static readonly HashSet<string> RedactedColumns = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "PSAL_NAME", "PASSWORD", "PASSWD", "PASS", "RMZ", "RAMZ",
+            "TOKEN", "APIKEY", "API_KEY", "SECRET", "SERIAL", "LICENSE",
+        };
+
+        private const int MaxCapturedColumns = 25;
+        private const int MaxCapturedValueLength = 60;
 
         /// <summary>امضا: SGN1 = 1 و مانند آن. عمداً SGN1usid را نمی‌گیرد.</summary>
         private static readonly Regex RxSign =
@@ -270,10 +297,16 @@ namespace Prg_Proccessy.AUDIT
             var label = DescribeTable(st.Table, tag);
             var suffix = key is null ? string.Empty : " " + key;
 
-            Audit.Data(st.Action, st.Table, key,
-                       persianTitle: VerbOf(st.Action) + " " + label + suffix,
-                       formName: formName,
-                       oldValue: null, newValue: null);
+            // برای UPDATE، ستون‌های تغییرکرده و مقدار جدیدشان از بخش SET
+            // همین دستور خوانده می‌شود — بدون هیچ رفت‌وبرگشت اضافه‌ای.
+            var detail = st.Action == AuditAction.Update
+                ? BuildChangedColumns(segment, parameters)
+                : null;
+
+            Audit.DataWithDetail(st.Action, st.Table, key,
+                                 persianTitle: VerbOf(st.Action) + " " + label + suffix,
+                                 formName: formName,
+                                 detail: detail);
 
             // امضا: یک UPDATE امضا معمولاً همه‌ی خانه‌ها را با هم می‌نویسد
             // (SGN1=0, SGN2=0, SGN3=1). گرفتن فقط اولین تطبیق — کاری که
@@ -364,6 +397,158 @@ namespace Prg_Proccessy.AUDIT
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// استخراج ستون‌های تغییرکرده و مقدار جدیدشان از بخش SET یک UPDATE.
+        ///
+        /// عمداً با یک پیمایش دستی انجام می‌شود نه Regex: کاما و علامت مساوی
+        /// می‌توانند داخل پرانتز (مثل <c>ISNULL(a, b)</c>) یا داخل رشته
+        /// (<c>N'a, b'</c>) باشند و تقسیم ساده آن‌ها را خراب می‌کند.
+        /// </summary>
+        private static string? BuildChangedColumns(string segment, object? parameters)
+        {
+            // بخش بین SET و WHERE. اگر WHERE نباشد تا انتها.
+            var setAt = IndexOfKeyword(segment, "SET");
+            if (setAt < 0) return null;
+
+            var body = segment.Substring(setAt + 3);
+            var whereAt = IndexOfKeyword(body, "WHERE");
+            if (whereAt >= 0) body = body.Substring(0, whereAt);
+
+            var pairs = new List<KeyValuePair<string, string>>();
+
+            foreach (var part in SplitTopLevel(body, ','))
+            {
+                if (pairs.Count >= MaxCapturedColumns) break;
+
+                var eq = IndexOfTopLevel(part, '=');
+                if (eq <= 0) continue;
+
+                var column = part.Substring(0, eq).Trim().Trim('[', ']', ' ');
+                if (column.Length == 0 || column.Length > 40) continue;
+                // نام ستون باید شناسه باشد، نه عبارت.
+                if (!IsIdentifier(column)) continue;
+
+                if (!CaptureNewValues)
+                {
+                    pairs.Add(new KeyValuePair<string, string>(column, "?"));
+                    continue;
+                }
+
+                if (RedactedColumns.Contains(column))
+                {
+                    pairs.Add(new KeyValuePair<string, string>(column, "***"));
+                    continue;
+                }
+
+                var raw = part.Substring(eq + 1).Trim();
+
+                // زیرکوئری یا عبارت طولانی ذخیره نمی‌شود؛ نه خوانا است نه امن.
+                if (raw.Length == 0 || raw.Length > 200) continue;
+                if (raw.IndexOf("SELECT", StringComparison.OrdinalIgnoreCase) >= 0) continue;
+
+                var value = NormalizeValue(raw, parameters);
+                if (value is null) continue;
+
+                if (value.Length > MaxCapturedValueLength)
+                    value = value.Substring(0, MaxCapturedValueLength) + "…";
+
+                pairs.Add(new KeyValuePair<string, string>(column, value));
+            }
+
+            if (pairs.Count == 0) return null;
+
+            try
+            {
+                var map = new Dictionary<string, string>(pairs.Count, StringComparer.OrdinalIgnoreCase);
+                foreach (var kv in pairs) map[kv.Key] = kv.Value;
+                return JsonSerializer.Serialize(new { changed = map });
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private static bool IsIdentifier(string s)
+        {
+            if (s.Length == 0) return false;
+            if (!char.IsLetter(s[0]) && s[0] != '_') return false;
+            for (var i = 1; i < s.Length; i++)
+            {
+                if (!char.IsLetterOrDigit(s[i]) && s[i] != '_') return false;
+            }
+            return true;
+        }
+
+        /// <summary>جای یک کلیدواژه، بیرون از رشته و پرانتز.</summary>
+        private static int IndexOfKeyword(string text, string keyword)
+        {
+            var depth = 0;
+            var inQuote = false;
+
+            for (var i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (inQuote) { if (c == '\'') inQuote = false; continue; }
+                if (c == '\'') { inQuote = true; continue; }
+                if (c == '(') { depth++; continue; }
+                if (c == ')') { if (depth > 0) depth--; continue; }
+                if (depth != 0) continue;
+
+                if (i + keyword.Length > text.Length) continue;
+                if (string.Compare(text, i, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase) != 0) continue;
+
+                var before = i == 0 || !char.IsLetterOrDigit(text[i - 1]) && text[i - 1] != '_';
+                var afterIdx = i + keyword.Length;
+                var after = afterIdx >= text.Length || (!char.IsLetterOrDigit(text[afterIdx]) && text[afterIdx] != '_');
+                if (before && after) return i;
+            }
+            return -1;
+        }
+
+        private static int IndexOfTopLevel(string text, char target)
+        {
+            var depth = 0;
+            var inQuote = false;
+            for (var i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (inQuote) { if (c == '\'') inQuote = false; continue; }
+                if (c == '\'') { inQuote = true; continue; }
+                if (c == '(') { depth++; continue; }
+                if (c == ')') { if (depth > 0) depth--; continue; }
+                if (depth == 0 && c == target) return i;
+            }
+            return -1;
+        }
+
+        private static List<string> SplitTopLevel(string text, char separator)
+        {
+            var parts = new List<string>();
+            var depth = 0;
+            var inQuote = false;
+            var start = 0;
+
+            for (var i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (inQuote) { if (c == '\'') inQuote = false; continue; }
+                if (c == '\'') { inQuote = true; continue; }
+                if (c == '(') { depth++; continue; }
+                if (c == ')') { if (depth > 0) depth--; continue; }
+
+                if (depth == 0 && c == separator)
+                {
+                    parts.Add(text.Substring(start, i - start));
+                    start = i + 1;
+                    if (parts.Count > MaxCapturedColumns * 2) return parts;
+                }
+            }
+
+            if (start < text.Length) parts.Add(text.Substring(start));
+            return parts;
         }
 
         private static string DescribeTable(string table, int? tag)

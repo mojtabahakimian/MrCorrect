@@ -77,6 +77,36 @@ namespace Prg_Proccessy.AUDIT
                                   string? formName = null, object? oldValue = null, Guid? correlationId = null)
             => Data(AuditAction.Delete, entity, entityKey, persianTitle, formName, oldValue, null, correlationId);
 
+        /// <summary>
+        /// مثل <see cref="Data"/>، ولی جزئیات از قبل به‌صورت JSON آماده است.
+        /// تشخیص خودکار SQL از این استفاده می‌کند تا ستون‌های تغییرکرده و
+        /// مقدار جدیدشان را بدون سریال‌سازی دوباره ثبت کند.
+        /// </summary>
+        public static void DataWithDetail(string action, string entity, string? entityKey,
+                                          string? persianTitle, string? formName, string? detail,
+                                          Guid? correlationId = null)
+        {
+            try
+            {
+                var isDelete = string.Equals(action, AuditAction.Delete, StringComparison.OrdinalIgnoreCase);
+
+                Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Data,
+                    Severity = isDelete ? AuditSeverity.Sensitive : AuditSeverity.Notable,
+                    Action = action,
+                    Entity = entity,
+                    EntityKey = entityKey,
+                    FormName = formName,
+                    Title = persianTitle ?? BuildDataTitle(action, entity, entityKey),
+                    Detail = detail,
+                    CorrelationId = correlationId,
+                    IsCritical = isDelete,
+                });
+            }
+            catch (Exception) { }
+        }
+
         public static void Data(string action, string entity, string? entityKey, string? persianTitle,
                                 string? formName, object? oldValue, object? newValue, Guid? correlationId = null)
         {
