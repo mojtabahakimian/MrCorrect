@@ -53,33 +53,55 @@ namespace TestRunner
                 Baseknow.GetInitTheApp();
                 Console.WriteLine($"[PASS] Baseknow initialized. STMO: {Baseknow.STMO}");
 
-                var appInstance = Application.Current ?? new Application();
-                var resourceUris = new[]
+                var thread = new Thread(() =>
                 {
-                    "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml",
-                    "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml",
-                    "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.LightBlue.xaml",
-                    "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.LightBlue.xaml",
-                    "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ObsoleteBrushes.xaml"
-                };
-                foreach (var u in resourceUris)
-                {
-                    try { appInstance.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(u, UriKind.RelativeOrAbsolute) }); } catch { }
-                }
+                    var appInstance = Application.Current ?? new Application();
+                    var resourceUris = new[]
+                    {
+                        "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml",
+                        "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml",
+                        "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.LightBlue.xaml",
+                        "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.LightBlue.xaml",
+                        "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ObsoleteBrushes.xaml"
+                    };
+                    foreach (var u in resourceUris)
+                    {
+                        try { appInstance.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(u, UriKind.RelativeOrAbsolute) }); } catch { }
+                    }
 
-                var main = new AUTO_BAZ.MainWindow();
+                    var main = new AUTO_BAZ.MainWindow();
+                    main.Loaded += async (s, e) =>
+                    {
+                        try
+                        {
+                            Console.WriteLine("[INFO] Running C0_TASK (Rebuild average rate)...");
+                            await main.C0_TASK();
+                            Console.WriteLine("[PASS] C0_TASK completed successfully.");
 
-                Console.WriteLine("[INFO] Running C0_TASK (Rebuild average rate)...");
-                main.C0_TASK().GetAwaiter().GetResult();
-                Console.WriteLine("[PASS] C0_TASK completed successfully.");
+                            Console.WriteLine("[INFO] Running C1_TASK (Sales invoice deeds)...");
+                            await main.C1_TASK();
+                            Console.WriteLine("[PASS] C1_TASK completed successfully.");
 
-                Console.WriteLine("[INFO] Running C1_TASK (Sales invoice deeds)...");
-                main.C1_TASK().GetAwaiter().GetResult();
-                Console.WriteLine("[PASS] C1_TASK completed successfully.");
-
-                Console.WriteLine("[INFO] Running C8_TASK (Sales return deeds)...");
-                main.C8_TASK().GetAwaiter().GetResult();
-                Console.WriteLine("[PASS] C8_TASK completed successfully.");
+                            Console.WriteLine("[INFO] Running C8_TASK (Sales return deeds)...");
+                            await main.C8_TASK();
+                            Console.WriteLine("[PASS] C8_TASK completed successfully.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[ERROR] Task execution failed: {ex.Message}");
+                        }
+                        finally
+                        {
+                            main.Close();
+                            System.Windows.Threading.Dispatcher.ExitAllFrames();
+                        }
+                    };
+                    main.Show();
+                    System.Windows.Threading.Dispatcher.Run();
+                });
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Start();
+                thread.Join();
 
                 // Check MOGHA_ANBAR for the 3 codes
                 using var cnn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
