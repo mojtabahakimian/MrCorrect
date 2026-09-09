@@ -181,11 +181,11 @@ namespace MrCorrect.E2ETests
                 switch (windowType)
                 {
                     case WindowType.USER_LOGIN:
-                        ExecuteUserLoginScenario(activeWindow, step2Screenshot);
+                        ExecuteUserLoginScenario(activeWindow, step2Screenshot, startupMsgPath, treeDumpPath);
                         break;
 
                     case WindowType.WinConnectionChoose:
-                        ExecuteConnectionChooseScenario(activeWindow, step2Screenshot);
+                        ExecuteConnectionChooseScenario(activeWindow, step2Screenshot, startupMsgPath, treeDumpPath);
                         break;
 
                     case WindowType.Msgwin:
@@ -201,8 +201,9 @@ namespace MrCorrect.E2ETests
                 // 6. Capture final post-interaction screenshot
                 CaptureScreen(step3Screenshot);
 
-                // 7. Verify window is operational
-                Assert.NotNull(activeWindow);
+                // 7. Verify post-interaction active window is operational
+                AutomationElement? finalWindow = GetActiveWindow();
+                Assert.NotNull(finalWindow);
             }
             catch (Exception ex)
             {
@@ -301,7 +302,7 @@ namespace MrCorrect.E2ETests
             return noteElement?.Text ?? noteElement?.Name ?? "[No text available]";
         }
 
-        private static void ExecuteUserLoginScenario(AutomationElement window, string screenshotPath)
+        private void ExecuteUserLoginScenario(AutomationElement window, string screenshotPath, string startupMsgPath, string treeDumpPath)
         {
             // Toggle Password Visibility CheckBox
             var dispassCheckBox = FindCheckBox(window, "dispass", "نمایش رمز عبور");
@@ -323,24 +324,78 @@ namespace MrCorrect.E2ETests
             // Click Login Button
             var loginBtn = FindButton(window, "Greet", "ورود");
             Assert.NotNull(loginBtn);
-            if (loginBtn.IsEnabled)
+            Assert.True(loginBtn.IsEnabled, "Login button ('Greet') is disabled.");
+
+            loginBtn.Click();
+            Thread.Sleep(2000);
+
+            // Re-detect post-login active top-level window
+            AutomationElement? postLoginWindow = GetActiveWindow();
+            Assert.NotNull(postLoginWindow);
+
+            if (ClassifyWindow(postLoginWindow) == WindowType.Msgwin)
             {
-                loginBtn.Click();
-                Thread.Sleep(1000);
+                string loginMsgNote = GetMsgwinNote(postLoginWindow);
+                File.AppendAllText(startupMsgPath, $"[{DateTime.UtcNow:o}] LOGIN RESULT MSGWIN: {loginMsgNote}\n", Encoding.UTF8);
+
+                using (var writer = new StreamWriter(treeDumpPath, true, Encoding.UTF8))
+                {
+                    writer.WriteLine($"\n=== UIA3 AUTOMATION TREE DUMP FOR LOGIN RESULT MSGWIN ({loginMsgNote}) ===");
+                    DumpAutomationTree(postLoginWindow, writer, 0);
+                }
+
+                // Verify login result Msgwin contains expected validation text
+                Assert.False(string.IsNullOrWhiteSpace(loginMsgNote), "Login result Msgwin note was empty.");
+
+                var seeOkBtn = FindButton(postLoginWindow, "Btn_SeeOK", "تایید") ?? FindButton(postLoginWindow, "Btn_yes", "بله");
+                if (seeOkBtn != null && seeOkBtn.IsEnabled)
+                {
+                    seeOkBtn.Click();
+                    Thread.Sleep(1000);
+                }
             }
         }
 
-        private static void ExecuteConnectionChooseScenario(AutomationElement window, string screenshotPath)
+        private void ExecuteConnectionChooseScenario(AutomationElement window, string screenshotPath, string startupMsgPath, string treeDumpPath)
         {
             var testConnBtn = FindButton(window, "Btn_TestConnection", "تست اتصال");
-            if (testConnBtn != null && testConnBtn.IsEnabled)
+            Assert.NotNull(testConnBtn);
+            Assert.True(testConnBtn.IsEnabled, "Btn_TestConnection button is disabled.");
+
+            // 1. Click Test Connection button
+            testConnBtn.Click();
+            Thread.Sleep(2000);
+            CaptureScreen(screenshotPath);
+
+            // 2. Click Test Connection triggers GoTestConnectionOK() and displays Msgwin with test result
+            AutomationElement? resultMsgWin = GetActiveWindow();
+            if (resultMsgWin != null && ClassifyWindow(resultMsgWin) == WindowType.Msgwin)
             {
-                testConnBtn.Click();
-                Thread.Sleep(1000);
-                CaptureScreen(screenshotPath);
+                string resultNote = GetMsgwinNote(resultMsgWin);
+                File.AppendAllText(startupMsgPath, $"[{DateTime.UtcNow:o}] CONNECTION TEST RESULT MSGWIN: {resultNote}\n", Encoding.UTF8);
+
+                using (var writer = new StreamWriter(treeDumpPath, true, Encoding.UTF8))
+                {
+                    writer.WriteLine($"\n=== UIA3 AUTOMATION TREE DUMP FOR CONNECTION TEST MSGWIN ({resultNote}) ===");
+                    DumpAutomationTree(resultMsgWin, writer, 0);
+                }
+
+                // Verify the Msgwin contains connection test response text
+                Assert.False(string.IsNullOrWhiteSpace(resultNote), "Connection test Msgwin note was empty.");
+
+                // Dismiss the connection test Msgwin dialog
+                var seeOkBtn = FindButton(resultMsgWin, "Btn_SeeOK", "تایید") ?? FindButton(resultMsgWin, "Btn_yes", "بله");
+                if (seeOkBtn != null && seeOkBtn.IsEnabled)
+                {
+                    seeOkBtn.Click();
+                    Thread.Sleep(1000);
+                }
             }
 
-            var saveBtn = FindButton(window, "Btn_SaveConnection", "تایید");
+            // 3. Re-detect WinConnectionChoose and verify Save button
+            var activeWindow = GetActiveWindow();
+            Assert.NotNull(activeWindow);
+            var saveBtn = FindButton(activeWindow, "Btn_SaveConnection", "تایید");
             Assert.NotNull(saveBtn);
         }
 
