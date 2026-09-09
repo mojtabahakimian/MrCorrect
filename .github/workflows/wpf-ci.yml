@@ -1,4 +1,4 @@
-name: WPF Cloud Validation & CI
+name: WPF Cloud Validation & E2E GUI Test CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  build-and-gui-e2e-test:
     runs-on: windows-latest
 
     steps:
@@ -28,16 +28,23 @@ jobs:
     - name: Build Solution (Debug)
       run: dotnet build MrCorrect.sln --configuration Debug --no-restore
 
-    - name: Build Solution (Release)
-      run: dotnet build MrCorrect.sln --configuration Release --no-restore
-
-    - name: Run Non-GUI / Unit Tests
+    - name: Run FlaUI Automated WPF GUI E2E Test
       run: |
-        dotnet test TestRunner/TestRunner.csproj --configuration Debug --no-build || true
+        dotnet test MrCorrect.E2ETests/MrCorrect.E2ETests.csproj --configuration Debug --no-build --logger "trx;LogFileName=e2e-test-results.trx"
 
-    - name: Upload Build Artifacts
+    - name: Upload Test Results & Screenshots Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: WPF-E2E-Test-Artifacts
+        path: |
+          MrCorrect.E2ETests/TestResults/
+          MrCorrect.E2ETests/bin/Debug/net8.0-windows7.0/TestArtifacts/
+
+    - name: Upload Build Package Artifact
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: MrCorrect-WPF-Package
         path: |
-          Prg_UI/bin/Release/net8.0-windows7.0/win-x64/
+          Prg_UI/bin/Debug/net8.0-windows7.0/win-x64/

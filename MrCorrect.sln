@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prg_UI", "Prg_UI\Prg_UI.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AUTO_BAZ", "AUTO_BAZ\AUTO_BAZ.csproj", "{B1C34ED0-F712-407C-87BA-B9DA39D7D51B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MrCorrect.E2ETests", "MrCorrect.E2ETests\MrCorrect.E2ETests.csproj", "{C4E7D6A1-889B-4F8A-A2F0-9112E0893321}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B1C34ED0-F712-407C-87BA-B9DA39D7D51B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1C34ED0-F712-407C-87BA-B9DA39D7D51B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1C34ED0-F712-407C-87BA-B9DA39D7D51B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4E7D6A1-889B-4F8A-A2F0-9112E0893321}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4E7D6A1-889B-4F8A-A2F0-9112E0893321}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4E7D6A1-889B-4F8A-A2F0-9112E0893321}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4E7D6A1-889B-4F8A-A2F0-9112E0893321}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
