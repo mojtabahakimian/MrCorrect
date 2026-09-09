@@ -58,7 +58,11 @@ namespace MrCorrect.E2ETests
 
                 // 2. Attach UIA3 Automation & Get Initial Active Top-Level Window
                 AutomationElement? activeWindow = GetActiveWindow();
-                Assert.NotNull(activeWindow);
+                if (activeWindow == null)
+                {
+                    string procInfo = _app != null ? $"ProcessID: {_app.ProcessId}, HasExited: {_app.HasExited}" : "App process is null";
+                    throw new InvalidOperationException($"Failed to detect active top-level WPF window for process. ({procInfo})");
+                }
 
                 // 3. Classify initial window state
                 WindowType windowType = ClassifyWindow(activeWindow);
@@ -93,7 +97,11 @@ namespace MrCorrect.E2ETests
                     windowType = ClassifyWindow(activeWindow);
                 }
 
-                Assert.NotNull(activeWindow);
+                if (activeWindow == null)
+                {
+                    string procInfo = _app != null ? $"ProcessID: {_app.ProcessId}, HasExited: {_app.HasExited}" : "App process is null";
+                    throw new InvalidOperationException($"Active top-level window became null after dismissing startup Msgwin dialog. ({procInfo})");
+                }
 
                 // 4. Dump complete UIA3 Automation Tree of main target window
                 using (var writer = new StreamWriter(treeDumpPath, true, Encoding.UTF8))
@@ -135,7 +143,18 @@ namespace MrCorrect.E2ETests
             {
                 string errorScreenshot = Path.Combine(artifactDir, "error_failure_screenshot.png");
                 CaptureScreen(errorScreenshot);
-                File.WriteAllText(Path.Combine(artifactDir, "test_error_log.txt"), ex.ToString(), Encoding.UTF8);
+
+                var procInfo = new StringBuilder();
+                procInfo.AppendLine($"[TEST FAILURE DIAGNOSTICS - {DateTime.UtcNow:o}]");
+                if (_app != null)
+                {
+                    procInfo.AppendLine($"ProcessID: {_app.ProcessId}");
+                    procInfo.AppendLine($"HasExited: {_app.HasExited}");
+                    try { if (_app.HasExited) procInfo.AppendLine($"ExitCode: {_app.ExitCode}"); } catch { }
+                }
+                procInfo.AppendLine($"Exception: {ex}");
+
+                File.WriteAllText(Path.Combine(artifactDir, "test_error_log.txt"), procInfo.ToString(), Encoding.UTF8);
                 throw;
             }
             finally
