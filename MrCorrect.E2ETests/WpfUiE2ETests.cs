@@ -21,6 +21,7 @@ namespace MrCorrect.E2ETests
             USER_LOGIN,
             WinConnectionChoose,
             Msgwin,
+            Splash,
             Unknown
         }
 
@@ -100,8 +101,39 @@ namespace MrCorrect.E2ETests
                 // 3. Classify initial window state
                 WindowType windowType = ClassifyWindow(activeWindow);
 
+                // If Splash screen (WinSplashy) is open at launch, wait for main window to load
+                if (windowType == WindowType.Splash)
+                {
+                    File.AppendAllText(startupMsgPath, $"[{DateTime.UtcNow:o}] SPLASH SCREEN DETECTED (WinSplashy)\n", Encoding.UTF8);
+
+                    using (var writer = new StreamWriter(treeDumpPath, true, Encoding.UTF8))
+                    {
+                        writer.WriteLine($"\n=== UIA3 AUTOMATION TREE DUMP FOR SPLASH SCREEN (WinSplashy) ===");
+                        DumpAutomationTree(activeWindow, writer, 0);
+                    }
+
+                    CaptureScreen(step1Screenshot);
+
+                    // Wait for main application window to load and splash screen to close
+                    activeWindow = Retry.WhileNull(
+                        () =>
+                        {
+                            if (_app == null || _app.HasExited) return null;
+                            var windows = _app.GetAllTopLevelWindows(_automation);
+                            return windows.FirstOrDefault(w => w.IsAvailable && ClassifyWindow(w) != WindowType.Splash);
+                        },
+                        TimeSpan.FromSeconds(20),
+                        TimeSpan.FromMilliseconds(500)
+                    ).Result ?? GetActiveWindow();
+
+                    if (activeWindow != null)
+                    {
+                        windowType = ClassifyWindow(activeWindow);
+                    }
+                }
+
                 // If Msgwin dialog(s) appear at startup, log message text, dump tree, dismiss it and re-detect
-                while (windowType == WindowType.Msgwin)
+                while (windowType == WindowType.Msgwin && activeWindow != null)
                 {
                     string msgNote = GetMsgwinNote(activeWindow);
                     File.AppendAllText(startupMsgPath, $"[{DateTime.UtcNow:o}] MSGWIN DETECTED: {msgNote}\n", Encoding.UTF8);
@@ -133,7 +165,7 @@ namespace MrCorrect.E2ETests
                 if (activeWindow == null)
                 {
                     string procInfo = _app != null ? $"ProcessID: {_app.ProcessId}, HasExited: {_app.HasExited}" : "App process is null";
-                    throw new InvalidOperationException($"Active top-level window became null after dismissing startup Msgwin dialog. ({procInfo})");
+                    throw new InvalidOperationException($"Active top-level window became null after startup window transitions. ({procInfo})");
                 }
 
                 // 4. Dump complete UIA3 Automation Tree of main target window
@@ -228,6 +260,14 @@ namespace MrCorrect.E2ETests
         private static WindowType ClassifyWindow(AutomationElement window)
         {
             if (window == null) return WindowType.Unknown;
+
+            // Check WinSplashy controls
+            if (window.FindFirstDescendant(cf => cf.ByAutomationId("RDP_LABEL")) != null ||
+                window.ClassName == "WinSplashy" ||
+                window.Name == "WinSplashy")
+            {
+                return WindowType.Splash;
+            }
 
             // Check Msgwin controls
             if (window.FindFirstDescendant(cf => cf.ByAutomationId("MsgTextNote")) != null ||
