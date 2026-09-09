@@ -9,11 +9,18 @@ namespace Prg_Proccessy.AUDIT
     /// <summary>
     /// ساختار جدول‌های سابقه.
     ///
-    /// این DDL منبع یگانه‌ی حقیقت است و باید عیناً به مخزن ScriptSqly
-    /// (فایل ScriptSqly.Core/ScriptSqly.Audit.cs) منتقل شود؛ توضیح در
-    /// Doc/AUDIT_TRAIL.md آمده است. تا وقتی آن انتقال انجام نشده،
-    /// <see cref="EnsureCreatedAsync"/> همین اسکریپت را یک بار در هر اجرای
-    /// برنامه روی نخ پس‌زمینه اجرا می‌کند. تمام دستورها idempotent هستند.
+    /// این DDL از نسخه‌ی فعلی به بعد در مخزن ScriptSqly نگه‌داری می‌شود
+    /// (فایل <c>ScriptSqly.Core/ScriptSqly.Audit.cs</c>، متد
+    /// <c>AuditScript</c> که از <c>LetsGo</c> صدا زده می‌شود) — طبق قرارداد
+    /// پروژه که هر تغییر ساختار دیتابیس باید از مسیر مایگریشن برود.
+    ///
+    /// نسخه‌ی اینجا به‌عنوان **پشتیبان** نگه داشته شده، برای نصب‌هایی که هنوز
+    /// ScriptSqly را به‌روز نکرده‌اند. <see cref="EnsureCreatedAsync"/> اول با
+    /// یک کوئری بررسی می‌کند ساختار موجود است یا نه و در آن صورت هیچ DDL
+    /// نمی‌فرستد. هر دو نسخه idempotent‌اند، پس اجرای هم‌زمانشان بی‌ضرر است.
+    ///
+    /// اگر این دو را تغییر دادید، **هر دو** را با هم به‌روز کنید.
+    /// شرح کامل در Doc/AUDIT_TRAIL.md.
     ///
     /// نکته‌ی طراحی درباره‌ی تاریخ: فیلتر و ایندکس روی AT_SERVER است، نه روی
     /// تاریخ شمسی. ساعت کلاینت‌ها قابل اعتماد نیست و تبدیل شمسی داخل T-SQL
@@ -275,6 +282,18 @@ namespace Prg_Proccessy.AUDIT
             {
                 using var db = new SqlConnection(connectionString);
                 await db.OpenAsync().ConfigureAwait(false);
+
+                // مسیر سریع: از نسخه‌ی فعلی به بعد، ساختار توسط مایگریشن
+                // ScriptSqly (متد AuditScript) ساخته می‌شود. این بوت‌استرپ
+                // فقط برای نصب‌هایی می‌ماند که هنوز ScriptSqly به‌روز نشده.
+                // اگر همه چیز از قبل هست، با یک رفت‌وبرگشت برگرد.
+                var alreadyThere = await db.ExecuteScalarAsync<int>(
+                    @"SELECT CASE WHEN OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]',       N'U') IS NOT NULL
+                                   AND OBJECT_ID(N'[dbo].[SYS_AUDIT_SESSION]',     N'U') IS NOT NULL
+                                   AND OBJECT_ID(N'[dbo].[VW_SYS_AUDIT_TIMELINE]', N'V') IS NOT NULL
+                                  THEN 1 ELSE 0 END").ConfigureAwait(false);
+
+                if (alreadyThere == 1) return true;
 
                 foreach (var sql in Statements)
                 {
