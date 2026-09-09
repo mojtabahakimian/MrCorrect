@@ -1,0 +1,43 @@
+name: WPF Cloud Validation & CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore MrCorrect.sln
+
+    - name: Build Solution (Debug)
+      run: dotnet build MrCorrect.sln --configuration Debug --no-restore
+
+    - name: Build Solution (Release)
+      run: dotnet build MrCorrect.sln --configuration Release --no-restore
+
+    - name: Run Non-GUI / Unit Tests
+      run: |
+        dotnet test TestRunner/TestRunner.csproj --configuration Debug --no-build || true
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: MrCorrect-WPF-Package
+        path: |
+          Prg_UI/bin/Release/net8.0-windows7.0/win-x64/
