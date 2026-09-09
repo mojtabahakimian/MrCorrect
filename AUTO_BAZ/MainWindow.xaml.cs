@@ -15,6 +15,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -222,6 +223,62 @@ namespace AUTO_BAZ
             COUNTER_TXBL.Content = $"{overallProgress:F1}%";
 
             UpdateDataInSharedViewModel();
+        }
+
+        // ───────── زمان‌سنجیِ اجرا ─────────
+        // زمانِ شروعِ کلِ بازسازی؛ در پایان از همین، مدتِ کل حساب می‌شود.
+        private DateTime _runStartedAt;
+
+        /// <summary>مدت را کوتاه و خوانا می‌نویسد: زیر یک ساعت mm:ss، بالاتر h:mm:ss.</summary>
+        private static string FormatDuration(TimeSpan d) =>
+            d.TotalHours >= 1
+                ? $"{(int)d.TotalHours}:{d.Minutes:D2}:{d.Seconds:D2}"
+                : $"{d.Minutes:D2}:{d.Seconds:D2}";
+
+        /// <summary>
+        /// برچسب‌های مدت را در شروعِ هر اجرا پنهان می‌کند، تا مدتِ دورِ قبل کنار
+        /// دایره‌ای که هنوز شروع نشده دیده نشود.
+        /// </summary>
+        private void ClearTaskDurations()
+        {
+            foreach (var lbl in new[] { LBL_C0, LBL_C00, LBL_C1, LBL_C2, LBL_C3, LBL_C4,
+                                        LBL_C5, LBL_C6, LBL_C7, LBL_C8, LBL_C9, LBL_C10,
+                                        LBL_C11, LBL_C12 })
+            {
+                if (lbl is null) continue;
+                lbl.Content = "";
+                lbl.Visibility = Visibility.Hidden;
+            }
+        }
+
+        /// <summary>مدتِ یک پروسه را روی برچسبِ کوچکِ کنارِ همان دایره می‌نویسد.</summary>
+        private void ShowTaskDuration(Label? lbl, TimeSpan d)
+        {
+            if (lbl is null) return;
+            lbl.Content = FormatDuration(d);
+            lbl.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// پروسه را اجرا می‌کند و مدتش را روی برچسبِ کنارش می‌نویسد.
+        ///
+        /// ⚠️ finally و نه ContinueWith: استثنا باید دقیقاً همان‌طور که بود بالا
+        /// برود (کدِ فراخوان روی OperationCanceledException و نوعِ خطا حساب
+        /// می‌کند)، و ContinueWith آن را در AggregateException می‌پیچید.
+        /// </summary>
+        private async Task RunTimedAsync(Label? lbl, Func<Task> body)
+        {
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                await body();
+            }
+            finally
+            {
+                sw.Stop();
+                var elapsed = sw.Elapsed;
+                Dispatcher.Invoke(new Action(() => ShowTaskDuration(lbl, elapsed)));
+            }
         }
 
         public ObservableCollection<string> LST_DATA5 { get; set; } = new ObservableCollection<string>();
@@ -564,12 +621,16 @@ namespace AUTO_BAZ
                 // DoResetCountersDisplay() همه‌ی نوارها و درصد کل را صفر می‌کرد، و در انتها
                 // دوباره متن را "0.00%" می‌گذاشت. یعنی کاربر عملاً هیچ‌وقت ۱۰۰٪ را نمی‌دید.
                 //
-                // صفر کردن اینجا هم لازم نیست: ابتدای هر اجرای تازه در LetsGoBtn_Click
-                // خودش DoResetCountersDisplay() را صدا می‌زند. پس نتیجه‌ی اجرا روی صفحه
-                // می‌ماند تا کاربر ببیند کدام بخش‌ها کامل شده‌اند.
+                // ⚠️ به‌خواستِ کاربر: دایره‌ی کل بعد از پایان صفر می‌شود، نه اینکه
+                // روی ۱۰۰٪ بماند — وگرنه از روی صفحه معلوم نیست اجرا تمام شده یا
+                // هنوز روی آخرین درصد ایستاده است.
+                //
+                // دایره‌های تک‌تکِ پروسه‌ها عمداً دست‌نخورده می‌مانند: همان‌ها هستند
+                // که نشان می‌دهند کدام بخش کامل شد، و مدتِ هرکدام هم کنارشان
+                // نوشته شده است.
                 // ───────────────────────────────────────────────────────────────────────────
-                TOGHER_PROGRESS.Value = 100;
-                COUNTER_TXBL.Content = $"100%";
+                TOGHER_PROGRESS.Value = 0;
+                COUNTER_TXBL.Content = $"0.00%";
                 UpdateDataInSharedViewModel();
 
                 C00.Foreground = Generaly.PutThisColor("#FF000000");
@@ -660,6 +721,7 @@ namespace AUTO_BAZ
                 if (IsAtLeasOnChecked() is false) { return; }
 
                 Generaly.DoResetCountersDisplay();
+                ClearTaskDurations();
 
                 if (!int.TryParse(repeatb.Text.Trim(), out repeatCount) || repeatCount <= 0)
                 {
@@ -689,6 +751,7 @@ namespace AUTO_BAZ
                     // ───────────────────────────────────────────────────────────────────────
                     CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
                     Generaly.DoResetCountersDisplay();
+                ClearTaskDurations();
 
                     Dispatcher.Invoke(new Action(() =>
                     {
@@ -701,7 +764,8 @@ namespace AUTO_BAZ
                             Properties.Settings.Default.Save();
                         }
 
-                        LST_DATA5.Add("شروع" + Conversions.ToString(DateTime.Now));
+                        _runStartedAt = DateTime.Now;
+                        LST_DATA5.Add("شروع : " + Conversions.ToString(_runStartedAt));
                         StillMethodIsWorking = true;
                     }));
 
@@ -716,8 +780,8 @@ namespace AUTO_BAZ
                     // امروز C0 هیچ‌کدام از توابع کش‌شده را صدا نمی‌زند (بررسی شد)، ولی اتکا به
                     // این موضوع شکننده است. با روشن‌کردن کش بعد از C0/C00، این وابستگی از بین
                     // می‌رود: هر چه کش می‌شود، حتماً بعد از نهایی‌شدن DTL_MANF خوانده شده است.
-                    if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
-                    if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
+                    if (Generaly.C0) { await Task.Run(async () => { await RunTimedAsync(LBL_C0, C0_TASK); }); } //باز سازی نرخ میانگین
+                    if (Generaly.C00) { await Task.Run(async () => { await RunTimedAsync(LBL_C00, C00_TASK); }); } //باز سازی موجودی انبار
 
                     // کش جستجوهای تکراری (نام حساب، نام دپارتمان، وجود حساب تفصیلی) فقط در
                     // طول همین بازسازی دسته‌ای فعال است و برای هر اجرا از نو ساخته می‌شود.
@@ -726,18 +790,18 @@ namespace AUTO_BAZ
                     CL_HESABDARI_AUTO_BAZ.ClearLookupCaches();
                     CL_HESABDARI_AUTO_BAZ.LookupCacheEnabled = true;
 
-                    if (Generaly.C1) { tasks.Add(C1_TASK()); } //سند فروش
-                    if (Generaly.C2) { tasks.Add(C2_TASK()); } //سند خرید
-                    if (Generaly.C3) { tasks.Add(C3_TASK()); } //سند خزانه
-                    if (Generaly.C4) { tasks.Add(C4_TASK()); } //سند انتقالی
-                    if (Generaly.C5) { tasks.Add(C5_TASK()); } //سند خروج مواد
-                    if (Generaly.C6) { tasks.Add(C6_TASK()); } //سند خروج سایر
-                    if (Generaly.C7) { tasks.Add(C7_TASK()); } //سند تولید ورود
-                    if (Generaly.C8) { tasks.Add(C8_TASK()); } //سند برگشت فروش + آزاد
-                    if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
-                    if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
-                    if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
-                    if (Generaly.C12) { tasks.Add(C12_TASK()); } //سند برگشت خرید آزاد
+                    if (Generaly.C1) { tasks.Add(RunTimedAsync(LBL_C1, C1_TASK)); } //سند فروش
+                    if (Generaly.C2) { tasks.Add(RunTimedAsync(LBL_C2, C2_TASK)); } //سند خرید
+                    if (Generaly.C3) { tasks.Add(RunTimedAsync(LBL_C3, C3_TASK)); } //سند خزانه
+                    if (Generaly.C4) { tasks.Add(RunTimedAsync(LBL_C4, C4_TASK)); } //سند انتقالی
+                    if (Generaly.C5) { tasks.Add(RunTimedAsync(LBL_C5, C5_TASK)); } //سند خروج مواد
+                    if (Generaly.C6) { tasks.Add(RunTimedAsync(LBL_C6, C6_TASK)); } //سند خروج سایر
+                    if (Generaly.C7) { tasks.Add(RunTimedAsync(LBL_C7, C7_TASK)); } //سند تولید ورود
+                    if (Generaly.C8) { tasks.Add(RunTimedAsync(LBL_C8, C8_TASK)); } //سند برگشت فروش + آزاد
+                    if (Generaly.C9) { tasks.Add(RunTimedAsync(LBL_C9, C9_TASK)); } //سند برگشت فروش + آزاد
+                    if (Generaly.C10) { tasks.Add(RunTimedAsync(LBL_C10, C10_TASK)); } //سند برگشت فروش + آزاد
+                    if (Generaly.C11) { tasks.Add(RunTimedAsync(LBL_C11, C11_TASK)); } // سند وصولی اسناد دریافتنی
+                    if (Generaly.C12) { tasks.Add(RunTimedAsync(LBL_C12, C12_TASK)); } //سند برگشت خرید آزاد
 
                     // Start all tasks concurrently
                     var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
@@ -802,11 +866,13 @@ namespace AUTO_BAZ
                                     LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()?.SectionName}");
                                     ERTRACKLIST?.Clear();
                                 }
-                                LST_DATA5.Add("پایان یافته با خطا :" + Conversions.ToString(DateTime.Now));
+                                LST_DATA5.Add("پایان یافته با خطا : " + Conversions.ToString(DateTime.Now)
+                                              + "   (مدت کل: " + FormatDuration(DateTime.Now - _runStartedAt) + ")");
                             }
                             else //Successfull
                             {
-                                LST_DATA5.Add("پايان :" + Conversions.ToString(DateTime.Now));
+                                LST_DATA5.Add("پايان : " + Conversions.ToString(DateTime.Now)
+                                              + "   (مدت کل: " + FormatDuration(DateTime.Now - _runStartedAt) + ")");
                             }
 
                         }));
@@ -822,7 +888,8 @@ namespace AUTO_BAZ
                         {
                             TOGHER_PROGRESS.Value = 0;
                             COUNTER_TXBL.Content = $"0.00%";
-                            LST_DATA5.Add("لغو شده :" + Conversions.ToString(DateTime.Now));
+                            LST_DATA5.Add("لغو شده : " + Conversions.ToString(DateTime.Now)
+                                          + "   (مدت کل: " + FormatDuration(DateTime.Now - _runStartedAt) + ")");
                         }));
 
                         StillMethodIsWorking = false;
@@ -838,7 +905,8 @@ namespace AUTO_BAZ
                         CL_HESABDARI_AUTO_BAZ.BumpUiProgressGeneration();
                         StillMethodIsWorking = false;
 
-                        LST_DATA5.Add("به خاطر خطا لغو شد. :" + Conversions.ToString(DateTime.Now));
+                        LST_DATA5.Add("به خاطر خطا لغو شد. : " + Conversions.ToString(DateTime.Now)
+                                      + "   (مدت کل: " + FormatDuration(DateTime.Now - _runStartedAt) + ")");
                         Btn_DoCancel.Content = "لغو";
 
                         var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
