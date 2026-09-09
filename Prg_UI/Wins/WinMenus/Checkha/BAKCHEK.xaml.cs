@@ -354,10 +354,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     msgwin.ShowDialog();
 
                     // اگر چک قبلاً واگذار شده باشد، برای "از حساب" (FHES) از حساب واگذاری قبلی (previousHes2) استفاده می‌کنیم.
-                    // اگر خالی بود، از this.HES1 استفاده می‌کنیم.
+                    // اگر خالی بود، از this.HES1 استفاده می‌کنیم، و در نهایت از ترکیب کد حساب کل، معین و تفصیلی چک (KOL, MOIN, TAF) استفاده می‌کنیم.
+                    var chkRow = rst.FirstOrDefault();
+                    string fallbackFromCode = (chkRow != null && chkRow.N_KOL.HasValue && chkRow.N_MOIN.HasValue && chkRow.N_TAF.HasValue)
+                        ? $"{chkRow.N_KOL}-{chkRow.N_MOIN}-{chkRow.N_TAF}{(chkRow.N_TAF2.HasValue ? "-" + chkRow.N_TAF2 : "")}"
+                        : (!string.IsNullOrEmpty(KOL.Text) && !string.IsNullOrEmpty(MOIN.Text) && !string.IsNullOrEmpty(TAF.Text)
+                            ? $"{KOL.Text}-{MOIN.Text}-{TAF.Text}"
+                            : "");
+
                     string targetHesForFrom = !string.IsNullOrEmpty(previousHes2)
                         ? previousHes2
-                        : (this.HES1.SelectedValue != null ? this.HES1.SelectedValue.ToString() : "");
+                        : (this.HES1.SelectedValue != null && !string.IsNullOrEmpty(this.HES1.SelectedValue.ToString())
+                            ? this.HES1.SelectedValue.ToString()
+                            : fallbackFromCode);
 
                     if (!string.IsNullOrEmpty(targetHesForFrom))
                     {
