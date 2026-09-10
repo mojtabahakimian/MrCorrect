@@ -210,6 +210,18 @@ internal static class Program
         AuditSqlSniffer.Observe("UPDATE dbo.PGET_HED SET N_S = 12 WHERE ID = 3; INSERT INTO dbo.DEED_DTL (N_S) VALUES (12);");
         AuditSqlSniffer.Observe("INSERT INTO dbo.X (A, B) SELECT A, B FROM Y");
 
+        // شکل واقعی از ZASESABBEESAB.xaml.cs:609 — آنچه بعد از UPDATE آمده
+        // نام مستعار است و باید از بند FROM به جدول واقعی باز شود.
+        AuditSqlSniffer.Observe(
+            "UPDATE vd SET CUST_NO = @ToHes " +
+            "FROM dbo.HEAD_LST hl INNER JOIN dbo.VISITOR_DTL vd ON hl.NUMBER = vd.NUMBER " +
+            "WHERE (vd.CUST_NO = @AzHes)", new { ToHes = "H-9", AzHes = "H-1" });
+
+        // WHERE داخل زیرکوئری نباید کلید رکورد را بدزدد.
+        AuditSqlSniffer.Observe(
+            "UPDATE dbo.TCOD_BANKS SET NAME = N'بانک الف' " +
+            "WHERE CODE = 77 AND ID IN (SELECT ID FROM dbo.PAY_GETD WHERE CODE = 999)");
+
         Audit.Form("HEAD_LST_PISHFROOSH2");
         Audit.Print("پیش‌فاکتور", entity: "HEAD_LST", entityKey: "NUMBER=1234;TAG=20", isPreview: false);
         Audit.Login("Controller");
@@ -237,6 +249,12 @@ internal static class Program
             Has(e => e.Entity == "X" && e.Action == AuditAction.Insert && e.EntityKey is null));
         Ok("DELETE با alias: نام جدول درست است نه «d»",
             Has(e => e.Action == AuditAction.Delete && e.Entity == "DEED_DTL"));
+        Ok("UPDATE با alias: نام جدول درست است نه «vd»",
+            Has(e => e.Action == AuditAction.Update && e.Entity == "VISITOR_DTL"));
+        Ok("UPDATE با alias: زیر نام مستعار ثبت نشد",
+            !Has(e => e.Entity == "vd"));
+        Ok("WHEREِ زیرکوئری کلید را ندزدید (CODE=77 نه 999)",
+            ev.FirstOrDefault(e => e.Entity == "TCOD_BANKS")?.EntityKey == "CODE=77");
         Ok("SELECT هیچ رویدادی نساخت", !Has(e => e.Entity == "STUF_DEF"));
         Ok("جدول‌های خود سابقه رد شدند (بدون حلقه‌ی بی‌پایان)",
             !Has(e => e.Entity == "SYS_AUDIT_EVENT"));

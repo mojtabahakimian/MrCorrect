@@ -182,21 +182,36 @@ namespace Prg_Proccessy.AUDIT
             var s = _session;
             if (s is null) return;
 
-            try
+            // سطر نشست را نخ پس‌زمینه درج می‌کند و ورود کاربر ممکن است زودتر
+            // از آن اتفاق بیفتد — مخصوصاً روی دیتابیس تازه که EnsureCreatedAsync
+            // اول باید جدول‌ها را بسازد. آن‌وقت این UPDATE روی صفر سطر می‌نشیند
+            // و بی‌صدا رد می‌شود، یعنی کل آن اجرا با USER_NAME خالی ثبت می‌شد.
+            // پس تا وقتی سطر پیدا شود دوباره تلاش می‌شود.
+            for (var attempt = 0; attempt < 12; attempt++)
             {
-                using var db = new SqlConnection(_connectionString);
-                await db.OpenAsync().ConfigureAwait(false);
-                await db.ExecuteAsync(
-                    @"UPDATE [dbo].[SYS_AUDIT_SESSION]
-                         SET [USER_ID] = @UserId,
-                             [USER_NAME] = @UserName,
-                             [FISCAL_YEAR] = @FiscalYear,
-                             [APP_VERSION] = @AppVersion
-                       WHERE [SESSION_ID] = @SessionId",
-                    s, commandTimeout: 30).ConfigureAwait(false);
-            }
-            catch (Exception)
-            {
+                try
+                {
+                    using var db = new SqlConnection(_connectionString);
+                    await db.OpenAsync().ConfigureAwait(false);
+                    var affected = await db.ExecuteAsync(
+                        @"UPDATE [dbo].[SYS_AUDIT_SESSION]
+                             SET [USER_ID] = @UserId,
+                                 [USER_NAME] = @UserName,
+                                 [FISCAL_YEAR] = @FiscalYear,
+                                 [APP_VERSION] = @AppVersion
+                           WHERE [SESSION_ID] = @SessionId",
+                        s, commandTimeout: 30).ConfigureAwait(false);
+
+                    if (affected > 0) return;
+                }
+                catch (Exception)
+                {
+                    // دیتابیس هنوز بالا نیامده یا ساختار ساخته نشده.
+                }
+
+                // ۲۵۰ms، ۵۰۰ms، ۱s، سپس ۲s تا سقف — روی هم حدود ۲۰ ثانیه.
+                var delay = attempt < 3 ? 250 << attempt : 2000;
+                await Task.Delay(delay).ConfigureAwait(false);
             }
         }
 
@@ -287,7 +302,12 @@ namespace Prg_Proccessy.AUDIT
 
                 lock (_criticalSpillLock)
                 {
-                    if (!_spillDirReady)
+                    // Directory.CreateDirectory اگر پوشه باشد بی‌هزینه برمی‌گردد.
+                    // قبلاً نتیجه یک‌بار برای همیشه نگه داشته می‌شد؛ اگر پوشه
+                    // بعداً پاک می‌شد (پاک‌سازی دیسک، پروفایل موقت) هر نوشتن
+                    // استثنا می‌داد و بی‌صدا بلعیده می‌شد — یعنی همان تضمین
+                    // «رویداد حساس گم نمی‌شود» از بین می‌رفت.
+                    if (!_spillDirReady || !Directory.Exists(dir))
                     {
                         Directory.CreateDirectory(dir);
                         _spillDirReady = true;
@@ -736,8 +756,20 @@ namespace Prg_Proccessy.AUDIT
                 foreach (var line in File.ReadLines(file))
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
-                    var e = JsonSerializer.Deserialize<AuditEvent>(line);
-                    if (e != null) rows.Add(e);
+
+                    // یک خط ناقص (مثلاً وقتی برنامه وسط نوشتن بسته شده) نباید
+                    // کل فایل را زمین‌گیر کند: بدون این try، استثنا از حلقه
+                    // بیرون می‌زد، فایل نه پاک می‌شد نه بازنویسی، و چون همیشه
+                    // اولین فایل انتخاب می‌شود، پخش تا سقف ۲۰۰ فایل قفل می‌ماند
+                    // و از آن به بعد همه چیز دور ریخته می‌شد.
+                    try
+                    {
+                        var e = JsonSerializer.Deserialize<AuditEvent>(line);
+                        if (e != null) rows.Add(e);
+                    }
+                    catch (JsonException)
+                    {
+                    }
                 }
 
                 // اگر درج تکه‌ی دوم شکست بخورد، فایل نباید دست‌نخورده بماند:

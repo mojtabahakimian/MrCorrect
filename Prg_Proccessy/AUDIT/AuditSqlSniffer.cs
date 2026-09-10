@@ -209,12 +209,20 @@ namespace Prg_Proccessy.AUDIT
                 for (var i = 0; i < count; i++)
                 {
                     var st = statements[i];
-                    if (Excluded.Contains(st.Table)) continue;
 
                     // دامنه‌ی هر statement تا شروع statement بعدی است، وگرنه
                     // کلیدِ statement بعدی به این یکی نسبت داده می‌شود.
                     var end = (i + 1 < statements.Count) ? statements[i + 1].Start : sql.Length;
                     var segment = sql.Substring(st.Start, end - st.Start);
+
+                    // در شکل «UPDATE vd SET ... FROM ... JOIN dbo.VISITOR_DTL vd»
+                    // آنچه بعد از UPDATE آمده نام مستعار است. باید پیش از
+                    // فیلتر Excluded باز شود، وگرنه جدولی که باید نادیده
+                    // گرفته شود از زیر نام مستعارش رد می‌شود.
+                    if (st.Action == AuditAction.Update)
+                        st.Table = ResolveUpdateAlias(segment, st.Table);
+
+                    if (Excluded.Contains(st.Table)) continue;
 
                     Emit(st, segment, parameters, formName);
                 }
@@ -256,6 +264,46 @@ namespace Prg_Proccessy.AUDIT
             Audit.Security(AuditAction.ExecProcedure, $"اجرای رویه‌ی {name}", entity: name, formName: formName);
         }
 
+        /// <summary>واژه‌های کلیدی بند FROM که جدول نیستند.</summary>
+        private static readonly HashSet<string> JoinNoise = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CROSS", "JOIN",
+            "APPLY", "ON", "AS", "WITH", "NOLOCK",
+        };
+
+        private static readonly Regex RxFromBinding =
+            new(@"(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?\s+(?:AS\s+)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
+
+        /// <summary>
+        /// در «UPDATE vd SET ... FROM dbo.HEAD_LST hl INNER JOIN dbo.VISITOR_DTL vd ON ...»
+        /// آنچه بین UPDATE و SET می‌آید نام مستعار است، نه جدول. اگر بند FROM
+        /// آن نام را به جدولی ببندد، نام واقعی جدول برگردانده می‌شود.
+        ///
+        /// بدون این، رویداد زیر نام «vd» ثبت می‌شد و جست‌وجو بر اساس نام
+        /// جدول پیدایش نمی‌کرد. دو مورد واقعی در همین کدبیس:
+        /// ZASESABBEESAB.xaml.cs خطوط ۵۹۸ و ۶۰۹. برای DELETE این حالت از
+        /// قبل با RxDeleteFrom پوشش داده شده بود، برای UPDATE نه.
+        /// </summary>
+        private static string ResolveUpdateAlias(string segment, string name)
+        {
+            var fromAt = IndexOfKeyword(segment, "FROM");
+            if (fromAt < 0) return name;
+
+            var from = segment.Substring(fromAt + 4);
+            var stopAt = IndexOfKeyword(from, "WHERE");
+            if (stopAt >= 0) from = from.Substring(0, stopAt);
+
+            foreach (Match m in RxFromBinding.Matches(from))
+            {
+                var table = m.Groups[1].Value;
+                var alias = m.Groups[2].Value;
+                if (JoinNoise.Contains(table) || JoinNoise.Contains(alias)) continue;
+                if (alias.Equals(name, StringComparison.OrdinalIgnoreCase)) return table;
+            }
+
+            return name;
+        }
+
         private static void Collect(List<Statement> into, Regex rx, string sql, string action)
         {
             foreach (Match match in rx.Matches(sql))
@@ -273,7 +321,12 @@ namespace Prg_Proccessy.AUDIT
             // کلید رکورد فقط از بخش WHERE همین statement خوانده می‌شود. اگر
             // کل دستور جستجو شود، در «UPDATE X SET CODE='A' WHERE ID=5» مقدار
             // جدیدِ CODE به‌جای شناسه‌ی رکورد برداشته می‌شود.
-            var whereAt = segment.LastIndexOf("WHERE", StringComparison.OrdinalIgnoreCase);
+            // LastIndexOf آخرین WHERE را برمی‌دارد، و در
+            // «UPDATE X SET A=1 WHERE ID IN (SELECT ... WHERE Y=2)» آن WHERE
+            // متعلق به زیرکوئری است — پس کلید رکورد از جدول اشتباه خوانده
+            // می‌شد. IndexOfKeyword پرانتز و رشته را می‌فهمد و اولین WHERE
+            // سطح بالا را می‌دهد، که همان WHERE خودِ statement است.
+            var whereAt = IndexOfKeyword(segment, "WHERE");
             var scope = whereAt >= 0 ? segment.Substring(whereAt) : segment;
 
             int? tag = null;

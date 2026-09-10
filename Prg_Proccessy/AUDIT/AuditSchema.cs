@@ -308,8 +308,16 @@ namespace Prg_Proccessy.AUDIT
                     }
                 }
 
+                // همان سه شیئی که مسیر سریع بالا بررسی می‌کند. قبلاً فقط
+                // جدول رویداد چک می‌شد، پس اگر ساختِ نما رد می‌شد (استثنایش
+                // بالاتر عمداً بلعیده می‌شود) این متد true برمی‌گرداند و
+                // SchemaReady درست می‌شد، ولی هر جست‌وجو در فرم سوابق با
+                // «Invalid object name» شکست می‌خورد.
                 var ok = await db.ExecuteScalarAsync<int>(
-                    "SELECT CASE WHEN OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]', N'U') IS NULL THEN 0 ELSE 1 END")
+                    @"SELECT CASE WHEN OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]',       N'U') IS NOT NULL
+                                   AND OBJECT_ID(N'[dbo].[SYS_AUDIT_SESSION]',     N'U') IS NOT NULL
+                                   AND OBJECT_ID(N'[dbo].[VW_SYS_AUDIT_TIMELINE]', N'V') IS NOT NULL
+                                  THEN 1 ELSE 0 END")
                     .ConfigureAwait(false);
 
                 return ok == 1;
