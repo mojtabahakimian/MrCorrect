@@ -508,7 +508,9 @@ namespace Prg_Proccessy.AUDIT
         /// حساس HTML (&lt; &gt; &amp; ') همچنان escape می‌شوند، پس امن‌تر از
         /// UnsafeRelaxedJsonEscaping است.
         /// </summary>
-        internal static readonly JsonSerializerOptions JsonOptions = new()
+        // public است چون Prg_UI اسمبلی جداست و شیم AuditLogger هم باید از
+        // همین سیاست سریال‌سازی استفاده کند؛ با internal کامپایل نمی‌شد.
+        public static readonly JsonSerializerOptions JsonOptions = new()
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
         };
