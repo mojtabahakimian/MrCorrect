@@ -1,0 +1,65 @@
+# اعتبارسنجی سیستم سابقه و ردیابی فعالیت کاربران.
+#
+# چرا این فایل لازم است: پروژه‌ی Prg_UI روی net8.0-windows7.0 با WPF/XAML
+# است و روی لینوکس کامپایل نمی‌شود، پس تغییرات UI فقط روی یک ماشین ویندوزی
+# قابل راستی‌آزمایی است. این workflow همان کار را روی راهانداز ویندوز
+# GitHub انجام می‌دهد: کل Solution کامپایل می‌شود و بعد ۶۸ بررسی موتور
+# سابقه اجرا می‌شود.
+#
+# عمداً هیچ تست GUI (FlaUI) اینجا نیست: آن تست‌ها به SQL Server و یک
+# دسکتاپ تعاملی واقعی نیاز دارند و روی راهانداز CI شکست می‌خورند.
+
+name: Audit Trail CI
+
+on:
+  push:
+    branches: [ "claude/scriptsqly-review-prep-ojn0s3" ]
+  pull_request:
+  workflow_dispatch:
+
+# اگر چند push پشت‌سرهم آمد، فقط آخری اجرا شود تا دقیقه‌ی CI هدر نرود.
+concurrency:
+  group: audit-trail-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ۱) بازخورد سریع: موتور سابقه net8.0 خالص است و روی لینوکس هم اجرا می‌شود.
+  audit-tests-linux:
+    name: تست‌های موتور سابقه (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build Prg_Proccessy
+        run: dotnet build Prg_Proccessy/Prg_Proccessy.csproj --configuration Release
+
+      - name: اجرای تست‌های سابقه
+        run: dotnet run --project Tests/AuditTests/AuditTests.csproj --configuration Release
+
+  # ۲) راستی‌آزمایی واقعی: کامپایل WPF/XAML که فقط روی ویندوز ممکن است.
+  windows-build:
+    name: کامپایل کامل Solution + تست‌ها (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Prg_UI.csproj به External/ScriptSqly ارجاع می‌دهد و آن یک
+          # submodule است؛ بدون این خط restore شکست می‌خورد.
+          submodules: recursive
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore MrCorrect.sln
+
+      - name: Build Solution
+        run: dotnet build MrCorrect.sln --configuration Debug --no-restore
+
+      - name: اجرای تست‌های سابقه روی ویندوز
+        run: dotnet run --project Tests/AuditTests/AuditTests.csproj --configuration Release
