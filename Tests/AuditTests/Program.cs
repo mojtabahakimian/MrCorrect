@@ -98,6 +98,7 @@ internal static class Program
         await ValidateRealDatabaseHardAsync();
         await ValidateLegacyWritesAsync();
         await ValidateCommandListenerAsync();
+        await ValidateFormContextAndCapAsync();
 
         Console.WriteLine($"\n\nنتیجه:  موفق {_pass}  |  ناموفق {_fail}");
         return _fail == 0 ? 0 : 1;
@@ -1158,6 +1159,91 @@ SELECT TOP (@Take)
             && ev.Where(e => e.Title == "کار رضا").All(e => e.SessionId == s2));
         Ok("خروج کاربر ثبت شد",
             ev.Any(e => e.Action == AuditAction.Logout && e.UserName == "ALI"));
+
+        ClearSpill();
+    }
+
+
+    // ── ۱۴) زمینه‌ی فرم و شفاف بودن سقف عملیات گروهی ──────────────────
+    private static async Task ValidateFormContextAndCapAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("زمینه‌ی فرم و سقف عملیات گروهی");
+
+        using var probe = new SqlConnection(cs);
+        await probe.OpenAsync();
+        await probe.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[HEAD_LST]', N'U') IS NULL
+                CREATE TABLE [dbo].[HEAD_LST] (NUMBER INT, TAG INT, CUST_NO NVARCHAR(20), MABL_HAZ FLOAT);
+            DELETE FROM [dbo].[HEAD_LST];
+            TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+        AuditService.AttachUser(78, "Controller", 1405, "1.0");
+
+        // کاربر فرم پیش‌فاکتور را باز می‌کند، بعد یک نوشتن انجام می‌دهد
+        Audit.Form("HEAD_LST_PISHFROOSH2");
+        using (var db = new SqlConnection(cs))
+        {
+            db.Open();
+            db.Execute("INSERT INTO dbo.HEAD_LST (NUMBER, TAG, CUST_NO) VALUES (1234, 20, N'C-5')");
+
+            // تراکنشی، از فرم دیگری
+            Audit.Form("HEAD_LST_FROOSH22");
+            using var tx = db.BeginTransaction();
+            db.Execute("UPDATE dbo.HEAD_LST SET MABL_HAZ = 500 WHERE NUMBER = 1234", null, tx);
+            tx.Commit();
+        }
+        await AuditService.ShutdownAsync(15000);
+
+        var rows = (await probe.QueryAsync(
+            "SELECT [ACTION],[FORM_NAME],[TITLE] FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'HEAD_LST'")).ToList();
+
+        Ok("درج، نام فرم را با خود دارد",
+            rows.Any(r => (string)r.ACTION == "INSERT" && (string?)r.FORM_NAME == "HEAD_LST_PISHFROOSH2"),
+            rows.FirstOrDefault(r => (string)r.ACTION == "INSERT")?.FORM_NAME as string);
+        Ok("ویرایش تراکنشی، نام فرم خودش را دارد",
+            rows.Any(r => (string)r.ACTION == "UPDATE" && (string?)r.FORM_NAME == "HEAD_LST_FROOSH22"),
+            rows.FirstOrDefault(r => (string)r.ACTION == "UPDATE")?.FORM_NAME as string);
+
+        // ── سقف عملیات گروهی باید دیده شود، نه بی‌صدا ──────────────────
+        await probe.ExecuteAsync("TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT]; DELETE FROM [dbo].[HEAD_LST];");
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+        AuditService.AttachUser(78, "Controller", 1405, "1.0");
+        Audit.Form("BULK_FORM");
+
+        const int bulk = 620;   // بیشتر از سقف ۵۰۰
+        using (var db = new SqlConnection(cs))
+        {
+            db.Open();
+            using var tx = db.BeginTransaction();
+            for (var i = 0; i < bulk; i++)
+                db.Execute($"INSERT INTO dbo.HEAD_LST (NUMBER, TAG) VALUES ({i}, 20)", null, tx);
+            tx.Commit();
+        }
+        await AuditService.ShutdownAsync(30000);
+
+        var logged = await probe.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'HEAD_LST'");
+        var summary = (await probe.QueryAsync(
+            "SELECT [TITLE],[FORM_NAME],[SEVERITY] FROM [dbo].[SYS_AUDIT_EVENT] WHERE [TITLE] LIKE N'%عملیات گروهی%'")).ToList();
+
+        Ok("تا سقف، جزئیات ثبت شد", logged == 500, logged.ToString());
+        Ok("ناقص بودن، خودش یک رویداد شد (بی‌صدا نبود)", summary.Count == 1, summary.Count.ToString());
+        if (summary.Count == 1)
+        {
+            var t = (string)summary[0].TITLE;
+            Ok("رویداد خلاصه تعداد کل و تعداد ثبت‌نشده را می‌گوید",
+                t.Contains(bulk.ToString()) && t.Contains((bulk - 500).ToString()), t);
+            Ok("رویداد خلاصه حساس علامت خورده", summary[0].SEVERITY == (byte)3);
+            Ok("رویداد خلاصه نام فرم را دارد", (string?)summary[0].FORM_NAME == "BULK_FORM");
+        }
+        Ok("شمارنده‌ی از دست رفته واقعیت را نشان می‌دهد",
+            AuditService.DroppedCount >= bulk - 500, AuditService.DroppedCount.ToString());
 
         ClearSpill();
     }

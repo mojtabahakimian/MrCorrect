@@ -61,6 +61,17 @@ namespace Prg_Proccessy.AUDIT
         private sealed class Pending
         {
             public long ConnectionHash;
+
+            /// <summary>نام فرمی که تراکنش از آن شروع شده.</summary>
+            public string? FormName;
+
+            /// <summary>
+            /// تعداد دستورهایی که به‌خاطر سقف نگه داشته نشدند. صفر نبودنش
+            /// یعنی جزئیات ناقص است و باید در خط زمانی دیده شود — سابقه‌ی
+            /// ناقصِ بی‌صدا بدترین حالت است.
+            /// </summary>
+            public int Skipped;
+
             public readonly List<(string Sql, object? Parameters)> Rows = new();
         }
 
@@ -176,18 +187,27 @@ namespace Prg_Proccessy.AUDIT
                 // SqlParameterCollection پاس داده شود: تحلیل‌گر آن نوع را
                 // نمی‌شناسد و مقدارها resolve نمی‌شدند، پس «مقدار جدید فیلد»
                 // در DETAIL خالی می‌ماند.
-                AuditSqlSniffer.Observe(sql, Snapshot(cmd.Parameters));
+                AuditSqlSniffer.Observe(sql, Snapshot(cmd.Parameters), Audit.CurrentForm);
                 return;
             }
 
             // داخل تراکنش: تا معلوم شدن سرنوشت نگه داشته می‌شود.
-            if (_pending.Count >= MaxOpenTransactions && !_pending.ContainsKey(txId.Value)) return;
+            if (_pending.Count >= MaxOpenTransactions && !_pending.ContainsKey(txId.Value))
+            {
+                AuditService.CountDropped(1);
+                return;
+            }
 
             var slot = _pending.GetOrAdd(txId.Value, _ => new Pending());
             lock (slot)
             {
-                if (slot.Rows.Count >= MaxPerTransaction) return;
+                if (slot.Rows.Count >= MaxPerTransaction)
+                {
+                    slot.Skipped++;
+                    return;
+                }
                 slot.ConnectionHash = ConnectionKey(cmd.Connection);
+                slot.FormName ??= Audit.CurrentForm;
                 // پارامترها به تراکنش گره خورده‌اند و ممکن است پس از پایان
                 // دستور بازاستفاده شوند، پس همین‌جا کپی می‌شوند.
                 slot.Rows.Add((sql, Snapshot(cmd.Parameters)));
@@ -206,9 +226,29 @@ namespace Prg_Proccessy.AUDIT
 
             lock (slot)
             {
+                var form = slot.FormName;
+
                 foreach (var (sql, ps) in slot.Rows)
                 {
-                    AuditSqlSniffer.Observe(sql, ps);
+                    AuditSqlSniffer.Observe(sql, ps, form);
+                }
+
+                // عملیات گروهی بزرگ‌تر از سقف: به‌جای اینکه بقیه بی‌صدا گم
+                // شوند، خودِ ناقص بودن یک رویداد می‌شود تا در بررسی دیده شود.
+                if (slot.Skipped > 0)
+                {
+                    var total = slot.Rows.Count + slot.Skipped;
+                    Audit.Write(new AuditEventDraft
+                    {
+                        Category = AuditCategory.Data,
+                        Severity = AuditSeverity.Sensitive,
+                        Action = AuditAction.Update,
+                        FormName = form,
+                        Title = $"عملیات گروهی: {total} تغییر در یک تراکنش — "
+                              + $"جزئیات {slot.Skipped} مورد به‌دلیل سقف ثبت نشد",
+                        IsCritical = true,
+                    });
+                    AuditService.CountDropped(slot.Skipped);
                 }
             }
         }

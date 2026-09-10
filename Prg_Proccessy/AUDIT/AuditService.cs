@@ -295,6 +295,12 @@ namespace Prg_Proccessy.AUDIT
         /// افزودن رویداد به صف. این تنها متدی است که از نخ رابط کاربری صدا
         /// زده می‌شود و عمداً هیچ کاری جز یک نوشتن در صف انجام نمی‌دهد.
         /// </summary>
+        /// <summary>شمردن رویدادهایی که جای دیگری از دست رفته‌اند، تا شمارنده واقعی بماند.</summary>
+        internal static void CountDropped(int count)
+        {
+            if (count > 0) Interlocked.Add(ref _dropped, count);
+        }
+
         internal static void Enqueue(AuditEvent evt)
         {
             var channel = _channel;
