@@ -165,9 +165,20 @@ namespace Prg_Proccessy.AUDIT
             var current = _session;
             if (current is null) return;
 
+            // خروج و ورود دوباره بدون بسته شدن برنامه ممکن است
+            // (WinBase پنجره‌ی لاگین را دوباره باز می‌کند و AuditService
+            // همچنان در حال کار است). در آن حالت Start زودتر برمی‌گردد و
+            // نشست قبلی باقی می‌ماند؛ اگر فقط نام کاربر عوض شود، یک سطر
+            // نشست حاوی رویدادهای دو کاربر مختلف می‌شود و سطح نشست به
+            // کاربر دوم نسبت پیدا می‌کند. پس با تغییر واقعی کاربر، نشست
+            // تازه‌ای باز می‌شود.
+            var switching = current.UserId is not null and not 0
+                            && userId is not null and not 0
+                            && current.UserId != userId;
+
             _session = new AuditSessionInfo
             {
-                SessionId = current.SessionId,
+                SessionId = switching ? Guid.NewGuid() : current.SessionId,
                 UserId = userId ?? current.UserId,
                 UserName = Trim(userName, 50) ?? current.UserName,
                 WindowsUser = current.WindowsUser,
@@ -181,7 +192,10 @@ namespace Prg_Proccessy.AUDIT
                 StartedAt = current.StartedAt,
             };
 
-            _ = Task.Run(UpdateSessionUserAsync);
+            // نشست تازه باید سطر خودش را داشته باشد؛ در غیر این صورت فقط
+            // سطر موجود به‌روز می‌شود.
+            if (switching) _ = Task.Run(WriteSessionRowAsync);
+            else _ = Task.Run(UpdateSessionUserAsync);
         }
 
         private static async Task UpdateSessionUserAsync()

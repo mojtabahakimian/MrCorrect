@@ -52,6 +52,20 @@ namespace Prg_Proccessy.AUDIT
         private static readonly Regex RxDeleteBare =
             new(@"\bDELETE\s+(?:TOP\s*\([^)]*\)\s*)?(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]{2,})\]?", Opts);
 
+        // MERGE نه «INSERT INTO» دارد نه «UPDATE <جدول> SET»، پس با الگوهای
+        // بالا اصلاً دیده نمی‌شد. در کد واقعی استفاده می‌شود:
+        // GeneralOptionManager.cs و حضور و غیاب حقوق.
+        private static readonly Regex RxMerge =
+            new(@"\bMERGE\s+(?:INTO\s+)?(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
+
+        private static readonly Regex RxTruncate =
+            new(@"\bTRUNCATE\s+TABLE\s+(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?", Opts);
+
+        // «SELECT ... INTO <جدول> FROM» یک جدول تازه می‌سازد و پرش می‌کند.
+        // شرط FROM لازم است تا با «INSERT INTO» اشتباه گرفته نشود.
+        private static readonly Regex RxSelectInto =
+            new(@"\bSELECT\b(?![^;]{0,4000}?\bINSERT\b)[^;]{0,4000}?\bINTO\s+(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?\s+FROM\b", Opts);
+
         /// <summary>ستون‌های کلیدی رایج، به ترتیب اولویت.</summary>
         private static readonly Regex RxKey =
             new(@"\b(N_S|NUMBER1|NUMBER|IDH|IDD|CODE|N_SERI|ID)\s*=\s*(N?'[^']*'|@[A-Za-z_][A-Za-z0-9_]*|[0-9.]+)", Opts);
@@ -147,13 +161,102 @@ namespace Prg_Proccessy.AUDIT
         /// با SELECT پر نشود. بدون این غربال، یک تراکنش که چند ده SELECT
         /// می‌زند سقف صف را پر می‌کرد و نوشتن‌های واقعی از سابقه می‌افتادند.
         /// </summary>
+        /// <summary>
+        /// نسخه‌ای از دستور که فقط برای «تشخیص» به کار می‌رود: محتوای
+        /// کامنت‌ها و رشته‌های نقل‌قولی با فاصله جایگزین می‌شود.
+        ///
+        /// چرا لازم است: تشخیص با جست‌وجوی کلمه انجام می‌شود، و بدون این کار
+        /// یک SELECT بی‌ضرر که رشته یا کامنتش کلمه‌ی نوشتنی دارد، رویداد
+        /// جعلی می‌ساخت. نمونه‌ی واقعیِ آزموده‌شده:
+        ///
+        ///     SELECT * FROM CUST_HESAB WHERE MOLAH = N'DELETE FROM HEAD_LST'
+        ///
+        /// که یک «حذف فاکتور» کاملاً ساختگی ثبت می‌کرد. در سابقه‌ای که مبنای
+        /// بررسی کاربران است، رویداد دروغ از رویداد نبوده هم بدتر است.
+        ///
+        /// طول رشته عمداً دست‌نخورده می‌ماند تا اندیس‌ها معتبر بمانند: مقدارها
+        /// بعداً از متن اصلی خوانده می‌شوند، نه از این نسخه (وگرنه مقدار
+        /// فیلدها و کلید رکورد از بین می‌رفت).
+        /// </summary>
+        internal static string MaskLiterals(string sql)
+        {
+            if (string.IsNullOrEmpty(sql)) return sql;
+            if (sql.IndexOf('\'') < 0 && sql.IndexOf("--", StringComparison.Ordinal) < 0
+                && sql.IndexOf("/*", StringComparison.Ordinal) < 0)
+            {
+                return sql;
+            }
+
+            var buf = sql.ToCharArray();
+            var i = 0;
+            while (i < buf.Length)
+            {
+                var c = buf[i];
+
+                if (c == '\'')
+                {
+                    buf[i++] = ' ';
+                    while (i < buf.Length)
+                    {
+                        if (buf[i] == '\'')
+                        {
+                            // '' یعنی یک نقل‌قول داخل رشته، نه پایان آن.
+                            if (i + 1 < buf.Length && buf[i + 1] == '\'')
+                            {
+                                buf[i++] = ' ';
+                                buf[i++] = ' ';
+                                continue;
+                            }
+                            buf[i++] = ' ';
+                            break;
+                        }
+                        if (buf[i] != '\n' && buf[i] != '\r') buf[i] = ' ';
+                        i++;
+                    }
+                    continue;
+                }
+
+                if (c == '-' && i + 1 < buf.Length && buf[i + 1] == '-')
+                {
+                    while (i < buf.Length && buf[i] != '\n') buf[i++] = ' ';
+                    continue;
+                }
+
+                if (c == '/' && i + 1 < buf.Length && buf[i + 1] == '*')
+                {
+                    buf[i++] = ' ';
+                    buf[i++] = ' ';
+                    while (i < buf.Length)
+                    {
+                        if (buf[i] == '*' && i + 1 < buf.Length && buf[i + 1] == '/')
+                        {
+                            buf[i++] = ' ';
+                            buf[i++] = ' ';
+                            break;
+                        }
+                        if (buf[i] != '\n' && buf[i] != '\r') buf[i] = ' ';
+                        i++;
+                    }
+                    continue;
+                }
+
+                i++;
+            }
+
+            return new string(buf);
+        }
+
         public static bool LooksLikeWrite(string? sql)
         {
             if (string.IsNullOrEmpty(sql)) return false;
-            return sql.IndexOf("INSERT", StringComparison.OrdinalIgnoreCase) >= 0
-                || sql.IndexOf("UPDATE", StringComparison.OrdinalIgnoreCase) >= 0
-                || sql.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0
-                || sql.IndexOf("EXEC", StringComparison.OrdinalIgnoreCase) >= 0;
+            var probe = MaskLiterals(sql);
+            return probe.IndexOf("INSERT", StringComparison.OrdinalIgnoreCase) >= 0
+                || probe.IndexOf("UPDATE", StringComparison.OrdinalIgnoreCase) >= 0
+                || probe.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0
+                || probe.IndexOf("MERGE", StringComparison.OrdinalIgnoreCase) >= 0
+                || probe.IndexOf("TRUNCATE", StringComparison.OrdinalIgnoreCase) >= 0
+                || probe.IndexOf("INTO", StringComparison.OrdinalIgnoreCase) >= 0
+                || probe.IndexOf("EXEC", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
@@ -168,12 +271,21 @@ namespace Prg_Proccessy.AUDIT
 
             try
             {
-                // خروج سریع: اکثر قریب‌به‌اتفاق دستورها SELECT هستند.
-                var hasInsert = sql.IndexOf("INSERT", StringComparison.OrdinalIgnoreCase) >= 0;
-                var hasUpdate = sql.IndexOf("UPDATE", StringComparison.OrdinalIgnoreCase) >= 0;
-                var hasDelete = sql.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0;
+                // تشخیص روی نسخه‌ی ماسک‌شده انجام می‌شود تا کلمه‌ای که داخل
+                // کامنت یا رشته است رویداد جعلی نسازد. طول یکی است، پس
+                // اندیس‌ها روی متن اصلی معتبر می‌مانند و مقدارها بعداً از
+                // خودِ متن اصلی خوانده می‌شوند.
+                var scan = MaskLiterals(sql);
 
-                if (!hasInsert && !hasUpdate && !hasDelete)
+                // خروج سریع: اکثر قریب‌به‌اتفاق دستورها SELECT هستند.
+                var hasInsert = scan.IndexOf("INSERT", StringComparison.OrdinalIgnoreCase) >= 0;
+                var hasUpdate = scan.IndexOf("UPDATE", StringComparison.OrdinalIgnoreCase) >= 0;
+                var hasDelete = scan.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0;
+                var hasMerge = scan.IndexOf("MERGE", StringComparison.OrdinalIgnoreCase) >= 0;
+                var hasTrunc = scan.IndexOf("TRUNCATE", StringComparison.OrdinalIgnoreCase) >= 0;
+                var hasInto = scan.IndexOf("INTO", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (!hasInsert && !hasUpdate && !hasDelete && !hasMerge && !hasTrunc && !hasInto)
                 {
                     // رویه‌ی ذخیره‌شده: نوشتن داخل رویه از دید این لایه پنهان
                     // است، ولی خودِ «اجرای رویه» رویداد مهمی است — مثل
@@ -193,13 +305,24 @@ namespace Prg_Proccessy.AUDIT
                 // است هم UPDATE هدر و هم چند INSERT ردیف داشته باشد؛ نسخه‌ی
                 // قبلی فقط اولی را می‌دید و بقیه بی‌صدا گم می‌شدند.
                 var statements = new List<Statement>();
-                if (hasUpdate) Collect(statements, RxUpdate, sql, AuditAction.Update);
-                if (hasInsert) Collect(statements, RxInsert, sql, AuditAction.Insert);
-                if (hasDelete)
+
+                // MERGE اول: بدنه‌اش خودش UPDATE و INSERT دارد و اگر آن‌ها
+                // جدا شمرده شوند، یک دستور چند رویداد بی‌معنا می‌سازد.
+                if (hasMerge) Collect(statements, RxMerge, scan, AuditAction.Update);
+
+                if (statements.Count == 0)
                 {
-                    Collect(statements, RxDeleteFrom, sql, AuditAction.Delete);
-                    if (statements.Count == 0) Collect(statements, RxDeleteBare, sql, AuditAction.Delete);
+                    if (hasUpdate) Collect(statements, RxUpdate, scan, AuditAction.Update);
+                    if (hasInsert) Collect(statements, RxInsert, scan, AuditAction.Insert);
+                    if (hasDelete)
+                    {
+                        Collect(statements, RxDeleteFrom, scan, AuditAction.Delete);
+                        if (statements.Count == 0) Collect(statements, RxDeleteBare, scan, AuditAction.Delete);
+                    }
                 }
+
+                if (hasTrunc) Collect(statements, RxTruncate, scan, AuditAction.Delete);
+                if (hasInto && !hasInsert) Collect(statements, RxSelectInto, scan, AuditAction.Insert);
 
                 if (statements.Count == 0) return;
 

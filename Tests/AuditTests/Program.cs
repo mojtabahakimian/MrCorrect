@@ -89,6 +89,8 @@ internal static class Program
         ValidateSetClauseParser();
         ValidateWriteFilter();
         ValidateReviewFixes();
+        ValidateAdversarialSql();
+        ValidateUserSwitch();
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
@@ -1063,6 +1065,99 @@ SELECT TOP (@Take)
         // و مقدار واقعاً در دیتابیس درست است
         var mabl = await probe.ExecuteScalarAsync<double?>("SELECT MABL_HAZ FROM dbo.HEAD_LST WHERE NUMBER = 1234");
         Ok("دیتابیس واقعاً همان را دارد که سابقه می‌گوید", mabl == 135000, mabl?.ToString());
+
+        ClearSpill();
+    }
+
+
+    // ── ۱۲) SQL خصمانه: کامنت، رشته، و شکل‌های نوشتنی کمتر رایج ────────
+    private static void ValidateAdversarialSql()
+    {
+        Section("SQL خصمانه");
+
+        (string Label, string Sql, bool ShouldLog, string? Entity)[] cases =
+        {
+            ("رشته‌ی حاوی DELETE",
+             "SELECT * FROM CUST_HESAB WHERE MOLAH = N'DELETE FROM HEAD_LST'", false, null),
+            ("کامنت خطی حاوی UPDATE",
+             "-- UPDATE HEAD_LST SET MABL_HAZ = 1\nSELECT 1 FROM HEAD_LST", false, null),
+            ("کامنت بلوکی حاوی INSERT",
+             "/* INSERT INTO HEAD_LST (A) VALUES (1) */ SELECT 1", false, null),
+            ("ستون به نام IS_DELETED",
+             "SELECT IS_DELETED FROM HEAD_LST WHERE NUMBER = 1", false, null),
+            ("رشته با نقل‌قول دوتایی",
+             "SELECT * FROM T WHERE N = N'it''s DELETE FROM X'", false, null),
+            ("MERGE واقعی (GeneralOptionManager)",
+             @"MERGE dbo.GENERAL_OPTIONS AS target
+               USING (SELECT @OptionName AS OptionName) AS source
+               ON (target.OptionName = source.OptionName)
+               WHEN MATCHED THEN UPDATE SET OptionValue = @OptionValue
+               WHEN NOT MATCHED THEN INSERT (OptionName, OptionValue) VALUES (@OptionName, @OptionValue);",
+             true, "GENERAL_OPTIONS"),
+            ("TRUNCATE TABLE", "TRUNCATE TABLE dbo.TEMP_CALC", true, "TEMP_CALC"),
+            ("SELECT ... INTO", "SELECT * INTO dbo.BACKUP_TBL FROM dbo.HEAD_LST", true, "BACKUP_TBL"),
+            ("UPDATE واقعی همچنان کار کند",
+             "UPDATE dbo.HEAD_LST SET MABL_HAZ = 5 WHERE NUMBER = 7", true, "HEAD_LST"),
+        };
+
+        foreach (var c in cases)
+        {
+            ClearSpill();
+            AuditService.Start(DeadConnection, 1, "u", "1", 1405, "d");
+            AuditSqlSniffer.Observe(c.Sql);
+            AuditService.ShutdownAsync(6000).GetAwaiter().GetResult();
+
+            var ev = ReadSpill().Where(e => e.Category == AuditCategory.Data).ToList();
+            var logged = ev.Count > 0;
+
+            if (logged != c.ShouldLog)
+            {
+                Ok(c.Label, false, logged ? $"ثبت شد: {ev[0].Action} {ev[0].Entity}" : "ثبت نشد");
+            }
+            else if (c.ShouldLog && !string.Equals(ev[0].Entity, c.Entity, StringComparison.OrdinalIgnoreCase))
+            {
+                Ok(c.Label, false, $"جدول {ev[0].Entity} به‌جای {c.Entity}");
+            }
+            else
+            {
+                Ok(c.Label, true);
+            }
+        }
+
+        ClearSpill();
+    }
+
+    // ── ۱۳) تعویض کاربر بدون بسته شدن برنامه ──────────────────────────
+    private static void ValidateUserSwitch()
+    {
+        Section("تعویض کاربر در همان اجرا");
+
+        ClearSpill();
+        AuditService.Start(DeadConnection, 0, "-", "1", 1405, "d");
+
+        AuditService.AttachUser(10, "ALI", 1405, "1");
+        var s1 = AuditService.CurrentSession?.SessionId;
+        Audit.Write(new AuditEventDraft { Category = AuditCategory.Data, Action = AuditAction.Update, Title = "کار علی" });
+
+        // خروج و ورود کاربر دیگر، بدون بسته شدن برنامه
+        Audit.Logout("ALI");
+        AuditService.AttachUser(20, "REZA", 1405, "1");
+        var s2 = AuditService.CurrentSession?.SessionId;
+        Audit.Write(new AuditEventDraft { Category = AuditCategory.Data, Action = AuditAction.Update, Title = "کار رضا" });
+
+        AuditService.ShutdownAsync(8000).GetAwaiter().GetResult();
+        var ev = ReadSpill();
+
+        Ok("با تعویض کاربر، نشست تازه باز می‌شود", s1 is not null && s2 is not null && s1 != s2, $"{s1} / {s2}");
+        Ok("کار علی به علی نسبت دارد",
+            ev.Any(e => e.Title == "کار علی" && e.UserName == "ALI" && e.UserId == 10));
+        Ok("کار رضا به رضا نسبت دارد",
+            ev.Any(e => e.Title == "کار رضا" && e.UserName == "REZA" && e.UserId == 20));
+        Ok("رویدادهای دو کاربر در یک نشست قاطی نشدند",
+            ev.Where(e => e.Title == "کار علی").All(e => e.SessionId == s1)
+            && ev.Where(e => e.Title == "کار رضا").All(e => e.SessionId == s2));
+        Ok("خروج کاربر ثبت شد",
+            ev.Any(e => e.Action == AuditAction.Logout && e.UserName == "ALI"));
 
         ClearSpill();
     }
