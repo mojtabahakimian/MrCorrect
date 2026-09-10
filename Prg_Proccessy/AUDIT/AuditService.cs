@@ -319,6 +319,23 @@ namespace Prg_Proccessy.AUDIT
                 }
             }
             catch (Exception) { }
+
+            // دسته‌ای که نخ پس‌زمینه از صف برداشته ولی هنوز ننوشته است.
+            // این‌ها در تخلیه‌ی بالا نمی‌آیند چون دیگر در صف نیستند.
+            //
+            // ریسک پذیرفته‌شده: اگر نخ پس‌زمینه بعد از این لحظه موفق شود
+            // بنویسد، همان رویدادها یک بار هم از روی دیسک منتقل می‌شوند و
+            // تکراری می‌مانند. در لحظه‌ی بسته شدن برنامه این پنجره خیلی باریک
+            // است، و رویداد تکراری از رویداد گم‌شده به‌مراتب بی‌ضررتر است.
+            try
+            {
+                var inFlight = _inFlight;
+                if (worker is not null && !worker.IsCompleted && inFlight is { Count: > 0 })
+                {
+                    TrySpill(inFlight);
+                }
+            }
+            catch (Exception) { }
         }
 
         // ── تولید ────────────────────────────────────────────────────────
@@ -328,6 +345,17 @@ namespace Prg_Proccessy.AUDIT
         /// زده می‌شود و عمداً هیچ کاری جز یک نوشتن در صف انجام نمی‌دهد.
         /// </summary>
         /// <summary>شمردن رویدادهایی که جای دیگری از دست رفته‌اند، تا شمارنده واقعی بماند.</summary>
+        /// <summary>
+        /// دسته‌ای که همین حالا در حال نوشتن روی دیتابیس است.
+        ///
+        /// این رویدادها دیگر در صف نیستند (از آن برداشته شده‌اند) ولی هنوز
+        /// روی دیتابیس هم ننشسته‌اند. اگر نخ پس‌زمینه داخل یک فراخوانی SQLِ
+        /// معلق گیر کند و کاربر برنامه را ببندد، تخلیه‌ی صف به آن‌ها نمی‌رسد
+        /// و با بسته شدن process از بین می‌روند. پس مسیر خاموش‌سازی این را هم
+        /// روی دیسک می‌گذارد.
+        /// </summary>
+        private static volatile List<AuditEvent>? _inFlight;
+
         internal static void CountDropped(int count)
         {
             if (count > 0) Interlocked.Add(ref _dropped, count);
@@ -518,6 +546,8 @@ namespace Prg_Proccessy.AUDIT
 
         private static async Task FlushAsync(List<AuditEvent> batch)
         {
+            _inFlight = batch;
+
             if (!_schemaReady)
             {
                 // تلاش دوباره برای ساخت ساختار فقط هر چند دقیقه یک بار.
@@ -597,12 +627,16 @@ namespace Prg_Proccessy.AUDIT
                     // روی دیسک محلی نگه داشته می‌شود؛ تکه‌های نوشته‌شده دوباره
                     // ذخیره نمی‌شوند تا ردیف تکراری ایجاد نشود.
                     TrySpill(batch.GetRange(index, batch.Count - index));
+                    _inFlight = null;
                     return;
                 }
 
                 Interlocked.Add(ref _written, chunk.Count);
                 index += chunk.Count;
             }
+
+            // دسته با موفقیت نوشته شد؛ دیگر «در حال پرواز» نیست.
+            _inFlight = null;
 
             try
             {

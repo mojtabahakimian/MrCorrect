@@ -4,6 +4,8 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Prg_Proccessy.AUDIT;
 using Prg_Proccessy.CNNMANAGER;
 using System.Diagnostics;
+using System.Net.Sockets;
+using System.Net;
 using System.Reflection;
 using System.Text.Json;
 
@@ -92,6 +94,7 @@ internal static class Program
         ValidateAdversarialSql();
         ValidateUserSwitch();
         ValidateShutdownWhileWorkerStuck();
+        await ValidateStuckAfterDequeueAsync();
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
@@ -1316,6 +1319,144 @@ SELECT TOP (@Take)
             sw.Elapsed.TotalSeconds < 15, $"{sw.Elapsed.TotalSeconds:N1}s");
 
         ClearSpill();
+    }
+
+
+    // ── ۱۶) گیر کردن نخ پس‌زمینه *بعد از* برداشتن دسته از صف ───────────
+    //
+    // حالت سخت‌تر از بخش قبل: دیتابیس هنگام راه‌اندازی سالم است، پس نخ
+    // پس‌زمینه ساختار را می‌سازد و شروع به خواندن از صف می‌کند. بعد دیتابیس
+    // معلق می‌شود در حالی که یک دسته از صف برداشته شده و در حال نوشتن است.
+    // آن رویدادها دیگر در صف نیستند، پس تخلیه‌ی صف به آن‌ها نمی‌رسد.
+    //
+    // برای بازسازی، یک پروکسی TCP بین برنامه و SQL Server گذاشته می‌شود که
+    // با یک سوئیچ، انتقال داده را متوقف می‌کند بدون آنکه اتصال را ببندد.
+    private static async Task ValidateStuckAfterDequeueAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("گیر کردن نخ پس‌زمینه پس از برداشتن دسته");
+
+        var upstream = new SqlConnectionStringBuilder(cs);
+        var hostPort = upstream.DataSource.Split(',');
+        var host = hostPort[0];
+        var port = hostPort.Length > 1 ? int.Parse(hostPort[1]) : 1433;
+
+        using var proxy = new FreezableProxy(host, port);
+        proxy.Start();
+
+        var viaProxy = new SqlConnectionStringBuilder(cs)
+        {
+            DataSource = $"127.0.0.1,{proxy.Port}",
+        }.ConnectionString;
+
+        ClearSpill();
+        AuditService.Start(viaProxy, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+
+        // صبر تا نخ پس‌زمینه واقعاً راه بیفتد و ساختار را ببیند
+        for (var i = 0; i < 40 && !AuditService.SchemaReady; i++) await Task.Delay(250);
+        Ok("دیتابیس در ابتدا سالم بود و ساختار آماده شد", AuditService.SchemaReady);
+
+        // از این لحظه هر بایتی که رد و بدل شود معلق می‌ماند
+        proxy.Freeze();
+
+        const int n = 80;
+        for (var i = 0; i < n; i++)
+            Audit.Delete("HEAD_LST", $"NUMBER={8000 + i};TAG=2", $"حذف فاکتور {8000 + i}");
+
+        // فرصت بده تا نخ پس‌زمینه دسته را از صف بردارد و روی SQL گیر کند
+        await Task.Delay(3000);
+
+        await AuditService.ShutdownAsync(300);
+
+        var onDisk = ReadSpill().Count;
+        Ok($"هر {n} رویداد روی دیسک نشستند، حتی آن‌هایی که از صف برداشته شده بودند",
+            onDisk >= n, $"{onDisk} از {n}");
+
+        ClearSpill();
+    }
+
+    /// <summary>
+    /// پروکسی TCP ساده که با Freeze انتقال داده را متوقف می‌کند ولی اتصال را
+    /// باز نگه می‌دارد — یعنی دقیقاً «دیتابیس معلق»، نه «دیتابیس قطع».
+    /// </summary>
+    private sealed class FreezableProxy : IDisposable
+    {
+        private readonly string _host;
+        private readonly int _port;
+        private readonly TcpListener _listener;
+        private volatile bool _frozen;
+        private volatile bool _stopped;
+
+        public FreezableProxy(string host, int port)
+        {
+            _host = host;
+            _port = port;
+            _listener = new TcpListener(IPAddress.Loopback, 0);
+        }
+
+        public int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
+
+        public void Start()
+        {
+            _listener.Start();
+            _ = Task.Run(AcceptLoopAsync);
+        }
+
+        public void Freeze() => _frozen = true;
+
+        private async Task AcceptLoopAsync()
+        {
+            while (!_stopped)
+            {
+                TcpClient client;
+                try { client = await _listener.AcceptTcpClientAsync(); }
+                catch { return; }
+                _ = Task.Run(() => PumpAsync(client));
+            }
+        }
+
+        private async Task PumpAsync(TcpClient client)
+        {
+            try
+            {
+                using (client)
+                using (var server = new TcpClient())
+                {
+                    await server.ConnectAsync(_host, _port);
+                    using var cs = client.GetStream();
+                    using var ss = server.GetStream();
+                    await Task.WhenAny(Copy(cs, ss), Copy(ss, cs));
+                }
+            }
+            catch { }
+        }
+
+        private async Task Copy(NetworkStream from, NetworkStream to)
+        {
+            var buf = new byte[16 * 1024];
+            while (!_stopped)
+            {
+                // پس از Freeze دیگر چیزی منتقل نمی‌شود، ولی سوکت باز می‌ماند:
+                // طرف مقابل تا سررسید فرمان منتظر پاسخی می‌ماند که نمی‌آید.
+                if (_frozen) { await Task.Delay(250); continue; }
+
+                int read;
+                try { read = await from.ReadAsync(buf, 0, buf.Length); }
+                catch { return; }
+                if (read <= 0) return;
+
+                try { await to.WriteAsync(buf, 0, read); }
+                catch { return; }
+            }
+        }
+
+        public void Dispose()
+        {
+            _stopped = true;
+            try { _listener.Stop(); } catch { }
+        }
     }
 
 }

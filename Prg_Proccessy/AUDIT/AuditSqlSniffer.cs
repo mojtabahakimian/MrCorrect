@@ -66,6 +66,45 @@ namespace Prg_Proccessy.AUDIT
         private static readonly Regex RxSelectInto =
             new(@"\bSELECT\b(?![^;]{0,4000}?\bINSERT\b)[^;]{0,4000}?\bINTO\s+(?:\[?dbo\]?\s*\.\s*)?\[?([A-Za-z_][A-Za-z0-9_]*)\]?\s+FROM\b", Opts);
 
+        /// <summary>
+        /// جدول‌هایی که کلیدشان مرکب است و باید به شکل کد حساب ساخته شود.
+        /// </summary>
+        private static readonly HashSet<string> AccountTables = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "DETA_HES", "TDETA_HES", "TDETA_HES2", "TDETA_HES3", "TDETA_HES4",
+        };
+
+        private static readonly string[] AccountKeyColumns =
+            { "N_KOL", "NUMBER", "TNUMBER", "TNUMBER2", "TNUMBER3", "TNUMBER4" };
+
+        /// <summary>
+        /// ساخت کد حساب از بخش WHERE، با همان قالبی که خودِ نرم‌افزار در
+        /// <c>DEED_DTL.HES</c> استفاده می‌کند:
+        /// <c>N_KOL-NUMBER-TNUMBER[-TNUMBER2-TNUMBER3-TNUMBER4]</c>،
+        /// جداکننده «-» و سطوحی که در دستور نیامده‌اند حذف می‌شوند.
+        ///
+        /// اگر هیچ‌کدام پیدا نشد null برمی‌گردد تا مسیر عادی امتحان شود.
+        /// </summary>
+        private static string? BuildAccountKey(string scope, object? parameters)
+        {
+            var parts = new List<string>(AccountKeyColumns.Length);
+
+            foreach (var col in AccountKeyColumns)
+            {
+                var m = Regex.Match(
+                    scope,
+                    @"\b" + col + @"\s*=\s*(N?'[^']*'|@[A-Za-z_][A-Za-z0-9_]*|[0-9.]+)",
+                    Opts);
+                if (!m.Success) break;
+
+                var v = NormalizeValue(m.Groups[1].Value, parameters);
+                if (v is null) break;
+                parts.Add(v);
+            }
+
+            return parts.Count == 0 ? null : "HES=" + string.Join("-", parts);
+        }
+
         /// <summary>ستون‌های کلیدی رایج، به ترتیب اولویت.</summary>
         private static readonly Regex RxKey =
             new(@"\b(N_S|NUMBER1|NUMBER|IDH|IDD|CODE|N_SERI|ID)\s*=\s*(N?'[^']*'|@[A-Za-z_][A-Za-z0-9_]*|[0-9.]+)", Opts);
@@ -115,6 +154,17 @@ namespace Prg_Proccessy.AUDIT
 
         private static readonly Dictionary<string, string> TableLabels = new(StringComparer.OrdinalIgnoreCase)
         {
+            // سلسله‌مراتب حساب‌ها. عنوان‌ها از مستند ساختار جدول‌های خود
+            // پروژه برداشته شده. تفصیلی سطح۱ همان جایی است که مشتری و
+            // تامین‌کننده تعریف می‌شوند، پس ویرایش و حذفش زیاد رخ می‌دهد و
+            // بدون برچسب، در خط زمانی «TDETA_HES» خام دیده می‌شد.
+            ["TOTA_HES"] = "سرفصل حساب کل",
+            ["DETA_HES"] = "سرفصل حساب معین",
+            ["TDETA_HES"] = "حساب تفصیلی",
+            ["TDETA_HES2"] = "حساب تفصیلی سطح ۲",
+            ["TDETA_HES3"] = "حساب تفصیلی سطح ۳",
+            ["TDETA_HES4"] = "حساب تفصیلی سطح ۴",
+
             ["DEED_HED"] = "سند حسابداری",
             ["DEED_DTL"] = "ردیف سند حسابداری",
             ["PGET_HED"] = "سند خزانه",
@@ -464,7 +514,13 @@ namespace Prg_Proccessy.AUDIT
                 // فهرست ستون‌ها مشخص می‌شود. بدون این، رویدادِ «ایجاد سند»
                 // شماره‌ی سند را نداشت و جستجوی چرخه‌ی عمر یک فاکتور،
                 // لحظه‌ی ساخته شدنش را نشان نمی‌داد.
-                key = BuildInsertKey(segment, parameters, ref tag);
+                key = BuildInsertKey(segment, parameters, ref tag, st.Table);
+            }
+            else if (AccountTables.Contains(st.Table))
+            {
+                // کلید این جدول‌ها مرکب است. برداشتن فقط NUMBER هیچ حسابی را
+                // مشخص نمی‌کند (هر تفصیلیِ زیر همان معین همین NUMBER را دارد).
+                key = BuildAccountKey(scope, parameters);
             }
             else
             {
@@ -606,7 +662,7 @@ namespace Prg_Proccessy.AUDIT
         /// <c>INSERT ... SELECT</c> باشد یا فهرست ستون نداشته باشد، کلیدی
         /// قابل استخراج نیست و null برمی‌گردد.
         /// </summary>
-        private static string? BuildInsertKey(string segment, object? parameters, ref int? tag)
+        private static string? BuildInsertKey(string segment, object? parameters, ref int? tag, string? table = null)
         {
             try
             {
@@ -649,6 +705,21 @@ namespace Prg_Proccessy.AUDIT
                 {
                     var t = Lookup("TAG");
                     if (t != null && int.TryParse(t, out var parsed)) tag = parsed;
+                }
+
+                // جدول‌های حساب کلید مرکب دارند: برداشتن فقط NUMBER یعنی ثبت
+                // «کدام معین»، نه «کدام حساب». برای ساخته شدن یک مشتری تازه
+                // این تفاوت مهم است.
+                if (table != null && AccountTables.Contains(table))
+                {
+                    var parts = new List<string>(AccountKeyColumns.Length);
+                    foreach (var col in AccountKeyColumns)
+                    {
+                        var v = Lookup(col);
+                        if (string.IsNullOrEmpty(v)) break;
+                        parts.Add(v!);
+                    }
+                    if (parts.Count > 0) return "HES=" + string.Join("-", parts);
                 }
 
                 foreach (var candidate in KeyColumnPriority)
