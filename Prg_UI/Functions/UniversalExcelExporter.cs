@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml;
+using OfficeOpenXml;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Syncfusion.UI.Xaml.Grid;
@@ -60,6 +60,33 @@ namespace Functions
             return false;
         }
 
+        /// <summary>نام فرمی که این جدول داخل آن است، برای ثبت در سابقه.</summary>
+        private static string? OwnerFormName(object grid)
+        {
+            try
+            {
+                return grid is DependencyObject d
+                    ? (Window.GetWindow(d)?.GetType().Name)
+                    : null;
+            }
+            catch (Exception) { return null; }
+        }
+
+        /// <summary>تعداد ردیف خروجی‌گرفته‌شده، تا حجم خروج داده معلوم باشد.</summary>
+        private static int? RowCountOf(object grid)
+        {
+            try
+            {
+                return grid switch
+                {
+                    DataGrid g => g.Items?.Count,
+                    SfDataGrid g => g.View?.Records?.Count,
+                    _ => null,
+                };
+            }
+            catch (Exception) { return null; }
+        }
+
         public static async Task ExportToExcelAsync(object grid, string fileName = null, bool openAfterExport = true, bool KeepTypeFormat = true)
         {
             try
@@ -98,6 +125,20 @@ namespace Functions
                         return exportPath;
                     }
                 });
+
+                // خروج داده از سیستم، نقطه‌ی مهمی برای بررسی است: با یک
+                // خروجی اکسل می‌شود کل یک لیست را از نرم‌افزار بیرون برد.
+                // این تنها نقطه‌ی مرکزی خروجی اکسل است و ۱۱۹ فرم از آن
+                // استفاده می‌کنند، پس همین یک قلاب همه را پوشش می‌دهد.
+                try
+                {
+                    Prg_Proccessy.AUDIT.Audit.Export(
+                        "Excel",
+                        System.IO.Path.GetFileNameWithoutExtension(filePath),
+                        formName: OwnerFormName(grid),
+                        rowCount: RowCountOf(grid));
+                }
+                catch (Exception) { }
 
                 if (openAfterExport)
                 {
