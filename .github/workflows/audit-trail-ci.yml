@@ -11,9 +11,12 @@
 
 name: Audit Trail CI
 
+# روی شاخه‌ای که PR باز دارد، رویداد push و pull_request هر دو می‌آیند و
+# job دوبار اجرا می‌شود. پس push فقط روی master (بعد از ادغام) و بقیه از
+# مسیر pull_request.
 on:
   push:
-    branches: [ "claude/scriptsqly-review-prep-ojn0s3" ]
+    branches: [ master ]
   pull_request:
   workflow_dispatch:
 
