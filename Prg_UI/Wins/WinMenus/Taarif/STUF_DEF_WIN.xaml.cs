@@ -132,6 +132,15 @@ namespace Wins.WinMenus.Taarif
             public string? CODE { get; set; }
             public int? IDD { get; set; }
         }
+        public class _KALA_DUP_INFO
+        {
+            public string? CODE { get; set; }
+            public string? NAME { get; set; }
+            public string? N_FANI { get; set; }
+            public string? GroupName { get; set; }
+            public string? Warehouses { get; set; }
+            public int? IDD { get; set; }
+        }
         #endregion
 
         public STUF_DEF_WIN(double? number_to_open = null)
@@ -1184,11 +1193,60 @@ namespace Wins.WinMenus.Taarif
 
                 if (ex.Number == 2601)
                 {
-                    new Msgwin(false, "نام کالا تکراری است ! , کالایی دیگر با این نام وجود دارد!");
+                    string cleanName = NAM.Text.Trim().FixPersianChars();
+                    var dup = dbms.DoGetDataSQL<_KALA_DUP_INFO>(@"
+                        SELECT TOP 1
+                            S.CODE,
+                            S.NAME,
+                            ISNULL(S.N_FANI, '') AS N_FANI,
+                            ISNULL(G.NAMES, N'نامشخص') AS GroupName,
+                            ISNULL(
+                                (SELECT STRING_AGG(CAST(F.ANBAR AS NVARCHAR(10)) + N' - ' + ISNULL(A.NAMES, N''), N' ، ')
+                                 FROM dbo.STUF_FSK F WITH (NOLOCK)
+                                 LEFT JOIN dbo.TCOD_ANBAR A WITH (NOLOCK) ON F.ANBAR = A.CODE
+                                 WHERE F.CODE = S.CODE),
+                                N'تعریف نشده'
+                            ) AS Warehouses,
+                            S.IDD
+                        FROM dbo.STUF_DEF S WITH (NOLOCK)
+                        LEFT JOIN dbo.TCOD_STUFGROUP G WITH (NOLOCK) ON S.RADAH = G.CODE
+                        WHERE S.NAME = @Name",
+                        new { Name = cleanName }
+                    ).FirstOrDefault();
+
+                    string msg = dup != null
+                        ? $"نام کالا تکراری است!\n\nکالای متناظر در سیستم:\n• کد کالا: {dup.CODE}\n• نام کالا: {dup.NAME}\n• شماره فنی: {(string.IsNullOrWhiteSpace(dup.N_FANI) ? "ندارد" : dup.N_FANI)}\n• گروه کالا: {dup.GroupName}\n• انبارها: {dup.Warehouses}"
+                        : "نام کالا تکراری است ! , کالایی دیگر با این نام وجود دارد!";
+
+                    new Msgwin(false, msg, "", true).ShowDialog();
                 }
                 else if (ex.Number == 2627)
                 {
-                    new Msgwin(false, "کد کالا تکراری است کالایی دیگر با این کد وجود دارد!");
+                    var dupCode = dbms.DoGetDataSQL<_KALA_DUP_INFO>(@"
+                        SELECT TOP 1
+                            S.CODE,
+                            S.NAME,
+                            ISNULL(S.N_FANI, '') AS N_FANI,
+                            ISNULL(G.NAMES, N'نامشخص') AS GroupName,
+                            ISNULL(
+                                (SELECT STRING_AGG(CAST(F.ANBAR AS NVARCHAR(10)) + N' - ' + ISNULL(A.NAMES, N''), N' ، ')
+                                 FROM dbo.STUF_FSK F WITH (NOLOCK)
+                                 LEFT JOIN dbo.TCOD_ANBAR A WITH (NOLOCK) ON F.ANBAR = A.CODE
+                                 WHERE F.CODE = S.CODE),
+                                N'تعریف نشده'
+                            ) AS Warehouses,
+                            S.IDD
+                        FROM dbo.STUF_DEF S WITH (NOLOCK)
+                        LEFT JOIN dbo.TCOD_STUFGROUP G WITH (NOLOCK) ON S.RADAH = G.CODE
+                        WHERE S.CODE = @Code",
+                        new { Code = CODE.Text }
+                    ).FirstOrDefault();
+
+                    string msg = dupCode != null
+                        ? $"کد کالا تکراری است!\n\nکالای متناظر با این کد:\n• کد کالا: {dupCode.CODE}\n• نام کالا: {dupCode.NAME}\n• گروه کالا: {dupCode.GroupName}\n• انبارها: {dupCode.Warehouses}"
+                        : "کد کالا تکراری است کالایی دیگر با این کد وجود دارد!";
+
+                    new Msgwin(false, msg, "", true).ShowDialog();
                 }
                 return;
             }
