@@ -1,4 +1,4 @@
-using Functions;
+﻿using Functions;
 using Functions.SMSService;
 using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;

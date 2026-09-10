@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.AUDIT;
 using Prg_Proccessy.FUNCTIONS;

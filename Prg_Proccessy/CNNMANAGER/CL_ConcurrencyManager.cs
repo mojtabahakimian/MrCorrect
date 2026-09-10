@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Prg_SendInvoice.CNNMANAGER;
 using System.Data;
@@ -14,14 +14,6 @@ namespace Prg_Proccessy.CNNMANAGER
         private bool _disposed;
         private bool _isExternalTransaction;
         private string SQLCNN = null;
-
-        /// <summary>
-        /// دستورهای نوشتنی تراکنش که هنوز commit نشده‌اند.
-        ///
-        /// اگر بلافاصله بعد از Execute ثبت شوند، rollback بعدی (که در
-        /// <see cref="Dispose"/> هم به‌صورت خودکار رخ می‌دهد) ردیف‌هایی در
-        /// سابقه جا می‌گذارد که هرگز در دیتابیس نوشته نشده‌اند.
-        /// </summary>
 
         /// <summary>
         /// Ignore Transaction way go like CNNMANAGER Open then Close immediately
@@ -99,9 +91,9 @@ namespace Prg_Proccessy.CNNMANAGER
                     try
                     {
                         db.Open();
-                        var rows = db.Query<T>(sql, parameters, commandTimeout: 3600);
-                        // «INSERT ... OUTPUT INSERTED.id» هم از مسیر Query می‌گذرد.
-                        return rows;
+                        // «INSERT ... OUTPUT INSERTED.id» هم از مسیر Query می‌گذرد
+                        // و شنونده‌ی مرکزی همان را هم می‌بیند.
+                        return db.Query<T>(sql, parameters, commandTimeout: 3600);
                     }
                     catch (Exception ex)
                     {
@@ -124,8 +116,7 @@ namespace Prg_Proccessy.CNNMANAGER
                         _connection.Query($"SELECT 1 FROM {_TableName_} WITH (TABLOCKX, HOLDLOCK)", parameters, transaction: _transaction);
                     }
 
-                    var rows = _connection.Query<T>(sql, parameters, transaction: _transaction, commandTimeout: 3600);
-                    return rows;
+                    return _connection.Query<T>(sql, parameters, transaction: _transaction, commandTimeout: 3600);
                 }
                 catch (Exception ex)
                 {
@@ -180,8 +171,7 @@ namespace Prg_Proccessy.CNNMANAGER
                         _connection.Query($"SELECT 1 FROM {_TableName_} WITH (TABLOCKX, HOLDLOCK)", parameters, transaction: _transaction);
                     }
 
-                    var affected = _connection.Execute(sql, parameters, transaction: _transaction, commandTimeout: 3600);
-                    return affected;
+                    return _connection.Execute(sql, parameters, transaction: _transaction, commandTimeout: 3600);
                 }
                 catch (Exception ex)
                 {
@@ -231,7 +221,6 @@ namespace Prg_Proccessy.CNNMANAGER
             }
         }
 
-        /// <summary>نگه‌داشتن دستور تا زمان Commit. سقف دارد تا تراکنش بزرگ حافظه نگیرد.</summary>
         public void Rollback()
         {
             if (_transaction == null)

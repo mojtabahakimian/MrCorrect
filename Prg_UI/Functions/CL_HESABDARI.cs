@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Functions;
 using iText.Layout.Font;

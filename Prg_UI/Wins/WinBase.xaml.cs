@@ -1,4 +1,4 @@
-using AUTO_BAZ.HelperWins;
+﻿using AUTO_BAZ.HelperWins;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;

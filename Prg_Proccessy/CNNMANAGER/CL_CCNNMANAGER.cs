@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Data.Sql;
 using Microsoft.Data.SqlClient;
 using Microsoft.Win32;
@@ -263,11 +263,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 try
                 {
                     db.Open();
-                    var results = db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
                     // این متد فقط خواندن نیست: دستورهای INSERT ... OUTPUT INSERTED.id
-                    // هم از همین‌جا اجرا می‌شوند. برای دستورهای خواندنی، Observe
-                    // با سه IndexOf بلافاصله برمی‌گردد.
-                    return results;
+                    // هم از همین‌جا اجرا می‌شوند و شنونده‌ی مرکزی آن‌ها را می‌بیند.
+                    return db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
                 }
                 //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
@@ -327,9 +325,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 try
                 {
                     db.Open();
-                    var result = db.Execute(sql, parameters, commandTimeout: 3600);
-                    // ثبت خودکار سابقه‌ی INSERT/UPDATE/DELETE. فقط بعد از
-                    return result;
+                    return db.Execute(sql, parameters, commandTimeout: 3600);
                 }
                 catch (SqlException ex)
                 {
@@ -671,6 +667,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                         cancellationToken: cancellationToken);
 
                     var rowsAffected = await db.ExecuteAsync(command).ConfigureAwait(false);
+
                     return rowsAffected;
                 }
                 catch (SqlException ex) when (transientErrorNumbers.Contains(ex.Number) && attempt < maxRetries)

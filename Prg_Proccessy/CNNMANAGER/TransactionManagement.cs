@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -17,7 +17,6 @@ namespace Prg_Proccessy.CNNMANAGER
 
         private SqlConnection _connection;
         private IDbTransaction _transaction;
-
         public TransactionManagement(string connectionString)
         {
             _connection = new SqlConnection(connectionString);
@@ -36,8 +35,7 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    var affected = _connection.Execute(sql, parameters, _transaction, commandTimeout: 3600);
-                    return affected;
+                    return _connection.Execute(sql, parameters, _transaction, commandTimeout: 3600);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
@@ -65,10 +63,9 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    var rows = _connection.Query<T>(sql, parameters, _transaction, commandTimeout: 3600);
                     // این متد فقط خواندن نیست: «INSERT ... OUTPUT INSERTED.id»
                     // هم از همین‌جا اجرا می‌شود.
-                    return rows;
+                    return _connection.Query<T>(sql, parameters, _transaction, commandTimeout: 3600);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
@@ -97,8 +94,7 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    var affected = await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 3600);
-                    return affected;
+                    return await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 3600);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
@@ -127,8 +123,7 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    var rows = await _connection.QueryAsync<T>(sql, parameters, _transaction, commandTimeout: 3600);
-                    return rows;
+                    return await _connection.QueryAsync<T>(sql, parameters, _transaction, commandTimeout: 3600);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
