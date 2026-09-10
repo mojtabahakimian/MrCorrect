@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using System.Threading;
 
 namespace Prg_Proccessy.AUDIT
@@ -188,7 +190,7 @@ namespace Prg_Proccessy.AUDIT
                     EntityKey = entityKey,
                     FormName = formName,
                     Title = persianTitle,
-                    Detail = JsonSerializer.Serialize(slots),
+                    Detail = JsonSerializer.Serialize(slots, JsonOptions),
                     IsCritical = true,
                 });
             }
@@ -210,7 +212,7 @@ namespace Prg_Proccessy.AUDIT
                     EntityKey = fromKey,
                     FormName = formName,
                     Title = $"تبدیل {DescribeEntity(fromEntity, fromKey)} به {DescribeEntity(toEntity, toKey)}",
-                    Detail = JsonSerializer.Serialize(new { from = fromEntity, fromKey, to = toEntity, toKey }),
+                    Detail = JsonSerializer.Serialize(new { from = fromEntity, fromKey, to = toEntity, toKey }, JsonOptions),
                     CorrelationId = correlationId,
                     IsCritical = true,
                 });
@@ -307,12 +309,13 @@ namespace Prg_Proccessy.AUDIT
         public static void LoginFailed(string? userName, string? reason = null, string? formName = null)
             => Auth(AuditAction.LoginFailed,
                     $"ورود ناموفق {userName}" + (string.IsNullOrWhiteSpace(reason) ? "" : $" — {reason}"),
-                    false, formName);
+                    false, formName, userName);
 
         public static void Logout(string? userName, string? formName = null)
-            => Auth(AuditAction.Logout, $"خروج کاربر {userName}", true, formName);
+            => Auth(AuditAction.Logout, $"خروج کاربر {userName}", true, formName, userName);
 
-        private static void Auth(string action, string title, bool success, string? formName)
+        private static void Auth(string action, string title, bool success, string? formName,
+                                 string? userNameOverride = null)
         {
             try
             {
@@ -325,6 +328,7 @@ namespace Prg_Proccessy.AUDIT
                     Title = title,
                     IsSuccess = success,
                     IsCritical = true,
+                    UserNameOverride = userNameOverride,
                 });
             }
             catch (Exception) { }
@@ -381,7 +385,7 @@ namespace Prg_Proccessy.AUDIT
                     // روی نخ پس‌زمینه؛ وگرنه اگر کاربر عوض شود رویداد به نام
                     // شخص اشتباه ثبت می‌شود.
                     UserId = session?.UserId,
-                    UserName = session?.UserName,
+                    UserName = draft.UserNameOverride ?? session?.UserName,
 
                     AtClient = now,
                     DateS = ToPersianDateNumber(now),
@@ -493,11 +497,27 @@ namespace Prg_Proccessy.AUDIT
             return $"{verb} {DescribeEntity(entity, key)}";
         }
 
+        /// <summary>
+        /// تنظیم سریال‌سازی JSON برای ستون DETAIL.
+        ///
+        /// System.Text.Json به‌طور پیش‌فرض هر نویسه‌ی غیر ASCII را escape می‌کند،
+        /// یعنی «بانک ملی» به شکل \u0628\u0627... ذخیره می‌شد و کاربر در فرم
+        /// سوابق به‌جای متن فارسی، دنباله‌ی کد می‌دید.
+        ///
+        /// UnicodeRanges.All همه‌ی نویسه‌ها را دست‌نخورده می‌گذارد ولی نویسه‌های
+        /// حساس HTML (&lt; &gt; &amp; ') همچنان escape می‌شوند، پس امن‌تر از
+        /// UnsafeRelaxedJsonEscaping است.
+        /// </summary>
+        internal static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        };
+
         private static string? ToJson(object? value)
         {
             if (value is null) return null;
             if (value is string s) return s;
-            try { return JsonSerializer.Serialize(value); }
+            try { return JsonSerializer.Serialize(value, JsonOptions); }
             catch (Exception) { return null; }
         }
 
@@ -506,7 +526,7 @@ namespace Prg_Proccessy.AUDIT
             if (oldJson is null && newJson is null) return null;
             try
             {
-                return JsonSerializer.Serialize(new { old = oldJson, @new = newJson });
+                return JsonSerializer.Serialize(new { old = oldJson, @new = newJson }, JsonOptions);
             }
             catch (Exception)
             {
@@ -534,5 +554,14 @@ namespace Prg_Proccessy.AUDIT
         public AuditLegacyTarget Legacy { get; set; } = AuditLegacyTarget.None;
         public string? LegacyOldValue { get; set; }
         public string? LegacyNewValue { get; set; }
+
+        /// <summary>
+        /// نام کاربری که رویداد به او نسبت دارد، وقتی با کاربرِ نشست یکی نیست.
+        /// فقط برای رویدادهای پیش از ورود لازم است: در لحظه‌ی «ورود ناموفق»
+        /// هنوز نشست به کاربری وصل نشده، پس USER_NAME رویداد خالی می‌ماند و
+        /// نمای خط زمانی با ISNULL آن را به کاربرِ نشست نسبت می‌داد — یعنی هر
+        /// تلاش ناموفق زیر نام کسی می‌نشست که بعداً موفق وارد شده بود.
+        /// </summary>
+        public string? UserNameOverride { get; set; }
     }
 }

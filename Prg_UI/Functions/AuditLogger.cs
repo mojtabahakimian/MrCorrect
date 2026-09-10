@@ -114,7 +114,7 @@ namespace Functions
         {
             if (value is null) return null;
             if (value is string s) return s;
-            try { return JsonSerializer.Serialize(value); }
+            try { return JsonSerializer.Serialize(value, Prg_Proccessy.AUDIT.Audit.JsonOptions); }
             catch { return value.ToString(); }
         }
     }

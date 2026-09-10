@@ -619,7 +619,7 @@ namespace Prg_Proccessy.AUDIT
             {
                 var map = new Dictionary<string, string>(pairs.Count, StringComparer.OrdinalIgnoreCase);
                 foreach (var kv in pairs) map[kv.Key] = kv.Value;
-                return JsonSerializer.Serialize(new { changed = map });
+                return JsonSerializer.Serialize(new { changed = map }, Audit.JsonOptions);
             }
             catch (Exception)
             {

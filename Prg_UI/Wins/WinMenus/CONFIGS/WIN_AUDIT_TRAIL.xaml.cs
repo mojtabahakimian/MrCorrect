@@ -4,11 +4,13 @@ using Prg_Proccessy.AUDIT;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -229,8 +231,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     Category = (CMB_CATEGORY.SelectedValue as byte?),
                     Action = string.IsNullOrWhiteSpace(CMB_ACTION.SelectedValue as string)
                              ? null : (string?)CMB_ACTION.SelectedValue,
-                    Doc = string.IsNullOrWhiteSpace(TXT_DOC.Text) ? null : "%" + TXT_DOC.Text.Trim() + "%",
-                    Search = string.IsNullOrWhiteSpace(TXT_SEARCH.Text) ? null : "%" + TXT_SEARCH.Text.Trim() + "%",
+                    Doc = BuildLike(TXT_DOC.Text),
+                    Search = BuildLike(TXT_SEARCH.Text),
                     OnlySensitive = CHK_SENSITIVE.IsChecked == true,
                     AfterId = _lastLogId,
                 };
@@ -309,11 +311,44 @@ SELECT TOP (@Take)
         }
 
         /// <summary>تبدیل «1405/05/17» یا «14050517» به تاریخ میلادی.</summary>
+        /// <summary>
+        /// آماده کردن متن کاربر برای LIKE.
+        ///
+        /// ٪ و _ و [ در LIKE معنای ویژه دارند. بدون escape، جست‌وجوی «٪» همه‌ی
+        /// سطرها را برمی‌گرداند و «_» هر تک‌نویسه‌ای را می‌گرفت — یعنی نتیجه‌ی
+        /// جست‌وجو بی‌ربط می‌شد. ارقام فارسی هم مثل بقیه‌ی فرم یکسان‌سازی
+        /// می‌شوند تا جست‌وجوی «۱۲۳۴» سند ۱۲۳۴ را پیدا کند.
+        /// </summary>
+        private static string? BuildLike(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+
+            var t = CL_LMethods.NormalizeDigits(text).Trim();
+            var sb = new StringBuilder(t.Length + 8);
+            sb.Append('%');
+            foreach (var c in t)
+            {
+                // فقط همین سه نویسه معنای ویژه دارند. با escape شدن «[» دیگر
+                // هیچ bracket expressionی باز نمی‌شود، پس «]» و «^» خودبه‌خود
+                // نویسه‌ی معمولی‌اند و نباید دستکاری شوند (وگرنه «[^]» ساخته
+                // می‌شد که خودش الگوی ناقص است).
+                if (c is '%' or '_' or '[') sb.Append('[').Append(c).Append(']');
+                else sb.Append(c);
+            }
+            sb.Append('%');
+            return sb.ToString();
+        }
+
         private static DateTime? ParseShamsi(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return null;
 
-            var digits = new string(text.Where(char.IsDigit).ToArray());
+            // char.IsDigit برای ارقام فارسی (۱۲۳) هم true است ولی int.TryParse
+            // آن‌ها را نمی‌پذیرد. کاربر با صفحه‌کلید فارسی «۱۴۰۵/۰۵/۱۷» تایپ
+            // می‌کرد و پیام «تاریخ نامعتبر» می‌گرفت. NormalizeDigits همان تابعی
+            // است که بقیه‌ی نرم‌افزار برای همین کار استفاده می‌کند.
+            var normalized = CL_LMethods.NormalizeDigits(text);
+            var digits = new string(normalized.Where(c => c >= '0' && c <= '9').ToArray());
             if (digits.Length != 8) return null;
             if (!int.TryParse(digits, out var n)) return null;
 

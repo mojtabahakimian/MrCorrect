@@ -245,6 +245,24 @@ namespace Prg_Proccessy.AUDIT
             // باعث ObjectDisposedException می‌شود. یک CancellationTokenSource
             // در لحظه‌ی بسته شدن برنامه ارزش این ریسک را ندارد.
             try { _cts?.Cancel(); } catch { }
+
+            // اگر تخلیه به تایم‌اوت خورد، هرچه در صف مانده روی دیسک نگه داشته
+            // می‌شود تا در اجرای بعدی منتقل شود. بدون این، برنامه بسته می‌شد و
+            // نخ پس‌زمینه با آن از بین می‌رفت — یعنی همان رویدادهایی که تضمین
+            // کرده بودیم گم نمی‌شوند، دقیقاً هنگام خروج گم می‌شدند.
+            try
+            {
+                if (worker is { IsCompleted: false } && channel != null)
+                {
+                    var leftovers = new List<AuditEvent>();
+                    while (leftovers.Count < QueueCapacity && channel.Reader.TryRead(out var e))
+                    {
+                        leftovers.Add(e);
+                    }
+                    if (leftovers.Count > 0) TrySpill(leftovers);
+                }
+            }
+            catch (Exception) { }
         }
 
         // ── تولید ────────────────────────────────────────────────────────
@@ -722,8 +740,16 @@ namespace Prg_Proccessy.AUDIT
                 Directory.CreateDirectory(dir);
 
                 // سقف تعداد فایل: اگر دیتابیس مدت طولانی قطع باشد، دیسک نباید پر شود.
+                //
+                // این یک از دست رفتن واقعی است، پس شمرده می‌شود. قبلاً بی‌صدا
+                // برمی‌گشت و شمارنده‌ی «چند رویداد از دست رفت» — همانی که در
+                // فرم سوابق هشدار می‌دهد — این‌ها را نمی‌دید، یعنی حتی حذف و
+                // امضا می‌توانستند بی‌هیچ ردی گم شوند.
                 if (Directory.EnumerateFiles(dir, "*.jsonl").Take(MaxSpillFiles + 1).Count() > MaxSpillFiles)
+                {
+                    Interlocked.Add(ref _dropped, rows.Count);
                     return;
+                }
 
                 var file = Path.Combine(dir, $"audit_{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}.jsonl");
                 var sb = new StringBuilder(rows.Count * 200);

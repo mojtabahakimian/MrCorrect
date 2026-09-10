@@ -87,6 +87,7 @@ internal static class Program
         ValidatePersianDates();
         ValidateSetClauseParser();
         ValidateWriteFilter();
+        ValidateReviewFixes();
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
@@ -191,6 +192,40 @@ internal static class Program
     }
 
     // ── ۴) غربال نوشتن/خواندن ─────────────────────────────────────────
+    private static void ValidateReviewFixes()
+    {
+        Section("رگرسیون ایرادهای بازبینی");
+
+        // متن فارسی در DETAIL نباید به \uXXXX تبدیل شود، وگرنه کاربر در فرم
+        // سوابق به‌جای «بانک ملی» دنباله‌ی کد می‌بیند.
+        var m = typeof(AuditSqlSniffer).GetMethod("BuildChangedColumns",
+                    BindingFlags.NonPublic | BindingFlags.Static);
+        var detail = m?.Invoke(null, new object?[]
+        {
+            "UPDATE dbo.TCOD_BANKS SET NAME = N'بانک ملی' WHERE CODE = 7", null
+        }) as string;
+        Ok("مقدار فارسی در DETAIL خوانا ذخیره می‌شود",
+            detail != null && detail.Contains("بانک ملی") && !detail.Contains("\\u06"), detail);
+
+        // ورود ناموفق باید به نام تلاش‌کننده ثبت شود، نه کاربر نشست
+        ClearSpill();
+        AuditService.Start(DeadConnection, 78, "Controller", "1.0", 1405, "DB");
+        Audit.LoginFailed("hacker", "رمز عبور نادرست");
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Update, Title = "عادی",
+        });
+        AuditService.ShutdownAsync(8000).GetAwaiter().GetResult();
+
+        var ev = ReadSpill();
+        var failed = ev.FirstOrDefault(e => e.Action == AuditAction.LoginFailed);
+        Ok("ورود ناموفق به نام تلاش‌کننده ثبت شد، نه کاربر نشست",
+            failed?.UserName == "hacker", failed?.UserName);
+        Ok("رویداد عادی همچنان به کاربر نشست نسبت دارد",
+            ev.Any(e => e.Action == AuditAction.Update && e.UserName == "Controller"));
+        ClearSpill();
+    }
+
     private static void ValidateWriteFilter()
     {
         Section("غربال نوشتن در برابر خواندن");
@@ -282,8 +317,14 @@ internal static class Program
         Ok("ورود ناموفق با IsSuccess=false",
             Has(e => e.Action == AuditAction.LoginFailed && !e.IsSuccess));
 
-        Ok("همه به کاربر درست نسبت داده شدند",
-            ev.All(e => e.UserName == "Controller" && e.UserId == 78));
+        // «ورود ناموفق» عمداً به نام تلاش‌کننده ثبت می‌شود، نه کاربر نشست —
+        // وگرنه تلاش ناموفق زیر نام کسی می‌نشست که بعداً موفق وارد شده.
+        Ok("همه‌ی رویدادهای عادی به کاربر نشست نسبت دارند",
+            ev.Where(e => e.Action != AuditAction.LoginFailed)
+              .All(e => e.UserName == "Controller" && e.UserId == 78));
+        Ok("ورود ناموفق به نام تلاش‌کننده ثبت شد",
+            ev.Where(e => e.Action == AuditAction.LoginFailed)
+              .All(e => e.UserName == "hacker"));
         Ok("همه به یک نشست وصل‌اند", ev.Select(e => e.SessionId).Distinct().Count() == 1);
         Ok("SEQ یکتا است", ev.Select(e => e.Seq).Distinct().Count() == ev.Count);
         Ok("تاریخ شمسی روی هر رویداد",
@@ -560,9 +601,15 @@ internal static class Program
         var viewCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[VW_SYS_AUDIT_TIMELINE]");
         Ok("نما همان تعداد سطر را برمی‌گرداند", viewCount == total, $"{viewCount} در برابر {total}");
 
+        // هر سطر باید اطلاعات نشست را کنار خودش داشته باشد. سنجه MACHINE_NAME
+        // است نه USER_NAME، چون «ورود ناموفق» عمداً نام دیگری دارد.
         var joined = await db.ExecuteScalarAsync<int>(
-            "SELECT COUNT(*) FROM [dbo].[VW_SYS_AUDIT_TIMELINE] WHERE [USER_NAME] = N'Controller' AND [MACHINE_NAME] IS NOT NULL");
+            "SELECT COUNT(*) FROM [dbo].[VW_SYS_AUDIT_TIMELINE] WHERE [MACHINE_NAME] IS NOT NULL");
         Ok("نما رویداد را به نشست وصل می‌کند", joined == total, $"{joined} در برابر {total}");
+
+        var attempted = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[VW_SYS_AUDIT_TIMELINE] WHERE [ACTION] = 'LOGIN_FAILED' AND [USER_NAME] = N'hacker'");
+        Ok("نما ورود ناموفق را به کاربر موفق نسبت نمی‌دهد", attempted == 1, attempted.ToString());
 
         // دقیقاً همان SQL فرم WIN_AUDIT_TRAIL
         const string viewerSql = @"
