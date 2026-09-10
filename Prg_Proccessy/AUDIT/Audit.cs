@@ -33,7 +33,6 @@ namespace Prg_Proccessy.AUDIT
 
         // ── ناوبری ───────────────────────────────────────────────────────
 
-        /// <summary>ثبت باز شدن یک فرم.</summary>
         /// <summary>
         /// آخرین فرمی که کاربر باز کرده.
         ///
@@ -61,6 +60,7 @@ namespace Prg_Proccessy.AUDIT
             if (!string.IsNullOrWhiteSpace(formName)) _currentForm = formName;
         }
 
+        /// <summary>ثبت باز شدن یک فرم.</summary>
         /// <param name="setContext">
         /// آیا این فرم، «فرم جاری» هم بشود. برای بررسی دسترسی (LETSGO) باید
         /// false باشد: آنجا کدهایی مثل «chartfilter» پاس داده می‌شود که پنجره

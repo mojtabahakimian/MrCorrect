@@ -58,10 +58,10 @@ namespace Prg_Proccessy.AUDIT
         /// <summary>نشست جاری. تا وقتی <see cref="Start"/> صدا زده نشده null است.</summary>
         public static AuditSessionInfo? CurrentSession => _session;
 
-        /// <summary>آیا موتور در حال کار است.</summary>
         /// <summary>آیا شنونده‌ی مرکزی دستورهای SQL وصل است.</summary>
         public static bool ListenerAttached => AuditCommandListener.IsAttached;
 
+        /// <summary>آیا موتور در حال کار است.</summary>
         public static bool IsRunning => _running;
 
         /// <summary>تعداد رویدادهایی که به‌خاطر پر بودن صف از دست رفته‌اند. صفر نبودنش یعنی مشکلی هست.</summary>
@@ -341,11 +341,6 @@ namespace Prg_Proccessy.AUDIT
         // ── تولید ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// افزودن رویداد به صف. این تنها متدی است که از نخ رابط کاربری صدا
-        /// زده می‌شود و عمداً هیچ کاری جز یک نوشتن در صف انجام نمی‌دهد.
-        /// </summary>
-        /// <summary>شمردن رویدادهایی که جای دیگری از دست رفته‌اند، تا شمارنده واقعی بماند.</summary>
-        /// <summary>
         /// دسته‌ای که همین حالا در حال نوشتن روی دیتابیس است.
         ///
         /// این رویدادها دیگر در صف نیستند (از آن برداشته شده‌اند) ولی هنوز
@@ -356,11 +351,16 @@ namespace Prg_Proccessy.AUDIT
         /// </summary>
         private static volatile List<AuditEvent>? _inFlight;
 
+        /// <summary>شمردن رویدادهایی که جای دیگری از دست رفته‌اند، تا شمارنده واقعی بماند.</summary>
         internal static void CountDropped(int count)
         {
             if (count > 0) Interlocked.Add(ref _dropped, count);
         }
 
+        /// <summary>
+        /// افزودن رویداد به صف. این تنها متدی است که از نخ رابط کاربری صدا
+        /// زده می‌شود و عمداً هیچ کاری جز یک نوشتن در صف انجام نمی‌دهد.
+        /// </summary>
         internal static void Enqueue(AuditEvent evt)
         {
             var channel = _channel;

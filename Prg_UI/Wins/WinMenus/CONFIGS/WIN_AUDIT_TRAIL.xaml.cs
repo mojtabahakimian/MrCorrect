@@ -310,7 +310,6 @@ SELECT TOP (@Take)
             return $"{n / 10000:0000}/{(n / 100) % 100:00}/{n % 100:00}";
         }
 
-        /// <summary>تبدیل «1405/05/17» یا «14050517» به تاریخ میلادی.</summary>
         /// <summary>
         /// آماده کردن متن کاربر برای LIKE.
         ///
@@ -339,6 +338,7 @@ SELECT TOP (@Take)
             return sb.ToString();
         }
 
+        /// <summary>تبدیل «1405/05/17» یا «14050517» به تاریخ میلادی.</summary>
         private static DateTime? ParseShamsi(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return null;
