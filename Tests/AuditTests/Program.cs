@@ -95,6 +95,7 @@ internal static class Program
         ValidateUserSwitch();
         ValidateShutdownWhileWorkerStuck();
         await ValidateStuckAfterDequeueAsync();
+        await ValidateColumnWideningAsync();
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
@@ -548,6 +549,9 @@ internal static class Program
 
         // ── ۲) موتور، سرتاسر، روی دیتابیس واقعی ────────────────────────
         ClearSpill();
+        // شمارنده در سطح process است و بخش‌های قبلی هم ممکن است نوشته باشند،
+        // پس تفاضل سنجیده می‌شود نه مقدار مطلق.
+        var writtenBefore = AuditService.WrittenCount;
         AuditService.Start(cs, 0, "-", "1.0.0.999", 1405, "AuditRealTest");
         AuditService.AttachUser(78, "Controller", 1405, "1.0.0.999");
 
@@ -573,7 +577,8 @@ internal static class Program
         var total = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");
         Ok("رویدادها واقعاً در جدول درج شدند", total > 0, total.ToString());
         Ok("شمارنده‌ی نوشته‌شده با جدول می‌خواند",
-            AuditService.WrittenCount == total, $"{AuditService.WrittenCount} در برابر {total}");
+            AuditService.WrittenCount - writtenBefore == total,
+            $"{AuditService.WrittenCount - writtenBefore} در برابر {total}");
 
         var rows = (await db.QueryAsync(
             "SELECT [ACTION],[ENTITY],[ENTITY_KEY],[TITLE],[DETAIL],[SEVERITY],[USER_NAME],[IS_SUCCESS],[DATE_S] " +
@@ -780,7 +785,7 @@ SELECT TOP (@Take)
         Ok("مقدار بلند بریده شد و درج شد (نه خطای 8152)", longRow.Count == 1, longRow.Count.ToString());
         if (longRow.Count == 1)
         {
-            Ok("ENTITY به ۴۸ بریده شد",     ((string)longRow[0].ENTITY).Length == 48);
+            Ok("ENTITY به ۱۰۰ بریده شد",    ((string)longRow[0].ENTITY).Length == 100);
             Ok("ENTITY_KEY به ۸۰ بریده شد", ((string)longRow[0].ENTITY_KEY).Length == 80);
             Ok("TITLE به ۲۵۰ بریده شد",     ((string)longRow[0].TITLE).Length == 250);
         }
@@ -1457,6 +1462,79 @@ SELECT TOP (@Take)
             _stopped = true;
             try { _listener.Stop(); } catch { }
         }
+    }
+
+
+    // ── ۱۷) ارتقای نصب قبلی: گشاد شدن ستون‌ها ─────────────────────────
+    //
+    // اندازه‌گیری روی دیتابیس واقعی نشان داد ActionType تا ۳۲ و TableName تا
+    // ۵۵ نویسه مقدار دارد. نصب‌های قبلی ستون‌های باریک‌تر دارند و مایگریشن
+    // باید آن‌ها را گشاد کند، نه اینکه فقط برای نصب تازه درست باشد.
+    private static async Task ValidateColumnWideningAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("ارتقای نصب قبلی: گشاد شدن ستون‌ها");
+
+        using var db = new SqlConnection(cs);
+        await db.OpenAsync();
+
+        // شبیه‌سازی نصب قدیمی با عرض‌های باریک
+        await db.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[VW_SYS_AUDIT_TIMELINE]', N'V') IS NOT NULL DROP VIEW [dbo].[VW_SYS_AUDIT_TIMELINE];
+            IF OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]', N'U') IS NOT NULL DROP TABLE [dbo].[SYS_AUDIT_EVENT];
+            CREATE TABLE [dbo].[SYS_AUDIT_EVENT](
+                [LOG_ID] BIGINT IDENTITY(1,1) NOT NULL,
+                [SESSION_ID] UNIQUEIDENTIFIER NULL, [SEQ] INT NULL, [USER_ID] INT NULL,
+                [USER_NAME] NVARCHAR(50) NULL, [AT_CLIENT] DATETIME2(3) NULL,
+                [AT_SERVER] DATETIME2(3) NOT NULL DEFAULT (SYSDATETIME()),
+                [DATE_S] INT NULL, [TIME_S] INT NULL, [CATEGORY] TINYINT NOT NULL,
+                [SEVERITY] TINYINT NOT NULL DEFAULT (1),
+                [ACTION] VARCHAR(24) NOT NULL,
+                [ENTITY] NVARCHAR(48) NULL,
+                [ENTITY_KEY] NVARCHAR(80) NULL, [FORM_NAME] VARCHAR(64) NULL,
+                [TITLE] NVARCHAR(250) NULL, [DETAIL] NVARCHAR(MAX) NULL,
+                [IS_SUCCESS] BIT NOT NULL DEFAULT (1), [ERR_MSG] NVARCHAR(400) NULL,
+                [DURATION_MS] INT NULL, [CORR_ID] UNIQUEIDENTIFIER NULL,
+                CONSTRAINT [PK_SYS_AUDIT_EVENT] PRIMARY KEY CLUSTERED ([LOG_ID]));");
+
+        async Task<int> WidthOf(string col) => await db.ExecuteScalarAsync<int>(
+            @"SELECT max_length FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]') AND name = @c",
+            new { c = col });
+
+        Ok("نصب قدیمی با ستون باریک ساخته شد",
+            await WidthOf("ACTION") == 24 && await WidthOf("ENTITY") == 96);
+
+        var ok = await AuditSchema.EnsureCreatedAsync(cs);
+        Ok("مایگریشن روی نصب قدیمی اجرا شد", ok);
+
+        // NVARCHAR: max_length بر حسب بایت است، پس ۱۰۰ نویسه = ۲۰۰
+        Ok("ACTION به ۳۲ گشاد شد", await WidthOf("ACTION") == 32, (await WidthOf("ACTION")).ToString());
+        Ok("ENTITY به ۱۰۰ گشاد شد", await WidthOf("ENTITY") == 200, (await WidthOf("ENTITY")).ToString());
+
+        // همان مقدارهای واقعی که روی دیتابیس شما دیده شد
+        const string realAction = "MOADIAN SEND BUTTON CALLED IN F4";
+        const string realEntity = "فاکتور برگشت فروش (آزاد) رسید شده => پورسانت ویزیتور ها";
+
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = realAction,
+            Entity = realEntity, EntityKey = "ID=1", Title = "مقدار واقعی",
+        });
+        await AuditService.ShutdownAsync(15000);
+
+        var row = (await db.QueryAsync(
+            "SELECT [ACTION],[ENTITY] FROM [dbo].[SYS_AUDIT_EVENT] WHERE [TITLE] = N'مقدار واقعی'")).ToList();
+        Ok("مقدار واقعی ۳۲ نویسه‌ای ACTION کامل ذخیره شد",
+            row.Count == 1 && (string)row[0].ACTION == realAction, row.Count == 1 ? (string)row[0].ACTION : null);
+        Ok("مقدار واقعی ۵۵ نویسه‌ای ENTITY کامل ذخیره شد",
+            row.Count == 1 && (string)row[0].ENTITY == realEntity, row.Count == 1 ? (string)row[0].ENTITY : null);
+
+        ClearSpill();
     }
 
 }

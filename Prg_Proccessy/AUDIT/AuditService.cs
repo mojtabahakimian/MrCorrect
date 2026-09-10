@@ -679,8 +679,8 @@ namespace Prg_Proccessy.AUDIT
                 p.Add("@m" + i, e.TimeS);
                 p.Add("@c" + i, (byte)e.Category);
                 p.Add("@v" + i, (byte)e.Severity);
-                p.Add("@a" + i, Trim(e.Action, 24));
-                p.Add("@e" + i, Trim(e.Entity, 48));
+                p.Add("@a" + i, Trim(e.Action, 32));
+                p.Add("@e" + i, Trim(e.Entity, 100));
                 p.Add("@k" + i, Trim(e.EntityKey, 80));
                 p.Add("@f" + i, Trim(e.FormName, 64));
                 p.Add("@l" + i, Trim(e.Title, 250));
