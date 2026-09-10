@@ -91,6 +91,7 @@ internal static class Program
         ValidateReviewFixes();
         ValidateAdversarialSql();
         ValidateUserSwitch();
+        ValidateShutdownWhileWorkerStuck();
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
@@ -1274,6 +1275,45 @@ SELECT TOP (@Take)
         }
         Ok("شمارنده‌ی از دست رفته واقعیت را نشان می‌دهد",
             AuditService.DroppedCount >= bulk - 500, AuditService.DroppedCount.ToString());
+
+        ClearSpill();
+    }
+
+
+    // ── ۱۵) خروج در حالی که نخ پس‌زمینه گیر کرده ──────────────────────
+    //
+    // بدترین حالت واقعی: دیتابیس معلق است (نه قطع — معلق)، نخ پس‌زمینه داخل
+    // یک فراخوانی SQL منتظر مانده، و کاربر برنامه را می‌بندد. اگر مسیر
+    // خاموش‌سازی در این حالت از خواندن صف صرف‌نظر کند، هرچه در حافظه مانده
+    // با بسته شدن process از بین می‌رود.
+    private static void ValidateShutdownWhileWorkerStuck()
+    {
+        Section("خروج در حالی که نخ پس‌زمینه گیر کرده");
+
+        // آدرس بی‌پاسخ: اتصال تا سررسید طولانی معلق می‌ماند، پس نخ پس‌زمینه
+        // واقعاً گیر می‌کند — برخلاف کانکشن‌استرینگ نامعتبر که سریع خطا می‌دهد.
+        const string hanging =
+            "Server=10.255.255.1,1433;Database=none;User Id=x;Password=y;" +
+            "Connect Timeout=90;TrustServerCertificate=True";
+
+        ClearSpill();
+        AuditService.Start(hanging, 78, "Controller", "1.0", 1405, "DB");
+
+        const int n = 120;
+        for (var i = 0; i < n; i++)
+        {
+            Audit.Delete("HEAD_LST", $"NUMBER={7000 + i};TAG=2", $"حذف فاکتور {7000 + i}");
+        }
+
+        var sw = Stopwatch.StartNew();
+        AuditService.ShutdownAsync(300).GetAwaiter().GetResult();
+        sw.Stop();
+
+        var onDisk = ReadSpill().Count;
+        Ok($"همه‌ی {n} رویداد با وجود گیر کردن نخ، روی دیسک نشستند",
+            onDisk >= n, $"{onDisk} از {n}");
+        Ok("خاموش‌سازی برنامه را طولانی نگه نداشت",
+            sw.Elapsed.TotalSeconds < 15, $"{sw.Elapsed.TotalSeconds:N1}s");
 
         ClearSpill();
     }
