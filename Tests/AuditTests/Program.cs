@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Prg_Proccessy.AUDIT;
+using Prg_Proccessy.CNNMANAGER;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
@@ -94,6 +95,7 @@ internal static class Program
         await ValidateRealDatabaseAsync();
         await ValidateRealDatabaseHardAsync();
         await ValidateLegacyWritesAsync();
+        await ValidateCommandListenerAsync();
 
         Console.WriteLine($"\n\nنتیجه:  موفق {_pass}  |  ناموفق {_fail}");
         return _fail == 0 ? 0 : 1;
@@ -971,6 +973,96 @@ SELECT TOP (@Take)
         Ok("نبودِ جدول قدیمی جریان اصلی را از کار نمی‌اندازد",
             await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]") == 1);
         Ok("و رویداد روی دیسک هم نریخت", ReadSpill().Count == 0, ReadSpill().Count.ToString());
+
+        ClearSpill();
+    }
+
+
+    // ── ۱۱) شنونده‌ی مرکزی: نوشتن‌هایی که قلاب‌ها نمی‌دیدند ────────────
+    //
+    // ۷۵ نقطه در Prg_UI مستقیم روی SqlConnection خام با Dapper می‌نویسند —
+    // از جمله ساخت و ویرایش فاکتور و پیش‌فاکتور و سند. هیچ‌کدام از مسیرهای
+    // قلاب‌خورده عبور نمی‌کنند. این بخش همان الگو را بازمی‌سازد.
+    private static async Task ValidateCommandListenerAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("شنونده‌ی مرکزی دستورهای SQL");
+
+        using var probe = new SqlConnection(cs);
+        await probe.OpenAsync();
+        await probe.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[HEAD_LST]', N'U') IS NULL
+                CREATE TABLE [dbo].[HEAD_LST] (NUMBER INT, TAG INT, CUST_NO NVARCHAR(20), MABL_HAZ FLOAT);
+            DELETE FROM [dbo].[HEAD_LST];
+            TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+        AuditService.AttachUser(78, "Controller", 1405, "1.0");
+
+        // دقیقاً الگوی HEAD_LST_PISHFROOSH2: کانکشن خام + تراکنش + Dapper
+        using (var db = new SqlConnection(cs))
+        {
+            db.Open();
+            using (var tx = db.BeginTransaction())
+            {
+                db.Execute("INSERT INTO dbo.HEAD_LST (NUMBER, TAG, CUST_NO) VALUES (1234, 20, N'C-5')", null, tx);
+                tx.Commit();
+            }
+
+            // برگشت‌خورده: نباید ثبت شود
+            using (var tx = db.BeginTransaction())
+            {
+                db.Execute("UPDATE dbo.HEAD_LST SET MABL_HAZ = 999 WHERE NUMBER = 1234", null, tx);
+                tx.Rollback();
+            }
+
+            // Dispose بدون commit: از نظر SQL Server یعنی rollback
+            using (var tx = db.BeginTransaction())
+            {
+                db.Execute("UPDATE dbo.HEAD_LST SET MABL_HAZ = 888 WHERE NUMBER = 1234", null, tx);
+            }
+
+            // بدون تراکنش صریح
+            db.Execute("UPDATE dbo.HEAD_LST SET MABL_HAZ = @V WHERE NUMBER = @N", new { V = 135000, N = 1234 });
+            db.Query<int>("SELECT COUNT(*) FROM dbo.HEAD_LST").FirstOrDefault();
+        }
+
+        // از مسیر قلاب‌خورده‌ی قدیمی: نباید دوبار ثبت شود
+        using (var tm = new TransactionManagement(cs))
+        {
+            tm.ExecuteSqlCommandCtc("UPDATE dbo.HEAD_LST SET CUST_NO = @C WHERE NUMBER = @N",
+                                    new { C = "C-9", N = 1234 });
+            tm.DoCommit();
+        }
+
+        await AuditService.ShutdownAsync(15000);
+
+        var rows = (await probe.QueryAsync(
+            "SELECT [ACTION],[ENTITY],[ENTITY_KEY],[DETAIL] FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'HEAD_LST'")).ToList();
+
+        int Count(string act) => rows.Count(r => (string)r.ACTION == act);
+
+        Ok("درج با Dapper روی کانکشن خام ثبت شد (قبلاً نامرئی بود)", Count("INSERT") == 1, Count("INSERT").ToString());
+        Ok("کلید سند از همان درج استخراج شد",
+            rows.Any(r => (string)r.ACTION == "INSERT" && (string?)r.ENTITY_KEY == "NUMBER=1234;TAG=20"));
+
+        Ok("نوشتن برگشت‌خورده ثبت نشد",
+            !rows.Any(r => r.DETAIL != null && ((string)r.DETAIL).Contains("999")));
+        Ok("تراکنشِ بدون commit ثبت نشد",
+            !rows.Any(r => r.DETAIL != null && ((string)r.DETAIL).Contains("888")));
+
+        Ok("ویرایش بدون تراکنش ثبت شد",
+            rows.Any(r => (string)r.ACTION == "UPDATE" && r.DETAIL != null && ((string)r.DETAIL).Contains("135000")));
+
+        Ok("هیچ رویدادی دوبار ثبت نشد", Count("UPDATE") == 2, $"{Count("UPDATE")} به‌جای ۲");
+        Ok("SELECT رویدادی نساخت", rows.Count == 3, rows.Count.ToString());
+
+        // و مقدار واقعاً در دیتابیس درست است
+        var mabl = await probe.ExecuteScalarAsync<double?>("SELECT MABL_HAZ FROM dbo.HEAD_LST WHERE NUMBER = 1234");
+        Ok("دیتابیس واقعاً همان را دارد که سابقه می‌گوید", mabl == 135000, mabl?.ToString());
 
         ClearSpill();
     }

@@ -441,6 +441,14 @@ namespace Prg_Proccessy.AUDIT
 
             try
             {
+                // شنونده‌ی مرکزی پارامترهای SqlCommand را به‌صورت دیکشنری
+                // کپی می‌کند (نگه داشتن خودِ SqlParameterCollection پس از
+                // پایان دستور امن نیست).
+                if (parameters is IDictionary<string, object?> map)
+                {
+                    return map.TryGetValue(name, out var mv) ? mv?.ToString() : null;
+                }
+
                 if (parameters is DynamicParameters dyn)
                 {
                     // بررسی وجود پیش از Get: متد Get وقتی پارامتر نباشد استثنا

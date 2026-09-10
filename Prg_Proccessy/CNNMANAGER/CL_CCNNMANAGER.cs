@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Data.Sql;
 using Microsoft.Data.SqlClient;
 using Microsoft.Win32;
@@ -267,7 +267,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     // این متد فقط خواندن نیست: دستورهای INSERT ... OUTPUT INSERTED.id
                     // هم از همین‌جا اجرا می‌شوند. برای دستورهای خواندنی، Observe
                     // با سه IndexOf بلافاصله برمی‌گردد.
-                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
                     return results;
                 }
                 //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
@@ -330,8 +329,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     db.Open();
                     var result = db.Execute(sql, parameters, commandTimeout: 3600);
                     // ثبت خودکار سابقه‌ی INSERT/UPDATE/DELETE. فقط بعد از
-                    // موفقیت دستور، تا عملیاتی که شکست خورده در سابقه نیفتد.
-                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
                     return result;
                 }
                 catch (SqlException ex)
@@ -413,7 +410,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                 {
                     await db.OpenAsync();
                     var result = await db.ExecuteAsync(sql, parameters, commandTimeout: 3600);
-                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
                     return result;
                 }
                 catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
@@ -476,7 +472,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                     await db.ExecuteAsync("SET ARITHABORT ON");
                     var results = await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600);
                     //await db.ExecuteAsync("SET ARITHABORT OFF");
-                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
                     return results;
                 }
                 catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
@@ -676,7 +671,6 @@ namespace Prg_SendInvoice.CNNMANAGER
                         cancellationToken: cancellationToken);
 
                     var rowsAffected = await db.ExecuteAsync(command).ConfigureAwait(false);
-                    Prg_Proccessy.AUDIT.AuditSqlSniffer.Observe(sql, parameters);
                     return rowsAffected;
                 }
                 catch (SqlException ex) when (transientErrorNumbers.Contains(ex.Number) && attempt < maxRetries)

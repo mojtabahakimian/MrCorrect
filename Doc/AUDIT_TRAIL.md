@@ -263,6 +263,44 @@ EXEC dbo.SYS_AUDIT_BACKFILL;
 
 ---
 
+
+### چرا قلاب روی متدهای مرکزی کافی نبود
+نسخه‌ی اول روی **۹ متد دسترسی به داده** قلاب می‌گذاشت. بررسی عمیق `Prg_UI`
+نشان داد **۷۵ نقطه** مستقیم روی یک `SqlConnection` خام با Dapper می‌نویسند و
+از هیچ‌کدام از آن متدها عبور نمی‌کنند — از جمله ساخت و ویرایش
+**فاکتور، پیش‌فاکتور و سند** (`HEAD_LST` با ۲۵ مورد، `DEED_DTL`، `INVO_LST`،
+`DEED_HED`). یعنی مهم‌ترین اسناد سیستم اصلاً سابقه نمی‌خوردند.
+
+الگوی نمونه در `HEAD_LST_PISHFROOSH2.xaml.cs`:
+
+```csharp
+using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+{
+    db.Execute(QRE_HEADINSUP, null, transaction);   // ← از دید قلاب‌ها نامرئی
+    transaction.Commit();
+}
+```
+
+جایگزین: `AuditCommandListener` که به `DiagnosticSource` خودِ
+`Microsoft.Data.SqlClient` گوش می‌دهد و **هر دستور را از هر مسیری** می‌بیند.
+هیچ نقطه‌ی فراخوانی‌ای دستکاری نشد و کد آینده هم خودبه‌خود پوشش دارد. قلاب‌های
+دستی قبلی حذف شدند، وگرنه هر نوشتن دوبار ثبت می‌شد.
+
+**دو نکته که فقط با آزمایش روی نسخه‌ی واقعی کتابخانه معلوم شد:**
+
+۱. `SqlTransaction.Rollback()` همان کلید رویدادِ `WriteTransactionCommitAfter`
+   را منتشر می‌کند. تنها چیزی که commit را از rollback جدا می‌کند فیلد
+   `Operation` است. اگر روی نام رویداد تکیه می‌شد، **نوشتن‌های برگشت‌خورده
+   به‌عنوان واقعی ثبت می‌شدند**.
+
+۲. SqlClient بیش از یک `DiagnosticListener` با نام یکسان منتشر می‌کند و
+   رویدادها بینشان پخش می‌شود: دستورها از یکی می‌آمد و پایان تراکنش از
+   دیگری. با اشتراک روی فقط اولی، **هر نوشتنِ داخل تراکنش بی‌صدا گم می‌شد**.
+
+تراکنشی که بدون `Commit` فقط `Dispose` شود هیچ رویداد پایانی نمی‌دهد؛ از نظر
+SQL Server یعنی rollback، پس دور ریخته می‌شود.
+
 ## جدول‌های قدیمی
 
 `AMALIAT`، `USER_AUDIT_LOG` و همه‌ی جدول‌های `TR_*` **حذف نشده‌اند و همچنان

@@ -59,6 +59,9 @@ namespace Prg_Proccessy.AUDIT
         public static AuditSessionInfo? CurrentSession => _session;
 
         /// <summary>آیا موتور در حال کار است.</summary>
+        /// <summary>آیا شنونده‌ی مرکزی دستورهای SQL وصل است.</summary>
+        public static bool ListenerAttached => AuditCommandListener.IsAttached;
+
         public static bool IsRunning => _running;
 
         /// <summary>تعداد رویدادهایی که به‌خاطر پر بودن صف از دست رفته‌اند. صفر نبودنش یعنی مشکلی هست.</summary>
@@ -141,6 +144,10 @@ namespace Prg_Proccessy.AUDIT
 
                 _running = true;
                 _worker = Task.Run(() => WorkerLoopAsync(token));
+
+                // شنونده‌ی مرکزی دستورهای SQL. باید بعد از راه‌افتادن صف وصل
+                // شود، وگرنه رویدادهای اولیه جایی برای نشستن ندارند.
+                AuditCommandListener.Attach();
             }
         }
 
@@ -231,6 +238,9 @@ namespace Prg_Proccessy.AUDIT
                 channel = _channel;
                 worker = _worker;
             }
+
+            // اول شنونده جدا شود تا در حین تخلیه رویداد تازه‌ای نیاید.
+            try { AuditCommandListener.Detach(); } catch { }
 
             try { channel?.Writer.TryComplete(); } catch { }
 
