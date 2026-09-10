@@ -342,6 +342,16 @@ namespace Prg_Proccessy.AUDIT
             if (_schemaReady)
             {
                 await WriteSessionRowAsync().ConfigureAwait(false);
+
+                // رویدادهای به‌جا مانده از اجرای قبلی، همین حالا منتقل شوند.
+                //
+                // انتقال فقط در انتهای FlushAsync انجام می‌شد، یعنی تنها وقتی
+                // رویداد تازه‌ای برای نوشتن وجود داشت. ولی فایل روی دیسک دقیقاً
+                // وقتی ساخته می‌شود که دیتابیس قطع بوده؛ اگر در اجرای بعدی
+                // کاربر کار قابل‌ثبتی نکند، حلقه‌ی مصرف پشت WaitToReadAsync
+                // منتظر می‌ماند، FlushAsync هرگز صدا زده نمی‌شود و آن رویدادها
+                // — که همه حساس‌اند: حذف، امضا، ورود ناموفق — روی دیسک می‌مانند.
+                await DrainSpillAsync().ConfigureAwait(false);
             }
 
             var batch = new List<AuditEvent>(BatchMaxRows);
@@ -722,6 +732,43 @@ namespace Prg_Proccessy.AUDIT
                     sb.AppendLine(JsonSerializer.Serialize(r));
                 }
                 File.WriteAllText(file, sb.ToString(), Encoding.UTF8);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        /// <summary>
+        /// همه‌ی فایل‌های به‌جا مانده را پشت سر هم منتقل می‌کند. اگر یک دور
+        /// هیچ فایلی کم نکند (دیتابیس هنوز قطع است) بیرون می‌آید تا بی‌جهت
+        /// نچرخد؛ دور بعدی در انتهای اولین Flush دوباره تلاش می‌شود.
+        /// </summary>
+        private static async Task DrainSpillAsync()
+        {
+            try
+            {
+                var dir = SpillDirectory;
+                if (!Directory.Exists(dir)) return;
+
+                static int Count(string d) =>
+                    Directory.EnumerateFiles(d, "*.jsonl").Take(MaxSpillFiles + 1).Count();
+
+                if (Count(dir) == 0) return;
+
+                using var db = new SqlConnection(_connectionString);
+                await db.OpenAsync().ConfigureAwait(false);
+
+                for (var i = 0; i < MaxSpillFiles; i++)
+                {
+                    var before = Count(dir);
+                    if (before == 0) break;
+
+                    await ReplayOneSpillFileAsync(db).ConfigureAwait(false);
+
+                    // پیشرفتی نشد: یا دیتابیس در دسترس نیست یا فایل قابل
+                    // انتقال نیست. ادامه‌ی حلقه فقط وقت تلف می‌کند.
+                    if (Count(dir) >= before) break;
+                }
             }
             catch (Exception)
             {

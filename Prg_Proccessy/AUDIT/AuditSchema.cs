@@ -178,7 +178,20 @@ namespace Prg_Proccessy.AUDIT
                   LEFT JOIN [dbo].[SYS_AUDIT_SESSION] AS s ON s.[SESSION_ID] = e.[SESSION_ID]",
 
             // ── پاک‌سازی: تکه‌تکه، تا قفل طولانی روی جدول ایجاد نشود ─────
-            @"CREATE OR ALTER PROCEDURE [dbo].[SP_SYS_AUDIT_PURGE]
+            // ── پاک‌سازی نام قدیمی ───────────────────────────────────────
+            // نسخه‌ی اول این رویه‌ها با پیشوند SP_ ساخته می‌شد. آن پیشوند در
+            // SQL Server رزرو شده است: هر نامی که با sp_ شروع شود اول در
+            // master جست‌وجو می‌شود، نه در دیتابیس جاری. نتیجه‌اش دو مشکل بود:
+            // اگر نسخه‌ای از همان نام در master وجود داشت، ساختِ رویه در
+            // دیتابیس کاربر با خطای «Invalid object name» شکست می‌خورد، و در
+            // زمان اجرا هم EXEC می‌توانست نسخه‌ی master را صدا بزند. پس نام
+            // بدون پیشوند شد و نسخه‌ی قدیمی اگر مانده باشد حذف می‌شود.
+            @"IF OBJECT_ID(N'[dbo].[SP_SYS_AUDIT_PURGE]',    N'P') IS NOT NULL
+                  DROP PROCEDURE [dbo].[SP_SYS_AUDIT_PURGE];
+              IF OBJECT_ID(N'[dbo].[SP_SYS_AUDIT_BACKFILL]', N'P') IS NOT NULL
+                  DROP PROCEDURE [dbo].[SP_SYS_AUDIT_BACKFILL];",
+
+            @"CREATE OR ALTER PROCEDURE [dbo].[SYS_AUDIT_PURGE]
                   @KeepDaysNavigation INT = 90,
                   @KeepDaysOther      INT = 1825,
                   @ChunkSize          INT = 5000
@@ -218,7 +231,7 @@ namespace Prg_Proccessy.AUDIT
             // اجرایش می‌کند. DATE_S/TIME_S برای ردیف‌های قدیمی NULL می‌ماند
             // چون تبدیل شمسی داخل T-SQL قابل اتکا نیست؛ فیلتر تاریخ در گزارش
             // روی AT_SERVER است و برای این ردیف‌ها هم درست کار می‌کند.
-            @"CREATE OR ALTER PROCEDURE [dbo].[SP_SYS_AUDIT_BACKFILL]
+            @"CREATE OR ALTER PROCEDURE [dbo].[SYS_AUDIT_BACKFILL]
               AS
               BEGIN
                   SET NOCOUNT ON;

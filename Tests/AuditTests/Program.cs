@@ -1,3 +1,5 @@
+using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Prg_Proccessy.AUDIT;
 using System.Diagnostics;
@@ -62,8 +64,16 @@ internal static class Program
             foreach (var line in File.ReadAllLines(f))
                 if (!string.IsNullOrWhiteSpace(line))
                 {
-                    var e = JsonSerializer.Deserialize<AuditEvent>(line);
-                    if (e != null) list.Add(e);
+                    // مثل خودِ موتور، خط خراب رد می‌شود — بعضی تست‌ها عمداً
+                    // یک خط ناقص می‌سازند تا ثابت کنند انتقال را قفل نمی‌کند.
+                    try
+                    {
+                        var e = JsonSerializer.Deserialize<AuditEvent>(line);
+                        if (e != null) list.Add(e);
+                    }
+                    catch (JsonException)
+                    {
+                    }
                 }
         return list;
     }
@@ -80,6 +90,8 @@ internal static class Program
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
+        await ValidateRealDatabaseAsync();
+        await ValidateRealDatabaseHardAsync();
 
         Console.WriteLine($"\n\nنتیجه:  موفق {_pass}  |  ناموفق {_fail}");
         return _fail == 0 ? 0 : 1;
@@ -386,4 +398,411 @@ internal static class Program
         try { AuditSqlSniffer.Observe(null); Ok("Observe(null) امن است", true); }
         catch (Exception ex) { Ok("Observe(null) امن است", false, ex.GetType().Name); }
     }
+
+    // ── ۸) تست واقعی روی SQL Server ───────────────────────────────────
+    //
+    // تنها بخشی که به دیتابیس واقعی نیاز دارد. با متغیر محیطی
+    // AUDIT_TEST_SQL فعال می‌شود و اگر نباشد بی‌صدا رد می‌شود، تا اجرای
+    // معمولی روی ماشین توسعه‌دهنده و CI بدون SQL Server هم کار کند.
+    private static async Task ValidateRealDatabaseAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs))
+        {
+            Section("تست واقعی روی SQL Server — رد شد (AUDIT_TEST_SQL تنظیم نشده)");
+            return;
+        }
+
+        Section("تست واقعی روی SQL Server");
+
+        using var db = new SqlConnection(cs);
+        await db.OpenAsync();
+
+        var version = await db.ExecuteScalarAsync<string>("SELECT @@VERSION");
+        Console.WriteLine("  " + (version ?? "").Split('\n')[0].Trim());
+
+        // پاک‌سازی از اجرای قبلی
+        await db.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[VW_SYS_AUDIT_TIMELINE]', N'V')  IS NOT NULL DROP VIEW [dbo].[VW_SYS_AUDIT_TIMELINE];
+            IF OBJECT_ID(N'[dbo].[SYS_AUDIT_PURGE]',    N'P')  IS NOT NULL DROP PROCEDURE [dbo].[SYS_AUDIT_PURGE];
+            IF OBJECT_ID(N'[dbo].[SYS_AUDIT_BACKFILL]', N'P')  IS NOT NULL DROP PROCEDURE [dbo].[SYS_AUDIT_BACKFILL];
+            IF OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]',       N'U')  IS NOT NULL DROP TABLE [dbo].[SYS_AUDIT_EVENT];
+            IF OBJECT_ID(N'[dbo].[SYS_AUDIT_SESSION]',     N'U')  IS NOT NULL DROP TABLE [dbo].[SYS_AUDIT_SESSION];");
+
+        // جدول‌های قدیمی، با همان شکلی که در نرم‌افزار هستند. حضورشان ثابت
+        // می‌کند مایگریشن کنارشان می‌نشیند و آن‌ها را خراب نمی‌کند.
+        await db.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[TFORMS]', N'U') IS NULL
+                CREATE TABLE [dbo].[TFORMS] (
+                    FORMNAME NVARCHAR(64), CAPTION NVARCHAR(128),
+                    kind INT, GRP INT, IDH INT, CRT DATETIME);
+            IF OBJECT_ID(N'[dbo].[AMALIAT]', N'U') IS NULL
+                CREATE TABLE [dbo].[AMALIAT] (
+                    USERID NVARCHAR(20), USERNAME NVARCHAR(50),
+                    ADATE DATETIME, AMALID NVARCHAR(64));
+            DELETE FROM [dbo].[TFORMS];
+            DELETE FROM [dbo].[AMALIAT];
+            INSERT INTO [dbo].[TFORMS] (FORMNAME, CAPTION, kind, GRP, IDH, CRT)
+                 VALUES (N'USERS', N'کاربران', 3, 16, 41, GETDATE());
+            INSERT INTO [dbo].[AMALIAT] (USERID, USERNAME, ADATE, AMALID)
+                 VALUES (N'78', N'Controller', GETDATE(), N'HEAD_LST_FROOSH22'),
+                        (N'78', N'Controller', NULL,      N'DEED_HED_WIN');");
+
+        // ── ۱) مایگریشن روی موتور واقعی ────────────────────────────────
+        var created = await AuditSchema.EnsureCreatedAsync(cs);
+        Ok("مایگریشن روی SQL Server واقعی اجرا شد", created);
+
+        async Task<int> Exists(string name, string type) =>
+            await db.ExecuteScalarAsync<int>(
+                $"SELECT CASE WHEN OBJECT_ID(N'[dbo].[{name}]', N'{type}') IS NULL THEN 0 ELSE 1 END");
+
+        Ok("جدول SYS_AUDIT_EVENT ساخته شد",       await Exists("SYS_AUDIT_EVENT", "U") == 1);
+        Ok("جدول SYS_AUDIT_SESSION ساخته شد",     await Exists("SYS_AUDIT_SESSION", "U") == 1);
+        Ok("نمای VW_SYS_AUDIT_TIMELINE ساخته شد", await Exists("VW_SYS_AUDIT_TIMELINE", "V") == 1);
+        Ok("رویه‌ی SYS_AUDIT_PURGE ساخته شد",   await Exists("SYS_AUDIT_PURGE", "P") == 1);
+        Ok("رویه‌ی SYS_AUDIT_BACKFILL ساخته شد", await Exists("SYS_AUDIT_BACKFILL", "P") == 1);
+
+        var idx = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM sys.indexes WHERE object_id = OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]') AND name LIKE 'IX_%'");
+        Ok("هر ۵ ایندکس ساخته شدند", idx == 5, idx.ToString());
+
+        var seqKey = await db.ExecuteScalarAsync<int>(
+            @"SELECT ISNULL(MAX(CAST(optimize_for_sequential_key AS INT)), 0) FROM sys.indexes
+               WHERE object_id = OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]') AND is_primary_key = 1");
+        Ok("OPTIMIZE_FOR_SEQUENTIAL_KEY روی PK فعال شد", seqKey == 1);
+
+        // نام رویه‌ها نباید با SP_ شروع شود. SQL Server هر نامی که با sp_
+        // آغاز شود اول در master جست‌وجو می‌کند، نه در دیتابیس جاری. اگر
+        // نسخه‌ای از همان نام در master باشد، ساخت رویه در دیتابیس کاربر با
+        // «Invalid object name» شکست می‌خورد و در زمان اجرا هم EXEC ممکن است
+        // نسخه‌ی master را صدا بزند. این تست همان شرایط را بازمی‌سازد.
+        var badPrefix = await db.ExecuteScalarAsync<int>(
+            @"SELECT COUNT(*) FROM sys.procedures
+               WHERE name LIKE 'SP[_]%' AND name LIKE '%AUDIT%'");
+        Ok("هیچ رویه‌ی سابقه با پیشوند رزرو شده‌ی SP_ ساخته نشد", badPrefix == 0, badPrefix.ToString());
+
+        var reg = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[TFORMS] WHERE FORMNAME = N'AUDITTRAIL'");
+        Ok("فرم AUDITTRAIL در TFORMS ثبت شد", reg == 1, reg.ToString());
+
+        var grp = await db.ExecuteScalarAsync<int?>(
+            "SELECT GRP FROM [dbo].[TFORMS] WHERE FORMNAME = N'AUDITTRAIL'");
+        Ok("گروه فرم از روی USERS برداشته شد", grp == 16, grp?.ToString());
+
+        // اجرای دوباره نباید چیزی را خراب کند یا رکورد تکراری بسازد
+        var again = await AuditSchema.EnsureCreatedAsync(cs);
+        var reg2 = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[TFORMS] WHERE FORMNAME = N'AUDITTRAIL'");
+        Ok("مایگریشن idempotent است (اجرای دوم بی‌ضرر)", again && reg2 == 1, reg2.ToString());
+
+        // ── ۲) موتور، سرتاسر، روی دیتابیس واقعی ────────────────────────
+        ClearSpill();
+        AuditService.Start(cs, 0, "-", "1.0.0.999", 1405, "AuditRealTest");
+        AuditService.AttachUser(78, "Controller", 1405, "1.0.0.999");
+
+        AuditSqlSniffer.Observe("INSERT INTO dbo.HEAD_LST (NUMBER, TAG, CUST_NO) VALUES (1234, 20, N'C-5')");
+        AuditSqlSniffer.Observe("UPDATE dbo.HEAD_LST SET MABL_HAZ = 135000 WHERE TAG = 20 AND NUMBER = 1234");
+        AuditSqlSniffer.Observe("UPDATE HEAD_LST SET SGN1=0, SGN2=0, SGN3=1 WHERE TAG=20 AND NUMBER=1234");
+        AuditSqlSniffer.Observe(
+            "UPDATE vd SET CUST_NO = @ToHes FROM dbo.HEAD_LST hl " +
+            "INNER JOIN dbo.VISITOR_DTL vd ON hl.NUMBER = vd.NUMBER WHERE (vd.CUST_NO = @AzHes)",
+            new { ToHes = "H-9", AzHes = "H-1" });
+        AuditSqlSniffer.Observe("UPDATE dbo.SALA_DTL SET PSAL_NAME = N'secret123' WHERE IDD = 5");
+        AuditSqlSniffer.Observe("SELECT NAME FROM dbo.STUF_DEF WHERE CODE = @CODE", new { CODE = "K-1" });
+        Audit.Form("HEAD_LST_PISHFROOSH2");
+        Audit.Print("پیش‌فاکتور", entity: "HEAD_LST", entityKey: "NUMBER=1234;TAG=20", isPreview: false);
+        Audit.LoginFailed("hacker", "رمز عبور نادرست");
+        AuditSqlSniffer.Observe("DELETE FROM dbo.HEAD_LST WHERE TAG = 20 AND NUMBER = 1234");
+
+        await AuditService.ShutdownAsync(15000);
+
+        var spilled = ReadSpill().Count;
+        Ok("هیچ رویدادی به دیسک نریخت (یعنی همه در DB نوشته شدند)", spilled == 0, $"{spilled} روی دیسک");
+
+        var total = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");
+        Ok("رویدادها واقعاً در جدول درج شدند", total > 0, total.ToString());
+        Ok("شمارنده‌ی نوشته‌شده با جدول می‌خواند",
+            AuditService.WrittenCount == total, $"{AuditService.WrittenCount} در برابر {total}");
+
+        var rows = (await db.QueryAsync(
+            "SELECT [ACTION],[ENTITY],[ENTITY_KEY],[TITLE],[DETAIL],[SEVERITY],[USER_NAME],[IS_SUCCESS],[DATE_S] " +
+            "FROM [dbo].[SYS_AUDIT_EVENT]")).ToList();
+
+        bool Row(Func<dynamic, bool> p) => rows.Any(p);
+
+        Ok("درج فاکتور با کلید درست", Row(r => r.ACTION == "INSERT" && r.ENTITY == "HEAD_LST" && r.ENTITY_KEY == "NUMBER=1234;TAG=20"));
+        Ok("ویرایش با مقدار جدید در DETAIL", Row(r => r.ACTION == "UPDATE" && r.DETAIL != null && ((string)r.DETAIL).Contains("135000")));
+        Ok("امضا با وضعیت هر سه خانه", Row(r => r.ACTION == "SIGN" && r.DETAIL != null && ((string)r.DETAIL).Contains("\"3\":true")));
+        Ok("برچسب فارسی «پیش‌فاکتور» در TITLE", Row(r => r.TITLE != null && ((string)r.TITLE).Contains("پیش‌فاکتور")));
+        Ok("UPDATE با alias زیر نام جدول واقعی ثبت شد", Row(r => r.ENTITY == "VISITOR_DTL"));
+        Ok("SELECT هیچ رویدادی نساخت", !Row(r => r.ENTITY == "STUF_DEF"));
+        Ok("حذف ثبت شد", Row(r => r.ACTION == "DELETE" && r.ENTITY == "HEAD_LST"));
+        Ok("چاپ ثبت شد", Row(r => r.ACTION == "PRINT"));
+        Ok("ورود ناموفق با IS_SUCCESS=0", Row(r => r.ACTION == "LOGIN_FAILED" && r.IS_SUCCESS == false));
+        Ok("رویدادهای حساس SEVERITY=3", Row(r => r.ACTION == "DELETE" && r.SEVERITY == (byte)3));
+        Ok("تاریخ شمسی درست ذخیره شد", rows.All(r => r.DATE_S > 14000000 && r.DATE_S < 15000000));
+
+        var pwd = rows.FirstOrDefault(r => r.ENTITY == "SALA_DTL");
+        Ok("ستون رمز عبور ماسک شد و مقدار واقعی ذخیره نشد",
+            pwd != null && (pwd.DETAIL == null || !((string)pwd.DETAIL).Contains("secret123")),
+            pwd?.DETAIL as string);
+
+        // ── ۳) سطر نشست و نام کاربر ────────────────────────────────────
+        var sess = (await db.QueryAsync(
+            "SELECT [USER_ID],[USER_NAME],[MACHINE_NAME],[CLIENT_IP],[APP_VERSION],[FISCAL_YEAR] FROM [dbo].[SYS_AUDIT_SESSION]")).ToList();
+        Ok("سطر نشست ساخته شد", sess.Count == 1, sess.Count.ToString());
+        Ok("نام کاربر روی نشست نشست (رقابت زمانی رفع شده)",
+            sess.Count == 1 && (string?)sess[0].USER_NAME == "Controller", sess.Count == 1 ? (string?)sess[0].USER_NAME : null);
+        Ok("سال مالی روی نشست ثبت شد", sess.Count == 1 && sess[0].FISCAL_YEAR == 1405);
+        Ok("نام کامپیوتر ثبت شد", sess.Count == 1 && !string.IsNullOrWhiteSpace((string?)sess[0].MACHINE_NAME));
+
+        // ── ۴) نما و کوئری واقعیِ فرم گزارش ────────────────────────────
+        var viewCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[VW_SYS_AUDIT_TIMELINE]");
+        Ok("نما همان تعداد سطر را برمی‌گرداند", viewCount == total, $"{viewCount} در برابر {total}");
+
+        var joined = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[VW_SYS_AUDIT_TIMELINE] WHERE [USER_NAME] = N'Controller' AND [MACHINE_NAME] IS NOT NULL");
+        Ok("نما رویداد را به نشست وصل می‌کند", joined == total, $"{joined} در برابر {total}");
+
+        // دقیقاً همان SQL فرم WIN_AUDIT_TRAIL
+        const string viewerSql = @"
+SELECT TOP (@Take)
+       [LOG_ID], [AT_CLIENT], [AT_SERVER], [DATE_S], [TIME_S],
+       [USER_ID], [USER_NAME], [CATEGORY], [SEVERITY], [ACTION],
+       [ENTITY], [ENTITY_KEY], [FORM_NAME], [TITLE], [DETAIL],
+       [IS_SUCCESS], [SESSION_ID], [MACHINE_NAME], [CLIENT_IP],
+       [WIN_USER], [APP_VERSION]
+  FROM [dbo].[VW_SYS_AUDIT_TIMELINE]
+ WHERE [AT_SERVER] >= @From
+   AND [AT_SERVER] <  @To
+   AND (@UserId   IS NULL OR [USER_ID]  = @UserId)
+   AND (@Category IS NULL OR [CATEGORY] = @Category)
+   AND (@Action   IS NULL OR [ACTION]   = @Action)
+   AND (@Doc      IS NULL OR [ENTITY_KEY] LIKE @Doc OR [ENTITY] LIKE @Doc)
+   AND (@Search   IS NULL OR [TITLE]      LIKE @Search)
+   AND (@OnlySensitive = 0 OR [SEVERITY] = 3)
+   AND (@AfterId  IS NULL OR [LOG_ID] < @AfterId)
+ ORDER BY [LOG_ID] DESC
+ OPTION (RECOMPILE)";
+
+        object Args(object? doc = null, object? afterId = null, bool sensitive = false, object? userId = null) => new
+        {
+            Take = 50,
+            From = DateTime.Today.AddDays(-1),
+            To = DateTime.Today.AddDays(1),
+            UserId = (int?)userId,
+            Category = (byte?)null,
+            Action = (string?)null,
+            Doc = (string?)doc,
+            Search = (string?)null,
+            OnlySensitive = sensitive,
+            AfterId = (long?)afterId,
+        };
+
+        var page = (await db.QueryAsync(viewerSql, Args())).ToList();
+        Ok("کوئری واقعی فرم گزارش اجرا شد", page.Count > 0, page.Count.ToString());
+        Ok("مرتب‌سازی نزولی است", page.Count < 2 || page[0].LOG_ID > page[1].LOG_ID);
+
+        var docPage = (await db.QueryAsync(viewerSql, Args(doc: "%NUMBER=1234%"))).ToList();
+        Ok("جست‌وجوی «تاریخچه‌ی این سند» چرخه‌ی عمر را می‌آورد", docPage.Count >= 4, docPage.Count.ToString());
+        var acts = docPage.Select(r => (string)r.ACTION).ToHashSet();
+        Ok("چرخه‌ی عمر شامل ثبت، ویرایش، امضا، چاپ و حذف است",
+            acts.IsSupersetOf(new[] { "INSERT", "UPDATE", "SIGN", "PRINT", "DELETE" }),
+            string.Join(",", acts));
+
+        var sens = (await db.QueryAsync(viewerSql, Args(sensitive: true))).ToList();
+        Ok("فیلتر «فقط حساس» کار می‌کند", sens.Count > 0 && sens.All(r => r.SEVERITY == (byte)3), sens.Count.ToString());
+
+        var noUser = (await db.QueryAsync(viewerSql, Args(userId: 999999))).ToList();
+        Ok("فیلتر کاربرِ ناموجود خالی برمی‌گرداند", noUser.Count == 0);
+
+        // صفحه‌بندی keyset
+        var firstId = (long)page[0].LOG_ID;
+        var next = (await db.QueryAsync(viewerSql, Args(afterId: firstId))).ToList();
+        Ok("صفحه‌بندی keyset سطر تکراری نمی‌دهد", next.All(r => (long)r.LOG_ID < firstId));
+
+        // ── ۵) رویه‌ها ─────────────────────────────────────────────────
+        await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_BACKFILL]", commandTimeout: 120);
+        var backfilled = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [SESSION_ID] IS NULL AND [ACTION] = 'OPEN_FORM'");
+        Ok("انتقال سابقه‌ی قدیمی از AMALIAT انجام شد", backfilled == 2, backfilled.ToString());
+        Ok("سطر با ADATE خالی هم منتقل شد (ISNULL کار کرد)",
+            await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [FORM_NAME] = N'DEED_HED_WIN'") == 1);
+
+        await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_BACKFILL]", commandTimeout: 120);
+        var backfilled2 = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [SESSION_ID] IS NULL AND [ACTION] = 'OPEN_FORM'");
+        Ok("انتقال دوباره رکورد تکراری نمی‌سازد", backfilled2 == 2, backfilled2.ToString());
+
+        var beforePurge = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");
+        await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_PURGE]", commandTimeout: 120);
+        var afterPurge = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");
+        Ok("پاک‌سازی رویدادهای تازه را حذف نمی‌کند", afterPurge == beforePurge, $"{beforePurge} → {afterPurge}");
+
+        // ── ۶) جدول‌های قدیمی سالم مانده‌اند ───────────────────────────
+        Ok("AMALIAT دست‌نخورده ماند",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[AMALIAT]") == 2);
+        Ok("TFORMS خراب نشد",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[TFORMS] WHERE FORMNAME = N'USERS'") == 1);
+
+        ClearSpill();
+    }
+
+
+    // ── ۹) مسیرهای سخت روی SQL Server واقعی ───────────────────────────
+    //
+    // آنچه مسیر خوش‌بینانه به آن نمی‌رسد: مقدار بلندتر از ستون، انتقال
+    // رویدادهای روی دیسک به دیتابیس، پاک‌سازی واقعی، حجم بالا و همزمانی.
+    private static async Task ValidateRealDatabaseHardAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("مسیرهای سخت روی SQL Server واقعی");
+
+        using var db = new SqlConnection(cs);
+        await db.OpenAsync();
+        await db.ExecuteAsync("TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT]; DELETE FROM [dbo].[SYS_AUDIT_SESSION];");
+
+        // ── ۱) مقدار بلندتر از عرض ستون نباید کل دسته را از بین ببرد ───
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "AuditRealTest");
+
+        var longKey   = new string('K', 500);
+        var longTitle = new string('ت', 4000);
+        var longEnt   = new string('E', 300);
+
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Update,
+            Title = longTitle, Entity = longEnt, EntityKey = longKey,
+            FormName = new string('F', 300),
+        });
+        // یک رویداد سالم پشت سرش: اگر دسته به‌خاطر رویداد قبلی بترکد، این هم گم می‌شود.
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Insert,
+            Title = "سطر سالم پس از سطر بلند", Entity = "CANARY", EntityKey = "ID=1",
+        });
+
+        await AuditService.ShutdownAsync(15000);
+
+        var longRow = (await db.QueryAsync(
+            "SELECT [ENTITY],[ENTITY_KEY],[TITLE],[FORM_NAME] FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] LIKE 'EEE%'")).ToList();
+        Ok("مقدار بلند بریده شد و درج شد (نه خطای 8152)", longRow.Count == 1, longRow.Count.ToString());
+        if (longRow.Count == 1)
+        {
+            Ok("ENTITY به ۴۸ بریده شد",     ((string)longRow[0].ENTITY).Length == 48);
+            Ok("ENTITY_KEY به ۸۰ بریده شد", ((string)longRow[0].ENTITY_KEY).Length == 80);
+            Ok("TITLE به ۲۵۰ بریده شد",     ((string)longRow[0].TITLE).Length == 250);
+        }
+        Ok("رویداد سالمِ پشت سر آن گم نشد",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'CANARY'") == 1);
+
+        // ── ۲) فارسی: round-trip دقیق، نه فقط Contains ─────────────────
+        await db.ExecuteAsync("TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+        const string persian = "ویرایش پیش‌فاکتور «تست» — ۱۴۰۵/۰۵/۱۷ ﷼";
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "AuditRealTest");
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Update,
+            Title = persian, Entity = "HEAD_LST", EntityKey = "NUMBER=1",
+            Detail = "{\"نام\":\"علی\"}",
+        });
+        await AuditService.ShutdownAsync(15000);
+
+        var back = await db.ExecuteScalarAsync<string>("SELECT TOP 1 [TITLE] FROM [dbo].[SYS_AUDIT_EVENT]");
+        Ok("متن فارسی بدون تغییر برگشت (NVARCHAR درست)", back == persian, back);
+        var detail = await db.ExecuteScalarAsync<string>("SELECT TOP 1 [DETAIL] FROM [dbo].[SYS_AUDIT_EVENT]");
+        Ok("DETAIL فارسی سالم برگشت", detail == "{\"نام\":\"علی\"}", detail);
+
+        // ── ۳) انتقال رویدادهای روی دیسک به دیتابیس ────────────────────
+        // این مسیر تا حالا هرگز روی دیتابیس واقعی اجرا نشده بود: رویداد
+        // حساسی که موتور خاموش بوده روی دیسک می‌نشیند و باید در اجرای بعدی
+        // به دیتابیس منتقل شود.
+        await db.ExecuteAsync("TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+        ClearSpill();
+
+        // موتور خاموش است → رویداد حساس باید روی دیسک بنشیند
+        Audit.Delete("HEAD_LST", "NUMBER=555;TAG=2", "حذف فاکتور فروش ۵۵۵");
+        Audit.Sign("HEAD_LST", "NUMBER=556;TAG=20", 1, true, persianTitle: "امضای پیش‌فاکتور ۵۵۶");
+        var onDisk = ReadSpill().Count;
+        Ok("رویداد حساس با موتور خاموش روی دیسک نشست", onDisk == 2, onDisk.ToString());
+
+        // یک خط خراب هم وسطش می‌گذاریم: نباید انتقال را قفل کند
+        var spillFile = Directory.EnumerateFiles(SpillDir, "*.jsonl").First();
+        File.AppendAllText(spillFile, "{این JSON معتبر نیست\n");
+
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "AuditRealTest");
+        for (var i = 0; i < 40 && ReadSpill().Count > 0; i++) await Task.Delay(500);
+        await AuditService.ShutdownAsync(15000);
+
+        var replayed = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY_KEY] IN (N'NUMBER=555;TAG=2', N'NUMBER=556;TAG=20')");
+        Ok("رویدادهای روی دیسک به دیتابیس منتقل شدند", replayed == 2, replayed.ToString());
+        Ok("خط خراب انتقال را قفل نکرد (فایل پاک شد)", ReadSpill().Count == 0, ReadSpill().Count.ToString());
+
+        // ── ۴) پاک‌سازی واقعاً حذف می‌کند ──────────────────────────────
+        await db.ExecuteAsync("TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+        await db.ExecuteAsync(@"
+            INSERT INTO [dbo].[SYS_AUDIT_EVENT] ([AT_SERVER],[CATEGORY],[SEVERITY],[ACTION],[TITLE]) VALUES
+                (DATEADD(DAY, -120,  SYSDATETIME()), 1, 1, 'OPEN_FORM', N'ناوبری قدیمی'),
+                (DATEADD(DAY, -30,   SYSDATETIME()), 1, 1, 'OPEN_FORM', N'ناوبری تازه'),
+                (DATEADD(DAY, -120,  SYSDATETIME()), 2, 3, 'DELETE',    N'حذف نسبتاً قدیمی'),
+                (DATEADD(YEAR, -6,   SYSDATETIME()), 2, 3, 'DELETE',    N'حذف خیلی قدیمی');");
+
+        await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_PURGE]", commandTimeout: 120);
+
+        Ok("ناوبری قدیمی‌تر از ۹۰ روز حذف شد",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [TITLE] = N'ناوبری قدیمی'") == 0);
+        Ok("ناوبری تازه‌تر از ۹۰ روز ماند",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [TITLE] = N'ناوبری تازه'") == 1);
+        Ok("حذفِ ۱۲۰ روزه ماند (نگهداری ۵ سال)",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [TITLE] = N'حذف نسبتاً قدیمی'") == 1);
+        Ok("حذفِ ۶ ساله پاک شد",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [TITLE] = N'حذف خیلی قدیمی'") == 0);
+
+        // ── ۵) حجم بالا و همزمانی روی دیتابیس واقعی ────────────────────
+        await db.ExecuteAsync("TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT]; DELETE FROM [dbo].[SYS_AUDIT_SESSION];");
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "AuditRealTest");
+
+        const int threads = 8, perThread = 750;   // ۶۰۰۰ رویداد، چند برابر ظرفیت یک دسته
+        var sw = Stopwatch.StartNew();
+        await Task.WhenAll(Enumerable.Range(0, threads).Select(t => Task.Run(() =>
+        {
+            for (var i = 0; i < perThread; i++)
+                Audit.Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Data, Action = AuditAction.Update,
+                    Title = $"بار سنگین {t}-{i}", Entity = "LOADTEST", EntityKey = $"T={t};I={i}",
+                });
+        })));
+        var enqueueMs = sw.Elapsed.TotalMilliseconds;
+        await AuditService.ShutdownAsync(60000);
+        sw.Stop();
+
+        var landed = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'LOADTEST'");
+        var expected = threads * perThread;
+        Ok($"هر {expected} رویداد از {threads} نخ در دیتابیس نشست",
+            landed + AuditService.DroppedCount >= expected && landed > 0,
+            $"{landed} درج، {AuditService.DroppedCount} دورریز");
+        Ok("هیچ رویدادی بی‌حساب گم نشد",
+            landed + AuditService.DroppedCount + ReadSpill().Count >= expected,
+            $"{landed}+{AuditService.DroppedCount}+{ReadSpill().Count} در برابر {expected}");
+        Ok("کلیدها یکتا ماندند (بدون تداخل نخ‌ها)",
+            await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(DISTINCT [ENTITY_KEY]) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'LOADTEST'") == landed);
+        Ok("SEQ در سطح دیتابیس یکتا ماند",
+            await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) - COUNT(DISTINCT [SEQ]) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'LOADTEST'") == 0);
+
+        Console.WriteLine($"  زمان صف‌کردن {expected} رویداد روی نخ فراخوان: {enqueueMs:N0}ms " +
+                          $"({enqueueMs * 1000 / expected:N2}us هر کدام) — کل تا تخلیه: {sw.Elapsed.TotalSeconds:N1}s");
+
+        ClearSpill();
+    }
+
 }

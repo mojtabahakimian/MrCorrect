@@ -249,8 +249,8 @@ namespace Prg_Proccessy.AUDIT
             "SP_PAY2_FINALIZE_SETTLE",
             "SP_PAY2_CLOSE_PERIOD",
             "SP_PAY2_REVERT_RUN",
-            "SP_SYS_AUDIT_PURGE",
-            "SP_SYS_AUDIT_BACKFILL",
+            "SYS_AUDIT_PURGE",
+            "SYS_AUDIT_BACKFILL",
         };
 
         private static void ObserveProcedure(string sql, string? formName)
