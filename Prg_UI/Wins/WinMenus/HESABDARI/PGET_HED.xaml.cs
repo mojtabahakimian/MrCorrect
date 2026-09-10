@@ -3064,23 +3064,54 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     CURRENT_ITMES_ROW.N_SERI = null;
                     CURRENT_ITMES_ROW.BANK = null;
 
-                    CURRENT_ITMES_ROW.FHES = null;
-                    CURRENT_ITMES_ROW.NAME_FHES = null;
-                    CURRENT_ITMES_ROW.FHES_K = null;
-                    CURRENT_ITMES_ROW.FHES_M = null;
-                    CURRENT_ITMES_ROW.FHES_T = null;
-                    CURRENT_ITMES_ROW.FHES_T2 = null;
-                    CURRENT_ITMES_ROW.FHES_T3 = null;
-                    CURRENT_ITMES_ROW.FHES_T4 = null;
+                    bool isNewRow = (CURRENT_ITMES_ROW.IDH == null || CURRENT_ITMES_ROW.IDH <= 0);
+                    bool nahvaChanged = (WAS_ROW_ITEM == null || WAS_ROW_ITEM.NAHVA != 3);
 
-                    CURRENT_ITMES_ROW.THES = null;
-                    CURRENT_ITMES_ROW.NAME_THES = null;
-                    CURRENT_ITMES_ROW.THES_K = null;
-                    CURRENT_ITMES_ROW.THES_M = null;
-                    CURRENT_ITMES_ROW.THES_T = null;
-                    CURRENT_ITMES_ROW.THES_T2 = null;
-                    CURRENT_ITMES_ROW.THES_T3 = null;
-                    CURRENT_ITMES_ROW.THES_T4 = null;
+                    if (isNewRow && nahvaChanged)
+                    {
+                        CURRENT_ITMES_ROW.FHES = null;
+                        CURRENT_ITMES_ROW.NAME_FHES = null;
+                        CURRENT_ITMES_ROW.FHES_K = null;
+                        CURRENT_ITMES_ROW.FHES_M = null;
+                        CURRENT_ITMES_ROW.FHES_T = null;
+                        CURRENT_ITMES_ROW.FHES_T2 = null;
+                        CURRENT_ITMES_ROW.FHES_T3 = null;
+                        CURRENT_ITMES_ROW.FHES_T4 = null;
+
+                        CURRENT_ITMES_ROW.THES = null;
+                        CURRENT_ITMES_ROW.NAME_THES = null;
+                        CURRENT_ITMES_ROW.THES_K = null;
+                        CURRENT_ITMES_ROW.THES_M = null;
+                        CURRENT_ITMES_ROW.THES_T = null;
+                        CURRENT_ITMES_ROW.THES_T2 = null;
+                        CURRENT_ITMES_ROW.THES_T3 = null;
+                        CURRENT_ITMES_ROW.THES_T4 = null;
+                    }
+                    else if (!isNewRow && WAS_ROW_ITEM != null)
+                    {
+                        if (string.IsNullOrEmpty(CURRENT_ITMES_ROW.FHES) && !string.IsNullOrEmpty(WAS_ROW_ITEM.FHES))
+                        {
+                            CURRENT_ITMES_ROW.FHES = WAS_ROW_ITEM.FHES;
+                            CURRENT_ITMES_ROW.NAME_FHES = WAS_ROW_ITEM.NAME_FHES;
+                            CURRENT_ITMES_ROW.FHES_K = WAS_ROW_ITEM.FHES_K;
+                            CURRENT_ITMES_ROW.FHES_M = WAS_ROW_ITEM.FHES_M;
+                            CURRENT_ITMES_ROW.FHES_T = WAS_ROW_ITEM.FHES_T;
+                            CURRENT_ITMES_ROW.FHES_T2 = WAS_ROW_ITEM.FHES_T2;
+                            CURRENT_ITMES_ROW.FHES_T3 = WAS_ROW_ITEM.FHES_T3;
+                            CURRENT_ITMES_ROW.FHES_T4 = WAS_ROW_ITEM.FHES_T4;
+                        }
+                        if (string.IsNullOrEmpty(CURRENT_ITMES_ROW.THES) && !string.IsNullOrEmpty(WAS_ROW_ITEM.THES))
+                        {
+                            CURRENT_ITMES_ROW.THES = WAS_ROW_ITEM.THES;
+                            CURRENT_ITMES_ROW.NAME_THES = WAS_ROW_ITEM.NAME_THES;
+                            CURRENT_ITMES_ROW.THES_K = WAS_ROW_ITEM.THES_K;
+                            CURRENT_ITMES_ROW.THES_M = WAS_ROW_ITEM.THES_M;
+                            CURRENT_ITMES_ROW.THES_T = WAS_ROW_ITEM.THES_T;
+                            CURRENT_ITMES_ROW.THES_T2 = WAS_ROW_ITEM.THES_T2;
+                            CURRENT_ITMES_ROW.THES_T3 = WAS_ROW_ITEM.THES_T3;
+                            CURRENT_ITMES_ROW.THES_T4 = WAS_ROW_ITEM.THES_T4;
+                        }
+                    }
                 }
                 else if (CURRENT_ITMES_ROW.NAHVA == 1)
                 {
@@ -3385,10 +3416,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                                 default:
                                     {
-                                        CURRENT_ITMES_ROW.FHES_K = null;
-                                        CURRENT_ITMES_ROW.FHES_M = null;
-                                        CURRENT_ITMES_ROW.FHES_T = null;
-                                        CURRENT_ITMES_ROW.FHES = null;
+                                        bool isNewRow = (CURRENT_ITMES_ROW.IDH == null || CURRENT_ITMES_ROW.IDH <= 0);
+                                        bool nahvaChanged = (WAS_ROW_ITEM == null || WAS_ROW_ITEM.NAHVA != CURRENT_ITMES_ROW.NAHVA);
+                                        if (isNewRow && nahvaChanged)
+                                        {
+                                            CURRENT_ITMES_ROW.FHES_K = null;
+                                            CURRENT_ITMES_ROW.FHES_M = null;
+                                            CURRENT_ITMES_ROW.FHES_T = null;
+                                            CURRENT_ITMES_ROW.FHES = null;
+                                            CURRENT_ITMES_ROW.NAME_FHES = null;
+                                        }
                                         this.fHES_KColumn.IsReadOnly = false;
                                         this.fHES_MColumn.IsReadOnly = false;
                                         SetIsTabStopCell("FHES_K", true, row_index);
@@ -3400,10 +3437,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                         break;
                                     }
                             }
-                            CURRENT_ITMES_ROW.THES_K = null;
-                            CURRENT_ITMES_ROW.THES_M = null;
-                            CURRENT_ITMES_ROW.THES_T = null;
-                            CURRENT_ITMES_ROW.THES = null;
+                            bool isNewRowPay = (CURRENT_ITMES_ROW.IDH == null || CURRENT_ITMES_ROW.IDH <= 0);
+                            bool nahvaChangedPay = (WAS_ROW_ITEM == null || WAS_ROW_ITEM.NAHVA != CURRENT_ITMES_ROW.NAHVA);
+                            if (isNewRowPay && nahvaChangedPay && CURRENT_ITMES_ROW.NAHVA == 3)
+                            {
+                                CURRENT_ITMES_ROW.THES_K = null;
+                                CURRENT_ITMES_ROW.THES_M = null;
+                                CURRENT_ITMES_ROW.THES_T = null;
+                                CURRENT_ITMES_ROW.THES = null;
+                                CURRENT_ITMES_ROW.NAME_THES = null;
+                            }
                             this.tHES_KColumn.IsReadOnly = false;
                             this.tHES_MColumn.IsReadOnly = false;
                             SetIsTabStopCell("THES_K", true, row_index);
