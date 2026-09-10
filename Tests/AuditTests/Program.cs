@@ -93,6 +93,7 @@ internal static class Program
         ValidateResilience();
         await ValidateRealDatabaseAsync();
         await ValidateRealDatabaseHardAsync();
+        await ValidateLegacyWritesAsync();
 
         Console.WriteLine($"\n\nنتیجه:  موفق {_pass}  |  ناموفق {_fail}");
         return _fail == 0 ? 0 : 1;
@@ -848,6 +849,128 @@ SELECT TOP (@Take)
 
         Console.WriteLine($"  زمان صف‌کردن {expected} رویداد روی نخ فراخوان: {enqueueMs:N0}ms " +
                           $"({enqueueMs * 1000 / expected:N2}us هر کدام) — کل تا تخلیه: {sw.Elapsed.TotalSeconds:N1}s");
+
+        ClearSpill();
+    }
+
+
+    // ── ۱۰) نوشتن در جدول‌های قدیمی ───────────────────────────────────
+    //
+    // خواسته‌ی صریح: جدول‌های قدیمی حفظ شوند و همچنان پر شوند. تا حالا فقط
+    // ثابت شده بود که خراب نمی‌شوند و جهت برعکس (انتقال) کار می‌کند؛ خودِ
+    // نوشتن هرگز روی دیتابیس واقعی اجرا نشده بود.
+    private static async Task ValidateLegacyWritesAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("نوشتن در جدول‌های قدیمی");
+
+        using var db = new SqlConnection(cs);
+        await db.OpenAsync();
+
+        // USER_AUDIT_LOG با همان شکل واقعی، شامل ستون‌های NOT NULL
+        await db.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[USER_AUDIT_LOG]', N'U') IS NOT NULL DROP TABLE [dbo].[USER_AUDIT_LOG];
+            CREATE TABLE [dbo].[USER_AUDIT_LOG] (
+                [ID] INT IDENTITY(1,1) PRIMARY KEY,
+                [UserName] NVARCHAR(100) NOT NULL,
+                [WindowsUserName] NVARCHAR(100) NULL,
+                [ActionType] NVARCHAR(50) NOT NULL,
+                [TableName] NVARCHAR(100) NOT NULL,
+                [RecordID] NVARCHAR(100) NULL,
+                [OldValue] NVARCHAR(MAX) NULL,
+                [NewValue] NVARCHAR(MAX) NULL,
+                [IPAddress] NVARCHAR(50) NULL,
+                [MachineName] NVARCHAR(100) NULL,
+                [ApplicationVersion] NVARCHAR(50) NULL,
+                [WindowsVersion] NVARCHAR(100) NULL,
+                [ActionDateTime] DATETIME NULL,
+                [AdditionalInfo] NVARCHAR(MAX) NULL,
+                [SessionID] UNIQUEIDENTIFIER NULL,
+                [ProcessID] INT NULL,
+                [ThreadID] INT NULL,
+                [StackTrace] NVARCHAR(MAX) NULL,
+                [IsSuccess] BIT NULL,
+                [ErrorMessage] NVARCHAR(MAX) NULL);
+            DELETE FROM [dbo].[AMALIAT];
+            TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+
+        ClearSpill();
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+
+        Audit.Form("HEAD_LST_PISHFROOSH2");
+        Audit.Form("DEED_HED_WIN");
+
+        // همان کاری که شیم AuditLogger در Prg_UI می‌کند
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data,
+            Action = AuditAction.Delete,
+            Entity = "HEAD_LST",
+            EntityKey = "NUMBER=1234;TAG=20",
+            Title = "حذف پیش‌فاکتور ۱۲۳۴",
+            Legacy = AuditLegacyTarget.UserAuditLog,
+            LegacyOldValue = "{\"MABL\":\"135000\"}",
+            IsCritical = true,
+        });
+
+        // رویداد بدون کاربر و بدون موجودیت: ستون‌های NOT NULL جدول قدیمی
+        // نباید کل دسته را رد کنند.
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data,
+            Action = AuditAction.Update,
+            Title = "بدون موجودیت",
+            Legacy = AuditLegacyTarget.UserAuditLog,
+        });
+
+        await AuditService.ShutdownAsync(15000);
+
+        var amaliat = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[AMALIAT]");
+        Ok("باز کردن فرم همچنان در AMALIAT نوشته می‌شود", amaliat == 2, amaliat.ToString());
+
+        var amalId = await db.ExecuteScalarAsync<string>(
+            "SELECT TOP 1 [AMALID] FROM [dbo].[AMALIAT] WHERE [AMALID] = N'HEAD_LST_PISHFROOSH2'");
+        Ok("نام فرم در AMALIAT درست است", amalId == "HEAD_LST_PISHFROOSH2", amalId);
+
+        var ual = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[USER_AUDIT_LOG]");
+        Ok("USER_AUDIT_LOG همچنان پر می‌شود", ual == 2, ual.ToString());
+
+        var del = (await db.QueryAsync(
+            "SELECT [UserName],[ActionType],[TableName],[RecordID],[OldValue],[MachineName],[IsSuccess] " +
+            "FROM [dbo].[USER_AUDIT_LOG] WHERE [ActionType] = 'DELETE'")).ToList();
+        Ok("سطر حذف با همه‌ی ستون‌ها نوشته شد", del.Count == 1, del.Count.ToString());
+        if (del.Count == 1)
+        {
+            Ok("نام جدول و شناسه‌ی رکورد درست است",
+                (string?)del[0].TableName == "HEAD_LST" && (string?)del[0].RecordID == "NUMBER=1234;TAG=20");
+            Ok("مقدار قبلی ذخیره شد", ((string?)del[0].OldValue)?.Contains("135000") == true);
+            Ok("اطلاعات نشست روی سطر قدیمی هم می‌نشیند",
+                !string.IsNullOrWhiteSpace((string?)del[0].MachineName));
+        }
+
+        Ok("رویداد بدون موجودیت هم نوشته شد (NOT NULL دسته را رد نکرد)",
+            await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM [dbo].[USER_AUDIT_LOG] WHERE [ActionType] = 'UPDATE'") == 1);
+
+        // مهم‌ترین بخش: جریان اصلی نباید به جدول قدیمی وابسته باشد
+        var main = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");
+        Ok("همه‌ی رویدادها در جریان اصلی هم هستند (نوشتن دوگانه)", main == 4, main.ToString());
+
+        // اگر جدول قدیمی اصلاً نباشد، جریان اصلی باید سالم بماند
+        await db.ExecuteAsync("DROP TABLE [dbo].[USER_AUDIT_LOG]; TRUNCATE TABLE [dbo].[SYS_AUDIT_EVENT];");
+        AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Delete,
+            Entity = "HEAD_LST", EntityKey = "NUMBER=1", Title = "حذف",
+            Legacy = AuditLegacyTarget.UserAuditLog, IsCritical = true,
+        });
+        await AuditService.ShutdownAsync(15000);
+        Ok("نبودِ جدول قدیمی جریان اصلی را از کار نمی‌اندازد",
+            await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]") == 1);
+        Ok("و رویداد روی دیسک هم نریخت", ReadSpill().Count == 0, ReadSpill().Count.ToString());
 
         ClearSpill();
     }
