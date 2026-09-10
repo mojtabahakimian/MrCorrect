@@ -189,12 +189,24 @@ namespace Prg_Proccessy.AUDIT
                 ProcessId = current.ProcessId,
                 FiscalYear = fiscalYear ?? current.FiscalYear,
                 DatabaseName = current.DatabaseName,
-                StartedAt = current.StartedAt,
+                // نشست تازه از همین لحظه شروع می‌شود؛ کپی کردن زمان شروعِ
+                // نشست قبلی، مدت حضور کاربر دوم را از ابتدای کار کاربر اول
+                // نشان می‌داد.
+                StartedAt = switching ? DateTime.Now : current.StartedAt,
             };
 
             // نشست تازه باید سطر خودش را داشته باشد؛ در غیر این صورت فقط
             // سطر موجود به‌روز می‌شود.
-            if (switching) _ = Task.Run(WriteSessionRowAsync);
+            if (switching)
+            {
+                // نشست قبلی باید بسته شود، وگرنه ENDED_AT آن برای همیشه خالی
+                // می‌ماند و در گزارش، نشستِ کاربر قبلی هنوز «باز» به نظر می‌رسد.
+                _ = Task.Run(async () =>
+                {
+                    await CloseSessionRowAsync(current).ConfigureAwait(false);
+                    await WriteSessionRowAsync().ConfigureAwait(false);
+                });
+            }
             else _ = Task.Run(UpdateSessionUserAsync);
         }
 
@@ -336,10 +348,16 @@ namespace Prg_Proccessy.AUDIT
             // صف پر است. رویدادهای عادی دور ریخته می‌شوند (شمرده می‌شوند تا
             // معلوم باشد)، ولی رویداد حساس هرگز از بین نمی‌رود: روی دیسک
             // محلی می‌نشیند و در چرخه‌ی بعدی به دیتابیس منتقل می‌شود.
-            Interlocked.Increment(ref _dropped);
+            // رویداد حساس روی دیسک می‌نشیند و در اجرای بعدی منتقل می‌شود،
+            // پس «از دست رفته» نیست. شمردنش باعث می‌شد فرم سوابق به بازرس
+            // هشدار بدهد که رویدادی گم شده، در حالی که ثبت شده بود.
             if (evt.IsCritical)
             {
                 AppendCriticalSpill(evt);
+            }
+            else
+            {
+                Interlocked.Increment(ref _dropped);
             }
         }
 
@@ -744,9 +762,10 @@ namespace Prg_Proccessy.AUDIT
             }
         }
 
-        private static async Task CloseSessionRowAsync()
+        private static async Task CloseSessionRowAsync(AuditSessionInfo? target = null)
         {
             var s = _session;
+            if (target != null) s = target;
             if (s is null) return;
 
             try

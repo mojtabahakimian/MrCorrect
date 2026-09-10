@@ -1,4 +1,4 @@
-﻿using Functions;
+using Functions;
 using Functions.SMSService;
 using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
@@ -134,6 +134,24 @@ namespace Prg_UI.Wins
         /// انجام نمی‌دهد؛ ساخت جدول‌ها و درج ردیف نشست روی نخ پس‌زمینه است.
         /// فراخوانی دوباره بی‌اثر است.
         /// </summary>
+        /// <summary>
+        /// اجرای مایگریشن بدون ثبت در سابقه.
+        ///
+        /// موتور سابقه عمداً پیش از لاگین راه می‌افتد تا «ورود ناموفق» هم ثبت
+        /// شود، ولی مایگریشن بعد از آن اجرا می‌شود. بدون این، دستورهای خودِ
+        /// مایگریشن (مثل درج در TFORMS) به‌عنوان تغییر داده‌ی کاربر ثبت
+        /// می‌شدند — آن هم بدون نام کاربر، چون هنوز کسی وارد نشده، و نمای
+        /// خط زمانی با ISNULL آن‌ها را به اولین کاربری که وارد می‌شود نسبت
+        /// می‌داد.
+        /// </summary>
+        private static void RunMigrationWithoutAudit(Action migrate)
+        {
+            var previous = Prg_Proccessy.AUDIT.AuditSqlSniffer.Enabled;
+            Prg_Proccessy.AUDIT.AuditSqlSniffer.Enabled = false;
+            try { migrate(); }
+            finally { Prg_Proccessy.AUDIT.AuditSqlSniffer.Enabled = previous; }
+        }
+
         private static void StartAuditSession()
         {
             try
@@ -238,7 +256,7 @@ namespace Prg_UI.Wins
                 StartAuditSession();
                 Prg_Proccessy.AUDIT.Audit.Login(Baseknow.UUSER, nameof(USER_LOGIN));
 
-                ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
+                RunMigrationWithoutAudit(() => ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR));
                 App.splashScreen.LoadComplete();
 
                 if (CL_Generaly.SectionName == "HEAD_LST_FROOSH22")
@@ -316,7 +334,7 @@ namespace Prg_UI.Wins
             return;//Should Remove this lone
 #endif
 
-            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
+            RunMigrationWithoutAudit(() => ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR));
 
             #region TinyLockCheck
             CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
@@ -1562,7 +1580,7 @@ del ""%~f0"" & exit
                 return;
             }
 
-            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true);
+            RunMigrationWithoutAudit(() => ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true));
             new Msgwin(false, "اسکریپت‌ها اجرا شدند.").Show();
         }
     }

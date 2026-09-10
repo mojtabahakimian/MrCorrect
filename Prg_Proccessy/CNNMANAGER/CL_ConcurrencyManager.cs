@@ -289,8 +289,6 @@ namespace Prg_Proccessy.CNNMANAGER
             if (_disposed)
                 return;
 
-            // Dispose بدون Commit یعنی rollback؛ صف سابقه باید دور ریخته شود.
-
             try
             {
                 if (!_isExternalTransaction)

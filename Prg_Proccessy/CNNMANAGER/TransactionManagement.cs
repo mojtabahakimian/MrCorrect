@@ -18,15 +18,6 @@ namespace Prg_Proccessy.CNNMANAGER
         private SqlConnection _connection;
         private IDbTransaction _transaction;
 
-        /// <summary>
-        /// دستورهای نوشتنی که هنوز commit نشده‌اند.
-        ///
-        /// ثبت سابقه نمی‌تواند بلافاصله بعد از Execute انجام شود: اگر تراکنش
-        /// بعداً rollback شود، ردیف‌هایی در سابقه می‌ماند که هرگز در دیتابیس
-        /// نوشته نشده‌اند و بررسی‌کننده را گمراه می‌کند. پس دستورها اینجا
-        /// نگه داشته می‌شوند و فقط هنگام commit موفق ثبت می‌گردند.
-        /// </summary>
-
         public TransactionManagement(string connectionString)
         {
             _connection = new SqlConnection(connectionString);
@@ -185,8 +176,6 @@ namespace Prg_Proccessy.CNNMANAGER
         }
         public void Dispose()
         {
-            // Dispose بدون commit یعنی rollback؛ صف باید دور ریخته شود نه ثبت.
-
             _transaction?.Dispose();
             _transaction = null;
 

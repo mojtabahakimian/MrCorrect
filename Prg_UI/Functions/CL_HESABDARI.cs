@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Functions;
 using iText.Layout.Font;
@@ -1632,7 +1632,14 @@ namespace Prg_Proccessy.FUNCTIONS
             {
                 // پیش از این یک درج همزمان روی نخ فراخوان بود؛ حالا از همان
                 // صف پس‌زمینه‌ی سابقه عبور می‌کند و جدول AMALIAT همچنان پر می‌شود.
-                Prg_Proccessy.AUDIT.Audit.Form(frm);
+                //
+                // setContext: false — این متد از LETSGO هم رد می‌شود و آنجا
+                // کدهای بررسی دسترسی پاس داده می‌شوند (مثل chartfilter) که
+                // پنجره نیستند. اگر زمینه را عوض کنند، نوشتن‌های بعدی به نام
+                // یک کدِ دسترسی نسبت داده می‌شوند نه پنجره‌ی واقعی.
+                // AMALIYAT_USER که واقعاً از خودِ فرم‌ها صدا زده می‌شود
+                // دست‌نخورده مانده و همچنان زمینه را تنظیم می‌کند.
+                Prg_Proccessy.AUDIT.Audit.Form(frm, setContext: false);
             }
             catch { }
 

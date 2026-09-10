@@ -61,14 +61,20 @@ namespace Prg_Proccessy.AUDIT
             if (!string.IsNullOrWhiteSpace(formName)) _currentForm = formName;
         }
 
-        public static void Form(string? formName, string? persianTitle = null)
+        /// <param name="setContext">
+        /// آیا این فرم، «فرم جاری» هم بشود. برای بررسی دسترسی (LETSGO) باید
+        /// false باشد: آنجا کدهایی مثل «chartfilter» پاس داده می‌شود که پنجره
+        /// نیستند، و اگر زمینه را عوض کنند نوشتن‌های بعدی به نام یک کدِ
+        /// دسترسی نسبت داده می‌شوند نه به پنجره‌ی واقعی.
+        /// </param>
+        public static void Form(string? formName, string? persianTitle = null, bool setContext = true)
         {
             if (string.IsNullOrWhiteSpace(formName)) return;
 
             // پیش از فیلتر تکرار تنظیم می‌شود: اگر کاربر به فرمی برگردد که
             // کمتر از پانزده ثانیه پیش باز کرده، رویداد تازه‌ای ثبت نمی‌شود
             // ولی زمینه باید همان فرم باشد.
-            _currentForm = formName;
+            if (setContext) _currentForm = formName;
 
             try
             {

@@ -934,8 +934,8 @@ SELECT TOP (@Take)
         ClearSpill();
         AuditService.Start(cs, 78, "Controller", "1.0", 1405, "MRC_AUDIT_TEST");
 
-        Audit.Form("HEAD_LST_PISHFROOSH2");
-        Audit.Form("DEED_HED_WIN");
+        Audit.Form("LEGACY_FORM_A");
+        Audit.Form("LEGACY_FORM_B");
 
         // همان کاری که شیم AuditLogger در Prg_UI می‌کند
         Audit.Write(new AuditEventDraft
@@ -966,8 +966,8 @@ SELECT TOP (@Take)
         Ok("باز کردن فرم همچنان در AMALIAT نوشته می‌شود", amaliat == 2, amaliat.ToString());
 
         var amalId = await db.ExecuteScalarAsync<string>(
-            "SELECT TOP 1 [AMALID] FROM [dbo].[AMALIAT] WHERE [AMALID] = N'HEAD_LST_PISHFROOSH2'");
-        Ok("نام فرم در AMALIAT درست است", amalId == "HEAD_LST_PISHFROOSH2", amalId);
+            "SELECT TOP 1 [AMALID] FROM [dbo].[AMALIAT] WHERE [AMALID] = N'LEGACY_FORM_A'");
+        Ok("نام فرم در AMALIAT درست است", amalId == "LEGACY_FORM_A", amalId);
 
         var ual = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[USER_AUDIT_LOG]");
         Ok("USER_AUDIT_LOG همچنان پر می‌شود", ual == 2, ual.ToString());
@@ -1215,14 +1215,14 @@ SELECT TOP (@Take)
         AuditService.AttachUser(78, "Controller", 1405, "1.0");
 
         // کاربر فرم پیش‌فاکتور را باز می‌کند، بعد یک نوشتن انجام می‌دهد
-        Audit.Form("HEAD_LST_PISHFROOSH2");
+        Audit.Form("CTX_FORM_A");
         using (var db = new SqlConnection(cs))
         {
             db.Open();
             db.Execute("INSERT INTO dbo.HEAD_LST (NUMBER, TAG, CUST_NO) VALUES (1234, 20, N'C-5')");
 
             // تراکنشی، از فرم دیگری
-            Audit.Form("HEAD_LST_FROOSH22");
+            Audit.Form("CTX_FORM_B");
             using var tx = db.BeginTransaction();
             db.Execute("UPDATE dbo.HEAD_LST SET MABL_HAZ = 500 WHERE NUMBER = 1234", null, tx);
             tx.Commit();
@@ -1233,10 +1233,10 @@ SELECT TOP (@Take)
             "SELECT [ACTION],[FORM_NAME],[TITLE] FROM [dbo].[SYS_AUDIT_EVENT] WHERE [ENTITY] = N'HEAD_LST'")).ToList();
 
         Ok("درج، نام فرم را با خود دارد",
-            rows.Any(r => (string)r.ACTION == "INSERT" && (string?)r.FORM_NAME == "HEAD_LST_PISHFROOSH2"),
+            rows.Any(r => (string)r.ACTION == "INSERT" && (string?)r.FORM_NAME == "CTX_FORM_A"),
             rows.FirstOrDefault(r => (string)r.ACTION == "INSERT")?.FORM_NAME as string);
         Ok("ویرایش تراکنشی، نام فرم خودش را دارد",
-            rows.Any(r => (string)r.ACTION == "UPDATE" && (string?)r.FORM_NAME == "HEAD_LST_FROOSH22"),
+            rows.Any(r => (string)r.ACTION == "UPDATE" && (string?)r.FORM_NAME == "CTX_FORM_B"),
             rows.FirstOrDefault(r => (string)r.ACTION == "UPDATE")?.FORM_NAME as string);
 
         // ── سقف عملیات گروهی باید دیده شود، نه بی‌صدا ──────────────────
