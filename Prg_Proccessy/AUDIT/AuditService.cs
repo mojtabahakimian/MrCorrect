@@ -274,9 +274,18 @@ namespace Prg_Proccessy.AUDIT
             // می‌شود تا در اجرای بعدی منتقل شود. بدون این، برنامه بسته می‌شد و
             // نخ پس‌زمینه با آن از بین می‌رفت — یعنی همان رویدادهایی که تضمین
             // کرده بودیم گم نمی‌شوند، دقیقاً هنگام خروج گم می‌شدند.
+            // پس از Cancel، کمی به نخ پس‌زمینه فرصت داده می‌شود تا خودش تمام
+            // شود. Channel با SingleReader ساخته شده، پس خواندن همزمان از دو
+            // نخ رفتار تعریف‌نشده دارد؛ اگر نخ هنوز زنده باشد، دست نمی‌زنیم و
+            // رویدادها در اجرای بعدی از همان صف‌های روی دیسک برمی‌گردند.
+            if (worker != null && !worker.IsCompleted)
+            {
+                try { await Task.WhenAny(worker, Task.Delay(500)).ConfigureAwait(false); } catch { }
+            }
+
             try
             {
-                if (worker is { IsCompleted: false } && channel != null)
+                if (worker is null or { IsCompleted: true } && channel != null)
                 {
                     var leftovers = new List<AuditEvent>();
                     while (leftovers.Count < QueueCapacity && channel.Reader.TryRead(out var e))
@@ -311,7 +320,10 @@ namespace Prg_Proccessy.AUDIT
             // بدون این، نوشتنی که پیش از لاگین یا حین خروج رخ دهد بی‌رد گم می‌شد.
             if (channel is null || !_running)
             {
-                if (evt.IsCritical) TrySpill(new[] { evt });
+                // AppendCriticalSpill و نه TrySpill: دومی برای هر رویداد یک
+                // فایل جدا می‌سازد و ۲۰۰ رویداد در این حالت سقف فایل‌ها را
+                // پر می‌کرد و بقیه بی‌صدا دور ریخته می‌شدند.
+                if (evt.IsCritical) AppendCriticalSpill(evt);
                 return;
             }
 
@@ -497,7 +509,18 @@ namespace Prg_Proccessy.AUDIT
 
                 Interlocked.Exchange(ref _lastSchemaAttemptTicks, now);
 
+                var wasReady = _schemaReady;
                 _schemaReady = await AuditSchema.EnsureCreatedAsync(_connectionString!).ConfigureAwait(false);
+
+                // ساختار تازه آماده شده: سطر نشست هنوز نوشته نشده، چون تلاش
+                // اول هنگام راه‌اندازی شکست خورده بود. بدون این، کل رویدادهای
+                // این اجرا به نشستی اشاره می‌کنند که وجود ندارد و در فرم
+                // سوابق نام کامپیوتر و IP خالی می‌ماند.
+                if (_schemaReady && !wasReady)
+                {
+                    await WriteSessionRowAsync().ConfigureAwait(false);
+                }
+
                 if (!_schemaReady)
                 {
                     TrySpill(batch);

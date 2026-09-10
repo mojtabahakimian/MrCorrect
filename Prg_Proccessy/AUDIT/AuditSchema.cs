@@ -241,8 +241,14 @@ namespace Prg_Proccessy.AUDIT
                   SET NOCOUNT ON;
 
                   IF OBJECT_ID(N'[dbo].[AMALIAT]', N'U') IS NOT NULL
+                     -- نشانه‌ی «قبلاً منتقل شده»: سطرهای منتقل‌شده SEQ ندارند.
+                     -- رویداد زنده همیشه SEQ دارد، پس این نشانه با داده‌ی واقعی
+                     -- اشتباه نمی‌شود. گارد قبلی روی ACTION بود و اگر رویداد
+                     -- زنده‌ای با همان ACTION و نشستِ خالی وجود داشت، انتقال
+                     -- کلاً انجام نمی‌شد.
                      AND NOT EXISTS (SELECT 1 FROM [dbo].[SYS_AUDIT_EVENT]
-                                     WHERE [ACTION] = 'OPEN_FORM' AND [SESSION_ID] IS NULL)
+                                     WHERE [SEQ] IS NULL AND [SESSION_ID] IS NULL
+                                       AND [CATEGORY] = 1)
                   BEGIN
                       INSERT INTO [dbo].[SYS_AUDIT_EVENT]
                           ([SESSION_ID], [SEQ], [USER_ID], [USER_NAME], [AT_CLIENT], [AT_SERVER],
@@ -261,27 +267,51 @@ namespace Prg_Proccessy.AUDIT
                       FROM [dbo].[AMALIAT] AS a;
                   END
 
+                  -- گارد «قبلاً منتقل شده»: سطرهای منتقل‌شده SEQ ندارند و
+                  -- رویداد زنده همیشه SEQ دارد، پس با داده‌ی واقعی اشتباه
+                  -- نمی‌شود. گارد قبلی ACTION = 'DELETE' را می‌دید، در حالی
+                  -- که ACTION این سطرها از ActionType جدول قدیمی می‌آید و هر
+                  -- مقداری می‌تواند باشد؛ اگر جدول قدیمی هیچ DELETEای نداشت،
+                  -- هر اجرای دوباره کل جدول را از نو درج می‌کرد.
                   IF OBJECT_ID(N'[dbo].[USER_AUDIT_LOG]', N'U') IS NOT NULL
                      AND NOT EXISTS (SELECT 1 FROM [dbo].[SYS_AUDIT_EVENT]
-                                     WHERE [ACTION] = 'DELETE' AND [SESSION_ID] IS NULL)
+                                     WHERE [SEQ] IS NULL AND [SESSION_ID] IS NULL
+                                       AND [CATEGORY] = 2)
                   BEGIN
-                      INSERT INTO [dbo].[SYS_AUDIT_EVENT]
-                          ([SESSION_ID], [SEQ], [USER_NAME], [AT_CLIENT], [AT_SERVER],
-                           [CATEGORY], [SEVERITY], [ACTION],
-                           [ENTITY], [ENTITY_KEY], [TITLE], [DETAIL], [IS_SUCCESS], [ERR_MSG])
-                      SELECT NULL, NULL,
-                             LEFT(u.[UserName], 50),
-                             u.[ActionDateTime],
-                             ISNULL(u.[ActionDateTime], SYSDATETIME()),
-                             2, 3,
-                             LEFT(u.[ActionType], 24),
-                             LEFT(u.[TableName], 48),
-                             LEFT(u.[RecordID], 80),
-                             LEFT(ISNULL(u.[ActionType], N'') + N' — ' + ISNULL(u.[TableName], N'') + N' ' + ISNULL(u.[RecordID], N''), 250),
-                             u.[AdditionalInfo],
-                             u.[IsSuccess],
-                             LEFT(u.[ErrorMessage], 400)
-                      FROM [dbo].[USER_AUDIT_LOG] AS u;
+                      -- عمداً پویا اجرا می‌شود.
+                      --
+                      -- رزولوشن نامِ ستون‌های یک جدولِ موجود در CREATE PROCEDURE
+                      -- به تعویق نمی‌افتد. یعنی اگر USER_AUDIT_LOG در یک نصب
+                      -- حتی یک ستون کم داشته باشد، ساختِ کل این رویه شکست
+                      -- می‌خورد — و چون خطای مایگریشن بلعیده می‌شود، انتقال
+                      -- AMALIAT هم بی‌صدا از بین می‌رفت. با اجرای پویا، فقط
+                      -- همین بخش رد می‌شود و بقیه سالم می‌ماند.
+                      BEGIN TRY
+                          EXEC sp_executesql N'
+                              INSERT INTO [dbo].[SYS_AUDIT_EVENT]
+                                  ([SESSION_ID], [SEQ], [USER_NAME], [AT_CLIENT], [AT_SERVER],
+                                   [CATEGORY], [SEVERITY], [ACTION],
+                                   [ENTITY], [ENTITY_KEY], [TITLE], [DETAIL], [IS_SUCCESS], [ERR_MSG])
+                              SELECT NULL, NULL,
+                                     LEFT(u.[UserName], 50),
+                                     u.[ActionDateTime],
+                                     ISNULL(u.[ActionDateTime], SYSDATETIME()),
+                                     2, 3,
+                                     LEFT(u.[ActionType], 24),
+                                     LEFT(u.[TableName], 48),
+                                     LEFT(u.[RecordID], 80),
+                                     LEFT(CONCAT(u.[ActionType], N'' — '', u.[TableName], N'' '', u.[RecordID]), 250),
+                                     u.[AdditionalInfo],
+                                     -- IS_SUCCESS ستون NOT NULL است ولی در جدول
+                                     -- قدیمی می‌تواند خالی باشد؛ بدون این، کل
+                                     -- انتقال با خطای NOT NULL رد می‌شد. همان
+                                     -- الگویی که برای ADATE در AMALIAT رعایت شد.
+                                     ISNULL(u.[IsSuccess], 1),
+                                     LEFT(u.[ErrorMessage], 400)
+                              FROM [dbo].[USER_AUDIT_LOG] AS u;';
+                      END TRY
+                      BEGIN CATCH
+                      END CATCH
                   END
               END",
         };

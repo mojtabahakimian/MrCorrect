@@ -49,6 +49,18 @@ namespace Prg_Proccessy.AUDIT
         internal static string? CurrentForm => _currentForm;
         private static volatile string? _currentForm;
 
+        /// <summary>
+        /// فقط زمینه‌ی فرم جاری را به‌روز می‌کند، بدون ساختن رویداد.
+        ///
+        /// وقتی کاربر به پنجره‌ای که از قبل باز است برمی‌گردد، «باز کردن فرم»
+        /// دوباره ثبت نمی‌شود — ولی زمینه باید همان پنجره شود، وگرنه
+        /// نوشتن‌های بعدی به نام فرمی می‌خورد که آخرین بار باز شده بود.
+        /// </summary>
+        public static void SetCurrentForm(string? formName)
+        {
+            if (!string.IsNullOrWhiteSpace(formName)) _currentForm = formName;
+        }
+
         public static void Form(string? formName, string? persianTitle = null)
         {
             if (string.IsNullOrWhiteSpace(formName)) return;

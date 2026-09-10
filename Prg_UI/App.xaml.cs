@@ -1,4 +1,4 @@
-﻿using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_Proccessy.Generaly;
@@ -870,6 +870,11 @@ namespace Prg_UI
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             UnhookWindowsHookEx(_hookID);
+
+            // خروج قطعی برنامه: اینجا سابقه تخلیه و بسته می‌شود. عمداً در
+            // CleanupBeforeExiting نیست، چون آن متد از هندلر خطای قابل
+            // بازیابی هم رد می‌شود.
+            CL_LMethods.AuditShutdown();
             CL_LMethods.CleanupBeforeExiting();
         }
 

@@ -688,6 +688,36 @@ SELECT TOP (@Take)
             "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [SESSION_ID] IS NULL AND [ACTION] = 'OPEN_FORM'");
         Ok("انتقال دوباره رکورد تکراری نمی‌سازد", backfilled2 == 2, backfilled2.ToString());
 
+        // جدول قدیمیِ USER_AUDIT_LOG بدون هیچ سطر DELETE. گارد قبلی روی
+        // ACTION='DELETE' بود، پس هرگز راضی نمی‌شد و هر اجرای دوباره کل
+        // جدول را از نو درج می‌کرد.
+        await db.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[USER_AUDIT_LOG]', N'U') IS NOT NULL DROP TABLE [dbo].[USER_AUDIT_LOG];
+            CREATE TABLE [dbo].[USER_AUDIT_LOG] (
+                [ID] INT IDENTITY(1,1) PRIMARY KEY, [UserName] NVARCHAR(100) NOT NULL,
+                [WindowsUserName] NVARCHAR(100) NULL,
+                [ActionType] NVARCHAR(50) NOT NULL, [TableName] NVARCHAR(100) NOT NULL,
+                [RecordID] NVARCHAR(100) NULL, [OldValue] NVARCHAR(MAX) NULL,
+                [NewValue] NVARCHAR(MAX) NULL, [IPAddress] NVARCHAR(50) NULL,
+                [MachineName] NVARCHAR(100) NULL, [ApplicationVersion] NVARCHAR(50) NULL,
+                [WindowsVersion] NVARCHAR(100) NULL, [ActionDateTime] DATETIME NULL,
+                [AdditionalInfo] NVARCHAR(MAX) NULL, [SessionID] UNIQUEIDENTIFIER NULL,
+                [ProcessID] INT NULL, [ThreadID] INT NULL, [StackTrace] NVARCHAR(MAX) NULL,
+                [IsSuccess] BIT NULL, [ErrorMessage] NVARCHAR(MAX) NULL);
+            INSERT INTO [dbo].[USER_AUDIT_LOG] (UserName, ActionType, TableName, RecordID, ActionDateTime)
+                 VALUES (N'ALI', N'UPDATE', N'HEAD_LST', N'NUMBER=1', GETDATE()),
+                        (N'ALI', N'INSERT', N'INVO_LST', N'NUMBER=2', GETDATE());");
+
+        await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_BACKFILL]", commandTimeout: 120);
+        var ual1 = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [SEQ] IS NULL AND [SESSION_ID] IS NULL AND [CATEGORY] = 2");
+        Ok("انتقال USER_AUDIT_LOG بدون سطر DELETE انجام شد", ual1 == 2, ual1.ToString());
+
+        await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_BACKFILL]", commandTimeout: 120);
+        var ual2 = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT] WHERE [SEQ] IS NULL AND [SESSION_ID] IS NULL AND [CATEGORY] = 2");
+        Ok("اجرای دوباره، جدول قدیمی را دوباره درج نمی‌کند", ual2 == 2, $"{ual1} → {ual2}");
+
         var beforePurge = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");
         await db.ExecuteAsync("EXEC [dbo].[SYS_AUDIT_PURGE]", commandTimeout: 120);
         var afterPurge = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [dbo].[SYS_AUDIT_EVENT]");

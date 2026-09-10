@@ -1,4 +1,4 @@
-﻿using AUTO_BAZ.HelperWins;
+using AUTO_BAZ.HelperWins;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
@@ -1904,6 +1904,11 @@ namespace Prg_UI.Functions
                     var existingWindow = FindExistingWindow(newWindow.GetType());
                     if (existingWindow != null)
                     {
+                        // فرم دوباره باز نمی‌شود، پس رویداد «باز کردن» هم
+                        // ثبت نمی‌شود؛ ولی زمینه باید همین پنجره شود تا
+                        // نوشتن‌های بعدی به فرم درست نسبت داده شوند.
+                        try { Prg_Proccessy.AUDIT.Audit.SetCurrentForm(newWindow.GetType().Name); } catch { }
+
                         FocusExistingWindow(existingWindow);
                         return;
                     }
@@ -2246,15 +2251,16 @@ namespace Prg_UI.Functions
 
         public static void CleanupBeforeExiting()
         {
-            // تخلیه‌ی صف سابقه پیش از بسته شدن، با تایم‌اوت کوتاه تا بستن
-            // برنامه را نگه ندارد. رویدادهایی که در این فرصت نوشته نشوند روی
-            // دیسک محلی می‌مانند و در اجرای بعدی منتقل می‌شوند.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Logout(Baseknow.UUSER);
-                Prg_Proccessy.AUDIT.AuditService.ShutdownAsync(2500).GetAwaiter().GetResult();
-            }
-            catch (Exception) { }
+            // سابقه عمداً اینجا خاموش نمی‌شود.
+            //
+            // این متد از Application_DispatcherUnhandledException هم صدا زده
+            // می‌شود، و آن هندلر برای خطاهای قابل بازیابی e.Handled = true
+            // می‌گذارد و برنامه ادامه می‌دهد. اگر خاموش کردن اینجا می‌ماند،
+            // یک خطای گذرای رابط کاربری کل سابقه‌ی باقی‌مانده‌ی آن اجرا را
+            // از بین می‌برد (به‌علاوه یک «خروج» دروغین و ۲٫۵ ثانیه بلوکه
+            // شدن نخ UI داخل هندلر خطا).
+            // تخلیه‌ی واقعی در AuditShutdown انجام می‌شود که فقط از مسیر
+            // خروج قطعی برنامه صدا زده می‌شود.
 
             try { ProcLoader.DisposeAll(); } catch (Exception) { }
 
@@ -2263,6 +2269,22 @@ namespace Prg_UI.Functions
                 CL_PRC_LOADER.Dispose(); //New Version
             }
             catch { }
+        }
+
+        /// <summary>
+        /// تخلیه و بستن سیستم سابقه. فقط از مسیر خروج قطعی برنامه صدا زده
+        /// می‌شود، نه از مسیر پاک‌سازی عمومی که هندلر خطا هم از آن می‌گذرد.
+        /// چند بار صدا زدنش بی‌ضرر است.
+        /// </summary>
+        public static void AuditShutdown()
+        {
+            try
+            {
+                if (!Prg_Proccessy.AUDIT.AuditService.IsRunning) return;
+                Prg_Proccessy.AUDIT.Audit.Logout(Baseknow.UUSER);
+                Prg_Proccessy.AUDIT.AuditService.ShutdownAsync(2500).GetAwaiter().GetResult();
+            }
+            catch (Exception) { }
         }
 
         public static void GoExitTheApplication()
