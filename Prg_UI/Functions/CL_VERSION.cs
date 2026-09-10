@@ -10,7 +10,7 @@ namespace Functions
 {
     public static class CL_VERSION
     {
-        //public static string MrCorrectFullVersion { get; } = "Version 1.0.0.395 Date : 1405/01/26";
+        //public static string MrCorrectFullVersion { get; } = "Version 1.0.0.460 Date : 1405/06/19";
         public static string MrCorrectFullVersion { get; } = "Version 1.0.0.460 Date : 1405/06/19";
 
         /// <summary>
