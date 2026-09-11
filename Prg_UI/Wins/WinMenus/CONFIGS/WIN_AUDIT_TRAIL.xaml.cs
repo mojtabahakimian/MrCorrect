@@ -1,4 +1,5 @@
-﻿using Dapper;
+using Dapper;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.AUDIT;
 using Prg_Proccessy.FUNCTIONS;
@@ -6,14 +7,26 @@ using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Syncfusion.Data;
+using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
+using Syncfusion.UI.Xaml.Grid;
+using Syncfusion.UI.Xaml.Grid.Helpers;
+using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Prg_UI.Wins.WinMenus.CONFIGS
 {
@@ -31,16 +44,18 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
 
         private void Btn_Max_Click(object sender, RoutedEventArgs e)
         {
-            PackIcon? packIcon = Btn_Max.Content as PackIcon;
+            PackIcon packIcon = new PackIcon();
             switch (WindowState)
             {
                 case WindowState.Maximized:
                     WindowState = WindowState.Normal;
-                    if (packIcon != null) packIcon.Kind = PackIconKind.WindowMaximize;
+                    packIcon.Kind = PackIconKind.WindowMaximize;
+                    Btn_Max.Content = packIcon;
                     break;
                 case WindowState.Normal:
                     WindowState = WindowState.Maximized;
-                    if (packIcon != null) packIcon.Kind = PackIconKind.WindowRestore;
+                    packIcon.Kind = PackIconKind.WindowRestore;
+                    Btn_Max.Content = packIcon;
                     break;
             }
         }
@@ -52,7 +67,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (e.ChangedButton == MouseButton.Left) this.DragMove();
             if (e.ClickCount == 2) Btn_Max_Click(null, null);
         }
-        //Header Window End;
         #endregion
 
         private const int PageSize = 300;
@@ -61,12 +75,28 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         private long? _lastLogId;
         private bool _busy;
 
+        UniversControl universControl = new UniversControl();
+        private readonly FilterService<AuditTrailRow> filterService = new FilterService<AuditTrailRow>();
+        public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
+
+        private string? CurrentCellValue = null;
+        private RowColumnIndex CurrentCellIndex;
+
+        public bool NowIsReady { get; private set; }
         public ObservableCollection<AuditTrailRow> Rows { get; } = new ObservableCollection<AuditTrailRow>();
 
         public WIN_AUDIT_TRAIL()
         {
             InitializeComponent();
             this.DataContext = this;
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            NowIsReady = true;
         }
 
         /// <summary>
@@ -77,11 +107,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // این پنجره فعالیت همه‌ی کاربران را به‌همراه IP، نام کامپیوتر و
-            // ورودهای ناموفق نشان می‌دهد، پس باید مجوزدار باشد.
-            // LETSGO وقتی ردیف دسترسی وجود نداشته باشد false برمی‌گرداند
-            // (fail-closed)، پس تا وقتی مدیر دسترسی را تعریف نکرده، هیچ‌کس
-            // نمی‌تواند سوابق بقیه را ببیند.
             if (!CL_HESABDARI.LETSGO(PermissionFormName))
             {
                 Prg_Proccessy.AUDIT.Audit.Security(
@@ -98,16 +123,21 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 return;
             }
 
+            if (SYNCFUSION_DG != null)
+            {
+                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
+                SYNCFUSION_DG.Loaded += (s, ev) => UpdateRowCountLabel();
+                UpdateRowCountLabel();
+            }
+
             FillStaticCombos();
 
-            // بازه‌ی پیش‌فرض: از ابتدای امروز.
             var today = DateTime.Now;
-            TXT_FROM.Text = ToShamsiText(today);
+            TXT_FROM.Text = ToShamsiText(today.AddDays(-7));
             TXT_TO.Text = ToShamsiText(today);
 
             await FillUsersAsync();
 
-            // مشاهده‌ی سوابق خودش یک رویداد حساس است و ثبت می‌شود.
             Audit.Security(AuditAction.AuditViewed, "مشاهده‌ی سوابق فعالیت کاربران",
                            formName: this.GetType().Name);
 
@@ -119,6 +149,337 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (e.Key == Key.Escape) this.Close();
             if (e.Key == Key.F5) { e.Handled = true; _ = SearchAsync(reset: true); }
         }
+
+        #region SYNCFUSION_DATA_GRID
+        private void View_FilterChanged(object sender, GridFilterEventArgs e)
+        {
+            UpdateRowCountLabel();
+        }
+
+        private void UpdateRowCountLabel()
+        {
+            if (ROWCOUNT_TEXTBLK == null) return;
+            if (SYNCFUSION_DG?.View == null)
+            {
+                ROWCOUNT_TEXTBLK.Text = Rows.Count.ToString();
+                return;
+            }
+            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
+            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+        }
+
+        private void SYNCFUSION_DG_CurrentCellActivated(object sender, CurrentCellActivatedEventArgs e)
+        {
+            if (e?.CurrentRowColumnIndex == null) return;
+            UpdateCurrentCellValue(e.CurrentRowColumnIndex);
+        }
+
+        private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
+        {
+        }
+
+        private void UpdateCurrentCellValue(RowColumnIndex rowColumnIndex)
+        {
+            CurrentCellIndex = rowColumnIndex;
+            CurrentCellValue = null;
+
+            if (this.SYNCFUSION_DG?.Columns == null || this.SYNCFUSION_DG.Columns.Count == 0)
+            {
+                return;
+            }
+
+            int rowIndex = rowColumnIndex.RowIndex;
+            int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
+            if (columnIndex < 0 || columnIndex >= this.SYNCFUSION_DG.Columns.Count) return;
+
+            var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName;
+            if (string.IsNullOrEmpty(mappingName)) return;
+            var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
+            if (recordIndex < 0 || recordIndex >= this.SYNCFUSION_DG.View.Records.Count) return;
+
+            var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
+            if (record == null) return;
+
+            var propertyInfo = record.GetType().GetProperty(mappingName);
+            if (propertyInfo == null) return;
+
+            var propertyValue = propertyInfo.GetValue(record);
+            CurrentCellValue = propertyValue?.ToStringNullSafe() ?? string.Empty;
+        }
+
+        private string GetSelectedText()
+        {
+            var dataGrid = SYNCFUSION_DG;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
+
+            if (currentCell == null) return string.Empty;
+
+            if (currentCell.IsEditing)
+            {
+                var editingElement = dataGrid.FindElementOfType<TextBox>();
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
+                {
+                    return editingElement.SelectedText;
+                }
+            }
+
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
+                    {
+                        return textBox.SelectedText;
+                    }
+                }
+            }
+            catch { }
+
+            return string.Empty;
+        }
+
+        private (string? ColumnName, object? FilterValue) GetSelectedCellDetails()
+        {
+            if (SYNCFUSION_DG.SelectionController?.CurrentCellManager?.CurrentCell != null)
+            {
+                var columnName = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell.GridColumn.MappingName;
+                return (columnName, CurrentCellValue);
+            }
+            return (null, null);
+        }
+
+        private void ApplyCumulativeFilter()
+        {
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as AuditTrailRow);
+            SYNCFUSION_DG.View.RefreshFilter();
+            UpdateRowCountLabel();
+        }
+
+        private void FilterBySelection_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedText = GetSelectedText();
+            var (columnName, filterValue) = GetSelectedCellDetails();
+
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(selectedText))
+            {
+                filterService.AddFilter(columnName, selectedText, isExclusion: false, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Contains \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            if (filterValue != null)
+            {
+                filterService.AddFilter(columnName, filterValue, isExclusion: false, isExactMatch: true);
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} = {displayValue}");
+                ApplyCumulativeFilter();
+            }
+            else
+            {
+                filterService.AddFilter(columnName, null, isExclusion: false, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} = NULL");
+                ApplyCumulativeFilter();
+            }
+        }
+
+        private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedText = GetSelectedText();
+            var (columnName, filterValue) = GetSelectedCellDetails();
+
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(selectedText))
+            {
+                filterService.AddFilter(columnName, selectedText, isExclusion: true, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Does Not Contain \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            if (filterValue != null)
+            {
+                filterService.AddFilter(columnName, filterValue, isExclusion: true, isExactMatch: true);
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} != {displayValue}");
+                ApplyCumulativeFilter();
+            }
+            else
+            {
+                filterService.AddFilter(columnName, null, isExclusion: true, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} != NULL");
+                ApplyCumulativeFilter();
+            }
+        }
+
+        private string FormatValueForDisplay(object? value)
+        {
+            if (value == null) return "NULL";
+
+            if (value is double || value is decimal || value is float)
+            {
+                try { return Convert.ToDecimal(value).ToString("N", CultureInfo.InvariantCulture); }
+                catch { return value.ToString() ?? string.Empty; }
+            }
+
+            if (value is int || value is long || value is short || value is byte)
+            {
+                try { return Convert.ToInt64(value).ToString("N0", CultureInfo.InvariantCulture); }
+                catch { return value.ToString() ?? string.Empty; }
+            }
+
+            return value.ToString() ?? string.Empty;
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CopySelectedRowsToClipboard();
+        }
+
+        private void CopySelectedRowsToClipboard()
+        {
+            try
+            {
+                var _SelectedTextCell_ = GetSelectedText();
+                if (!string.IsNullOrEmpty(_SelectedTextCell_))
+                {
+                    Clipboard.SetText(_SelectedTextCell_);
+                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+                    return;
+                }
+            }
+            catch { return; }
+
+            if (SYNCFUSION_DG.SelectedItems == null || !SYNCFUSION_DG.SelectedItems.Any())
+            {
+                universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            var sb = new StringBuilder();
+            try
+            {
+                foreach (var column in SYNCFUSION_DG.Columns)
+                {
+                    if (!column.IsHidden)
+                        sb.Append(column.HeaderText + "\t");
+                }
+                sb.AppendLine();
+
+                foreach (var item in SYNCFUSION_DG.SelectedItems)
+                {
+                    foreach (var column in SYNCFUSION_DG.Columns)
+                    {
+                        if (!column.IsHidden)
+                        {
+                            var propertyValue = item.GetType().GetProperty(column.MappingName)?.GetValue(item, null);
+                            sb.Append(propertyValue?.ToString() + "\t");
+                        }
+                    }
+                    sb.AppendLine();
+                }
+
+                Clipboard.SetText(sb.ToString());
+                universControl.PopNotifyShow($"{SYNCFUSION_DG.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            }
+            catch { }
+        }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                universControl.PopNotifyShowUp("... در حال اماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
+                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "AuditTrailExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
+        }
+
+        private void RemoveFilterSort_Click(object sender, RoutedEventArgs e)
+        {
+            filterService.ClearFilters();
+            ActiveFilters.Clear();
+            ApplyCumulativeFilter();
+        }
+
+        private void HideCurrentColumn_Click(object sender, RoutedEventArgs e)
+        {
+            var currentColumn = SYNCFUSION_DG.SelectionController?
+                .CurrentCellManager?.CurrentCell?.GridColumn;
+
+            if (currentColumn == null)
+            {
+                universControl.PopNotifyShow("ابتدا یک سلول از ستون مورد نظر را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            if (SYNCFUSION_DG.Columns.Count(column => !column.IsHidden) <= 1)
+            {
+                universControl.PopNotifyShow("آخرین ستون قابل نمایش را نمی‌توان مخفی کرد.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            currentColumn.IsHidden = true;
+        }
+
+        private void ShowAllColumns_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var column in SYNCFUSION_DG.Columns.Where(column => column.IsHidden))
+            {
+                column.IsHidden = false;
+            }
+        }
+
+        private void ViewDetail_Click(object? sender, EventArgs? e)
+        {
+            var row = SYNCFUSION_DG.SelectedItem as AuditTrailRow;
+            if (row == null)
+            {
+                universControl.PopNotifyShow("ابتدا یک سطر را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"شناسه: {row.LOG_ID}");
+            sb.AppendLine($"تاریخ و ساعت: {row.DateText} {row.TimeText}");
+            sb.AppendLine($"کاربر: {row.UserText}");
+            sb.AppendLine($"دسته: {row.CategoryText} | عملیات: {row.ActionText}");
+            sb.AppendLine($"وضعیت: {row.StatusText} | اهمیت: {row.SeverityText}");
+            sb.AppendLine($"شرح رویداد: {row.TITLE}");
+            if (!string.IsNullOrWhiteSpace(row.DocumentText))
+                sb.AppendLine($"سند / موجودیت: {row.DocumentText}");
+            if (!string.IsNullOrWhiteSpace(row.FORM_NAME))
+                sb.AppendLine($"فرم: {row.FORM_NAME}");
+            sb.AppendLine($"نام کامپیوتر: {row.MACHINE_NAME} | آدرس IP: {row.CLIENT_IP}");
+            sb.AppendLine($"کاربر ویندوز: {row.WIN_USER} | نسخه: {row.APP_VERSION}");
+            sb.AppendLine();
+            sb.AppendLine("جزئیات و تغییرات:");
+            sb.AppendLine(!string.IsNullOrWhiteSpace(row.DETAIL) ? row.DETAIL : "(بدون جزئیات تکمیلی)");
+
+            new Msgwin(true, sb.ToString()).ShowDialog();
+        }
+
+        private void SYNCFUSION_DG_CellDoubleTapped(object sender, GridCellDoubleTappedEventArgs e)
+        {
+            ViewDetail_Click(sender, e);
+        }
+        #endregion
 
         private void FillStaticCombos()
         {
@@ -155,11 +516,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             CMB_ACTION.SelectedIndex = 0;
         }
 
-        /// <summary>
-        /// فهرست کاربران از خود جدول نشست خوانده می‌شود، نه از SALA_DTL؛
-        /// این‌طور فقط کاربرانی که واقعاً فعالیت داشته‌اند نمایش داده می‌شوند
-        /// و نیازی به رمزگشایی نام کاربری هم نیست.
-        /// </summary>
         private async Task FillUsersAsync()
         {
             try
@@ -202,9 +558,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     _lastLogId = null;
                 }
 
-                // تاریخ نامعتبر نباید بی‌صدا به «امروز» تبدیل شود: کاربر
-                // «1404/1/1» را می‌بیند ولی نتیجه‌ی امروز را می‌گیرد و فکر
-                // می‌کند رکوردی وجود ندارد.
                 var from = ParseShamsi(TXT_FROM.Text);
                 var to = ParseShamsi(TXT_TO.Text);
 
@@ -237,9 +590,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     AfterId = _lastLogId,
                 };
 
-                // OPTION (RECOMPILE): چون بیشتر شرط‌ها اختیاری‌اند، یک نقشه‌ی
-                // اجرای ذخیره‌شده برای همه‌ی ترکیب‌ها بد است. با RECOMPILE
-                // برای هر جستجو نقشه‌ی مناسب همان فیلترها ساخته می‌شود.
                 const string sql = @"
 SELECT TOP (@Take)
        [LOG_ID], [AT_CLIENT], [AT_SERVER], [DATE_S], [TIME_S],
@@ -268,10 +618,10 @@ SELECT TOP (@Take)
 
                 BTN_MORE.IsEnabled = page.Count == PageSize;
 
+                UpdateRowCountLabel();
+
                 if (page.Count == 0 && Rows.Count == 0)
                 {
-                    // «رکوردی یافت نشد» وقتی ساختار اصلاً ساخته نشده گمراه‌کننده
-                    // است؛ مدیر باید بفهمد مشکل از دسترسی دیتابیس است نه از فیلتر.
                     LBL_STATUS.Text = AuditService.SchemaReady
                         ? "رکوردی یافت نشد."
                         : "رکوردی یافت نشد — ساختار جدول‌های سابقه ساخته نشده است. " +
@@ -290,9 +640,6 @@ SELECT TOP (@Take)
             catch (Exception ex)
             {
                 LBL_STATUS.Text = "خطا در خواندن سوابق: " + ex.Message;
-
-                // اگر قبلاً صفحه‌ای خوانده شده بود، کاربر باید بتواند ادامه
-                // را دوباره امتحان کند؛ وگرنه دکمه برای همیشه غیرفعال می‌ماند.
                 BTN_MORE.IsEnabled = _lastLogId.HasValue;
             }
             finally
@@ -302,22 +649,12 @@ SELECT TOP (@Take)
             }
         }
 
-        // ── تاریخ شمسی ────────────────────────────────────────────────────
-
         private static string ToShamsiText(DateTime value)
         {
             var n = Audit.ToPersianDateNumber(value);
             return $"{n / 10000:0000}/{(n / 100) % 100:00}/{n % 100:00}";
         }
 
-        /// <summary>
-        /// آماده کردن متن کاربر برای LIKE.
-        ///
-        /// ٪ و _ و [ در LIKE معنای ویژه دارند. بدون escape، جست‌وجوی «٪» همه‌ی
-        /// سطرها را برمی‌گرداند و «_» هر تک‌نویسه‌ای را می‌گرفت — یعنی نتیجه‌ی
-        /// جست‌وجو بی‌ربط می‌شد. ارقام فارسی هم مثل بقیه‌ی فرم یکسان‌سازی
-        /// می‌شوند تا جست‌وجوی «۱۲۳۴» سند ۱۲۳۴ را پیدا کند.
-        /// </summary>
         private static string? BuildLike(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return null;
@@ -327,10 +664,6 @@ SELECT TOP (@Take)
             sb.Append('%');
             foreach (var c in t)
             {
-                // فقط همین سه نویسه معنای ویژه دارند. با escape شدن «[» دیگر
-                // هیچ bracket expressionی باز نمی‌شود، پس «]» و «^» خودبه‌خود
-                // نویسه‌ی معمولی‌اند و نباید دستکاری شوند (وگرنه «[^]» ساخته
-                // می‌شد که خودش الگوی ناقص است).
                 if (c is '%' or '_' or '[') sb.Append('[').Append(c).Append(']');
                 else sb.Append(c);
             }
@@ -338,15 +671,10 @@ SELECT TOP (@Take)
             return sb.ToString();
         }
 
-        /// <summary>تبدیل «1405/05/17» یا «14050517» به تاریخ میلادی.</summary>
         private static DateTime? ParseShamsi(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return null;
 
-            // char.IsDigit برای ارقام فارسی (۱۲۳) هم true است ولی int.TryParse
-            // آن‌ها را نمی‌پذیرد. کاربر با صفحه‌کلید فارسی «۱۴۰۵/۰۵/۱۷» تایپ
-            // می‌کرد و پیام «تاریخ نامعتبر» می‌گرفت. NormalizeDigits همان تابعی
-            // است که بقیه‌ی نرم‌افزار برای همین کار استفاده می‌کند.
             var normalized = CL_LMethods.NormalizeDigits(text);
             var digits = new string(normalized.Where(c => c >= '0' && c <= '9').ToArray());
             if (digits.Length != 8) return null;
@@ -354,8 +682,6 @@ SELECT TOP (@Take)
 
             return Audit.FromPersianDateNumber(n);
         }
-
-        // ── مدل‌ها ────────────────────────────────────────────────────────
 
         public sealed class UserItem
         {
@@ -378,7 +704,6 @@ SELECT TOP (@Take)
         }
     }
 
-    /// <summary>یک سطر از خط زمانی. فقط برای نمایش استفاده می‌شود.</summary>
     public sealed class AuditTrailRow
     {
         public long LOG_ID { get; set; }
@@ -407,8 +732,6 @@ SELECT TOP (@Take)
         {
             get
             {
-                // برای ردیف‌های منتقل‌شده از جدول‌های قدیمی، DATE_S خالی است
-                // و تاریخ از روی زمان سرور ساخته می‌شود.
                 var n = DATE_S.GetValueOrDefault() > 0
                     ? DATE_S!.Value
                     : Audit.ToPersianDateNumber(AT_CLIENT ?? AT_SERVER);
@@ -427,6 +750,11 @@ SELECT TOP (@Take)
             }
         }
 
+        public string UserText =>
+            !string.IsNullOrWhiteSpace(USER_NAME)
+                ? USER_NAME
+                : (!string.IsNullOrWhiteSpace(WIN_USER) ? $"{WIN_USER} (ویندوز)" : "سیستم");
+
         public string CategoryText => CATEGORY switch
         {
             1 => "فرم",
@@ -435,7 +763,7 @@ SELECT TOP (@Take)
             4 => "چاپ",
             5 => "ورود/خروج",
             6 => "امنیتی",
-            _ => string.Empty,
+            _ => "سایر",
         };
 
         public string ActionText => (ACTION ?? string.Empty) switch
@@ -462,12 +790,25 @@ SELECT TOP (@Take)
             AuditAction.PermissionChange => "تغییر دسترسی",
             AuditAction.AuditViewed => "مشاهده سوابق",
             AuditAction.ExecProcedure => "اجرای رویه",
+            "SaveRow" => "ذخیره سطر",
+            "REPLACE HESAB" => "جایگزینی حساب",
+            "MOADIAN SEND BUTTON CALLED IN F4" => "ارسال به سامانه مودیان",
             _ => ACTION ?? string.Empty,
         };
 
+        public string StatusText => IS_SUCCESS ? "موفق" : "ناموفق";
+
+        public string SeverityText => SEVERITY switch
+        {
+            1 => "عادی",
+            2 => "مهم",
+            3 => "حساس",
+            _ => "عادی",
+        };
+
         public string DocumentText =>
-            string.IsNullOrWhiteSpace(ENTITY_KEY)
-                ? (ENTITY ?? string.Empty)
-                : $"{ENTITY} {ENTITY_KEY}".Trim();
+            string.IsNullOrWhiteSpace(ENTITY)
+                ? (string.IsNullOrWhiteSpace(ENTITY_KEY) ? "-" : ENTITY_KEY)
+                : (string.IsNullOrWhiteSpace(ENTITY_KEY) ? ENTITY : $"{ENTITY} {ENTITY_KEY}".Trim());
     }
 }

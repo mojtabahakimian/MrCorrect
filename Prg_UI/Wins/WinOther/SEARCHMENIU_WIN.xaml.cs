@@ -417,7 +417,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "درباره تهیه کنندگان", WIN_NAME = CL_MenuManager.WinNameType.WIN_About });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق و ردیابی فعالیت کاربران", WIN_NAME = CL_MenuManager.WinNameType.WIN_AUDIT_TRAIL });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "_LOGS_", WIN_NAME = CL_MenuManager.WinNameType.WIN_AUDIT_TRAIL });
 
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جمع داری اموال", WIN_NAME = CL_MenuManager.WinNameType.WIN_AMVAL });
 
