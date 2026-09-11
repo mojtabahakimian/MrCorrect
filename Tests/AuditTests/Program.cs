@@ -96,6 +96,7 @@ internal static class Program
         ValidateShutdownWhileWorkerStuck();
         await ValidateStuckAfterDequeueAsync();
         await ValidateColumnWideningAsync();
+        await ValidateFastPathDoesNotSkipWideningAsync();
         await ValidateEndToEndAsync();
         await ValidatePerformanceAsync();
         ValidateResilience();
@@ -1533,6 +1534,102 @@ SELECT TOP (@Take)
             row.Count == 1 && (string)row[0].ACTION == realAction, row.Count == 1 ? (string)row[0].ACTION : null);
         Ok("مقدار واقعی ۵۵ نویسه‌ای ENTITY کامل ذخیره شد",
             row.Count == 1 && (string)row[0].ENTITY == realEntity, row.Count == 1 ? (string)row[0].ENTITY : null);
+
+        ClearSpill();
+    }
+
+    /// <summary>
+    /// سناریوی واقعیِ ارتقا: **همه‌ی** اشیاء موجودند ولی ستون‌ها باریک‌اند.
+    ///
+    /// تست قبلی (ValidateColumnWideningAsync) جدول و نما را DROP می‌کرد، پس
+    /// گاردِ «مسیر سریع» فعال نمی‌شد و دستورها اجرا می‌شدند. یعنی آن تست
+    /// دقیقاً همان حالتی را که در عمل خراب بود نمی‌سنجید.
+    ///
+    /// در دنیای واقعی نصب قبلی هر سه شیء را دارد. گارد قبلی فقط وجود اشیاء
+    /// را می‌دید، «همه چیز هست» نتیجه می‌گرفت و زودتر برمی‌گشت — پس ALTERها
+    /// هرگز اجرا نمی‌شدند و ستون‌ها برای همیشه باریک می‌ماندند.
+    ///
+    /// این روی دیتابیس عملیاتی مشاهده شد. این تست همان وضعیت را می‌سازد.
+    /// </summary>
+    private static async Task ValidateFastPathDoesNotSkipWideningAsync()
+    {
+        var cs = Environment.GetEnvironmentVariable("AUDIT_TEST_SQL");
+        if (string.IsNullOrWhiteSpace(cs)) return;
+
+        Section("ارتقا وقتی همه‌ی اشیاء موجودند (مسیر سریع نباید گشاد کردن را رد کند)");
+
+        using var db = new SqlConnection(cs);
+        await db.OpenAsync();
+
+        // نصب قدیمیِ کامل: جدول رویداد با ستون باریک، جدول نشست، و نما —
+        // هر سه موجود، دقیقاً مثل یک نصب واقعی.
+        await db.ExecuteAsync(@"
+            IF OBJECT_ID(N'[dbo].[VW_SYS_AUDIT_TIMELINE]', N'V') IS NOT NULL DROP VIEW [dbo].[VW_SYS_AUDIT_TIMELINE];
+            IF OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]', N'U') IS NOT NULL DROP TABLE [dbo].[SYS_AUDIT_EVENT];
+            CREATE TABLE [dbo].[SYS_AUDIT_EVENT](
+                [LOG_ID] BIGINT IDENTITY(1,1) NOT NULL,
+                [SESSION_ID] UNIQUEIDENTIFIER NULL, [SEQ] INT NULL, [USER_ID] INT NULL,
+                [USER_NAME] NVARCHAR(50) NULL, [AT_CLIENT] DATETIME2(3) NULL,
+                [AT_SERVER] DATETIME2(3) NOT NULL DEFAULT (SYSDATETIME()),
+                [DATE_S] INT NULL, [TIME_S] INT NULL, [CATEGORY] TINYINT NOT NULL,
+                [SEVERITY] TINYINT NOT NULL DEFAULT (1),
+                [ACTION] VARCHAR(24) NOT NULL,
+                [ENTITY] NVARCHAR(48) NULL,
+                [ENTITY_KEY] NVARCHAR(80) NULL, [FORM_NAME] VARCHAR(64) NULL,
+                [TITLE] NVARCHAR(250) NULL, [DETAIL] NVARCHAR(MAX) NULL,
+                [IS_SUCCESS] BIT NOT NULL DEFAULT (1), [ERR_MSG] NVARCHAR(400) NULL,
+                [DURATION_MS] INT NULL, [CORR_ID] UNIQUEIDENTIFIER NULL,
+                CONSTRAINT [PK_SYS_AUDIT_EVENT] PRIMARY KEY CLUSTERED ([LOG_ID]));
+
+            -- ایندکس‌های واقعی هم ساخته می‌شوند: ENTITY کلید یکی از آن‌هاست و
+            -- ACTION در INCLUDE هر دو. اگر ALTER روی ستون ایندکس‌شده شکست
+            -- بخورد، اینجا معلوم می‌شود.
+            CREATE NONCLUSTERED INDEX [IX_SYS_AUDIT_EVENT_USER_TIME]
+                ON [dbo].[SYS_AUDIT_EVENT]([USER_ID], [AT_SERVER], [LOG_ID])
+                INCLUDE ([DATE_S], [TIME_S], [CATEGORY], [SEVERITY], [ACTION], [ENTITY], [ENTITY_KEY], [FORM_NAME], [TITLE], [USER_NAME]);
+            CREATE NONCLUSTERED INDEX [IX_SYS_AUDIT_EVENT_ENTITY]
+                ON [dbo].[SYS_AUDIT_EVENT]([ENTITY], [ENTITY_KEY], [LOG_ID])
+                INCLUDE ([USER_ID], [USER_NAME], [AT_SERVER], [DATE_S], [TIME_S], [ACTION], [TITLE]);
+
+            -- نما هم ساخته می‌شود تا هر سه شیء موجود باشند و گاردِ مسیر سریع
+            -- واقعاً فعال شود.
+            EXEC(N'CREATE VIEW [dbo].[VW_SYS_AUDIT_TIMELINE] AS SELECT [LOG_ID] FROM [dbo].[SYS_AUDIT_EVENT]');");
+
+        async Task<int> WidthOf(string col) => await db.ExecuteScalarAsync<int>(
+            @"SELECT max_length FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]') AND name = @c",
+            new { c = col });
+
+        var sessionThere = await db.ExecuteScalarAsync<int>(
+            "SELECT CASE WHEN OBJECT_ID(N'[dbo].[SYS_AUDIT_SESSION]', N'U') IS NOT NULL THEN 1 ELSE 0 END");
+        var viewThere = await db.ExecuteScalarAsync<int>(
+            "SELECT CASE WHEN OBJECT_ID(N'[dbo].[VW_SYS_AUDIT_TIMELINE]', N'V') IS NOT NULL THEN 1 ELSE 0 END");
+
+        Ok("هر سه شیء موجودند (شرط فعال شدن مسیر سریع)",
+            sessionThere == 1 && viewThere == 1);
+        Ok("ستون‌ها باریک‌اند: ACTION=24 و ENTITY=96 بایت",
+            await WidthOf("ACTION") == 24 && await WidthOf("ENTITY") == 96);
+
+        // با گاردِ قبلی اینجا زودتر برمی‌گشت و هیچ ALTERی اجرا نمی‌شد.
+        var ok = await AuditSchema.EnsureCreatedAsync(cs);
+        Ok("مایگریشن اجرا شد", ok);
+
+        var actionW = await WidthOf("ACTION");
+        var entityW = await WidthOf("ENTITY");
+
+        Ok("مسیر سریع گشاد کردن ACTION را رد نکرد", actionW == 32, actionW.ToString());
+        Ok("مسیر سریع گشاد کردن ENTITY را رد نکرد", entityW == 200, entityW.ToString());
+
+        // ALTER روی ستونی که کلید یک ایندکس است باید موفق شده باشد.
+        var idx = await db.ExecuteScalarAsync<int>(
+            @"SELECT COUNT(*) FROM sys.indexes
+               WHERE object_id = OBJECT_ID(N'[dbo].[SYS_AUDIT_EVENT]')
+                 AND name = N'IX_SYS_AUDIT_EVENT_ENTITY'");
+        Ok("ایندکس روی ستون گشادشده سالم ماند", idx == 1);
+
+        // و بار دوم دیگر نباید کاری کند (idempotent بودن مسیر سریع).
+        var ok2 = await AuditSchema.EnsureCreatedAsync(cs);
+        Ok("اجرای دوباره بی‌اثر است", ok2 && await WidthOf("ACTION") == 32);
 
         ClearSpill();
     }
