@@ -93,6 +93,7 @@ internal static class Program
         ValidateReviewFixes();
         ValidateAdversarialSql();
         ValidateUserSwitch();
+        ValidateUnattachedSessionIsVisible();
         ValidateShutdownWhileWorkerStuck();
         await ValidateStuckAfterDequeueAsync();
         await ValidateColumnWideningAsync();
@@ -1630,6 +1631,68 @@ SELECT TOP (@Take)
         // و بار دوم دیگر نباید کاری کند (idempotent بودن مسیر سریع).
         var ok2 = await AuditSchema.EnsureCreatedAsync(cs);
         Ok("اجرای دوباره بی‌اثر است", ok2 && await WidthOf("ACTION") == 32);
+
+        ClearSpill();
+    }
+
+    /// <summary>
+    /// رویدادهایی که پیش از چسبیدن هویت کاربر ثبت می‌شوند، باید قابل
+    /// تشخیص باشند — نه اینکه بی‌صدا با نام خالی بنشینند و بعداً کسی فکر
+    /// کند «سابقه کاربر را ثبت نمی‌کند».
+    ///
+    /// این حالت در یک تست واقعی روی دیتابیس دیده شد: ۱۰۶ رویداد با
+    /// USER_NAME خالی. ریشه‌اش یک میان‌بر توسعه‌دهنده در بیلد Debug بود که
+    /// پنجره‌ی اصلی را مستقیم باز می‌کرد و AttachUser را صدا نمی‌زد.
+    ///
+    /// موتور عمداً پیش از لاگین راه می‌افتد تا «ورود ناموفق» هم ثبت شود، پس
+    /// وجود رویداد بدون کاربر فی‌نفسه باگ نیست. آنچه باگ است، ادامه پیدا
+    /// کردن آن بعد از ورود کاربر است.
+    /// </summary>
+    private static void ValidateUnattachedSessionIsVisible()
+    {
+        Section("رویداد پیش از اتصال هویت کاربر");
+
+        ClearSpill();
+
+        // شروع بدون کاربر — همان کاری که هنگام بالا آمدن برنامه رخ می‌دهد
+        AuditService.Start(DeadConnection, null, null, "1", 1405, "d");
+
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Update,
+            Title = "کار پیش از ورود", IsCritical = true,
+        });
+
+        var beforeName = AuditService.CurrentSession?.UserName;
+        Ok("پیش از ورود، نشست کاربری ندارد", string.IsNullOrEmpty(beforeName), beforeName);
+
+        // حالا کاربر وارد می‌شود
+        AuditService.AttachUser(78, "Controller", 1405, "1");
+
+        Audit.Write(new AuditEventDraft
+        {
+            Category = AuditCategory.Data, Action = AuditAction.Update,
+            Title = "کار پس از ورود", IsCritical = true,
+        });
+
+        AuditService.ShutdownAsync(8000).GetAwaiter().GetResult();
+        var ev = ReadSpill();
+
+        var before = ev.FirstOrDefault(e => e.Title == "کار پیش از ورود");
+        var after = ev.FirstOrDefault(e => e.Title == "کار پس از ورود");
+
+        Ok("رویداد پیش از ورود ثبت شد (گم نشد)", before is not null);
+        Ok("رویداد پیش از ورود کاربر ندارد — همین درست است",
+            before is not null && string.IsNullOrEmpty(before.UserName));
+
+        // این مهم‌ترین بررسی است: بعد از AttachUser دیگر نباید رویدادی
+        // بی‌کاربر ثبت شود.
+        Ok("پس از ورود، نام کاربر به رویدادها می‌چسبد",
+            after is not null && after.UserName == "Controller" && after.UserId == 78,
+            after is null ? "رویداد پیدا نشد" : $"{after.UserName}/{after.UserId}");
+
+        Ok("هیچ رویدادی پس از ورود بدون کاربر نماند",
+            ev.Where(e => e.Title == "کار پس از ورود").All(e => !string.IsNullOrEmpty(e.UserName)));
 
         ClearSpill();
     }
