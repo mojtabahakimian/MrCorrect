@@ -140,6 +140,12 @@ namespace TestRunner
                 return;
             }
 
+            if (args != null && args.Any(a => string.Equals(a, "audit-ui", StringComparison.OrdinalIgnoreCase)))
+            {
+                AuditVerificationRunner.RunUIOnly("YAZDSEPAR1405_TEST");
+                return;
+            }
+
             Console.WriteLine("=========================================================================");
             Console.WriteLine("          VISUAL / UI HARNESS VERIFICATION FOR MrCorrect                 ");
             Console.WriteLine("=========================================================================");

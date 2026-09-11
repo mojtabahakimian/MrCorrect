@@ -273,5 +273,116 @@ namespace TestRunner
 
             Console.WriteLine("\n🎉 تست کامل سوابق و ردیابی کاربران با موفقیت به پایان رسید.");
         }
+
+        public static void RunUIOnly(string dbName = "YAZDSEPAR1405_TEST")
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.WriteLine("=========================================================================");
+            Console.WriteLine($"          AUDIT TRAIL UI VISUAL CAPTURE ({dbName})                      ");
+            Console.WriteLine("=========================================================================");
+
+            string cs = $"Data Source=MERCEDES\\SQL2022;Initial Catalog={dbName};Integrated Security=True;TrustServerCertificate=True;Max Pool Size=1000;";
+            Baseknow.USERCOD = 78;
+            Baseknow.UUSER = "Controller";
+            CL_Generaly.SHIFT_OF_USER = 1;
+            CL_Generaly.VAHED_OF_USER = 1;
+            Baseknow.UGRP = "1";
+            CL_Generaly.IsCalledExternally = true;
+            CL_CCNNMANAGER.CONNECTION_STR = cs;
+            CL_CCNNMANAGER.ConnectedToSQLDB = true;
+            Baseknow.GetInitTheApp();
+
+            using (var db = new SqlConnection(cs))
+            {
+                db.Open();
+                var currentDb = db.ExecuteScalar<string>("SELECT DB_NAME();");
+                Console.WriteLine($"[DB CHECK] Connected database: {currentDb}");
+
+                db.Execute(@"
+                    IF NOT EXISTS (SELECT 1 FROM dbo.SAL_CHEK WHERE USERCO = 78 AND [OBJECT] = 479)
+                        INSERT INTO dbo.SAL_CHEK (USERCO, [OBJECT], RUN, SEE, INP, UPD, DEL, CRT, UID)
+                        VALUES (78, 479, 1, 1, 0, 0, 0, GETDATE(), 78);");
+            }
+
+            AuditService.Start(cs, 78, "Controller", "1.0.0.460", 1405, dbName);
+            AuditService.AttachUser(78, "Controller", 1405, "1.0.0.460");
+
+            string screenshotPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WIN_AUDIT_TRAIL_SCREENSHOT.png");
+
+            var staThread = new Thread(() =>
+            {
+                var app = Application.Current ?? new Application();
+                var resourceUris = new[]
+                {
+                    "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml",
+                    "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml",
+                    "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.LightBlue.xaml",
+                    "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.LightBlue.xaml",
+                    "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ObsoleteBrushes.xaml",
+                    "pack://application:,,,/MrCorrect;component/UiDictionary/Greeny.xaml",
+                    "pack://application:,,,/MrCorrect;component/UiDictionary/Rangy.xaml",
+                    "pack://application:,,,/MrCorrect;component/UiDictionary/ColorModel.xaml",
+                    "pack://application:,,,/MrCorrect;component/UiDictionary/GlobalSoftTheme.xaml",
+                    "pack://application:,,,/Syncfusion.SfGrid.WPF;component/Themes/Generic.xaml"
+                };
+                foreach (var u in resourceUris)
+                {
+                    try { app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(u, UriKind.RelativeOrAbsolute) }); }
+                    catch (Exception ex) { Console.WriteLine($"[WARN Resource] {u} : {ex.Message}"); }
+                }
+
+                try
+                {
+                    app.Resources["IRANYEKAN"] = new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/MrCorrect;component/UiDrive/FNT/"), "#IRANYekanFN");
+                }
+                catch { app.Resources["IRANYEKAN"] = new System.Windows.Media.FontFamily("Tahoma"); }
+
+                var win = new WIN_AUDIT_TRAIL();
+                win.Loaded += (s, e) =>
+                {
+                    Console.WriteLine("[PASS] پنجره WIN_AUDIT_TRAIL باز شد (Title: " + win.Title + ")");
+
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+                    timer.Tick += (ts, te) =>
+                    {
+                        timer.Stop();
+                        try
+                        {
+                            Console.WriteLine($"[INFO] تعداد سطرهای بارگذاری‌شده در گرید: {win.Rows.Count}");
+                            var interop = new System.Windows.Interop.WindowInteropHelper(win);
+                            GetWindowRect(interop.Handle, out RECT rect);
+                            int w = rect.Right - rect.Left;
+                            int h = rect.Bottom - rect.Top;
+                            if (w > 0 && h > 0)
+                            {
+                                using var bmp = new Bitmap(w, h);
+                                using var g = Graphics.FromImage(bmp);
+                                g.CopyFromScreen(rect.Left, rect.Top, 0, 0, new System.Drawing.Size(w, h));
+                                bmp.Save(screenshotPath, ImageFormat.Png);
+                                Console.WriteLine($"[PASS] اسکرین‌شات ذخیره شد: {screenshotPath}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[WARN] خطا در تصویربرداری: {ex.Message}");
+                        }
+                        finally
+                        {
+                            win.Close();
+                            app.Shutdown();
+                        }
+                    };
+                    timer.Start();
+                };
+
+                app.Run(win);
+            });
+            staThread.SetApartmentState(ApartmentState.STA);
+            staThread.Start();
+            staThread.Join();
+
+            AuditService.ShutdownAsync(5000).GetAwaiter().GetResult();
+            Console.WriteLine("[DONE] UI Execution and capture complete.");
+        }
     }
 }
