@@ -2603,7 +2603,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         string QRE_HEADINSUP =
                         $@"INSERT INTO dbo.HEAD_LST(NUMBER, TAG, ANBAR, NUMBER1, 					   DATE_N, TAH, 	   MAS, VAS, 					 CUST_NO, 			 MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, 		MABL_HAZ, MOIN_HAZ, 		TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, 					DEPATMAN, 						SHIFT, 				   CUST_KIND, 			 USER_NAME, 		   SHARAYET, 		MBAA , HMBAA, 										   TAMIR, 							  TICMBAA, TKHF, 							 OKF, SADER, ARZD, ARZKIND, 				   CDDATE, CDTIME, OKDATE, OKTIME, 							   JAY, 															   MODAT_PPID, 															 PEPID, 														PEID,							  SGN1, 							SGN2, 							  SGN3, 										sgn1usid, 										  sgn2usid, 									  sgn3usid)
-	                    				       VALUES({num}, 20 ,  0   ,    0.0 , {DATE_N.Text.ToRawTarikh()},N'' , {MAS.Text},0.0 , N'{CUST_NO.SelectedValue}' , N'{MOLAH.Text}' ,    0.0 ,     0.0 ,     N'' ,     0.0 ,     N'' , {MABL_HAZ.Text},     N'' , {TAKHFIF.Text} ,     N'' ,   0   ,   0.0 , {DEPATMAN.SelectedValue} , {CL_Generaly.SHIFT_OF_USER}, {CUST_KIND.SelectedValue}, N'{USER_NAME.Text}' , N'{SHARAYET.Text}' , {MBAA.Text} ,  N'' , {((FrameworkElement)TAMIR.SelectedValue).Tag} , {Convert.ToByte(TICMBAA.IsChecked)}, NULL, {Convert.ToByte(OKF.IsChecked)},  0   , 0.0 ,    0   , {Tarikh.FullCurrentDate} ,   0   ,   0   ,   0   , {Convert.ToByte(JAY.IsChecked)}, {(MODAT_PPID.SelectedValue is null ? "NULL" : MODAT_PPID.SelectedValue)} , {(PEPID.SelectedValue is null ? "NULL" : PEPID.SelectedValue)} ,{(PEID.SelectedValue is null ? "NULL" : PEID.SelectedValue)} , {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, {Convert.ToByte(SGN3.IsChecked)}, {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
+	                    				       VALUES({num}, 20 ,  0   ,    0.0 , {DATE_N.Text.ToRawTarikh()},N'' , {MAS.Text},0.0 , N'{CUST_NO.SelectedValue?.ToString().Replace("'", "''")}' , N'{MOLAH.Text.Replace("'", "''")}' ,    0.0 ,     0.0 ,     N'' ,     0.0 ,     N'' , {MABL_HAZ.Text},     N'' , {TAKHFIF.Text} ,     N'' ,   0   ,   0.0 , {DEPATMAN.SelectedValue} , {CL_Generaly.SHIFT_OF_USER}, {CUST_KIND.SelectedValue}, N'{USER_NAME.Text.Replace("'", "''")}' , N'{SHARAYET.Text.Replace("'", "''")}' , {MBAA.Text} ,  N'' , {((FrameworkElement)TAMIR.SelectedValue).Tag} , {Convert.ToByte(TICMBAA.IsChecked)}, NULL, {Convert.ToByte(OKF.IsChecked)},  0   , 0.0 ,    0   , {Tarikh.FullCurrentDate} ,   0   ,   0   ,   0   , {Convert.ToByte(JAY.IsChecked)}, {(MODAT_PPID.SelectedValue is null ? "NULL" : MODAT_PPID.SelectedValue)} , {(PEPID.SelectedValue is null ? "NULL" : PEPID.SelectedValue)} ,{(PEID.SelectedValue is null ? "NULL" : PEID.SelectedValue)} , {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, {Convert.ToByte(SGN3.IsChecked)}, {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
                                   )";
 
 
@@ -2624,15 +2624,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                      TICMBAA={Convert.ToByte(TICMBAA.IsChecked)},
                                      OKF={Convert.ToByte(OKF.IsChecked)},
                                      JAY={Convert.ToByte(JAY.IsChecked)},
-                                     CUST_NO=N'{CUST_NO.SelectedValue}', 
-                                     DEPATMAN={DEPATMAN.SelectedValue}, 
-                                     MOLAH=N'{MOLAH.Text}',
-                                     USER_NAME=N'{USER_NAME.Text}',
+                                     CUST_NO=N'{CUST_NO.SelectedValue?.ToString().Replace("'", "''")}',
+                                     DEPATMAN={DEPATMAN.SelectedValue},
+                                     MOLAH=N'{MOLAH.Text.Replace("'", "''")}',
+                                     USER_NAME=N'{USER_NAME.Text.Replace("'", "''")}',
                                      MAS={MAS.Text},
                                      TAKHFIF={TAKHFIF.Text},
                                      MBAA={MBAA.Text},
                                      MABL_HAZ={MABL_HAZ.Text},
-                                     SHARAYET=N'{SHARAYET.Text}',
+                                     SHARAYET=N'{SHARAYET.Text.Replace("'", "''")}',
                                      TAMIR={((FrameworkElement)TAMIR.SelectedValue).Tag},
                                      MODAT_PPID = {(MODAT_PPID.SelectedValue is null ? "NULL" : MODAT_PPID.SelectedValue)},
                                      PEPID = {(PEPID.SelectedValue is null ? "NULL" : PEPID.SelectedValue)},
