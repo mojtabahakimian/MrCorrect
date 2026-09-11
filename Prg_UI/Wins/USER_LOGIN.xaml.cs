@@ -454,6 +454,23 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
+            // میان‌بر توسعه‌دهنده، پنجره‌ی اصلی را مستقیم باز می‌کند و از
+            // OpenMainWindowAsync رد می‌شود — یعنی هویت کاربر به نشست سابقه
+            // نمی‌چسبد. نتیجه‌اش این بود که در بیلد Debug همه‌ی رویدادها با
+            // USER_NAME خالی ثبت می‌شدند و هیچ رویداد ورودی هم ساخته نمی‌شد.
+            //
+            // این فقط داخل #if DEBUG است و به بیلد Release نمی‌رسد، ولی باعث
+            // می‌شد هر تستی که روی بیلد Debug اجرا شود نتیجه‌ی گمراه‌کننده
+            // بدهد: «سابقه کاربر را ثبت نمی‌کند» در حالی که مشکل از خودِ
+            // میان‌بر بود، نه از موتور.
+            try
+            {
+                Prg_Proccessy.AUDIT.AuditService.AttachUser(
+                    Baseknow.USERCOD, Baseknow.UUSER, Baseknow.YEA, CL_VERSION.MrCorrectFullVersion);
+                Prg_Proccessy.AUDIT.Audit.Login(Baseknow.UUSER, nameof(USER_LOGIN));
+            }
+            catch (Exception) { }
+
             new WinBase().Show();
             //new AZAE_WIN().Show();
             //new WIN_About().Show();

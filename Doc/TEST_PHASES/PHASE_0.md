@@ -1,185 +1,73 @@
-﻿# فاز ۰ — آماده‌سازی و راستی‌آزمایی محیط
+﻿# فاز ۰ — آماده‌سازی
 
-تو مهندس تست سیستم «سابقه و ردیابی فعالیت کاربران» (Audit Trail) در
-نرم‌افزار MrCorrect هستی. این **فاز ۰** از یک تست هشت‌فازی است.
+## قوانین (در همه‌ی فازها)
+1. فقط روی `YAZDSEPAR1405_TEST`. اول بزن: `SELECT DB_NAME();`
+2. کد را عوض نکن. اگر مجبور شدی، بنویس و آخرش `git checkout --` کن.
+3. **با موس و کیبورد در برنامه کار کن.** ساختن فایل `.cs` تستی یا صدا زدن
+   مستقیم `Prg_Proccessy.AUDIT` **ممنوع**.
+4. تست‌نشده را ادعا نکن. نمی‌دانی؟ بنویس «نمی‌دانم».
 
-در این فاز **هیچ تستی انجام نمی‌دهی**. فقط محیط را آماده و راستی‌آزمایی
-می‌کنی. اگر این فاز درست نشود، هفت فاز بعدی بی‌ارزش‌اند.
-
----
-
-## ⛔ چهار قانونی که در تمام هشت فاز برقرارند
-
-### ۱. فقط روی کپی دیتابیس
-
-تست‌های بعدی شامل **قطع کردن SQL Server**، **حذف رکورد**، **کشتن پروسه**
-و `SYS_AUDIT_PURGE` هستند. هرگز روی دیتابیس عملیاتی اجرا نکن.
-
-### ۲. کد منبع را عوض نکن
-
-اگر مجبور شدی (مثلاً یک `#if DEBUG return;` مانع اجرا شد): فایل و خط و متن
-دقیق را در گزارش بنویس، و در پایان با `git checkout -- <file>` برش گردان.
-
-### ۳. ⭐ با دست کار کن، نه با کد
-
-**این مهم‌ترین قانون است.** دو دور تست قبلی به همین دلیل ناکام ماندند:
-به‌جای استفاده از رابط کاربری، یک برنامه‌ی تستی ساخته شد که متدهای موتور
-را **مستقیم** صدا می‌زد.
-
-آن کار ثابت می‌کند «موتور درست ثبت می‌کند» — که از قبل می‌دانیم. چیزی که
-**نمی‌دانیم** این است که آیا خودِ فرم‌ها موتور را درست صدا می‌زنند یا نه.
-
-پس:
-
-| ❌ ممنوع | ✅ لازم |
-|---|---|
-| `Audit.LoginFailed("ali", ...)` | در فرم لاگین رمز غلط تایپ کن |
-| `AuditService.AttachUser(2, "ALI")` | واقعاً خروج بزن و با کاربر دیگر وارد شو |
-| `AuditService.ShutdownAsync(50)` | در Task Manager روی `End Task` کلیک کن |
-| `Audit.Export("Excel", ...)` | در فرم روی دکمه‌ی خروجی اکسل کلیک کن |
-
-ساختن هر فایل `.cs` تستی که `Prg_Proccessy.AUDIT` را صدا بزند **ممنوع**
-است. تنها ابزارهای مجاز: خودِ برنامه، SQL Server Management Studio،
-Task Manager، و File Explorer.
-
-### ۴. حدس نزن، دروغ نگو
-
-اگر تستی را انجام ندادی بنویس انجام ندادی. اگر نتیجه مبهم بود بنویس مبهم
-بود. هر ادعا باید خروجی واقعی یا اسکرین‌شات کنارش باشد.
-
----
-
-## آنچه باید بدانی
-
-- ثبت سابقه روی نخ رابط کاربری فقط یک نوشتن در **صف حافظه** است. یک نخ
-  پس‌زمینه هر **۷۵۰ میلی‌ثانیه** (یا هر ۴۰۰ رویداد) دسته‌ای می‌نویسد.
-  **پس بعد از هر کار ۳ ثانیه صبر کن و بعد کوئری بزن.**
-- داخل تراکنش، رویداد **فقط بعد از `Commit`** ثبت می‌شود.
-- اگر دیتابیس قطع باشد، رویدادهای حساس روی
-  `%LOCALAPPDATA%\MrCorrect\AuditSpill\` می‌نشینند.
-
----
-
-# گام ۰.۱ — ساخت کپی دیتابیس
+**بعد از هر کار ۳ ثانیه صبر کن** (نوشتن دسته‌ای، هر ۷۵۰ms).
 
 ```sql
-BACKUP DATABASE YAZDSEPAR1405 TO DISK = 'C:\temp\yz.bak' WITH INIT;
+SELECT LOG_ID,USER_NAME,ACTION,CATEGORY,SEVERITY,ENTITY,ENTITY_KEY,FORM_NAME,TITLE,DETAIL
+FROM dbo.VW_SYS_AUDIT_TIMELINE WHERE LOG_ID > @شروع ORDER BY LOG_ID;
+```
 
-RESTORE DATABASE YAZDSEPAR1405_TEST FROM DISK = 'C:\temp\yz.bak'
-WITH MOVE 'YAZDSEPAR1405'     TO 'C:\temp\yz_test.mdf',
+---
+
+در این فاز **تستی انجام نمی‌دهی**، فقط محیط را آماده می‌کنی.
+
+## ۰.۱ کپی دیتابیس
+```sql
+BACKUP DATABASE YAZDSEPAR1405 TO DISK='C:\temp\yz.bak' WITH INIT;
+RESTORE DATABASE YAZDSEPAR1405_TEST FROM DISK='C:\temp\yz.bak'
+WITH MOVE 'YAZDSEPAR1405' TO 'C:\temp\yz_test.mdf',
      MOVE 'YAZDSEPAR1405_log' TO 'C:\temp\yz_test_log.ldf', REPLACE;
 ```
+(نام فایل‌های منطقی: `RESTORE FILELISTONLY FROM DISK='C:\temp\yz.bak';`)
 
-اگر نام فایل‌های منطقی فرق داشت، اول با این ببین:
+## ۰.۲ برنامه را به کپی وصل کن
+رشته‌ی اتصال را عوض کن، برنامه را اجرا کن و وارد شو.
 
+## ۰.۳ ⭐ اثبات اینکه روی کپی هستی — هر دو لازم است
 ```sql
-RESTORE FILELISTONLY FROM DISK = 'C:\temp\yz.bak';
-```
-
-# گام ۰.۲ — وصل کردن برنامه به کپی
-
-رشته‌ی اتصال برنامه را طوری تنظیم کن که به `YAZDSEPAR1405_TEST` وصل شود،
-نه به دیتابیس اصلی. (در این نرم‌افزار از `CL_CCNNMANAGER` خوانده می‌شود و
-معمولاً در رجیستری یا تنظیمات ذخیره است — پیدایش کن.)
-
-برنامه را اجرا کن و وارد شو.
-
-# گام ۰.۳ — ⭐ اثبات اینکه روی کپی هستی
-
-**این دو مدرک هر دو لازم‌اند:**
-
-**الف) از SSMS:**
-
-```sql
-SELECT DB_NAME() AS [دیتابیس فعلی];
-```
-
-**ب) از خودِ برنامه** — این ستون را برنامه موقع شروع نشست پر می‌کند، پس
-نشان می‌دهد **برنامه** به کجا وصل است، نه فقط SSMS:
-
-```sql
-SELECT TOP 1 SESSION_ID, USER_NAME, MACHINE_NAME, CLIENT_IP, DB_NAME, STARTED_AT
+SELECT DB_NAME();
+SELECT TOP 1 USER_NAME,MACHINE_NAME,CLIENT_IP,DB_NAME,STARTED_AT
 FROM dbo.SYS_AUDIT_SESSION ORDER BY STARTED_AT DESC;
 ```
+ستون `DB_NAME` را **برنامه** پر می‌کند. اگر `YAZDSEPAR1405` بود (بدون
+`_TEST`)، برنامه هنوز به دیتابیس عملیاتی وصل است → **متوقف شو**.
 
-> ❗ اگر ستون `DB_NAME` مقدار `YAZDSEPAR1405` (بدون `_TEST`) داشت، یعنی
-> **برنامه هنوز به دیتابیس عملیاتی وصل است**. متوقف شو و اول درستش کن.
-
-# گام ۰.۴ — بررسی سلامت ساختار
-
+## ۰.۴ سلامت ساختار
 ```sql
--- هر ۵ شیء باید باشند
-SELECT name, type_desc FROM sys.objects
-WHERE name IN ('SYS_AUDIT_SESSION','SYS_AUDIT_EVENT',
-               'VW_SYS_AUDIT_TIMELINE','SYS_AUDIT_PURGE','SYS_AUDIT_BACKFILL');
-
--- عرض ستون‌ها: ACTION باید ۳۲ و ENTITY باید ۲۰۰ باشد
-SELECT name, TYPE_NAME(user_type_id) AS نوع, max_length
-FROM sys.columns
-WHERE object_id = OBJECT_ID(N'dbo.SYS_AUDIT_EVENT')
-  AND name IN ('ACTION','ENTITY');
-
--- نباید رویه‌ای با پیشوند SP_ مانده باشد
+SELECT name,type_desc FROM sys.objects WHERE name IN
+ ('SYS_AUDIT_SESSION','SYS_AUDIT_EVENT','VW_SYS_AUDIT_TIMELINE',
+  'SYS_AUDIT_PURGE','SYS_AUDIT_BACKFILL');
+SELECT name,max_length FROM sys.columns
+WHERE object_id=OBJECT_ID(N'dbo.SYS_AUDIT_EVENT') AND name IN('ACTION','ENTITY');
 SELECT name FROM sys.objects WHERE name LIKE 'SP[_]SYS[_]AUDIT[_]%';
 ```
+انتظار: ۵ شیء · `ACTION`=۳۲ و `ENTITY`=۲۰۰ · رویه‌ی `SP_` صفر ردیف.
 
-| بررسی | انتظار |
-|---|---|
-| ۵ شیء | هر ۵ موجود |
-| `ACTION` | `varchar` با `max_length = 32` |
-| `ENTITY` | `nvarchar` با `max_length = 200` |
-| رویه‌ی `SP_` | **صفر ردیف** |
-
-> اگر `ACTION` عدد ۲۴ یا `ENTITY` عدد ۹۶ داد، یعنی گشاد شدن ستون‌ها انجام
-> نشده. این یک باگ شناخته‌شده بود که رفع شده — اگر دوباره دیدی، همین‌جا
-> گزارش کن و ادامه نده.
-
-# گام ۰.۵ — دادن دسترسی فرم سوابق
-
+## ۰.۵ دسترسی فرم سوابق
 ```sql
-SELECT IDH, FORMNAME, CAPTION FROM dbo.TFORMS WHERE FORMNAME = N'AUDITTRAIL';
+SELECT IDH,FORMNAME FROM dbo.TFORMS WHERE FORMNAME=N'AUDITTRAIL';
+-- 78=کد کاربر تو، 479=IDH بالا
+INSERT INTO dbo.SAL_CHEK (USERCO,[OBJECT],RUN,SEE,INP,UPD,DEL,CRT,UID)
+VALUES (78,479,1,1,0,0,0,GETDATE(),78);
 ```
+برنامه را ببند و باز کن → `Ctrl+F` → «سوابق» → باید باز شود. اسکرین‌شات.
 
-اگر ردیف نبود، یعنی مایگریشن اجرا نشده — گزارش کن.
-
-بعد (به‌جای `78` کد کاربر خودت از `SALA_DTL.IDD`، و به‌جای `479` مقدار
-`IDH` که بالا گرفتی):
-
+## ۰.۶ نقطه‌ی شروع
 ```sql
-INSERT INTO dbo.SAL_CHEK (USERCO, [OBJECT], RUN, SEE, INP, UPD, DEL, CRT, UID)
-VALUES (78, 479, 1, 1, 0, 0, 0, GETDATE(), 78);
+SELECT MAX(LOG_ID) FROM dbo.SYS_AUDIT_EVENT;
 ```
 
-برنامه را **ببند و دوباره باز کن**، بعد `Ctrl+F` بزن، «سوابق» را تایپ کن
-و فرم را باز کن.
+> اگر هر کدام مشکل داشت، **فاز ۱ را شروع نکن**.
 
-**انتظار:** فرم باز می‌شود و ردیف‌ها را نشان می‌دهد. یک اسکرین‌شات بگیر.
+## گزارش
+جدول نتایج + خروجی خام کوئری + `MAX(LOG_ID)` پایانی.
+هر گام: ✅ / ❌ / ⏭ (انجام نشد + دلیل).
 
-# گام ۰.۶ — گرفتن نقطه‌ی شروع
-
-این عدد را یادداشت کن؛ در تمام فازهای بعدی لازمش داری:
-
-```sql
-SELECT MAX(LOG_ID) AS نقطه_شروع FROM dbo.SYS_AUDIT_EVENT;
-```
-
----
-
-# گزارش فاز ۰
-
-```
-دیتابیس از دید SSMS       : <خروجی SELECT DB_NAME()>
-دیتابیس از دید برنامه     : <ستون DB_NAME از SYS_AUDIT_SESSION>
-عرض ACTION / ENTITY       : <عددها>
-رویه‌ی SP_ باقی‌مانده      : <تعداد>
-IDH فرم AUDITTRAIL        : <عدد>
-فرم سوابق باز شد؟         : بله / خیر  (+ اسکرین‌شات)
-MAX(LOG_ID) در شروع       : <عدد>
-تغییری در کد دادم؟        : <فایل و خط، یا «هیچ»>
-```
-
-اگر هر کدام از این‌ها مشکل داشت، **فاز ۱ را شروع نکن** و اول گزارش بده.
-
----
-
-> وقتی این گزارش را دادی، فاز ۱ به تو داده می‌شود.
+> گزارش را بده تا فاز بعد داده شود.
