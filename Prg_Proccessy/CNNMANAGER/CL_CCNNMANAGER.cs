@@ -263,8 +263,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 try
                 {
                     db.Open();
-                    var results = db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
-                    return results;
+                    // این متد فقط خواندن نیست: دستورهای INSERT ... OUTPUT INSERTED.id
+                    // هم از همین‌جا اجرا می‌شوند و شنونده‌ی مرکزی آن‌ها را می‌بیند.
+                    return db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
                 }
                 //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex)))
@@ -324,8 +325,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 try
                 {
                     db.Open();
-                    var result = db.Execute(sql, parameters, commandTimeout: 3600);
-                    return result;
+                    return db.Execute(sql, parameters, commandTimeout: 3600);
                 }
                 catch (SqlException ex)
                 {

@@ -9,6 +9,12 @@ namespace Prg_Proccessy.CNNMANAGER
     /// </summary>
     public class TransactionManagement : IDisposable
     {
+        // ثبت سابقه اینجا انجام نمی‌شود: شنونده‌ی مرکزی AuditCommandListener
+        // هر دستور SQL را از هر مسیری می‌بیند — از جمله نوشتن مستقیم با
+        // Dapper روی SqlConnection خام که این کلاس از آن خبر ندارد — و
+        // تراکنش را هم خودش مدیریت می‌کند (فقط پس از Commit ثبت می‌کند).
+        // نگه داشتن قلاب قبلی در کنارش، هر نوشتن را دوبار ثبت می‌کرد.
+
         private SqlConnection _connection;
         private IDbTransaction _transaction;
         public TransactionManagement(string connectionString)
@@ -57,6 +63,8 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
+                    // این متد فقط خواندن نیست: «INSERT ... OUTPUT INSERTED.id»
+                    // هم از همین‌جا اجرا می‌شود.
                     return _connection.Query<T>(sql, parameters, _transaction, commandTimeout: 3600);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
@@ -153,6 +161,8 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 _transaction?.Rollback();
             }
+
+            // عمداً چیزی ثبت نمی‌شود: این دستورها هرگز در دیتابیس ننشستند.
 
             if (_AutomaticDispose)
             {
