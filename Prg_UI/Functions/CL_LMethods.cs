@@ -1904,6 +1904,11 @@ namespace Prg_UI.Functions
                     var existingWindow = FindExistingWindow(newWindow.GetType());
                     if (existingWindow != null)
                     {
+                        // فرم دوباره باز نمی‌شود، پس رویداد «باز کردن» هم
+                        // ثبت نمی‌شود؛ ولی زمینه باید همین پنجره شود تا
+                        // نوشتن‌های بعدی به فرم درست نسبت داده شوند.
+                        try { Prg_Proccessy.AUDIT.Audit.SetCurrentForm(newWindow.GetType().Name); } catch { }
+
                         FocusExistingWindow(existingWindow);
                         return;
                     }
@@ -1914,6 +1919,18 @@ namespace Prg_UI.Functions
 
                 // Add window to tracking system
                 RegisterWindowTracking(newWindow);
+
+                // ثبت سابقه‌ی باز شدن فرم.
+                //
+                // این تنها مسیر باز شدن پنجره‌ها در نرم‌افزار است، پس یک قلاب
+                // اینجا تمام فرم‌ها را پوشش می‌دهد — از جمله فرم‌هایی که در
+                // سازنده‌ی خودشان AMALIYAT_USER را صدا نمی‌زنند. فرم‌هایی که
+                // آن را صدا می‌زنند دوباره ثبت نمی‌شوند چون Audit.Form
+                // رویداد تکراری در بازه‌ی کوتاه را نادیده می‌گیرد.
+                //
+                // عمداً بعد از بازگشتِ زودهنگامِ «پنجره از قبل باز است» قرار
+                // گرفته تا فوکوس دوباره روی یک پنجره‌ی باز، «باز کردن» شمرده نشود.
+                try { Prg_Proccessy.AUDIT.Audit.Form(newWindow.GetType().Name); } catch { }
 
                 // Display window with proper focus handling
                 ShowWindowWithFocus(owner, newWindow, isModalDialog);
@@ -2234,6 +2251,16 @@ namespace Prg_UI.Functions
 
         public static void CleanupBeforeExiting()
         {
+            // سابقه عمداً اینجا خاموش نمی‌شود.
+            //
+            // این متد از Application_DispatcherUnhandledException هم صدا زده
+            // می‌شود، و آن هندلر برای خطاهای قابل بازیابی e.Handled = true
+            // می‌گذارد و برنامه ادامه می‌دهد. اگر خاموش کردن اینجا می‌ماند،
+            // یک خطای گذرای رابط کاربری کل سابقه‌ی باقی‌مانده‌ی آن اجرا را
+            // از بین می‌برد (به‌علاوه یک «خروج» دروغین و ۲٫۵ ثانیه بلوکه
+            // شدن نخ UI داخل هندلر خطا).
+            // تخلیه‌ی واقعی در AuditShutdown انجام می‌شود که فقط از مسیر
+            // خروج قطعی برنامه صدا زده می‌شود.
 
             try { ProcLoader.DisposeAll(); } catch (Exception) { }
 
@@ -2242,6 +2269,22 @@ namespace Prg_UI.Functions
                 CL_PRC_LOADER.Dispose(); //New Version
             }
             catch { }
+        }
+
+        /// <summary>
+        /// تخلیه و بستن سیستم سابقه. فقط از مسیر خروج قطعی برنامه صدا زده
+        /// می‌شود، نه از مسیر پاک‌سازی عمومی که هندلر خطا هم از آن می‌گذرد.
+        /// چند بار صدا زدنش بی‌ضرر است.
+        /// </summary>
+        public static void AuditShutdown()
+        {
+            try
+            {
+                if (!Prg_Proccessy.AUDIT.AuditService.IsRunning) return;
+                Prg_Proccessy.AUDIT.Audit.Logout(Baseknow.UUSER);
+                Prg_Proccessy.AUDIT.AuditService.ShutdownAsync(2500).GetAwaiter().GetResult();
+            }
+            catch (Exception) { }
         }
 
         public static void GoExitTheApplication()

@@ -1420,6 +1420,12 @@ namespace Prg_UI.Wins
                 // 2. پاک کردن PageManagement و navigation stack
                 ClearPageManagement();
 
+                // خروج کاربر پیش از پاک شدن نامش ثبت می‌شود. این مسیر خروجِ
+                // داخل برنامه است (پنجره‌ی لاگین دوباره باز می‌شود و برنامه
+                // بسته نمی‌شود)، و بدون این، خط زمانی رویدادهای دو کاربر را
+                // پشت سر هم نشان می‌داد بدون هیچ نشانه‌ای از تعویض کاربر.
+                try { Prg_Proccessy.AUDIT.Audit.Logout(Baseknow.UUSER); } catch (Exception) { }
+
                 // 3. پاک کردن اطلاعات جلسه کاربری
                 Baseknow.USERCOD = 0;
                 Baseknow.UUSER = string.Empty;

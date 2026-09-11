@@ -91,6 +91,8 @@ namespace Prg_Proccessy.CNNMANAGER
                     try
                     {
                         db.Open();
+                        // «INSERT ... OUTPUT INSERTED.id» هم از مسیر Query می‌گذرد
+                        // و شنونده‌ی مرکزی همان را هم می‌بیند.
                         return db.Query<T>(sql, parameters, commandTimeout: 3600);
                     }
                     catch (Exception ex)
@@ -240,6 +242,7 @@ namespace Prg_Proccessy.CNNMANAGER
             }
             finally
             {
+                // عمداً چیزی ثبت نمی‌شود: این دستورها هرگز در دیتابیس ننشستند.
                 _transaction.Dispose();
                 _transaction = null;
             }

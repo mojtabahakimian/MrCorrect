@@ -126,11 +126,70 @@ namespace Prg_UI.Wins
         }
 
         /// <summary>
+        /// اجرای مایگریشن بدون ثبت در سابقه.
+        ///
+        /// موتور سابقه عمداً پیش از لاگین راه می‌افتد تا «ورود ناموفق» هم ثبت
+        /// شود، ولی مایگریشن بعد از آن اجرا می‌شود. بدون این، دستورهای خودِ
+        /// مایگریشن (مثل درج در TFORMS) به‌عنوان تغییر داده‌ی کاربر ثبت
+        /// می‌شدند — آن هم بدون نام کاربر، چون هنوز کسی وارد نشده، و نمای
+        /// خط زمانی با ISNULL آن‌ها را به اولین کاربری که وارد می‌شود نسبت
+        /// می‌داد.
+        /// </summary>
+        private static void RunMigrationWithoutAudit(Action migrate)
+        {
+            var previous = Prg_Proccessy.AUDIT.AuditSqlSniffer.Enabled;
+            Prg_Proccessy.AUDIT.AuditSqlSniffer.Enabled = false;
+            try { migrate(); }
+            finally { Prg_Proccessy.AUDIT.AuditSqlSniffer.Enabled = previous; }
+        }
+
+        /// <summary>
+        /// راه‌اندازی موتور سابقه. هیچ کار مسدودکننده‌ای روی نخ رابط کاربری
+        /// انجام نمی‌دهد؛ ساخت جدول‌ها و درج ردیف نشست روی نخ پس‌زمینه است.
+        /// فراخوانی دوباره بی‌اثر است.
+        /// </summary>
+        private static void StartAuditSession()
+        {
+            try
+            {
+                Prg_Proccessy.AUDIT.AuditService.Start(
+                    CL_CCNNMANAGER.CONNECTION_STR,
+                    Baseknow.USERCOD,
+                    Baseknow.UUSER,
+                    CL_VERSION.MrCorrectFullVersion,
+                    Baseknow.YEA,
+                    CL_Generaly.General_DBname);
+            }
+            catch (Exception) { }
+        }
+
+        /// <summary>
         /// بعد از لاگین موفق، تم ذخیره‌شده کاربر را از DB لود و اعمال می‌کند،
         /// سپس پنجره اصلی را باز می‌کند.
         /// </summary>
-        private async Task OpenMainWindowAsync()
+        private async Task OpenMainWindowAsync(bool viaMasterPassword = false)
         {
+            // ورود موفق: هویت کاربر به نشستی که پیش از لاگین باز شده بود
+            // چسبانده می‌شود و خود رویداد ورود ثبت می‌گردد.
+            try
+            {
+                Prg_Proccessy.AUDIT.AuditService.AttachUser(
+                    Baseknow.USERCOD, Baseknow.UUSER, Baseknow.YEA, CL_VERSION.MrCorrectFullVersion);
+
+                if (viaMasterPassword)
+                {
+                    Prg_Proccessy.AUDIT.Audit.Security(
+                        Prg_Proccessy.AUDIT.AuditAction.Login,
+                        $"ورود کاربر {Baseknow.UUSER} با رمز اصلی (نه رمز خودِ کاربر)",
+                        formName: nameof(USER_LOGIN));
+                }
+                else
+                {
+                    Prg_Proccessy.AUDIT.Audit.Login(Baseknow.UUSER, nameof(USER_LOGIN));
+                }
+            }
+            catch (Exception) { }
+
             try
             {
                 var themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
@@ -191,7 +250,13 @@ namespace Prg_UI.Wins
                 this.Hide();
 
                 Baseknow.GetInitTheApp();
-                ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
+
+                // در این مسیر کاربر از بیرون (اکسس) پاس داده شده و از قبل
+                // مشخص است، پس نشست سابقه با هویت کامل شروع می‌شود.
+                StartAuditSession();
+                Prg_Proccessy.AUDIT.Audit.Login(Baseknow.UUSER, nameof(USER_LOGIN));
+
+                RunMigrationWithoutAudit(() => ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR));
                 App.splashScreen.LoadComplete();
 
                 if (CL_Generaly.SectionName == "HEAD_LST_FROOSH22")
@@ -227,6 +292,11 @@ namespace Prg_UI.Wins
                 winConnectionChoose.ShowDialog();
                 return;
             }
+
+            // نشست سابقه عمداً پیش از لاگین شروع می‌شود تا تلاش‌های ناموفق
+            // ورود هم ثبت شوند. هویت کاربر بعد از ورود موفق، در
+            // OpenMainWindowAsync به همین نشست چسبانده می‌شود.
+            StartAuditSession();
 
             // Moved to Window_ContentRendered to allow UI to show progress
             //if (!CL_VERSION.IsValidGreaterVersion())
@@ -264,7 +334,7 @@ namespace Prg_UI.Wins
             return;//Should Remove this lone
 #endif
 
-            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR);
+            RunMigrationWithoutAudit(() => ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR));
 
             #region TinyLockCheck
             CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
@@ -594,7 +664,10 @@ namespace Prg_UI.Wins
                         Baseknow.USERCOD = USF.IDD;
                         Baseknow.UGRP = USF.GRSAL.ToString();
                         StoreInRegister();
-                        await OpenMainWindowAsync();
+                        // ورود با رمز اصلی باید در سابقه از ورود عادی قابل
+                        // تفکیک باشد؛ وگرنه دقیقاً همان رویدادی ثبت می‌شود که
+                        // یک ورود واقعی با رمز خودِ کاربر ثبت می‌کند.
+                        await OpenMainWindowAsync(viaMasterPassword: true);
                         return;
 
                     }
@@ -614,6 +687,7 @@ namespace Prg_UI.Wins
                         else
                         {
                             //Pop1.IsOpen = true;
+                            Prg_Proccessy.AUDIT.Audit.LoginFailed(Krbri.Text, "رمز عبور نادرست", nameof(USER_LOGIN));
                             PopNotifyShow("رمز عبور شما صحیح نیست !");
                         }
                     }
@@ -632,12 +706,14 @@ namespace Prg_UI.Wins
                         }
                         else
                         {
+                            Prg_Proccessy.AUDIT.Audit.LoginFailed(Krbri.Text, "رمز عبور نادرست", nameof(USER_LOGIN));
                             PopNotifyShow("رمز عبور شما صحیح نیست !");
                         }
                     }
                 }
                 else
                 {
+                    Prg_Proccessy.AUDIT.Audit.LoginFailed(Krbri.Text, "نام کاربری ناشناخته", nameof(USER_LOGIN));
                     PopNotifyShow("نام کاربری صحیح نیست !");
                 }
                 lbloader.Visibility = Visibility.Hidden;
@@ -1504,7 +1580,7 @@ del ""%~f0"" & exit
                 return;
             }
 
-            ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true);
+            RunMigrationWithoutAudit(() => ScriptSqly.Migrations.ScriptSqly.LetsGo(CL_CCNNMANAGER.CONNECTION_STR, true));
             new Msgwin(false, "اسکریپت‌ها اجرا شدند.").Show();
         }
     }

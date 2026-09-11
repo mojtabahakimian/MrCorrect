@@ -1,18 +1,14 @@
-﻿using Newtonsoft.Json;
-using Prg_Proccessy.MODELS;
-using Prg_SendInvoice.CNNMANAGER;
+﻿using Prg_Proccessy.AUDIT;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Functions
 {
+    /// <summary>
+    /// نگه‌داشته شده برای سازگاری. کدهایی که این مدل را می‌سازند بدون تغییر
+    /// کامپایل می‌شوند.
+    /// </summary>
     public class AuditLogEntry
     {
         public string UserName { get; set; }
@@ -35,155 +31,91 @@ namespace Functions
         public bool IsSuccess { get; set; }
         public string ErrorMessage { get; set; }
     }
+
+    /// <summary>
+    /// پوسته‌ی نازک روی <see cref="Audit"/>.
+    ///
+    /// امضای متدها عمداً دست‌نخورده مانده تا هر ۹۶ نقطه‌ی فراخوانی موجود
+    /// بدون هیچ تغییری کامپایل شوند، ولی رفتار زیر پوست عوض شده و سه ایراد
+    /// واقعی نسخه‌ی قبلی برطرف شده است:
+    ///
+    ///   ۱. <c>Dns.GetHostEntry</c> که یک فراخوانی DNS مسدودکننده بود و پیش
+    ///      از اولین await — یعنی روی نخ رابط کاربری — اجرا می‌شد. اگر سرور
+    ///      نام کند بود، فرم چند ثانیه فریز می‌شد. حالا آدرس IP یک بار در
+    ///      شروع نشست و از روی کارت‌های شبکه‌ی محلی خوانده می‌شود.
+    ///   ۲. <c>Process.GetCurrentProcess()</c> در هر فراخوانی یک شیء
+    ///      Dispose‌نشده می‌ساخت؛ در ۸۳ نقطه‌ی حذف تکرار می‌شد.
+    ///   ۳. یک <c>SemaphoreSlim</c> سراسری تمام نوشتن‌های سابقه را صف می‌کرد.
+    ///
+    /// جدول قدیمی <c>USER_AUDIT_LOG</c> همچنان پر می‌شود، ولی از نخ پس‌زمینه.
+    /// </summary>
     public static class AuditLogger
     {
-        private static readonly CL_CCNNMANAGER _dbms = new CL_CCNNMANAGER();
-        private static readonly Guid _sessionId = Guid.NewGuid();
-        private static readonly string _appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        private static object _lockObject = new object();
+        public static Task LogActionAsync(string actionType, string tableName, string recordId,
+                                          string oldValue = null, string newValue = null, string additionalInfo = null)
+        {
+            Send(actionType, tableName, recordId, oldValue, newValue, additionalInfo);
+            return Task.CompletedTask;
+        }
 
-        private static readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
+        public static Task LogActionAsync(string actionType, string tableName, string recordId,
+                                          object oldValue = null, object newValue = null, string additionalInfo = null)
+        {
+            Send(actionType, tableName, recordId, Stringify(oldValue), Stringify(newValue), additionalInfo);
+            return Task.CompletedTask;
+        }
 
-        public static async Task LogActionAsync(string actionType, string tableName, string recordId, string oldValue = null, string newValue = null, string additionalInfo = null)
+        private static void Send(string actionType, string tableName, string recordId,
+                                 string oldValue, string newValue, string additionalInfo)
         {
             try
             {
-                var entry = CreateAuditEntry(actionType, tableName, recordId, oldValue, newValue, additionalInfo);
-                await SaveAuditLogAsync(entry);
+                var isDelete = string.Equals(actionType, "DELETE", StringComparison.OrdinalIgnoreCase);
+
+                Audit.Write(new AuditEventDraft
+                {
+                    Category = AuditCategory.Data,
+                    Severity = isDelete ? AuditSeverity.Sensitive : AuditSeverity.Notable,
+                    Action = string.IsNullOrWhiteSpace(actionType) ? "UNKNOWN" : actionType.ToUpperInvariant(),
+                    Entity = tableName,
+                    EntityKey = recordId,
+                    Title = BuildTitle(actionType, tableName, recordId),
+                    Detail = additionalInfo,
+                    IsCritical = isDelete,
+
+                    // جدول قدیمی حذف نشده و همچنان تغذیه می‌شود.
+                    Legacy = AuditLegacyTarget.UserAuditLog,
+                    LegacyOldValue = oldValue,
+                    LegacyNewValue = newValue,
+                });
             }
-            catch (Exception ex)
+            catch
             {
-                //// Fallback logging to file system if database logging fails
-                //await FallbackLogToFileAsync(ex, actionType, tableName, recordId);
+                // ثبت سابقه هرگز نباید کار کاربر را متوقف کند.
             }
         }
 
-        public static async Task LogActionAsync(string actionType, string tableName, string recordId, object oldValue = null, object newValue = null, string additionalInfo = null)
+        private static string BuildTitle(string actionType, string tableName, string recordId)
         {
-            try
+            var verb = (actionType ?? string.Empty).ToUpperInvariant() switch
             {
-                var entry = CreateAuditEntry(actionType, tableName, recordId, oldValue, newValue, additionalInfo);
-                await SaveAuditLogAsync(entry);
-            }
-            catch (Exception ex)
-            {
-                //// Fallback logging to file system if database logging fails
-                //await FallbackLogToFileAsync(ex, actionType, tableName, recordId);
-            }
-        }
-
-        private static AuditLogEntry CreateAuditEntry(string actionType, string tableName, string recordId, object oldValue, object newValue, string additionalInfo)
-        {
-            var ipAddresses = GetIPAddresses();
-            var windowsVersion = GetWindowsVersion();
-
-            return new AuditLogEntry
-            {
-                UserName = GetCurrentUser(),
-                WindowsUserName = Environment.UserName,
-                ActionType = actionType,
-                TableName = tableName,
-                RecordID = recordId,
-                OldValue = oldValue is null ? null : JsonConvert.SerializeObject(oldValue),
-                NewValue = newValue is null ? null : JsonConvert.SerializeObject(newValue),
-                IPAddress = string.Join(";", ipAddresses),
-                MachineName = Environment.MachineName,
-                ApplicationVersion = CL_VERSION.MrCorrectFullVersion,
-                WindowsVersion = windowsVersion,
-                ActionDateTime = DateTime.Now,
-                AdditionalInfo = additionalInfo,
-                SessionID = _sessionId,
-                ProcessID = Process.GetCurrentProcess().Id,
-                ThreadID = Thread.CurrentThread.ManagedThreadId,
-                //StackTrace = new StackTrace(true).ToString(),
-                StackTrace = null,
-                IsSuccess = true
+                "DELETE" => "حذف",
+                "INSERT" => "ثبت",
+                "UPDATE" => "ویرایش",
+                _ => actionType,
             };
+
+            var what = string.IsNullOrWhiteSpace(tableName) ? string.Empty : " " + tableName;
+            var key = string.IsNullOrWhiteSpace(recordId) ? string.Empty : " " + recordId;
+            return (verb + what + key).Trim();
         }
 
-        private static async Task SaveAuditLogAsync(AuditLogEntry entry)
+        private static string Stringify(object value)
         {
-            try
-            {
-                await _asyncLock.WaitAsync(); // Use SemaphoreSlim instead of lock for async operations
-
-                var sql = @"
-                 INSERT INTO USER_AUDIT_LOG (
-                     UserName, WindowsUserName, ActionType, TableName, RecordID, 
-                     OldValue, NewValue, IPAddress, MachineName, ApplicationVersion,
-                     WindowsVersion, ActionDateTime, AdditionalInfo, SessionID,
-                     ProcessID, ThreadID, StackTrace, IsSuccess, ErrorMessage
-                 )
-                 VALUES (
-                     @UserName, @WindowsUserName, @ActionType, @TableName, @RecordID,
-                     @OldValue, @NewValue, @IPAddress, @MachineName, @ApplicationVersion,
-                     @WindowsVersion, @ActionDateTime, @AdditionalInfo, @SessionID,
-                     @ProcessID, @ThreadID, @StackTrace, @IsSuccess, @ErrorMessage
-                 )";
-
-                await _dbms.DoExecuteSQLAsync(sql, entry);
-            }
-            finally
-            {
-                _asyncLock.Release();
-            }
-        }
-
-        private static string GetCurrentUser()
-        {
-            return string.IsNullOrEmpty(Baseknow.UUSER) ? "NOTPASSED" : Baseknow.UUSER; // Replace with actual implementation
-        }
-
-        private static List<string> GetIPAddresses()
-        {
-            var ipAddresses = new List<string>();
-            try
-            {
-                var hostEntry = Dns.GetHostEntry(Dns.GetHostName());
-                ipAddresses.AddRange(hostEntry.AddressList
-                    .Where(ip => ip.AddressFamily == AddressFamily.InterNetwork)
-                    .Select(ip => ip.ToString()));
-            }
-            catch
-            {
-                ipAddresses.Add("Unable to determine IP");
-            }
-            return ipAddresses;
-        }
-
-        private static string GetWindowsVersion()
-        {
-            try
-            {
-                return Environment.OSVersion.VersionString;
-            }
-            catch
-            {
-                return "Unknown";
-            }
-        }
-
-        private static async Task FallbackLogToFileAsync(Exception ex, string actionType, string tableName, string recordId)
-        {
-            var fallbackLogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "MCR_DEL", "FallbackLogs");
-
-            Directory.CreateDirectory(fallbackLogPath);
-
-            var logFile = Path.Combine(fallbackLogPath, $"AuditLog_{DateTime.Now:yyyyMMdd}.txt");
-
-            var logEntry = $@"
-                              Time: {DateTime.Now}
-                              Error: Database logging failed
-                              Action: {actionType}
-                              Table: {tableName}
-                              RecordID: {recordId}
-                              Exception: {ex}
-                              User: {Environment.UserName}
-                              Machine: {Environment.MachineName}
-                              ----------------------------------------";
-
-            await File.AppendAllTextAsync(logFile, logEntry);
+            if (value is null) return null;
+            if (value is string s) return s;
+            try { return JsonSerializer.Serialize(value, Prg_Proccessy.AUDIT.Audit.JsonOptions); }
+            catch { return value.ToString(); }
         }
     }
-
 }
