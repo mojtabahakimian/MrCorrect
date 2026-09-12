@@ -1471,6 +1471,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             DATE_N.IsReadOnly = true;
             USER_NAME.IsReadOnly = true;
             FNUMCO.IsReadOnly = true;
+
+            try
+            {
+                if (INVO_LST_RASID_SUB.ItemsSource is System.ComponentModel.IEditableCollectionView editableView)
+                {
+                    if (editableView.IsAddingNew)
+                        editableView.CancelNew();
+                    if (editableView.IsEditingItem)
+                        editableView.CancelEdit();
+                }
+                INVO_LST_RASID_SUB.CancelEdit(DataGridEditingUnit.Row);
+                INVO_LST_RASID_SUB.CancelEdit(DataGridEditingUnit.Cell);
+            }
+            catch { }
+
             INVO_LST_RASID_SUB.IsReadOnly = true;
 
             NUMBER1.IsEnabled = false;

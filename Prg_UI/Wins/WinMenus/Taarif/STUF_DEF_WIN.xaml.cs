@@ -733,6 +733,31 @@ namespace Wins.WinMenus.Taarif
 
             return false;
         }
+
+        private bool NameKalaExist()
+        {
+            var name = NAM.Text.FixPersianChars().Trim();
+            if (!string.IsNullOrEmpty(name))
+            {
+                var KALA = dbms.DoGetDataSQL<_KALA_QRE_6>("SELECT TOP 1 CODE, IDD FROM dbo.STUF_DEF WHERE NAME = @Name", new { Name = name }).FirstOrDefault();
+                if (MASTER_IDD is not null)
+                {
+                    if (KALA != null && KALA.IDD != MASTER_IDD)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (KALA != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         private void GetMaxKalaCode()
         {
             //Form_BeforeUpdate
@@ -1089,6 +1114,10 @@ namespace Wins.WinMenus.Taarif
             if (CodeKalaExist())
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "کد کالای وارد شده تکراری است" });
+            }
+            if (NameKalaExist())
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نام کالا تکراری است و قبلاً در سیستم ثبت شده است" });
             }
             if (string.IsNullOrEmpty(NAM.Text))
             {
