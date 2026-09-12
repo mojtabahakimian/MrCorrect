@@ -1,19 +1,12 @@
 ﻿using Dapper;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using Stimulsoft.Report.Helpers;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
@@ -28,7 +21,6 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,13 +28,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
-using Wins.WinMenus.KHARID_FORUSH;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using static Prg_UI.Wins.WinMenus.SANATI.HAVALE_EXIT_SAYER;
-using static Wins.WinMenus.SANATI.HAVALAH_ENTER;
 
 namespace Prg_UI.Wins.WinMenus.TR
 {

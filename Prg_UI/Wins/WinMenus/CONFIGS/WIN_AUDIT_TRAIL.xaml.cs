@@ -74,6 +74,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         private long? _lastLogId;
         private bool _busy;
+        private bool _onlyImportant = true;
 
         UniversControl universControl = new UniversControl();
         private readonly FilterService<AuditTrailRow> filterService = new FilterService<AuditTrailRow>();
@@ -130,6 +131,14 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 UpdateRowCountLabel();
             }
 
+            if (GR_NAV_DATAGRID != null)
+            {
+                GR_NAV_DATAGRID.ReGetDataAction = () =>
+                {
+                    _ = SearchAsync(reset: true);
+                };
+            }
+
             FillStaticCombos();
 
             var today = DateTime.Now;
@@ -144,10 +153,45 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             await SearchAsync(reset: true);
         }
 
+        private async void BTN_MODE_TOGGLE_Click(object sender, RoutedEventArgs e)
+        {
+            _onlyImportant = !_onlyImportant;
+            BTN_MODE_TOGGLE.Content = _onlyImportant ? "نمایش کلیه سوابق" : "نمایش رکوردهای مهم";
+            await SearchAsync(reset: true);
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape) this.Close();
             if (e.Key == Key.F5) { e.Handled = true; _ = SearchAsync(reset: true); }
+
+            // Navigation shortcuts
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if (e.Key == Key.Home)
+                {
+                    e.Handled = true;
+                    GR_NAV_DATAGRID?.GoFirst();
+                }
+                else if (e.Key == Key.End)
+                {
+                    e.Handled = true;
+                    GR_NAV_DATAGRID?.GoLast();
+                }
+            }
+            else if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+            {
+                if (e.Key == Key.Left)
+                {
+                    e.Handled = true;
+                    GR_NAV_DATAGRID?.GoNext();
+                }
+                else if (e.Key == Key.Right)
+                {
+                    e.Handled = true;
+                    GR_NAV_DATAGRID?.GoPrevious();
+                }
+            }
         }
 
         #region SYNCFUSION_DATA_GRID
@@ -162,10 +206,13 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (SYNCFUSION_DG?.View == null)
             {
                 ROWCOUNT_TEXTBLK.Text = Rows.Count.ToString();
-                return;
             }
-            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
-            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+            else
+            {
+                var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
+                ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+            }
+            GR_NAV_DATAGRID?.UpdateNavigationDisplay();
         }
 
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, CurrentCellActivatedEventArgs e)
@@ -546,9 +593,12 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (_busy) return;
             _busy = true;
 
+            if (BusyOverlay != null) BusyOverlay.Visibility = Visibility.Visible;
+
             try
             {
                 BTN_SEARCH.IsEnabled = false;
+                if (BTN_MODE_TOGGLE != null) BTN_MODE_TOGGLE.IsEnabled = false;
                 BTN_MORE.IsEnabled = false;
                 LBL_STATUS.Text = "در حال خواندن ...";
 
@@ -587,6 +637,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     Doc = BuildLike(TXT_DOC.Text),
                     Search = BuildLike(TXT_SEARCH.Text),
                     OnlySensitive = CHK_SENSITIVE.IsChecked == true,
+                    OnlyImportant = _onlyImportant && (CMB_CATEGORY.SelectedValue as byte?) == null && string.IsNullOrWhiteSpace(CMB_ACTION.SelectedValue as string),
                     AfterId = _lastLogId,
                 };
 
@@ -606,6 +657,7 @@ SELECT TOP (@Take)
    AND (@Doc      IS NULL OR [ENTITY_KEY] LIKE @Doc OR [ENTITY] LIKE @Doc)
    AND (@Search   IS NULL OR [TITLE]      LIKE @Search)
    AND (@OnlySensitive = 0 OR [SEVERITY] = 3)
+   AND (@OnlyImportant = 0 OR [SEVERITY] >= 2 OR [CATEGORY] <> 1)
    AND (@AfterId  IS NULL OR [LOG_ID] < @AfterId)
  ORDER BY [LOG_ID] DESC
  OPTION (RECOMPILE)";
@@ -629,8 +681,10 @@ SELECT TOP (@Take)
                 }
                 else
                 {
+                    string modeHint = _onlyImportant ? " [فقط رویدادهای مهم]" : " [کلیه سوابق]";
                     LBL_STATUS.Text =
                         $"{Rows.Count:N0} رکورد نمایش داده شد" +
+                        modeHint +
                         (BTN_MORE.IsEnabled ? " (رکورد بیشتری هست)" : " (پایان نتایج)") +
                         (AuditService.DroppedCount > 0
                             ? $"  |  ⚠ {AuditService.DroppedCount:N0} رویداد در این نشست به‌دلیل پر شدن صف ثبت نشد"
@@ -644,7 +698,9 @@ SELECT TOP (@Take)
             }
             finally
             {
+                if (BusyOverlay != null) BusyOverlay.Visibility = Visibility.Collapsed;
                 BTN_SEARCH.IsEnabled = true;
+                if (BTN_MODE_TOGGLE != null) BTN_MODE_TOGGLE.IsEnabled = true;
                 _busy = false;
             }
         }
