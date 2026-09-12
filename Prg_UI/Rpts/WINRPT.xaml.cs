@@ -140,87 +140,35 @@ namespace Rpts
         /// لامبداها عمداً دو پارامتری و بدون نوع صریح نوشته شده‌اند تا به نوع
         /// دقیق delegate در نسخه‌ی نصب‌شده‌ی Stimulsoft وابسته نباشند.
         /// همچنین هیچ ارجاعی به this نگه نمی‌دارند تا پنجره را زنده نگه ندارند.
-        /// </summary>
-        /// <summary>
-        /// آخرین باری که چاپ/خروجی ثبت شد، برای جلوگیری از ثبت دوباره.
         ///
-        /// دو مسیر به یک کار وصل‌اند (رویداد ویور و رویداد خودِ گزارش). اگر
-        /// هر دو در یک نسخه شلیک کنند، یک کلیک کاربر دو ردیف می‌ساخت.
+        /// ⚠ هرگز به رویدادهای خودِ StiWpfViewerControl وصل نشوید — مخصوصاً
+        /// ProcessExport. آن رویداد «اعلان» نیست، «جایگزین» است. کد خودِ
+        /// Stimulsoft (از دیس‌اسمبلِ Stimulsoft.Report.Wpf.dll) این است:
+        ///
+        ///     void InvokeProcessExport(object o) {
+        ///         if (this.ProcessExport != null) { this.ProcessExport(o, EventArgs.Empty); return; }
+        ///         this.OnProcessExport(o);   // ← خروجی گرفتنِ واقعی همین‌جاست
+        ///     }
+        ///
+        /// یعنی به‌محض اینکه یک handler وصل شود، ویور نتیجه می‌گیرد که میزبان
+        /// خودش خروجی را می‌سازد و OnProcessExport (که StiExportService.Export
+        /// را صدا می‌زند) اصلاً اجرا نمی‌شود. handler ما فقط یک ردیف سابقه
+        /// می‌نوشت و برمی‌گشت، پس Save ▸ Adobe PDF File هیچ کاری نمی‌کرد.
+        ///
+        /// همین اتفاق در کامیت b9694f0 افتاد و اینجا برگردانده شد.
         /// </summary>
-        private long _lastPrintTick;
-        private long _lastExportTick;
-        private const int AuditDedupMs = 3000;
-
-        private bool ShouldLog(ref long last)
-        {
-            var now = Environment.TickCount64;
-            if (last != 0 && now - last < AuditDedupMs) return false;
-            last = now;
-            return true;
-        }
-
         private void AttachReportAuditEvents(string reportTitle)
         {
             var report = MyReport;
-            var formName = nameof(WINRPT);
-
-            // ── رویدادهای خودِ کنترل نمایشگر ──────────────────────────────
-            //
-            // این مهم‌ترین بخش است. قبلاً فقط به رویدادهای StiReport وصل
-            // می‌شدیم (Printed و Exported)، ولی وقتی کاربر دکمه‌ی چاپ یا
-            // ذخیره را در **نوار ابزار خودِ نمایشگر** می‌زند،
-            // StiWpfViewerControl کار را داخل خودش انجام می‌دهد و آن
-            // رویدادهای StiReport اصلاً شلیک نمی‌شوند.
-            //
-            // نتیجه‌اش این بود که چاپ واقعی و خروجی گرفتن از گزارش — یعنی
-            // همان چیزی که «آیا کاربر واقعاً چاپ گرفت؟» را جواب می‌دهد —
-            // هیچ ردی در سابقه نمی‌گذاشت. این در یک تست واقعی روی رابط
-            // کاربری دیده شد، نه فرضی بود.
-            //
-            // نام رویدادها با بازتاب روی همان نسخه‌ی نصب‌شده‌ی Stimulsoft
-            // بررسی شد: نمایشگر ReportPrint و ProcessExport دارد.
-            try
-            {
-                if (TheReportViewer != null)
-                {
-                    TheReportViewer.ReportPrint += (s, e) =>
-                    {
-                        try
-                        {
-                            if (ShouldLog(ref _lastPrintTick))
-                                Prg_Proccessy.AUDIT.Audit.Print(reportTitle, isPreview: false, formName: formName);
-                        }
-                        catch { }
-                    };
-
-                    TheReportViewer.ProcessExport += (s, e) =>
-                    {
-                        try
-                        {
-                            if (ShouldLog(ref _lastExportTick))
-                                Prg_Proccessy.AUDIT.Audit.Export("فایل", reportTitle, formName: formName);
-                        }
-                        catch { }
-                    };
-                }
-            }
-            catch { }
-
-            // ── رویدادهای خودِ گزارش ──────────────────────────────────────
-            // برای مسیرهایی که گزارش از کد چاپ یا خروجی گرفته می‌شود و از
-            // نوار ابزار نمی‌گذرد. با همان فیلتر تکرار، یک کلیک کاربر دو
-            // ردیف نمی‌سازد.
             if (report is null) return;
+
+            var formName = nameof(WINRPT);
 
             try
             {
                 report.Printed += (s, e) =>
                 {
-                    try
-                    {
-                        if (ShouldLog(ref _lastPrintTick))
-                            Prg_Proccessy.AUDIT.Audit.Print(reportTitle, isPreview: false, formName: formName);
-                    }
+                    try { Prg_Proccessy.AUDIT.Audit.Print(reportTitle, isPreview: false, formName: formName); }
                     catch { }
                 };
             }
@@ -230,11 +178,7 @@ namespace Rpts
             {
                 report.Exported += (s, e) =>
                 {
-                    try
-                    {
-                        if (ShouldLog(ref _lastExportTick))
-                            Prg_Proccessy.AUDIT.Audit.Export("فایل", reportTitle, formName: formName);
-                    }
+                    try { Prg_Proccessy.AUDIT.Audit.Export("فایل", reportTitle, formName: formName); }
                     catch { }
                 };
             }

@@ -244,7 +244,23 @@ namespace Wins.WinMenus.ANBAR
             report["KALACODE"] = KALA.SelectedValue.ToString();
             ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
 
+            // آرگومان اولِ StiNumberFormatService تعداد رقم اعشار نیست،
+            // negativePattern است (الگوی نمایش عدد منفی). دادنِ «رقم اعشارِ
+            // سازمان» به آن یک اشتباهِ جابه‌جاییِ آرگومان بود:
+            // NumberFormatInfo.NumberNegativePattern فقط ۰ تا ۴ را می‌پذیرد و
+            // برای مقدار بزرگ‌تر ArgumentOutOfRangeException می‌دهد. Stimulsoft
+            // آن استثنا را می‌بلعد و سلول را خالی رها می‌کند — به همین دلیل با
+            // DIG >= 5 کل ستون «مقدار» در کارت انبار سفید می‌شد، در حالی که
+            // ستون‌های دیگر (که TextFormatشان بازنویسی نمی‌شود) درست بودند.
+            // ۳ همان مقداری است که خودِ طراحیِ گزارش برای این سلول‌ها دارد
+            // (R_KA_KALA.Table1_Cell17 → StiNumberFormatService(3, ".", 0, ",", 3, ...)),
+            // پس این بازنویسی فقط «تعداد رقم اعشار» را عوض می‌کند و بس.
+            const int negativePattern = 3;
+
+            // NumberDecimalDigits هم فقط ۰ تا ۱۵ را می‌پذیرد.
             var decimalPlaces = Baseknow.DIG.HasValue ? (int)Baseknow.DIG.Value : 2;
+            if (decimalPlaces < 0) decimalPlaces = 0;
+            if (decimalPlaces > 15) decimalPlaces = 15;
 
             if (THE_RPT_NAME != "KARTR2")
             {
@@ -253,14 +269,14 @@ namespace Wins.WinMenus.ANBAR
                 if (_ONE_ != null)
                 {
                     //(report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
-                    (report.GetComponentByName("Table1_Cell17") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //مقدار
-                    (report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
+                    (report.GetComponentByName("Table1_Cell17") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(negativePattern, ".", decimalPlaces, ",", 3, true, false, ""); //مقدار
+                    (report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(negativePattern, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
                 }
                 var _SECOND_ = (report.GetComponentByName("Table1_Cell9") as StiTableCell); //موجودی
                 if (_SECOND_ != null)
                 {
                     //(report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
-                    (report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
+                    (report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(negativePattern, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
                 }
             }
 
