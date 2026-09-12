@@ -87,17 +87,6 @@ namespace Rpts
             #region MyRegion
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            // پیش از این فقط نام کلاس «WINRPT» ثبت می‌شد و معلوم نبود کدام
-            // گزارش باز شده. حالا عنوان واقعی گزارش ثبت می‌شود و چاپ واقعی و
-            // خروجی گرفتن هم از رویدادهای خودِ Stimulsoft تشخیص داده می‌شوند،
-            // نه از باز شدن پنجره.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Print(_RerportTitle_, isPreview: true, formName: this.GetType().Name);
-                AttachReportAuditEvents(_RerportTitle_);
-            }
-            catch { }
-
             //
             //var report = new StiReport();
 
@@ -128,117 +117,6 @@ namespace Rpts
 
             pathreport?.Dispose();
             #endregion
-        }
-
-        /// <summary>
-        /// اتصال ثبت سابقه به رویدادهای خودِ گزارش.
-        ///
-        /// «باز کردن گزارش» با «چاپ گرفتن» یکی نیست؛ کاربر ممکن است گزارش را
-        /// ببیند و چاپ نکند. این رویدادها همان لحظه‌ی واقعی چاپ و خروجی را
-        /// می‌دهند.
-        ///
-        /// لامبداها عمداً دو پارامتری و بدون نوع صریح نوشته شده‌اند تا به نوع
-        /// دقیق delegate در نسخه‌ی نصب‌شده‌ی Stimulsoft وابسته نباشند.
-        /// همچنین هیچ ارجاعی به this نگه نمی‌دارند تا پنجره را زنده نگه ندارند.
-        /// </summary>
-        /// <summary>
-        /// آخرین باری که چاپ/خروجی ثبت شد، برای جلوگیری از ثبت دوباره.
-        ///
-        /// دو مسیر به یک کار وصل‌اند (رویداد ویور و رویداد خودِ گزارش). اگر
-        /// هر دو در یک نسخه شلیک کنند، یک کلیک کاربر دو ردیف می‌ساخت.
-        /// </summary>
-        private long _lastPrintTick;
-        private long _lastExportTick;
-        private const int AuditDedupMs = 3000;
-
-        private bool ShouldLog(ref long last)
-        {
-            var now = Environment.TickCount64;
-            if (last != 0 && now - last < AuditDedupMs) return false;
-            last = now;
-            return true;
-        }
-
-        private void AttachReportAuditEvents(string reportTitle)
-        {
-            var report = MyReport;
-            var formName = nameof(WINRPT);
-
-            // ── رویدادهای خودِ کنترل نمایشگر ──────────────────────────────
-            //
-            // این مهم‌ترین بخش است. قبلاً فقط به رویدادهای StiReport وصل
-            // می‌شدیم (Printed و Exported)، ولی وقتی کاربر دکمه‌ی چاپ یا
-            // ذخیره را در **نوار ابزار خودِ نمایشگر** می‌زند،
-            // StiWpfViewerControl کار را داخل خودش انجام می‌دهد و آن
-            // رویدادهای StiReport اصلاً شلیک نمی‌شوند.
-            //
-            // نتیجه‌اش این بود که چاپ واقعی و خروجی گرفتن از گزارش — یعنی
-            // همان چیزی که «آیا کاربر واقعاً چاپ گرفت؟» را جواب می‌دهد —
-            // هیچ ردی در سابقه نمی‌گذاشت. این در یک تست واقعی روی رابط
-            // کاربری دیده شد، نه فرضی بود.
-            //
-            // نام رویدادها با بازتاب روی همان نسخه‌ی نصب‌شده‌ی Stimulsoft
-            // بررسی شد: نمایشگر ReportPrint و ProcessExport دارد.
-            try
-            {
-                if (TheReportViewer != null)
-                {
-                    TheReportViewer.ReportPrint += (s, e) =>
-                    {
-                        try
-                        {
-                            if (ShouldLog(ref _lastPrintTick))
-                                Prg_Proccessy.AUDIT.Audit.Print(reportTitle, isPreview: false, formName: formName);
-                        }
-                        catch { }
-                    };
-
-                    TheReportViewer.ProcessExport += (s, e) =>
-                    {
-                        try
-                        {
-                            if (ShouldLog(ref _lastExportTick))
-                                Prg_Proccessy.AUDIT.Audit.Export("فایل", reportTitle, formName: formName);
-                        }
-                        catch { }
-                    };
-                }
-            }
-            catch { }
-
-            // ── رویدادهای خودِ گزارش ──────────────────────────────────────
-            // برای مسیرهایی که گزارش از کد چاپ یا خروجی گرفته می‌شود و از
-            // نوار ابزار نمی‌گذرد. با همان فیلتر تکرار، یک کلیک کاربر دو
-            // ردیف نمی‌سازد.
-            if (report is null) return;
-
-            try
-            {
-                report.Printed += (s, e) =>
-                {
-                    try
-                    {
-                        if (ShouldLog(ref _lastPrintTick))
-                            Prg_Proccessy.AUDIT.Audit.Print(reportTitle, isPreview: false, formName: formName);
-                    }
-                    catch { }
-                };
-            }
-            catch { }
-
-            try
-            {
-                report.Exported += (s, e) =>
-                {
-                    try
-                    {
-                        if (ShouldLog(ref _lastExportTick))
-                            Prg_Proccessy.AUDIT.Audit.Export("فایل", reportTitle, formName: formName);
-                    }
-                    catch { }
-                };
-            }
-            catch { }
         }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();

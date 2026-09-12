@@ -244,24 +244,31 @@ namespace Wins.WinMenus.ANBAR
             report["KALACODE"] = KALA.SelectedValue.ToString();
             ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
 
+            // تعداد رقم اعشارِ سازمان. NumberDecimalDigits فقط ۰ تا ۱۵ را
+            // می‌پذیرد، پس محدود می‌شود.
             var decimalPlaces = Baseknow.DIG.HasValue ? (int)Baseknow.DIG.Value : 2;
+            if (decimalPlaces < 0) decimalPlaces = 0;
+            if (decimalPlaces > 15) decimalPlaces = 15;
 
             if (THE_RPT_NAME != "KARTR2")
             {
-                //Report_Open:
-                var _ONE_ = (report.GetComponentByName("Table1_Cell8") as StiTableCell); //موجودی
-                if (_ONE_ != null)
-                {
-                    //(report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
-                    (report.GetComponentByName("Table1_Cell17") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //مقدار
-                    (report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
-                }
-                var _SECOND_ = (report.GetComponentByName("Table1_Cell9") as StiTableCell); //موجودی
-                if (_SECOND_ != null)
-                {
-                    //(report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
-                    (report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
-                }
+                // فقط «تعداد رقم اعشار» عوض می‌شود؛ بقیه‌ی قالبِ طراحی‌شده
+                // (الگوی عدد منفی، جداکننده‌ها، نمایش تهی) دست‌نخورده می‌ماند.
+                //
+                // پیش از این به‌جای این کار یک StiNumberFormatService تازه
+                // ساخته می‌شد و رقم اعشار در آرگومان اول هم گذاشته می‌شد. اما
+                // آرگومان اول تعداد رقم نیست، negativePattern است. چون
+                // NumberFormatInfo.NumberNegativePattern فقط ۰ تا ۴ را می‌پذیرد،
+                // با رقم اعشار ۵ یا بیشتر Format استثنا می‌داد، Stimulsoft آن را
+                // می‌بلعید و سلول خالی می‌ماند — ستون «مقدار» کارت انبار دقیقاً
+                // به همین دلیل سفید می‌شد، در حالی که ستون‌های دیگر (که قالبشان
+                // بازنویسی نمی‌شود) درست بودند.
+                //
+                // این شکل هیچ قالبی نمی‌سازد و هیچ آرگومانی جابه‌جا نمی‌شود، پس
+                // آن دسته از خطاها دیگر ممکن نیست.
+                SetDecimalDigits(report, "Table1_Cell17", decimalPlaces); // مقدار
+                SetDecimalDigits(report, "Table1_Cell8", decimalPlaces);
+                SetDecimalDigits(report, "Table1_Cell9", decimalPlaces);
             }
 
             //report.Render();
@@ -270,6 +277,29 @@ namespace Wins.WinMenus.ANBAR
             //pathreport?.Dispose();
 
             new Rpts.WINRPT(report, "کارت انبار کالا").Show();
+        }
+
+        /// <summary>
+        /// فقط تعداد رقم اعشارِ یک سلول را عوض می‌کند و بقیه‌ی قالبِ
+        /// طراحی‌شده را نگه می‌دارد.
+        ///
+        /// اگر سلول اصلاً قالب عددی نداشته باشد (مثل سلول‌های سرستون که
+        /// مقدارشان رشته‌ی ثابت است) کاری نمی‌کند. هیچ خطایی از اینجا نباید
+        /// چاپ را متوقف کند یا یک ستون را خالی بگذارد.
+        /// </summary>
+        private static void SetDecimalDigits(StiReport report, string componentName, int decimalPlaces)
+        {
+            try
+            {
+                var cell = report.GetComponentByName(componentName) as StiTableCell;
+                if (cell is null) return;
+
+                var nf = cell.TextFormat as Stimulsoft.Report.Components.TextFormats.StiNumberFormatService;
+                if (nf is null) return;
+
+                nf.DecimalDigits = decimalPlaces;
+            }
+            catch { }
         }
 
         private void CANBAR_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
