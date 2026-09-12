@@ -642,11 +642,27 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AUTO_BAZ\AUTO_BAZ.csproj" />
 		<ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
-		<!-- ساب‌ماژولِ خودِ همین مخزن، نه یک کلونِ کنارِ آن. مسیر قبلی
-		     ..\..\ScriptSqly بود که به C:\prg\ScriptSqly می‌رسید — پوشه‌ای که
-		     MrCorrect ردیابی‌اش نمی‌کند، پس روی هر کلونِ تازه وجود نداشت و
-		     restore با «Unable to find project information» می‌افتاد. -->
-		<ProjectReference Include="..\External\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj" />
+		<!-- ScriptSqly.Core موتور مهاجرت دیتابیس است و در هر ورود کاربر
+		     (USER_LOGIN → ScriptSqly.LetsGo) روی دیتابیسِ مشتری اجرا می‌شود،
+		     پس «کدام نسخه‌ی ScriptSqly داخل EXE کامپایل می‌شود» یک تصمیمِ
+		     عملیاتی است، نه یک جزئیاتِ بیلد.
+
+		     مرجعِ اصلی همان کلونِ کنارِ مخزن است (C:\prg\ScriptSqly) — همان
+		     چیزی که پیش از این بود و خودِ توسعه‌دهنده کنترلش می‌کند. اگر آن
+		     پوشه موجود باشد، حتماً همان انتخاب می‌شود.
+
+		     ساب‌ماژولِ External\ScriptSqly فقط جایگزینِ پشتیبان برای کلونِ
+		     تازه و CI است، جایی که آن پوشه وجود ندارد و restore با
+		     «Unable to find project information» می‌افتاد.
+
+		     چرا شرطی شد: در نسخه‌ی پیشین این ارجاع بی‌قید به ساب‌ماژول عوض
+		     شده بود. نتیجه این بود که بیلدِ عملیاتی به‌جای ScriptSqlyِ خودِ
+		     توسعه‌دهنده، نسخه‌ی پین‌شده‌ی ساب‌ماژول را می‌برد و مهاجرت‌هایی که
+		     هنوز منتشر نشده بودند در هر ورود روی دیتابیس مشتری اجرا می‌شد. -->
+		<ProjectReference Include="..\..\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj"
+		                  Condition="Exists('$(MSBuildThisFileDirectory)..\..\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj')" />
+		<ProjectReference Include="..\External\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj"
+		                  Condition="!Exists('$(MSBuildThisFileDirectory)..\..\ScriptSqly\ScriptSqly.Core\ScriptSqly.Core.csproj')" />
 	</ItemGroup>
 
 	<ItemGroup>
