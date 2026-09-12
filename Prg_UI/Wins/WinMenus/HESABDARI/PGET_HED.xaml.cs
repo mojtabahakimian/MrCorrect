@@ -550,8 +550,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             ReGetMasterData();
 
-            Form_Current();
-
             //DataGrid SUB EVETNS LOADINGS:
             #region SUB_LOADING
             //Check Matter
@@ -1638,7 +1636,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
 
             //#Left ی و ک عربی باید درست بشه
-            if (!this.NewRecord && CL_HESABDARI.UCurrentUser() != this.USER_NAME.Text)
+            string currentUser = CL_HESABDARI.Fixp(Baseknow.UUSER ?? CL_HESABDARI.UCurrentUser()?.ToString() ?? "").Trim();
+            string recordUser = CL_HESABDARI.Fixp(this.USER_NAME.Text ?? "").Trim();
+
+            if (!this.NewRecord && !string.Equals(currentUser, recordUser, StringComparison.OrdinalIgnoreCase))
             {
                 if (!CL_HESABDARI.LETSGO("DPSEE"))
                 {
@@ -2301,8 +2302,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 //this.OKF = true;
                 OKF.IsChecked = true;
 
-            sgn1usid.Tag = Baseknow.USERCOD;
-            sgn1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
+            if (SGN1.IsChecked == true)
+            {
+                sgn1usid.Tag = Baseknow.USERCOD;
+                sgn1usid.Text = rst_personel?.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+            }
+            else
+            {
+                sgn1usid.Tag = null;
+                sgn1usid.Text = null;
+            }
 
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
             {
@@ -2372,8 +2381,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             if (!(bool)OKF.IsChecked)
                 OKF.IsChecked = true;
 
-            sgn2usid.Tag = Baseknow.USERCOD;
-            sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
+            if (SGN2.IsChecked == true)
+            {
+                sgn2usid.Tag = Baseknow.USERCOD;
+                sgn2usid.Text = rst_personel?.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+            }
+            else
+            {
+                sgn2usid.Tag = null;
+                sgn2usid.Text = null;
+            }
 
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
             {
@@ -2498,8 +2515,16 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             Meidnum = MID;
             if (!(bool)OKF.IsChecked)
                 OKF.IsChecked = true;
-            sgn3usid.Tag = Baseknow.USERCOD;
-            sgn3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
+            if (SGN3.IsChecked == true)
+            {
+                sgn3usid.Tag = Baseknow.USERCOD;
+                sgn3usid.Text = rst_personel?.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+            }
+            else
+            {
+                sgn3usid.Tag = null;
+                sgn3usid.Text = null;
+            }
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
             {
                 if ((bool)SGN1.IsEnabled || (bool)SGN2.IsEnabled || (bool)SGN3.IsEnabled)
