@@ -1,23 +1,16 @@
 ﻿using MaterialDesignThemes.Wpf;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Components.Table;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Prg_Proccessy.FUNCTIONS;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Prg_Proccessy.SQLMODELS;
-using Prg_UI.UiTools;
-using static Functions.InventoryManager;
 
 namespace Wins.WinMenus.ANBAR
 {

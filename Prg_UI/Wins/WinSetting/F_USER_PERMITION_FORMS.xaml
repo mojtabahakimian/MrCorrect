@@ -197,7 +197,7 @@
                         <RadioButton x:Name="MLT" Content="انتخاب چندگانه" GroupName="GRP1" Margin="20,3,3,3" Click="MLT_Click"/>
                         <RadioButton x:Name="SS" Content="انتخاب تکی" GroupName="GRP1" IsChecked="True" Margin="10,3,3,3" Click="SS_Click"/>
                     </StackPanel>
-                    <UniformGrid Margin="407,304,660,75">
+                    <UniformGrid Margin="407,304,660,75" Visibility="Hidden">
                         <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.SEE, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="SEE"/>
                         <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.INP, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="INP"/>
                         <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.INP, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="INP"/>
