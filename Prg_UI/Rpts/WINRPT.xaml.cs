@@ -87,17 +87,6 @@ namespace Rpts
             #region MyRegion
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            // پیش از این فقط نام کلاس «WINRPT» ثبت می‌شد و معلوم نبود کدام
-            // گزارش باز شده. حالا عنوان واقعی گزارش ثبت می‌شود و چاپ واقعی و
-            // خروجی گرفتن هم از رویدادهای خودِ Stimulsoft تشخیص داده می‌شوند،
-            // نه از باز شدن پنجره.
-            try
-            {
-                Prg_Proccessy.AUDIT.Audit.Print(_RerportTitle_, isPreview: true, formName: this.GetType().Name);
-                AttachReportAuditEvents(_RerportTitle_);
-            }
-            catch { }
-
             //
             //var report = new StiReport();
 
@@ -128,61 +117,6 @@ namespace Rpts
 
             pathreport?.Dispose();
             #endregion
-        }
-
-        /// <summary>
-        /// اتصال ثبت سابقه به رویدادهای خودِ گزارش.
-        ///
-        /// «باز کردن گزارش» با «چاپ گرفتن» یکی نیست؛ کاربر ممکن است گزارش را
-        /// ببیند و چاپ نکند. این رویدادها همان لحظه‌ی واقعی چاپ و خروجی را
-        /// می‌دهند.
-        ///
-        /// لامبداها عمداً دو پارامتری و بدون نوع صریح نوشته شده‌اند تا به نوع
-        /// دقیق delegate در نسخه‌ی نصب‌شده‌ی Stimulsoft وابسته نباشند.
-        /// همچنین هیچ ارجاعی به this نگه نمی‌دارند تا پنجره را زنده نگه ندارند.
-        ///
-        /// ⚠ هرگز به رویدادهای خودِ StiWpfViewerControl وصل نشوید — مخصوصاً
-        /// ProcessExport. آن رویداد «اعلان» نیست، «جایگزین» است. کد خودِ
-        /// Stimulsoft (از دیس‌اسمبلِ Stimulsoft.Report.Wpf.dll) این است:
-        ///
-        ///     void InvokeProcessExport(object o) {
-        ///         if (this.ProcessExport != null) { this.ProcessExport(o, EventArgs.Empty); return; }
-        ///         this.OnProcessExport(o);   // ← خروجی گرفتنِ واقعی همین‌جاست
-        ///     }
-        ///
-        /// یعنی به‌محض اینکه یک handler وصل شود، ویور نتیجه می‌گیرد که میزبان
-        /// خودش خروجی را می‌سازد و OnProcessExport (که StiExportService.Export
-        /// را صدا می‌زند) اصلاً اجرا نمی‌شود. handler ما فقط یک ردیف سابقه
-        /// می‌نوشت و برمی‌گشت، پس Save ▸ Adobe PDF File هیچ کاری نمی‌کرد.
-        ///
-        /// همین اتفاق در کامیت b9694f0 افتاد و اینجا برگردانده شد.
-        /// </summary>
-        private void AttachReportAuditEvents(string reportTitle)
-        {
-            var report = MyReport;
-            if (report is null) return;
-
-            var formName = nameof(WINRPT);
-
-            try
-            {
-                report.Printed += (s, e) =>
-                {
-                    try { Prg_Proccessy.AUDIT.Audit.Print(reportTitle, isPreview: false, formName: formName); }
-                    catch { }
-                };
-            }
-            catch { }
-
-            try
-            {
-                report.Exported += (s, e) =>
-                {
-                    try { Prg_Proccessy.AUDIT.Audit.Export("فایل", reportTitle, formName: formName); }
-                    catch { }
-                };
-            }
-            catch { }
         }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
