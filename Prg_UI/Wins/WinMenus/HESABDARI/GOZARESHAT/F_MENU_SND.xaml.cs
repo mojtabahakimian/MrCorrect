@@ -159,8 +159,23 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void OpenReport2()
         {
-            _sql_query = $"SELECT NUMBER, NAM, CODE, NAMES, daraee, GRP FROM TARAZNAMAH({DT1.SelectedValue}) TARAZNAMAH WHERE (GRP = 1) AND (daraee <> 0)";
-            _sql_query_2 = $"SELECT NUMBER, NAM, CODE, NAMES, BEDEHE, GRP FROM TARAZNAMAH({DT1.SelectedValue}) TARAZNAMAH WHERE (GRP = 2) AND (BEDEHE <> 0)";
+            string docNo = "9999999";
+            if (DT1.SelectedValue != null && !string.IsNullOrWhiteSpace(DT1.SelectedValue.ToString()))
+            {
+                docNo = DT1.SelectedValue.ToString()!;
+            }
+            else if (!string.IsNullOrWhiteSpace(DT1.Text))
+            {
+                docNo = CL_LMethods.NormalizeDigits(DT1.Text).Trim();
+            }
+
+            if (!double.TryParse(docNo, out _))
+            {
+                docNo = "9999999";
+            }
+
+            _sql_query = $"SELECT NUMBER, NAM, CODE, NAMES, daraee, GRP FROM TARAZNAMAH({docNo}) TARAZNAMAH WHERE (GRP = 1) AND (daraee <> 0)";
+            _sql_query_2 = $"SELECT NUMBER, NAM, CODE, NAMES, BEDEHE, GRP FROM TARAZNAMAH({docNo}) TARAZNAMAH WHERE (GRP = 2) AND (BEDEHE <> 0)";
 
             
             var report = new StiReport();
@@ -173,7 +188,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             report.Dictionary.Variables.Add("Q_PARM1", _sql_query);
             report.Dictionary.Variables.Add("Q_PARM2", _sql_query_2);
 
-            string dt1 = $"کلیه اسناد تا سند : {DT1.Text}";
+            string dt1 = $"کلیه اسناد تا سند : {docNo}";
 
             (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
             (report.GetComponentByName("DT1_N") as StiText).Text = dt1.ToString();
@@ -186,11 +201,6 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void Commnd5_Click(object sender, RoutedEventArgs e)
         {
-            if (DT1.SelectedValue == null)
-            {
-                DT1.SelectedValue = 9999999;
-            }
-
             OpenReport2();
         }
 
