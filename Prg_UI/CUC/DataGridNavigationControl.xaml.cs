@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Syncfusion.UI.Xaml.Grid;
+using Syncfusion.UI.Xaml.ScrollAxis;
 
 namespace Prg_UI.CUC
 {
@@ -26,6 +29,10 @@ namespace Prg_UI.CUC
         public static readonly DependencyProperty TargetDataGridProperty =
             DependencyProperty.Register("TargetDataGrid", typeof(DataGrid), typeof(DataGridNavigationControl),
                 new PropertyMetadata(null, OnTargetDataGridChanged));
+
+        public static readonly DependencyProperty TargetSfDataGridProperty =
+            DependencyProperty.Register("TargetSfDataGrid", typeof(SfDataGrid), typeof(DataGridNavigationControl),
+                new PropertyMetadata(null, OnTargetSfDataGridChanged));
 
         public static readonly DependencyProperty DataLoadFunctionProperty =
             DependencyProperty.Register("DataLoadFunction", typeof(Func<Task<IEnumerable>>), typeof(DataGridNavigationControl));
@@ -184,6 +191,15 @@ namespace Prg_UI.CUC
         }
 
         /// <summary>
+        /// The SfDataGrid to navigate
+        /// </summary>
+        public SfDataGrid TargetSfDataGrid
+        {
+            get { return (SfDataGrid)GetValue(TargetSfDataGridProperty); }
+            set { SetValue(TargetSfDataGridProperty, value); }
+        }
+
+        /// <summary>
         /// Function to load/reload data for the DataGrid
         /// </summary>
         public Func<Task<IEnumerable>> DataLoadFunction
@@ -257,7 +273,7 @@ namespace Prg_UI.CUC
             }
         }
 
-        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DataGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             UpdateNavigationDisplay();
 
@@ -267,15 +283,64 @@ namespace Prg_UI.CUC
             }
         }
 
+        private static void OnTargetSfDataGridChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (DataGridNavigationControl)d;
+            if (e.OldValue is SfDataGrid oldSfGrid)
+            {
+                oldSfGrid.SelectionChanged -= control.SfDataGrid_SelectionChanged;
+                oldSfGrid.CurrentCellActivated -= control.SfDataGrid_CurrentCellActivated;
+            }
+
+            if (e.NewValue is SfDataGrid newSfGrid)
+            {
+                newSfGrid.SelectionChanged += control.SfDataGrid_SelectionChanged;
+                newSfGrid.CurrentCellActivated += control.SfDataGrid_CurrentCellActivated;
+                control.UpdateNavigationDisplay();
+            }
+        }
+
+        private void SfDataGrid_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
+        {
+            UpdateNavigationDisplay();
+
+            if (!_isNavigating && SelectionChangedCallback != null && TargetSfDataGrid?.SelectedItem != null)
+            {
+                SelectionChangedCallback(TargetSfDataGrid.SelectedItem);
+            }
+        }
+
+        private void SfDataGrid_CurrentCellActivated(object sender, CurrentCellActivatedEventArgs e)
+        {
+            UpdateNavigationDisplay();
+        }
+
         #region Navigation Methods
 
         /// <summary>
         /// Updates the navigation display (current index and total count)
         /// </summary>
-        private void UpdateNavigationDisplay()
+        public void UpdateNavigationDisplay()
         {
             try
             {
+                if (TargetSfDataGrid != null)
+                {
+                    int totalCountSf = GetActualSfItemCount();
+                    txtTotal.Text = totalCountSf.ToString();
+
+                    int currentIndexSf = TargetSfDataGrid.SelectedIndex;
+                    if (currentIndexSf >= 0 && currentIndexSf < totalCountSf)
+                    {
+                        txtCurrent.Text = (currentIndexSf + 1).ToString();
+                    }
+                    else
+                    {
+                        txtCurrent.Text = totalCountSf > 0 ? "1" : "0";
+                    }
+                    return;
+                }
+
                 if (TargetDataGrid == null)
                 {
                     txtCurrent.Text = "0";
@@ -308,6 +373,65 @@ namespace Prg_UI.CUC
             catch (Exception ex)
             {
                 // Log the error but don't disturb the user
+            }
+        }
+
+        public int GetActualSfItemCount()
+        {
+            try
+            {
+                if (TargetSfDataGrid == null) return 0;
+                if (TargetSfDataGrid.View?.Records != null)
+                {
+                    return TargetSfDataGrid.View.Records.Count;
+                }
+                if (TargetSfDataGrid.ItemsSource is IList list)
+                {
+                    return list.Count;
+                }
+                if (TargetSfDataGrid.ItemsSource is IEnumerable en)
+                {
+                    return en.Cast<object>().Count();
+                }
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void MoveSfDataGridToRecord(int recordIndex)
+        {
+            if (TargetSfDataGrid == null) return;
+            int count = GetActualSfItemCount();
+            if (recordIndex < 0 || recordIndex >= count) return;
+
+            _isNavigating = true;
+            _isNewRow = false;
+            try
+            {
+                TargetSfDataGrid.SelectedIndex = recordIndex;
+                int rowIndex = TargetSfDataGrid.ResolveToRowIndex(recordIndex);
+                if (rowIndex >= 0)
+                {
+                    var rowCol = new RowColumnIndex(rowIndex, 0);
+                    TargetSfDataGrid.ScrollInView(rowCol);
+                    try
+                    {
+                        TargetSfDataGrid.MoveCurrentCell(rowCol);
+                    }
+                    catch { }
+                }
+
+                if (SelectionChangedCallback != null && TargetSfDataGrid.SelectedItem != null)
+                {
+                    SelectionChangedCallback(TargetSfDataGrid.SelectedItem);
+                }
+            }
+            finally
+            {
+                _isNavigating = false;
             }
         }
 
@@ -432,12 +556,19 @@ namespace Prg_UI.CUC
         #region Public Navigation Methods
 
         /// <summary>
-        /// Navigates to the first record in the DataGrid
+        /// Navigates to the first record in the DataGrid or SfDataGrid
         /// </summary>
         public void GoFirst()
         {
             try
             {
+                if (TargetSfDataGrid != null)
+                {
+                    MoveSfDataGridToRecord(0);
+                    UpdateNavigationDisplay();
+                    return;
+                }
+
                 if (TargetDataGrid == null) return;
 
                 _isNavigating = true;
@@ -471,12 +602,19 @@ namespace Prg_UI.CUC
         }
 
         /// <summary>
-        /// Navigates to the last record in the DataGrid
+        /// Navigates to the last record in the DataGrid or SfDataGrid
         /// </summary>
         public void GoLast()
         {
             try
             {
+                if (TargetSfDataGrid != null)
+                {
+                    MoveSfDataGridToRecord(GetActualSfItemCount() - 1);
+                    UpdateNavigationDisplay();
+                    return;
+                }
+
                 if (TargetDataGrid == null) return;
 
                 _isNavigating = true;
@@ -514,12 +652,24 @@ namespace Prg_UI.CUC
         }
 
         /// <summary>
-        /// Navigates to the next record in the DataGrid
+        /// Navigates to the next record in the DataGrid or SfDataGrid
         /// </summary>
         public void GoNext()
         {
             try
             {
+                if (TargetSfDataGrid != null)
+                {
+                    int currentIndex = TargetSfDataGrid.SelectedIndex;
+                    int count = GetActualSfItemCount();
+                    if (currentIndex < count - 1)
+                    {
+                        MoveSfDataGridToRecord(currentIndex < 0 ? 0 : currentIndex + 1);
+                    }
+                    UpdateNavigationDisplay();
+                    return;
+                }
+
                 if (TargetDataGrid == null) return;
 
                 _isNavigating = true;
@@ -563,12 +713,23 @@ namespace Prg_UI.CUC
         }
 
         /// <summary>
-        /// Navigates to the previous record in the DataGrid
+        /// Navigates to the previous record in the DataGrid or SfDataGrid
         /// </summary>
         public void GoPrevious()
         {
             try
             {
+                if (TargetSfDataGrid != null)
+                {
+                    int currentIndex = TargetSfDataGrid.SelectedIndex;
+                    if (currentIndex > 0)
+                    {
+                        MoveSfDataGridToRecord(currentIndex - 1);
+                    }
+                    UpdateNavigationDisplay();
+                    return;
+                }
+
                 if (TargetDataGrid == null) return;
 
                 _isNavigating = true;
@@ -671,13 +832,14 @@ namespace Prg_UI.CUC
             // Execute the user-provided reload logic
             reloadAction?.Invoke();
 
-            // After reload, reset the current position to the first record if available
+            // After reload, reset the current position to the record if available
             if (TargetDataGrid != null && TargetDataGrid.Items.Count > 0)
             {
-                //TargetDataGrid.SelectedIndex = 0;
-                //TargetDataGrid.ScrollIntoView(TargetDataGrid.SelectedItem);
-
                 GoLast();
+            }
+            else if (TargetSfDataGrid != null && GetActualSfItemCount() > 0)
+            {
+                GoFirst();
             }
 
             // Update navigation info after reload
